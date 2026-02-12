@@ -51,3 +51,42 @@ def test_operator_extraction(tmp_path: Path) -> None:
     assert len(entries) == 2
     assert entries[0].operator == "when"
     assert entries[1].operator == "how"
+
+
+def test_trigger_splitting(tmp_path: Path) -> None:
+    """Split triggers and extras on pipe with edge case handling.
+
+    Handles trailing pipes, empty segments, and whitespace trimming.
+    """
+    index_file = tmp_path / "test_index.md"
+    index_file.write_text(
+        "## Test Section\n"
+        "\n"
+        "/when auth fails | auth error, login failure\n"
+        "/when auth fails\n"
+        "/when auth | \n"
+        "/when auth fails | single\n"
+        "/when mock patch | test doubles\n"
+    )
+
+    entries = parse_index(index_file)
+
+    # auth fails with multiple extras
+    assert entries[0].trigger == "auth fails"
+    assert entries[0].extra_triggers == ["auth error", "login failure"]
+
+    # auth fails with no extras
+    assert entries[1].trigger == "auth fails"
+    assert entries[1].extra_triggers == []
+
+    # auth with trailing pipe (empty extras filtered)
+    assert entries[2].trigger == "auth"
+    assert entries[2].extra_triggers == []
+
+    # auth fails with single extra
+    assert entries[3].trigger == "auth fails"
+    assert entries[3].extra_triggers == ["single"]
+
+    # extra triggers trimmed of whitespace
+    assert entries[4].trigger == "mock patch"
+    assert entries[4].extra_triggers == ["test doubles"]

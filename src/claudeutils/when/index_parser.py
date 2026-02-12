@@ -37,12 +37,14 @@ def parse_index(index_path: Path) -> list[WhenEntry]:
             operator, rest = line.split(" ", 1)
             operator = operator[1:]  # Remove leading /
 
-            # Split on pipe for trigger and extras
-            if " | " in rest:
-                trigger, extras_str = rest.split(" | ", 1)
-                extra_triggers = [e.strip() for e in extras_str.split(",")]
+            # Split on first pipe for trigger and extras
+            if "|" in rest:
+                trigger, extras_str = rest.split("|", 1)
+                trigger = trigger.strip()
+                # Split on comma, strip each, filter out empty segments
+                extra_triggers = [e.strip() for e in extras_str.split(",") if e.strip()]
             else:
-                trigger = rest
+                trigger = rest.strip()
                 extra_triggers = []
 
             entry = WhenEntry(
