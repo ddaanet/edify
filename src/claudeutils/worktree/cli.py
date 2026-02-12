@@ -275,11 +275,32 @@ def clean_tree() -> None:
 
 
 @worktree.command()
-@click.argument("slug")
+@click.argument("slug", required=False)
 @click.option("--base", default="HEAD", help="Base commit for worktree branch")
 @click.option("--session", default="", help="Session file path")
-def new(slug: str, base: str, session: str) -> None:
+@click.option("--task", default="", help="Task name from session.md")
+@click.option("--session-md", default="agents/session.md", help="Path to session.md")
+def new(slug: str | None, base: str, session: str, task: str, session_md: str) -> None:
     """Create worktree at sibling -wt container with branch {slug}."""
+    if task and slug:
+        msg = "slug and --task are mutually exclusive"
+        raise click.UsageError(msg)
+
+    if not task and not slug:
+        msg = "either slug or --task is required"
+        raise click.UsageError(msg)
+
+    if task and session:
+        click.echo("Warning: --session option ignored when --task provided", err=True)
+
+    if task:
+        slug = derive_slug(task)
+        session_content = focus_session(task, session_md)
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".md") as f:
+            f.write(session_content)
+            session = f.name
+
+    assert slug is not None
     worktree_path = wt_path(slug, create_container=True)
 
     if worktree_path.exists():

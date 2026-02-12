@@ -397,3 +397,61 @@ def test_new_environment_initialization(
     just_setup_calls = [c for c in calls if c[0] == ["just", "setup"]]
     assert len(just_setup_calls) > 0
     assert any(c[1].get("cwd") == worktree_path for c in just_setup_calls)
+
+
+def test_new_task_option(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify --task option with --session-md default."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+
+    _init_git_repo(repo_path)
+
+    # Create initial commit
+    (repo_path / "README.md").write_text("test")
+    subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
+    )
+
+    # Create agents directory and session.md
+    agents_dir = repo_path / "agents"
+    agents_dir.mkdir()
+    session_file = agents_dir / "session.md"
+    session_file.write_text(
+        "# Session\n\n"
+        "## Pending Tasks\n\n"
+        "- [ ] **Implement feature** — `command` | sonnet\n"
+        "  - Plan: plans/test-plan\n"
+        "- [ ] **Another task** — `command` | sonnet\n"
+        "  - Plan: plans/other-plan\n"
+    )
+
+    runner = CliRunner()
+
+    # Test 1: --task with default --session-md works
+    result = runner.invoke(worktree, ["new", "--task", "Implement feature"])
+    assert result.exit_code == 0
+    container_path = tmp_path / "repo-wt"
+    worktree_path = container_path / "implement-feature"
+    assert worktree_path.exists()
+
+    # Test 2: Both slug and --task provided should error
+    result = runner.invoke(worktree, ["new", "explicit-slug", "--task", "Another task"])
+    assert result.exit_code != 0
+    assert (
+        "mutually exclusive" in result.output.lower() or "both" in result.output.lower()
+    )
+
+    # Test 3: --session ignored when --task provided (warning printed)
+    result = runner.invoke(
+        worktree,
+        ["new", "--task", "Another task", "--session", "some-session.md"],
+    )
+    assert result.exit_code == 0
+    assert "warning" in result.output.lower() or "ignored" in result.output.lower()
+
+    # Test 4: Help shows --task and --session-md options
+    result = runner.invoke(worktree, ["new", "--help"])
+    assert "--task" in result.output
+    assert "--session-md" in result.output
