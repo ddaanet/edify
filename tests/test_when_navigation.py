@@ -66,3 +66,42 @@ Some content here.
     # H2 (top-level): should have only file link
     ancestors = compute_ancestors("Test Organization", "testing.md", content)
     assert ancestors == ["/when ..testing.md"]
+
+
+def test_flat_h2_file_ancestors() -> None:
+    """Handle flat H2 files with no nesting (all headings at same level)."""
+    # Flat H2 file: all headings are H2, no H3 nesting
+    content = """\
+## Oneshot Workflow Pattern
+
+Pattern description here.
+
+## TDD Workflow Integration
+
+Another section here.
+
+## Handoff Pattern
+
+More content.
+"""
+
+    # For H2 heading in flat file, ancestor should be only the file link
+    ancestors = compute_ancestors(
+        "Oneshot Workflow Pattern", "workflow-core.md", content
+    )
+    assert ancestors == ["/when ..workflow-core.md"]
+
+    # Another H2 in same flat file
+    ancestors = compute_ancestors(
+        "TDD Workflow Integration", "workflow-core.md", content
+    )
+    assert ancestors == ["/when ..workflow-core.md"]
+
+    # Verify hierarchy extraction produces flat list (all H2, no parents)
+    hierarchy = extract_heading_hierarchy(content)
+    assert hierarchy["Oneshot Workflow Pattern"].parent is None
+    assert hierarchy["Oneshot Workflow Pattern"].level == 2
+    assert hierarchy["TDD Workflow Integration"].parent is None
+    assert hierarchy["TDD Workflow Integration"].level == 2
+    assert hierarchy["Handoff Pattern"].parent is None
+    assert hierarchy["Handoff Pattern"].level == 2
