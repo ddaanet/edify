@@ -396,8 +396,12 @@ def rm(slug: str) -> None:
     """Remove worktree at sibling -wt container and its branch (forced)."""
     worktree_path = wt_path(slug)
     if worktree_path.exists():
-        if _git("-C", str(worktree_path), "status", "--porcelain", check=False):
-            click.echo(f"Warning: {slug} has uncommitted changes")
+        status_output = _git(
+            "-C", str(worktree_path), "status", "--porcelain", check=False
+        )
+        if status_output:
+            uncommitted_count = len(status_output.strip().split("\n"))
+            click.echo(f"Warning: worktree has {uncommitted_count} uncommitted files")
         _git("worktree", "remove", "--force", str(worktree_path))
     else:
         _git("worktree", "prune")

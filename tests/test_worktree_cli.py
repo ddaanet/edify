@@ -372,3 +372,51 @@ def test_task_mode_integration(
     session_content_created = session_md_path.read_text()
     assert "# Session: Worktree — Implement feature X" in session_content_created
     assert "Fix bug Y" not in session_content_created
+
+
+def test_rm_command_path_resolution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Rm command uses wt_path() and warns about uncommitted changes."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+    init_repo(repo_path)
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["new", "test-slug"])
+    assert result.exit_code == 0
+
+    worktree_path = wt_path("test-slug")
+    assert worktree_path.exists()
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["rm", "test-slug"])
+    assert result.exit_code == 0
+    assert not worktree_path.exists()
+
+
+def test_rm_command_dirty_tree_warning(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Rm command warns when worktree has uncommitted changes."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+    init_repo(repo_path)
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["new", "test-slug"])
+    assert result.exit_code == 0
+
+    worktree_path = wt_path("test-slug")
+
+    test_file = worktree_path / "test.txt"
+    test_file.write_text("uncommitted content")
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["rm", "test-slug"])
+    assert result.exit_code == 0
+    assert "Warning: worktree has" in result.output
+    assert "uncommitted files" in result.output
+    assert not worktree_path.exists()
