@@ -44,11 +44,26 @@ def score_match(query: str, candidate: str) -> float:
                 consecutive_bonus = (
                     4 if j > 1 and score[i - 1][j - 1] > score[i - 1][j - 2] else 0
                 )
+                # Boundary bonus: check character before match
+                boundary_bonus = 0.0
+                if j > 1:
+                    prev_char = candidate_lower[j - 2]
+                    if prev_char == " ":
+                        boundary_bonus = 10
+                    elif prev_char in ("/", "-", "_"):
+                        boundary_bonus = 9
+                    elif prev_char.islower() and candidate_lower[j - 1].isupper():
+                        boundary_bonus = 7
+
+                # First character match bonus multiplied by 2
+                first_char_multiplier = 2 if i == 1 else 1
+
                 score[i][j] = max(
                     score[i][j - 1],  # skip this candidate position
                     score[i - 1][j - 1]
-                    + match_score
-                    + consecutive_bonus,  # use this match
+                    + match_score * first_char_multiplier
+                    + consecutive_bonus
+                    + boundary_bonus,  # use this match
                 )
             else:
                 # No match at this position: carry forward best score
