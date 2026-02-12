@@ -1,6 +1,7 @@
 """Tests for worktree rm subcommand."""
 
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -9,34 +10,9 @@ from click.testing import CliRunner
 from claudeutils.worktree.cli import worktree
 
 
-def _init_repo(repo_path: Path) -> None:
-    """Initialize git repo with user config and initial commit."""
-    subprocess.run(["git", "init"], cwd=repo_path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.com"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test User"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(
-        ["git", "add", "README.md"], cwd=repo_path, check=True, capture_output=True
-    )
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-
-
-def _create_worktree(repo_path: Path, slug: str) -> Path:
+def _create_worktree(
+    repo_path: Path, slug: str, init_repo: Callable[[Path], None]
+) -> Path:
     """Create worktree and return its path."""
     runner = CliRunner()
     result = runner.invoke(worktree, ["new", slug])
@@ -56,14 +32,16 @@ def _branch_exists(name: str) -> bool:
     return name in result.stdout
 
 
-def test_rm_basic(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_rm_basic(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
     """Removes worktree directory and branch."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
-    _init_repo(repo_path)
-    worktree_path = _create_worktree(repo_path, "test-feature")
+    init_repo(repo_path)
+    worktree_path = _create_worktree(repo_path, "test-feature", init_repo)
     assert worktree_path.exists()
 
     runner = CliRunner()
@@ -75,14 +53,16 @@ def test_rm_basic(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert "removed" in result.output.lower()
 
 
-def test_rm_dirty_warning(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_rm_dirty_warning(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
     """Warns about uncommitted changes but proceeds with removal."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
-    _init_repo(repo_path)
-    worktree_path = _create_worktree(repo_path, "test-feature")
+    init_repo(repo_path)
+    worktree_path = _create_worktree(repo_path, "test-feature", init_repo)
     (worktree_path / "newfile.txt").write_text("uncommitted")
 
     runner = CliRunner()
@@ -94,14 +74,16 @@ def test_rm_dirty_warning(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
     assert "uncommitted" in result.output.lower() or "warning" in result.output.lower()
 
 
-def test_rm_branch_only(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_rm_branch_only(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
     """Cleans up branch when directory removed externally."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
-    _init_repo(repo_path)
-    worktree_path = _create_worktree(repo_path, "test-feature")
+    init_repo(repo_path)
+    worktree_path = _create_worktree(repo_path, "test-feature", init_repo)
     assert _branch_exists("test-feature")
 
     subprocess.run(["rm", "-rf", str(worktree_path)], check=True, capture_output=True)

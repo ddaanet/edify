@@ -3,6 +3,7 @@
 import json
 import stat
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -15,33 +16,6 @@ from claudeutils.worktree.cli import (
     worktree,
     wt_path,
 )
-
-
-def _init_repo(repo_path: Path) -> None:
-    """Initialize git repo with user config and initial commit."""
-    subprocess.run(["git", "init"], cwd=repo_path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.com"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test User"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(
-        ["git", "add", "README.md"], cwd=repo_path, check=True, capture_output=True
-    )
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
 
 
 def test_package_import() -> None:
@@ -78,13 +52,15 @@ def test_derive_slug() -> None:
         derive_slug("   ")
 
 
-def test_ls_empty(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_ls_empty(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
     """Empty output when no worktrees exist."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
-    _init_repo(repo_path)
+    init_repo(repo_path)
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["ls"])
@@ -92,12 +68,14 @@ def test_ls_empty(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     assert result.output == ""
 
 
-def test_ls_multiple_worktrees(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_ls_multiple_worktrees(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
     """Parses porcelain output and extracts slug from path."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-    _init_repo(repo_path)
+    init_repo(repo_path)
 
     subprocess.run(["git", "branch", "task-a"], check=True, capture_output=True)
     subprocess.run(["git", "branch", "task-b"], check=True, capture_output=True)
@@ -130,38 +108,42 @@ def test_ls_multiple_worktrees(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
 
 
 def test_wt_path_not_in_container(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """Returns container path when repo not in -wt container."""
     repo_path = tmp_path / "my-repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-    _init_repo(repo_path)
+    init_repo(repo_path)
 
     result_path = wt_path("feature-a")
     assert str(result_path).endswith("my-repo-wt/feature-a")
 
 
-def test_wt_path_in_container(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_wt_path_in_container(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
     """Detects repo inside -wt container, returns sibling path."""
     container_path = tmp_path / "my-repo-wt"
     container_path.mkdir()
     repo_path = container_path / "main"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-    _init_repo(repo_path)
+    init_repo(repo_path)
 
     path_a = wt_path("feature-a")
     assert path_a.parent.name == "my-repo-wt"
     assert "-wt/-wt" not in str(path_a)
 
 
-def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_session_precommit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
     """Session file committed to worktree branch before worktree creation."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-    _init_repo(repo_path)
+    init_repo(repo_path)
 
     session_file = tmp_path / "test-session.md"
     session_file.write_text("# Focused Session\n\nTask content")
@@ -195,13 +177,13 @@ def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
 
 
 def test_wt_path_creates_container(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """Creates container directory with create_container=True."""
     repo_path = tmp_path / "my-repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-    _init_repo(repo_path)
+    init_repo(repo_path)
 
     container_path = repo_path.parent / "my-repo-wt"
     result_path = wt_path("feature-a", create_container=True)
@@ -211,18 +193,20 @@ def test_wt_path_creates_container(
     assert stat.S_IMODE(container_path.stat().st_mode) == 0o755
 
 
-def test_wt_path_edge_cases(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_wt_path_edge_cases(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
     """Edge cases: special characters, deep nesting, empty slug."""
     repo_path = tmp_path / "my-repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-    _init_repo(repo_path)
+    init_repo(repo_path)
     assert "#123" in str(wt_path("fix-bug#123"))
 
     deep_path = tmp_path / "a" / "b" / "c" / "d" / "e" / "repo"
     deep_path.mkdir(parents=True)
     monkeypatch.chdir(deep_path)
-    _init_repo(deep_path)
+    init_repo(deep_path)
     result = wt_path("nested-test")
     assert result.is_absolute()
 
@@ -351,14 +335,14 @@ def test_focus_session_missing_task(tmp_path: Path) -> None:
         focus_session("nonexistent-task", session_file)
 
 
-def test_new_task_mode_integration(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_task_mode_integration(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """Task mode: slug derivation, focused session, tab-separated output."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-    _init_repo(repo_path)
+    init_repo(repo_path)
 
     session_file = repo_path / "agents" / "session.md"
     session_file.parent.mkdir(parents=True, exist_ok=True)

@@ -268,6 +268,39 @@ def markdown_fixtures_dir() -> Path:
 
 # Worktree Fixtures
 @pytest.fixture
+def init_repo() -> Callable[[Path], None]:
+    """Return function to initialize git repo with user config and initial
+    commit."""
+
+    def _init_repo(repo_path: Path) -> None:
+        subprocess.run(["git", "init"], cwd=repo_path, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@example.com"],
+            cwd=repo_path,
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Test User"],
+            cwd=repo_path,
+            check=True,
+            capture_output=True,
+        )
+        (repo_path / "README.md").write_text("test")
+        subprocess.run(
+            ["git", "add", "README.md"], cwd=repo_path, check=True, capture_output=True
+        )
+        subprocess.run(
+            ["git", "commit", "-m", "Initial commit"],
+            cwd=repo_path,
+            check=True,
+            capture_output=True,
+        )
+
+    return _init_repo
+
+
+@pytest.fixture
 def repo_with_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Create git repo with submodule and session files.
 

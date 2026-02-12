@@ -230,7 +230,7 @@ def _create_session_commit(slug: str, base: str, session: str) -> str:
             "commit-tree", tree, "-p", base, "-m", f"Focused session for {slug}"
         )
     finally:
-        Path(tmp_index_path).unlink()
+        Path(tmp_index_path).unlink(missing_ok=True)
 
 
 def _check_branch_exists(branch: str) -> bool:
@@ -338,16 +338,29 @@ def new(slug: str | None, base: str, session: str, task: str, session_md: str) -
                 session = f.name
                 temp_session_file = session
 
-        assert slug is not None
+        if slug is None:
+            msg = "either slug or --task is required"
+            raise click.UsageError(msg)
+
         worktree_path = wt_path(slug, create_container=True)
 
         if worktree_path.exists():
             click.echo(f"Error: existing directory {worktree_path}", err=True)
             raise SystemExit(1)
 
-        _create_parent_worktree(worktree_path, slug, base, session)
+        try:
+            _create_parent_worktree(worktree_path, slug, base, session)
+        except subprocess.CalledProcessError as e:
+            click.echo(f"Error creating parent worktree: {e.stderr}", err=True)
+            raise SystemExit(1) from e
+
         project_root = _git("rev-parse", "--show-toplevel")
-        _create_submodule_worktree(project_root, worktree_path, slug)
+
+        try:
+            _create_submodule_worktree(project_root, worktree_path, slug)
+        except subprocess.CalledProcessError as e:
+            click.echo(f"Error creating submodule worktree: {e.stderr}", err=True)
+            raise SystemExit(1) from e
 
         container_path = worktree_path.parent
         add_sandbox_dir(str(container_path), ".claude/settings.local.json")
@@ -361,11 +374,8 @@ def new(slug: str | None, base: str, session: str, task: str, session_md: str) -
             click.echo(f"{slug}\t{worktree_path}")
         else:
             click.echo(str(worktree_path))
-    except subprocess.CalledProcessError as e:
-        click.echo(f"Error creating worktree: {e.stderr}", err=True)
-        raise SystemExit(1) from e
     finally:
-        if temp_session_file:
+        if temp_session_file is not None:
             Path(temp_session_file).unlink(missing_ok=True)
 
 

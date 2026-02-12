@@ -1,6 +1,7 @@
 """Tests for worktree submodule initialization."""
 
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -9,41 +10,29 @@ from click.testing import CliRunner
 from claudeutils.worktree.cli import worktree
 
 
-def _init_git_repo(repo_path: Path) -> None:
-    """Initialize a basic git repository."""
-    subprocess.run(["git", "init"], cwd=repo_path, check=True, capture_output=True)
+def _setup_repo_with_submodule(
+    repo_path: Path, init_repo: Callable[[Path], None]
+) -> None:
+    """Set up a test repo with a simulated submodule (gitlink)."""
+    init_repo(repo_path)
+
+    agent_core_path = repo_path / "agent-core"
+    agent_core_path.mkdir()
+    subprocess.run(
+        ["git", "init"], cwd=agent_core_path, check=True, capture_output=True
+    )
     subprocess.run(
         ["git", "config", "user.email", "test@example.com"],
-        cwd=repo_path,
+        cwd=agent_core_path,
         check=True,
         capture_output=True,
     )
     subprocess.run(
         ["git", "config", "user.name", "Test User"],
-        cwd=repo_path,
+        cwd=agent_core_path,
         check=True,
         capture_output=True,
     )
-
-
-def _setup_repo_with_submodule(repo_path: Path) -> None:
-    """Set up a test repo with a simulated submodule (gitlink)."""
-    _init_git_repo(repo_path)
-
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(
-        ["git", "add", "README.md"], cwd=repo_path, check=True, capture_output=True
-    )
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-
-    agent_core_path = repo_path / "agent-core"
-    agent_core_path.mkdir()
-    _init_git_repo(agent_core_path)
 
     (agent_core_path / "core.txt").write_text("core content")
     subprocess.run(
@@ -107,13 +96,15 @@ def _setup_repo_with_submodule(repo_path: Path) -> None:
     )
 
 
-def test_new_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_new_submodule(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
     """Verify new subcommand initializes submodule and creates branch."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
-    _setup_repo_with_submodule(repo_path)
+    _setup_repo_with_submodule(repo_path, init_repo)
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["new", "test-feature"])
@@ -154,14 +145,14 @@ def test_new_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_new_worktree_submodule(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """Verify submodule uses worktree-based approach with branch reuse."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
-    _setup_repo_with_submodule(repo_path)
+    _setup_repo_with_submodule(repo_path, init_repo)
 
     runner = CliRunner()
 

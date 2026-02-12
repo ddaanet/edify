@@ -2,6 +2,7 @@
 
 import json
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -10,24 +11,10 @@ from click.testing import CliRunner
 from claudeutils.worktree.cli import worktree
 
 
-def _init_git_repo(repo_path: Path) -> None:
-    subprocess.run(["git", "init"], cwd=repo_path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.com"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test User"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-
-
-def _setup_repo_with_submodule(repo_path: Path) -> None:
-    _init_git_repo(repo_path)
+def _setup_repo_with_submodule(
+    repo_path: Path, init_repo: Callable[[Path], None]
+) -> None:
+    init_repo(repo_path)
     (repo_path / "README.md").write_text("test")
     subprocess.run(
         ["git", "add", "README.md"], cwd=repo_path, check=True, capture_output=True
@@ -41,7 +28,21 @@ def _setup_repo_with_submodule(repo_path: Path) -> None:
 
     agent_core_path = repo_path / "agent-core"
     agent_core_path.mkdir()
-    _init_git_repo(agent_core_path)
+    subprocess.run(
+        ["git", "init"], cwd=agent_core_path, check=True, capture_output=True
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=agent_core_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"],
+        cwd=agent_core_path,
+        check=True,
+        capture_output=True,
+    )
     (agent_core_path / "core.txt").write_text("core content")
     subprocess.run(
         ["git", "add", "core.txt"], cwd=agent_core_path, check=True, capture_output=True
@@ -98,18 +99,13 @@ def _setup_repo_with_submodule(repo_path: Path) -> None:
 
 
 def test_new_collision_detection(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """Reuses existing branch without error."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-    _init_git_repo(repo_path)
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
-    )
+    init_repo(repo_path)
     subprocess.run(["git", "branch", "test-feature"], check=True, capture_output=True)
 
     runner = CliRunner()
@@ -120,18 +116,13 @@ def test_new_collision_detection(
 
 
 def test_new_directory_collision(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """Detects existing directory collision."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-    _init_git_repo(repo_path)
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
-    )
+    init_repo(repo_path)
 
     container_path = tmp_path / "repo-wt"
     container_path.mkdir()
@@ -151,17 +142,14 @@ def test_new_directory_collision(
     assert "test-feature" not in result.stdout
 
 
-def test_new_basic_flow(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_new_basic_flow(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
     """Creates worktree with new branch in sibling container."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-    _init_git_repo(repo_path)
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
-    )
+    init_repo(repo_path)
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["new", "test-feature"])
@@ -189,19 +177,14 @@ def test_new_basic_flow(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
 
 
 def test_new_command_sibling_paths(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """Creates multiple worktrees in sibling container."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
-    _init_git_repo(repo_path)
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
-    )
+    init_repo(repo_path)
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["new", "test-wt"])
@@ -234,19 +217,14 @@ def test_new_command_sibling_paths(
 
 
 def test_new_sandbox_registration(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """Registers container in main and worktree settings."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
-    _init_git_repo(repo_path)
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
-    )
+    init_repo(repo_path)
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["new", "test-feature"])
@@ -274,19 +252,14 @@ def test_new_sandbox_registration(
 
 
 def test_new_environment_initialization(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """Runs just setup in worktree if available."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
-    _init_git_repo(repo_path)
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
-    )
+    init_repo(repo_path)
 
     original_run = subprocess.run
     calls: list[tuple[list[str], dict[str, object]]] = []
@@ -318,18 +291,15 @@ def test_new_environment_initialization(
     )
 
 
-def test_new_task_option(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_new_task_option(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
     """Creates worktree with --task option."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
-    _init_git_repo(repo_path)
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
-    )
+    init_repo(repo_path)
 
     (repo_path / "agents").mkdir()
     (repo_path / "agents" / "session.md").write_text(
@@ -364,19 +334,14 @@ def test_new_task_option(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_new_session_handling_branch_reuse(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """Warns and ignores --session when branch already exists."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
-    _init_git_repo(repo_path)
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
-    )
+    init_repo(repo_path)
     subprocess.run(["git", "branch", "test-feature"], check=True, capture_output=True)
 
     (repo_path / "agents").mkdir()
@@ -398,3 +363,62 @@ def test_new_session_handling_branch_reuse(
     result = runner.invoke(worktree, ["new", "new-branch"])
     assert result.exit_code == 0
     assert (container_path / "new-branch").exists()
+
+
+def test_new_environment_init_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Warns when just setup fails but continues worktree creation."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+
+    init_repo(repo_path)
+
+    original_run = subprocess.run
+    calls: list[tuple[list[str], dict[str, object]]] = []
+
+    def mock_run(args, **kwargs) -> subprocess.CompletedProcess[str]:  # noqa: ANN001, ANN003
+        calls.append((args, kwargs))
+        if args == ["just", "--version"]:
+            return subprocess.CompletedProcess(
+                args=args, returncode=0, stdout="just 1.0\n", stderr=""
+            )
+        if args == ["just", "setup"]:
+            return subprocess.CompletedProcess(
+                args=args, returncode=1, stdout="", stderr="Setup failed"
+            )
+        return original_run(args, **kwargs)
+
+    monkeypatch.setattr("claudeutils.worktree.cli.subprocess.run", mock_run)
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["new", "test-failure"])
+    assert result.exit_code == 0
+
+    worktree_path = tmp_path / "repo-wt" / "test-failure"
+    assert worktree_path.exists()
+    assert "warning" in result.output.lower() or "failed" in result.output.lower()
+
+
+def test_new_container_idempotent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Container creation is idempotent with exist_ok=True."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+
+    init_repo(repo_path)
+
+    container_path = tmp_path / "repo-wt"
+    container_path.mkdir()
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["new", "test-idempotent"])
+    assert result.exit_code == 0
+
+    assert (container_path / "test-idempotent").exists()
+    result = runner.invoke(worktree, ["new", "test-idempotent-2"])
+    assert result.exit_code == 0
+    assert (container_path / "test-idempotent-2").exists()
