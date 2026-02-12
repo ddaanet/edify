@@ -9,6 +9,7 @@
 - Cycle 0.1: Character subsequence matching (620c1c2) — created `src/claudeutils/when/fuzzy.py` with DP matrix scorer, `rank_matches` function, and `tests/test_when_fuzzy.py`
 - Cycle 0.2: Boundary bonus scoring (17ab47c) — added `_boundary_bonus()` helper, first-char multiplier. Refactored for complexity (b59039d)
 - Cycle 0.3: Skipped GREEN — consecutive bonus already implemented by cycle 0.1 (over-implementation). Test committed (7d29296)
+- Cycle 0.4: Gap penalties (b28ec75) — added gap penalty calculation with post-DP backtrace, `_get_match_positions()` helper. Adjusted `test_boundary_bonuses_applied()` to isolate boundary bonuses from gap effects
 
 ### RED Pass Blast Radius Diagnostic
 
@@ -27,8 +28,8 @@ Report: `plans/orchestrate-evolution/reports/red-pass-blast-radius.md`
 
 - [>] **Execute when-recall runbook** — `/orchestrate when-recall` | sonnet
   - Plan: plans/when-recall
-  - Progress: 3/47 cycles complete (Phase 0: 0.1 ✓, 0.2 ✓, 0.3 skip)
-  - Next: cycle 0.4 (gap penalties)
+  - Progress: 4/47 cycles complete (Phase 0: 0.1 ✓, 0.2 ✓, 0.3 skip, 0.4 ✓)
+  - Next: cycle 0.5 (word-overlap tiebreaker — needs assertion rewrite before execution)
   - Known issues: 0.5 needs assertion rewrite, 0.7 skip GREEN, 0.8 may skip GREEN
   - Protocol written for RED pass handling: blast radius assessment
 
@@ -71,4 +72,5 @@ Report: `plans/orchestrate-evolution/reports/red-pass-blast-radius.md`
 - `plans/when-recall/reports/cycle-0-1.md` — Cycle 0.1 execution report
 - `plans/when-recall/reports/cycle-0-2.md` — Cycle 0.2 execution report
 - `plans/when-recall/reports/refactor-0-2.md` — Refactor report
+- `plans/when-recall/reports/cycle-0-4.md` — Cycle 0.4 execution report
 - `.claude/agents/when-recall-task.md` — TDD task agent
