@@ -44,3 +44,35 @@ def extract_heading_hierarchy(content: str) -> dict[str, HeadingInfo]:
         stack.append((level, heading_text))
 
     return hierarchy
+
+
+def compute_ancestors(heading: str, file_path: str, file_content: str) -> list[str]:
+    """Compute ancestor links for a heading.
+
+    Args:
+        heading: Target heading text
+        file_path: Path to the markdown file
+        file_content: Markdown content
+
+    Returns:
+        List of ancestor links in format `/when .SectionTitle` for headings,
+        plus `/when ..filename.md` as final link
+    """
+    hierarchy = extract_heading_hierarchy(file_content)
+
+    if heading not in hierarchy:
+        return []
+
+    ancestors: list[str] = []
+    current = hierarchy[heading]
+
+    # Walk up and collect ancestor chain
+    ancestor_chain: list[str] = []
+    while current.parent is not None:
+        ancestor_chain.append(current.parent)
+        current = hierarchy[current.parent]
+
+    # Reverse to get top-down order
+    ancestors = [f"/when .{name}" for name in reversed(ancestor_chain)]
+    ancestors.append(f"/when ..{file_path}")
+    return ancestors

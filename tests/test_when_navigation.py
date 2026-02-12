@@ -1,6 +1,6 @@
 """Tests for markdown navigation hierarchy extraction."""
 
-from claudeutils.when.navigation import extract_heading_hierarchy
+from claudeutils.when.navigation import compute_ancestors, extract_heading_hierarchy
 
 
 def test_extract_heading_hierarchy() -> None:
@@ -39,3 +39,30 @@ Content for A2.
     assert hierarchy2["C"].level == 4
     assert hierarchy2["B"].level == 3
     assert hierarchy2["A"].level == 2
+
+
+def test_compute_ancestors() -> None:
+    """Compute ancestor links for heading hierarchy."""
+    content = """\
+## Test Organization
+### Mock Patching
+#### Mock Patching Pattern
+Some content here.
+## Another Section
+"""
+
+    # H3 under H2: should have parent H2 and file link
+    ancestors = compute_ancestors("Mock Patching", "testing.md", content)
+    assert ancestors == ["/when .Test Organization", "/when ..testing.md"]
+
+    # H4 under H3 under H2: should have grandparent H2, parent H3, and file link
+    ancestors = compute_ancestors("Mock Patching Pattern", "testing.md", content)
+    assert ancestors == [
+        "/when .Test Organization",
+        "/when .Mock Patching",
+        "/when ..testing.md",
+    ]
+
+    # H2 (top-level): should have only file link
+    ancestors = compute_ancestors("Test Organization", "testing.md", content)
+    assert ancestors == ["/when ..testing.md"]
