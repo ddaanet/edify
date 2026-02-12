@@ -112,6 +112,26 @@ def test_minimum_score_threshold() -> None:
     assert no_match == 0.0
 
 
+def test_prefix_word_disambiguates() -> None:
+    """Prefix words in query match prefix words in candidate headings."""
+    # Prefix word "when" in query matches "when" at start of heading
+    when_match = score_match("when writing mock tests", "When Writing Mock Tests")
+    how_match = score_match("when writing mock tests", "How to Write Mock Tests")
+    assert when_match > how_match
+
+    # Prefix word "how" in query matches "how" at start of heading
+    how_match2 = score_match("how encode paths", "How to Encode Paths")
+    when_match2 = score_match("how encode paths", "When Encoding Paths")
+    assert how_match2 > when_match2
+
+    # Query without prefix: scores closer together (less disambiguation)
+    no_prefix_when = score_match("writing mock tests", "When Writing Mock Tests")
+    no_prefix_how = score_match("writing mock tests", "How to Write Mock Tests")
+    with_prefix_gap = when_match - how_match
+    without_prefix_gap = no_prefix_when - no_prefix_how
+    assert with_prefix_gap > without_prefix_gap
+
+
 def test_rank_matches_returns_sorted_limited() -> None:
     """Rank matches returns sorted list of (candidate, score) tuples."""
     candidates = [
