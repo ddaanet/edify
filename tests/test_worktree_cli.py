@@ -390,3 +390,20 @@ def test_focus_session_section_filtering(tmp_path: Path) -> None:
     assert "Unrelated issue: GPU memory constraints" not in result
     assert "Design for feature X" in result
     assert "Unrelated design" not in result
+
+
+def test_focus_session_missing_task(tmp_path: Path) -> None:
+    """Raise clear error when task name doesn't exist in session.md."""
+    session_file = tmp_path / "session.md"
+    session_content = r"""# Session Handoff: 2026-02-12
+
+## Pending Tasks
+
+- [ ] **Existing task** — `\`/plan\`` | sonnet
+"""
+    session_file.write_text(session_content)
+
+    with pytest.raises(
+        ValueError, match=r"Task 'nonexistent-task' not found in session\.md"
+    ):
+        focus_session("nonexistent-task", session_file)
