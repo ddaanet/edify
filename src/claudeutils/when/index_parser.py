@@ -1,8 +1,11 @@
 """Parse /when and /how format entries from index files."""
 
+import logging
 from pathlib import Path
 
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 
 class WhenEntry(BaseModel):
@@ -46,6 +49,15 @@ def parse_index(index_path: Path) -> list[WhenEntry]:
             else:
                 trigger = rest.strip()
                 extra_triggers = []
+
+            # Validate: trigger must be non-empty
+            if not trigger:
+                logger.warning(
+                    "Skipping entry with empty trigger at line %d: %s",
+                    line_num,
+                    line,
+                )
+                continue
 
             entry = WhenEntry(
                 operator=operator,
