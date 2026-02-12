@@ -353,3 +353,41 @@ def test_add_sandbox_dir_missing_keys(tmp_path: Path) -> None:
     assert result2["permissions"]["additionalDirectories"] == ["/new/path"]
     assert result2["permissions"]["other_key"] == "value"  # Preserved
     assert isinstance(result2["permissions"]["additionalDirectories"], list)
+
+
+def test_add_sandbox_dir_deduplication(tmp_path: Path) -> None:
+    """Idempotent operation: existing paths not duplicated in array.
+
+    Given settings file with additionalDirectories: ["/path/a", "/path/b"],
+    adding "/path/a" again leaves array unchanged. Adding "/path/c" appends it.
+    Uses exact string match (no path normalization). Calling twice with same
+    path has same effect as calling once.
+    """
+    settings_file = tmp_path / "settings.json"
+    initial_settings = {
+        "permissions": {"additionalDirectories": ["/path/a", "/path/b"]}
+    }
+    settings_file.write_text(json.dumps(initial_settings, indent=2))
+
+    add_sandbox_dir("/path/a", settings_file)
+
+    result = json.loads(settings_file.read_text())
+    assert result["permissions"]["additionalDirectories"] == ["/path/a", "/path/b"]
+
+    add_sandbox_dir("/path/c", settings_file)
+
+    result = json.loads(settings_file.read_text())
+    assert result["permissions"]["additionalDirectories"] == [
+        "/path/a",
+        "/path/b",
+        "/path/c",
+    ]
+
+    add_sandbox_dir("/path/a", settings_file)
+
+    result = json.loads(settings_file.read_text())
+    assert result["permissions"]["additionalDirectories"] == [
+        "/path/a",
+        "/path/b",
+        "/path/c",
+    ]
