@@ -49,10 +49,50 @@ def derive_slug(task_name: str, max_length: int = 30) -> str:
     return slug.rstrip("-")
 
 
+def _is_relevant_entry(entry: str, task_name: str, plan_dir: str | None) -> bool:
+    """Check if entry mentions task name or plan directory."""
+    entry_lower = entry.lower()
+    task_lower = task_name.lower()
+
+    if task_lower in entry_lower:
+        return True
+    return bool(plan_dir and plan_dir.lower() in entry_lower)
+
+
+def _filter_section(
+    content: str, section_name: str, task_name: str, plan_dir: str | None
+) -> str:
+    """Extract and filter a section, returning section text or empty string."""
+    pattern = rf"## {re.escape(section_name)}\n\n(.*?)(?=\n## |\Z)"
+    match = re.search(pattern, content, re.DOTALL)
+    if not match:
+        return ""
+
+    section_content = match.group(1)
+    lines = section_content.split("\n")
+
+    relevant_lines = []
+    for line in lines:
+        if line.startswith("- "):
+            entry = line[2:].strip()
+            if _is_relevant_entry(entry, task_name, plan_dir):
+                relevant_lines.append(line)
+        elif not line.strip():
+            continue
+        else:
+            relevant_lines.append(line)
+
+    if not relevant_lines:
+        return ""
+
+    return f"## {section_name}\n\n" + "\n".join(relevant_lines) + "\n"
+
+
 def focus_session(task_name: str, session_md_path: str | Path) -> str:
     """Extract task from session.md and generate focused session.
 
-    Returns formatted string with H1 header, status, and extracted task.
+    Returns formatted string with H1 header, status, extracted task, and
+    filtered sections.
     """
     session_md_path = Path(session_md_path)
     content = session_md_path.read_text()
@@ -66,7 +106,13 @@ def focus_session(task_name: str, session_md_path: str | Path) -> str:
     task_metadata = match.group(1).rstrip()
     task_line = f"- [ ] **{task_name}** {task_metadata}"
 
-    return (
+    plan_dir = None
+    if "plan:" in task_metadata:
+        plan_match = re.search(r"plan:\s*(\S+)", task_metadata)
+        if plan_match:
+            plan_dir = plan_match.group(1)
+
+    result = (
         f"# Session: Worktree — {task_name}\n"
         f"\n"
         f"**Status:** Focused worktree for parallel execution.\n"
@@ -75,6 +121,16 @@ def focus_session(task_name: str, session_md_path: str | Path) -> str:
         f"\n"
         f"{task_line}\n"
     )
+
+    blockers = _filter_section(content, "Blockers / Gotchas", task_name, plan_dir)
+    if blockers:
+        result += f"\n{blockers}"
+
+    references = _filter_section(content, "Reference Files", task_name, plan_dir)
+    if references:
+        result += f"\n{references}"
+
+    return result
 
 
 def add_sandbox_dir(container: str, settings_path: str | Path) -> None:

@@ -409,3 +409,37 @@ None
     assert r"- [ ] **Implement feature X** — `\`/plan-adhoc\`` | sonnet" in result
     assert "Fix bug Y" not in result
     assert "Completed task Z" not in result
+
+
+def test_focus_session_section_filtering(tmp_path: Path) -> None:
+    """Filter blockers and references to only relevant entries."""
+    session_file = tmp_path / "session.md"
+    session_content = r"""# Session Handoff: 2026-02-12
+
+## Pending Tasks
+
+- [ ] **Implement feature X** — `\`/plan-adhoc\`` | sonnet | plan: plans/feature-x/
+
+## Blockers / Gotchas
+
+- Implement feature X workflow depends on Phase 0 completion
+- Unrelated issue: GPU memory constraints
+- See plans/feature-x/ for implementation notes
+
+## Reference Files
+
+- `agents/decisions/implementation-notes.md` — General reference
+- `plans/feature-x/design.md` — Design for feature X
+- `plans/other-feature/design.md` — Unrelated design
+"""
+    session_file.write_text(session_content)
+
+    result = focus_session("Implement feature X", session_file)
+
+    assert isinstance(result, str)
+    assert "Implement feature X workflow depends on Phase 0 completion" in result
+    assert "See plans/feature-x/ for implementation notes" in result
+    assert "Unrelated issue: GPU memory constraints" not in result
+    assert "Design for feature X" in result
+    assert "Unrelated design" not in result
+    assert "General reference" not in result
