@@ -397,3 +397,50 @@ def test_new_task_option(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
     result = runner.invoke(worktree, ["new", "--help"])
     assert "--task" in result.output
     assert "--session-md" in result.output
+
+
+def test_new_session_handling_branch_reuse(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Warns and ignores --session when branch already exists."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+
+    _init_git_repo(repo_path)
+    (repo_path / "README.md").write_text("test")
+    subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
+    )
+
+    # Create existing branch
+    subprocess.run(["git", "branch", "test-feature"], check=True, capture_output=True)
+
+    # Create session file to pass
+    agents_dir = repo_path / "agents"
+    agents_dir.mkdir()
+    session_file = agents_dir / "session.md"
+    session_file.write_text("# Session\n\n## Pending Tasks\n\n- [ ] **Test** — test\n")
+
+    runner = CliRunner()
+    # Call with --session when branch exists
+    result = runner.invoke(
+        worktree, ["new", "test-feature", "--session", str(session_file)]
+    )
+
+    # Should succeed with warning
+    assert result.exit_code == 0
+    assert "warning" in result.output.lower() or "exists" in result.output.lower()
+    assert "session" in result.output.lower() or "ignored" in result.output.lower()
+
+    # Worktree should be created
+    container_path = tmp_path / "repo-wt"
+    worktree_path = container_path / "test-feature"
+    assert worktree_path.exists()
+
+    # New branch without --session should work normally
+    result = runner.invoke(worktree, ["new", "new-branch"])
+    assert result.exit_code == 0
+    worktree_path2 = container_path / "new-branch"
+    assert worktree_path2.exists()

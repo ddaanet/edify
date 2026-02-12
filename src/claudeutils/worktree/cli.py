@@ -253,8 +253,12 @@ def _create_parent_worktree(
     """Create parent worktree with appropriate branch handling."""
     branch_exists = _check_branch_exists(slug)
     if branch_exists and session:
-        click.echo(f"Error: existing branch {slug}", err=True)
-        raise SystemExit(1)
+        click.echo(
+            f"Warning: branch {slug} exists, ignoring --session "
+            "(session already committed)",
+            err=True,
+        )
+        session = ""
 
     if session:
         _git("branch", slug, _create_session_commit(slug, base, session))
