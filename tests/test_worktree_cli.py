@@ -55,15 +55,13 @@ def test_derive_slug() -> None:
 def test_ls_empty(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
-    """Empty output when no worktrees exist."""
+    """Empty when no worktrees."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-
     init_repo(repo_path)
 
-    runner = CliRunner()
-    result = runner.invoke(worktree, ["ls"])
+    result = CliRunner().invoke(worktree, ["ls"])
     assert result.exit_code == 0
     assert result.output == ""
 
@@ -71,7 +69,7 @@ def test_ls_empty(
 def test_ls_multiple_worktrees(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
-    """Parses porcelain output and extracts slug from path."""
+    """Parses porcelain, extracts slug and branch."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
@@ -93,8 +91,7 @@ def test_ls_multiple_worktrees(
         capture_output=True,
     )
 
-    runner = CliRunner()
-    result = runner.invoke(worktree, ["ls"])
+    result = CliRunner().invoke(worktree, ["ls"])
     assert result.exit_code == 0
 
     lines = result.output.strip().split("\n")
@@ -110,7 +107,7 @@ def test_ls_multiple_worktrees(
 def test_wt_path_not_in_container(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
-    """Returns container path when repo not in -wt container."""
+    """Container path when not in -wt."""
     repo_path = tmp_path / "my-repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
@@ -123,7 +120,7 @@ def test_wt_path_not_in_container(
 def test_wt_path_in_container(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
-    """Detects repo inside -wt container, returns sibling path."""
+    """Sibling path when in -wt container."""
     container_path = tmp_path / "my-repo-wt"
     container_path.mkdir()
     repo_path = container_path / "main"
@@ -148,15 +145,12 @@ def test_session_precommit(
     session_file = tmp_path / "test-session.md"
     session_file.write_text("# Focused Session\n\nTask content")
 
-    runner = CliRunner()
-    result = runner.invoke(
+    result = CliRunner().invoke(
         worktree, ["new", "test-feature", "--session", str(session_file)]
     )
     assert result.exit_code == 0
 
-    container_path = tmp_path / "repo-wt"
-    worktree_path = container_path / "test-feature"
-    session_md_path = worktree_path / "agents" / "session.md"
+    session_md_path = tmp_path / "repo-wt" / "test-feature" / "agents" / "session.md"
     assert session_md_path.read_text() == "# Focused Session\n\nTask content"
 
     result = subprocess.run(
@@ -355,8 +349,7 @@ def test_task_mode_integration(
 """
     session_file.write_text(session_content)
 
-    runner = CliRunner()
-    result = runner.invoke(worktree, ["new", "--task", "Implement feature X"])
+    result = CliRunner().invoke(worktree, ["new", "--task", "Implement feature X"])
     assert result.exit_code == 0
 
     lines = result.output.strip().split("\n")
@@ -383,15 +376,13 @@ def test_rm_command_path_resolution(
     monkeypatch.chdir(repo_path)
     init_repo(repo_path)
 
-    runner = CliRunner()
-    result = runner.invoke(worktree, ["new", "test-slug"])
+    result = CliRunner().invoke(worktree, ["new", "test-slug"])
     assert result.exit_code == 0
 
     worktree_path = wt_path("test-slug")
     assert worktree_path.exists()
 
-    runner = CliRunner()
-    result = runner.invoke(worktree, ["rm", "test-slug"])
+    result = CliRunner().invoke(worktree, ["rm", "test-slug"])
     assert result.exit_code == 0
     assert not worktree_path.exists()
 
@@ -405,17 +396,14 @@ def test_rm_command_dirty_tree_warning(
     monkeypatch.chdir(repo_path)
     init_repo(repo_path)
 
-    runner = CliRunner()
-    result = runner.invoke(worktree, ["new", "test-slug"])
+    result = CliRunner().invoke(worktree, ["new", "test-slug"])
     assert result.exit_code == 0
 
     worktree_path = wt_path("test-slug")
-
     test_file = worktree_path / "test.txt"
     test_file.write_text("uncommitted content")
 
-    runner = CliRunner()
-    result = runner.invoke(worktree, ["rm", "test-slug"])
+    result = CliRunner().invoke(worktree, ["rm", "test-slug"])
     assert result.exit_code == 0
     assert "Warning: worktree has" in result.output
     assert "uncommitted files" in result.output

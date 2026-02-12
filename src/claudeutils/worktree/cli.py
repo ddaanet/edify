@@ -29,7 +29,7 @@ def _git(
 
 
 def wt_path(slug: str, create_container: bool = False) -> Path:  # noqa: FBT001,FBT002
-    """Return worktree path in sibling -wt container."""
+    """Worktree path in sibling -wt container."""
     if not slug or not slug.strip():
         msg = "slug must not be empty or whitespace"
         raise ValueError(msg)
@@ -49,38 +49,33 @@ def wt_path(slug: str, create_container: bool = False) -> Path:  # noqa: FBT001,
 
 
 def derive_slug(task_name: str, max_length: int = 30) -> str:
-    """Transform task name to slug."""
+    """Task name to slug."""
     if not task_name or not task_name.strip():
         msg = "task_name must not be empty"
         raise ValueError(msg)
-
     slug = re.sub(r"[^a-z0-9]+", "-", task_name.lower()).strip("-")[:max_length]
     return slug.rstrip("-")
-
-
-def _is_relevant_entry(entry: str, task_name: str, plan_dir: str | None) -> bool:
-    entry_lower = entry.lower()
-    return task_name.lower() in entry_lower or bool(
-        plan_dir and plan_dir.lower() in entry_lower
-    )
 
 
 def _filter_section(
     content: str, section_name: str, task_name: str, plan_dir: str | None
 ) -> str:
-    """Extract and filter a section, returning section text or empty string."""
+    """Filter section to task-relevant entries."""
     pattern = rf"## {re.escape(section_name)}\n\n(.*?)(?=\n## |\Z)"
     match = re.search(pattern, content, re.DOTALL)
     if not match:
         return ""
 
+    def is_relevant(entry: str) -> bool:
+        entry_lower = entry.lower()
+        return task_name.lower() in entry_lower or bool(
+            plan_dir and plan_dir.lower() in entry_lower
+        )
+
     relevant_lines = [
         line
         for line in match.group(1).split("\n")
-        if (
-            line.startswith("- ")
-            and _is_relevant_entry(line[2:].strip(), task_name, plan_dir)
-        )
+        if (line.startswith("- ") and is_relevant(line[2:].strip()))
         or (not line.startswith("- ") and line.strip())
     ]
     return (
@@ -91,7 +86,7 @@ def _filter_section(
 
 
 def focus_session(task_name: str, session_md_path: str | Path) -> str:
-    """Generate focused session.md for task."""
+    """Focused session.md for task."""
     content = Path(session_md_path).read_text()
     pattern = rf"- \[ \] \*\*{re.escape(task_name)}\*\* (.+?)(?=\n-|\n## |\Z)"
     match = re.search(pattern, content, re.DOTALL)
@@ -118,7 +113,7 @@ def focus_session(task_name: str, session_md_path: str | Path) -> str:
 
 
 def add_sandbox_dir(container: str, settings_path: str | Path) -> None:
-    """Register container in settings for sandbox access."""
+    """Register container in settings for sandbox."""
     settings_path = Path(settings_path)
     if settings_path.exists():
         with settings_path.open() as f:
@@ -132,18 +127,19 @@ def add_sandbox_dir(container: str, settings_path: str | Path) -> None:
     )
     if container not in dirs:
         dirs.append(container)
-
     with settings_path.open("w") as f:
         json.dump(settings, f, indent=2, ensure_ascii=False)
 
 
 def initialize_environment(worktree_path: Path) -> None:
-    """Initialize worktree environment via just setup."""
+    """Run just setup in worktree."""
     try:
-        result = subprocess.run(
-            ["just", "--version"], capture_output=True, text=True, check=False
+        just_available = (
+            subprocess.run(
+                ["just", "--version"], capture_output=True, text=True, check=False
+            ).returncode
+            == 0
         )
-        just_available = result.returncode == 0
     except FileNotFoundError:
         just_available = False
 
@@ -171,7 +167,7 @@ def worktree() -> None:
 
 @worktree.command()
 def ls() -> None:
-    """List active worktrees (excluding main)."""
+    """List worktrees excluding main."""
     main_path = _git("rev-parse", "--show-toplevel")
     porcelain_output = _git("worktree", "list", "--porcelain")
 
@@ -198,7 +194,7 @@ def ls() -> None:
 
 
 def _build_tree_with_session(content: str, base_tree: str, env: dict[str, str]) -> str:
-    """Build git tree with session.md added."""
+    """Git tree with session.md added."""
     blob = _git("hash-object", "-w", "--stdin", input_data=content)
     _git("read-tree", base_tree, env=env)
     _git(
@@ -212,7 +208,7 @@ def _build_tree_with_session(content: str, base_tree: str, env: dict[str, str]) 
 
 
 def _create_session_commit(slug: str, base: str, session: str) -> str:
-    """Pre-commit session.md, return commit hash."""
+    """Commit session.md, return hash."""
     try:
         content = Path(session).read_text()
     except (FileNotFoundError, PermissionError) as e:
@@ -233,25 +229,19 @@ def _create_session_commit(slug: str, base: str, session: str) -> str:
         Path(tmp_index_path).unlink(missing_ok=True)
 
 
-def _check_branch_exists(branch: str) -> bool:
-    """Check if branch exists."""
-    try:
-        _git("rev-parse", "--verify", branch)
-    except subprocess.CalledProcessError:
-        return False
-    else:
-        return True
-
-
 def _create_parent_worktree(
     worktree_path: Path, slug: str, base: str, session: str
 ) -> None:
-    """Create parent worktree with appropriate branch handling."""
-    branch_exists = _check_branch_exists(slug)
+    """Create parent worktree."""
+    try:
+        _git("rev-parse", "--verify", slug)
+        branch_exists = True
+    except subprocess.CalledProcessError:
+        branch_exists = False
+
     if branch_exists and session:
         click.echo(
-            f"Warning: branch {slug} exists, ignoring --session "
-            "(session already committed)",
+            f"Warning: branch {slug} exists, ignoring --session (session already committed)",
             err=True,
         )
         session = ""
@@ -268,7 +258,7 @@ def _create_parent_worktree(
 def _create_submodule_worktree(
     project_root: str, worktree_path: Path, slug: str
 ) -> None:
-    """Create submodule worktree if agent-core exists."""
+    """Create submodule worktree for agent-core."""
     agent_core_local = Path(project_root) / "agent-core"
     if not agent_core_local.exists() or not (agent_core_local / ".git").exists():
         return
@@ -289,9 +279,39 @@ def _create_submodule_worktree(
     )
 
 
+def _setup_worktree(
+    worktree_path: Path, slug: str, base: str, session: str, task: str
+) -> None:
+    """Create parent and submodule worktrees, configure sandbox."""
+    try:
+        _create_parent_worktree(worktree_path, slug, base, session)
+    except subprocess.CalledProcessError as e:
+        click.echo(f"Error creating parent worktree: {e.stderr}", err=True)
+        raise SystemExit(1) from e
+
+    project_root = _git("rev-parse", "--show-toplevel")
+
+    try:
+        _create_submodule_worktree(project_root, worktree_path, slug)
+    except subprocess.CalledProcessError as e:
+        click.echo(f"Error creating submodule worktree: {e.stderr}", err=True)
+        raise SystemExit(1) from e
+
+    container_path = worktree_path.parent
+    add_sandbox_dir(str(container_path), ".claude/settings.local.json")
+    add_sandbox_dir(str(container_path), f"{worktree_path}/.claude/settings.local.json")
+
+    initialize_environment(worktree_path)
+
+    if task:
+        click.echo(f"{slug}\t{worktree_path}")
+    else:
+        click.echo(str(worktree_path))
+
+
 @worktree.command(name="clean-tree")
 def clean_tree() -> None:
-    """Validate clean state, exempt session context files."""
+    """Clean tree except session context."""
     parent_status = _git("status", "--porcelain")
     submodule_status = _git("-C", "agent-core", "status", "--porcelain", check=False)
 
@@ -327,6 +347,7 @@ def new(slug: str | None, base: str, session: str, task: str, session_md: str) -
         raise click.UsageError(msg)
     if task and session:
         click.echo("Warning: --session option ignored when --task provided", err=True)
+        session = ""
 
     temp_session_file = None
     try:
@@ -348,32 +369,7 @@ def new(slug: str | None, base: str, session: str, task: str, session_md: str) -
             click.echo(f"Error: existing directory {worktree_path}", err=True)
             raise SystemExit(1)
 
-        try:
-            _create_parent_worktree(worktree_path, slug, base, session)
-        except subprocess.CalledProcessError as e:
-            click.echo(f"Error creating parent worktree: {e.stderr}", err=True)
-            raise SystemExit(1) from e
-
-        project_root = _git("rev-parse", "--show-toplevel")
-
-        try:
-            _create_submodule_worktree(project_root, worktree_path, slug)
-        except subprocess.CalledProcessError as e:
-            click.echo(f"Error creating submodule worktree: {e.stderr}", err=True)
-            raise SystemExit(1) from e
-
-        container_path = worktree_path.parent
-        add_sandbox_dir(str(container_path), ".claude/settings.local.json")
-        add_sandbox_dir(
-            str(container_path), f"{worktree_path}/.claude/settings.local.json"
-        )
-
-        initialize_environment(worktree_path)
-
-        if task:
-            click.echo(f"{slug}\t{worktree_path}")
-        else:
-            click.echo(str(worktree_path))
+        _setup_worktree(worktree_path, slug, base, session, task)
     finally:
         if temp_session_file is not None:
             Path(temp_session_file).unlink(missing_ok=True)
@@ -382,7 +378,7 @@ def new(slug: str | None, base: str, session: str, task: str, session_md: str) -
 @worktree.command(name="add-commit")
 @click.argument("files", nargs=-1, required=True)
 def add_commit(files: tuple[str, ...]) -> None:
-    """Stage files and commit with message from stdin."""
+    """Stage and commit with stdin message."""
     _git("add", *list(files))
     try:
         _git("diff", "--quiet", "--cached")
@@ -393,7 +389,7 @@ def add_commit(files: tuple[str, ...]) -> None:
 @worktree.command()
 @click.argument("slug")
 def rm(slug: str) -> None:
-    """Remove worktree at sibling -wt container and its branch (forced)."""
+    """Remove worktree and branch."""
     worktree_path = wt_path(slug)
     if worktree_path.exists():
         status_output = _git(
