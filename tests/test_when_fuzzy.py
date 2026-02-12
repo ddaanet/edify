@@ -93,3 +93,20 @@ def test_word_overlap_tiebreaker() -> None:
     assert score1 == 151.0
     assert score2 == 150.5
     assert score1 > score2
+
+
+def test_minimum_score_threshold() -> None:
+    """Minimum score threshold filters spurious matches on short queries."""
+    # Short query against long candidate string: high per-char threshold required
+    short_query_long = score_match(
+        "x", "extremely long candidate string with many words"
+    )
+    assert short_query_long == 0.0
+
+    # Legitimate match: short query with reasonable match score
+    legitimate_match = score_match("when", "when auth fails")
+    assert legitimate_match > 0
+
+    # No valid subsequence or below threshold
+    no_match = score_match("zq", "writing mock tests")
+    assert no_match == 0.0

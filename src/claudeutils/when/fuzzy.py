@@ -34,6 +34,66 @@ def _get_match_positions(
     return positions
 
 
+def _compute_dp_matrix(query_lower: str, candidate_lower: str) -> list[list[float]]:
+    """Compute DP matrix for character subsequence matching.
+
+    Args:
+        query_lower: Lowercase query
+        candidate_lower: Lowercase candidate string
+
+    Returns:
+        DP score matrix[i][j] = best score matching query[0:i] with candidate[0:j]
+    """
+    m, n = len(query_lower), len(candidate_lower)
+    score = [[0.0 for _ in range(n + 1)] for _ in range(m + 1)]
+
+    for j in range(n + 1):
+        score[0][j] = 0.0
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if query_lower[i - 1] == candidate_lower[j - 1]:
+                match_score = 16
+                consecutive_bonus = (
+                    4 if j > 1 and score[i - 1][j - 1] > score[i - 1][j - 2] else 0
+                )
+                boundary_bonus = _boundary_bonus(candidate_lower, j)
+                first_char_multiplier = 2 if i == 1 else 1
+
+                score[i][j] = max(
+                    score[i][j - 1],
+                    score[i - 1][j - 1]
+                    + match_score * first_char_multiplier
+                    + consecutive_bonus
+                    + boundary_bonus,
+                )
+            else:
+                score[i][j] = score[i][j - 1]
+
+    return score
+
+
+def _meets_minimum_threshold(
+    query_lower: str,
+    base_score: float,
+    word_overlap: int,
+) -> bool:
+    """Check if match meets minimum score threshold.
+
+    Single-character queries require either word overlap or very high base score
+    to avoid spurious matches.
+
+    Args:
+        query_lower: Lowercase query
+        base_score: Base fzf score before adjustments
+        word_overlap: Number of query words found in candidate
+
+    Returns:
+        True if match meets threshold, False otherwise
+    """
+    return not (len(query_lower) == 1 and word_overlap == 0 and base_score < 50.0)
+
+
 def _boundary_bonus(candidate_lower: str, match_pos: int) -> float:
     """Calculate boundary bonus for a character match.
 
@@ -86,39 +146,7 @@ def score_match(query: str, candidate: str) -> float:
     if m > n:
         return 0.0
 
-    # First pass: compute scores WITHOUT gap penalties (too early to know gaps)
-    score = [[0.0 for _ in range(n + 1)] for _ in range(m + 1)]
-
-    # Base case: matching empty query succeeds with score 0
-    for j in range(n + 1):
-        score[0][j] = 0.0
-
-    # Fill matrix: for each query character, try to match it at each position
-    for i in range(1, m + 1):
-        for j in range(1, n + 1):
-            if query_lower[i - 1] == candidate_lower[j - 1]:
-                # Characters match: score is base score per character
-                match_score = 16  # base score per matched character
-                # Consecutive bonus: if previous query char matched at j-1
-                consecutive_bonus = (
-                    4 if j > 1 and score[i - 1][j - 1] > score[i - 1][j - 2] else 0
-                )
-                # Boundary bonus: check character before match
-                boundary_bonus = _boundary_bonus(candidate_lower, j)
-
-                # First character match bonus multiplied by 2
-                first_char_multiplier = 2 if i == 1 else 1
-
-                score[i][j] = max(
-                    score[i][j - 1],  # skip this candidate position
-                    score[i - 1][j - 1]
-                    + match_score * first_char_multiplier
-                    + consecutive_bonus
-                    + boundary_bonus,  # use this match
-                )
-            else:
-                # No match at this position: carry forward best score
-                score[i][j] = score[i][j - 1]
+    score = _compute_dp_matrix(query_lower, candidate_lower)
 
     base_score = score[m][n]
 
@@ -142,6 +170,9 @@ def score_match(query: str, candidate: str) -> float:
     candidate_words = set(candidate_lower.split())
     word_overlap = len(query_words & candidate_words)
     word_overlap_bonus = word_overlap * 0.5
+
+    if not _meets_minimum_threshold(query_lower, base_score, word_overlap):
+        return 0.0
 
     return base_score + gap_penalty + word_overlap_bonus
 
