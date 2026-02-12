@@ -10,7 +10,7 @@ Plan lifecycle tracking. Updated when plans change status.
 |------|--------|-------|
 | continuation-prepend | requirements | Problem statement only |
 | feature-requests | requirements | GH issue research (sandbox, tool overrides) |
-| handoff-validation | requirements | Requires continuation-passing |
+| handoff-validation | killed | Problems resolved by existing tooling |
 | orchestrate-evolution | designed | Design.md complete, vet in progress, planning next |
 | parallel-orchestration | requirements | Deferred from orchestrate-evolution (worktree isolation needed) |
 | plugin-migration | planned | Runbook assembled: 15 steps, haiku execution ready |
