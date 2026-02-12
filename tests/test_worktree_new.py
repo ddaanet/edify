@@ -11,7 +11,7 @@ from claudeutils.worktree.cli import worktree
 
 
 def _init_git_repo(repo_path: Path) -> None:
-    """Initialize a basic git repository."""
+    """Initialize git repository with user config."""
     subprocess.run(["git", "init"], cwd=repo_path, check=True, capture_output=True)
     subprocess.run(
         ["git", "config", "user.email", "test@example.com"],
@@ -28,10 +28,8 @@ def _init_git_repo(repo_path: Path) -> None:
 
 
 def _setup_repo_with_submodule(repo_path: Path) -> None:
-    """Set up a test repo with a simulated submodule (gitlink)."""
+    """Set up repo with agent-core submodule."""
     _init_git_repo(repo_path)
-
-    # Create initial commit
     (repo_path / "README.md").write_text("test")
     subprocess.run(
         ["git", "add", "README.md"], cwd=repo_path, check=True, capture_output=True
@@ -43,17 +41,12 @@ def _setup_repo_with_submodule(repo_path: Path) -> None:
         capture_output=True,
     )
 
-    # Create agent-core submodule
     agent_core_path = repo_path / "agent-core"
     agent_core_path.mkdir()
     _init_git_repo(agent_core_path)
-
     (agent_core_path / "core.txt").write_text("core content")
     subprocess.run(
-        ["git", "add", "core.txt"],
-        cwd=agent_core_path,
-        check=True,
-        capture_output=True,
+        ["git", "add", "core.txt"], cwd=agent_core_path, check=True, capture_output=True
     )
     subprocess.run(
         ["git", "commit", "-m", "Initial core commit"],
@@ -62,13 +55,9 @@ def _setup_repo_with_submodule(repo_path: Path) -> None:
         capture_output=True,
     )
 
-    # Create .gitmodules
-    gitmodules_path = repo_path / ".gitmodules"
-    gitmodules_path.write_text(
+    (repo_path / ".gitmodules").write_text(
         '[submodule "agent-core"]\n\tpath = agent-core\n\turl = ./agent-core\n'
     )
-
-    # Create a gitlink entry in the index (simulates submodule)
     result = subprocess.run(
         ["git", "rev-parse", "HEAD"],
         cwd=agent_core_path,
@@ -77,7 +66,6 @@ def _setup_repo_with_submodule(repo_path: Path) -> None:
         check=True,
     )
     commit_hash = result.stdout.strip()
-
     subprocess.run(
         [
             "git",
@@ -99,8 +87,6 @@ def _setup_repo_with_submodule(repo_path: Path) -> None:
         check=True,
         capture_output=True,
     )
-
-    # Add .gitignore with wt/ entry
     (repo_path / ".gitignore").write_text("wt/\n")
     subprocess.run(
         ["git", "add", ".gitignore"], cwd=repo_path, check=True, capture_output=True
@@ -116,24 +102,19 @@ def _setup_repo_with_submodule(repo_path: Path) -> None:
 def test_new_collision_detection(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Verify new subcommand reuses existing branch (no error)."""
+    """Reuses existing branch without error."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
     _init_git_repo(repo_path)
-
-    # Create initial commit
     (repo_path / "README.md").write_text("test")
     subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
     )
-
-    # Create an existing branch
     subprocess.run(["git", "branch", "test-feature"], check=True, capture_output=True)
 
-    # Run new command with existing branch name - should succeed and reuse branch
     runner = CliRunner()
     result = runner.invoke(worktree, ["new", "test-feature"])
 
@@ -146,21 +127,18 @@ def test_new_collision_detection(
 def test_new_directory_collision(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Verify directory collision detection in sibling container."""
+    """Detects existing directory collision."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
     _init_git_repo(repo_path)
-
-    # Create initial commit
     (repo_path / "README.md").write_text("test")
     subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
     )
 
-    # Create an existing directory at repo-wt/test-feature
     container_path = tmp_path / "repo-wt"
     container_path.mkdir()
     (container_path / "test-feature").mkdir()
@@ -181,14 +159,12 @@ def test_new_directory_collision(
 
 
 def test_new_basic_flow(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify worktree creation with branch in sibling container."""
+    """Creates worktree with new branch in sibling container."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
     _init_git_repo(repo_path)
-
-    # Create initial commit
     (repo_path / "README.md").write_text("test")
     subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
     subprocess.run(
@@ -197,43 +173,39 @@ def test_new_basic_flow(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["new", "test-feature"])
-
     assert result.exit_code == 0
     assert "repo-wt/test-feature" in result.output
 
     container_path = tmp_path / "repo-wt"
     worktree_path = container_path / "test-feature"
     assert worktree_path.exists()
-    assert worktree_path.is_dir()
 
-    result = subprocess.run(
+    branch_result = subprocess.run(
         ["git", "branch", "--list", "test-feature"],
         capture_output=True,
         text=True,
         check=True,
     )
-    assert "test-feature" in result.stdout
+    assert "test-feature" in branch_result.stdout
 
-    result = subprocess.run(
+    head_result = subprocess.run(
         ["git", "-C", str(worktree_path), "rev-parse", "--abbrev-ref", "HEAD"],
         capture_output=True,
         text=True,
         check=True,
     )
-    assert "test-feature" in result.stdout
+    assert "test-feature" in head_result.stdout
 
 
 def test_new_command_sibling_paths(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Verify worktree sibling paths and branch reuse."""
+    """Creates multiple worktrees in sibling container."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
     _init_git_repo(repo_path)
-
-    # Create initial commit
     (repo_path / "README.md").write_text("test")
     subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
     subprocess.run(
@@ -241,30 +213,22 @@ def test_new_command_sibling_paths(
     )
 
     runner = CliRunner()
-
-    # Test 1: Create new worktree (new branch)
     result = runner.invoke(worktree, ["new", "test-wt"])
     assert result.exit_code == 0
 
     container_path = tmp_path / "repo-wt"
     worktree_path = container_path / "test-wt"
     assert worktree_path.exists()
-    assert worktree_path.is_dir()
-    assert container_path.exists()
-
-    # Verify output shows sibling path
     assert "repo-wt/test-wt" in result.output
 
-    # Verify branch was created
-    result = subprocess.run(
+    branch_result = subprocess.run(
         ["git", "branch", "--list", "test-wt"],
         capture_output=True,
         text=True,
         check=True,
     )
-    assert "test-wt" in result.stdout
+    assert "test-wt" in branch_result.stdout
 
-    # Test 2: Create second new worktree (new branch), container already exists
     result = runner.invoke(worktree, ["new", "another-wt"])
     assert result.exit_code == 0
 
@@ -272,24 +236,19 @@ def test_new_command_sibling_paths(
     assert worktree_path2.exists()
     assert "repo-wt/another-wt" in result.output
 
-    # Test 3: Reuse existing branch (no error, uses branch without -b flag)
-    # Create an existing branch in main repo first
     subprocess.run(
         ["git", "branch", "existing-branch"], check=True, capture_output=True
     )
-
     result = runner.invoke(worktree, ["new", "existing-branch"])
     assert result.exit_code == 0
-
-    worktree_path3 = container_path / "existing-branch"
-    assert worktree_path3.exists()
+    assert (container_path / "existing-branch").exists()
     assert "repo-wt/existing-branch" in result.output
 
 
 def test_new_sandbox_registration(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Verify sandbox registration for both settings files."""
+    """Registers container in main and worktree settings."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
@@ -312,30 +271,23 @@ def test_new_sandbox_registration(
     worktree_path = container_path / "test-feature"
 
     main_settings = repo_path / ".claude" / "settings.local.json"
-    assert main_settings.exists(), "Main settings file should exist"
+    assert main_settings.exists()
 
     with main_settings.open() as f:
         main_settings_data = json.load(f)
 
     dirs = main_settings_data.get("permissions", {}).get("additionalDirectories", [])
-    assert str(container_path) in dirs, (
-        f"Container path {container_path} should be in main settings"
-    )
+    assert str(container_path) in dirs
 
     wt_settings = worktree_path / ".claude" / "settings.local.json"
-    assert wt_settings.exists(), "Worktree settings file should exist"
+    assert wt_settings.exists()
 
     with wt_settings.open() as f:
         wt_settings_data = json.load(f)
 
     wt_dirs = wt_settings_data.get("permissions", {}).get("additionalDirectories", [])
-    assert str(container_path) in wt_dirs, (
-        f"Container path {container_path} should be in worktree settings"
-    )
+    assert str(container_path) in wt_dirs
 
-    assert container_path.is_absolute()
-
-    container_path / "test-feature-2"
     result = runner.invoke(worktree, ["new", "test-feature-2"])
     assert result.exit_code == 0
 
@@ -345,15 +297,14 @@ def test_new_sandbox_registration(
     dirs_after = main_settings_data_after.get("permissions", {}).get(
         "additionalDirectories", []
     )
-    # Count occurrences of container path - should still be 1 (deduplication works)
     count = dirs_after.count(str(container_path))
-    assert count == 1, f"Container path should appear exactly once, found {count}"
+    assert count == 1
 
 
 def test_new_environment_initialization(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Verify environment initialization via just setup."""
+    """Runs just setup in worktree if available."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
@@ -400,21 +351,18 @@ def test_new_environment_initialization(
 
 
 def test_new_task_option(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify --task option with --session-md default."""
+    """Creates worktree with --task option."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
 
     _init_git_repo(repo_path)
-
-    # Create initial commit
     (repo_path / "README.md").write_text("test")
     subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
     )
 
-    # Create agents directory and session.md
     agents_dir = repo_path / "agents"
     agents_dir.mkdir()
     session_file = agents_dir / "session.md"
@@ -428,30 +376,24 @@ def test_new_task_option(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
     )
 
     runner = CliRunner()
-
-    # Test 1: --task with default --session-md works
     result = runner.invoke(worktree, ["new", "--task", "Implement feature"])
     assert result.exit_code == 0
     container_path = tmp_path / "repo-wt"
     worktree_path = container_path / "implement-feature"
     assert worktree_path.exists()
 
-    # Test 2: Both slug and --task provided should error
     result = runner.invoke(worktree, ["new", "explicit-slug", "--task", "Another task"])
     assert result.exit_code != 0
     assert (
         "mutually exclusive" in result.output.lower() or "both" in result.output.lower()
     )
 
-    # Test 3: --session ignored when --task provided (warning printed)
     result = runner.invoke(
-        worktree,
-        ["new", "--task", "Another task", "--session", "some-session.md"],
+        worktree, ["new", "--task", "Another task", "--session", "some-session.md"]
     )
     assert result.exit_code == 0
     assert "warning" in result.output.lower() or "ignored" in result.output.lower()
 
-    # Test 4: Help shows --task and --session-md options
     result = runner.invoke(worktree, ["new", "--help"])
     assert "--task" in result.output
     assert "--session-md" in result.output
