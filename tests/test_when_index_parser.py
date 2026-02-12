@@ -30,3 +30,24 @@ def test_parse_when_entry_basic(tmp_path: Path) -> None:
     assert how_entry.operator == "how"
     assert how_entry.trigger == "encode paths"
     assert how_entry.extra_triggers == ["path encoding"]
+
+
+def test_operator_extraction(tmp_path: Path) -> None:
+    """Only /when and /how operators are valid; all others skipped."""
+    index_file = tmp_path / "test_index.md"
+    index_file.write_text(
+        "## Test Section\n"
+        "\n"
+        "/when valid operator\n"
+        "/how also valid\n"
+        "/what not valid\n"
+        "/why not valid\n"
+        "bare text ignored\n"
+        "## Header ignored\n"
+    )
+
+    entries = parse_index(index_file)
+
+    assert len(entries) == 2
+    assert entries[0].operator == "when"
+    assert entries[1].operator == "how"
