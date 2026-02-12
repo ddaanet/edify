@@ -17,7 +17,7 @@ def _git(
     env: dict[str, str] | None = None,
     input_data: str | None = None,
 ) -> str:
-    """Run git command and return stripped stdout."""
+    """Run git command and return stdout."""
     result: subprocess.CompletedProcess[str] = subprocess.run(
         ["git", *args],
         capture_output=True,
@@ -37,7 +37,6 @@ def wt_path(slug: str, create_container: bool = False) -> Path:  # noqa: FBT001,
 
     current_path = Path.cwd()
     parent_name = current_path.parent.name
-
     container_path = (
         current_path.parent
         if parent_name.endswith("-wt")

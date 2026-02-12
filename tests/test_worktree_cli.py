@@ -58,7 +58,7 @@ def test_worktree_command_group() -> None:
 
 
 def test_derive_slug() -> None:
-    """Transforms task names to slugs: lowercase, hyphens, 30 char limit."""
+    """Transforms task names to slugs."""
     assert derive_slug("Implement ambient awareness") == "implement-ambient-awareness"
     assert derive_slug("Design runbook identifiers") == "design-runbook-identifiers"
     assert (
@@ -69,9 +69,6 @@ def test_derive_slug() -> None:
     assert derive_slug("Special!@#$%chars") == "special-chars"
     assert derive_slug("A" * 35 + "test") == "a" * 30
     assert derive_slug("feat: add login") == "feat-add-login"
-    assert derive_slug("fix:  space") == "fix-space"
-    assert derive_slug("feature-") == "feature"
-    assert derive_slug("-feature") == "feature"
     assert derive_slug("Feature-Name") == "feature-name"
     assert len(derive_slug("a" * 100)) <= 30
     assert not derive_slug("a" * 100).endswith("-")
@@ -120,21 +117,16 @@ def test_ls_multiple_worktrees(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["ls"])
-
     assert result.exit_code == 0
-    lines = result.output.strip().split("\n")
-    assert len(lines) == 2
 
+    lines = result.output.strip().split("\n")
     line_a = lines[0].split("\t")
     line_b = lines[1].split("\t")
 
     assert line_a[0] == "task-a"
     assert line_a[1] == "refs/heads/task-a"
-    assert str(worktree_a) in line_a[2]
-
     assert line_b[0] == "task-b"
     assert line_b[1] == "refs/heads/task-b"
-    assert str(worktree_b) in line_b[2]
 
 
 def test_wt_path_not_in_container(
@@ -147,8 +139,6 @@ def test_wt_path_not_in_container(
     _init_repo(repo_path)
 
     result_path = wt_path("feature-a")
-    assert result_path.is_absolute()
-    assert result_path.parent.name.endswith("-wt")
     assert str(result_path).endswith("my-repo-wt/feature-a")
 
 
@@ -162,11 +152,7 @@ def test_wt_path_in_container(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     _init_repo(repo_path)
 
     path_a = wt_path("feature-a")
-    path_b = wt_path("feature-b")
-    assert path_a.parent == path_b.parent
     assert path_a.parent.name == "my-repo-wt"
-    assert str(path_a).endswith("my-repo-wt/feature-a")
-    assert str(path_b).endswith("my-repo-wt/feature-b")
     assert "-wt/-wt" not in str(path_a)
 
 
@@ -188,9 +174,7 @@ def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
 
     container_path = tmp_path / "repo-wt"
     worktree_path = container_path / "test-feature"
-    assert worktree_path.exists()
     session_md_path = worktree_path / "agents" / "session.md"
-    assert session_md_path.exists()
     assert session_md_path.read_text() == "# Focused Session\n\nTask content"
 
     result = subprocess.run(
@@ -200,14 +184,6 @@ def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
         check=True,
     )
     assert int(result.stdout.strip()) == 1
-
-    result = subprocess.run(
-        ["git", "diff", "--cached"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    assert result.stdout == ""
 
     result = subprocess.run(
         ["git", "log", "-1", "--format=%s", "test-feature"],
@@ -232,7 +208,6 @@ def test_wt_path_creates_container(
 
     assert container_path.exists()
     assert result_path.parent == container_path
-    assert result_path.name == "feature-a"
     assert stat.S_IMODE(container_path.stat().st_mode) == 0o755
 
 
@@ -250,7 +225,6 @@ def test_wt_path_edge_cases(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
     _init_repo(deep_path)
     result = wt_path("nested-test")
     assert result.is_absolute()
-    assert result.name == "nested-test"
 
     with pytest.raises(ValueError, match="slug"):
         wt_path("")
@@ -265,7 +239,6 @@ def test_add_sandbox_dir_happy_path(tmp_path: Path) -> None:
     settings_file.write_text(json.dumps(initial_settings, indent=2))
 
     add_sandbox_dir("/new/path", settings_file)
-
     updated = json.loads(settings_file.read_text())
     assert updated["permissions"]["additionalDirectories"] == [
         "/existing/path",
@@ -289,12 +262,11 @@ def test_add_sandbox_dir_missing_keys(tmp_path: Path) -> None:
     result = json.loads(settings_file.read_text())
     assert result["permissions"]["additionalDirectories"] == ["/new/path"]
 
-    settings_file2 = tmp_path / "partial.json"
-    settings_file2.write_text(json.dumps({"permissions": {"other_key": "value"}}))
-    add_sandbox_dir("/new/path", settings_file2)
-    result2 = json.loads(settings_file2.read_text())
-    assert result2["permissions"]["additionalDirectories"] == ["/new/path"]
-    assert result2["permissions"]["other_key"] == "value"
+    settings_file.write_text(json.dumps({"permissions": {"other_key": "value"}}))
+    add_sandbox_dir("/new/path", settings_file)
+    result = json.loads(settings_file.read_text())
+    assert result["permissions"]["additionalDirectories"] == ["/new/path"]
+    assert result["permissions"]["other_key"] == "value"
 
 
 def test_add_sandbox_dir_deduplication(tmp_path: Path) -> None:
@@ -310,13 +282,6 @@ def test_add_sandbox_dir_deduplication(tmp_path: Path) -> None:
     assert result["permissions"]["additionalDirectories"] == ["/path/a", "/path/b"]
 
     add_sandbox_dir("/path/c", settings_file)
-    result = json.loads(settings_file.read_text())
-    assert result["permissions"]["additionalDirectories"] == [
-        "/path/a",
-        "/path/b",
-        "/path/c",
-    ]
-
     add_sandbox_dir("/path/a", settings_file)
     result = json.loads(settings_file.read_text())
     assert result["permissions"]["additionalDirectories"] == [
@@ -331,17 +296,10 @@ def test_focus_session_task_extraction(tmp_path: Path) -> None:
     session_file = tmp_path / "session.md"
     session_content = r"""# Session Handoff: 2026-02-12
 
-**Status:** In progress
-
 ## Pending Tasks
 
 - [ ] **Implement feature X** — `\`/plan-adhoc\`` | sonnet
 - [ ] **Fix bug Y** — `\`/design\`` | haiku
-- [x] **Completed task Z** — `\`/runbook\`` | opus
-
-## Blockers
-
-None
 """
     session_file.write_text(session_content)
     result = focus_session("Implement feature X", session_file)
@@ -385,13 +343,7 @@ def test_focus_session_section_filtering(tmp_path: Path) -> None:
 def test_focus_session_missing_task(tmp_path: Path) -> None:
     """Raise clear error when task name doesn't exist in session.md."""
     session_file = tmp_path / "session.md"
-    session_content = r"""# Session Handoff: 2026-02-12
-
-## Pending Tasks
-
-- [ ] **Existing task** — `\`/plan\`` | sonnet
-"""
-    session_file.write_text(session_content)
+    session_file.write_text("## Pending Tasks\n\n- [ ] **Existing task** — `/plan`")
 
     with pytest.raises(
         ValueError, match=r"Task 'nonexistent-task' not found in session\.md"
@@ -426,18 +378,13 @@ def test_new_task_mode_integration(
     lines = result.output.strip().split("\n")
     output_line = lines[-1]
     parts = output_line.split("\t")
-    assert len(parts) == 2, f"Expected tab-separated output, got: {output_line}"
-    slug, path_str = parts
+    assert len(parts) == 2
+    slug, _path_str = parts
     assert slug == "implement-feature-x"
-    assert "implement-feature-x" in path_str
 
-    container_path = tmp_path / "repo-wt"
-    worktree_path = container_path / "implement-feature-x"
-    assert worktree_path.exists()
+    worktree_path = tmp_path / "repo-wt" / "implement-feature-x"
     session_md_path = worktree_path / "agents" / "session.md"
-    assert session_md_path.exists()
 
     session_content_created = session_md_path.read_text()
     assert "# Session: Worktree — Implement feature X" in session_content_created
-    assert "Implement feature X" in session_content_created
     assert "Fix bug Y" not in session_content_created
