@@ -1,21 +1,21 @@
 # Session Handoff: 2026-02-12
 
-**Status:** Fixed workflow-advanced.md line limit. Pending tasks unchanged.
+**Status:** Updated plan-tdd skill with background review pattern. Fixed workflow-advanced line limit.
 
 ## Completed This Session
+
+### Updated plan-tdd skill — background phase review pattern
+
+- Phase 3: Added background review pattern — launch review with `run_in_background=true` after writing each phase, continue generating next phase
+- Phase 5: New step 1 collects per-phase review results, checks escalations before holistic review
+- Phase 5: Renumbered steps 2→3 through 6→7
 
 ### Fixed workflow-advanced.md line limit (421 → 398)
 
 - Removed duplicate "Manual Runbook Assembly Bypasses Automation" entry
 - Merged orphaned "Planning Workflow Patterns (continued)" section into main Planning section
-- Moved "Skill Dependencies" and "Phase Boundaries" entries into main section, compressed
 
 ## Pending Tasks
-
-- [ ] **Update plan-tdd skill** — Document background phase review agent pattern | sonnet
-  - Add run_in_background=true delegation pattern to Phase 3 guidance
-  - Update holistic review step to wait for all agents before proceeding
-  - Pattern proven efficient: 7 parallel reviews vs sequential
 
 - [ ] **Execute worktree-update runbook** — Run /orchestrate worktree-update | haiku | restart
   - Plan: plans/worktree-update
