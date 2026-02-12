@@ -140,6 +140,40 @@ def test_wt_path_not_in_container(
     assert str(result_path).endswith("my-repo-wt/feature-a")
 
 
+def test_wt_path_in_container(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """wt_path() detects when repo is already inside a -wt container.
+
+    When cwd is inside a container, returns sibling path (not nested). Multiple
+    slugs return different paths sharing same container parent.
+    """
+    container_path = tmp_path / "my-repo-wt"
+    container_path.mkdir()
+    repo_path = container_path / "main"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+
+    _init_repo(repo_path)
+
+    path_a = wt_path("feature-a")
+    path_b = wt_path("feature-b")
+
+    assert path_a.is_absolute()
+    assert path_b.is_absolute()
+
+    assert path_a.name == "feature-a"
+    assert path_b.name == "feature-b"
+
+    assert path_a.parent == path_b.parent
+    assert path_a.parent.name == "my-repo-wt"
+
+    assert path_a != path_b
+    assert str(path_a).endswith("my-repo-wt/feature-a")
+    assert str(path_b).endswith("my-repo-wt/feature-b")
+
+    assert "-wt/-wt" not in str(path_a)
+    assert "-wt/-wt" not in str(path_b)
+
+
 def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Session file committed to worktree branch before worktree creation."""
     repo_path = tmp_path / "repo"
