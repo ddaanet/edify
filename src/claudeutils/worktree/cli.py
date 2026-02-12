@@ -1,4 +1,4 @@
-"""Worktree CLI module."""
+"""Worktree CLI."""
 
 import json
 import os
@@ -17,7 +17,7 @@ def _git(
     env: dict[str, str] | None = None,
     input_data: str | None = None,
 ) -> str:
-    result: subprocess.CompletedProcess[str] = subprocess.run(
+    r = subprocess.run(
         ["git", *args],
         capture_output=True,
         text=True,
@@ -25,7 +25,7 @@ def _git(
         env=env,
         input=input_data,
     )
-    return result.stdout.strip()
+    return r.stdout.strip()
 
 
 def wt_path(slug: str, create_container: bool = False) -> Path:  # noqa: FBT001,FBT002
@@ -67,10 +67,8 @@ def _filter_section(
         return ""
 
     def is_relevant(entry: str) -> bool:
-        entry_lower = entry.lower()
-        return task_name.lower() in entry_lower or bool(
-            plan_dir and plan_dir.lower() in entry_lower
-        )
+        lo = entry.lower()
+        return task_name.lower() in lo or bool(plan_dir and plan_dir.lower() in lo)
 
     relevant_lines = [
         line
@@ -78,11 +76,9 @@ def _filter_section(
         if (line.startswith("- ") and is_relevant(line[2:].strip()))
         or (not line.startswith("- ") and line.strip())
     ]
-    return (
-        f"## {section_name}\n\n" + "\n".join(relevant_lines) + "\n"
-        if relevant_lines
-        else ""
-    )
+    if not relevant_lines:
+        return ""
+    return f"## {section_name}\n\n" + "\n".join(relevant_lines) + "\n"
 
 
 def focus_session(task_name: str, session_md_path: str | Path) -> str:
@@ -134,12 +130,8 @@ def add_sandbox_dir(container: str, settings_path: str | Path) -> None:
 def initialize_environment(worktree_path: Path) -> None:
     """Run just setup in worktree."""
     try:
-        just_available = (
-            subprocess.run(
-                ["just", "--version"], capture_output=True, text=True, check=False
-            ).returncode
-            == 0
-        )
+        r = subprocess.run(["just", "--version"], capture_output=True, check=False)
+        just_available = r.returncode == 0
     except FileNotFoundError:
         just_available = False
 
@@ -147,17 +139,15 @@ def initialize_environment(worktree_path: Path) -> None:
         click.echo("Warning: just command not found, skipping setup step", err=True)
         return
 
-    result = subprocess.run(
+    r = subprocess.run(
         ["just", "setup"],
         cwd=worktree_path,
         capture_output=True,
         text=True,
         check=False,
     )
-    if result.returncode != 0:
-        click.echo(
-            f"Warning: just setup failed in {worktree_path}: {result.stderr}", err=True
-        )
+    if r.returncode != 0:
+        click.echo(f"Warning: just setup failed: {r.stderr}", err=True)
 
 
 @click.group(name="_worktree")
@@ -240,10 +230,8 @@ def _create_parent_worktree(
         branch_exists = False
 
     if branch_exists and session:
-        click.echo(
-            f"Warning: branch {slug} exists, ignoring --session (session already committed)",
-            err=True,
-        )
+        msg = f"Warning: branch {slug} exists, ignoring --session"
+        click.echo(msg, err=True)
         session = ""
 
     if session:
