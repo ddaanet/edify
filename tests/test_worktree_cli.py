@@ -186,7 +186,8 @@ def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     )
     assert result.exit_code == 0
 
-    worktree_path = repo_path / "wt" / "test-feature"
+    container_path = tmp_path / "repo-wt"
+    worktree_path = container_path / "test-feature"
     assert worktree_path.exists()
     session_md_path = worktree_path / "agents" / "session.md"
     assert session_md_path.exists()

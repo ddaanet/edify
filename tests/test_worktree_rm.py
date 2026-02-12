@@ -41,7 +41,8 @@ def _create_worktree(repo_path: Path, slug: str) -> Path:
     runner = CliRunner()
     result = runner.invoke(worktree, ["new", slug])
     assert result.exit_code == 0
-    return repo_path / "wt" / slug
+    container_path = repo_path.parent / f"{repo_path.name}-wt"
+    return container_path / slug
 
 
 def _branch_exists(name: str) -> bool:

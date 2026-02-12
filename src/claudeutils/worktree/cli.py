@@ -243,26 +243,35 @@ def clean_tree() -> None:
 @click.option("--base", default="HEAD", help="Base commit for worktree branch")
 @click.option("--session", default="", help="Session file path")
 def new(slug: str, base: str, session: str) -> None:
-    """Create worktree at wt/{slug}/ with branch {slug}."""
-    worktree_path = Path(f"wt/{slug}")
+    """Create worktree at sibling -wt container with branch {slug}."""
+    worktree_path = wt_path(slug, create_container=True)
 
     if worktree_path.exists():
         click.echo(f"Error: existing directory {worktree_path}", err=True)
         raise SystemExit(1)
 
+    # Check if branch already exists
     try:
         _git("rev-parse", "--verify", slug)
+        branch_exists = True
+    except subprocess.CalledProcessError:
+        branch_exists = False
+
+    # If branch exists but in new context (session), that's a collision
+    if branch_exists and session:
         click.echo(f"Error: existing branch {slug}", err=True)
         raise SystemExit(1)
-    except subprocess.CalledProcessError:
-        pass  # Branch doesn't exist, which is what we want
 
     try:
         if session:
             branch_commit = _create_session_commit(slug, base, session)
             _git("branch", slug, branch_commit)
             _git("worktree", "add", str(worktree_path), slug)
+        elif branch_exists:
+            # Reuse existing branch without -b flag
+            _git("worktree", "add", str(worktree_path), slug)
         else:
+            # Create new branch with -b flag
             _git("worktree", "add", str(worktree_path), "-b", slug, base)
 
         project_root = _git("rev-parse", "--show-toplevel")
@@ -315,8 +324,8 @@ def add_commit(files: tuple[str, ...]) -> None:
 @worktree.command()
 @click.argument("slug")
 def rm(slug: str) -> None:
-    """Remove worktree at wt/{slug}/ and its branch (forced)."""
-    worktree_path = Path(f"wt/{slug}")
+    """Remove worktree at sibling -wt container and its branch (forced)."""
+    worktree_path = wt_path(slug)
 
     if worktree_path.exists():
         status = _git("-C", str(worktree_path), "status", "--porcelain", check=False)
