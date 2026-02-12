@@ -5,6 +5,7 @@ from claudeutils.when.navigation import (
     compute_ancestors,
     compute_siblings,
     extract_heading_hierarchy,
+    format_navigation,
 )
 
 
@@ -233,3 +234,44 @@ More content here.
     siblings = compute_siblings("Mock Patching Pattern", content, entries)
     # Should be empty because the structural heading has no sibling grouping
     assert siblings == []
+
+
+def test_format_navigation_output() -> None:
+    """Format navigation links with ancestor and sibling sections."""
+    # Test with both ancestors and siblings
+    ancestors = ["/when .Test Organization", "/when ..testing.md"]
+    siblings = ["/when testing strategy", "/when success metrics"]
+    result = format_navigation(ancestors, siblings)
+    expected = """\
+Broader:
+/when .Test Organization
+/when ..testing.md
+
+Related:
+/when testing strategy
+/when success metrics"""
+    assert result == expected
+
+    # Test with only ancestors
+    result_ancestors_only = format_navigation(
+        ["/when .Test Organization", "/when ..testing.md"], []
+    )
+    expected_ancestors = """\
+Broader:
+/when .Test Organization
+/when ..testing.md"""
+    assert result_ancestors_only == expected_ancestors
+
+    # Test with only siblings
+    result_siblings_only = format_navigation(
+        [], ["/when testing strategy", "/when success metrics"]
+    )
+    expected_siblings = """\
+Related:
+/when testing strategy
+/when success metrics"""
+    assert result_siblings_only == expected_siblings
+
+    # Test with no links
+    result_empty = format_navigation([], [])
+    assert result_empty == ""

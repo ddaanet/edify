@@ -167,3 +167,25 @@ def compute_siblings(
             siblings.append(f"/when {entry.trigger}")
 
     return siblings
+
+
+def format_navigation(ancestors: list[str], siblings: list[str]) -> str:
+    """Format ancestor and sibling links as navigation output.
+
+    Args:
+        ancestors: List of ancestor links
+        siblings: List of sibling links
+
+    Returns:
+        Formatted navigation string with "Broader:" and "Related:" sections,
+        omitting empty sections. Returns empty string if both lists are empty.
+    """
+    sections = []
+
+    if ancestors:
+        sections.append("Broader:\n" + "\n".join(ancestors))
+
+    if siblings:
+        sections.append("Related:\n" + "\n".join(siblings))
+
+    return "\n\n".join(sections)
