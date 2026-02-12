@@ -1,5 +1,6 @@
 """Tests for worktree CLI module."""
 
+import stat
 import subprocess
 from pathlib import Path
 
@@ -223,3 +224,33 @@ def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     )
     commit_msg = result.stdout.strip()
     assert commit_msg == "Focused session for test-feature"
+
+
+def test_wt_path_creates_container(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Container directory creation after wt_path(create_container=True)."""
+    repo_path = tmp_path / "my-repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+
+    _init_repo(repo_path)
+
+    # Before calling wt_path(), container directory doesn't exist
+    container_path = repo_path.parent / "my-repo-wt"
+    assert not container_path.exists()
+
+    # After calling wt_path(create_container=True), container directory exists
+    result_path = wt_path("feature-a", create_container=True)
+
+    assert container_path.exists()
+    assert container_path.is_dir()
+    assert result_path.parent == container_path
+    assert result_path.name == "feature-a"
+
+    # Created directory should be empty (no files inside)
+    assert len(list(container_path.iterdir())) == 0
+
+    # Check directory permissions (default 0o755 on Unix)
+    mode = stat.S_IMODE(container_path.stat().st_mode)
+    assert mode == 0o755

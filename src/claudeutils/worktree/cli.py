@@ -9,8 +9,8 @@ from pathlib import Path
 import click
 
 
-def wt_path(slug: str) -> Path:
-    """Return absolute worktree path, creating -wt container if needed."""
+def wt_path(slug: str, create_container: bool = False) -> Path:  # noqa: FBT001,FBT002
+    """Return absolute worktree path, optionally creating -wt container."""
     current_path = Path.cwd()
     parent_name = current_path.parent.name
 
@@ -20,6 +20,9 @@ def wt_path(slug: str) -> Path:
         repo_name = current_path.name
         container_name = f"{repo_name}-wt"
         container_path = current_path.parent / container_name
+
+    if create_container and not parent_name.endswith("-wt"):
+        container_path.mkdir(parents=True, exist_ok=True)
 
     return container_path / slug
 
