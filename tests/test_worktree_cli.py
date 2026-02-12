@@ -75,7 +75,6 @@ def test_derive_slug() -> None:
     assert derive_slug("Feature-Name") == "feature-name"
     assert len(derive_slug("a" * 100)) <= 30
     assert not derive_slug("a" * 100).endswith("-")
-
     with pytest.raises(ValueError, match="task_name must not be empty"):
         derive_slug("")
     with pytest.raises(ValueError, match="task_name must not be empty"):
@@ -101,7 +100,6 @@ def test_ls_multiple_worktrees(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-
     _init_repo(repo_path)
 
     subprocess.run(["git", "branch", "task-a"], check=True, capture_output=True)
@@ -149,7 +147,6 @@ def test_wt_path_not_in_container(
     _init_repo(repo_path)
 
     result_path = wt_path("feature-a")
-
     assert result_path.is_absolute()
     assert result_path.parent.name.endswith("-wt")
     assert str(result_path).endswith("my-repo-wt/feature-a")
@@ -166,7 +163,6 @@ def test_wt_path_in_container(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
 
     path_a = wt_path("feature-a")
     path_b = wt_path("feature-b")
-
     assert path_a.parent == path_b.parent
     assert path_a.parent.name == "my-repo-wt"
     assert str(path_a).endswith("my-repo-wt/feature-a")
@@ -179,7 +175,6 @@ def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
-
     _init_repo(repo_path)
 
     session_file = tmp_path / "test-session.md"
@@ -193,7 +188,6 @@ def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
 
     worktree_path = repo_path / "wt" / "test-feature"
     assert worktree_path.exists()
-
     session_md_path = worktree_path / "agents" / "session.md"
     assert session_md_path.exists()
     assert session_md_path.read_text() == "# Focused Session\n\nTask content"
@@ -204,8 +198,7 @@ def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
         text=True,
         check=True,
     )
-    commits_ahead = int(result.stdout.strip())
-    assert commits_ahead == 1
+    assert int(result.stdout.strip()) == 1
 
     result = subprocess.run(
         ["git", "diff", "--cached"],
@@ -221,8 +214,7 @@ def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
         text=True,
         check=True,
     )
-    commit_msg = result.stdout.strip()
-    assert commit_msg == "Focused session for test-feature"
+    assert result.stdout.strip() == "Focused session for test-feature"
 
 
 def test_wt_path_creates_container(
@@ -249,9 +241,7 @@ def test_wt_path_edge_cases(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
     _init_repo(repo_path)
-
-    result = wt_path("fix-bug#123")
-    assert "#123" in str(result)
+    assert "#123" in str(wt_path("fix-bug#123"))
 
     deep_path = tmp_path / "a" / "b" / "c" / "d" / "e" / "repo"
     deep_path.mkdir(parents=True)
@@ -354,7 +344,6 @@ None
 """
     session_file.write_text(session_content)
     result = focus_session("Implement feature X", session_file)
-
     assert "# Session: Worktree — Implement feature X" in result
     assert "**Status:** Focused worktree for parallel execution." in result
     assert r"- [ ] **Implement feature X** — `\`/plan-adhoc\`` | sonnet" in result
