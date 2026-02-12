@@ -52,7 +52,8 @@ def add_sandbox_dir(container: str | Path, settings_path: str | Path) -> None:
         with settings_path.open() as f:
             settings = json.load(f)
 
-    settings["permissions"]["additionalDirectories"].append(str(container))
+    perms = settings.setdefault("permissions", {})
+    perms.setdefault("additionalDirectories", []).append(str(container))
 
     with settings_path.open("w") as f:
         json.dump(settings, f, indent=2)

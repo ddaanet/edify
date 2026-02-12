@@ -323,3 +323,33 @@ def test_add_sandbox_dir_missing_file(tmp_path: Path) -> None:
     created = json.loads(settings_file.read_text())
     assert created == {"permissions": {"additionalDirectories": ["/new/path"]}}
     assert isinstance(created["permissions"]["additionalDirectories"], list)
+
+
+def test_add_sandbox_dir_missing_keys(tmp_path: Path) -> None:
+    """Handle case where JSON exists but nested keys are missing.
+
+    Given settings file with {} or {"permissions": {}} (missing
+    additionalDirectories key), creates nested structure correctly. Preserves
+    existing keys at each level.
+    """
+    # Case 1: Empty JSON object
+    settings_file = tmp_path / "empty.json"
+    settings_file.write_text(json.dumps({}))
+
+    add_sandbox_dir("/new/path", settings_file)
+
+    result = json.loads(settings_file.read_text())
+    assert result["permissions"]["additionalDirectories"] == ["/new/path"]
+    assert isinstance(result["permissions"], dict)
+    assert isinstance(result["permissions"]["additionalDirectories"], list)
+
+    # Case 2: Permissions key exists but additionalDirectories missing
+    settings_file2 = tmp_path / "partial.json"
+    settings_file2.write_text(json.dumps({"permissions": {"other_key": "value"}}))
+
+    add_sandbox_dir("/new/path", settings_file2)
+
+    result2 = json.loads(settings_file2.read_text())
+    assert result2["permissions"]["additionalDirectories"] == ["/new/path"]
+    assert result2["permissions"]["other_key"] == "value"  # Preserved
+    assert isinstance(result2["permissions"]["additionalDirectories"], list)
