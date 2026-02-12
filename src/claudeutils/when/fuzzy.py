@@ -1,5 +1,16 @@
 """Fuzzy matching engine using modified fzf V2 scoring algorithm."""
 
+MATCH_SCORE = 16
+CONSECUTIVE_BONUS = 4
+FIRST_CHAR_MULTIPLIER = 2
+BOUNDARY_WHITESPACE = 10.0
+BOUNDARY_DELIMITER = 9.0
+BOUNDARY_CAMELCASE = 7.0
+GAP_START_PENALTY = -3
+GAP_EXTENSION_PENALTY = -1
+WORD_OVERLAP_BONUS = 0.5
+MIN_THRESHOLD_SINGLE_CHAR = 50.0
+
 
 def _get_match_positions(
     query_lower: str, candidate_lower: str, score: list[list[float]]
@@ -53,17 +64,18 @@ def _compute_dp_matrix(query_lower: str, candidate_lower: str) -> list[list[floa
     for i in range(1, m + 1):
         for j in range(1, n + 1):
             if query_lower[i - 1] == candidate_lower[j - 1]:
-                match_score = 16
                 consecutive_bonus = (
-                    4 if j > 1 and score[i - 1][j - 1] > score[i - 1][j - 2] else 0
+                    CONSECUTIVE_BONUS
+                    if j > 1 and score[i - 1][j - 1] > score[i - 1][j - 2]
+                    else 0
                 )
                 boundary_bonus = _boundary_bonus(candidate_lower, j)
-                first_char_multiplier = 2 if i == 1 else 1
+                first_char_multiplier = FIRST_CHAR_MULTIPLIER if i == 1 else 1
 
                 score[i][j] = max(
                     score[i][j - 1],
                     score[i - 1][j - 1]
-                    + match_score * first_char_multiplier
+                    + MATCH_SCORE * first_char_multiplier
                     + consecutive_bonus
                     + boundary_bonus,
                 )
@@ -91,7 +103,11 @@ def _meets_minimum_threshold(
     Returns:
         True if match meets threshold, False otherwise
     """
-    return not (len(query_lower) == 1 and word_overlap == 0 and base_score < 50.0)
+    return not (
+        len(query_lower) == 1
+        and word_overlap == 0
+        and base_score < MIN_THRESHOLD_SINGLE_CHAR
+    )
 
 
 def _boundary_bonus(candidate_lower: str, match_pos: int) -> float:
@@ -111,11 +127,11 @@ def _boundary_bonus(candidate_lower: str, match_pos: int) -> float:
     curr_char = candidate_lower[match_pos - 1]
 
     if prev_char == " ":
-        return 10.0
+        return BOUNDARY_WHITESPACE
     if prev_char in ("/", "-", "_"):
-        return 9.0
+        return BOUNDARY_DELIMITER
     if prev_char.islower() and curr_char.isupper():
-        return 7.0
+        return BOUNDARY_CAMELCASE
 
     return 0.0
 
@@ -132,7 +148,7 @@ def score_match(query: str, candidate: str) -> float:
         candidate: The string to search in (case-insensitive)
 
     Returns:
-        Float score: positive if match found, 0.0 or negative if no match
+        Float score: positive if match found, 0.0 if no match
     """
     query_lower = query.lower()
     candidate_lower = candidate.lower()
@@ -163,13 +179,13 @@ def score_match(query: str, candidate: str) -> float:
         curr_pos = match_positions[idx + 1]
         gap_length = curr_pos - prev_pos - 1
         if gap_length > 0:
-            gap_penalty += -3 + (-1 * gap_length)
+            gap_penalty += GAP_START_PENALTY + (GAP_EXTENSION_PENALTY * gap_length)
 
     # Word-overlap tiebreaker: bonus for matching whole words
     query_words = set(query.lower().split())
     candidate_words = set(candidate_lower.split())
     word_overlap = len(query_words & candidate_words)
-    word_overlap_bonus = word_overlap * 0.5
+    word_overlap_bonus = word_overlap * WORD_OVERLAP_BONUS
 
     if not _meets_minimum_threshold(query_lower, base_score, word_overlap):
         return 0.0
@@ -196,7 +212,6 @@ def rank_matches(
         if score > 0:
             scored.append((candidate, score))
 
-    # Sort by score descending
     scored.sort(key=lambda x: x[1], reverse=True)
 
     return scored[:limit]
