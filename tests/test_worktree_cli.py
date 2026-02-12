@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import derive_slug, worktree
+from claudeutils.worktree.cli import derive_slug, worktree, wt_path
 
 
 def _init_repo(repo_path: Path) -> None:
@@ -117,6 +117,27 @@ def test_ls_multiple_worktrees(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     assert line_b[0] == "task-b"
     assert line_b[1] == "refs/heads/task-b"
     assert str(worktree_b) in line_b[2]
+
+
+def test_wt_path_not_in_container(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """wt_path() returns correct container path when repo not in -wt container.
+
+    Verifies absolute path, correct slug, and -wt suffix on parent.
+    """
+    repo_path = tmp_path / "my-repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+
+    _init_repo(repo_path)
+
+    result_path = wt_path("feature-a")
+
+    assert result_path.is_absolute()
+    assert result_path.name == "feature-a"
+    assert result_path.parent.name.endswith("-wt")
+    assert str(result_path).endswith("my-repo-wt/feature-a")
 
 
 def test_new_session_precommit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

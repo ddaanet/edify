@@ -9,16 +9,23 @@ from pathlib import Path
 import click
 
 
+def wt_path(slug: str) -> Path:
+    """Return absolute worktree path, creating -wt container if needed."""
+    current_path = Path.cwd()
+    parent_name = current_path.parent.name
+
+    if parent_name.endswith("-wt"):
+        container_path = current_path.parent
+    else:
+        repo_name = current_path.name
+        container_name = f"{repo_name}-wt"
+        container_path = current_path.parent / container_name
+
+    return container_path / slug
+
+
 def derive_slug(task_name: str, max_length: int = 30) -> str:
-    """Transform task name to worktree slug.
-
-    Args:
-        task_name: The task name to convert.
-        max_length: Maximum slug length (default 30).
-
-    Returns:
-        A slugified version: lowercase, hyphens, truncated, no trailing hyphens.
-    """
+    """Transform task name to slug: lowercase, hyphens, truncated to max_length."""
     slug = task_name.lower()
     slug = re.sub(r"[^a-z0-9]+", "-", slug)
     slug = slug.strip("-")
@@ -78,14 +85,10 @@ def ls() -> None:
 def _create_session_commit(slug: str, base: str, session: str) -> str:
     """Pre-commit session.md to branch using isolated temp index.
 
-    Avoids polluting main worktree index by using GIT_INDEX_FILE isolation.
-
-    Returns:
-        Commit hash for the session commit.
+    Returns commit hash.
     """
-    session_path = Path(session)
     try:
-        session_content = session_path.read_text()
+        session_content = Path(session).read_text()
     except (FileNotFoundError, PermissionError) as e:
         click.echo(f"Error reading session file {session}: {e}", err=True)
         raise SystemExit(1) from e
@@ -163,11 +166,9 @@ def _create_session_commit(slug: str, base: str, session: str) -> str:
 
 @worktree.command(name="clean-tree")
 def clean_tree() -> None:
-    """Validate clean state of parent repo and submodule.
+    """Validate clean state (exits 1 with dirty files if unclean).
 
-    Exits 0 silently if clean, exits 1 with dirty file list if dirty. Session
-    context files (agents/session.md, agents/jobs.md, agents/learnings.md) are
-    excluded from clean-tree checks.
+    Exempts session context files.
     """
     result = subprocess.run(
         ["git", "status", "--porcelain"],
@@ -177,7 +178,7 @@ def clean_tree() -> None:
     )
     parent_status = result.stdout
 
-    # Graceful degradation: if agent-core doesn't exist, treat as clean
+    # Treat missing agent-core as clean
     result = subprocess.run(
         ["git", "-C", "agent-core", "status", "--porcelain"],
         capture_output=True,
@@ -212,12 +213,9 @@ def clean_tree() -> None:
 @click.option("--base", default="HEAD", help="Base commit for worktree branch")
 @click.option("--session", default="", help="Session file path")
 def new(slug: str, base: str, session: str) -> None:
-    """Create a new git worktree with branch.
+    """Create worktree at wt/{slug}/ with branch {slug}.
 
-    Creates a worktree at wt/{slug}/ checked out to a new branch {slug} based on
-    the specified base commit (default HEAD).
-
-    With --session: pre-commits focused session file to branch before creating worktree.
+    With --session, pre-commits focused session.
     """
     worktree_path = Path(f"wt/{slug}")
 
@@ -265,12 +263,9 @@ def new(slug: str, base: str, session: str) -> None:
             check=True,
         )
         project_root = result.stdout.strip()
-
-        # Get the agent-core path (if submodule exists in parent)
         agent_core_local = Path(project_root) / "agent-core"
         if agent_core_local.exists() and (agent_core_local / ".git").exists():
-            # Use git submodule update with --reference to use local objects
-            # This avoids fetching from remote
+            # Use --reference to avoid fetching from remote
             subprocess.run(
                 [
                     "git",
@@ -285,8 +280,7 @@ def new(slug: str, base: str, session: str) -> None:
                 check=False,
                 capture_output=True,
             )
-
-            # Create and checkout branch in submodule matching the worktree slug
+            # Create branch in submodule matching worktree slug
             submodule_path = worktree_path / "agent-core"
             if submodule_path.exists():
                 result = subprocess.run(
@@ -310,8 +304,7 @@ def new(slug: str, base: str, session: str) -> None:
 def add_commit(files: tuple[str, ...]) -> None:
     """Stage files and commit with message from stdin.
 
-    Idempotent: exits 0 silently if nothing staged. If staged changes exist,
-    reads commit message from stdin and outputs commit hash to stdout.
+    Idempotent if nothing staged.
     """
     subprocess.run(
         ["git", "add", *list(files)],
@@ -338,14 +331,9 @@ def add_commit(files: tuple[str, ...]) -> None:
 @worktree.command()
 @click.argument("slug")
 def rm(slug: str) -> None:
-    """Remove a git worktree and its branch.
+    """Remove worktree at wt/{slug}/ and its branch (forced).
 
-    Removes the worktree directory at wt/{slug}/ and the corresponding git
-    branch. Warns if worktree has uncommitted changes or branch is unmerged, but
-    proceeds with removal anyway (forced).
-
-    Handles branch-only cleanup: if worktree directory doesn't exist but branch
-    does, prunes stale worktree registration then removes the branch (idempotent).
+    Idempotent.
     """
     worktree_path = Path(f"wt/{slug}")
 
@@ -366,7 +354,7 @@ def rm(slug: str) -> None:
             capture_output=True,
         )
     else:
-        # Worktree directory doesn't exist; prune stale registration
+        # Prune stale registration
         subprocess.run(
             ["git", "worktree", "prune"],
             check=True,
