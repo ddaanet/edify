@@ -16,10 +16,7 @@ INDEXED_GLOBS = [
 ]
 
 # Sections that are exempt from file-based validation
-EXEMPT_SECTIONS = {
-    "Behavioral Rules (fragments — already loaded)",
-    "Technical Decisions (mixed — check entry for specific file)",
-}
+EXEMPT_SECTIONS: set[str] = set()
 
 
 def collect_structural_headers(root: Path) -> set[str]:

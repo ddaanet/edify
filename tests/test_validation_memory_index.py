@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from claudeutils.validation.memory_index import extract_index_entries, validate
+from claudeutils.validation.memory_index_helpers import EXEMPT_SECTIONS
 
 
 @pytest.fixture
@@ -213,24 +214,16 @@ def test_structural_header_entries_removed_by_autofix(
     assert "real header" in content
 
 
-def test_exempt_sections_preserved_as_is(tmp_path: Path, decisions_dir: Path) -> None:
-    """Exempt sections preserved as-is during autofix."""
+def test_exempt_sections_removed_after_migration(
+    tmp_path: Path, decisions_dir: Path
+) -> None:
+    """Exempt sections removed after migration (no longer exempt)."""
     (decisions_dir / "test-decision.md").write_text(
         "# Test Decision\n\n## Test Header\nContent.\n"
     )
     index = _write_index(
         tmp_path,
         """# Memory Index
-
-## Behavioral Rules (fragments — already loaded)
-
-Some custom rule — description that shows em-dash format here
-Another rule — another entry with proper em-dash separator today
-
-## Technical Decisions (mixed — check entry for specific file)
-
-Technical note — entry with em-dash in technical section here
-Another item — another entry with proper format today now
 
 ## agents/decisions/test-decision.md
 
@@ -240,9 +233,10 @@ Another item — another entry with proper format today now
     assert validate("agents/memory-index.md", tmp_path, autofix=True) == []
 
     content = index.read_text()
-    assert "Some custom rule" in content
-    assert "Another rule" in content
-    assert "Technical note" in content
+    # Exempt sections should not be present after migration
+    assert "Behavioral Rules" not in content
+    assert "Technical Decisions" not in content
+    assert "/when test header" in content
 
 
 def test_autofix_false_reports_all_issues(tmp_path: Path, decisions_dir: Path) -> None:
@@ -552,3 +546,28 @@ def test_word_count_removed(tmp_path: Path, decisions_dir: Path) -> None:
     )
     # Both entries should pass validation
     assert errors == []
+
+
+def test_exempt_sections_updated(tmp_path: Path, decisions_dir: Path) -> None:
+    """After migration, EXEMPT_SECTIONS is empty and all sections validated.
+
+    Assertions:
+    - EXEMPT_SECTIONS is empty set (no exempt sections remain)
+    - Validation runs on ALL sections (no skipping)
+    - Old exempt section names are not in EXEMPT_SECTIONS
+    - If index has old exempt sections, validated like any other section
+    """
+    # Verify EXEMPT_SECTIONS is empty
+    assert set() == EXEMPT_SECTIONS, (
+        f"EXEMPT_SECTIONS should be empty after migration, but found: {EXEMPT_SECTIONS}"
+    )
+
+    # Verify old exempt section names are not present
+    old_exempt_names = {
+        "Behavioral Rules (fragments — already loaded)",
+        "Technical Decisions (mixed — check entry for specific file)",
+    }
+    assert EXEMPT_SECTIONS.isdisjoint(old_exempt_names), (
+        f"Old exempt section names still in EXEMPT_SECTIONS: "
+        f"{EXEMPT_SECTIONS & old_exempt_names}"
+    )

@@ -5,8 +5,8 @@ from pathlib import Path
 from claudeutils.validation.memory_index import validate
 
 
-def test_exempt_sections_preserved_as_is(tmp_path: Path) -> None:
-    """Test that exempt sections are preserved as-is."""
+def test_exempt_sections_removed_after_migration(tmp_path: Path) -> None:
+    """Test that exempt sections are removed after migration."""
     decisions_dir = tmp_path / "agents" / "decisions"
     decisions_dir.mkdir(parents=True)
 
@@ -20,16 +20,6 @@ Content here.
     index_file = tmp_path / "agents" / "memory-index.md"
     index_file.write_text("""# Memory Index
 
-## Behavioral Rules (fragments — already loaded)
-
-Some custom rule — description that shows em-dash format here
-Another rule — another entry with proper em-dash separator today
-
-## Technical Decisions (mixed — check entry for specific file)
-
-Technical note — entry with em-dash in technical section here
-Another item — another entry with proper format today now
-
 ## agents/decisions/test-decision.md
 
 /when test header
@@ -38,11 +28,11 @@ Another item — another entry with proper format today now
     errors = validate("agents/memory-index.md", tmp_path, autofix=True)
     assert errors == []
 
-    # Verify exempt sections preserved
+    # Verify exempt sections are not present after migration
     content = index_file.read_text()
-    assert "Some custom rule — description that shows em-dash format here" in content
-    assert "Another rule — another entry with proper em-dash separator today" in content
-    assert "Technical note — entry with em-dash in technical section here" in content
+    assert "Behavioral Rules" not in content
+    assert "Technical Decisions" not in content
+    assert "/when test header" in content
 
 
 def test_autofix_false_reports_all_issues(tmp_path: Path) -> None:
