@@ -6,6 +6,10 @@ from claudeutils.when import fuzzy
 from claudeutils.when.index_parser import parse_index
 
 
+class ResolveError(Exception):
+    """Error during resolution."""
+
+
 def resolve(_mode: str, query: str, index_path: str, decisions_dir: str) -> str:
     """Resolve query to decision file content.
 
@@ -24,15 +28,83 @@ def resolve(_mode: str, query: str, index_path: str, decisions_dir: str) -> str:
         Section heading and content on successful match
 
     Raises:
-        ValueError: If no match found
+        ResolveError: If no match found or ambiguous match
     """
     if query.startswith(".."):
         return "file"
     if query.startswith("."):
-        return "section"
+        # Section mode: strip prefix and resolve
+        section_query = query[1:].strip()
+        return _resolve_section(section_query, decisions_dir)
 
     # Trigger mode: fuzzy match against index entries
     return _resolve_trigger(query, index_path, decisions_dir)
+
+
+def _resolve_section(query: str, decisions_dir: str) -> str:
+    """Resolve section mode query via heading lookup.
+
+    Scans all .md files in decisions_dir, builds heading→file mapping,
+    looks up query heading (case-insensitive), checks uniqueness.
+
+    Args:
+        query: Heading text to lookup (e.g., "Mock Patching Pattern")
+        decisions_dir: Directory containing decision files
+
+    Returns:
+        Heading and section content
+
+    Raises:
+        ResolveError: If no match, multiple matches, or other error
+    """
+    dec_dir = Path(decisions_dir)
+
+    # Scan decision files and collect headings
+    heading_to_files: dict[str, list[tuple[Path, str]]] = {}
+
+    for md_file in sorted(dec_dir.glob("*.md")):
+        try:
+            content = md_file.read_text()
+        except OSError as e:
+            msg = f"Failed to read {md_file}: {e}"
+            raise ResolveError(msg) from e
+
+        lines = content.split("\n")
+        for line in lines:
+            # Match H2+ headings (## or more #'s)
+            if line.startswith("##") and not line.startswith("###"):
+                # Extract heading text (remove the ##)
+                heading_text = line[2:].strip()
+                if heading_text:
+                    heading_lower = heading_text.lower()
+                    if heading_lower not in heading_to_files:
+                        heading_to_files[heading_lower] = []
+                    heading_to_files[heading_lower].append((md_file, heading_text))
+
+    # Lookup query (case-insensitive)
+    query_lower = query.lower()
+
+    if query_lower not in heading_to_files:
+        msg = f"Heading not found: {query}"
+        raise ResolveError(msg)
+
+    matches = heading_to_files[query_lower]
+
+    # Check uniqueness
+    if len(matches) > 1:
+        files = ", ".join(str(m[0]) for m in matches)
+        msg = f"Ambiguous heading '{query}' found in: {files}"
+        raise ResolveError(msg)
+
+    # Extract content from the unique match
+    file_path, heading_text = matches[0]
+    content = _extract_section(file_path, f"## {heading_text}")
+
+    if not content:
+        msg = f"Failed to extract section '{heading_text}' from {file_path}"
+        raise ResolveError(msg)
+
+    return content
 
 
 def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
@@ -50,7 +122,7 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
         Heading and section content
 
     Raises:
-        ValueError: If no match found
+        ResolveError: If no match found
     """
     index_file = Path(index_path)
     dec_dir = Path(decisions_dir)
@@ -67,7 +139,7 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
 
     if not matches:
         msg = f"No match for '{query}'"
-        raise ValueError(msg)
+        raise ResolveError(msg)
 
     matched_candidate, _score = matches[0]
 
@@ -85,7 +157,7 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
 
     if not matching_entry:
         msg = "Could not map matched candidate to entry"
-        raise ValueError(msg)
+        raise ResolveError(msg)
 
     # Construct expected heading from operator and trigger
     heading = _build_heading(operator, trigger_text)
@@ -96,14 +168,14 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
 
     if not file_path.exists():
         msg = f"Decision file not found: {file_path}"
-        raise ValueError(msg)
+        raise ResolveError(msg)
 
     # Read the file and extract the section
     content = _extract_section(file_path, heading)
 
     if not content:
         msg = f"Section not found in {file_path}: {heading}"
-        raise ValueError(msg)
+        raise ResolveError(msg)
 
     return content
 

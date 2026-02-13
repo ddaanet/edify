@@ -21,16 +21,62 @@ def test_mode_detection(tmp_path: Path) -> None:
     testing_file = decisions_dir / "testing.md"
     testing_file.write_text("## Test Section\n\nTest content.\n")
 
-    # Section mode detection (returns "section" mode identifier for now)
-    # Note: Full section mode implementation is in a later cycle
-    # For now, this test just verifies the mode is detected
+    # Section mode resolves heading to content
     section = resolve("section", ".Test Section", str(index_file), str(decisions_dir))
-    assert section == "section"
+    assert "## Test Section" in section
+    assert "Test content." in section
 
     # File mode detection (returns "file" mode identifier for now)
     # Note: Full file mode implementation is in a later cycle
     file_mode = resolve("file", "..testing.md", str(index_file), str(decisions_dir))
     assert file_mode == "file"
+
+
+def test_section_mode_resolves(tmp_path: Path) -> None:
+    """Section mode resolves global unique headings across decision files.
+
+    Tests heading lookup across files with uniqueness check and case-insensitive
+    matching.
+    """
+    # Create index file
+    index_file = tmp_path / "test_index.md"
+    index_file.write_text("## testing\n\n/when test | extra\n")
+
+    # Create decisions directory
+    decisions_dir = tmp_path / "decisions"
+    decisions_dir.mkdir()
+
+    # Create decision file with unique heading
+    workflow_file = decisions_dir / "workflow-core.md"
+    workflow_file.write_text(
+        "# Main Title\n"
+        "\n"
+        "## Mock Patching Pattern\n"
+        "\n"
+        "Use exact match for restoration operations.\n"
+        "\n"
+        "Prevents exploitation via command continuation.\n"
+        "\n"
+        "## Next Section\n"
+        "\n"
+        "Other content here.\n"
+    )
+
+    # Test unique heading lookup
+    result = resolve(
+        "section", ".Mock Patching Pattern", str(index_file), str(decisions_dir)
+    )
+    assert "## Mock Patching Pattern" in result
+    assert "Use exact match for restoration operations" in result
+    assert "Prevents exploitation via command continuation" in result
+    # Verify boundary: should not include next section
+    assert "## Next Section" not in result
+
+    # Test case-insensitive lookup
+    result = resolve(
+        "section", ".mock patching pattern", str(index_file), str(decisions_dir)
+    )
+    assert "## Mock Patching Pattern" in result
 
 
 def test_trigger_mode_resolves(tmp_path: Path) -> None:
