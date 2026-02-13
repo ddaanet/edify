@@ -1,260 +1,214 @@
-# Claude Code Feedback Extractor
+# claudeutils
 
-Extract user feedback from Claude Code conversation history for retrospective analysis.
+Workflow infrastructure for [Claude Code][claude-code]. Two parts: a Python CLI
+for working with session data and project structure, and a framework of skills,
+agents, hooks, and instruction fragments that give Claude Code agents structured
+workflows — design, planning, TDD, orchestration, review, and handoff.
 
-## Installation
+Not on PyPI. Install from source:
 
 ```bash
-# Clone repository
-git clone <repo-url>
+git clone https://github.com/ddaanet/claudeutils
 cd claudeutils
-
-# Install with uv
 uv tool install .
 ```
 
-## Usage
+Requires Python 3.14+ and [uv].
 
-### Basic Commands
+## Agent Framework
+
+The `agent-core/` submodule provides workflow infrastructure for Claude Code
+projects. Currently installed as a git submodule with symlinks
+(`just sync-to-parent`); converting to a Claude Code plugin.
+
+It ships 18 skills, 14 specialized sub-agents, 23 instruction fragments, and
+hooks — but the two things that matter most are structured workflow and memory
+management.
+
+### Structured Workflow
+
+Without structure, agent work drifts: incomplete implementations, skipped
+reviews, scope creep, no handoff between sessions. The framework imposes a
+pipeline:
+
+```
+/design → /runbook → [plan-reviewer] → /orchestrate → [vet-fix-agent] → /handoff
+```
+
+`/design` triages complexity — simple tasks execute directly, moderate tasks
+skip to planning, complex tasks get full Opus architectural design. `/runbook`
+produces step-by-step execution plans with per-phase typing (TDD cycles or
+general steps). `/orchestrate` dispatches each step to a sub-agent in isolated
+context. Vet review follows every production artifact. `/handoff` captures what
+happened for the next session.
+
+The pipeline is not mandatory. You can invoke any skill independently. But the
+full sequence is what prevents the "works on my prompt" failure mode where a
+task succeeds in one session and leaves wreckage for the next.
+
+### Memory Management
+
+Claude Code sessions are stateless — each conversation starts fresh. The
+framework maintains persistent project memory across sessions:
+
+- **session.md** — pending tasks, in-progress work, blockers. The handoff
+  document between sessions. Agents read it at startup, update it at `/handoff`
+- **learnings.md** — institutional knowledge accumulated from mistakes and
+  discoveries. Append-only, consolidated via `/remember` when it grows large
+- **memory-index.md** — keyword-rich catalog pointing to detailed documentation
+  in `decisions/`. Agents scan the index to decide what to load on demand,
+  instead of pre-loading everything
+- **decisions/** — architectural and implementation decisions, one heading per
+  topic. The permanent record that learnings graduate into
+- **jobs.md** — plan lifecycle tracking (`requirements` → `designed` → `planned`
+  → `complete`)
+
+`claudeutils validate` enforces consistency across these files — cross-reference
+integrity, format conventions, key uniqueness.
+
+The memory system solves the "agent amnesia" problem: without it, every session
+rediscovers the same decisions, repeats the same mistakes, and loses context
+from prior work.
+
+## CLI Commands
+
+### Feedback pipeline
+
+Claude Code stores session data in `~/.claude/projects/`. These commands parse
+the JSONL to extract your messages — what you actually said to your agents,
+across all sessions.
 
 ```bash
-# List all conversation sessions
+# List conversation sessions
 claudeutils list
 
-# Extract feedback from a specific session (by prefix)
+# Extract feedback from a session (prefix match on UUID)
 claudeutils extract e12d203f
 
-# Extract to file
-claudeutils extract e12d203f --output feedback.json
-
-# Use custom project directory
-claudeutils list --project /path/to/project
-claudeutils extract abc123 --project /path/to/project
-```
-
-### Token Counting
-
-Count tokens in files using the Anthropic API. Requires `ANTHROPIC_API_KEY` environment
-variable.
-
-```bash
-# Count tokens in a single file
-claudeutils tokens sonnet prompt.md
-
-# Count tokens across multiple files
-claudeutils tokens opus file1.md file2.md
-
-# JSON output format
-claudeutils tokens haiku prompt.md --json
-
-# Use full model ID instead of alias
-claudeutils tokens claude-sonnet-4-5-20250929 prompt.md
-```
-
-**Supported model aliases:**
-
-- `haiku` - Latest Claude Haiku model
-- `sonnet` - Latest Claude Sonnet model
-- `opus` - Latest Claude Opus model
-
-Aliases automatically resolve to the latest available model version (cached for 24
-hours). You can also use full model IDs like `claude-sonnet-4-5` or
-`claude-sonnet-4-5-20250929`.
-
-## Markdown Preprocessor
-
-The `markdown` command preprocesses Claude-generated markdown output before dprint
-formatting:
-
-```bash
-# Process files from git status
-git status --short | cut -c4- | claudeutils markdown
-
-# Or pipe file paths directly
-echo "output.md" | claudeutils markdown
-```
-
-**What it fixes:**
-
-- Consecutive emoji/symbol prefixed lines → proper lists
-- Nested code blocks in `` ```markdown `` fences
-- Metadata labels with following lists → indented nested lists
-- Numbered list spacing issues
-- And more...
-
-**Processing Pipeline:**
-
-```
-Claude output → markdown.py → dprint → final output
-```
-
-The preprocessor handles structural issues that Claude commonly produces but aren't
-valid markdown. After preprocessing, dprint applies consistent formatting.
-
-**Note:** This is currently a standalone tool but should eventually evolve into a dprint
-plugin for better integration.
-
-### Feedback Processing Pipeline
-
-Process feedback in stages: collect → analyze → rules
-
-```bash
-# Step 1: Collect feedback from ALL sessions into one file
-claudeutils collect --output all_feedback.json
-
-# Step 2: Analyze - filter noise and categorize
-claudeutils analyze --input all_feedback.json
-# Output: total count, filtered count, category breakdown
-
-# Step 3: Extract rule-worthy items (sorted, deduplicated)
-claudeutils rules --input all_feedback.json --format json
-
-# Pipeline with stdin (no intermediate files)
+# Full pipeline: collect all → filter noise → extract rules
 claudeutils collect | claudeutils analyze -
 claudeutils collect | claudeutils rules --input -
 ```
 
-#### Categories (from analyze)
+`collect` gathers feedback from every session. `analyze` categorizes it
+(instructions, corrections, process, code review, preferences) and filters
+noise — command output, system messages, single-character responses. `rules`
+applies stricter filters and deduplicates for actionable items.
 
-- **instructions** - Directives: "don't", "never", "always", "must", "should"
-- **corrections** - Fixes: "no", "wrong", "incorrect", "fix", "error"
-- **process** - Workflow: "plan", "next step", "workflow", "before", "after"
-- **code_review** - Quality: "review", "refactor", "improve", "clarity"
-- **preferences** - Other substantive feedback
+### Markdown cleanup
 
-#### Filtering (automatic)
+Claude generates markdown with structural issues that formatters can't handle:
+consecutive emoji lines that should be lists, nested code blocks inside
+markdown fences, metadata labels with dangling lists. The preprocessor fixes
+the structure in place, then you run [dprint] for consistent formatting.
 
-Noise removed: command output, bash stdout, system messages, short messages (<10 chars)
-
-Rules command applies stricter filters: removes questions ("How..."), long items (>1000
-chars), and deduplicates by content prefix.
-
-## Features
-
-- **Session listing:** Display top-level sessions with titles and timestamps
-- **Prefix matching:** Extract sessions by partial UUID prefix (e.g., `e12d203f`)
-- **Recursive extraction:** Automatically processes sub-agent sessions
-- **Trivial filtering:** Filters out single-character responses and common keywords
-- **Token counting:** Count tokens in files using Anthropic API with automatic model
-  alias resolution
-- **Structured output:** JSON format with full metadata
-- **Type-safe:** Pydantic validation with strict mypy checking
-
-## Data Model
-
-```python
-class FeedbackType(StrEnum):
-    TOOL_DENIAL = "tool_denial"     # User denied tool execution
-    INTERRUPTION = "interruption"   # User interrupted agent
-    MESSAGE = "message"             # User message/feedback
-
-class FeedbackItem(BaseModel):
-    timestamp: str                  # ISO 8601 format
-    session_id: str                 # UUID or agent ID
-    feedback_type: FeedbackType
-    content: str                    # User's message/feedback
-    agent_id: Optional[str]         # If from sub-agent
-    slug: Optional[str]             # Agent session slug
-    tool_use_id: Optional[str]      # For tool denials
+```bash
+# Fix files changed in working tree
+git status --short | cut -c4- | claudeutils markdown
 ```
+
+Reads file paths from stdin, modifies files in place.
+
+### Token counting
+
+Count tokens using the Anthropic API. Requires `ANTHROPIC_API_KEY`.
+
+```bash
+claudeutils tokens sonnet prompt.md
+claudeutils tokens opus file1.md file2.md
+claudeutils tokens haiku prompt.md --json
+```
+
+Aliases (`haiku`, `sonnet`, `opus`) resolve to the latest model version. Full
+model IDs also work.
+
+### Account and model management
+
+Switch between API providers and plan modes. Manage default model overrides.
+
+```bash
+claudeutils account status
+claudeutils account api
+claudeutils account plan
+
+claudeutils model list
+claudeutils model set claude-sonnet-4-5-20250929
+claudeutils model reset
+```
+
+### Composition
+
+Assemble a single markdown file from modular fragments. Used to build agent
+definitions and system prompts from reusable pieces.
+
+```yaml
+# compose.yaml
+output: agents/system-prompt.md
+fragments:
+  - fragments/core-rules.md
+  - fragments/tool-usage.md
+  - fragments/project-specific.md
+```
+
+```bash
+claudeutils compose compose.yaml --validate strict
+claudeutils compose compose.yaml --dry-run
+```
+
+### Validation
+
+Validate project structure and conventions — memory index consistency, decision
+file formatting, job tracking, learnings format, task key uniqueness.
+
+```bash
+claudeutils validate                    # all validators
+claudeutils validate memory-index       # specific validator
+claudeutils validate decisions
+claudeutils validate jobs
+claudeutils validate learnings
+claudeutils validate tasks
+```
+
+### Recall analysis
+
+Measure whether agents actually consult relevant memory index entries when
+working on related topics. Runs against local session history.
+
+```bash
+claudeutils recall --index agents/memory-index.md
+claudeutils recall --index agents/memory-index.md --sessions 50 --output report.md
+```
+
+### Statusline
+
+Reads the JSON that Claude Code pipes to statusline hooks and formats a
+two-line display: model, directory, git status, cost, and context usage on
+line one; account mode and usage limits on line two.
+
+Configured as a Claude Code statusline hook — not typically invoked directly.
 
 ## Development
 
 ```bash
-# Run full dev cycle (format, check, test)
-just dev
-
-# Run tests only
-just test
-
-# Run linting and type checking
-just check
+just dev        # format + check + test
+just test       # tests only
+just check      # lint + type check
+just precommit  # all checks (CI equivalent)
 ```
 
-### Project Structure
-
-```
-src/claudeutils/
-├── cli.py          # CLI entry point
-├── models.py       # Pydantic models
-├── paths.py        # Path encoding utilities
-├── parsing.py      # Content extraction
-├── discovery.py    # Session/agent discovery
-├── extraction.py   # Recursive extraction
-├── tokens.py       # Token counting with Anthropic API
-├── tokens_cli.py   # Token counting CLI handler
-└── exceptions.py   # Custom exceptions
-
-tests/
-├── test_cli_list.py
-├── test_cli_extract_basic.py
-├── test_cli_extract_output.py
-├── test_cli_tokens.py
-├── test_cli_help.py
-├── test_discovery.py
-├── test_parsing.py
-├── test_paths.py
-├── test_models.py
-├── test_agent_files.py
-├── test_extraction.py
-├── test_tokens_count.py
-├── test_tokens_resolve.py
-└── test_tokens_integration.py
-```
-
-## Implementation Notes
-
-Built with Test-Driven Development (TDD) across 5 implementation steps:
-
-1. **Path encoding & session discovery** - Project path encoding, session listing
-2. **Trivial message filter** - Filter out non-substantive responses
-3. **Message parsing** - Extract feedback from conversation history
-4. **Recursive sub-agent processing** - Handle nested agent sessions
-5. **CLI subcommands** - User-facing interface with argparse
-
-See `agents/decisions/` for architectural decisions and implementation
-patterns.
-
-## Architecture
-
-**Goal:** Foundational tools to support Claude-based development processes.
-
-**Current Features:**
-- Feedback extraction from Claude Code conversation history
-- Markdown formatting for CommonMark compliance
-- Agent rules management and system prompt generation
-- Token counting utilities
-
-**Extensible:** New tools added as needed to support Claude workflows.
-
-**Key Technologies:**
-- Python 3.14+ with full type annotations (mypy strict)
-- Pydantic for data validation and serialization
-- pytest for testing with TDD workflow
-- uv for dependency management
-- ruff for linting
-- just for task running
-
-**Development Approach:** Test-Driven Development (TDD) with discrete implementation
-steps.
-
-## Documentation
-
-- `agents/session.md` - Current work context and handoff information
-- `CLAUDE.md` - Project overview and coding standards
-- `agents/decisions/` - Architectural and implementation decisions
-- `agents/TEST_DATA.md` - Data types and sample entries
-- `agents/ROADMAP.md` - Future enhancement ideas
-- `agents/code.md` - TDD implementation guidelines (skill)
-- `agents/commit.md` - Git commit standards (skill)
-
-## Requirements
-
-- Python 3.14+
-- Dependencies: pydantic>=2.0, anthropic, platformdirs
-- Dev dependencies: pytest, mypy, ruff
-- Optional: `ANTHROPIC_API_KEY` environment variable (required for token counting)
+Python 3.14+ with full type annotations ([mypy] strict). [Pydantic] for data
+validation. [pytest] for testing. [ruff] for linting. [uv] for dependency
+management. [just] for task running.
 
 ## License
 
-[Add license here]
+MIT
+
+[claude-code]: https://github.com/anthropics/claude-code
+[dprint]: https://dprint.dev
+[mypy]: https://mypy.readthedocs.io
+[pydantic]: https://docs.pydantic.dev
+[pytest]: https://pytest.org
+[ruff]: https://docs.astral.sh/ruff
+[uv]: https://docs.astral.sh/uv
+[just]: https://just.systems
