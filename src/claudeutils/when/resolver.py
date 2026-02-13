@@ -163,8 +163,8 @@ def _handle_no_match(query: str, candidates: list[str]) -> None:
 def _load_matched_entry(matched_candidate: str, entries: list[WhenEntry]) -> WhenEntry:
     """Find matching entry for candidate string.
 
-    The matched_candidate uses "how to" mapping, so we need to map it back
-    to the stored operator value when matching against entries.
+    The matched_candidate uses "how to" mapping, so we need to map it back to
+    the stored operator value when matching against entries.
     """
     # Parse candidate to extract operator and trigger
     if matched_candidate.startswith("how to "):
@@ -209,7 +209,8 @@ def _resolve_trigger(
     query_with_operator = f"{operator_prefix} {query}"
     # Build candidates with same operator mapping
     candidates = [
-        f"{'how to' if e.operator == 'how' else e.operator} {e.trigger}" for e in entries
+        f"{'how to' if e.operator == 'how' else e.operator} {e.trigger}"
+        for e in entries
     ]
     matches = fuzzy.rank_matches(query_with_operator, candidates, limit=1)
 

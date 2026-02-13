@@ -116,7 +116,8 @@ def _check_orphan_headers(
     """Check for semantic headers without index entries.
 
     Uses fuzzy matching to bridge compression between semantic headers and index
-    triggers (e.g., "When Writing Mock Tests" fuzzy-matches "when writing mock tests").
+    triggers (e.g., "When Writing Mock Tests" fuzzy-matches "when writing mock
+    tests").
 
     Both headers and entry keys now include operator prefix, so they can be
     compared directly.
@@ -130,7 +131,8 @@ def _check_orphan_headers(
         if title in entries:
             continue
 
-        # Fuzzy match: entry keys (with operator prefix) against header titles (also with prefix)
+        # Fuzzy match: entry keys (with operator prefix) against header
+        # titles (also with prefix)
         best_score = 0.0
         for entry_key in entry_keys:
             score = score_match(entry_key, title)

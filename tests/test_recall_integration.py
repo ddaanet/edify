@@ -157,8 +157,10 @@ def test_recall_report_formatting(tmp_path: Path) -> None:
 
 
 def test_recall_analysis_with_new_format(tmp_path: Path) -> None:
-    """Verify recall analysis works with new /when format and empty
-    description."""
+    """Verify recall analysis works with new /when format and empty description.
+
+    The new format has no description field.
+    """
     # Create index file in new format (empty description)
     index_file = tmp_path / "index.md"
     index_file.write_text(
