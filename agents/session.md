@@ -19,15 +19,10 @@
 
 ## Pending Tasks
 
-- [ ] **Create bin wrapper** — `agent-core/bin/when-resolve.py` | haiku
-  - Thin wrapper calling `claudeutils.when.cli.when_cmd()` directly
-  - Usage: `when-resolve.py {when|how} <query...>`
-  - Shebang: `#!/usr/bin/env python3`
-  - Import: `from claudeutils.when.cli import when_cmd`
-  - Call: `when_cmd()` (Click handles sys.argv parsing)
-  - Make executable: `chmod +x agent-core/bin/when-resolve.py`
-  - Reference: Similar to add-learning.py but simpler (no arg parsing, Click handles it)
-  - See: plans/when-recall/design.md §Skills Implementation (lines 278-302)
+- [x] **Create bin wrapper** — `agent-core/bin/when-resolve.py` | haiku
+  - ✅ File created and made executable
+
+- [ ] **Author skill wrappers** — Phase 8 agentic prose | opus | restart
 
 - [ ] **Author skill wrappers** — Phase 8 agentic prose | opus | restart
   - `agent-core/skills/when/SKILL.md` — frontmatter in design.md, body needs authoring
