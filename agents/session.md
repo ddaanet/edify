@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-13
 
-**Status:** Recovered lost tasks from merge session, fixed handoff skill to prevent future sub-item trimming.
+**Status:** Task recovery, handoff carry-forward fix, workwoods + pushback requirements captured.
 
 ## Completed This Session
 
@@ -16,6 +16,29 @@
 - Fix: SKILL.md Step 2 — pending tasks are carry-forward data (read existing, patch mutations only: mark complete, append new, update changed metadata)
 - Reinforced in references/template.md with "Pending Task Carry-Forward" section
 - Files changed: `agent-core/skills/handoff/SKILL.md`, `agent-core/skills/handoff/references/template.md`
+
+**Design discussions (requirements captured, not yet designed):**
+- Workwoods — cross-tree worktree awareness via computed status script (`plans/workwoods/requirements.md`)
+  - FR-1: wt-ls upgrade with live status (commits since handoff, latest subject, tree state)
+  - FR-2: Vet artifact tracking via filesystem mtime comparison (source newer than vet = stale)
+  - FR-3: Plan state inferred from filesystem, replaces jobs.md manual tracking
+  - FR-4: Bidirectional worktree merge (wt-merge keeps tree, wt-rm separate)
+  - FR-5: Additive task merge on worktree combine
+  - FR-6: Eliminate jobs.md (plan directories are source of truth)
+  - Key decisions: filesystem mtime for artifact validity, git commit hash for work counting, no unversioned shared files, computed not stored status
+  - Integrates with worktree-update (additive merge)
+- Pushback — prevent yes-manning in design discussions (`plans/pushback/requirements.md`)
+  - FR-1: Structural pushback in d: discussions, FR-2: detect agreement momentum, FR-3: model selection evaluation
+  - Open: where does it live (fragment/skill/hook/protocol)? Can LLM self-correct sycophancy?
+- Identified agent can't detect own model tier — new pending task for hook
+
+**Pushback meta-observations during discussion:**
+- User challenged vigorously-agreeing pattern — several ideas got pushback after prompting
+- Separate tasks.md: may not be needed if carry-forward rule holds
+- Unversioned shared file: rejected in favor of computed script reads
+- Sonnet for TDD: RCA points to planning skill, not haiku capability
+- Handoff review agent: cost/benefit doesn't work
+- Protocol/enforcement won't fix judgment errors (model selection) — agent satisfies checks without correct content
 
 ## Pending Tasks
 
@@ -89,6 +112,17 @@
   - Session summary extraction prototype
   - Rewrite last-output prototype with TDD as claudeutils subcommand
 
+- [ ] **Build pushback into conversation process** — `/design plans/pushback/requirements.md` | opus
+  - Plan: pushback | Status: requirements
+  - Next task — design before other work to improve conversation quality
+
+- [ ] **Design workwoods** — `/design plans/workwoods/requirements.md` | opus
+  - Plan: workwoods | Status: requirements
+  - Integrates with worktree-update (additive merge, bidirectional sync)
+
+- [ ] **Model tier awareness hook** — Hook injecting "Response by Opus/Sonnet/Haiku" into context | sonnet | restart
+  - NOT UserPromptSubmit — correct event TBD (load hook skill when executing)
+
 - [ ] **Infrastructure scripts** — History tooling + agent-core script rewrites | sonnet
   - History cleanup tooling — git history rewriting, reusable scripts
   - Rewrite agent-core ad-hoc scripts via TDD to claudeutils package
@@ -125,8 +159,8 @@
 
 ## Reference Files
 
+- `plans/workwoods/requirements.md` — Workwoods requirements (6 FRs, cross-tree awareness)
+- `plans/pushback/requirements.md` — Pushback requirements (3 FRs, sycophancy prevention)
 - `plans/worktree-update/` — Runbook (40 TDD cycles, 7 phases), design, orchestrator plan
-- `.claude/agents/worktree-update-task.md` — TDD task agent
 - `plans/when-recall/design.md` — Vetted design document
 - `agents/decisions/deliverable-review.md` — Post-execution review methodology
-- `agents/decisions/runbook-review.md` — Pre-execution runbook review methodology

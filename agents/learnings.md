@@ -328,3 +328,13 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Primary mode is conversation-to-artifact capture; elicitation is secondary mode for cold-start
 - Rationale: User's actual need was "formalize what we just discussed" not "guide me through questions"
 - Design lesson: Rephrase understanding before building — first outline missed the core concept entirely
+## No model tier introspection
+- Anti-pattern: Assuming current model tier (e.g., "we're on sonnet, need to restart for opus")
+- Correct pattern: Don't guess model tier. Ask, stay silent about it, or rely on external signal (hook)
+- Rationale: No introspection API; agent consistently misidentifies as sonnet when running as opus
+- Fix: Pending hook to inject model tier into context
+## Enforcement cannot fix judgment errors
+- Anti-pattern: Adding precommit validation for judgment calls (model selection, task completeness)
+- Correct pattern: Enforcement works for structural/mechanical checks; judgment requires conversation-level intervention
+- Rationale: Writing agent can satisfy any structural check with wrong content (write `| sonnet` to pass model-required validation)
+- Example: Model tier on pending tasks — agent defaults to sonnet, precommit can verify field exists but not correctness
