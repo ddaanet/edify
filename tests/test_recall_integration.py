@@ -157,7 +157,8 @@ def test_recall_report_formatting(tmp_path: Path) -> None:
 
 
 def test_recall_analysis_with_new_format(tmp_path: Path) -> None:
-    """Verify recall analysis works with new /when format and empty description."""
+    """Verify recall analysis works with new /when format and empty
+    description."""
     # Create index file in new format (empty description)
     index_file = tmp_path / "index.md"
     index_file.write_text(
@@ -200,7 +201,9 @@ def test_recall_analysis_with_new_format(tmp_path: Path) -> None:
     # Find relevant entries (should work without description field)
     # Threshold 0.1 ensures keyword overlap "tdd" (1/5 = 0.2) exceeds it
     relevant = find_relevant_entries("test-session", topics, entries, threshold=0.1)
-    assert len(relevant) > 0, "New-format entries must produce matches, not silent empty list"
+    assert len(relevant) > 0, (
+        "New-format entries must produce matches, not silent empty list"
+    )
 
     # Calculate recall (should handle empty description gracefully)
     analysis = calculate_recall(
