@@ -325,3 +325,20 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Critical finding: Test flaws are deliverable defects — feature silently skipped when test passes for wrong reason
 - Example: Cycle 0.5 word-overlap tiebreaker passes due to boundary bonuses (212 vs 202), not word overlap
 - Protocol: `plans/orchestrate-evolution/reports/red-pass-blast-radius.md`
+## Common context signal competition
+- Anti-pattern: Phase-specific file paths and function names in global common context section of agent definition
+- Correct pattern: Common context must be phase-neutral (project conventions, package structure). Phase-specific paths belong in cycle step files only
+- Rationale: Persistent common context is stronger signal than one-time step file input. At haiku capability, persistent signal wins when step file task is semantically ambiguous
+- Evidence: 1/42 cycles derailed (3.5), caused by fuzzy.py paths in common context competing with resolver.py in step file
+- Fix: Strip phase-specific content from agent definition; plan-reviewer should flag phase-specific paths in common context
+## Vacuous assertion from skipped RED
+- Anti-pattern: Committing a test that never went RED without evaluating assertion strength
+- Correct pattern: When RED passes unexpectedly, verify assertions would catch the defect class — not just "doesn't crash" but "produces correct results"
+- Example: `assert isinstance(relevant, list)` passes on empty list — pipeline silently returns no matches but test passes
+- Detection: Check if key assertions distinguish "correct output" from "empty/default output"
+- Rationale: TDD RED phase proves the test can fail. Skipping RED means assertion quality is unverified
+## Vet-fix-agent commit discipline
+- Anti-pattern: Trust vet-fix-agent to commit its changes — it frequently doesn't
+- Correct pattern: Include explicit "Commit all changes and report before returning" in every vet delegation prompt
+- Evidence: Phases 2, 4, 6 checkpoints all left changes uncommitted, required resume to commit
+- Recurrence: Same root cause as "Delegation requires commit instruction" learning but specific to vet-fix-agent

@@ -18,7 +18,7 @@ Plan lifecycle tracking. Updated when plans change status.
 | reports | — | Shared reports directory (not a plan) |
 | requirements-skill | requirements | Evaluate with opus |
 | tweakcc | requirements | Local instances research |
-| when-recall | planned | `/when` memory recall system — executing, Phase 0 partial (3/8 cycles) |
+| when-recall | complete | `/when` memory recall system — 42/42 TDD cycles, 8 phases, all checkpoints passed |
 | worktree-update | planned | Runbook complete: 40 TDD cycles (7 phases), reviewed and assembled, haiku execution ready |
 | workflow-skills-audit | designed | plan-adhoc alignment + design skill audit, 12 items |
 | worktree-skill | complete | 42/42 cycles, merged to dev |
