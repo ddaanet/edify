@@ -13,12 +13,10 @@ Plan lifecycle tracking. Updated when plans change status.
 | orchestrate-evolution | designed | Design.md complete, vet in progress, planning next |
 | parallel-orchestration | requirements | Deferred from orchestrate-evolution (worktree isolation needed) |
 | plugin-migration | planned | Runbook assembled: 15 steps, haiku execution ready |
-| reflect-rca-sequential-task-launch | requirements | RCA on Task parallelization + vet context issues |
 | reports | — | Shared reports directory (not a plan) |
 | tweakcc | requirements | Local instances research |
 | when-recall | designed | `/when` memory recall system — design.md vetted, TDD runbook next |
 | worktree-update | planned | Runbook complete: 40 TDD cycles (7 phases), reviewed and assembled, haiku execution ready |
-| workflow-skills-audit | designed | plan-adhoc alignment + design skill audit, 12 items |
 
 ## Complete (Archived)
 
@@ -27,6 +25,8 @@ Plan lifecycle tracking. Updated when plans change status.
 Use `git log --all --online -- plans/<name>/` to find commits, `git show <hash>:<path>` to retrieve files.
 
 **Recent:**
+- `workflow-skills-audit` — Superseded by runbook unification (all 12 items landed)
+- `reflect-rca-sequential-task-launch` — Subsumed into process-review worktree
 - `requirements-skill` — Dual-mode extract/elicit requirements skill, empirical grounding
 - `worktree-skill` — Worktree skill implementation (42/42 cycles, merged to dev)
 - `worktree-skill-fixes` — Worktree skill findings (27 fixes across 7 phases, merged to dev)
