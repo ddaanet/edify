@@ -369,6 +369,38 @@ def _remove_worktrees(
 
 @worktree.command()
 @click.argument("slug")
+def merge(slug: str) -> None:  # noqa: ARG001
+    """Prepare for merge: verify OURS clean tree with session exemption."""
+    exempt = {
+        "agents/session.md",
+        "agents/jobs.md",
+        "agents/learnings.md",
+        "agent-core",
+    }
+
+    # Check main repo with session file exemption
+    parent_status = _git("status", "--porcelain", "--untracked-files=no", check=False)
+    parent_lines = [
+        line
+        for line in parent_status.split("\n")
+        if line and not any(path in line for path in exempt)
+    ]
+
+    if parent_lines:
+        click.echo("Clean tree required for merge (main)")
+        raise SystemExit(1)
+
+    # Check submodule (strict, no exemptions)
+    submodule_status = _git(
+        "-C", "agent-core", "status", "--porcelain", "--untracked-files=no", check=False
+    )
+    if submodule_status.strip():
+        click.echo("Clean tree required for merge (main submodule)")
+        raise SystemExit(1)
+
+
+@worktree.command()
+@click.argument("slug")
 def rm(slug: str) -> None:
     """Remove worktree and its branch."""
     worktree_path = wt_path(slug)

@@ -105,3 +105,63 @@ def test_add_commit_nothing_staged(
     # Should exit 0 with empty output (idempotent no-op when file unchanged)
     assert result.exit_code == 0
     assert result.output == ""
+
+
+def test_merge_ours_clean_tree(
+    repo_with_submodule: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Merge command enforces clean tree with session file exemption.
+
+    Verifies that the merge command:
+    - Exits 1 when main repo has uncommitted changes (except session files)
+    - Exits 1 when submodule has uncommitted changes
+    - Allows session.md, jobs.md, learnings.md to be dirty
+    - Both parent and submodule are checked
+    """
+    monkeypatch.chdir(repo_with_submodule)
+    runner = CliRunner()
+
+    # Test 1: Main repo dirty (source files) → should fail
+    src_dir = repo_with_submodule / "src" / "claudeutils"
+    src_dir.mkdir(parents=True)
+    (src_dir / "cli.py").write_text('"""Module."""\n')
+    subprocess.run(["git", "add", "src/"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Add source"], check=True, capture_output=True
+    )
+    (src_dir / "cli.py").write_text('"""Module."""\nprint("changed")\n')
+
+    result = runner.invoke(worktree, ["merge", "test-slug"])
+    assert result.exit_code == 1
+    assert "Clean tree required for merge (main)" in result.output
+
+    # Restore clean state for next test
+    subprocess.run(["git", "restore", "src/"], check=True, capture_output=True)
+
+    # Test 2: Session files dirty → should pass (exempted)
+    (repo_with_submodule / "agents" / "session.md").write_text("# Modified session\n")
+    result = runner.invoke(worktree, ["merge", "test-slug"])
+    assert result.exit_code != 1 or "Clean tree required" not in result.output
+
+    # Test 3: Jobs file dirty → should pass (exempted)
+    (repo_with_submodule / "agents" / "jobs.md").write_text("# Modified jobs\n")
+    result = runner.invoke(worktree, ["merge", "test-slug"])
+    assert result.exit_code != 1 or "Clean tree required" not in result.output
+
+    # Test 4: Learnings dirty → should pass (exempted)
+    (repo_with_submodule / "agents" / "learnings.md").write_text(
+        "# Modified learnings\n"
+    )
+    result = runner.invoke(worktree, ["merge", "test-slug"])
+    assert result.exit_code != 1 or "Clean tree required" not in result.output
+
+    # Restore session files for submodule test
+    subprocess.run(["git", "restore", "agents/"], check=True, capture_output=True)
+
+    # Test 5: Submodule dirty → should fail
+    (repo_with_submodule / "agent-core" / "README.md").write_text(
+        "modified submodule\n"
+    )
+    result = runner.invoke(worktree, ["merge", "test-slug"])
+    assert result.exit_code == 1
+    assert "Clean tree required for merge (main submodule)" in result.output
