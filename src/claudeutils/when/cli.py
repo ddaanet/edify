@@ -12,7 +12,7 @@ from claudeutils.when.resolver import ResolveError, resolve
 @click.command(name="when")
 @click.argument("operator", type=click.Choice(["when", "how"]))
 @click.argument("query", nargs=-1, required=True)
-def when_cmd(operator: str, query: tuple[str, ...]) -> None:  # noqa: ARG001
+def when_cmd(operator: str, query: tuple[str, ...]) -> None:
     """Query memory index with fuzzy matching operators.
 
     OPERATOR: when or how
@@ -25,7 +25,7 @@ def when_cmd(operator: str, query: tuple[str, ...]) -> None:  # noqa: ARG001
     decisions_dir = project_root / "agents" / "decisions"
 
     try:
-        result = resolve(query_str, str(index_path), str(decisions_dir))
+        result = resolve(operator, query_str, str(index_path), str(decisions_dir))
         click.echo(result)
     except ResolveError as e:
         click.echo(str(e), err=True)

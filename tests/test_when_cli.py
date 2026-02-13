@@ -73,10 +73,11 @@ def test_query_variadic_argument() -> None:
         # Multiple words joined
         result = runner.invoke(cli, ["when", "when", "writing", "mock", "tests"])
         assert result.exit_code == 0
-        # Verify the resolver was called with joined query
+        # Verify the resolver was called with operator and joined query
         mock_resolve.assert_called_once()
         call_args = mock_resolve.call_args[0]
-        assert call_args[0] == "writing mock tests"
+        assert call_args[0] == "when"  # operator
+        assert call_args[1] == "writing mock tests"  # query
 
         # Reset mock for next test
         mock_resolve.reset_mock()
@@ -85,10 +86,11 @@ def test_query_variadic_argument() -> None:
         # Dot prefix preserved
         result = runner.invoke(cli, ["when", "when", ".Section"])
         assert result.exit_code == 0
-        # Verify the resolver was called with dot prefix preserved
+        # Verify the resolver was called with operator and dot prefix preserved
         mock_resolve.assert_called_once()
         call_args = mock_resolve.call_args[0]
-        assert call_args[0] == ".Section"
+        assert call_args[0] == "when"  # operator
+        assert call_args[1] == ".Section"  # query
 
         # Reset mock for next test
         mock_resolve.reset_mock()
@@ -97,10 +99,11 @@ def test_query_variadic_argument() -> None:
         # Double dot prefix preserved
         result = runner.invoke(cli, ["when", "when", "..file.md"])
         assert result.exit_code == 0
-        # Verify the resolver was called with double dot prefix preserved
+        # Verify the resolver was called with operator and double dot prefix preserved
         mock_resolve.assert_called_once()
         call_args = mock_resolve.call_args[0]
-        assert call_args[0] == "..file.md"
+        assert call_args[0] == "when"  # operator
+        assert call_args[1] == "..file.md"  # query
 
     # No query args should error
     result = runner.invoke(cli, ["when", "when"])
