@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-13
 
-**Status:** Worktree skill tested end-to-end, worktree-fixes requirements captured.
+**Status:** Worktree-fixes worktree created, FR-6 added (automate session.md edits).
 
 ## Completed This Session
 
@@ -17,12 +17,16 @@
 - No-op merge skips commit: when conflict resolves to no net changes, phase 4 skips merge commit → branch orphaned → `git branch -d` rejects
 - Task name slugs truncate badly: 30-char limit cuts mid-word, special chars stripped silently
 
-**Requirements captured:** `plans/worktree-fixes/requirements.md` (5 FRs)
+**Requirements captured:** `plans/worktree-fixes/requirements.md` (6 FRs)
 - FR-1: Task name constraints — prose identifiers `[a-zA-Z0-9 ]`, no truncation
 - FR-2: Precommit task name validation
 - FR-3: Migrate existing task names
 - FR-4: Session merge preserves full task blocks (continuation lines)
 - FR-5: Always create merge commit when merge initiated (fix orphan branch)
+- FR-6: Automate session.md task movement on worktree create/remove (added post-commit)
+
+**Worktree setup:**
+- Created `worktree-fixes` worktree, moved task to Worktree Tasks
 
 ## Pending Tasks
 
@@ -101,10 +105,6 @@
   - History cleanup tooling — git history rewriting, reusable scripts
   - Rewrite agent-core ad-hoc scripts via TDD to claudeutils package
 
-- [ ] **Worktree fixes** — `/design plans/worktree-fixes/` | opus
-  - Plan: worktree-fixes | Status: requirements
-  - 5 FRs: task name constraints, precommit validation, migration, session merge blocks, merge commit fix
-
 ## Worktree Tasks
 
 - [ ] **Plan when-recall** → `wt/when-recall` — blocked on validator fix | sonnet
@@ -116,6 +116,9 @@
   - Outline: `plans/error-handling/outline.md`
 - [ ] **Build pushback into conversation process** → `wt/pushback` — `/design plans/pushback/requirements.md` | opus
   - Plan: pushback | Status: requirements
+- [ ] **Worktree fixes** → `worktree-fixes` — `/design plans/worktree-fixes/` | opus
+  - Plan: worktree-fixes | Status: requirements
+  - 6 FRs: task name constraints, precommit validation, migration, session merge blocks, merge commit fix, automate session edits
 
 ## Blockers / Gotchas
 
@@ -144,4 +147,4 @@
 - `plans/worktree-update/` — Runbook + reports (complete, merged)
 - `plans/when-recall/design.md` — Vetted design document
 - `agents/decisions/deliverable-review.md` — Post-execution review methodology
-- `plans/worktree-fixes/requirements.md` — Worktree fixes requirements (5 FRs, task naming + merge fixes)
+- `plans/worktree-fixes/requirements.md` — Worktree fixes requirements (6 FRs, task naming + merge fixes + session automation)
