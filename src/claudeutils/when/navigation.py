@@ -27,7 +27,7 @@ def extract_heading_hierarchy(content: str) -> dict[str, HeadingInfo]:
         Dict mapping heading text to HeadingInfo with parent, level, and line info
     """
     hierarchy: dict[str, HeadingInfo] = {}
-    stack: list[tuple[int, str]] = []
+    stack: list[tuple[int, str]] = []  # (level, heading_text)
 
     for line_num, line in enumerate(content.split("\n"), start=1):
         stripped = line.lstrip()
@@ -143,7 +143,7 @@ def compute_siblings(
         return []
 
     # If parent is structural, no sibling grouping
-    if parent in hierarchy and hierarchy[parent].is_structural:
+    if hierarchy[parent].is_structural:
         return []
 
     # Map entries to their headings
