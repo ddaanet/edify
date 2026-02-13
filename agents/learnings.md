@@ -349,3 +349,9 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Occurred: Phase 1 checkpoint and Cycle 2.4 in pushback execution
 - Fix: Sonnet escalation for mechanical submodule pointer commit (2 instances)
 - Better: Automate in orchestrator post-step verification with explicit instruction or git status check
+## Reasoning pushback ≠ conclusion pushback
+- Anti-pattern: Counting "your reasoning is wrong but your conclusion is right" as substantive pushback for agreement momentum detection
+- Correct pattern: Track conclusion-level agreement separately; reasoning corrections that end in agreement are not pushback
+- Evidence: Sycophantic agreement and reasoning engagement are mechanistically distinct (arXiv 2509.21305); LLMs accept user framing in 90% of responses (ELEPHANT study)
+- Observed: Agent passed all discussion mode structural checks (assumptions, failure conditions, alternatives) while agreeing with every conclusion — ritual compliance, not genuine evaluation
+- Research: `plans/pushback/reports/pushback-improvement-research.md`

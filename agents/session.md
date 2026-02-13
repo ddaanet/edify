@@ -1,35 +1,33 @@
 # Session Handoff: 2026-02-13
 
-**Status:** Pushback deliverable review complete. All findings fixed.
+**Status:** Pushback validation Scenario 3 failed. Research complete for improvement design.
 
 ## Completed This Session
 
-**Deliverable review (deliverable-review.md process):**
-- Performed full deliverable review on pushback plan per `agents/decisions/deliverable-review.md`
-- Inventory: 4 deliverables (fragment, hook, tests, CLAUDE.md wiring)
-- Gap analysis: zero gaps, all specified artifacts delivered, all 5 requirements traced
-- Per-deliverable review across all applicable axes (universal + type-specific)
-- Cross-cutting checks: path consistency, API contract alignment, naming uniformity
-- Result: 0 critical, 0 major, 4 minor findings
+**Pushback validation (partial):**
+- Ran Scenario 3 (agreement momentum) from `plans/pushback/reports/step-3-4-validation-template.md`
+- Result: FAIL — agent agreed with all 4 proposals' conclusions while pushing back on reasoning only
+- Failure mode: "correcting reasoning while agreeing with conclusions" evades momentum detection
+- Root cause: "substantive pushback" undefined in fragment; design heuristic ("vague = sycophantic") fails when agent gives specific reasoning while agreeing
 
-**Findings fixed:**
-- F-1: Fragment heading `## Pushback in Design Discussions` → `## Pushback` (restores ambient scope per design)
-- F-2: Section `### Agreement Momentum Detection` → `### Agreement Momentum` (matches design spec)
-- F-3: Extracted `_DISCUSS_EXPANSION` and `_PENDING_EXPANSION` shared variables, eliminating directive text duplication
-- F-4: Rewrote `scan_for_directive` to single-pass O(n) fence tracking (was O(n²) via per-line rescan)
-- All tests pass (761/762, 1 pre-existing xfail), precommit clean
-
-**Prior session work (carried forward):**
-- Pushback runbook executed: 11 steps, 100% TDD compliance
-- Final vet: all issues fixed (commit 9da5d02)
+**Improvement research:**
+- Comprehensive literature review: 16 references (10 arXiv, 3 Anthropic, ACL, blog, alignment post)
+- Report: `plans/pushback/reports/pushback-improvement-research.md`
+- Key findings: sycophantic agreement is mechanistically distinct from reasoning engagement; third-person reframing reduces sycophancy 63.8%; sequential presentation maximizes vulnerability; LLMs accept user framing in 90% of responses
+- 8 actionable techniques identified, grounded in cited research
 
 ## Pending Tasks
 
-- [ ] **Validate pushback behavioral changes** — Test 4 scenarios in validation template | opus
+- [ ] **Improve pushback agreement momentum detection** — `/design plans/pushback/reports/pushback-improvement-research.md` | opus
+  - Research grounding: `plans/pushback/reports/pushback-improvement-research.md`
+  - Scope: fragment rule refinement + hook injection improvements
+  - Must address: conclusion-level tracking, definition of "substantive pushback"
+  - Strongest-evidence techniques: third-person reframing, disagree-first protocol, explicit conclusion stance
+
+- [ ] **Complete pushback validation** — Re-run all 4 scenarios after momentum fix | opus
   - Template: plans/pushback/reports/step-3-4-validation-template.md
-  - Scenarios: good idea evaluation, flawed idea pushback, agreement momentum detection, model selection evaluation
+  - Scenarios 1, 2, 4 not yet tested; Scenario 3 requires re-test after fix
   - Requires fresh session (hooks active after restart)
-  - Plan: pushback | Status: awaiting user validation
 
 - [ ] **Design workwoods** — `/design plans/workwoods/requirements.md` | opus
   - Plan: workwoods | Status: requirements
@@ -41,6 +39,9 @@
   - Distill sub-agent-relevant rules (layered context model, no volatile references, no execution mechanics in steps) into agent templates
   - Source: tool prompts, review guide, memory system learnings
 
+- [ ] **Design behavioral intervention for nuanced conversational patterns** — `/design` | opus
+  - Requires synthesis from research on conversational patterns
+
 ## Blockers / Gotchas
 
 **Submodule pointer commit pattern:**
@@ -51,7 +52,7 @@
 
 ## Next Steps
 
-User validation of pushback behavioral changes. See plans/pushback/reports/step-3-4-validation-template.md for 4 test scenarios.
+Design session for pushback agreement momentum improvement. Clear session first (opus needs full context budget). Research is self-contained in the report file.
 
 ---
-*Handoff by Sonnet. Deliverable review complete: 4 minor findings, all fixed.*
+*Handoff by Sonnet. Scenario 3 failed, research complete, design next.*
