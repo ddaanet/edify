@@ -1,11 +1,12 @@
 """CLI command for when memory recall."""
 
 import os
+import sys
 from pathlib import Path
 
 import click
 
-from claudeutils.when.resolver import resolve
+from claudeutils.when.resolver import ResolveError, resolve
 
 
 @click.command(name="when")
@@ -23,5 +24,9 @@ def when_cmd(operator: str, query: tuple[str, ...]) -> None:  # noqa: ARG001
     index_path = project_root / "agents" / "memory-index.md"
     decisions_dir = project_root / "agents" / "decisions"
 
-    result = resolve(query_str, str(index_path), str(decisions_dir))
-    click.echo(result)
+    try:
+        result = resolve(query_str, str(index_path), str(decisions_dir))
+        click.echo(result)
+    except ResolveError as e:
+        click.echo(str(e), err=True)
+        sys.exit(1)

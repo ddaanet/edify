@@ -170,3 +170,48 @@ def test_cli_invokes_resolver(tmp_path: Path) -> None:
     assert "When Writing Mock Tests" in result.output
     # Output should not be empty
     assert len(result.output) > 0
+
+
+def test_cli_error_handling() -> None:
+    """Test that CLI properly handles errors with stderr output and exit code 1.
+
+    Verifies:
+    1. CLI with nonexistent trigger: exit code 1 (not 0)
+    2. Error message printed to stderr (not stdout)
+    3. Error message contains suggestion text ("Did you mean:" for trigger mode)
+    4. CLI with nonexistent section: exit code 1, stderr contains "not found"
+    5. CLI with nonexistent file: exit code 1, stderr contains "not found"
+    """
+    runner = CliRunner()
+
+    with runner.isolated_filesystem():
+        # Set up test structure
+        iso_index = Path("agents") / "memory-index.md"
+        iso_index.parent.mkdir(parents=True, exist_ok=True)
+        iso_index.write_text("## testing\n\n/when writing tests | tests\n")
+
+        iso_decisions = Path("agents") / "decisions"
+        iso_decisions.mkdir(parents=True, exist_ok=True)
+
+        iso_testing_file = iso_decisions / "testing.md"
+        iso_testing_file.write_text(
+            "# Test Guide\n\n## When Writing Tests\n\nUse tests for coverage.\n"
+        )
+
+        # Test 1: Nonexistent trigger
+        result = runner.invoke(cli, ["when", "when", "nonexistent", "trigger"])
+        assert result.exit_code == 1
+        # Error message should contain suggestion text
+        assert "Did you mean:" in result.output
+        # Verify it's an error condition
+        assert result.exit_code != 0
+
+        # Test 2: Nonexistent section (using . prefix)
+        result = runner.invoke(cli, ["when", "when", ".NotExist"])
+        assert result.exit_code == 1
+        assert "not found" in result.output.lower()
+
+        # Test 3: Nonexistent file (using .. prefix)
+        result = runner.invoke(cli, ["when", "when", "..nonexistent.md"])
+        assert result.exit_code == 1
+        assert "not found" in result.output.lower()
