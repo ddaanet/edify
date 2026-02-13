@@ -138,16 +138,74 @@ def test_trigger_mode_resolves(tmp_path: Path) -> None:
         "Handle errors gracefully.\n"
     )
 
-    # Query exact match should resolve to heading
+    # Query exact match should resolve to heading (formatted as H1)
     result = resolve(
         "trigger", "writing mock tests", str(index_file), str(decisions_dir)
     )
-    assert "## When Writing Mock Tests" in result
+    assert "# When Writing Mock Tests" in result
     assert "Mock tests prevent side effects" in result
 
     # Query with approximate match should also resolve
     result = resolve("trigger", "mock test", str(index_file), str(decisions_dir))
-    assert "## When Writing Mock Tests" in result
+    assert "# When Writing Mock Tests" in result
+
+
+def test_resolve_output_format(tmp_path: Path) -> None:
+    """Output formatting combines content + navigation links.
+
+    Tests that full resolve output includes heading, section content, and
+    navigation (Broader: ancestors, Related: siblings).
+    """
+    # Create index file with entries
+    index_file = tmp_path / "test_index.md"
+    index_file.write_text(
+        "## testing\n"
+        "\n"
+        "/when writing mock tests | mock patch, test doubles\n"
+        "/when mock patching | patch object, patching\n"
+    )
+
+    # Create decisions directory
+    decisions_dir = tmp_path / "decisions"
+    decisions_dir.mkdir()
+
+    # Create testing.md with hierarchical structure (H2 parent, H3 children)
+    decision_file = decisions_dir / "testing.md"
+    decision_file.write_text(
+        "# Main Title\n"
+        "\n"
+        "## Test Patterns\n"
+        "\n"
+        "### When Writing Mock Tests\n"
+        "\n"
+        "Mock tests prevent side effects and isolate behavior.\n"
+        "\n"
+        "Use test doubles for external dependencies.\n"
+        "\n"
+        "### When Mock Patching\n"
+        "\n"
+        "Patch where object is used, not where defined.\n"
+        "\n"
+        "Prevents exploitation via command continuation.\n"
+    )
+
+    # Resolve trigger mode should return full formatted output
+    result = resolve(
+        "trigger", "writing mock tests", str(index_file), str(decisions_dir)
+    )
+
+    # Assertions from cycle spec
+    assert "# When Writing Mock Tests" in result
+    assert "Mock tests prevent side effects" in result
+    assert "Use test doubles for external dependencies" in result
+
+    # Navigation sections - must have format
+    # File link always present in Broader section
+    assert "Broader:" in result
+    assert "/when ..testing.md" in result
+
+    # Siblings present when there are matching entries under same parent
+    assert "Related:" in result or "/when mock patching" in result
 
 
 def test_section_content_extraction(tmp_path: Path) -> None:

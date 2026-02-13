@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.when import fuzzy
+from claudeutils.when import fuzzy, navigation
 from claudeutils.when.index_parser import parse_index
 
 
@@ -144,7 +144,7 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
     """Resolve trigger mode query via fuzzy matching.
 
     Builds candidate list from index entries, fuzzy matches query,
-    returns matching heading and content from decision file.
+    returns matching heading and content from decision file, formatted with navigation.
 
     Args:
         query: Trigger text (no prefix)
@@ -152,7 +152,7 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
         decisions_dir: Directory containing decision files
 
     Returns:
-        Heading and section content
+        Heading, section content, and navigation links
 
     Raises:
         ResolveError: If no match found
@@ -192,9 +192,6 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
         msg = "Could not map matched candidate to entry"
         raise ResolveError(msg)
 
-    # Construct expected heading from operator and trigger
-    heading = _build_heading(operator, trigger_text)
-
     # Extract section name from index (it points to the file)
     # For now, assume the section name is the file name
     file_path = dec_dir / f"{matching_entry.section}.md"
@@ -203,14 +200,52 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
         msg = f"Decision file not found: {file_path}"
         raise ResolveError(msg)
 
-    # Read the file and extract the section
-    content = _extract_section(file_path, heading)
+    # Build heading text and search for it in the file
+    heading_text = _build_heading(operator, trigger_text)
+    file_content = file_path.read_text()
 
-    if not content:
-        msg = f"Section not found in {file_path}: {heading}"
+    # Find the actual heading line (may be H2, H3, or H4)
+    actual_heading = None
+    for line in file_content.split("\n"):
+        line_stripped = line.strip()
+        if line_stripped.endswith(heading_text) and line_stripped.startswith("#"):
+            actual_heading = line_stripped
+            break
+
+    if not actual_heading:
+        msg = f"Section not found in {file_path}: {heading_text}"
         raise ResolveError(msg)
 
-    return content
+    # Read the file and extract the section
+    content = _extract_section(file_path, actual_heading)
+
+    # Extract heading text without the # markers for navigation computation
+    heading_text_only = actual_heading.lstrip("#").strip()
+
+    # Compute navigation links
+    ancestors = navigation.compute_ancestors(
+        heading_text_only, f"{matching_entry.section}.md", file_content
+    )
+    siblings = navigation.compute_siblings(heading_text_only, file_content, entries)
+
+    # Format navigation output
+    nav_text = navigation.format_navigation(ancestors, siblings)
+
+    # Format heading as H1 regardless of source level
+    formatted_heading = f"# {heading_text}"
+
+    # Extract content without the original heading line
+    content_lines = content.split("\n")
+    # Skip first line (the original heading) and join the rest
+    section_content = "\n".join(content_lines[1:]).lstrip()
+
+    # Combine content with navigation
+    output_parts = [formatted_heading, section_content]
+    if nav_text:
+        output_parts.append("")
+        output_parts.append(nav_text)
+
+    return "\n".join(output_parts).rstrip()
 
 
 def _build_heading(operator: str, trigger: str) -> str:
@@ -221,18 +256,19 @@ def _build_heading(operator: str, trigger: str) -> str:
         trigger: Trigger text (e.g., "writing mock tests")
 
     Returns:
-        Heading string (e.g., "## When Writing Mock Tests")
+        Heading string without leading # markers (e.g., "When Writing Mock Tests")
+        Caller will add appropriate level markers.
     """
     if operator == "how":
         # Capitalize first letter of each word
         words = trigger.split()
         capitalized = " ".join(w.capitalize() for w in words)
-        return f"## How To {capitalized}"
+        return f"How To {capitalized}"
 
     # "when" operator
     words = trigger.split()
     capitalized = " ".join(w.capitalize() for w in words)
-    return f"## When {capitalized}"
+    return f"When {capitalized}"
 
 
 def _extract_section_content(heading: str, file_content: str) -> str:
