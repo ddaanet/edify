@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree, wt_path
+from claudeutils.worktree.cli import _remove_worktrees, worktree, wt_path
 
 
 def test_package_import() -> None:
@@ -240,3 +240,40 @@ def test_rm_worktree_registration_probing(
         check=True,
     ).stdout
     assert str(worktree_path / "agent-core") not in submodule_list_after
+
+
+def test_rm_submodule_first_ordering(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Removal order: submodule worktree removed first, parent worktree second."""
+    call_sequence: list[list[str]] = []
+
+    def mock_run(args: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+        call_sequence.append(args)
+        return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", mock_run)
+
+    worktree_path = tmp_path / "wt" / "test-slug"
+    worktree_path.mkdir(parents=True)
+
+    _remove_worktrees(
+        worktree_path,
+        parent_registered=True,
+        submodule_registered=True,
+    )
+
+    assert len(call_sequence) == 2
+    submodule_cmd = call_sequence[0]
+    parent_cmd = call_sequence[1]
+
+    assert submodule_cmd[1] == "-C"
+    assert submodule_cmd[2] == "agent-core"
+    assert submodule_cmd[3] == "worktree"
+    assert submodule_cmd[4] == "remove"
+    assert submodule_cmd[5] == "--force"
+
+    assert parent_cmd[0] == "git"
+    assert parent_cmd[1] == "worktree"
+    assert parent_cmd[2] == "remove"
+    assert parent_cmd[3] == "--force"

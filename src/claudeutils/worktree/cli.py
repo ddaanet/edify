@@ -76,6 +76,7 @@ def _filter_section(
         return ""
     return f"## {section_name}\n\n" + "\n".join(relevant_lines) + "\n"
 
+
 def focus_session(task_name: str, session_md_path: str | Path) -> str:
     """Build session.md containing only task_name and relevant sections."""
     content = Path(session_md_path).read_text()
