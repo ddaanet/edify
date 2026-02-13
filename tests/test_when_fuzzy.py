@@ -160,3 +160,14 @@ def test_rank_matches_returns_sorted_limited() -> None:
     # Test default limit is 5
     results_default = rank_matches("mock", candidates)
     assert len(results_default) <= 5
+
+
+def test_dp_rejects_non_subsequence() -> None:
+    """DP matrix correctly rejects candidates missing query characters."""
+    # 'o' and 'k' from "mock" don't exist in candidate — not a valid subsequence
+    assert score_match("when mock tests", "when evaluating test success metrics") == 0.0
+
+    # Valid subsequence still scores positive
+    assert score_match("mock", "mock patching") > 0
+
+

@@ -1,23 +1,18 @@
 # Session Handoff: 2026-02-13
 
-**Status:** Deliverable review round 2 findings fixed. Branch merge-ready after precommit validation.
+**Status:** Fuzzy matcher DP bug fixed. E2E validation of when-recall system complete.
 
 ## Completed This Session
 
-**Deliverable review round 2:**
-- Full review per `agents/decisions/deliverable-review.md` process
-- Inventory: 41 deliverables (14 code, 10 test, 3 agentic prose, 14 documentation)
-- Gap analysis: All 12 design steps delivered, no missing or unjustified excess
-- Report: `plans/when-recall/reports/deliverable-review-2.md`
-- Go/no-go: Fix C-1 and M-1 before merge, M-2 cleanup deferrable
-
-**Review findings fixed:**
-- **C-1 (worktree deregistration):** Restored `worktree` import (line 27) and `add_command(worktree)` (line 149) in `cli.py` — both when_cmd and worktree now registered
-- **M-1 (operator hardcoding):** Added `operator` param to `_handle_no_match()`, fixed candidate parsing to handle "how to X" format correctly, updated call site at line 218
-- **M-2 (duplicate functions):** Deleted dead `check_entry_placement()`, `check_orphan_entries()`, `check_structural_entries()` from `memory_index_checks.py` — facade uses live versions from helpers
-- **N-1 (acronym degradation):** Modified `_build_heading()` to preserve all-caps words via `w.isupper()` check before `capitalize()` — "TDD" stays "TDD" not "Tdd"
-- Added test `test_how_operator_error_suggestions()` to verify M-1 fix
-- All tests pass (811/812, 1 expected xfail), precommit clean
+**Fuzzy matcher DP bug fix:**
+- Designed 10 E2E scenarios testing different when-recall code paths (trigger, section, file, no-match, operator disambiguation, typo tolerance)
+- Ran scenarios against real index — 5/10 failed due to false positive matches
+- Root cause: `_compute_dp_matrix()` initialized impossible states with `0.0`, same as base case. Partial subsequence matches leaked positive scores (e.g., "when mock tests" scored 128.0 against "when evaluating test success metrics" despite no valid subsequence)
+- Fix: Initialize `score[i>0][j]` with `-inf` in `fuzzy.py`. Only `score[0][j] = 0.0` (base case)
+- Fixed `test_suggest_minimal_trigger` in `test_when_compress_key.py` — was relying on bug (target heading missing from corpus)
+- Added `test_dp_rejects_non_subsequence` to validate fix
+- Post-fix: all 5 false positive scenarios resolved, 46/46 when-recall tests pass, 812/813 full suite (1 xfail), precommit clean
+- Evaluated IDF/English frequency weighting — not needed, DP fix addressed root cause (false positives, not ranking)
 
 ## Pending Tasks
 
@@ -61,5 +56,4 @@
 ## Reference Files
 
 - `plans/when-recall/reports/deliverable-review-2.md` — Round 2 findings
-- `plans/when-recall/reports/deliverable-review.md` — Round 1 findings
 - `plans/when-recall/design.md` — Vetted design (ground truth)

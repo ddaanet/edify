@@ -1,5 +1,7 @@
 """Fuzzy matching engine using modified fzf V2 scoring algorithm."""
 
+_NEG_INF = float("-inf")
+
 MATCH_SCORE = 16
 CONSECUTIVE_BONUS = 4
 FIRST_CHAR_MULTIPLIER = 2
@@ -56,7 +58,7 @@ def _compute_dp_matrix(query_lower: str, candidate_lower: str) -> list[list[floa
         DP score matrix[i][j] = best score matching query[0:i] with candidate[0:j]
     """
     m, n = len(query_lower), len(candidate_lower)
-    score = [[0.0 for _ in range(n + 1)] for _ in range(m + 1)]
+    score = [[_NEG_INF for _ in range(n + 1)] for _ in range(m + 1)]
 
     for j in range(n + 1):
         score[0][j] = 0.0

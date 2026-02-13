@@ -348,3 +348,9 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Rationale: Exact keys are deterministic and debuggable; fuzzy in validation creates invisible mismatches when scores drift below threshold
 - Impact: D-6 heading prefix (When/How to) creates key mismatch — entry key strips operator, heading key includes it
 - Invalidates: "Fuzzy bridge: density and clarity" learning's claim that validator uses fuzzy engine
+## DP zero-ambiguity in subsequence matching
+- Anti-pattern: Initializing DP matrix with 0.0 for all cells — impossible states (i>0, j=0) indistinguishable from base case (i=0)
+- Correct pattern: Initialize score[i>0][j] with -inf, only score[0][j] = 0.0. Impossible subsequences propagate -inf
+- Rationale: When score[i-1][j-1] = 0 (no valid match for i-1 chars), transition score[i-1][j-1] + MATCH_SCORE produces positive score from nothing
+- Evidence: "when mock tests" scored 128.0 against candidate with no 'o' or 'k' — matched only 5 of 15 chars
+- Impact: All false positive fuzzy matches in E2E testing traced to this single bug

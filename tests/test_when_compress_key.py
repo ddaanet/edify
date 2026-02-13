@@ -133,8 +133,9 @@ def test_suggest_minimal_trigger() -> None:
     # Result should be shorter than full heading
     assert len(result) < len("how to encode paths")
 
-    # Test 2: Result is shorter than full heading for different heading
-    result2 = compress_key("When Writing Mock Tests", corpus)
+    # Test 2: Result is shorter than full heading (heading must be in corpus)
+    corpus_with_mock = [*corpus, "When Writing Mock Tests"]
+    result2 = compress_key("When Writing Mock Tests", corpus_with_mock)
     assert len(result2) < len("when writing mock tests")
 
     # Test 3: Actually tight corpus still finds unique triggers due to fuzzy scoring
