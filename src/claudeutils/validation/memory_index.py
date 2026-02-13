@@ -16,12 +16,11 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from .memory_index_checks import check_entry_sorting, check_trigger_format
 from .memory_index_helpers import (
     autofix_index,
     check_duplicate_entries,
-    check_em_dash_and_word_count,
     check_entry_placement,
-    check_entry_sorting,
     check_orphan_entries,
     check_structural_entries,
     collect_semantic_headers,
@@ -216,7 +215,7 @@ def validate(index_path: Path | str, root: Path, *, autofix: bool = True) -> lis
 
     # Non-autofixable checks
     errors.extend(check_duplicate_entries(index_path, root))
-    errors.extend(check_em_dash_and_word_count(entries))
+    errors.extend(check_trigger_format(entries))
     errors.extend(_check_orphan_headers(headers, entries))
     errors.extend(check_orphan_entries(entries, headers, structural))
     errors.extend(_check_duplicate_headers(headers))

@@ -34,8 +34,8 @@ def test_valid_index_with_matching_headers(tmp_path: Path, decisions_dir: Path) 
 
 ## agents/decisions/test-decision.md
 
-Decision One — First important decision with content here okay
-Decision Two — Second important decision with more content great
+/when decision one
+/when decision two
 """,
     )
     assert validate("agents/memory-index.md", tmp_path) == []
@@ -64,8 +64,8 @@ def test_orphan_index_entry_error(tmp_path: Path, decisions_dir: Path) -> None:
 
 ## agents/decisions/test-decision.md
 
-Nonexistent Header — Entry pointing to header that does not exist here
-Existing Header — Entry that matches a real semantic header now
+/when nonexistent header
+/when existing header
 """,
     )
     errors = validate("agents/memory-index.md", tmp_path)
@@ -84,8 +84,8 @@ def test_duplicate_index_entries_error(tmp_path: Path, decisions_dir: Path) -> N
 
 ## agents/decisions/test-decision.md
 
-Test Header — First entry matching the semantic header
-Test Header — Second entry with the same key appearing again here
+/when test header
+/when test header
 """,
     )
     errors = validate("agents/memory-index.md", tmp_path)
@@ -93,10 +93,14 @@ Test Header — Second entry with the same key appearing again here
     assert "duplicate index entry" in errors[0]
 
 
-def test_word_count_violation_error(tmp_path: Path, decisions_dir: Path) -> None:
-    """Word count outside 8-15 range returns error."""
+def test_long_entry_no_error_new_format(tmp_path: Path, decisions_dir: Path) -> None:
+    """Long entries allowed in new /when format.
+
+    Word count removed per D-9.
+    """
     (decisions_dir / "test-decision.md").write_text(
-        "# Test Decision\n\n## Short Entry\nContent.\n\n## Long Title Entry\nContent.\n"
+        "# Test Decision\n\n## Short\nContent.\n\n"
+        "## Long Entry With Many Words\nContent.\n"
     )
     _write_index(
         tmp_path,
@@ -104,18 +108,18 @@ def test_word_count_violation_error(tmp_path: Path, decisions_dir: Path) -> None
 
 ## agents/decisions/test-decision.md
 
-Short Entry — Too
-Long Title Entry — This is way too many words in entry for validation purposes here
+/when short
+/when long entry with many words
 """,
     )
     errors = validate("agents/memory-index.md", tmp_path)
-    assert len(errors) == 2
-    assert any("has 4 words" in e for e in errors)
-    assert any("has 16 words" in e for e in errors)
+    assert errors == []
 
 
-def test_missing_em_dash_separator_error(tmp_path: Path, decisions_dir: Path) -> None:
-    """Missing em-dash separator returns error."""
+def test_entry_without_operator_prefix_error(
+    tmp_path: Path, decisions_dir: Path
+) -> None:
+    """Entry without /when or /how prefix returns error."""
     (decisions_dir / "test-decision.md").write_text(
         "# Test Decision\n\n## Test Unique Header\nContent.\n"
     )
@@ -125,11 +129,11 @@ def test_missing_em_dash_separator_error(tmp_path: Path, decisions_dir: Path) ->
 
 ## agents/decisions/test-decision.md
 
-Test Unique Header just some words without em-dash separator
+Test Unique Header just some words without operator prefix
 """,
     )
     errors = validate("agents/memory-index.md", tmp_path)
-    assert any("entry lacks em-dash separator (D-3)" in e for e in errors)
+    assert any("no operator prefix" in e for e in errors)
 
 
 def test_entry_in_wrong_section_autofixed(tmp_path: Path, decisions_dir: Path) -> None:
@@ -146,8 +150,8 @@ def test_entry_in_wrong_section_autofixed(tmp_path: Path, decisions_dir: Path) -
 
 ## agents/decisions/file-one.md
 
-Second Header — Entry wrongly placed in file one section here
-First Header — Entry correctly in file one section here now
+/when second header
+/when first header
 """,
     )
     assert validate("agents/memory-index.md", tmp_path, autofix=True) == []
@@ -169,17 +173,17 @@ def test_entries_out_of_order_autofixed(tmp_path: Path, decisions_dir: Path) -> 
 
 ## agents/decisions/test-decision.md
 
-Third Header — Entry in wrong order but has valid content text here
-First Header — Entry that should come first in section order now
-Second Header — Entry in middle position with valid content today
+/when third header
+/when first header
+/when second header
 """,
     )
     assert validate("agents/memory-index.md", tmp_path, autofix=True) == []
 
     content = index.read_text()
-    first_pos = content.index("First Header")
-    second_pos = content.index("Second Header")
-    third_pos = content.index("Third Header")
+    first_pos = content.index("/when first header")
+    second_pos = content.index("/when second header")
+    third_pos = content.index("/when third header")
     assert first_pos < second_pos < third_pos
 
 
@@ -197,16 +201,16 @@ def test_structural_header_entries_removed_by_autofix(
 
 ## agents/decisions/test-decision.md
 
-Organizational Section — Entry pointing to structural section should be removed
-Real Header — Entry for semantic header with content here today
-Another Real Header — Another entry for second semantic header here now
+/when organizational section
+/when real header
+/when another real header
 """,
     )
     assert validate("agents/memory-index.md", tmp_path, autofix=True) == []
 
     content = index.read_text()
-    assert "Organizational Section" not in content
-    assert "Real Header" in content
+    assert "organizational section" not in content
+    assert "real header" in content
 
 
 def test_exempt_sections_preserved_as_is(tmp_path: Path, decisions_dir: Path) -> None:
@@ -230,7 +234,7 @@ Another item — another entry with proper format today now
 
 ## agents/decisions/test-decision.md
 
-Test Header — Entry for semantic header with content here
+/when test header
 """,
     )
     assert validate("agents/memory-index.md", tmp_path, autofix=True) == []
@@ -252,8 +256,8 @@ def test_autofix_false_reports_all_issues(tmp_path: Path, decisions_dir: Path) -
 
 ## agents/decisions/file-one.md
 
-Second Header — Entry in wrong order here today ok
-First Header — Entry that should come first now
+/when second header
+/when first header
 """,
     )
     errors = validate("agents/memory-index.md", tmp_path, autofix=False)
@@ -277,11 +281,11 @@ def test_duplicate_headers_across_files_error(
 
 ## agents/decisions/file-one.md
 
-Duplicate Name — Entry for duplicate header found multiple places now
+/when duplicate name
 
 ## agents/decisions/file-two.md
 
-Duplicate Name — Another entry for same duplicate header here too
+/when duplicate name
 """,
     )
     errors = validate("agents/memory-index.md", tmp_path, autofix=False)
@@ -302,9 +306,9 @@ def test_multiple_autofix_issues_resolved(tmp_path: Path, decisions_dir: Path) -
 
 ## agents/decisions/file-one.md
 
-Second Header — Entry in wrong section and wrong order fix this now
-Third Header — Entry in wrong section entirely different place today
-First Header — Entry in wrong order here too needs reordering now
+/when second header
+/when third header
+/when first header
 
 ## agents/decisions/file-two.md
 """,
@@ -315,7 +319,7 @@ First Header — Entry in wrong order here too needs reordering now
     assert "## agents/decisions/file-one.md" in content
     assert "## agents/decisions/file-two.md" in content
     file2_idx = content.index("## agents/decisions/file-two.md")
-    assert content.index("Third Header") > file2_idx
+    assert content.index("third header") > file2_idx
 
 
 def test_missing_index_file_returns_no_errors(tmp_path: Path) -> None:
@@ -341,7 +345,7 @@ def test_document_intro_exemption(tmp_path: Path, decisions_dir: Path) -> None:
 
 ## agents/decisions/test-decision.md
 
-Real Header — Semantic header after intro content here
+/when real header
 """,
     )
     assert validate("agents/memory-index.md", tmp_path) == []
@@ -386,3 +390,49 @@ def test_validator_parses_when_format(tmp_path: Path) -> None:
     # Old em-dash format not parsed (should be empty for that line)
     entry_count = len(entries)
     assert entry_count == 4  # Exactly 4 /when or /how entries
+
+
+def test_format_validation_rules(tmp_path: Path, decisions_dir: Path) -> None:
+    """Format validation checks operator prefix, trigger, extras.
+
+    Validates operator prefix, trigger non-empty, and extras format.
+    """
+    (decisions_dir / "test-decision.md").write_text(
+        "# Test Decision\n\n## Valid Trigger\nContent.\n"
+    )
+    _write_index(
+        tmp_path,
+        """# Memory Index
+
+## agents/decisions/test-decision.md
+
+/when valid trigger
+/when valid | extra1, extra2
+/what invalid operator
+/when
+/when trigger | ,,,
+Old em-dash format — no operator prefix
+Valid Trigger — Valid entry with em-dash
+""",
+    )
+    errors = validate("agents/memory-index.md", tmp_path)
+
+    # Should flag invalid operator
+    assert any("/what" in e and "invalid operator" in e for e in errors)
+
+    # Should flag empty trigger
+    assert any("/when" in e and "empty trigger" in e for e in errors)
+
+    # Valid entries should NOT be flagged
+    assert not any("valid trigger" in e and "error" in e for e in errors)
+    assert not any("extra1, extra2" in e and "error" in e for e in errors)
+
+    # Should flag old em-dash format (no operator prefix)
+    assert any("no operator prefix" in e for e in errors)
+
+    # Each error should include line number and message
+    assert all(
+        "memory-index.md:" in e
+        for e in errors
+        if "error" in e.lower() or "invalid" in e.lower() or "empty" in e.lower()
+    )

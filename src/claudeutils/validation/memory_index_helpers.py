@@ -142,7 +142,14 @@ def _build_file_entries_map(
         if section_name in EXEMPT_SECTIONS:
             continue
         for entry in entry_lines:
-            key = entry.split(" — ")[0].lower() if " — " in entry else entry.lower()
+            # Extract key using same logic as _extract_entry_key in memory_index.py
+            if entry.startswith(("/when ", "/how ")):
+                _, rest = entry.split(" ", 1)
+                key = rest.split("|", 1)[0].strip().lower()
+            elif " — " in entry:
+                key = entry.split(" — ")[0].lower()
+            else:
+                key = entry.lower()
             if key in structural:
                 continue
             if key in headers:
@@ -263,34 +270,6 @@ def check_entry_placement(
                     f"  memory-index.md:{lineno}: entry '{key}' in section "
                     f"'{section}' but header is in '{source_file}'"
                 )
-    return errors
-
-
-def check_entry_sorting(
-    index_path: Path | str,
-    root: Path,
-    headers: dict[str, list[tuple[str, int, str]]],
-) -> list[str]:
-    """Check that entries within file sections match source file order."""
-    file_section = re.compile(r"^## (agents/decisions/\S+\.md)$")
-
-    errors = []
-    _preamble, sections = extract_index_structure(index_path, root)
-    for section_name, entry_lines in sections:
-        if section_name in EXEMPT_SECTIONS:
-            continue
-        if not file_section.match(f"## {section_name}"):
-            continue
-
-        entry_positions = []
-        for entry in entry_lines:
-            key = entry.split(" — ")[0].lower() if " — " in entry else entry.lower()
-            if key in headers:
-                entry_positions.append((headers[key][0][1], entry))
-
-        if entry_positions != sorted(entry_positions):
-            errors.append(f"  Section '{section_name}': entries not in file order")
-
     return errors
 
 

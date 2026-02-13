@@ -51,8 +51,8 @@ def check_duplicate_entries(index_path: Path | str, root: Path) -> list[str]:
     return errors
 
 
-def check_em_dash_and_word_count(entries: dict[str, tuple[int, str, str]]) -> list[str]:
-    """Check entries for em-dash separator and word count.
+def check_trigger_format(entries: dict[str, tuple[int, str, str]]) -> list[str]:
+    """Check entries for /when or /how format with valid trigger.
 
     Args:
         entries: Dictionary of entries from extract_index_entries.
@@ -61,20 +61,53 @@ def check_em_dash_and_word_count(entries: dict[str, tuple[int, str, str]]) -> li
         List of error messages.
     """
     errors = []
-    for lineno, full_entry, _section in entries.values():
-        if " — " not in full_entry:
-            errors.append(
-                f"  memory-index.md:{lineno}: entry lacks em-dash separator "
-                f"(D-3): '{full_entry}'"
-            )
+    for lineno, full_entry, section in entries.values():
+        # Skip entries in exempt sections (preserved as-is)
+        if section in EXEMPT_SECTIONS:
+            continue
+
+        stripped = full_entry.strip()
+
+        # Check operator prefix
+        if not stripped.startswith(("/when ", "/how ")):
+            # Allow /when and /how without trailing space
+            # (empty trigger case handled below)
+            if stripped in ("/when", "/how"):
+                operator = stripped
+                trigger = ""
+            elif stripped.startswith(("/when ", "/how ")):
+                # Valid prefix with space
+                operator = stripped.split(" ", 1)[0]
+                trigger = stripped.split(" ", 1)[1] if " " in stripped else ""
+            else:
+                # Invalid operator or no operator
+                if stripped.startswith("/"):
+                    # Invalid operator like /what
+                    errors.append(
+                        f"  memory-index.md:{lineno}: invalid operator "
+                        f"prefix (use /when or /how): '{full_entry}'"
+                    )
+                else:
+                    # No operator (old em-dash format)
+                    errors.append(
+                        f"  memory-index.md:{lineno}: entry missing "
+                        f"operator prefix (no operator prefix): "
+                        f"'{full_entry}'"
+                    )
+                continue
         else:
-            # Check word count (8-15 word hard limit for key + description total)
-            word_count = len(full_entry.split())
-            if word_count < 8 or word_count > 15:
-                errors.append(
-                    f"  memory-index.md:{lineno}: entry has {word_count} words, "
-                    f"must be 8-15: '{full_entry}'"
-                )
+            # Valid operator prefix
+            operator = stripped.split(" ", 1)[0]
+            trigger = stripped.split(" ", 1)[1] if " " in stripped else ""
+
+        # Check trigger non-empty after stripping
+        trigger = trigger.split("|", 1)[0].strip() if trigger else ""
+        if not trigger:
+            errors.append(
+                f"  memory-index.md:{lineno}: {operator} has "
+                f"empty trigger: '{full_entry}'"
+            )
+
     return errors
 
 
@@ -136,7 +169,14 @@ def check_entry_sorting(
         # Get entries with their source line numbers
         entry_positions = []
         for entry in entry_lines:
-            key = entry.split(" — ")[0].lower() if " — " in entry else entry.lower()
+            # Extract key using same logic as _extract_entry_key
+            if entry.startswith(("/when ", "/how ")):
+                _, rest = entry.split(" ", 1)
+                key = rest.split("|", 1)[0].strip().lower()
+            elif " — " in entry:
+                key = entry.split(" — ")[0].lower()
+            else:
+                key = entry.lower()
             if key in headers:
                 source_lineno = headers[key][0][1]  # Line number in source file
                 entry_positions.append((source_lineno, entry))

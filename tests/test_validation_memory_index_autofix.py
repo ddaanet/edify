@@ -32,7 +32,7 @@ Another item — another entry with proper format today now
 
 ## agents/decisions/test-decision.md
 
-Test Header — Entry for semantic header with content here
+/when test header
 """)
 
     errors = validate("agents/memory-index.md", tmp_path, autofix=True)
@@ -65,8 +65,8 @@ More content.
 
 ## agents/decisions/file-one.md
 
-Second Header — Entry in wrong order here today ok
-First Header — Entry that should come first now
+/when second header
+/when first header
 """)
 
     # With autofix=False, should report errors
@@ -99,11 +99,11 @@ Different content.
 
 ## agents/decisions/file-one.md
 
-Duplicate Name — Entry for duplicate header found multiple places now
+/when duplicate name
 
 ## agents/decisions/file-two.md
 
-Duplicate Name — Another entry for same duplicate header here too
+/when duplicate name
 """)
 
     errors = validate("agents/memory-index.md", tmp_path, autofix=False)
@@ -138,9 +138,9 @@ Content here.
 
 ## agents/decisions/file-one.md
 
-Second Header — Entry in wrong section and wrong order fix this now
-Third Header — Entry in wrong section entirely different place today
-First Header — Entry in wrong order here too needs reordering now
+/when second header
+/when third header
+/when first header
 
 ## agents/decisions/file-two.md
 """)
@@ -204,7 +204,7 @@ Actual content here.
 
 ## agents/decisions/test-decision.md
 
-Real Header — Semantic header after intro content here
+/when real header
 """)
 
     errors = validate("agents/memory-index.md", tmp_path)
