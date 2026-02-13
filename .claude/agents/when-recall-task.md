@@ -327,21 +327,16 @@ Do not proceed beyond assigned cycle. Do not make assumptions about unstated req
 ## Common Context
 
 **Design reference:**
-- D-4 (Custom fuzzy engine) — ~80 line custom implementation, tuned scoring constants
-- plans/when-recall/reports/fzf-research.md — fzf V2 scoring algorithm reference
+- plans/when-recall/design.md — Full design specification
 
 **Project conventions:**
 - agents/decisions/testing.md — TDD RED/GREEN/refactor conventions
 - agents/decisions/implementation-notes.md — Pydantic over dataclass, Path.cwd() patterns
 
-**Project paths:**
-- `src/claudeutils/when/fuzzy.py` — fuzzy engine module (create in Phase 0)
-- `tests/test_when_fuzzy.py` — test file (create in Phase 0)
-- `src/claudeutils/when/__init__.py` — package marker (empty)
+**Package:** `src/claudeutils/when/` — all modules live here
 
 **Stop/error conditions:**
-- Scoring constants: Use exact values from design (don't modify without justification)
-- Test file must match function signatures (score_match, rank_matches)
+- Use file paths and function names from the step file, not from this section
 - Verify RED fails before implementing GREEN
 
 ---
