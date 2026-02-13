@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.validation.memory_index import validate
+from claudeutils.validation.memory_index import extract_index_entries, validate
 
 
 @pytest.fixture
@@ -351,3 +351,38 @@ def test_empty_index_file_no_errors(tmp_path: Path) -> None:
     """Empty index file returns no errors."""
     _write_index(tmp_path, "")
     assert validate("agents/memory-index.md", tmp_path) == []
+
+
+def test_validator_parses_when_format(tmp_path: Path) -> None:
+    """Validator parses /when and /how format entries correctly."""
+    index_with_when_format = """# Memory Index
+
+## Testing Decisions
+
+/when writing mock tests | mock patch
+/how to structure fixtures | test fixtures
+/when mocking subprocess | error injection
+
+## Implementation Notes
+
+/when choosing between approaches | design trade-offs
+"""
+    _write_index(tmp_path, index_with_when_format)
+
+    entries = extract_index_entries("agents/memory-index.md", tmp_path)
+
+    # Entry keyed by trigger text (lowercase)
+    assert "writing mock tests" in entries
+    assert entries["writing mock tests"][2] == "Testing Decisions"
+
+    # /how entries also parsed
+    assert "to structure fixtures" in entries
+    assert entries["to structure fixtures"][2] == "Testing Decisions"
+
+    # All /when and /how lines captured
+    assert "mocking subprocess" in entries
+    assert "choosing between approaches" in entries
+
+    # Old em-dash format not parsed (should be empty for that line)
+    entry_count = len(entries)
+    assert entry_count == 4  # Exactly 4 /when or /how entries

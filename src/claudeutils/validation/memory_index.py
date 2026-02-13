@@ -32,13 +32,31 @@ from .memory_index_helpers import (
 FILE_SECTION = re.compile(r"^## (agents/decisions/\S+\.md)$")
 
 
+def _extract_entry_key(line: str) -> str | None:
+    """Extract key from a line, supporting multiple formats.
+
+    Returns lowercase key for /when, /how, or em-dash formats, or None if
+    invalid.
+    """
+    if line.startswith(("/when ", "/how ")):
+        # Parse /when or /how format: extract trigger before pipe
+        _, rest = line.split(" ", 1)
+        trigger = rest.split("|", 1)[0].strip() if "|" in rest else rest.strip()
+        return trigger.lower() if trigger else None
+    if " — " in line:
+        # Parse em-dash format
+        key = line.split(" — ")[0].strip()
+        return key.lower() if key else None
+    # Bare line without valid format
+    return line.lower()
+
+
 def extract_index_entries(
     index_path: Path | str, root: Path
 ) -> dict[str, tuple[int, str, str]]:
     """Extract index entries from memory-index.md.
 
-    Index entries are bare lines (not headers, not bold, not list markers)
-    with em-dash separator: "Key — description"
+    Supports /when, /how, and em-dash formats.
 
     Args:
         index_path: Path to memory-index.md (relative to root).
@@ -51,10 +69,7 @@ def extract_index_entries(
     entries: dict[str, tuple[int, str, str]] = {}
 
     try:
-        if isinstance(index_path, str):
-            full_path = root / index_path
-        else:
-            full_path = root / index_path
+        full_path = root / index_path
         lines = full_path.read_text().splitlines()
     except FileNotFoundError:
         return entries
@@ -66,34 +81,18 @@ def extract_index_entries(
 
         # Handle headers - track section state
         if stripped.startswith("##") and not stripped.startswith("###"):
-            # Extract section name (part after "## ")
             current_section = stripped[3:] if stripped.startswith("## ") else None
             continue
 
-        # Skip H1 headers
-        if stripped.startswith("# "):
+        # Skip non-entries
+        if not stripped or stripped.startswith(("#", "**", "- ")):
             continue
 
-        # Skip empty lines without changing section state
-        if not stripped:
-            continue
-
-        # Skip bold directives (** at start)
-        if stripped.startswith("**"):
-            continue
-
-        # Skip list markers (old format, shouldn't exist but handle gracefully)
-        if stripped.startswith("- "):
-            continue
-
-        # In a section, non-header, non-bold, non-empty = index entry
+        # In a section, parse entry
         if current_section:
-            # Extract key (part before em-dash)
-            key = stripped.split(" — ")[0] if " — " in stripped else stripped
-
-            key_lower = key.lower()
-            # Always store (last occurrence wins), duplicates caught separately
-            entries[key_lower] = (i, stripped, current_section)
+            key = _extract_entry_key(stripped)
+            if key:
+                entries[key] = (i, stripped, current_section)
 
     return entries
 
