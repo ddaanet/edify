@@ -235,26 +235,21 @@ def _build_heading(operator: str, trigger: str) -> str:
     return f"## When {capitalized}"
 
 
-def _extract_section(file_path: Path, heading: str) -> str:
-    """Extract section content from decision file.
+def _extract_section_content(heading: str, file_content: str) -> str:
+    """Extract section content from file by heading boundary detection.
 
-    Reads file and extracts content from heading to next heading of same level.
+    Finds target heading line and collects content until the next heading of same
+    or higher level. Handles both nested (H2/H3) and flat (all H2) structures.
 
     Args:
-        file_path: Path to decision file
-        heading: Section heading to extract (e.g., "## When Writing Mock Tests")
+        heading: Heading text to extract (e.g., "## Heading A" or "### Child A1")
+        file_content: Full file content as string
 
     Returns:
-        Section heading and content, or empty string if not found
+        Section including heading line and content up to next heading boundary
     """
-    try:
-        content = file_path.read_text()
-    except OSError:
-        return ""
-
-    lines = content.split("\n")
+    lines = file_content.split("\n")
     heading_level = len(heading) - len(heading.lstrip("#"))
-    heading_marker = "#" * heading_level
 
     # Find the heading line
     start_idx = None
@@ -272,13 +267,34 @@ def _extract_section(file_path: Path, heading: str) -> str:
     for idx in range(start_idx + 1, len(lines)):
         line = lines[idx]
 
-        # Check if we've hit another heading of the same or higher level
-        if line.startswith(heading_marker) and line[0] == "#":
-            # Count the # symbols
-            heading_chars = len(line) - len(line.lstrip("#"))
-            if heading_chars <= heading_level and heading_chars > 0:
+        # Check if line is a heading
+        if line.startswith("#"):
+            # Count heading level
+            line_heading_level = len(line) - len(line.lstrip("#"))
+            # Stop if we hit a heading of same or higher level
+            if line_heading_level <= heading_level:
                 break
 
         result_lines.append(line)
 
     return "\n".join(result_lines).rstrip()
+
+
+def _extract_section(file_path: Path, heading: str) -> str:
+    """Extract section content from decision file.
+
+    Reads file and extracts content from heading to next heading of same level.
+
+    Args:
+        file_path: Path to decision file
+        heading: Section heading to extract (e.g., "## When Writing Mock Tests")
+
+    Returns:
+        Section heading and content, or empty string if not found
+    """
+    try:
+        content = file_path.read_text()
+    except OSError:
+        return ""
+
+    return _extract_section_content(heading, content)

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.when.resolver import ResolveError, resolve
+from claudeutils.when.resolver import ResolveError, _extract_section_content, resolve
 
 
 def test_mode_detection(tmp_path: Path) -> None:
@@ -148,3 +148,76 @@ def test_trigger_mode_resolves(tmp_path: Path) -> None:
     # Query with approximate match should also resolve
     result = resolve("trigger", "mock test", str(index_file), str(decisions_dir))
     assert "## When Writing Mock Tests" in result
+
+
+def test_section_content_extraction(tmp_path: Path) -> None:
+    """Extract content between heading boundaries.
+
+    Tests extraction with H3 nested structure, flat H2 structure, last heading
+    in file, and boundary exclusivity (next heading not included).
+    """
+    # Test nested H2/H3 structure
+    nested_file = tmp_path / "nested.md"
+    nested_file.write_text(
+        "## Parent A\n"
+        "\n"
+        "Parent A content.\n"
+        "\n"
+        "### Child A1\n"
+        "\n"
+        "Child A1 content.\n"
+        "\n"
+        "### Child A2\n"
+        "\n"
+        "Child A2 content.\n"
+        "\n"
+        "## Parent B\n"
+        "\n"
+        "Parent B content.\n"
+    )
+
+    # Extract H3 heading should get only that child's content
+    result = _extract_section_content("### Child A1", nested_file.read_text())
+    assert "### Child A1" in result
+    assert "Child A1 content" in result
+    assert "Child A2" not in result
+    assert "Parent B" not in result
+
+    # Test flat H2 structure
+    flat_file = tmp_path / "flat.md"
+    flat_file.write_text(
+        "## Heading A\n"
+        "\n"
+        "Content A line 1.\n"
+        "Content A line 2.\n"
+        "\n"
+        "## Heading B\n"
+        "\n"
+        "Content B.\n"
+    )
+
+    # Extract H2 should get content until next H2
+    result = _extract_section_content("## Heading A", flat_file.read_text())
+    assert "## Heading A" in result
+    assert "Content A line 1" in result
+    assert "Content A line 2" in result
+    assert "## Heading B" not in result
+    assert "Content B" not in result
+
+    # Test last heading in file extends to EOF
+    last_heading_file = tmp_path / "last.md"
+    last_heading_file.write_text(
+        "## First\n"
+        "\n"
+        "First content.\n"
+        "\n"
+        "## Last\n"
+        "\n"
+        "Last content line 1.\n"
+        "Last content line 2.\n"
+    )
+
+    result = _extract_section_content("## Last", last_heading_file.read_text())
+    assert "## Last" in result
+    assert "Last content line 1" in result
+    assert "Last content line 2" in result
