@@ -123,6 +123,33 @@ def _resolve_session_md_conflict(conflicts: list[str]) -> list[str]:
     return [c for c in conflicts if c != "agents/session.md"]
 
 
+def _resolve_learnings_md_conflict(conflicts: list[str]) -> list[str]:
+    """Resolve agents/learnings.md conflict.
+
+    Keep ours and append theirs-only content. Returns updated conflict list with
+    learnings.md removed if present.
+    """
+    if "agents/learnings.md" not in conflicts:
+        return conflicts
+
+    ours_content = _git("show", ":2:agents/learnings.md", check=False)
+    theirs_content = _git("show", ":3:agents/learnings.md", check=False)
+
+    ours_lines = set(ours_content.split("\n"))
+    theirs_lines = theirs_content.split("\n")
+
+    theirs_only = [line for line in theirs_lines if line not in ours_lines]
+
+    merged = ours_content
+    if theirs_only:
+        merged += "\n" + "\n".join(theirs_only)
+
+    Path("agents/learnings.md").write_text(merged)
+    _git("add", "agents/learnings.md")
+
+    return [c for c in conflicts if c != "agents/learnings.md"]
+
+
 def merge(slug: str) -> None:
     """Prepare for merge: verify OURS and THEIRS clean tree."""
     r = subprocess.run(
@@ -211,3 +238,4 @@ def merge(slug: str) -> None:
             conflicts = [c for c in conflicts if c != "agent-core"]
 
         conflicts = _resolve_session_md_conflict(conflicts)
+        conflicts = _resolve_learnings_md_conflict(conflicts)
