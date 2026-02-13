@@ -516,3 +516,39 @@ def test_collision_detection(tmp_path: Path, decisions_dir: Path) -> None:
     # Should include line numbers for both entries
     assert "line 5" in collision_error
     assert "line 6" in collision_error
+
+
+def test_word_count_removed(tmp_path: Path, decisions_dir: Path) -> None:
+    """Word count validation removed per D-9 (short triggers are intentional).
+
+    The /when format allows any word count for triggers. Validation previously
+    rejected 2-word entries but now accepts them.
+
+    Assertions:
+    - /when a b (2 words) passes validation (previously would fail 8-word minimum)
+    - /when very long trigger with many many many words in it (11 words) passes
+      (no upper limit now)
+    - No word count errors in validation output
+    """
+    (decisions_dir / "test-decision.md").write_text(
+        "# Test Decision\n\n## A B\nContent.\n\n"
+        "## Very Long Trigger With Many Many Many Words In It\nMore.\n"
+    )
+    _write_index(
+        tmp_path,
+        """# Memory Index
+
+## agents/decisions/test-decision.md
+
+/when a b
+/when very long trigger with many many many words in it
+""",
+    )
+    errors = validate("agents/memory-index.md", tmp_path)
+
+    # Verify no word count errors
+    assert not any("word" in e.lower() for e in errors), (
+        f"Unexpected word count errors: {errors}"
+    )
+    # Both entries should pass validation
+    assert errors == []

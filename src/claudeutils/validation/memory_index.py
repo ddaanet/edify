@@ -7,7 +7,6 @@ Checks:
 - Document intro content (between # and first ##) is exempt
 - Entries are in correct file section (autofix by default)
 - Entries are in file order within sections (autofix by default)
-- Word count 8-15 for entries (preamble lines exempt)
 - Entries pointing to structural sections are removed (autofix)
 """
 
