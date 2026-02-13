@@ -203,3 +203,51 @@ p: second directive"""
         # Should return first match (d:), not second
         assert "hookSpecificOutput" in output_multi
         assert "[DIRECTIVE: DISCUSS]" in output_multi["systemMessage"]
+
+
+class TestIntegration:
+    """Integration tests verifying all enhancements work together."""
+
+    def test_integration_e2e(self):
+        """Test full hook execution with combined scenarios."""
+        # Scenario 1: discuss: on line 3 inside triple-backtick fence → no match (excluded)
+        prompt_fenced = """line 1
+line 2
+```
+discuss: inside fence should be excluded
+```
+line 6 after fence"""
+        output_fenced = call_hook(prompt_fenced)
+        # Should return empty (no directive matched outside fence)
+        assert output_fenced == {}
+
+        # Scenario 2: discuss: on line 5 after fence closes → match with enhanced injection
+        prompt_after_fence = """line 1
+line 2
+```
+code block
+```
+discuss: after fence should match"""
+        output_after_fence = call_hook(prompt_after_fence)
+        assert "hookSpecificOutput" in output_after_fence
+        assert "[DIRECTIVE: DISCUSS]" in output_after_fence["systemMessage"]
+        # Verify enhanced content includes counterfactual structure
+        additional_context = output_after_fence["hookSpecificOutput"]["additionalContext"]
+        assert "identify assumptions" in additional_context.lower()
+        assert "confidence" in additional_context.lower()
+
+        # Scenario 3: Tier 1 command s → exact match output unchanged from baseline
+        output_s = call_hook("s")
+        # Tier 1 commands should have both hookSpecificOutput and systemMessage
+        assert "hookSpecificOutput" in output_s
+        assert "systemMessage" in output_s
+        # Both should contain the expansion text
+        assert "[SHORTCUT: #status]" in output_s["systemMessage"]
+        assert "[SHORTCUT: #status]" in output_s["hookSpecificOutput"]["additionalContext"]
+
+        # Scenario 4: Tier 1 command x → exact match unchanged
+        output_x = call_hook("x")
+        assert "hookSpecificOutput" in output_x
+        assert "systemMessage" in output_x
+        assert "[SHORTCUT: #execute]" in output_x["systemMessage"]
+        assert "[SHORTCUT: #execute]" in output_x["hookSpecificOutput"]["additionalContext"]
