@@ -23,17 +23,23 @@
 - Dropped 5 tasks that originated on main (will reappear on merge): Agentic process review, Consolidate learnings, Remove duplicate memory index, Update design skill, Handoff skill memory consolidation
 - Kept 6 tasks created in this branch for worktree-focused work
 
+**Recovery runbook created:**
+- Tier assessment: Tier 3 (simplified) — 6 independent fixes, all general steps
+- Phase 0.5: File discovery verified all paths from deliverable review
+- Created `plans/worktree-update/runbook.md` using Phase 0.95 fast path (small, well-specified runbook)
+- 6 steps (1.1-1.6): C2, C3 (config), M1, M2 (code), C4, C5 (tests)
+- Delegated to plan-reviewer for holistic review
+- Review findings: 1 critical, 4 major, 1 minor — all fixed
+- Key fixes: Added prerequisite for Step 1.2, removed prescriptive code from Step 1.3, corrected test file references
+- Review report: `plans/worktree-update/reports/runbook-review.md`
+- Status: Ready for orchestration (prepare-runbook.py next)
+
 ## Pending Tasks
 
-- [ ] **Worktree-update recovery** — Fix critical/major findings from deliverable review | sonnet
-  - Requirements: `plans/worktree-update/reports/deliverable-review.md`
-  - C1-C3: Justfile/config (wt-ls native bash, wt-merge THEIRS check, agent-core setup recipe)
-  - C4-C5: Missing tests (precommit failure, merge idempotency)
-  - M1-M2: Code correctness (filter_section continuation lines, plan_dir case-sensitive regex)
-  - M3-M4: SKILL.md prose (Mode B determinism, false idempotency claim)
-  - M5-M10: Test quality (submodule ancestry E2E rewrite, commit_file dedup, cleanup verification)
-  - R1: Auto-combine session.md/jobs.md on merge + agent review step
-  - Minor findings: batch during recovery or defer
+- [ ] **Worktree-update recovery** — Execute recovery runbook (6 steps: C2, C3, M1, M2, C4, C5) | sonnet
+  - Runbook: `plans/worktree-update/runbook.md` (reviewed, ready for orchestration)
+  - Requires: `agent-core/bin/prepare-runbook.py plans/worktree-update/runbook.md` then restart
+  - Next: `/orchestrate worktree-update-recovery`
 
 - [ ] **RCA: Runbook planning missed file growth** — Planning phase should project file growth and insert split points. The 400-line limit caused 7+ refactor escalations (>1hr wall-clock). This is a planning requirements gap, not an execution issue | opus
 
@@ -58,6 +64,8 @@
 
 ## Reference Files
 
+- `plans/worktree-update/runbook.md` — Recovery runbook (6 steps, ready for orchestration)
+- `plans/worktree-update/reports/runbook-review.md` — Runbook review (1C/4M/1m, all fixed)
 - `plans/worktree-update/reports/deliverable-review.md` — Consolidated review (5C/10M/24m + R1 requirement change)
 - `plans/worktree-update/design.md` — Worktree implementation design (conformance baseline)
 - `agents/decisions/deliverable-review.md` — ISO-grounded review methodology
@@ -65,7 +73,9 @@
 
 ## Next Steps
 
-`/runbook plans/worktree-update/reports/deliverable-review.md` — review report serves as requirements for recovery. Sonnet throughout: all findings have file:line references and clear specifications, no architectural decisions needed.
+1. Prepare runbook artifacts: `agent-core/bin/prepare-runbook.py plans/worktree-update/runbook.md`
+2. Restart session (new agent definition created in `.claude/agents/`)
+3. Execute: `/orchestrate worktree-update-recovery`
 
 ---
-*Handoff by Sonnet. Deliverable review complete, recovery task queued.*
+*Handoff by Sonnet. Recovery runbook ready for orchestration.*
