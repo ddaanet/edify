@@ -1,40 +1,25 @@
 # Session Handoff: 2026-02-13
 
-**Status:** Phases 1-8 complete. Precommit passing clean (all warnings resolved).
+**Status:** Deliverable review round 2 complete. 1 critical, 2 major, 3 minor findings require fixes before merge.
 
 ## Completed This Session
 
-**Complexity refactoring:**
-- `parse_memory_index()`: Extracted `_parse_new_format_line()` and `_parse_old_format_line()` helpers
-- `check_collisions()`: Extracted `_resolve_entry_heading()` helper, merged two entry loops
-- All C901/PLR0912/PLR0915 warnings resolved, `just precommit` passes
-
-**Remember skill update:**
-- Updated `agent-core/skills/remember/SKILL.md` Step 4a to generate `/when` or `/how` format entries
-- Added trigger naming guidelines: plain prose, 2-5 words, optimize for discovery
-- Added operator selection guidance: `/when` for behavioral, `/how` for procedural
-- Includes key compression tool verification step
-- Implements FR-5 from when-recall design
-
-**Deliverable review verification:**
-- Verified all critical issues resolved (operator wired, `_build_heading()` conflict fixed, precommit passing)
-- Verified all major issues resolved (bin wrapper 94e69d6, skills 4162ad9, migration 529ffda, H3+ support)
-- All fixes implemented after initial review (2026-02-13 morning)
-- Branch appears ready for merge
+**Deliverable review round 2:**
+- Full review per `agents/decisions/deliverable-review.md` process
+- Inventory: 41 deliverables (14 code, 10 test, 3 agentic prose, 14 documentation)
+- Gap analysis: All 12 design steps delivered, no missing or unjustified excess
+- Report: `plans/when-recall/reports/deliverable-review-2.md`
+- Go/no-go: Fix C-1 and M-1 before merge, M-2 cleanup deferrable
 
 ## Pending Tasks
 
-- [ ] **Run deliverable review round 2** — Verify all fixes and confirm merge readiness | sonnet
-  - Verify operator parameter implementation works correctly
-  - Verify heading resolution against prefixed format
-  - Check for any remaining gaps or edge cases
-  - Produce final go/no-go assessment
-  - Report: `plans/when-recall/reports/deliverable-review-2.md`
-
-- [x] **Address when-recall deliverable review findings** — Verified all resolved
-  - All 4 critical issues fixed (operator, heading conflict, precommit, migration)
-  - All 4 major issues fixed (bin wrapper, skills, H3+ support, migration)
-  - Commits: 94e69d6, 4162ad9, 529ffda (post-review fixes)
+- [ ] **Fix when-recall review round 2 findings** — `/design plans/when-recall/reports/deliverable-review-2.md` | sonnet
+  - C-1: `cli.py` replaced worktree import/registration with when_cmd — must restore both
+  - M-1: `resolver.py:150` `_handle_no_match()` hardcodes `/when` — needs operator param, fix "how to" candidate parsing
+  - M-2: Duplicate `check_orphan_entries`, `check_entry_placement`, `check_structural_entries` in both `memory_index_checks.py` and `memory_index_helpers.py` — facade uses helpers (exact match), checks versions (fuzzy) are dead code
+  - N-1: `_build_heading()` `capitalize()` degrades acronyms (TDD→Tdd) — confirmed in `workflow-core.md:40`
+  - N-2: `_get_suggestions()` reimplements fuzzy matching (error path only, low impact)
+  - N-3: `navigation.py` HeadingInfo uses dataclass not Pydantic (minor convention)
 
 - [ ] **Protocolize RED pass recovery** — Formalize orchestrator RED pass handling into orchestrate skill | sonnet
   - Scope: Classification taxonomy, blast radius procedure, defect impact evaluation
@@ -52,7 +37,7 @@
 - [ ] **Workflow fixes** — Implement process improvements from RCA | sonnet
   - Depends on: RCA completion
 
-- [ ] **Consolidate learnings** — learnings.md at 319+ lines | sonnet
+- [ ] **Consolidate learnings** — learnings.md at 349+ lines | sonnet
   - Blocked on: memory redesign
 
 - [ ] **Remove duplicate memory index entries on precommit** | sonnet
@@ -71,11 +56,13 @@
 
 **Common context signal competition:** Structural issue in prepare-runbook.py. See `tmp/rca-common-context.md`.
 
+**C-1 merge hazard:** `cli.py` lines 26 and 148 will conflict on merge to main — both worktree and when_cmd must be present.
+
 ## Reference Files
 
-- `plans/when-recall/reports/deliverable-review.md` — Initial review findings (2026-02-13 morning)
+- `plans/when-recall/reports/deliverable-review-2.md` — Round 2 findings (this session)
+- `plans/when-recall/reports/deliverable-review.md` — Round 1 findings (2026-02-13 morning)
 - `plans/when-recall/design.md` — Vetted design (ground truth)
-- `agent-core/skills/remember/SKILL.md` — Updated to generate `/when` or `/how` format entries
-- `src/claudeutils/when/cli.py` — Operator parameter wired to resolver (line 28)
-- `src/claudeutils/when/resolver.py` — Accepts operator, H3+ support, `_build_heading()`
-- `agents/decisions/implementation-notes.md` — Prefixed headings format verified
+- `src/claudeutils/when/resolver.py` — M-1 at line 150, N-1 at line 272
+- `src/claudeutils/cli.py` — C-1 at lines 26, 148
+- `src/claudeutils/validation/memory_index_checks.py` — M-2 dead code at lines 137, 222, 274
