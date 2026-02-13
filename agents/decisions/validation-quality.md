@@ -4,7 +4,7 @@ Data models, code quality standards, and feedback processing pipeline.
 
 ## .Data Models
 
-### Pydantic for Validation
+### When Choosing Pydantic For Validation
 
 **Pydantic for validation:**
 
@@ -19,7 +19,7 @@ Data models, code quality standards, and feedback processing pipeline.
 
 **Impact:** Type safety at runtime, not just static analysis
 
-### FeedbackType Enum
+### How to Define Feedback Type Enum
 
 **Decision:** Use StrEnum for feedback types (MESSAGE, TOOL_DENIAL, INTERRUPTION)
 
@@ -29,7 +29,7 @@ Data models, code quality standards, and feedback processing pipeline.
 
 ## .Code Quality
 
-### Docformatter vs. Ruff D205 Conflict
+### When Docstring Formatting Conflicts
 
 **Decision:** Accept docformatter wrapping as the source of D205 violations when docstring first line exceeds 80-char limit.
 
@@ -54,7 +54,7 @@ This triggers ruff D205 because docformatter doesn't add the blank line that ruf
 
 **Don't do:** Ignore D205 globally or disable docformatter.
 
-### Complexity Management
+### How to Manage Cyclomatic Complexity
 
 **Complexity management:**
 
@@ -67,7 +67,7 @@ This triggers ruff D205 because docformatter doesn't add the blank line that ruf
 
 **Rationale:** Ruff/pylint complexity checks enforced at build time; refactor rather than suppress
 
-### No Suppression Shortcuts
+### When Tempted To Suppress Linting
 
 **Decision:** Fix linting issues properly instead of using `# noqa` suppressions
 
@@ -79,7 +79,7 @@ This triggers ruff D205 because docformatter doesn't add the blank line that ruf
 - E501: Split long lines properly
 - C901/PLR0912: Extract helper functions
 
-### Type Annotations
+### When Adding Strict Type Annotations
 
 **Decision:** Full type annotations in strict mypy mode
 
@@ -89,7 +89,7 @@ This triggers ruff D205 because docformatter doesn't add the blank line that ruf
 
 ## .Feedback Processing Pipeline
 
-### Pipeline Architecture
+### How to Architect Feedback Pipeline
 
 **Feedback processing:**
 
@@ -103,7 +103,7 @@ This triggers ruff D205 because docformatter doesn't add the blank line that ruf
 - `analyze`: Filter noise, categorize → Statistics summary
 - `rules`: Stricter filter, deduplicate → Rule-worthy items for manual review
 
-### Filtering Module as Foundation
+### How to Build Reusable Filtering Module
 
 **Decision:** Create `filtering.py` module with reusable `is_noise()` and `categorize_feedback()` functions
 
@@ -111,7 +111,7 @@ This triggers ruff D205 because docformatter doesn't add the blank line that ruf
 
 **Impact:** Filtering module implemented first; other features depend on it
 
-### Noise Detection Patterns
+### How to Detect Noise In Command Output
 
 **Decision:** Multi-marker detection with length threshold
 
@@ -125,7 +125,7 @@ This triggers ruff D205 because docformatter doesn't add the blank line that ruf
 
 **Rationale:** Based on analysis of 1200 feedback items; these patterns dominated noise
 
-### Categorization by Keywords
+### How to Categorize Feedback By Keywords
 
 **Decision:** Keyword-based category assignment with priority order
 
@@ -142,7 +142,7 @@ This triggers ruff D205 because docformatter doesn't add the blank line that ruf
 
 **Rationale:** Simple O(1) keyword matching; categories derived from feedback summary analysis
 
-### Deduplication Strategy
+### How to Deduplicate Feedback Entries
 
 **Decision:** First 100 characters as dedup key, case-insensitive
 
@@ -150,7 +150,7 @@ This triggers ruff D205 because docformatter doesn't add the blank line that ruf
 
 **Implementation:** Track seen prefixes in set; skip items with already-seen prefix
 
-### Stricter Filtering for Rules
+### When Filtering For Rule Extraction
 
 **Decision:** `rules` applies additional filters beyond `analyze`
 

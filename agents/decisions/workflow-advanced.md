@@ -4,7 +4,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 ## .Documentation and Knowledge Management
 
-### Seeding Before Auto-Generation
+### When Seeding Indexes Before Generation
 
 **Seeding before auto-generation:**
 
@@ -18,7 +18,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Impact:** Immediate value from indexes while consolidation builds them incrementally.
 
-### Index Entries Require Backing Documentation
+### When Adding Entries Without Documentation
 
 **Index entries require backing documentation:**
 
@@ -32,7 +32,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Impact:** Index serves as reliable discovery mechanism, not aspirational wishlist.
 
-### Template Merge Semantics
+### How to Merge Templates Safely
 
 **Template merge semantics:**
 
@@ -48,7 +48,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 ## .Requirements and Execution
 
-### Requirements Immutable During Execution
+### When Requirements Change During Execution
 
 **Requirements immutable during execution:**
 
@@ -64,7 +64,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 ## .Knowledge Discovery and Context
 
-### Ambient Awareness Beats Invocation
+### When Embedding Knowledge In Context
 
 **Ambient awareness beats invocation:**
 
@@ -80,7 +80,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Impact:** Always-available context beats sometimes-invoked skills.
 
-### Task Prose Keys Pattern
+### How to Name Tasks As Prose Keys
 
 **Task prose keys pattern:**
 
@@ -96,7 +96,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 ## .Commit Workflow Patterns
 
-### Commit RCA Fixes Active
+### When Committing Rca Fixes
 
 **Decision Date:** 2026-02-05
 
@@ -111,7 +111,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Impact:** Prevents submodule sync drift, missing artifacts in commits, and dirty-state rationalization.
 
-### Precommit Is Read-Only
+### When Running Precommit Validation
 
 **Decision Date:** 2026-02-05
 
@@ -125,7 +125,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 ## .Planning Workflow Patterns
 
-### Outline Enables Phase-by-Phase Expansion
+### How to Expand Outlines Into Phases
 
 **Decision Date:** 2026-02-05
 
@@ -137,7 +137,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Impact:** Earlier feedback, better cross-phase coherence, reduced rework.
 
-### Phase-by-Phase Review Pattern
+### How to Review Phases Iteratively
 
 **Decision Date:** 2026-02-05
 
@@ -151,7 +151,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Impact:** Prevents drift accumulation, enables early course correction.
 
-### Manual Runbook Assembly Bypasses Automation
+### When Assembling Runbooks Manually
 
 **Decision Date:** 2026-02-11
 
@@ -167,7 +167,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Impact:** Consolidates assembly logic in one authoritative location, reduces manual errors.
 
-### Review Agent Fix-All Pattern
+### How to Use Review Agent Fix All Pattern
 
 **Decision Date:** 2026-02-05
 
@@ -186,7 +186,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Impact:** Caller handles escalation only, not routine fixes. Audit trail preserved for process improvement.
 
-### Recommendations Inline Transmission
+### How to Transmit Recommendations Inline
 
 **Decision Date:** 2026-02-05
 
@@ -200,7 +200,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Impact:** Guidance reaches executor, not lost in separate report file.
 
-### Report Naming Convention
+### How to Name Review Reports
 
 **Decision Date:** 2026-02-12
 
@@ -222,7 +222,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Impact:** Reports directory organization is predictable. Consumers can find latest review by pattern matching.
 
-### Prose Test Descriptions Save Tokens
+### When Writing Test Descriptions In Prose
 
 **Decision Date:** 2026-02-05
 
@@ -250,7 +250,7 @@ This is not full test code — it is precise prose that preserves the specificat
 
 **Rationale:** Standard prose is efficient for behavioral tests. For conformance work, the specification IS the exact string — abstracting it introduces translation loss. Precise prose preserves spec fidelity while maintaining token efficiency (still more compact than full test code).
 
-### Complexity Before Expansion
+### When Checking Complexity Before Expansion
 
 **Decision Date:** 2026-02-05
 
@@ -266,7 +266,7 @@ This is not full test code — it is precise prose that preserves the specificat
 
 **Impact:** Catch structure problems early, prevent executor overload.
 
-### Consolidation Gates Reduce Orchestrator Overhead
+### When Using Consolidation Gates
 
 **Decision Date:** 2026-02-05
 
@@ -284,7 +284,7 @@ This is not full test code — it is precise prose that preserves the specificat
 
 **Impact:** Reduced orchestrator overhead for trivial work without losing test granularity.
 
-### Workflow Feedback Loop Insights
+### When Applying Feedback Loop Insights
 
 **Decision Date:** 2026-02-05
 
@@ -298,7 +298,7 @@ This is not full test code — it is precise prose that preserves the specificat
 
 **Impact:** Self-correcting planning process prevents late-stage rework.
 
-### Dogfooding Validates Design
+### When Dogfooding Process Design
 
 **Decision Date:** 2026-02-05
 
@@ -312,7 +312,7 @@ This is not full test code — it is precise prose that preserves the specificat
 
 **Impact:** Design validation through practical application.
 
-### Skill Dependencies in Requirements
+### When Scanning Requirements For Skills
 
 **Decision Date:** 2026-02-11
 
@@ -324,7 +324,7 @@ This is not full test code — it is precise prose that preserves the specificat
 
 **Impact:** Early skill loading provides correct context for design decisions.
 
-### Phase Boundaries Require Checkpoint Delegation
+### When Crossing Phase Boundaries
 
 **Decision Date:** 2026-02-11
 
@@ -336,7 +336,7 @@ This is not full test code — it is precise prose that preserves the specificat
 
 ## .TDD Workflow Patterns
 
-### TDD GREEN Behavioral Descriptions
+### How to Write Green Phase Descriptions
 
 **Decision Date:** 2026-02-05
 
@@ -354,7 +354,7 @@ This is not full test code — it is precise prose that preserves the specificat
 
 ## .Model Selection Patterns
 
-### Efficient Model Analysis Requires Verification
+### When Verifying Model Analysis Results
 
 **Decision Date:** 2026-02-05
 
@@ -370,7 +370,7 @@ This is not full test code — it is precise prose that preserves the specificat
 
 ## .Validation Patterns
 
-### Domain Validation Pattern
+### How to Implement Domain Validation
 
 **Decision Date:** 2026-02-08
 

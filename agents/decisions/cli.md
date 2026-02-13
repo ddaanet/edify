@@ -4,7 +4,7 @@ CLI-specific patterns and conventions for claudeutils command-line interface.
 
 ## .CLI Conventions
 
-### Path.cwd() vs os.getcwd()
+### When Getting Current Working Directory
 
 **Decision:** Use `Path.cwd()` for default project directory
 
@@ -12,7 +12,7 @@ CLI-specific patterns and conventions for claudeutils command-line interface.
 
 **Implementation:** `cli.py:main()`
 
-### Error Output Pattern
+### How to Output Errors To Stderr
 
 **Decision:** Print errors to stderr using `print(..., file=sys.stderr)` before `sys.exit(1)`
 
@@ -22,7 +22,7 @@ CLI-specific patterns and conventions for claudeutils command-line interface.
 - "No session found with prefix 'xyz'" → stderr, exit 1
 - "Multiple sessions match prefix 'abc'" → stderr, exit 1
 
-### Entry Point Configuration
+### How to Configure Script Entry Points
 
 **Decision:** Add `[project.scripts]` in pyproject.toml: `claudeutils = "claudeutils.cli:main"`
 
@@ -32,7 +32,7 @@ CLI-specific patterns and conventions for claudeutils command-line interface.
 
 ## .Output Formats
 
-### Feedback Processing Output Formats
+### When Choosing Feedback Output Format
 
 **Decision:** Support both `--format text` (default) and `--format json`
 
@@ -40,7 +40,7 @@ CLI-specific patterns and conventions for claudeutils command-line interface.
 
 **Impact:** All batch commands (`analyze`, `rules`) support both formats
 
-### Token Output Format
+### How to Format Token Count Output
 
 **Decision:** Human-readable text by default, JSON with `--json` flag; include resolved model ID in all outputs
 

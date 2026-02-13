@@ -4,7 +4,7 @@ Token counting, markdown cleanup, and formatter selection decisions.
 
 ## .Token Counting
 
-### Model as First Positional Argument
+### How to Pass Model As Cli Argument
 
 **Decision:** Model is first positional argument in CLI, required parameter in functions
 
@@ -16,7 +16,7 @@ Token counting, markdown cleanup, and formatter selection decisions.
 
 **Supported models:** haiku, sonnet, opus (short aliases preferred)
 
-### Model Alias Support
+### How to Handle Model Alias Resolution
 
 **Decision:** Hybrid approach - support Anthropic's official aliases directly, with runtime probing fallback for unversioned aliases
 
@@ -51,7 +51,7 @@ Token counting, markdown cleanup, and formatter selection decisions.
 }
 ```
 
-### Anthropic API Integration
+### How to Integrate With Anthropic Api
 
 **Decision:** Use official Anthropic SDK with default environment variable handling
 
@@ -61,7 +61,7 @@ Token counting, markdown cleanup, and formatter selection decisions.
 
 **API Key:** `ANTHROPIC_API_KEY` environment variable (SDK default)
 
-### Empty File Optimization
+### When Counting Tokens In Empty Files
 
 **Decision:** Return 0 for empty files without API call
 
@@ -69,7 +69,7 @@ Token counting, markdown cleanup, and formatter selection decisions.
 
 **Performance:** Reduces API usage for module development workflows
 
-### No Glob Expansion (Initial Release)
+### When Expanding File Glob Patterns
 
 **Decision:** Defer glob pattern expansion to future release
 
@@ -83,7 +83,7 @@ Token counting, markdown cleanup, and formatter selection decisions.
 
 **Context:** Extend markdown preprocessor for Claude output patterns
 
-### Problem
+### When Fixing Consecutive Emoji Lines
 
 Claude generates markdown-like output that isn't always valid markdown:
 
@@ -93,7 +93,7 @@ Claude generates markdown-like output that isn't always valid markdown:
 
 These patterns break dprint formatting or produce suboptimal output.
 
-### Solution
+### How to Clean Markdown Before Formatting
 
 **Preprocessor approach:**
 
@@ -109,7 +109,7 @@ Claude output → markdown.py (structure) → dprint (style) → final output
 
 ### .Design Decisions
 
-#### Extend vs. New Functions
+#### When Extending Vs Creating Cleanup Functions
 
 **Decision:** Extend `fix_warning_lines` for checklist detection, create new functions for code blocks and metadata indentation.
 
@@ -124,7 +124,7 @@ Claude output → markdown.py (structure) → dprint (style) → final output
 - Create all new functions → More code duplication
 - Single mega-function → Harder to test and maintain
 
-#### Error on Invalid Patterns
+#### When Handling Invalid Markdown Patterns
 
 **Decision:** Error out when inner fences detected in non-markdown blocks.
 
@@ -139,7 +139,7 @@ Claude output → markdown.py (structure) → dprint (style) → final output
 - Silent skip → Hides problems, dprint fails later
 - Auto-fix → Risk of corrupting code content
 
-#### Processing Order
+#### How to Order Markdown Processing Steps
 
 **Decision:**
 
@@ -164,7 +164,7 @@ Claude output → markdown.py (structure) → dprint (style) → final output
 - Random order → Some fixes would break others
 - All new fixes at end → Spacing issues with numbered lists
 
-#### Prefix Detection Strategy
+#### How to Detect Markdown Line Prefixes
 
 **Decision:** Generic prefix detection (any consistent non-markup prefix), not hard-coded patterns.
 
@@ -179,7 +179,7 @@ Claude output → markdown.py (structure) → dprint (style) → final output
 - Whitelist specific prefixes → Brittle, needs updates
 - No grouping logic → Each pattern needs separate fix
 
-#### Indentation Amount
+#### How to Indent Nested Markdown Lists
 
 **Decision:** 2 spaces for nested lists.
 
@@ -194,7 +194,7 @@ Claude output → markdown.py (structure) → dprint (style) → final output
 - 3 spaces → Not standard
 - 4 spaces → Too much nesting, harder to read
 
-### Future Direction
+### When Evolving Markdown Processing
 
 **Evolution to dprint plugin:**
 
@@ -214,7 +214,7 @@ Current preprocessor is a separate step. Ideally, this should be a dprint plugin
 
 ## .Markdown Formatter Selection
 
-### remark-cli Over Prettier
+### When Choosing Markdown Formatter Tool
 
 **Remark-cli chosen:**
 

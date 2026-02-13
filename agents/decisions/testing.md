@@ -4,7 +4,7 @@ Testing conventions and patterns for claudeutils codebase.
 
 ## .Test Organization
 
-### Test Module Split Strategy
+### How to Split Test Modules
 
 **Decision:** Split test files to mirror source module structure + separate CLI test modules by subcommand
 
@@ -26,7 +26,7 @@ tests/
 
 ## .Mock Patching
 
-### Mock Patching Pattern
+### How to Apply Mock Patches Correctly
 
 **Decision:** Patch where object is **used**, not where it's **defined**
 
@@ -44,7 +44,7 @@ monkeypatch.setattr("pkg.a.foo", mock)  # ❌ Won't work
 
 ## .TDD Approach
 
-### Testing Strategy for Markdown Cleanup
+### How to Test Markdown Cleanup
 
 **TDD approach:**
 - Red test → minimal code → green test
@@ -58,7 +58,7 @@ monkeypatch.setattr("pkg.a.foo", mock)  # ❌ Won't work
 - Edge cases (empty blocks, unclosed fences, etc.)
 - Integration (multiple fixes together)
 
-### Success Metrics
+### When Evaluating Test Success Metrics
 
 - All new tests pass
 - All existing tests pass (no regressions)
@@ -66,7 +66,7 @@ monkeypatch.setattr("pkg.a.foo", mock)  # ❌ Won't work
 - Clear error messages for invalid input
 - Documentation complete and accurate
 
-## TDD RED Phase: Behavioral Verification
+## When Writing Red Phase Assertions
 
 **TDD RED behavioral:**
 
@@ -95,7 +95,7 @@ monkeypatch.setattr("pkg.a.foo", mock)  # ❌ Won't work
 
 **Impact:** Prevents trivial implementations that satisfy tests without implementing functionality.
 
-## TDD: Presentation vs Behavior
+## When Testing Presentation Vs Behavior
 
 **Decision Date:** 2026-01-31
 
@@ -107,7 +107,7 @@ monkeypatch.setattr("pkg.a.foo", mock)  # ❌ Won't work
 
 **Impact:** Focus TDD cycles on functionality, handle presentation in batch during vet checkpoints.
 
-## TDD Integration Test Gap
+## When Writing Integration Test Assertions
 
 **Decision Date:** 2026-02-05
 
@@ -125,7 +125,7 @@ monkeypatch.setattr("pkg.a.foo", mock)  # ❌ Won't work
 
 **Impact:** Ensures behavioral outcomes are tested, not just execution paths.
 
-## Conformance Validation for Migrations
+## How to Validate Migration Conformance
 
 **Decision Date:** 2026-02-05
 

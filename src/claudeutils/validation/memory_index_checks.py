@@ -6,7 +6,12 @@ Contains validation check functions extracted from memory_index_helpers.py.
 import re
 from pathlib import Path
 
-from .memory_index_helpers import EXEMPT_SECTIONS, extract_index_structure
+from claudeutils.when.fuzzy import score_match
+
+from .memory_index_helpers import (
+    EXEMPT_SECTIONS,
+    extract_index_structure,
+)
 
 
 def check_duplicate_entries(index_path: Path | str, root: Path) -> list[str]:
@@ -30,15 +35,32 @@ def check_duplicate_entries(index_path: Path | str, root: Path) -> list[str]:
         return errors
 
     seen_entry_keys: dict[str, int] = {}
+
     for i, line in enumerate(lines, 1):
         stripped = line.strip()
+
+        # Track section headers
+        if stripped.startswith("##") and not stripped.startswith("###"):
+            stripped[3:] if stripped.startswith("## ") else None
+            continue
+
         # Skip non-entry lines
         if not stripped or stripped.startswith(("#", "**", "- ")):
             continue
-        # Extract key
-        key = (
-            stripped.split(" — ")[0].lower() if " — " in stripped else stripped.lower()
-        )
+
+        # Extract key using same logic as _extract_entry_key
+        if stripped.startswith(("/when ", "/how ")):
+            _, rest = stripped.split(" ", 1)
+            key = (
+                rest.split("|", 1)[0].strip().lower()
+                if "|" in rest
+                else rest.strip().lower()
+            )
+        elif " — " in stripped:
+            key = stripped.split(" — ")[0].lower()
+        else:
+            key = stripped.lower()
+
         # Check for duplicates
         if key in seen_entry_keys:
             errors.append(
@@ -51,8 +73,8 @@ def check_duplicate_entries(index_path: Path | str, root: Path) -> list[str]:
     return errors
 
 
-def check_em_dash_and_word_count(entries: dict[str, tuple[int, str, str]]) -> list[str]:
-    """Check entries for em-dash separator and word count.
+def check_trigger_format(entries: dict[str, tuple[int, str, str]]) -> list[str]:
+    """Check entries for /when or /how format with valid trigger.
 
     Args:
         entries: Dictionary of entries from extract_index_entries.
@@ -61,48 +83,53 @@ def check_em_dash_and_word_count(entries: dict[str, tuple[int, str, str]]) -> li
         List of error messages.
     """
     errors = []
-    for lineno, full_entry, _section in entries.values():
-        if " — " not in full_entry:
-            errors.append(
-                f"  memory-index.md:{lineno}: entry lacks em-dash separator "
-                f"(D-3): '{full_entry}'"
-            )
-        else:
-            # Check word count (8-15 word hard limit for key + description total)
-            word_count = len(full_entry.split())
-            if word_count < 8 or word_count > 15:
-                errors.append(
-                    f"  memory-index.md:{lineno}: entry has {word_count} words, "
-                    f"must be 8-15: '{full_entry}'"
-                )
-    return errors
-
-
-def check_entry_placement(
-    entries: dict[str, tuple[int, str, str]],
-    headers: dict[str, list[tuple[str, int, str]]],
-) -> list[str]:
-    """Check that entries are in correct file sections.
-
-    Args:
-        entries: Dictionary of entries from extract_index_entries.
-        headers: Dictionary of semantic headers from collect_semantic_headers.
-
-    Returns:
-        List of error messages for misplaced entries.
-    """
-    errors = []
-    for key, (lineno, _full_entry, section) in entries.items():
+    for lineno, full_entry, section in entries.values():
+        # Skip entries in exempt sections (preserved as-is)
         if section in EXEMPT_SECTIONS:
             continue
-        if key in headers:
-            # Get the file this header is in
-            source_file = headers[key][0][0]  # First location's file
-            if section != source_file:
-                errors.append(
-                    f"  memory-index.md:{lineno}: entry '{key}' in section "
-                    f"'{section}' but header is in '{source_file}'"
-                )
+
+        stripped = full_entry.strip()
+
+        # Check operator prefix
+        if not stripped.startswith(("/when ", "/how ")):
+            # Allow /when and /how without trailing space
+            # (empty trigger case handled below)
+            if stripped in ("/when", "/how"):
+                operator = stripped
+                trigger = ""
+            elif stripped.startswith(("/when ", "/how ")):
+                # Valid prefix with space
+                operator = stripped.split(" ", 1)[0]
+                trigger = stripped.split(" ", 1)[1] if " " in stripped else ""
+            else:
+                # Invalid operator or no operator
+                if stripped.startswith("/"):
+                    # Invalid operator like /what
+                    errors.append(
+                        f"  memory-index.md:{lineno}: invalid operator "
+                        f"prefix (use /when or /how): '{full_entry}'"
+                    )
+                else:
+                    # No operator (old em-dash format)
+                    errors.append(
+                        f"  memory-index.md:{lineno}: entry missing "
+                        f"operator prefix (no operator prefix): "
+                        f"'{full_entry}'"
+                    )
+                continue
+        else:
+            # Valid operator prefix
+            operator = stripped.split(" ", 1)[0]
+            trigger = stripped.split(" ", 1)[1] if " " in stripped else ""
+
+        # Check trigger non-empty after stripping
+        trigger = trigger.split("|", 1)[0].strip() if trigger else ""
+        if not trigger:
+            errors.append(
+                f"  memory-index.md:{lineno}: {operator} has "
+                f"empty trigger: '{full_entry}'"
+            )
+
     return errors
 
 
@@ -136,8 +163,21 @@ def check_entry_sorting(
         # Get entries with their source line numbers
         entry_positions = []
         for entry in entry_lines:
-            key = entry.split(" — ")[0].lower() if " — " in entry else entry.lower()
-            if key in headers:
+            # Extract key using same logic as _extract_entry_key WITH operator prefix
+            if entry.startswith("/when "):
+                _, rest = entry.split(" ", 1)
+                trigger = rest.split("|", 1)[0].strip()
+                key = f"when {trigger}".lower() if trigger else None
+            elif entry.startswith("/how "):
+                _, rest = entry.split(" ", 1)
+                trigger = rest.split("|", 1)[0].strip()
+                key = f"how to {trigger}".lower() if trigger else None
+            elif " — " in entry:
+                key = entry.split(" — ")[0].lower()
+            else:
+                key = entry.lower()
+            # Headers have operator prefix, compare directly
+            if key and key in headers:
                 source_lineno = headers[key][0][1]  # Line number in source file
                 entry_positions.append((source_lineno, entry))
 
@@ -149,56 +189,57 @@ def check_entry_sorting(
     return errors
 
 
-def check_orphan_entries(
+def _resolve_entry_heading(
+    key: str,
+    headers: dict[str, list[tuple[str, int, str]]],
+    header_titles: list[str],
+    threshold: float,
+) -> str | None:
+    """Find the heading an entry key matches (exact or fuzzy)."""
+    if key in headers:
+        return key
+
+    best_score = 0.0
+    best_header = None
+    for header_title in header_titles:
+        score = score_match(key, header_title)
+        if score > best_score:
+            best_score = score
+            best_header = header_title
+
+    return best_header if best_score >= threshold else None
+
+
+def check_collisions(
     entries: dict[str, tuple[int, str, str]],
     headers: dict[str, list[tuple[str, int, str]]],
-    structural: set[str],
 ) -> list[str]:
-    """Check for orphan index entries (no matching headers).
+    """Check for multiple entries resolving to the same heading.
 
-    Args:
-        entries: Dictionary of entries from extract_index_entries.
-        headers: Dictionary of semantic headers from collect_semantic_headers.
-        structural: Set of structural header titles.
-
-    Returns:
-        List of error messages for orphan entries.
+    Uses fuzzy matching to detect when different entry keys match the same
+    semantic header via fuzzy scoring.
     """
-    errors = []
-    for key, (lineno, _full_entry, section) in entries.items():
-        # Skip exempt sections
-        if section in EXEMPT_SECTIONS:
-            continue
-        # Skip entries pointing to structural sections (will be removed by autofix)
-        if key in structural:
-            continue
-        if key not in headers:
-            errors.append(
-                f"  memory-index.md:{lineno}: orphan index entry '{key}' "
-                f"has no matching semantic header in agents/decisions/"
-            )
-    return errors
+    header_titles = list(headers.keys())
+    threshold = 50.0
 
-
-def check_structural_entries(
-    entries: dict[str, tuple[int, str, str]], structural: set[str]
-) -> list[str]:
-    """Check for entries pointing to structural sections.
-
-    Args:
-        entries: Dictionary of entries from extract_index_entries.
-        structural: Set of structural header titles.
-
-    Returns:
-        List of error messages for structural entries.
-    """
-    errors = []
+    heading_to_entries: dict[str, list[tuple[str, int]]] = {}
     for key, (lineno, _full_entry, section) in entries.items():
         if section in EXEMPT_SECTIONS:
             continue
-        if key in structural:
+
+        heading = _resolve_entry_heading(key, headers, header_titles, threshold)
+        if heading:
+            heading_to_entries.setdefault(heading, []).append((key, lineno))
+
+    errors = []
+    for heading, entry_list in heading_to_entries.items():
+        if len(entry_list) > 1:
+            descriptions = [
+                f"'{k}' (line {ln})" for k, ln in entry_list
+            ]
             errors.append(
-                f"  memory-index.md:{lineno}: entry '{key}' points to "
-                f"structural section"
+                f"  collision: entries {', '.join(descriptions)} "
+                f"resolve to same heading '{heading}'"
             )
+
     return errors

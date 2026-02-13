@@ -7,7 +7,6 @@ Checks:
 - Document intro content (between # and first ##) is exempt
 - Entries are in correct file section (autofix by default)
 - Entries are in file order within sections (autofix by default)
-- Word count 8-15 for entries (preamble lines exempt)
 - Entries pointing to structural sections are removed (autofix)
 """
 
@@ -16,12 +15,17 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from claudeutils.when.fuzzy import score_match
+
+from .memory_index_checks import (
+    check_collisions,
+    check_duplicate_entries,
+    check_entry_sorting,
+    check_trigger_format,
+)
 from .memory_index_helpers import (
     autofix_index,
-    check_duplicate_entries,
-    check_em_dash_and_word_count,
     check_entry_placement,
-    check_entry_sorting,
     check_orphan_entries,
     check_structural_entries,
     collect_semantic_headers,
@@ -32,13 +36,39 @@ from .memory_index_helpers import (
 FILE_SECTION = re.compile(r"^## (agents/decisions/\S+\.md)$")
 
 
+def _extract_entry_key(line: str) -> str | None:
+    """Extract key from a line, supporting multiple formats.
+
+    Returns lowercase key for /when, /how, or em-dash formats, or None if
+    invalid.
+
+    For /when and /how formats, key includes operator prefix:
+    - `/when X` → "when x"
+    - `/how X` → "how to x" (maps /how to "how to")
+    """
+    if line.startswith(("/when ", "/how ")):
+        # Parse /when or /how format: extract operator and trigger before pipe
+        operator, rest = line.split(" ", 1)
+        trigger = rest.split("|", 1)[0].strip() if "|" in rest else rest.strip()
+        if not trigger:
+            return None
+        # Map /how to "how to" for heading matching
+        operator_prefix = "how to" if operator == "/how" else "when"
+        return f"{operator_prefix} {trigger}".lower()
+    if " — " in line:
+        # Parse em-dash format
+        key = line.split(" — ")[0].strip()
+        return key.lower() if key else None
+    # Bare line without valid format
+    return line.lower()
+
+
 def extract_index_entries(
     index_path: Path | str, root: Path
 ) -> dict[str, tuple[int, str, str]]:
     """Extract index entries from memory-index.md.
 
-    Index entries are bare lines (not headers, not bold, not list markers)
-    with em-dash separator: "Key — description"
+    Supports /when, /how, and em-dash formats.
 
     Args:
         index_path: Path to memory-index.md (relative to root).
@@ -51,10 +81,7 @@ def extract_index_entries(
     entries: dict[str, tuple[int, str, str]] = {}
 
     try:
-        if isinstance(index_path, str):
-            full_path = root / index_path
-        else:
-            full_path = root / index_path
+        full_path = root / index_path
         lines = full_path.read_text().splitlines()
     except FileNotFoundError:
         return entries
@@ -66,34 +93,18 @@ def extract_index_entries(
 
         # Handle headers - track section state
         if stripped.startswith("##") and not stripped.startswith("###"):
-            # Extract section name (part after "## ")
             current_section = stripped[3:] if stripped.startswith("## ") else None
             continue
 
-        # Skip H1 headers
-        if stripped.startswith("# "):
+        # Skip non-entries
+        if not stripped or stripped.startswith(("#", "**", "- ")):
             continue
 
-        # Skip empty lines without changing section state
-        if not stripped:
-            continue
-
-        # Skip bold directives (** at start)
-        if stripped.startswith("**"):
-            continue
-
-        # Skip list markers (old format, shouldn't exist but handle gracefully)
-        if stripped.startswith("- "):
-            continue
-
-        # In a section, non-header, non-bold, non-empty = index entry
+        # In a section, parse entry
         if current_section:
-            # Extract key (part before em-dash)
-            key = stripped.split(" — ")[0] if " — " in stripped else stripped
-
-            key_lower = key.lower()
-            # Always store (last occurrence wins), duplicates caught separately
-            entries[key_lower] = (i, stripped, current_section)
+            key = _extract_entry_key(stripped)
+            if key:
+                entries[key] = (i, stripped, current_section)
 
     return entries
 
@@ -102,15 +113,39 @@ def _check_orphan_headers(
     headers: dict[str, list[tuple[str, int, str]]],
     entries: dict[str, tuple[int, str, str]],
 ) -> list[str]:
-    """Check for semantic headers without index entries."""
+    """Check for semantic headers without index entries.
+
+    Uses fuzzy matching to bridge compression between semantic headers and index
+    triggers (e.g., "When Writing Mock Tests" fuzzy-matches "when writing mock
+    tests").
+
+    Both headers and entry keys now include operator prefix, so they can be
+    compared directly.
+    """
     errors = []
+    entry_keys = list(entries.keys())
+    threshold = 50.0
+
     for title, locations in sorted(headers.items()):
-        if title not in entries:
+        # Exact match first
+        if title in entries:
+            continue
+
+        # Fuzzy match: entry keys (with operator prefix) against header
+        # titles (also with prefix)
+        best_score = 0.0
+        for entry_key in entry_keys:
+            score = score_match(entry_key, title)
+            best_score = max(best_score, score)
+
+        # If no match found (exact or fuzzy above threshold), report error
+        if best_score < threshold:
             for filepath, lineno, level in locations:
                 errors.append(
                     f"  {filepath}:{lineno}: orphan semantic header '{title}' "
                     f"({level} level) has no memory-index.md entry"
                 )
+
     return errors
 
 
@@ -217,9 +252,10 @@ def validate(index_path: Path | str, root: Path, *, autofix: bool = True) -> lis
 
     # Non-autofixable checks
     errors.extend(check_duplicate_entries(index_path, root))
-    errors.extend(check_em_dash_and_word_count(entries))
+    errors.extend(check_trigger_format(entries))
     errors.extend(_check_orphan_headers(headers, entries))
     errors.extend(check_orphan_entries(entries, headers, structural))
+    errors.extend(check_collisions(entries, headers))
     errors.extend(_check_duplicate_headers(headers))
 
     # Autofixable checks

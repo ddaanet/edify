@@ -4,7 +4,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 ## .Handoff Workflow
 
-### Handoff Tail-Call Pattern
+### How to Chain Handoff Tail Calls
 
 **Handoff tail-call:**
 
@@ -20,7 +20,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Impact:** Consistent workflow termination across all tier levels.
 
-### Handoff Commit Assumption
+### When Handoff Includes Commit Flag
 
 **Handoff commit assumption:**
 
@@ -38,7 +38,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 ## .Workflow Efficiency
 
-### Delegation with Context
+### When Context Already Loaded For Delegation
 
 **Delegation with context:**
 
@@ -56,7 +56,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Impact:** Reduces token waste from redundant context loading.
 
-### Routing Layer Efficiency
+### When Assessing Routing Layer Efficiency
 
 **Single-layer complexity:**
 
@@ -74,7 +74,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Impact:** Eliminates redundant analysis overhead.
 
-### Vet Agent Context Usage
+### When Reusing Vet Agent Context
 
 **Decision Date:** 2026-02-01
 
@@ -90,7 +90,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 ## .Design and Planning Patterns
 
-### Outline-First Design Workflow
+### How to Design With Outline First Approach
 
 **Outline-first design workflow:**
 
@@ -106,7 +106,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Impact:** Higher quality designs aligned with user expectations, less re-work.
 
-### Model Selection for Design Guidance
+### When Selecting Model For Design Guidance
 
 **Model selection design guidance:**
 
@@ -122,7 +122,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Impact:** Appropriate model selection reduces execution errors and re-work.
 
-### Design Review Uses Opus
+### When Choosing Model For Design Review
 
 **Decision Date:** 2026-02-04 (superseded by design-vet-agent)
 
@@ -138,7 +138,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Impact:** Three-agent vet system: vet-agent (code, sonnet), vet-fix-agent (code + fixes, sonnet), design-vet-agent (architecture, opus).
 
-### Vet Catches Structure Misalignments
+### When Vet Catches Structural Issues
 
 **Vet catches structure misalignments:**
 
@@ -156,7 +156,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 ## .Orchestration Patterns
 
-### Agent-Creator Reviews in Orchestration
+### When Reviewing Agent Definitions
 
 **Agent-creator reviews in orchestration:**
 
@@ -172,7 +172,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Impact:** Higher quality agent files through specialized review.
 
-### Template Commit Contradiction
+### When Template Context Contradicts Rules
 
 **Template commit contradiction:**
 
@@ -188,7 +188,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Impact:** Resolved directive conflict, clarified when commits are required.
 
-### Orchestrator Model Mismatch
+### When Orchestrator Model Differs From Step
 
 **Orchestrator model mismatch:**
 
@@ -206,7 +206,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 ## .Testing and TDD Patterns
 
-### Happy Path First TDD
+### When Ordering Tdd Test Cases
 
 **Happy path first TDD:**
 
@@ -222,7 +222,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 ## .Runbook Artifacts
 
-### Runbook Outline Format
+### How to Format Runbook Outlines
 
 **Decision Date:** 2026-02-05
 
@@ -278,7 +278,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 ## .Continuation Passing
 
-### Continuation Passing Pattern
+### How to Implement Continuation Passing
 
 **Decision Date:** 2026-02-09
 
@@ -303,7 +303,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Reference:** `agent-core/fragments/continuation-passing.md`, `plans/continuation-passing/design.md`
 
-### Hook-Based Parsing Rationale
+### When Using Hook Based Parsing
 
 **Decision Date:** 2026-02-09
 

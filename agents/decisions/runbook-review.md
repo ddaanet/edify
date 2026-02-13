@@ -6,7 +6,7 @@ Complements `deliverable-review.md` (post-execution artifact review).
 
 ## .Review Axes
 
-### Vacuous Cycles
+### When Detecting Vacuous Tdd Cycles
 
 Cycles where RED tests don't constrain implementation. Haiku satisfies them with degenerate GREEN (structurally correct, behaviorally meaningless).
 
@@ -20,7 +20,7 @@ Cycles where RED tests don't constrain implementation. Haiku satisfies them with
 
 **Grounding:** LLMs produce "syntactically correct but irrelevant" code at 13.6–31.7% rate ("wrong logical direction"), scaling inversely with model size. Vacuous RED tests cannot detect this failure mode. ([Jiang et al., 2024](https://arxiv.org/html/2406.08731v1))
 
-### Dependency Ordering
+### When Ordering Runbook Dependencies
 
 Cycles that reference structures not yet created. The executing model must either create them ad-hoc (scope creep) or mock them (implementation coupling). Both produce fragile GREEN implementations that break in later cycles.
 
@@ -33,7 +33,7 @@ Cycles that reference structures not yet created. The executing model must eithe
 
 **Grounding:** WebApp1K error taxonomy identifies "API Call Mismatch" (Type C) and "Scope Violation" (Type F) as direct consequences of executing against structures that don't match expected state. Non-reasoning models default to pretraining patterns when spec contradicts expectations. ([Fan et al., 2025](https://arxiv.org/html/2505.09027v1))
 
-### Cycle Density
+### When Evaluating Cycle Density
 
 Unnecessary cycles that dilute expansion quality and increase execution context pressure. Every cycle adds prompt length during both expansion (planner attention budget) and execution (haiku context window).
 
@@ -47,7 +47,7 @@ Unnecessary cycles that dilute expansion quality and increase execution context 
 
 **Grounding:** "Instruction loss in long prompts" — fidelity degrades as prompt grows. Remediation loops improve results only when tests encode meaningful requirements; trivial tests don't contribute signal. ([Mathews & Nagappan, 2024](https://arxiv.org/abs/2402.13521); [Fan et al., 2025](https://arxiv.org/html/2505.09027v1))
 
-### Checkpoint Spacing
+### When Spacing Runbook Checkpoints
 
 Distance between quality gates. Without intermediate checkpoints, haiku drift accumulates across phases — pretraining bias overrides spec, and errors compound.
 

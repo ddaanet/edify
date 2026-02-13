@@ -1,6 +1,6 @@
 # Deliverable Review
 
-## Deliverable Definition
+## When Identifying Deliverable Artifacts
 
 A **deliverable** is a production artifact that persists in the repository after plan execution and affects system behavior. It is the unit of review.
 

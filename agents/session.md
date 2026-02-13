@@ -107,10 +107,6 @@
 
 ## Worktree Tasks
 
-- [ ] **Plan when-recall** → `wt/when-recall` — blocked on validator fix | sonnet
-  - Fix validator for exact key matching (remove fuzzy, update _build_heading)
-  - Then migrate memory-index.md to /when format (152 entries)
-  - Findings: `plans/when-recall/reports/migration-findings.md`
 - [ ] **Error handling framework design** → `wt/error-handling` — Resume `/design` Phase B | opus
   - Blocked on: workflow improvements
   - Outline: `plans/error-handling/outline.md`

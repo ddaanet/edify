@@ -4,7 +4,7 @@ Module structure, path handling, data models, and general architectural decision
 
 ## .Module Architecture
 
-### Minimal `__init__.py`
+### How to Write Init Files
 
 **Minimal init:**
 
@@ -20,7 +20,7 @@ from claudeutils.discovery import list_top_level_sessions
 from claudeutils.extraction import extract_feedback_recursively
 ```
 
-### Private Helpers Stay With Callers
+### When Placing Helper Functions
 
 **Private helpers cohesion:**
 
@@ -30,7 +30,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 **Impact:** Clear module boundaries, easier to understand data flow
 
-### Module Split Pattern
+### When Splitting Large Modules
 
 **Decision:** Split large files by functional responsibility (models, paths, parsing, discovery, extraction, cli)
 
@@ -40,7 +40,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 ## .Path Handling
 
-### Path Encoding Algorithm
+### How to Encode File Paths
 
 **Path encoding:**
 
@@ -50,7 +50,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 **Implementation:** `paths.py:encode_project_path()`
 
-### History Directory Resolution
+### How to Resolve History Directories
 
 **Decision:** Use `~/.claude/projects/[ENCODED-PATH]/` as standard location
 
@@ -60,7 +60,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 ## .Content Parsing
 
-### Title Extraction
+### How to Extract Session Titles
 
 **Decision:** Handle both string and array (text blocks) content formats
 
@@ -72,7 +72,7 @@ from claudeutils.extraction import extract_feedback_recursively
 - Array content: find first `type="text"` dict and extract `text` field
 - Default: return empty string
 
-### Title Formatting
+### How to Format Session Titles
 
 **Decision:** Replace newlines with spaces, truncate to 80 chars with "..." suffix
 
@@ -82,7 +82,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 ## .Filtering Logic
 
-### Trivial Message Detection
+### How to Detect Trivial Messages
 
 **Decision:** Multi-layer filter - empty, single-char, slash commands, keyword set
 
@@ -100,7 +100,7 @@ from claudeutils.extraction import extract_feedback_recursively
 **Keywords:**
 `{"y", "n", "k", "g", "ok", "go", "yes", "no", "continue", "proceed", "sure", "okay", "resume"}`
 
-### Feedback Extraction Layering
+### How to Layer Feedback Extraction
 
 **Decision:** Type filter → error check → interruption check → trivial filter
 
@@ -110,7 +110,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 ## .Session Discovery
 
-### UUID Session Pattern
+### How to Validate Session Uuid Files
 
 **Decision:** Validate session files with regex `^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.jsonl$`
 
@@ -118,7 +118,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 **Implementation:** `discovery.py:list_top_level_sessions()`
 
-### Sorted Glob Results
+### When Sorting Glob Results
 
 **Decision:** Use `sorted(history_dir.glob("*.jsonl"))` instead of raw glob
 
@@ -126,7 +126,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 **Impact:** Consistent ordering across runs
 
-### First-Line Parsing
+### How to Parse First Line Metadata
 
 **Decision:** Parse only first JSONL line for session metadata (title, timestamp)
 
@@ -136,7 +136,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 ## .Agent Processing
 
-### Recursive Pattern: AgentId → SessionId
+### How to Resolve Agent Ids To Sessions
 
 **Decision:** Agent IDs become session IDs for child agents
 
@@ -150,7 +150,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 **Impact:** True tree recursion without special tracking
 
-### Agent ID Extraction
+### How to Extract Agent Ids From Sessions
 
 **Decision:** Extract `agentId` from first line when processing agent files
 
@@ -160,7 +160,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 ## .Error Handling
 
-### Graceful Degradation
+### When Handling Malformed Session Data
 
 **Decision:** Skip malformed entries, log warnings, continue processing
 
@@ -173,7 +173,7 @@ from claudeutils.extraction import extract_feedback_recursively
 
 **Rationale:** Partial data better than complete failure; user can investigate warnings
 
-### Optional Field Defaults
+### How to Handle Optional Field Defaults
 
 **Decision:** Use `.get(field, default)` for optional fields (sessionId, agentId, slug)
 

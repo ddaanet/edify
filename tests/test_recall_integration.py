@@ -154,3 +154,92 @@ def test_recall_report_formatting(tmp_path: Path) -> None:
     data = json.loads(json_text)
     assert data["sessions_analyzed"] == 1
     assert data["overall_recall_percent"] == 100.0
+
+
+def test_recall_analysis_with_new_format(tmp_path: Path) -> None:
+    """Verify recall analysis works with new /when format and empty description.
+
+    The new format has no description field.
+    """
+    # Create index file in new format (empty description)
+    index_file = tmp_path / "index.md"
+    index_file.write_text(
+        "## agents/decisions/testing.md\n\n"
+        "/when TDD RED Phase | verify behavior\n"
+        "/when TDD GREEN Phase | implement feature\n\n"
+        "## agents/decisions/workflow.md\n\n"
+        "/how weak orchestrator | pattern design\n"
+    )
+
+    # Create session with relevant topics
+    session_file = tmp_path / "session.jsonl"
+    session_file.write_text(
+        '{"type":"user","message":{"content":"Implementing TDD for testing"},'
+        '"timestamp":"2025-12-16T10:00:00.000Z","sessionId":"test-session"}\n'
+        '{"type":"assistant","message":{"content":[{"type":"tool_use",'
+        '"id":"read_1","name":"Read",'
+        '"input":{"file_path":"agents/decisions/testing.md"}}]},'
+        '"timestamp":"2025-12-16T10:00:01.000Z","sessionId":"test-session"}\n'
+    )
+
+    # Parse index with new format
+    entries = parse_memory_index(index_file)
+    assert len(entries) == 3
+    # Verify entries have empty description
+    for entry in entries:
+        assert entry.description == ""
+    # Verify keywords are extracted from trigger text
+    assert all(entry.keywords for entry in entries)
+
+    # Extract topics from session
+    topics = extract_session_topics(session_file)
+    assert "testing" in topics or "tdd" in topics
+
+    # Extract tool calls
+    tool_calls = extract_tool_calls_from_session(session_file)
+    assert len(tool_calls) == 1
+    assert tool_calls[0].tool_name == "Read"
+
+    # Find relevant entries (should work without description field)
+    # Threshold 0.1 ensures keyword overlap "tdd" (1/5 = 0.2) exceeds it
+    relevant = find_relevant_entries("test-session", topics, entries, threshold=0.1)
+    assert len(relevant) > 0, (
+        "New-format entries must produce matches, not silent empty list"
+    )
+
+    # Calculate recall (should handle empty description gracefully)
+    analysis = calculate_recall(
+        {"test-session": tool_calls},
+        {"test-session": relevant},
+        entries,
+    )
+
+    assert analysis.sessions_analyzed == 1
+    # Report should generate without crash
+    markdown_report = generate_markdown_report(analysis)
+    assert "# Memory Index Recall Report" in markdown_report
+    assert "## Summary" in markdown_report
+
+    # Test with empty index
+    empty_index = tmp_path / "empty.md"
+    empty_index.write_text("# Memory Index\n")
+    empty_entries = parse_memory_index(empty_index)
+    assert len(empty_entries) == 0
+
+    empty_session = tmp_path / "empty-session.jsonl"
+    empty_session.write_text(
+        '{"type":"user","message":{"content":"Some work"},'
+        '"timestamp":"2025-12-16T10:00:00.000Z","sessionId":"empty-session"}\n'
+    )
+    empty_topics = extract_session_topics(empty_session)
+    empty_relevant = find_relevant_entries("empty-session", empty_topics, empty_entries)
+    assert len(empty_relevant) == 0
+
+    empty_tool_calls = extract_tool_calls_from_session(empty_session)
+    empty_analysis = calculate_recall(
+        {"empty-session": empty_tool_calls},
+        {"empty-session": empty_relevant},
+        empty_entries,
+    )
+    assert empty_analysis.relevant_pairs_total == 0
+    assert empty_analysis.pairs_with_read == 0

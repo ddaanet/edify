@@ -2,7 +2,7 @@
 
 Detailed implementation decisions for claudeutils codebase. Consult this document when implementing similar features or patterns.
 
-## @ references limitation
+## When Using At-sign References
 
 **Context:** CLAUDE.md supports `@file.md` references for progressive disclosure.
 
@@ -17,7 +17,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** Skill documentation must use inline content or relative paths for supporting files.
 
-## Skill Rules Placement: Point of Violation
+## When Placing Skill Constraint Rules
 
 **Context:** Multi-phase skill procedures with content generation and cleanup.
 
@@ -35,7 +35,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 ## .Claude Code Hooks and Sessions
 
-### SessionStart Hook Limitation
+### When Using Session Start Hooks
 
 **Context:** SessionStart hook output is discarded for new interactive sessions.
 
@@ -47,7 +47,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** Don't build features depending on SessionStart until fixed upstream.
 
-### UserPromptSubmit Hook Filtering
+### How to Filter User Prompt Submit Hooks
 
 **Decision:** UserPromptSubmit hooks fire on every prompt; no `matcher` field support.
 
@@ -57,7 +57,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Example:** PreToolUse/PostToolUse support `matcher`, UserPromptSubmit does not.
 
-### Hook Capture Impractical for Subagents
+### When Using Hooks In Subagents
 
 **Anti-pattern:** Using PostToolUse hooks to capture Explore/claude-code-guide results.
 
@@ -67,7 +67,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** Sub-agents can have tools (Bash, Write) but hook interceptors won't execute.
 
-### MCP Tools Unavailable in Subagents
+### When Needing Mcp Tools In Subagents
 
 **Anti-pattern:** Assuming quiet-task or other sub-agents can call MCP tools (Context7, etc.).
 
@@ -77,7 +77,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** Context7 queries cost opus tokens when designer calls them, but results persist for planner reuse.
 
-### Loaded Skill Overrides Fresh-Session Framing
+### When Skill Is Already Loaded
 
 **Anti-pattern:** After `/clear`, treating loaded skill content as informational rather than actionable.
 
@@ -87,7 +87,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 ## .Version Control Patterns
 
-### Commits Are Sync Points
+### When Treating Commits As Sync Points
 
 **Principle:** Every version control commit synchronizes files, submodules, and context (session.md).
 
@@ -101,7 +101,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** Commit skill serves as synchronization checkpoint for all versioned state.
 
-### Never Auto-Commit in Interactive Sessions
+### When Deciding To Commit Interactively
 
 **Anti-pattern:** Committing after completing work because it "feels like a natural breakpoint".
 
@@ -117,7 +117,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 ## .Tokenization and Formatting
 
-### Title-Words Beat Kebab-Case
+### When Choosing Naming Convention Format
 
 **Decision:** Use title-words (e.g., `Tool batching unsolved`) instead of kebab-case identifiers (e.g., `tool-batching-unsolved`).
 
@@ -127,7 +127,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** More efficient token usage for identifiers and headers.
 
-### Bare Lines Beat List Markers
+### When Formatting Index Entry Lines
 
 **Decision:** Use bare lines without markers for flat keyword lists.
 
@@ -139,7 +139,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** 14% token reduction for index structures.
 
-### Default Semantic, Mark Structural
+### When Classifying Section Headers
 
 **Decision:** Default semantic, `.` prefix marks structural (`## .Title`).
 
@@ -159,7 +159,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 ## .Design and Requirements
 
-### Design Tables Are Binding Constraints
+### When Reading Design Classification Tables
 
 **Decision:** Read design classification tables LITERALLY. Apply judgment only where design says "use judgment".
 
@@ -171,7 +171,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** Implementation matches design intent without interpretation drift.
 
-### Header Titles Not Index Entries
+### When Writing Memory Index Entry Keys
 
 **Anti-pattern:** Adding header titles to memory-index.md and claiming "entries exist".
 
@@ -181,7 +181,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** Don't dismiss critical vet feedback by reframing it as a less-severe related finding.
 
-### Phase-Grouped Runbook Header Format
+### How to Format Runbook Phase Headers
 
 **Decision Date:** 2026-02-05
 
@@ -195,7 +195,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** Runbook processing tools work correctly with phase-grouped structure.
 
-## Prose Gate D+B Hybrid Fix
+## How to Implement Prose Gates
 
 **Decision Date:** 2026-02-06
 
@@ -216,7 +216,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 ## .Validation Patterns
 
-### Hard Limits vs Soft Limits
+### When Choosing Hard Or Soft Limits
 
 **Decision Date:** 2026-02-11
 
@@ -232,7 +232,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** Clear pass/fail states, no ambiguity about compliance.
 
-### Organizational Sections and Index Pollution
+### When Marking Organizational Sections
 
 **Decision Date:** 2026-02-11
 
@@ -246,7 +246,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Impact:** Cleaner indexes pointing only to actual content sections.
 
-### Index Entry Key Preservation
+### When Shortening Index Entry Keys
 
 **Decision Date:** 2026-02-11
 
@@ -262,7 +262,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 ## .Script Optimization
 
-### Batch Edit Token Efficiency
+### How to Format Batch Edits Efficiently
 
 **Decision Date:** 2026-02-11
 
@@ -279,7 +279,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 ## .Workflow Integrity
 
-### Commits Must Remove Invalidated Learnings
+### When Removing Stale Learnings On Commit
 
 **Decision Date:** 2026-02-11
 

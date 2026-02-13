@@ -5,44 +5,34 @@ from pathlib import Path
 from claudeutils.validation.memory_index import validate
 
 
-def test_exempt_sections_preserved_as_is(tmp_path: Path) -> None:
-    """Test that exempt sections are preserved as-is."""
+def test_exempt_sections_removed_after_migration(tmp_path: Path) -> None:
+    """Test that exempt sections are removed after migration."""
     decisions_dir = tmp_path / "agents" / "decisions"
     decisions_dir.mkdir(parents=True)
 
     decision_file = decisions_dir / "test-decision.md"
     decision_file.write_text("""# Test Decision
 
-## Test Header
+## When Test Header
 Content here.
 """)
 
     index_file = tmp_path / "agents" / "memory-index.md"
     index_file.write_text("""# Memory Index
 
-## Behavioral Rules (fragments — already loaded)
-
-Some custom rule — description that shows em-dash format here
-Another rule — another entry with proper em-dash separator today
-
-## Technical Decisions (mixed — check entry for specific file)
-
-Technical note — entry with em-dash in technical section here
-Another item — another entry with proper format today now
-
 ## agents/decisions/test-decision.md
 
-Test Header — Entry for semantic header with content here
+/when test header
 """)
 
     errors = validate("agents/memory-index.md", tmp_path, autofix=True)
     assert errors == []
 
-    # Verify exempt sections preserved
+    # Verify exempt sections are not present after migration
     content = index_file.read_text()
-    assert "Some custom rule — description that shows em-dash format here" in content
-    assert "Another rule — another entry with proper em-dash separator today" in content
-    assert "Technical note — entry with em-dash in technical section here" in content
+    assert "Behavioral Rules" not in content
+    assert "Technical Decisions" not in content
+    assert "/when test header" in content
 
 
 def test_autofix_false_reports_all_issues(tmp_path: Path) -> None:
@@ -53,10 +43,10 @@ def test_autofix_false_reports_all_issues(tmp_path: Path) -> None:
     file1 = decisions_dir / "file-one.md"
     file1.write_text("""# File One
 
-## First Header
+## When First Header
 Content here.
 
-## Second Header
+## When Second Header
 More content.
 """)
 
@@ -65,8 +55,8 @@ More content.
 
 ## agents/decisions/file-one.md
 
-Second Header — Entry in wrong order here today ok
-First Header — Entry that should come first now
+/when second header
+/when first header
 """)
 
     # With autofix=False, should report errors
@@ -83,14 +73,14 @@ def test_duplicate_headers_across_files_error(tmp_path: Path) -> None:
     file1 = decisions_dir / "file-one.md"
     file1.write_text("""# File One
 
-## Duplicate Name
+## When Duplicate Name
 Content here.
 """)
 
     file2 = decisions_dir / "file-two.md"
     file2.write_text("""# File Two
 
-## Duplicate Name
+## When Duplicate Name
 Different content.
 """)
 
@@ -99,16 +89,16 @@ Different content.
 
 ## agents/decisions/file-one.md
 
-Duplicate Name — Entry for duplicate header found multiple places now
+/when duplicate name
 
 ## agents/decisions/file-two.md
 
-Duplicate Name — Another entry for same duplicate header here too
+/when duplicate name
 """)
 
     errors = validate("agents/memory-index.md", tmp_path, autofix=False)
     assert len(errors) > 0
-    assert any("Duplicate header 'duplicate name'" in e for e in errors)
+    assert any("Duplicate header 'when duplicate name'" in e for e in errors)
 
 
 def test_multiple_autofix_issues_resolved_in_single_pass(tmp_path: Path) -> None:
@@ -119,17 +109,17 @@ def test_multiple_autofix_issues_resolved_in_single_pass(tmp_path: Path) -> None
     file1 = decisions_dir / "file-one.md"
     file1.write_text("""# File One
 
-## First Header
+## When First Header
 Content here.
 
-## Second Header
+## When Second Header
 More content.
 """)
 
     file2 = decisions_dir / "file-two.md"
     file2.write_text("""# File Two
 
-## Third Header
+## When Third Header
 Content here.
 """)
 
@@ -138,9 +128,9 @@ Content here.
 
 ## agents/decisions/file-one.md
 
-Second Header — Entry in wrong section and wrong order fix this now
-Third Header — Entry in wrong section entirely different place today
-First Header — Entry in wrong order here too needs reordering now
+/when second header
+/when third header
+/when first header
 
 ## agents/decisions/file-two.md
 """)
@@ -195,7 +185,7 @@ def test_document_intro_exemption(tmp_path: Path) -> None:
 Intro content with ## that looks like header syntax
 But this content should be skipped before first real header
 
-## Real Header
+## When Real Header
 Actual content here.
 """)
 
@@ -204,7 +194,7 @@ Actual content here.
 
 ## agents/decisions/test-decision.md
 
-Real Header — Semantic header after intro content here
+/when real header
 """)
 
     errors = validate("agents/memory-index.md", tmp_path)
@@ -218,4 +208,91 @@ def test_empty_index_file_no_errors(tmp_path: Path) -> None:
     index_file.write_text("")
 
     errors = validate("agents/memory-index.md", tmp_path)
+    assert errors == []
+
+
+def test_autofix_new_format(tmp_path: Path) -> None:
+    """Test that autofix handles /when format entries correctly.
+
+    Verifies:
+    - Entry in wrong file section → autofix moves to correct section
+    - Entries out of file order within section → autofix reorders
+    - Entry pointing to structural heading (. prefix) → autofix removes
+    - After autofix: re-running validation produces zero errors
+    """
+    decisions_dir = tmp_path / "agents" / "decisions"
+    decisions_dir.mkdir(parents=True)
+
+    file1 = decisions_dir / "file-one.md"
+    file1.write_text("""# File One
+
+## When Mock Test
+Content here.
+
+## When Real Header
+More content.
+""")
+
+    file2 = decisions_dir / "file-two.md"
+    file2.write_text("""# File Two
+
+## .Structural Section
+This is structural.
+""")
+
+    # Index with issues:
+    # 1. /when mock test in file-two section (wrong section)
+    # 2. Entries out of order
+    # 3. /when structural section pointing to dot-prefixed header
+    index_file = tmp_path / "agents" / "memory-index.md"
+    index_file.write_text("""# Memory Index
+
+## agents/decisions/file-two.md
+
+/when mock test
+/when structural section
+
+## agents/decisions/file-one.md
+
+/when real header
+""")
+
+    # Run autofix
+    errors = validate("agents/memory-index.md", tmp_path, autofix=True)
+    assert errors == []
+
+    # Verify the index was fixed:
+    content = index_file.read_text()
+
+    # Verify correct sections exist
+    assert "## agents/decisions/file-one.md" in content
+    assert "## agents/decisions/file-two.md" in content
+
+    # Verify /when format is preserved
+    assert "/when mock test" in content
+    assert "/when real header" in content
+
+    # Verify structural entry was removed
+    assert "/when structural section" not in content
+
+    # Verify mock test is in file-one section (correct location)
+    lines = content.splitlines()
+    file1_idx = next(
+        i for i, line in enumerate(lines) if "agents/decisions/file-one.md" in line
+    )
+    file2_idx = next(
+        i for i, line in enumerate(lines) if "agents/decisions/file-two.md" in line
+    )
+
+    mock_test_idx = next(i for i, line in enumerate(lines) if "/when mock test" in line)
+    assert file1_idx < mock_test_idx < file2_idx
+
+    # Verify ordering (mock test at line 3, real header at line 6)
+    real_header_idx = next(
+        i for i, line in enumerate(lines) if "/when real header" in line
+    )
+    assert mock_test_idx < real_header_idx
+
+    # Re-running validation should produce no errors
+    errors = validate("agents/memory-index.md", tmp_path, autofix=False)
     assert errors == []

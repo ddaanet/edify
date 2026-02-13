@@ -15,7 +15,7 @@ Memory index achieves 0% recall across 200 sessions (7,483 opportunities). The c
 - FR-3: Output includes ancestor (broader) and sibling (related) navigation — addressed by resolver output format
 - FR-4: Validator enforces bidirectional integrity (trigger↔heading) — addressed by validator update
 - FR-5: `/remember` produces `/when` format entries — addressed by remember skill update
-- FR-6: All ~140 entries migrated to new format — addressed by index migration (corpus analysis counts 122 non-exempt entries; ~140 includes exempt section entries that will be removed)
+- FR-6: All entries migrated to new format — addressed by index migration (current count: ~160 entries including exempt sections; actual migration scope depends on entry count at execution time)
 - FR-7: Three resolution modes: trigger, .section, ..file — addressed by resolver modes
 
 ### Non-Functional
@@ -30,7 +30,7 @@ Memory index achieves 0% recall across 200 sessions (7,483 opportunities). The c
 - Cross-file explicit relations
 - Hook-based auto-injection (future)
 - `/what` and `/why` operators (dropped — passive knowledge, LLMs don't probe)
-- Measurement tooling changes (existing recall tool works as-is)
+- Measurement tooling redesign (recall tool parser updated in step 12 to handle new format, but no architectural changes to recall analysis)
 
 ## Architecture
 
@@ -232,7 +232,10 @@ Related:
 - `src/claudeutils/validation/memory_index.py` — facade: `extract_index_entries()` format parsing
 - `src/claudeutils/validation/memory_index_checks.py` — `check_em_dash_and_word_count()` replaced with trigger format checks
 - `src/claudeutils/validation/memory_index_helpers.py` — `extract_index_structure()` and `autofix_index()` adapted for new format, EXEMPT_SECTIONS updated
-- `agent-core/bin/validate-memory-index.py` — bin script (parallel implementation, same changes)
+
+**Invocation:** Precommit runs `claudeutils validate` (via justfile), which calls `validate_memory_index()` from the package. There is no separate bin script — validation lives entirely in `src/claudeutils/validation/`.
+
+**Note on internal duplication:** `memory_index_helpers.py` and `memory_index_checks.py` both define check functions (e.g., `check_em_dash_and_word_count`, `check_duplicate_entries`). The facade (`memory_index.py`) imports from helpers. Both files need consistent updates.
 
 **Validation checks (updated):**
 
@@ -256,7 +259,7 @@ Related:
 
 **Backward compatibility:** During migration, both old format (`Key — description`) and new format (`/when trigger | extras`) may temporarily coexist. The validator must handle this transitional state or the migration must be atomic (all entries converted in one commit). Design choice: **atomic migration** — convert all entries and rename all headings in a single commit, avoiding dual-format complexity in the validator.
 
-**Exempt section changes:** "Behavioral Rules" section removed entirely (per design). "Technical Decisions (mixed)" section entries redistributed to file-based sections. EXEMPT_SECTIONS constant updated to empty set after migration.
+**Exempt section changes:** "Behavioral Rules" section removed entirely (per design). "Technical Decisions (mixed)" section entries redistributed to file-based sections — this creates new index sections for files currently without sections (e.g., `data-processing.md`, `cli.md`, `markdown-tooling.md`, `validation-quality.md`, `defense-in-depth.md`). EXEMPT_SECTIONS constant updated to empty set after migration.
 
 ### Key Compression Tool
 
@@ -277,7 +280,7 @@ Two thin skills, same resolver:
 ---
 name: when
 description: Recall behavioral knowledge. Invoke when facing a decision or pattern you've seen before.
-allowed-tools: Bash(claudeutils:*), Bash(agent-core/bin/when-resolve.py:*)
+allowed-tools: Bash(agent-core/bin/when-resolve.py:*)
 user-invocable: true
 ---
 ```
@@ -289,12 +292,14 @@ Execution: `agent-core/bin/when-resolve.py when <trigger>`
 ---
 name: how
 description: Recall procedural knowledge. Invoke when you need to know how to do something.
-allowed-tools: Bash(claudeutils:*), Bash(agent-core/bin/when-resolve.py:*)
+allowed-tools: Bash(agent-core/bin/when-resolve.py:*)
 user-invocable: true
 ---
 ```
 
 Execution: `agent-core/bin/when-resolve.py how <trigger>`
+
+**Tool permission note:** Skills use the bin script as entry point (matching `Bash(agent-core/bin/when-resolve.py:*)`). The bin script calls into `claudeutils.when` internally. This follows the same pattern as worktree skill using `Bash(claudeutils _worktree:*)`.
 
 ### Consumption Header Update
 
@@ -350,7 +355,7 @@ Where margin = ~2 tokens (overhead of `/` and entry formatting). If full content
 
 Keep decisions grouped in `agents/decisions/*.md` files.
 
-**Rationale:** Prompt caching research showed prefix-level caching (not file-level dedup). Splitting 102 headings into individual files would create 102 files with no caching benefit and significant management overhead.
+**Rationale:** Prompt caching research showed prefix-level caching (not file-level dedup). Splitting headings into individual files (120+) would create many files with no caching benefit and significant management overhead.
 
 ### D-3: Two operators only
 
@@ -358,7 +363,7 @@ Keep decisions grouped in `agents/decisions/*.md` files.
 
 **Rationale:** LLMs don't proactively seek definitions or rationale. `/what` and `/why` are passive knowledge — exactly the pattern that failed with 0% recall. Only behavioral triggers ("/when X happens, do Y") and procedural triggers ("/how to do X") create retrieval intention.
 
-Corpus analysis confirms: 27% of entries are `/how` candidates, remaining 73% fit `/when`. `/what` and `/why` candidates (16 entries) can be rephrased as `/when` or `/how`.
+Corpus analysis showed: 27% of entries are `/how` candidates, remaining 73% fit `/when`. `/what` and `/why` candidates (16 entries) can be rephrased as `/when` or `/how`. Note: corpus analysis was performed at 122 entries; index has since grown to ~160.
 
 ### D-4: Custom fuzzy engine over library
 
@@ -404,11 +409,11 @@ The existing recall analysis tool (`src/claudeutils/recall/`) parses the current
 
 **Impact:** The recall tool measures effectiveness (NFR-3: >10% recall within 30 sessions). It must work with the new format to validate success criteria.
 
-**Approach:** Update `src/claudeutils/recall/index_parser.py` to parse new format, or have it consume entries from the shared `when/index_parser.py`. This is not in the primary migration sequencing because it can be done as a follow-up (the recall tool is measurement infrastructure, not runtime).
+**Approach:** Update `src/claudeutils/recall/index_parser.py` to parse new format, or have it consume entries from the shared `when/index_parser.py`. Included as step 12 in migration sequencing.
 
 ### Decision file heading renames
 
-~140 headings need renaming. Each current heading (e.g., `### Mock Patching Pattern`) becomes prefixed (e.g., `### When Writing Mock Tests` or `### How to Patch Mocks`).
+Semantic headings need renaming. Each current heading (e.g., `### Mock Patching Pattern`) becomes prefixed (e.g., `### When Writing Mock Tests` or `### How to Patch Mocks`).
 
 **Process:**
 1. Build mapping: current heading → new heading (from migrated index)
@@ -417,23 +422,17 @@ The existing recall analysis tool (`src/claudeutils/recall/`) parses the current
 
 **Risk:** Heading renames may break `@` references or documentation links. Mitigate: grep for old heading text before rename, update references atomically.
 
-**Scope of heading renames:** Only semantic headings (non-`.` prefix) get renamed. Structural headings (`.` prefix like `.Test Organization`, `.Mock Patching`) remain unchanged — they are organizational, not indexed. This reduces rename scope from ~140 to ~102 headings (corpus analysis: 102 unique semantic H3 headings across 9 decision files).
+**Scope of heading renames:** Only semantic headings (non-`.` prefix) get renamed. Structural headings (`.` prefix like `.Test Organization`, `.Mock Patching`) remain unchanged — they are organizational, not indexed. Current counts: ~123 semantic H3+ headings across 11 decision files, ~70 structural headings. Exact rename scope determined at execution time.
 
 ### Validator refactoring
 
-Current validator exists in two locations:
-- `agent-core/bin/validate-memory-index.py` (480 lines, standalone bin script)
-- `src/claudeutils/validation/memory_index*.py` (3 modules: facade, checks, helpers — consolidated package)
+Validation lives in a single location: `src/claudeutils/validation/memory_index*.py` (3 modules: facade, checks, helpers). Precommit invokes this via `claudeutils validate` (justfile recipe). Core validation logic (bidirectional integrity, autofix) remains; format parsing changes.
 
-Both need format parsing updates. Core validation logic (bidirectional integrity, autofix) remains; format parsing changes.
-
-**Affected package modules:**
+**Affected modules:**
 - `src/claudeutils/validation/memory_index.py`: `extract_index_entries()` — new format parsing
 - `src/claudeutils/validation/memory_index_checks.py`: Format validation rules — replace `check_em_dash_and_word_count()` with trigger format check
 - `src/claudeutils/validation/memory_index_helpers.py`: Autofix — adapt for new format, update EXEMPT_SECTIONS
 - New dependency: fuzzy engine in `src/claudeutils/when/fuzzy.py` (imported by validator)
-
-**Bin script:** `agent-core/bin/validate-memory-index.py` must be updated in parallel (same changes). This duplication is an existing pattern; the bin script runs in precommit, the package modules are tested via pytest.
 
 ### Testing strategy
 
@@ -472,12 +471,13 @@ Components have dependencies. Recommended build order:
 3. **Navigation** (`src/claudeutils/when/navigation.py`) — depends on file content parsing (no resolver dependency)
 4. **Resolver** (`src/claudeutils/when/resolver.py`) — depends on fuzzy + parser + navigation
 5. **CLI** (`src/claudeutils/when/cli.py` + `agent-core/bin/when-resolve.py`) — depends on resolver
-6. **Validator update** (`src/claudeutils/validation/memory_index*.py` + bin script) — depends on fuzzy + parser
+6. **Validator update** (`src/claudeutils/validation/memory_index*.py`) — depends on fuzzy + parser
 7. **Key compression tool** (`agent-core/bin/compress-key.py`) — depends on fuzzy
 8. **Skills** (`agent-core/skills/when/`, `agent-core/skills/how/`) — depends on CLI (requires restart)
 9. **Index migration** (agents/memory-index.md + heading renames) — depends on all above (migration validates with new validator)
 10. **Remember skill update** (`agent-core/skills/remember/SKILL.md`) — depends on format spec
 11. **Consumption header** (agents/memory-index.md preamble) — depends on skills being ready
+12. **Recall tool parser update** (`src/claudeutils/recall/index_parser.py`) — update to parse new format (NFR-3 measurement depends on this)
 
 **Dependency correction:** Navigation (step 3) does not depend on the resolver — it operates on file content and heading strings directly. The resolver depends on navigation (to compute output links). This ordering allows navigation to be tested independently before resolver integration.
 
@@ -489,7 +489,6 @@ Components have dependencies. Recommended build order:
 | `src/claudeutils/recall/relevance.py` | Keyword overlap logic — informational only (fuzzy engine replaces) |
 | `src/claudeutils/validation/memory_index*.py` | Extend with new format support, keep autofix mechanics |
 | `src/claudeutils/validation/common.py` | Shared utilities if applicable |
-| `agent-core/bin/validate-memory-index.py` | Parallel update required (standalone bin script) |
 
 ## Requirements Traceability
 
@@ -516,7 +515,7 @@ Components have dependencies. Recommended build order:
 - `agents/decisions/testing.md` — TDD conventions
 - `plans/when-recall/reports/corpus-analysis.md` — entry pattern classification
 - `plans/when-recall/reports/fzf-research.md` — fuzzy algorithm research
-- `plans/when-recall/reports/explore-design-context.md` — validator/skill/package structure
+- `plans/when-recall/reports/explore-design-context.md` — validator/skill/package structure (note: was generated from a different worktree; `agent-core/bin/validate-memory-index.py` reference is stale — bin script does not exist in this repo)
 
 **Context7 references:**
 - Click CLI framework (query: "click command group subcommand") — if needed for CLI structure

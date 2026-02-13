@@ -4,7 +4,7 @@ Distilled from prompt-composer design (Dec 2025). Original research in `plans/pr
 
 ---
 
-## Position Bias (Serial Position Effects)
+## When Ordering Content For Position Bias
 
 LLMs exhibit **strong primacy bias** — content at the beginning of context receives disproportionate attention. Secondary **recency bias** exists at the end. Middle content has weakest influence ("lost in the middle").
 
@@ -23,7 +23,7 @@ LLMs exhibit **strong primacy bias** — content at the beginning of context rec
 
 ---
 
-## Rule Format Effectiveness
+## When Formatting Rules For Adherence
 
 Bullet points outperform prose for discrete task adherence. Connected ideas requiring context benefit from paragraph format.
 
@@ -40,7 +40,7 @@ Bullet points outperform prose for discrete task adherence. Connected ideas requ
 
 ---
 
-## Model Capability Differences
+## When Writing Rules For Different Models
 
 Different model classes benefit from different instruction density:
 
@@ -59,7 +59,7 @@ Different model classes benefit from different instruction density:
 
 ---
 
-## Rule Budget Constraints
+## When Managing Rule Count Budget
 
 LLM adherence degrades with excessive rules. Empirical observation: adherence collapses >200 rules. Claude system prompt consumes ~50, leaving ~150 for user rules.
 
@@ -67,7 +67,7 @@ LLM adherence degrades with excessive rules. Empirical observation: adherence co
 
 ---
 
-## Context Loading Behavior
+## When Loading Context For Llm Processing
 
 LLMs only read explicitly provided context. No inherent behavior to load additional files. Context files require explicit reading instructions or `@` references.
 
@@ -75,7 +75,7 @@ LLMs only read explicitly provided context. No inherent behavior to load additio
 
 ---
 
-## Tool Landscape (Dec 2025)
+## When Evaluating Prompt Structure Tools
 
 No existing tool combines position bias optimization + model-specific variants + rule budgeting. Closest matches:
 - **Airia Prompt Layering** — modular composition but no tiering/budgeting (commercial only)
@@ -86,7 +86,7 @@ No existing tool combines position bias optimization + model-specific variants +
 
 ---
 
-## Applicability to Current Architecture
+## When Applying Prompt Research
 
 The fragment system (`agent-core/fragments/` + CLAUDE.md `@` references) solves modular composition. Remaining opportunities:
 - ~~**Position optimization** — order fragments/rules by criticality (primacy/recency)~~ **Done** (Feb 2026)
@@ -95,7 +95,7 @@ The fragment system (`agent-core/fragments/` + CLAUDE.md `@` references) solves 
 
 ---
 
-## Fragment Ordering Rationale (Feb 2026)
+## How to Order Fragments By Position Bias
 
 CLAUDE.md sections ordered by position bias research (primacy strongest, recency secondary, middle weakest).
 

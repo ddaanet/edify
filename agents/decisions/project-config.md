@@ -4,7 +4,7 @@ Project-level configuration decisions for Claude Code, models, skills, and devel
 
 ## .Memory Index Pruning
 
-### Growth + Consolidation Model
+### How to Manage Memory Index Growth
 
 **Memory index append-only:**
 
@@ -31,7 +31,7 @@ Project-level configuration decisions for Claude Code, models, skills, and devel
 
 ## .Claude Code Rule Files
 
-### Rule Files for Context Injection
+### How to Inject Context With Rule Files
 
 **Rule files pattern:**
 
@@ -62,7 +62,7 @@ Project-level configuration decisions for Claude Code, models, skills, and devel
 
 ## .Model Terminology
 
-### Premium/Standard/Efficient Naming
+### When Naming Model Capability Tiers
 
 **Premium standard efficient:**
 
@@ -87,7 +87,7 @@ Project-level configuration decisions for Claude Code, models, skills, and devel
 
 ## .Skill Discovery
 
-### Multi-Layer Discovery Pattern
+### How to Surface Skills Through Discovery Layers
 
 **Skill discovery layers:**
 
@@ -111,7 +111,7 @@ Project-level configuration decisions for Claude Code, models, skills, and devel
 
 ## .Agent Development
 
-### Agent Frontmatter YAML Validation
+### When Writing Agent Yaml Frontmatter
 
 **Agent frontmatter multiline:**
 
@@ -138,7 +138,7 @@ description: |
 
 ## .Symlink Management
 
-### Symlink Persistence
+### When Verifying Symlinks After Operations
 
 **Symlinks after formatters:**
 
@@ -156,7 +156,7 @@ description: |
 
 ## .Shell Environment
 
-### Heredoc Sandbox Compatibility
+### When Using Heredocs In Sandbox
 
 **Heredocs in sandbox:**
 
@@ -174,7 +174,7 @@ description: |
 
 ## .Command-Line Parsing
 
-### Flags Are Exact Tokens
+### When Parsing Cli Flags As Tokens
 
 **Flags are exact tokens:**
 
@@ -215,7 +215,7 @@ description: |
 
 ## .Project Structure
 
-### Root Marker for Scripts
+### When Finding Project Root In Scripts
 
 **Root marker for scripts:**
 

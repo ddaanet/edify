@@ -2,7 +2,7 @@
 
 Workflow-related architectural decisions and patterns.
 
-## Oneshot Workflow Pattern
+## When Using Oneshot Workflow
 
 **Decision Date:** 2026-01-19
 
@@ -37,7 +37,7 @@ Workflow-related architectural decisions and patterns.
 - Standardized terminology across documentation
 - Reusable components via agent-core submodule
 
-## TDD Workflow Integration
+## How to Integrate Tdd Workflow
 
 **Decision Date:** 2026-01-19, Updated 2026-01-26
 
@@ -83,7 +83,7 @@ Workflow-related architectural decisions and patterns.
 - Consistent terminology across test and implementation phases
 - Proper execution flow: design → plan → review → prepare → orchestrate
 
-## Handoff Pattern: Inline Learnings
+## How to Store Learnings In Handoffs
 
 **Handoff pattern:**
 
@@ -107,7 +107,7 @@ Workflow-related architectural decisions and patterns.
 - Easier to discover and update learnings
 - Self-contained session documentation
 
-## Design Phase: Output Optimization
+## When Optimizing Design Phase Output
 
 **Decision Date:** 2026-01-27
 
@@ -128,7 +128,7 @@ Workflow-related architectural decisions and patterns.
 - No loss of implementation quality (detail added in planning)
 - Faster design sessions
 
-## Planning Pattern: Three-Stream Problem Documentation
+## How to Document Three Stream Planning
 
 **Decision Date:** 2026-01-27
 
@@ -153,7 +153,7 @@ plans/<stream-name>/
 - User can prioritize work streams easily
 - Clear separation of analysis vs design
 
-## TDD Workflow: Commit Squashing Pattern
+## How to Squash Tdd Cycle Commits
 
 **TDD commit squashing:**
 
@@ -179,7 +179,7 @@ plans/<stream-name>/
 - Full audit trail in execution reports
 - Easy to review feature implementation holistically
 
-## Orchestrator Execution Mode
+## When Setting Orchestrator Execution Mode
 
 **Decision Date:** 2026-01-31
 
@@ -212,7 +212,7 @@ plans/<stream-name>/
 - Clear contract between planner and orchestrator
 - Eliminates ambiguity in execution mode requirements
 
-## Orchestration Assessment: Three-Tier Implementation Model
+## When Assessing Orchestration Tier
 
 **Three-tier assessment:**
 
@@ -249,7 +249,7 @@ plans/<stream-name>/
 
 **Impact:** Prevents unnecessary runbook creation for straightforward tasks while surfacing lightweight delegation as middle ground.
 
-## Checkpoint Process for Runbooks
+## How to Checkpoint Runbook Execution
 
 **Checkpoint process:**
 
@@ -265,7 +265,7 @@ plans/<stream-name>/
 
 **Impact:** Optimal cost-benefit for runbook quality assurance.
 
-## Phase-Grouped TDD Runbooks
+## How to Structure Phase Grouped Runbooks
 
 **Decision Date:** 2026-01-31
 
@@ -281,7 +281,7 @@ plans/<stream-name>/
 
 **Impact:** Flexible runbook structure for different complexity levels.
 
-## Cycle Numbering Gaps Relaxed
+## When Cycle Numbering Has Gaps
 
 **Decision Date:** 2026-02-04
 
@@ -293,7 +293,7 @@ plans/<stream-name>/
 
 **Impact:** Reduced editing friction during runbook creation while maintaining validation for actual errors.
 
-## No Human Escalation During Refactoring
+## When Refactoring Needs Escalation
 
 **Decision Date:** 2026-01-31
 
@@ -303,7 +303,7 @@ plans/<stream-name>/
 
 **Impact:** Faster execution, clear separation between design (user input) and implementation (automated).
 
-## Defense-in-Depth: Commit Verification
+## How to Verify Commits Defense In Depth
 
 **Commit verification:**
 
@@ -321,7 +321,7 @@ plans/<stream-name>/
 
 ## .Delegation Patterns
 
-### Delegation Without Plan Causes Drift
+### When Delegating Without Plan
 
 **Decision Date:** 2026-02-11
 
