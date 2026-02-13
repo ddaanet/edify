@@ -190,6 +190,29 @@ description: |
 
 **Impact:** Clear separation between flags and prose arguments.
 
+## .File Size Limit
+
+### .400-Line Module Limit
+
+**File size limit rationale:**
+
+**Decision Date:** 2026-02-13
+
+**Decision:** 400-line hard limit per source module. Enforced by precommit.
+
+**Rationale (research-backed):**
+- Code review effectiveness drops faster-than-linear past ~400 LOC ([Baldawa 2024](https://rishi.baldawa.com/posts/pr-throughput/cognitive-load-cliff/)). Reviews under 300 lines get architectural feedback; past 600, only style comments.
+- AI-assisted development sweet spot: 150-500 lines ([Faherty 2025](https://medium.com/@eamonn.faherty_58176/right-sizing-your-python-files-the-150-500-line-sweet-spot-for-ai-code-editors-340d550dcea4))
+- PyLint default max-module-lines: 1000 (too permissive for agent context)
+- Provides backpressure against slop accumulation
+- Approximates what a human can read without significant effort
+
+**Remedy when exceeded:** Split module by functional responsibility. Refactor agent (sonnet) has authority to split without opus escalation — module extraction is mechanical, not architectural.
+
+**Anti-pattern:** Reactive per-cycle refactoring to squeeze lines within limit. Proactive split before a phase that targets a near-limit file.
+
+**Impact:** Runbook planning must project file growth and insert split points.
+
 ## .Project Structure
 
 ### Root Marker for Scripts

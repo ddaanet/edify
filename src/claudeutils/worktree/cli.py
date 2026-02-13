@@ -10,6 +10,8 @@ from pathlib import Path
 
 import click
 
+from claudeutils.worktree.merge import merge as merge_impl
+
 
 def _git(
     *args: str,
@@ -266,9 +268,9 @@ def clean_tree() -> None:
 def new(slug: str | None, base: str, session: str, task: str, session_md: str) -> None:
     """Create worktree in sibling container."""
     if task and slug:
-        raise click.UsageError("slug and --task are mutually exclusive")
+        raise click.UsageError("slug and --task are mutually exclusive")  # noqa: TRY003
     if not task and not slug:
-        raise click.UsageError("either slug or --task is required")
+        raise click.UsageError("either slug or --task is required")  # noqa: TRY003
     temp_session_file = None
     try:
         if task:
@@ -323,64 +325,11 @@ def _remove_worktrees(
     if parent_registered:
         _git("worktree", "remove", "--force", str(worktree_path))
 
-def _check_clean_for_merge(
-    path: Path | None = None,
-    exempt_paths: set[str] | None = None,
-    label: str = "main",
-) -> None:
-    """Verify clean tree for merge.
-
-    Args:
-        path: Directory to check (None = current directory)
-        exempt_paths: Paths to exempt from dirty check (None = strict mode)
-        label: Location label for error messages
-    """
-    parent_cmd = ["-C", str(path)] if path else []
-    parent_cmd.extend(["status", "--porcelain", "--untracked-files=no"])
-    parent = _git(*parent_cmd, check=False)
-
-    if exempt_paths:
-        dirty = [
-            line
-            for line in parent.split("\n")
-            if line and not any(p in line for p in exempt_paths)
-        ]
-    else:
-        dirty = [line for line in parent.split("\n") if line.strip()]
-
-    if dirty:
-        suffix = ": uncommitted changes would be lost" if not exempt_paths else ""
-        click.echo(f"Clean tree required for merge ({label}{suffix})")
-        raise SystemExit(1)
-
-    submodule_path = (path / "agent-core") if path else Path("agent-core")
-    if not (submodule_path.exists() and (submodule_path / ".git").exists()):
-        return
-    submodule = _git(
-        "-C",
-        str(submodule_path),
-        "status",
-        "--porcelain",
-        "--untracked-files=no",
-        check=False,
-    )
-    if submodule.strip():
-        click.echo(f"Clean tree required for merge ({label} submodule)")
-        raise SystemExit(1)
-
 @worktree.command()
 @click.argument("slug")
 def merge(slug: str) -> None:
     """Prepare for merge: verify OURS and THEIRS clean tree."""
-    _check_clean_for_merge(
-        exempt_paths={
-            "agents/session.md",
-            "agents/jobs.md",
-            "agents/learnings.md",
-            "agent-core",
-        }
-    )
-    _check_clean_for_merge(path=wt_path(slug), label="worktree")
+    merge_impl(slug)
 
 @worktree.command()
 @click.argument("slug")
