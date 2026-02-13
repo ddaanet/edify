@@ -1,13 +1,13 @@
 # Phase 4: Focused Session Generation
 
-**Complexity:** Medium (4 cycles)
+**Complexity:** Medium (3 cycles)
 **Files:**
 - `src/claudeutils/worktree/cli.py`
 - `tests/test_worktree_cli.py`
 
 **Description:** Parse session.md and generate focused content for worktree — extract task, filter relevant context.
 
-**Dependencies:** Phase 3 (slug derivation used internally)
+**Dependencies:** None
 
 ---
 
@@ -69,59 +69,65 @@
 
 ---
 
-## Cycle 4.2: Blockers filtering — relevant entries only
+## Cycle 4.2: Section filtering — Blockers and Reference Files
 
-**Objective:** Include only blockers/gotchas relevant to the extracted task.
+**Objective:** Include only blockers/gotchas and reference file entries relevant to the extracted task.
 
-**Prerequisite:** Read `agents/session.md` Blockers/Gotchas section — understand entry format and how entries reference tasks or plan directories.
+**Prerequisite:** Read `agents/session.md` Blockers/Gotchas and Reference Files sections — understand entry format and how entries reference tasks or plan directories.
 
 **RED Phase:**
 
-**Test:** `test_focus_session_blockers_filtering`
+**Test:** `test_focus_session_section_filtering`
 **Assertions:**
 - Given session.md with Blockers/Gotchas section containing:
   - Entry mentioning task name directly
   - Entry mentioning task's plan directory (e.g., `plans/feature-x/`)
   - Entry NOT related to task
-- `focus_session("task-name", session_path)` returns string containing only relevant blocker entries
-- Unrelated blocker entries NOT included in output
+- And Reference Files section containing:
+  - Entry relevant to task (mentions task name or plan directory)
+  - Entry NOT relevant to task
+- `focus_session("task-name", session_path)` returns string containing only relevant blocker and reference entries
+- Unrelated entries NOT included in output
 - Blockers section header present only if relevant entries exist
-- If no relevant blockers: section omitted entirely
+- Reference Files section header present only if relevant entries exist
+- If no relevant blockers: Blockers section omitted entirely
+- If no relevant references: Reference Files section omitted entirely
 
-**Expected failure:** AssertionError: all blockers included (no filtering) or blockers section always included even when empty
+**Expected failure:** AssertionError: all entries included (no filtering) or sections always included even when empty
 
-**Why it fails:** Function doesn't filter blockers yet, includes everything or nothing
+**Why it fails:** Function doesn't filter blockers or references yet, includes everything or nothing
 
-**Verify RED:** `pytest tests/test_worktree_cli.py::test_focus_session_blockers_filtering -v`
+**Verify RED:** `pytest tests/test_worktree_cli.py::test_focus_session_section_filtering -v`
 
 ---
 
 **GREEN Phase:**
 
-**Implementation:** Add blocker filtering logic to `focus_session()` function
+**Implementation:** Add section filtering logic to `focus_session()` function
 
 **Behavior:**
 - Parse Blockers/Gotchas section from session.md
-- For each blocker entry, check if it mentions:
+- Parse Reference Files section from session.md
+- For each entry in both sections, check if it mentions:
   - Task name (exact match or substring)
   - Plan directory associated with task (if task has plan metadata)
 - Include only matching entries in focused session
-- Omit Blockers section entirely if no relevant entries
+- Omit each section entirely if no relevant entries
 
-**Approach:** Section parsing, relevance checking per entry, conditional section inclusion
+**Approach:** Section parsing, relevance checking per entry, conditional section inclusion. Same filtering logic applies to both Blockers and References sections.
 
 **Changes:**
 - File: `src/claudeutils/worktree/cli.py`
-  Action: Add blocker parsing to `focus_session()` function
+  Action: Add section parsing to `focus_session()` function for both Blockers and References
   Location hint: After task extraction, before building output string
 - File: `src/claudeutils/worktree/cli.py`
-  Action: Implement relevance check — search for task name or plan directory in blocker text
-  Location hint: Filter blocker lines by content matching
+  Action: Implement relevance check — search for task name or plan directory in entry text
+  Location hint: Shared filter function applied to both sections
 - File: `src/claudeutils/worktree/cli.py`
-  Action: Conditionally include Blockers section in output (only if filtered list non-empty)
-  Location hint: String formatting with conditional section
+  Action: Conditionally include each section in output (only if filtered list non-empty)
+  Location hint: String formatting with conditional sections
 
-**Verify GREEN:** `pytest tests/test_worktree_cli.py::test_focus_session_blockers_filtering -v`
+**Verify GREEN:** `pytest tests/test_worktree_cli.py::test_focus_session_section_filtering -v`
 - Must pass
 
 **Verify no regression:** `pytest tests/test_worktree_cli.py::test_focus_session_task_extraction -v`
@@ -129,64 +135,7 @@
 
 ---
 
-## Cycle 4.3: Reference files filtering — relevant entries only
-
-**Objective:** Include only reference file entries relevant to the extracted task.
-
-**RED Phase:**
-
-**Test:** `test_focus_session_references_filtering`
-**Assertions:**
-- Given session.md with Reference Files section containing:
-  - Entry relevant to task (mentions task name or plan directory)
-  - Entry NOT relevant to task
-- `focus_session("task-name", session_path)` returns string containing only relevant reference entries
-- Unrelated reference entries NOT included
-- Reference Files section header present only if relevant entries exist
-- If no relevant references: section omitted entirely
-
-**Expected failure:** AssertionError: all references included (no filtering) or references section missing entirely
-
-**Why it fails:** Function doesn't filter references yet
-
-**Verify RED:** `pytest tests/test_worktree_cli.py::test_focus_session_references_filtering -v`
-
----
-
-**GREEN Phase:**
-
-**Implementation:** Add reference files filtering logic to `focus_session()` function
-
-**Behavior:**
-- Parse Reference Files section from session.md
-- For each reference entry, check if it mentions:
-  - Task name
-  - Plan directory associated with task
-- Include only matching entries in focused session
-- Omit Reference Files section entirely if no relevant entries
-
-**Approach:** Same pattern as blocker filtering — parse section, filter by relevance, conditional inclusion
-
-**Changes:**
-- File: `src/claudeutils/worktree/cli.py`
-  Action: Add reference file parsing to `focus_session()` function
-  Location hint: After blocker filtering, before building output string
-- File: `src/claudeutils/worktree/cli.py`
-  Action: Implement relevance check for references (same logic as blockers)
-  Location hint: Filter reference lines by content matching
-- File: `src/claudeutils/worktree/cli.py`
-  Action: Conditionally include Reference Files section in output
-  Location hint: String formatting with conditional section
-
-**Verify GREEN:** `pytest tests/test_worktree_cli.py::test_focus_session_references_filtering -v`
-- Must pass
-
-**Verify no regression:** `pytest tests/test_worktree_cli.py -v`
-- All Cycle 4.1 and 4.2 tests still pass
-
----
-
-## Cycle 4.4: Missing task error handling
+## Cycle 4.3: Missing task error handling
 
 **Objective:** Raise clear error when task name doesn't exist in session.md.
 

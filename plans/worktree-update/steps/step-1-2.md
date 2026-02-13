@@ -1,4 +1,4 @@
-# Cycle 1.2
+# Step 1.2
 
 **Plan**: `plans/worktree-update/runbook.md`
 **Execution Model**: haiku
@@ -6,53 +6,43 @@
 
 ---
 
-## Cycle 1.2: `wt_path()` basic path construction — not in container
+## Step 1.2: Fix _filter_section continuation lines and plan_dir regex
 
-**Objective:** Extract path computation into testable function for the simplest case (repository not in worktree container).
+**Objective**: Fix two bugs in `cli.py` — continuation lines leaking into filtered output (M1), and case-sensitive plan_dir regex (M2).
 
-**Prerequisite:** Read `src/claudeutils/worktree/cli.py` lines 1-100 — understand existing worktree creation logic and path handling patterns.
+**Findings**: M1 (`cli.py:55-60` non-bullet continuation lines leak) and M2 (`cli.py:73` regex `plan:\s*(\S+)` won't match title case `Plan:`).
 
-**RED Phase:**
+**Implementation**:
 
-**Test:** `test_wt_path_not_in_container`
-**Assertions:**
-- `wt_path("feature-a")` returns Path ending with `claudeutils-wt/feature-a`
-- Returned path parent directory name ends with `-wt`
-- Returned path is absolute (not relative)
-- Container directory does not exist yet (creation happens later)
+1. **Read _filter_section function** at `src/claudeutils/worktree/cli.py:55-60`:
+   - Understand current filtering logic
+   - Identify where continuation lines are processed
 
-**Expected failure:** NameError: function `wt_path` not defined
+2. **Add continuation line tracking**:
+   - Track state: whether current section is relevant (should include) or filtered out (should skip)
+   - When a bullet line matches filter: set state to "including"
+   - When a bullet line doesn't match: set state to "skipping"
+   - Only append lines (bullets + continuation) when state is "including"
 
-**Why it fails:** Function doesn't exist yet, needs extraction from CLI code
+3. **Handle edge cases**:
+   - Empty lines between sections (preserve structure)
+   - Nested bullets (indented with spaces)
+   - Headers (always include)
 
-**Verify RED:** `pytest tests/test_worktree_cli.py::test_wt_path_not_in_container -v`
+4. **Fix plan_dir regex** at `src/claudeutils/worktree/cli.py:73`:
+   - Change `plan:\s*(\S+)` to `[Pp]lan:\s*(\S+)` (explicit both cases)
+   - Check if other metadata fields (Model:, Restart:) have similar case issues — fix if found
 
----
+**Expected Outcome**: Focused sessions exclude continuation lines from irrelevant tasks. `focus_session` extracts plan directory from both `plan:` and `Plan:` formats.
 
-**GREEN Phase:**
+**Error Conditions**:
+- If filtering too aggressive → verify bullet detection regex
+- If continuation lines still leak → check state tracking logic
+- If regex matches incorrectly → verify \S+ captures plan directory without whitespace
 
-**Implementation:** Extract path computation into standalone `wt_path(slug)` function
-
-**Behavior:**
-- Takes slug as string input, returns Path object
-- Detects current directory is NOT in `-wt` container (parent name doesn't end with `-wt`)
-- Constructs container name: `<current-repo-name>-wt`
-- Returns: `<parent-of-repo>/<repo-name>-wt/<slug>`
-
-**Approach:** Port bash `wt-path()` function logic from justfile (lines 100-120) — same container detection and path construction rules
-
-**Changes:**
-- File: `src/claudeutils/worktree/cli.py`
-  Action: Add new function `wt_path(slug: str) -> Path` before `new` command definition
-  Location hint: At module level, before command functions
-- File: `src/claudeutils/worktree/cli.py`
-  Action: Implement logic — detect parent directory, check for `-wt` suffix, construct container path if not in container
-  Location hint: Function body uses `Path.cwd()`, `.parent.name`, string operations
-
-**Verify GREEN:** `pytest tests/test_worktree_cli.py::test_wt_path_not_in_container -v`
-- Must pass
-
-**Verify no regression:** `pytest tests/test_worktree_cli.py -v`
-- All existing worktree tests pass
+**Validation**:
+```bash
+pytest tests/test_worktree_commands.py -k "filter_section or focus_session" -v 2>/dev/null || echo "Manual verification needed"
+```
 
 ---

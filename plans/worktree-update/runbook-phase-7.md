@@ -1,6 +1,6 @@
 # Phase 7: Add `merge` Command (4-Phase Ceremony)
 
-**Complexity:** High (12 cycles)
+**Complexity:** High (13 cycles)
 **Files:**
 - `src/claudeutils/worktree/cli.py`
 - `tests/test_worktree_cli.py`
@@ -575,7 +575,57 @@
 
 ---
 
-## Cycle 7.11: Phase 3 conflict handling — source file abort
+## Cycle 7.11: Phase 3 conflict handling — jobs.md auto-resolve
+
+**Objective:** Auto-resolve jobs.md conflicts by keeping ours with warning (plan status is local state).
+
+**RED Phase:**
+
+**Test:** `test_merge_conflict_jobs_md`
+**Assertions:**
+- When `agents/jobs.md` in conflict list: run `git checkout --ours agents/jobs.md && git add agents/jobs.md`
+- After resolution: `agents/jobs.md` removed from conflict list
+- Warning printed: "jobs.md conflict: kept ours (local plan status)"
+- No manual intervention required
+
+**Expected failure:** AssertionError: jobs.md conflict not resolved, or no warning
+
+**Why it fails:** jobs.md auto-resolution not implemented
+
+**Verify RED:** `pytest tests/test_worktree_cli.py::test_merge_conflict_jobs_md -v`
+
+---
+
+**GREEN Phase:**
+
+**Implementation:** Add jobs.md conflict auto-resolution
+
+**Behavior:**
+- From 7.7: have conflict list
+- Check if `"agents/jobs.md"` in conflict list
+- If present: run `git checkout --ours agents/jobs.md` then `git add agents/jobs.md`
+- Print warning: "jobs.md conflict: kept ours (local plan status)"
+- Remove from conflict list after resolution
+
+**Approach:** Same pattern as agent-core resolution (7.8) — known-file auto-resolve with warning
+
+**Changes:**
+- File: `src/claudeutils/worktree/cli.py`
+  Action: Add jobs.md conflict check in `merge` command
+  Location hint: After learnings.md resolution from 7.10, before source file abort
+- File: `src/claudeutils/worktree/cli.py`
+  Action: Run checkout --ours and git add for jobs.md
+  Location hint: Conditional on conflict list membership
+
+**Verify GREEN:** `pytest tests/test_worktree_cli.py::test_merge_conflict_jobs_md -v`
+- Must pass
+
+**Verify no regression:** `pytest tests/test_worktree_cli.py -v`
+- All Phase 3 conflict handling tests still pass
+
+---
+
+## Cycle 7.12: Phase 3 conflict handling — source file abort
 
 **Objective:** Abort merge and clean debris when source file conflicts remain (manual resolution required).
 
@@ -583,7 +633,7 @@
 
 **Test:** `test_merge_conflict_source_files`
 **Assertions:**
-- When conflicts remain after auto-resolution (not agent-core, session.md, learnings.md): abort merge
+- When conflicts remain after auto-resolution (not agent-core, session.md, learnings.md, jobs.md): abort merge
 - Run `git merge --abort` to cancel merge
 - Clean debris: `git clean -fd` to remove materialized files from merge attempt
 - Exit 1 with conflict list: "Merge aborted: conflicts in <file1>, <file2>"
@@ -602,7 +652,7 @@
 **Implementation:** Add source file conflict abort logic
 
 **Behavior:**
-- After 7.8-7.10 auto-resolutions: check if conflict list still non-empty
+- After 7.8-7.11 auto-resolutions: check if conflict list still non-empty
 - Run `git diff --name-only --diff-filter=U` again to get remaining conflicts
 - If conflicts remain:
   - Run `git merge --abort`
@@ -615,7 +665,7 @@
 **Changes:**
 - File: `src/claudeutils/worktree/cli.py`
   Action: Add final conflict check in `merge` command
-  Location hint: After all auto-resolutions (7.8-7.10)
+  Location hint: After all auto-resolutions (7.8-7.11)
 - File: `src/claudeutils/worktree/cli.py`
   Action: Recheck conflict list with git diff
   Location hint: Run same command as 7.7
@@ -634,7 +684,7 @@
 
 ---
 
-## Cycle 7.12: Phase 4 precommit validation — run and check exit code
+## Cycle 7.13: Phase 4 precommit validation — run and check exit code
 
 **Objective:** Run precommit validation after successful merge, exit 1 on failure.
 
@@ -708,4 +758,4 @@
    - If stubs found: STOP, report which implementations need real behavior
    - If all functional: TDD implementation complete, proceed to Phase 8 (non-code artifacts)
 
-**Rationale:** Phase 7 completes TDD implementation. Final full checkpoint validates all 40 TDD cycles before non-code artifacts.
+**Rationale:** Phase 7 completes TDD implementation. Final full checkpoint validates all 37 TDD cycles before non-code artifacts.

@@ -21,7 +21,7 @@
 ## Pending Tasks
 
 - [ ] **Workflow improvements** — Process fixes from RCA + skill/fragment/orchestration cleanup | sonnet
-  - Blocked on: pending RCAs (file growth, vet over-escalation)
+  - RCA blocker resolved — reports at `plans/reports/rca-*-opus.md`
   - Input: `plans/orchestrate-evolution/design.md`, `plans/process-review/rca.md`
   - Orchestrate evolution — designed, stale Feb 10, refresh after RCA
   - Fragments cleanup — remove fragments duplicating skills/workflow
@@ -36,14 +36,13 @@
   - Scope: Classification taxonomy, blast radius procedure, defect impact evaluation
   - Reports: `plans/when-recall/reports/tdd-process-review.md`, `plans/orchestrate-evolution/reports/red-pass-blast-radius.md`
 
-- [ ] **RCA: Runbook planning missed file growth** — Planning phase should project file growth and insert split points | opus
-  - Input: `plans/worktree-update/reports/` (refactor escalation reports, in worktree branch)
-  - 400-line limit caused 7+ refactor escalations (>1hr wall-clock) during worktree-update
-  - Planning requirements gap, not execution issue
+- [x] **RCA: Runbook planning missed file growth** — Completed in worktree, opus report at `plans/reports/rca-planning-file-growth-opus.md`
 
-- [ ] **RCA: Vet over-escalation persists post-overhaul** — Pipeline overhaul didn't fix vet UNFIXABLE over-escalation | sonnet
-  - Input: `plans/worktree-update/reports/checkpoint-phase-5-vet.md` (in worktree branch)
-  - Phase 5 checkpoint flagged design deviation and naming convention as UNFIXABLE
+- [x] **RCA: Vet over-escalation persists post-overhaul** — Completed in worktree, opus report at `plans/reports/rca-vet-over-escalation-opus.md`
+
+- [ ] **Workflow fixes from RCA** — Implement process improvements from 3 RCA reports | sonnet
+  - Input: `plans/reports/rca-*-opus.md` (3 authoritative reports)
+  - Key fixes: normalize runbook-review.md axes, add execution-time split enforcement, add vet investigation protocol + UNFIXABLE taxonomy, orchestrate template enforcement
 
 - [ ] **Consolidate learnings** — learnings.md at 312+ lines (soft limit 80) | sonnet
   - Blocked on: memory redesign (/when, /how)
@@ -104,11 +103,7 @@
 
 ## Worktree Tasks
 
-- [ ] **Execute worktree-update runbook + recovery** → `wt/worktree` — `/orchestrate worktree-update` | haiku | restart
-  - Plan: plans/worktree-update — 40 TDD cycles, 7 phases
-  - Recovery scoped: C2-C5 + selected major findings (independent of workwoods)
-  - Deferred to workwoods: C1 (wt-ls), R1 (session.md/jobs.md auto-combine)
-  - Requirements: `plans/worktree-update/reports/deliverable-review.md`
+- [x] **Execute worktree-update runbook + recovery** — Merged to main. Recovery C2-C5 fixed. C1/R1 deferred to workwoods.
 - [ ] **Plan when-recall** → `wt/when-recall` — blocked on validator fix | sonnet
   - Fix validator for exact key matching (remove fuzzy, update _build_heading)
   - Then migrate memory-index.md to /when format (152 entries)

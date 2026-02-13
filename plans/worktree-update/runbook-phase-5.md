@@ -1,6 +1,6 @@
 # Phase 5: Update `new` Command and Task Mode
 
-**Complexity:** High (8 cycles)
+**Complexity:** High (7 cycles)
 **Files:**
 - `src/claudeutils/worktree/cli.py`
 - `tests/test_worktree_new.py`
@@ -67,9 +67,9 @@
 
 ---
 
-## Cycle 5.2: Worktree-based submodule creation — replace `--reference`
+## Cycle 5.2: Worktree-based submodule creation with branch reuse
 
-**Objective:** Use `git -C agent-core worktree add` instead of `submodule update --init --reference` for shared object store.
+**Objective:** Use `git -C agent-core worktree add` instead of `submodule update --init --reference` for shared object store. Handle both fresh branch creation and existing branch reuse.
 
 **Prerequisite:** Read justfile `wt-new` recipe lines 150-180 — understand worktree-based submodule approach and object store verification.
 
@@ -83,10 +83,14 @@
 - No `--reference` used (worktree shares object store inherently)
 - Submodule is on correct branch (matches slug)
 - Old `--reference` logic NOT present in code
+- Given existing submodule branch "feature-x" in agent-core: `new feature-x` reuses both parent branch AND submodule branch
+- No error from git attempting to create branch that already exists
+- Submodule worktree points to existing branch (not new branch)
+- Branch refs preserved (not recreated)
 
-**Expected failure:** AssertionError: `--reference` still used, or submodule not created as worktree, or subprocess.run error from git command
+**Expected failure:** AssertionError: `--reference` still used, or submodule not created as worktree, or error when reusing existing branch
 
-**Why it fails:** Command still uses old `submodule update --init --reference` approach
+**Why it fails:** Command still uses old `submodule update --init --reference` approach, and branch reuse not implemented
 
 **Verify RED:** `pytest tests/test_worktree_new.py::test_new_worktree_submodule -v`
 
@@ -94,7 +98,7 @@
 
 **GREEN Phase:**
 
-**Implementation:** Replace submodule initialization with worktree-based approach
+**Implementation:** Replace submodule initialization with worktree-based approach, with branch detection for both fresh and existing branches
 
 **Behavior:**
 - Check if submodule branch exists: `git -C agent-core rev-parse --verify <slug>` (same pattern as 5.1)
@@ -102,7 +106,7 @@
 - If submodule branch doesn't exist: `git -C agent-core worktree add <wt-path>/agent-core -b <slug>`
 - Remove all `--reference` logic and `git checkout -B` step (worktree handles branch automatically)
 
-**Approach:** Similar conditional pattern as 5.1, but for submodule in agent-core directory. Reference justfile recipe for command structure.
+**Approach:** Conditional pattern for submodule in agent-core directory, matching parent branch detection from 5.1. Reference justfile recipe for command structure.
 
 **Changes:**
 - File: `src/claudeutils/worktree/cli.py`
@@ -126,54 +130,7 @@
 
 ---
 
-## Cycle 5.3: Existing submodule branch detection and reuse
-
-**Objective:** Detect and reuse existing submodule branches (don't create duplicate branches).
-
-**RED Phase:**
-
-**Test:** `test_new_submodule_branch_reuse`
-**Assertions:**
-- Given existing submodule branch "feature-x" in agent-core
-- `new feature-x` reuses parent branch AND submodule branch (both exist)
-- No error from git about branch already existing
-- Submodule worktree points to existing branch (not new branch)
-- Branch refs preserved (not recreated)
-
-**Expected failure:** Error from git attempting to create branch that already exists, or wrong branch checked out
-
-**Why it fails:** Submodule branch detection not implemented (always tries to create with `-b`)
-
-**Verify RED:** `pytest tests/test_worktree_new.py::test_new_submodule_branch_reuse -v`
-
----
-
-**GREEN Phase:**
-
-**Implementation:** Verify Cycle 5.2 logic handles submodule branch detection correctly
-
-**Behavior:**
-- Logic from 5.2 already checks submodule branch existence
-- Conditional logic handles both cases (existing vs new)
-- No additional code needed if 5.2 implemented correctly
-- Test verifies the behavior works end-to-end
-
-**Approach:** This cycle validates that 5.2's branch detection applies to both parent and submodule
-
-**Changes:**
-- File: `src/claudeutils/worktree/cli.py`
-  Action: Verify submodule branch detection logic from 5.2 is correct (likely no changes needed)
-  Location hint: Review conditional logic in submodule worktree creation
-
-**Verify GREEN:** `pytest tests/test_worktree_new.py::test_new_submodule_branch_reuse -v`
-- Must pass
-
-**Verify no regression:** `pytest tests/test_worktree_new.py -v`
-- All Cycle 5.1 and 5.2 tests still pass
-
----
-
-## Cycle 5.4: Sandbox registration — both main and worktree settings files
+## Cycle 5.3: Sandbox registration — both main and worktree settings files
 
 **Objective:** Register container directory in sandbox permissions for both main repo and worktree.
 
@@ -226,7 +183,7 @@
 
 ---
 
-## Cycle 5.5: Environment initialization — `just setup` with warning on failure
+## Cycle 5.4: Environment initialization — `just setup` with warning on failure
 
 **Objective:** Run `just setup` in worktree after creation, warn if unavailable (don't fall back to manual commands).
 
@@ -284,7 +241,7 @@
 
 ---
 
-## Cycle 5.6: Add `--task` option with `--session-md` default
+## Cycle 5.5: Add `--task` option with `--session-md` default
 
 **Objective:** Add `--task` flag to enable task-based worktree creation mode.
 
@@ -341,7 +298,7 @@
 
 ---
 
-## Cycle 5.7: Task mode — slug derivation, focused session, tab-separated output
+## Cycle 5.6: Task mode — slug derivation, focused session, tab-separated output
 
 **Objective:** Implement task mode logic combining all helper functions and special output format.
 
@@ -408,7 +365,7 @@
 
 ---
 
-## Cycle 5.8: Session file handling — warn and ignore `--session` when branch exists
+## Cycle 5.7: Session file handling — warn and ignore `--session` when branch exists
 
 **Objective:** Handle session file logic correctly when reusing existing branches (session already committed).
 
@@ -439,7 +396,7 @@
   - Skip session commit logic
 - When branch doesn't exist and `--session` provided:
   - Proceed with existing session commit flow (unchanged)
-- When `--task` mode: session handling via temp file (from 5.7), branch reuse logic still applies
+- When `--task` mode: session handling via temp file (from 5.6), branch reuse logic still applies
 
 **Approach:** Conditional logic linking branch existence check from 5.1 to session commit decision
 

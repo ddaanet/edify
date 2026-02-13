@@ -1,4 +1,4 @@
-# Cycle 1.4
+# Step 1.4
 
 **Plan**: `plans/worktree-update/runbook.md`
 **Execution Model**: haiku
@@ -6,47 +6,48 @@
 
 ---
 
-## Cycle 1.4: Sibling path when in container — multiple slugs
+## Step 1.4: Add merge idempotency test
 
-**Objective:** Verify sibling path logic works for multiple worktrees in same container.
+**Objective**: Add test verifying merge can be safely re-run after manual fixes (idempotency).
 
-**RED Phase:**
+**Finding**: C5 from deliverable review — No merge idempotency test across all merge test files. Design specifies "Idempotency: re-running after manual fix resumes correctly."
 
-**Test:** `test_wt_path_siblings`
-**Assertions:**
-- When in container, `wt_path("wt-a")` and `wt_path("wt-b")` return different paths
-- Both paths share same parent directory (the container)
-- Paths differ only in final slug component
-- Neither path creates nested containers
+**Implementation**:
 
-**Expected failure:** Test should pass immediately (logic from 1.3 already handles this), or fails if implementation incorrectly creates nested structure
+1. **Test file location**: `tests/test_worktree_merge_validation.py` (validation-focused tests — idempotency is a validation concern)
 
-**Why it might fail:** Path construction incorrectly nests containers for multiple calls
+2. **Add test function to existing file**:
+   ```python
+   def test_merge_idempotency(tmp_path, fixtures_worktree):
+       """Test merge can be re-run after manual intervention."""
+       # Setup: create worktree with changes
+       # Run merge — let it fail (e.g., dirty tree)
+       # Fix the issue (e.g., commit changes)
+       # Re-run merge — should succeed
+       # Verify: merge completes, no duplicate commits, clean state
+   ```
 
-**Verify RED:** `pytest tests/test_worktree_cli.py::test_wt_path_siblings -v`
+3. **Test scenarios** (choose 1-2):
+   - Dirty tree → clean → merge succeeds
+   - Precommit fail → fix code → merge succeeds
+   - Conflict → resolve → merge succeeds
+   - **Recommended**: Dirty tree scenario (simpler, tests core idempotency)
 
----
+4. **Assertions**:
+   - First run: fails with appropriate error
+   - Second run: succeeds after fix
+   - No duplicate work (no double-merge commits)
+   - Final state matches single successful merge
 
-**GREEN Phase:**
+**Expected Outcome**: Test verifies merge is safe to retry, critical for recovery workflow reliability.
 
-**Implementation:** Verify existing logic handles multiple sibling paths correctly
+**Error Conditions**:
+- If test doesn't detect non-idempotency → verify assertions check for duplicate work
+- If cleanup between runs incomplete → verify fixtures reset state
 
-**Behavior:**
-- Function is stateless (pure function of slug input)
-- Each call with different slug returns different path with same parent
-- No side effects or state that would interfere with multiple calls
-
-**Approach:** Existing implementation from 1.3 should already satisfy this — verify with test
-
-**Changes:**
-- File: `src/claudeutils/worktree/cli.py`
-  Action: Verify logic (likely no changes needed if 1.3 implemented correctly)
-  Location hint: Review `wt_path()` function for stateless behavior
-
-**Verify GREEN:** `pytest tests/test_worktree_cli.py::test_wt_path_siblings -v`
-- Must pass
-
-**Verify no regression:** `pytest tests/test_worktree_cli.py -v`
-- All previous tests still pass
+**Validation**:
+```bash
+pytest tests/test_worktree_merge_validation.py::test_merge_idempotency -v
+```
 
 ---

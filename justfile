@@ -138,7 +138,7 @@ wt-task name task_name base="HEAD":
 
 # List active git worktrees
 wt-ls:
-    @claudeutils _worktree ls
+    @git worktree list --porcelain | awk '/^worktree/ {path=$2; branch=""} /^branch/ {branch=$2; sub(/^refs\/heads\//, "", branch)} /^$/ && branch != "" && path != "{{justfile_directory()}}" {n=split(path, parts, "/"); print parts[n] "\t" branch "\t" path; branch=""}'
 
 # Remove a git worktree and its branch
 [no-exit-message]
@@ -219,6 +219,13 @@ wt-merge name:
         echo "${RED}Dirty agent-core submodule:${NORMAL}" >&2
         echo "$submodule_dirty" >&2
         fail "Clean tree required for merge"
+    fi
+
+    # Check worktree (THEIRS) for uncommitted changes
+    if ! git -C "$wt_dir" diff --quiet --exit-code 2>/dev/null && ! git -C "$wt_dir" diff --cached --quiet --exit-code 2>/dev/null; then
+        echo "${RED}Worktree has uncommitted changes:${NORMAL}" >&2
+        git -C "$wt_dir" status --short >&2
+        fail "Worktree has uncommitted changes. Commit or stash before merging."
     fi
 
     if ! git rev-parse --verify "$branch" >/dev/null 2>&1; then

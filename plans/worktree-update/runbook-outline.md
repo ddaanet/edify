@@ -27,17 +27,15 @@
 
 ### Phase 1: Path Computation (`wt_path()`)
 
-**Complexity:** Medium (5 cycles)
-**Files:** `src/claudeutils/cli.py`, `src/claudeutils/worktree/cli.py`, `tests/test_worktree_path.py`
+**Complexity:** Medium (4 cycles)
+**Files:** `src/claudeutils/cli.py`, `src/claudeutils/worktree/cli.py`, `tests/test_worktree_cli.py`
 **Description:** Register CLI group and extract path computation logic into testable function
 
 **Cycles:**
-- 1.1: Register `_worktree` CLI group and verify hidden from help
-- 1.2: `wt_path()` basic path construction
-- 1.3: Container detection (`-wt` parent)
-- 1.4: Sibling path when in container
-- 1.5: Container creation when not in container
-- 1.6: Edge cases (root directory, deep nesting)
+- 1.1: `wt_path()` basic path construction with CLI group registration
+- 1.2: Container detection and sibling paths
+- 1.3: Container creation — directory materialization
+- 1.4: Edge cases (special characters, root directory, deep nesting)
 
 ---
 
@@ -74,17 +72,16 @@
 
 ### Phase 4: Focused Session Generation (`focus_session()`)
 
-**Complexity:** Medium (4 cycles)
-**Files:** `src/claudeutils/worktree/cli.py`, `tests/test_focus_session.py`
+**Complexity:** Medium (3 cycles)
+**Files:** `src/claudeutils/worktree/cli.py`, `tests/test_worktree_cli.py`
 **Description:** Parse session.md and generate focused content
 
 **Cycles:**
 - 4.1: Task extraction by name (with metadata, output formatting)
-- 4.2: Blockers filtering (relevant entries only)
-- 4.3: Reference files filtering (relevant entries only)
-- 4.4: Missing task error handling
+- 4.2: Section filtering — Blockers and Reference Files (relevant entries only)
+- 4.3: Missing task error handling
 
-**Depends on:** Phase 3 (slug derivation used internally)
+**Depends on:** None
 
 ---
 
@@ -96,13 +93,12 @@
 
 **Cycles:**
 - 5.1: Refactor to use `wt_path()` for sibling paths and existing branch detection/reuse
-- 5.2: Worktree-based submodule creation (replace `--reference`)
-- 5.3: Existing submodule branch detection and reuse
-- 5.4: Sandbox registration (both main and worktree settings files)
-- 5.5: Environment initialization (`just setup` with warning on failure)
-- 5.6: Add `--task` option with `--session-md` default
-- 5.7: Task mode: slug derivation + focused session + tab-separated output (`<slug>\t<path>`)
-- 5.8: Session file handling (warn and ignore `--session` when branch exists)
+- 5.2: Worktree-based submodule creation with branch reuse (replace `--reference`)
+- 5.3: Sandbox registration (both main and worktree settings files)
+- 5.4: Environment initialization (`just setup` with warning on failure)
+- 5.5: Add `--task` option with `--session-md` default
+- 5.6: Task mode: slug derivation + focused session + tab-separated output (`<slug>\t<path>`)
+- 5.7: Session file handling (warn and ignore `--session` when branch exists)
 
 **Depends on:** Phases 1, 2, 4 (functions must exist)
 
@@ -112,8 +108,8 @@
 
 ### Phase 6: Update `rm` Command
 
-**Complexity:** Medium (6 cycles)
-**Files:** `src/claudeutils/worktree/cli.py`, `tests/test_worktree_rm.py`
+**Complexity:** Medium (5 cycles)
+**Files:** `src/claudeutils/worktree/cli.py`, `tests/test_worktree_cli.py`
 **Description:** Refactor `rm` command with improved removal logic
 
 **Cycles:**
@@ -125,12 +121,14 @@
 
 **Depends on:** Phase 1 (`wt_path()` function)
 
+**Checkpoint:** Post-Phase 6 checkpoint (fix + functional) — Validates removal ordering correctness before large Phase 7 merge implementation
+
 ---
 
 ### Phase 7: Add `merge` Command (4-Phase Ceremony)
 
-**Complexity:** High (12 cycles)
-**Files:** `src/claudeutils/worktree/cli.py`, `tests/test_worktree_merge.py`
+**Complexity:** High (13 cycles)
+**Files:** `src/claudeutils/worktree/cli.py`, `tests/test_worktree_cli.py`
 **Description:** Implement 4-phase merge ceremony with auto-resolution
 
 **Cycles:**
@@ -144,8 +142,9 @@
 - 7.8: Phase 3 conflict handling — agent-core auto-resolve
 - 7.9: Phase 3 conflict handling — session.md auto-resolve (task extraction)
 - 7.10: Phase 3 conflict handling — learnings.md auto-resolve (append theirs-only)
-- 7.11: Phase 3 conflict handling — source file abort
-- 7.12: Phase 4 precommit validation — run and check exit code
+- 7.11: Phase 3 conflict handling — jobs.md auto-resolve
+- 7.12: Phase 3 conflict handling — source file abort
+- 7.13: Phase 4 precommit validation — run and check exit code
 
 **Depends on:** Phase 1 (`wt_path()` for directory resolution)
 
@@ -196,17 +195,17 @@ Decision 8 (D8): Justfile independence — both Python merge and justfile check 
 
 | Phase | Cycles | Complexity | Model |
 |-------|--------|------------|-------|
-| 1: Setup + wt_path() | 6 | Medium | haiku |
+| 1: Setup + wt_path() | 4 | Medium | haiku |
 | 2: add_sandbox_dir() | 4 | Medium | haiku |
 | 3: derive_slug() | 1 | Low | haiku |
-| 4: focus_session() | 4 | Medium | haiku |
-| 5: new command | 8 | High | haiku |
+| 4: focus_session() | 3 | Medium | haiku |
+| 5: new command | 7 | High | haiku |
 | 6: rm command | 5 | Medium | haiku |
-| 7: merge command | 12 | High | haiku |
+| 7: merge command | 13 | High | haiku |
 | 8: Non-code | N/A | Low | sonnet (direct) |
 | 9: Refactoring | N/A | N/A | opus (interactive) |
 
-**Total TDD cycles:** 40 (Phases 1-7, reduced from 48)
+**Total TDD cycles:** 37 (Phases 1-7)
 
 ---
 
@@ -253,7 +252,7 @@ The following recommendations should be incorporated during full runbook expansi
 **Cycle expansion:**
 - Phase 1 cycle 1.1: Combine CLI registration with verification (`assert worktree` + help output check)
 - Phase 5 cycle 5.2 (worktree-based submodule): Include shell line reference to justfile wt-new recipe (lines 150-180) for object store verification approach
-- Phase 7 cycles 7.8-7.11 (conflict handling): Reference justfile wt-merge recipe conflict resolution section (lines 250-290) for auto-resolution patterns
+- Phase 7 cycles 7.8-7.12 (conflict handling): Reference justfile wt-merge recipe conflict resolution section (lines 250-290) for auto-resolution patterns
 - Phase 7 cycle 7.9 (session.md task extraction): Specify exact regex pattern from design (line 152): `- [ ] **<name>**`
 - Phase 6 cycle 6.3 (removal ordering): Note git error message for detection: "fatal: 'remove' refusing to remove..." when order violated
 

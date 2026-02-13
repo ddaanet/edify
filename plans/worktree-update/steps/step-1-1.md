@@ -1,4 +1,4 @@
-# Cycle 1.1
+# Step 1.1
 
 **Plan**: `plans/worktree-update/runbook.md`
 **Execution Model**: haiku
@@ -6,52 +6,47 @@
 
 ---
 
-## Cycle 1.1: Register `_worktree` CLI group and verify hidden from help
+## Step 1.1: Fix wt-merge THEIRS clean tree check and agent-core setup recipe
 
-**Objective:** Register the worktree CLI group in main CLI and verify underscore prefix hides it from help output.
+**Objective**: Fix two justfile issues — add clean tree check for worktree side before merge (C2), and add setup recipe to agent-core (C3).
 
-**Prerequisite:** Read `src/claudeutils/cli.py` lines 1-50 — understand Click group registration pattern and existing command structure.
+**Findings**: C2 (`justfile:209-222` missing THEIRS clean tree check) and C3 (`agent-core/justfile` missing `setup` recipe required by design D5).
 
-**RED Phase:**
+**Implementation**:
 
-**Test:** `test_worktree_group_registered`
-**Assertions:**
-- Import succeeds: `from claudeutils.worktree.cli import worktree` does not raise ImportError
-- Group is callable: `isinstance(worktree, click.Group)` is True
-- Help output does NOT contain "_worktree" string (hidden due to underscore prefix)
-- Direct invocation works: `claudeutils _worktree --help` exits 0 with help text
+1. **Read current wt-merge recipe** at `justfile:209-222`:
+   - Identify where OURS clean tree check happens
+   - Note the check pattern and error message format
 
-**Expected failure:** ImportError (group not registered in main CLI) or AttributeError (worktree not added to cli)
+2. **Add THEIRS clean tree check**:
+   - After OURS check (around line 211-212)
+   - Before fetch and merge operations
+   - Check worktree directory for uncommitted changes
+   - Pattern: `git -C "$WT_PATH" diff --quiet --exit-code && git -C "$WT_PATH" diff --cached --quiet --exit-code`
+   - Error message: "Worktree has uncommitted changes. Commit or stash before merging."
 
-**Why it fails:** `cli.add_command(worktree)` not yet added to `src/claudeutils/cli.py`
+3. **Verify placement**:
+   - THEIRS check must run BEFORE `git fetch` (line 213)
+   - Both clean checks (OURS and THEIRS) must complete before merge operations
 
-**Verify RED:** `pytest tests/test_worktree_cli.py::test_worktree_group_registered -v`
+4. **Add agent-core setup recipe** in `agent-core/justfile`:
+   - Read existing recipes to understand structure
+   - Add after existing recipes
+   - agent-core is documentation/skills only — check if pyproject.toml or package.json exists
+   - If no package dependencies: stub recipe pointing to `just sync-to-parent`
+   - If dependencies exist: implement actual setup steps
 
----
+**Expected Outcome**: wt-merge recipe checks both sides for uncommitted changes. `just setup` runs successfully in agent-core directory.
 
-**GREEN Phase:**
+**Error Conditions**:
+- If git commands fail → check WT_PATH is correctly computed
+- If recipe syntax error → verify bash quoting and variable expansion
+- If justfile syntax error in agent-core → verify recipe formatting (tabs vs spaces)
 
-**Implementation:** Register worktree CLI group in main CLI module
-
-**Behavior:**
-- Import statement added to main CLI imports section
-- Command registered via `cli.add_command(worktree)` call
-- Underscore prefix automatically hides from help (Click convention)
-
-**Approach:** Follow existing command registration pattern in `src/claudeutils/cli.py` (other commands use same `add_command()` pattern)
-
-**Changes:**
-- File: `src/claudeutils/cli.py`
-  Action: Add import `from claudeutils.worktree.cli import worktree` at top
-  Location hint: With other command imports
-- File: `src/claudeutils/cli.py`
-  Action: Add `cli.add_command(worktree)` registration call
-  Location hint: After other command registrations (e.g., after statusline, commit commands)
-
-**Verify GREEN:** `pytest tests/test_worktree_cli.py::test_worktree_group_registered -v`
-- Must pass
-
-**Verify no regression:** `pytest tests/test_cli_*.py -v`
-- All existing CLI tests pass
+**Validation**:
+```bash
+grep -A 3 "THEIRS" justfile
+cd agent-core && just setup && echo $?
+```
 
 ---

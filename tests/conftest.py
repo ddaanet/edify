@@ -1,6 +1,5 @@
 """Shared pytest fixtures for all tests."""
 
-import subprocess
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
@@ -11,6 +10,8 @@ from anthropic import Anthropic
 from pytest_mock import MockerFixture
 
 from claudeutils.tokens import ModelId
+
+pytest_plugins = ["tests.fixtures_worktree"]
 
 
 # API Key Management
@@ -266,88 +267,4 @@ def markdown_fixtures_dir() -> Path:
     return fixtures_dir
 
 
-# Worktree Fixtures
-@pytest.fixture
-def repo_with_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Create git repo with submodule and session files.
-
-    Returns the main repo path. The repo has:
-    - Initial commit with README.md
-    - agent-core submodule initialized
-    - agents/session.md, agents/jobs.md, agents/learnings.md committed
-    """
-    repo_path = tmp_path / "repo"
-    repo_path.mkdir()
-    monkeypatch.chdir(repo_path)
-
-    # Initialize main repo
-    subprocess.run(["git", "init"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.com"],
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test User"], check=True, capture_output=True
-    )
-
-    # Create initial commit
-    (repo_path / "README.md").write_text("test")
-    subprocess.run(["git", "add", "README.md"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
-    )
-
-    # Initialize submodule (agent-core)
-    submodule_path = repo_path / "agent-core"
-    submodule_path.mkdir()
-    subprocess.run(["git", "init"], cwd=submodule_path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.com"],
-        cwd=submodule_path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test User"],
-        cwd=submodule_path,
-        check=True,
-        capture_output=True,
-    )
-    (submodule_path / "README.md").write_text("submodule")
-    subprocess.run(
-        ["git", "add", "README.md"], cwd=submodule_path, check=True, capture_output=True
-    )
-    subprocess.run(
-        ["git", "commit", "-m", "Submodule initial"],
-        cwd=submodule_path,
-        check=True,
-        capture_output=True,
-    )
-
-    # Add submodule to main repo
-    subprocess.run(
-        ["git", "submodule", "add", str(submodule_path), "agent-core"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "commit", "-m", "Add submodule"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-
-    # Add session files
-    agents_dir = repo_path / "agents"
-    agents_dir.mkdir()
-    (agents_dir / "session.md").write_text("# Session\n")
-    (agents_dir / "jobs.md").write_text("# Jobs\n")
-    (agents_dir / "learnings.md").write_text("# Learnings\n")
-    subprocess.run(["git", "add", "agents/"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Add session files"], check=True, capture_output=True
-    )
-
-    return repo_path
+# Worktree fixtures moved to tests/fixtures_worktree.py

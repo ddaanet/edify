@@ -288,3 +288,18 @@
 - All Phase 6 tests still pass
 
 ---
+
+**Checkpoint: Post-Phase 6**
+
+**Type:** Light checkpoint (Fix + Functional)
+
+**Process:**
+1. **Fix:** Run `just dev`. If failures, sonnet quiet-task diagnoses and fixes. Commit when passing.
+2. **Functional:** Review removal ordering against design.
+   - Check: Is submodule-first ordering enforced (FR-5 critical correctness constraint)?
+   - Check: Does registration probing handle all four states (both, parent-only, sub-only, neither)?
+   - Check: Does container cleanup handle non-empty containers correctly?
+   - If ordering wrong: STOP, report
+   - If all correct: Proceed to Phase 7
+
+**Rationale:** Phase 6 has complex data manipulation (subprocess output parsing) and a critical correctness constraint (submodule-first removal ordering). 17 cycles between Phase 5 and Phase 7 checkpoints exceeds >10 cycle threshold without this gate.

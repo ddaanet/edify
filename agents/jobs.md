@@ -19,7 +19,8 @@ Plan lifecycle tracking. Updated when plans change status.
 | workwoods | requirements | Cross-tree worktree awareness, vet tracking, plan state inference, bidirectional merge |
 | pushback | requirements | Prevent yes-manning in design discussions |
 | process-review | complete | RCA recovered to disk for workflow-improvements reference |
-| worktree-update | planned | Runbook complete: 40 TDD cycles (7 phases), reviewed and assembled, haiku execution ready |
+| workflow-fixes | complete | Unified /runbook skill, plan-reviewer agent, review-plan skill, pipeline-contracts |
+| worktree-update | complete | 40 TDD cycles, recovery (C2-C5), merged to main |
 
 ## Complete (Archived)
 

@@ -1,4 +1,4 @@
-# Cycle 1.3
+# Step 1.3
 
 **Plan**: `plans/worktree-update/runbook.md`
 **Execution Model**: haiku
@@ -6,47 +6,50 @@
 
 ---
 
-## Cycle 1.3: Container detection — in `-wt` parent
+## Step 1.3: Add precommit failure test
 
-**Objective:** Detect when repository is already inside a worktree container directory.
+**Objective**: Add test for Phase 4 merge behavior when precommit fails after successful merge.
 
-**RED Phase:**
+**Finding**: C4 from deliverable review — `tests/test_worktree_merge_parent.py` has no precommit failure test despite design requirement.
 
-**Test:** `test_wt_path_in_container`
-**Assertions:**
-- When `Path.cwd().parent.name` ends with `-wt`, `wt_path("feature-b")` returns sibling path (not nested container)
-- Returned path is `<parent-container>/<slug>` (parent already is the container)
-- Path does NOT contain nested `-wt/-wt` structure
-- Container name matches parent directory name exactly
+**Implementation**:
 
-**Expected failure:** AssertionError: path contains nested `-wt/-wt` or doesn't recognize existing container
+1. **Read existing precommit test** at `tests/test_worktree_merge_parent.py:89-159`:
+   - Understand test structure (setup, merge, assertions)
+   - Note docstring claims 6 behavioral conditions including failure path
+   - Current test only exercises happy path
 
-**Why it fails:** Container detection logic not yet implemented
+2. **Add new test function to existing file** (`test_worktree_merge_parent.py`):
+   ```python
+   def test_merge_precommit_failure(tmp_path, fixtures_worktree):
+       """Test Phase 4: merge succeeds but precommit fails."""
+       # Setup: create worktree with changes
+       # Merge to Phase 3 (merged but not committed)
+       # Mock or force precommit failure
+       # Verify: exit code 1, error message, no commit created
+   ```
 
-**Verify RED:** `pytest tests/test_worktree_cli.py::test_wt_path_in_container -v`
+3. **Mock precommit failure**:
+   - Option A: Mock `subprocess.run` for `just precommit` call
+   - Option B: Create actual precommit failure (invalid syntax in committed file)
+   - **Recommended**: Option A (faster, more isolated)
 
----
+4. **Assertions**:
+   - Exit code: 1 (not 0 or 2)
+   - Error message: "Precommit failed after merge"
+   - Git state: merge completed, but no merge commit
+   - Branch state: worktree branch still exists (merge incomplete)
 
-**GREEN Phase:**
+**Expected Outcome**: Test verifies merge handles precommit failure gracefully with correct exit code and error message.
 
-**Implementation:** Add container detection branch to `wt_path()` function
+**Error Conditions**:
+- If test hangs → check subprocess timeout settings
+- If test flakes → verify fixtures create clean isolated state
+- If precommit mock doesn't trigger → verify call pattern match
 
-**Behavior:**
-- Check if `Path.cwd().parent.name.endswith('-wt')`
-- If true: current directory is already in a container, return `parent/<slug>`
-- If false: use existing logic from 1.2 (create new container path)
-
-**Approach:** Conditional branch at function start — container check determines path construction strategy
-
-**Changes:**
-- File: `src/claudeutils/worktree/cli.py`
-  Action: Add container detection conditional at start of `wt_path()` function
-  Location hint: Before existing path construction logic from 1.2
-
-**Verify GREEN:** `pytest tests/test_worktree_cli.py::test_wt_path_in_container -v`
-- Must pass
-
-**Verify no regression:** `pytest tests/test_worktree_cli.py::test_wt_path_not_in_container -v`
-- Cycle 1.2 test still passes (existing behavior preserved)
+**Validation**:
+```bash
+pytest tests/test_worktree_merge_parent.py::test_merge_precommit_failure -v
+```
 
 ---

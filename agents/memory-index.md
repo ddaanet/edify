@@ -96,6 +96,13 @@ Mock patching pattern — patch where object is used not where defined
 Testing strategy for markdown cleanup — TDD approach with red green cycles and integration tests
 Success metrics — all tests pass, no regressions, clear errors, complete documentation
 
+## agents/decisions/pipeline-contracts.md
+
+Transformation table — T1-T6 pipeline stages defect types review gates criteria
+Review delegation scope template — scope IN OUT changed files requirements
+UNFIXABLE escalation — fix-all pattern grep UNFIXABLE stop escalate
+Phase type model — tdd general per-phase typing expansion review criteria
+
 ## agents/decisions/deliverable-review.md
 
 Deliverable definition — artifact types review axes ISO-grounded identification process
