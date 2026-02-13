@@ -256,3 +256,11 @@ def merge(slug: str) -> None:
         conflicts = _resolve_session_md_conflict(conflicts)
         conflicts = _resolve_learnings_md_conflict(conflicts)
         conflicts = _resolve_jobs_md_conflict(conflicts)
+
+        # Check if any conflicts remain (source files requiring manual resolution)
+        if conflicts:
+            _git("merge", "--abort")
+            _git("clean", "-fd")
+            conflict_list = ", ".join(conflicts)
+            click.echo(f"Merge aborted: conflicts in {conflict_list}")
+            raise SystemExit(1)
