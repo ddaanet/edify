@@ -1,24 +1,35 @@
 # Session Handoff: 2026-02-13
 
-**Status:** Worktree skill documentation fixed. Full deliverable review pending.
+**Status:** Deliverable review complete. Recovery task ready for /runbook.
 
 ## Completed This Session
 
-**Fix worktree skill documentation (5 vet issues):**
-- SKILL.md Mode A: Collapsed 7 steps to 5 — manual slug derivation, focused session generation, and tmp file management replaced by single `new --task` invocation
-- SKILL.md Mode B step 4: Direct `new --task` loop instead of "execute Mode A steps 2-7"
-- Marker format `→ wt/<slug>` → `→ <slug>` in SKILL.md (Mode A, Mode C), execute-rule.md (status display, Worktree Tasks section), and handoff template
-- Cross-cutting grep found stale marker in `agent-core/skills/handoff/references/template.md` — fixed
-- All `plans/` hits are historical (reports, designs, runbooks) — not modified
-- Precommit passing (796/797, 1 xfail)
+**Deliverable review of worktree-update:**
+- 3 parallel opus agents (code, tests, prose/config) reviewed 3535 lines against design.md
+- Sub-reports: `plans/worktree-update/reports/deliverable-review-{code,tests,prose}.md`
+- Consolidated: `plans/worktree-update/reports/deliverable-review.md`
+- Findings: 5 critical, 10 major, 24 minor
+- Core architecture sound (all 8 design decisions satisfied). Gaps in Phase 8 non-code artifacts and merge test edge cases
+- Requirement adjustment R1 added: auto-combine session.md/jobs.md on merge (replaces --ours)
+
+**Deliverable review skill created:**
+- `agent-core/skills/deliverable-review/SKILL.md` — parallel agent partitioning by artifact type
+- `agent-core/skills/deliverable-review/references/example-report.md` — real report as reference
+- Skill-reviewer applied, fixes integrated (description triggers, model heuristics, type-to-filename mapping)
+
+**Complexity triage:** Recovery is moderate (well-specified requirements, no architectural decisions) → /runbook, not /design
 
 ## Pending Tasks
 
-- [ ] **Review deliverables** — Opus review of worktree-update implementation quality | opus
-  - Full deliverable review per `agents/decisions/deliverable-review.md`
-  - Design.md adherence, test coverage completeness, UX (error messages, edge cases), workflow integration
-  - Scope: cli.py, merge.py, utils.py, 12 test files (2854 lines), SKILL.md, justfile recipes, sandbox config
-  - Prior session's partial review only covered doc edits, not implementation
+- [ ] **Worktree-update recovery** — Fix critical/major findings from deliverable review | sonnet
+  - Requirements: `plans/worktree-update/reports/deliverable-review.md`
+  - C1-C3: Justfile/config (wt-ls native bash, wt-merge THEIRS check, agent-core setup recipe)
+  - C4-C5: Missing tests (precommit failure, merge idempotency)
+  - M1-M2: Code correctness (filter_section continuation lines, plan_dir case-sensitive regex)
+  - M3-M4: SKILL.md prose (Mode B determinism, false idempotency claim)
+  - M5-M10: Test quality (submodule ancestry E2E rewrite, commit_file dedup, cleanup verification)
+  - R1: Auto-combine session.md/jobs.md on merge + agent review step
+  - Minor findings: batch during recovery or defer
 
 - [ ] **RCA: Runbook planning missed file growth** — Planning phase should project file growth and insert split points. The 400-line limit caused 7+ refactor escalations (>1hr wall-clock). This is a planning requirements gap, not an execution issue | opus
 
@@ -50,15 +61,20 @@
 **Learnings.md over soft limit:**
 - 386 lines, ~60 entries — consolidation deferred until entries age (≥7 active days required)
 
+**M6/M7 test mocking worse than missing tests:**
+- `test_merge_submodule_ancestry` sets up real git then replaces _git with MagicMock — asserts call structure, not behavior
+- These create false confidence. Should be E2E or deleted during recovery.
+
 ## Reference Files
 
-- `plans/worktree-update/design.md` — Worktree implementation design (4-phase merge ceremony, sibling containers)
-- `plans/worktree-update/reports/vet-review.md` — Final review (5 skill documentation issues, all now fixed)
-- `agents/decisions/deliverable-review.md` — ISO-grounded review methodology for next task
+- `plans/worktree-update/reports/deliverable-review.md` — Consolidated review (5C/10M/24m + R1 requirement change)
+- `plans/worktree-update/design.md` — Worktree implementation design (conformance baseline)
+- `agents/decisions/deliverable-review.md` — ISO-grounded review methodology
+- `agent-core/skills/deliverable-review/SKILL.md` — New skill for future reviews
 
 ## Next Steps
 
-Opus review of worktree-update deliverables using `agents/decisions/deliverable-review.md` methodology.
+`/runbook plans/worktree-update/reports/deliverable-review.md` — review report serves as requirements for recovery. Sonnet throughout: all findings have file:line references and clear specifications, no architectural decisions needed.
 
 ---
-*Handoff by Sonnet. Skill documentation fixes complete, 3 files updated.*
+*Handoff by Sonnet. Deliverable review complete, recovery task queued.*
