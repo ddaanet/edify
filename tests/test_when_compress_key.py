@@ -107,6 +107,15 @@ def test_uniqueness_verification() -> None:
     assert verify_unique("encode", corpus) is False
 
 
+def test_verify_unique_edge_cases() -> None:
+    """Verify uniqueness edge cases."""
+    # Empty corpus
+    assert verify_unique("any trigger", []) is False
+
+    # Single heading corpus
+    assert verify_unique("test", ["Test Heading"]) is True
+
+
 def test_suggest_minimal_trigger() -> None:
     """Suggest minimal unique trigger from heading."""
     corpus = [
@@ -128,14 +137,15 @@ def test_suggest_minimal_trigger() -> None:
     result2 = compress_key("When Writing Mock Tests", corpus)
     assert len(result2) < len("when writing mock tests")
 
-    # Test 3: Fallback to full heading lowercased when no shorter unique candidate
-    # Create a corpus where all shorter candidates are not unique
+    # Test 3: Actually tight corpus still finds unique triggers due to fuzzy scoring
+    # The implementation is smart enough to find "encode path" as unique
     tight_corpus = [
         "How to encode paths",
         "How to encode parameters",
         "How to encode strings",
     ]
     result3 = compress_key("How to Encode Paths", tight_corpus)
-    # Should fall back to full heading if no unique shorter candidate
-    assert isinstance(result3, str)
-    assert len(result3) > 0
+    # Verify it finds a unique trigger (even in tight corpus)
+    assert verify_unique(result3, tight_corpus) is True
+    # And it's shorter than full heading
+    assert len(result3) < len("how to encode paths")
