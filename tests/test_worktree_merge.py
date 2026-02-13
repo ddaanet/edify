@@ -146,7 +146,7 @@ def test_merge_submodule_ancestry(
         assert ls_tree_called, "merge should extract submodule commit via git ls-tree"
 
 
-def test_merge_submodule_fetch(  # noqa: PLR0915
+def test_merge_submodule_fetch(
     repo_with_submodule: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Verify merge checks object reachability and fetches when needed."""
@@ -298,3 +298,194 @@ def test_merge_submodule_fetch(  # noqa: PLR0915
         assert len(fetch_calls) > 0, (
             f"merge should fetch when unreachable, fetch_calls: {fetch_calls}"
         )
+
+
+def test_merge_submodule_merge_commit(
+    repo_with_submodule: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Verify merge performs submodule merge and commits changes.
+
+    Merge commit logic:
+    - If no merge needed: skip entirely
+    - If merge needed: run git -C agent-core merge --no-edit <wt-commit>
+    - Stage submodule: git add agent-core
+    - Check if staged: git diff --cached --quiet agent-core (exit != 0 means changes)
+    - If staged changes: commit with "🔀 Merge agent-core from <slug>"
+    - If no staged changes: skip commit
+    """
+    monkeypatch.chdir(repo_with_submodule)
+
+    (repo_with_submodule / ".gitignore").write_text("wt/\n")
+    subprocess.run(
+        ["git", "add", ".gitignore"],
+        cwd=repo_with_submodule,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Add gitignore"],
+        cwd=repo_with_submodule,
+        check=True,
+        capture_output=True,
+    )
+
+    agent_core_path = repo_with_submodule / "agent-core"
+
+    (agent_core_path / "base_change.txt").write_text("base change")
+    subprocess.run(
+        ["git", "add", "base_change.txt"],
+        cwd=agent_core_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Base change"],
+        cwd=agent_core_path,
+        check=True,
+        capture_output=True,
+    )
+
+    subprocess.run(
+        ["git", "-C", str(agent_core_path), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+
+    subprocess.run(
+        ["git", "add", "agent-core"],
+        cwd=repo_with_submodule,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Update agent-core to base"],
+        cwd=repo_with_submodule,
+        check=True,
+        capture_output=True,
+    )
+
+    subprocess.run(
+        ["git", "branch", "merge-test"],
+        cwd=repo_with_submodule,
+        check=True,
+        capture_output=True,
+    )
+    result = CliRunner().invoke(worktree, ["new", "merge-test"])
+    assert result.exit_code == 0
+
+    (agent_core_path / "main_change.txt").write_text("main change")
+    subprocess.run(
+        ["git", "add", "main_change.txt"],
+        cwd=agent_core_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Main branch change"],
+        cwd=agent_core_path,
+        check=True,
+        capture_output=True,
+    )
+
+    main_commit = subprocess.run(
+        ["git", "-C", str(agent_core_path), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+
+    subprocess.run(
+        ["git", "add", "agent-core"],
+        cwd=repo_with_submodule,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Update to main commit"],
+        cwd=repo_with_submodule,
+        check=True,
+        capture_output=True,
+    )
+
+    wt_agent_core = (
+        repo_with_submodule.parent
+        / f"{repo_with_submodule.name}-wt"
+        / "merge-test"
+        / "agent-core"
+    )
+    (wt_agent_core / "wt_change.txt").write_text("wt change")
+    subprocess.run(
+        ["git", "add", "wt_change.txt"],
+        cwd=wt_agent_core,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Worktree change"],
+        cwd=wt_agent_core,
+        check=True,
+        capture_output=True,
+    )
+
+    wt_commit = subprocess.run(
+        ["git", "-C", str(wt_agent_core), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+
+    wt_branch = (
+        repo_with_submodule.parent / f"{repo_with_submodule.name}-wt" / "merge-test"
+    )
+    subprocess.run(
+        ["git", "add", "agent-core"],
+        cwd=wt_branch,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Update wt pointer"],
+        cwd=wt_branch,
+        check=True,
+        capture_output=True,
+    )
+
+    result = CliRunner().invoke(worktree, ["merge", "merge-test"])
+    assert result.exit_code == 0
+
+    merged_commit = subprocess.run(
+        ["git", "-C", str(agent_core_path), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+
+    assert merged_commit != main_commit, "submodule should be merged to wt_commit"
+    assert (
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                str(agent_core_path),
+                "merge-base",
+                "--is-ancestor",
+                wt_commit,
+                merged_commit,
+            ],
+            check=False,
+        ).returncode
+        == 0
+    ), "merged_commit should have wt_commit as ancestor"
+
+    commit_message = subprocess.run(
+        ["git", "log", "-1", "--format=%s"],
+        cwd=repo_with_submodule,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+
+    assert "🔀 Merge agent-core from merge-test" in commit_message, (
+        f"commit message should reflect merge, got: {commit_message}"
+    )

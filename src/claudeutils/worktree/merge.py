@@ -149,3 +149,13 @@ def merge(slug: str) -> None:
                 str(wt_agent_core),
                 "HEAD",
             )
+
+        _git("-C", "agent-core", "merge", "--no-edit", wt_commit)
+        _git("add", "agent-core")
+
+        result = subprocess.run(
+            ["git", "diff", "--cached", "--quiet", "agent-core"],
+            check=False,
+        )
+        if result.returncode != 0:
+            _git("commit", "-m", f"🔀 Merge agent-core from {slug}")
