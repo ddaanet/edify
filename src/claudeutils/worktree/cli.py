@@ -52,12 +52,15 @@ def _filter_section(
         lo = entry.lower()
         return task_name.lower() in lo or bool(plan_dir and plan_dir.lower() in lo)
 
-    lines = [
-        line
-        for line in match.group(1).split("\n")
-        if (line.startswith("- ") and is_relevant(line[2:].strip()))
-        or (not line.startswith("- ") and line.strip())
-    ]
+    lines = []
+    include = False
+    for line in match.group(1).split("\n"):
+        if line.startswith("- "):
+            include = is_relevant(line[2:].strip())
+            if include:
+                lines.append(line)
+        elif include and line.strip():
+            lines.append(line)
     return f"## {section_name}\n\n" + "\n".join(lines) + "\n" if lines else ""
 
 
@@ -70,7 +73,7 @@ def focus_session(task_name: str, session_md_path: str | Path) -> str:
         raise ValueError(msg)
 
     metadata = match.group(1).rstrip()
-    plan_dir = m.group(1) if (m := re.search(r"plan:\s*(\S+)", metadata)) else None
+    plan_dir = m.group(1) if (m := re.search(r"[Pp]lan:\s*(\S+)", metadata)) else None
     result = (
         f"# Session: Worktree — {task_name}\n\n"
         f"**Status:** Focused worktree for parallel execution.\n\n"
