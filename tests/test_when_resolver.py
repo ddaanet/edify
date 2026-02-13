@@ -208,6 +208,67 @@ def test_resolve_output_format(tmp_path: Path) -> None:
     assert "Related:" in result or "/when mock patching" in result
 
 
+def test_trigger_not_found_suggests_matches(tmp_path: Path) -> None:
+    """When no match found, error includes fuzzy suggestions.
+
+    Tests that ResolveError raised for non-existent queries includes up to 3
+    closest fuzzy matches formatted as `/when <trigger>` suggestions.
+    """
+    # Create index file with multiple entries
+    index_file = tmp_path / "test_index.md"
+    index_file.write_text(
+        "## testing\n"
+        "\n"
+        "/when writing mock tests | mock patch, test doubles\n"
+        "/when error handling | exceptions, debugging\n"
+        "/when mock patching | patch object, patching\n"
+        "/when debugging tests | print, inspect\n"
+    )
+
+    # Create decisions directory
+    decisions_dir = tmp_path / "decisions"
+    decisions_dir.mkdir()
+
+    # Create testing.md with matching entries
+    decision_file = decisions_dir / "testing.md"
+    decision_file.write_text(
+        "## When Writing Mock Tests\n"
+        "\n"
+        "Mock tests prevent side effects.\n"
+        "\n"
+        "## Error Handling\n"
+        "\n"
+        "Handle errors gracefully.\n"
+        "\n"
+        "## When Mock Patching\n"
+        "\n"
+        "Patch where object is used.\n"
+        "\n"
+        "## When Debugging Tests\n"
+        "\n"
+        "Debugging strategies.\n"
+    )
+
+    # Query with no match should raise ResolveError
+    try:
+        resolve("trigger", "nonexistent topic xyz", str(index_file), str(decisions_dir))
+        raise AssertionError("Expected ResolveError")
+    except ResolveError as e:
+        error_msg = str(e)
+        # Must contain "No match for" and the query text
+        assert "No match for" in error_msg
+        assert "nonexistent topic xyz" in error_msg
+        # Must contain "Did you mean:" followed by suggestions
+        assert "Did you mean:" in error_msg
+        # Each suggestion should be formatted as /when <trigger>
+        # With fuzzy matching, "topic" and "xyz" are close to existing terms
+        assert "/when " in error_msg
+        # Should have multiple suggestions (up to 3)
+        suggestion_count = error_msg.count("/when ")
+        assert suggestion_count >= 1  # At least one suggestion
+        assert suggestion_count <= 3  # At most 3 suggestions
+
+
 def test_section_content_extraction(tmp_path: Path) -> None:
     """Extract content between heading boundaries.
 

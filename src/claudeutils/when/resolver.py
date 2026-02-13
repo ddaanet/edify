@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from claudeutils.when import fuzzy, navigation
-from claudeutils.when.index_parser import parse_index
+from claudeutils.when.index_parser import WhenEntry, parse_index
 
 
 class ResolveError(Exception):
@@ -140,6 +140,76 @@ def _resolve_section(query: str, decisions_dir: str) -> str:
     return content
 
 
+def _get_suggestions(
+    query: str, candidates: list[str], limit: int = 3
+) -> list[tuple[str, float]]:
+    """Get top fuzzy suggestions when no match found.
+
+    Args:
+        query: The search pattern
+        candidates: List of candidates to score
+        limit: Maximum number of suggestions (default 3)
+
+    Returns:
+        List of (candidate, score) tuples sorted by score descending
+    """
+    scored = []
+
+    for candidate in candidates:
+        # Get partial matching score (count of matched chars)
+        partial_score = _get_partial_match_score(query, candidate)
+        if partial_score > 0:
+            scored.append((candidate, partial_score))
+
+    scored.sort(key=lambda x: x[1], reverse=True)
+    return scored[:limit]
+
+
+def _get_partial_match_score(query: str, candidate: str) -> float:
+    """Count query characters found in order within candidate."""
+    query_lower = query.lower()
+    candidate_lower = candidate.lower()
+
+    # Count how many query characters we can match in order
+    matched = 0
+    q_idx = 0
+    for c in candidate_lower:
+        if q_idx < len(query_lower) and c == query_lower[q_idx]:
+            matched += 1
+            q_idx += 1
+
+    return float(matched)
+
+
+def _handle_no_match(query: str, candidates: list[str]) -> None:
+    """Raise ResolveError with fuzzy suggestions."""
+    suggestions = _get_suggestions(query, candidates)
+    msg = f"No match for '{query}'"
+    if suggestions:
+        msg += "\nDid you mean:"
+        for candidate, _score in suggestions:
+            parts = candidate.split(" ", 1)
+            trigger = parts[1] if len(parts) > 1 else candidate
+            msg += f"\n  /when {trigger}"
+    raise ResolveError(msg)
+
+
+def _load_matched_entry(
+    matched_candidate: str, entries: list[WhenEntry]
+) -> WhenEntry:
+    """Find matching entry for candidate string."""
+    parts = matched_candidate.split(" ", 1)
+    operator = parts[0]
+    trigger_text = parts[1] if len(parts) > 1 else ""
+
+    for entry in entries:
+        if entry.operator == operator and entry.trigger == trigger_text:
+            return entry
+
+    msg = "Could not map matched candidate to entry"
+    raise ResolveError(msg)
+
+
 def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
     """Resolve trigger mode query via fuzzy matching.
 
@@ -160,40 +230,17 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
     index_file = Path(index_path)
     dec_dir = Path(decisions_dir)
 
-    # Parse index entries
     entries = parse_index(index_file)
-
-    # Build candidates: "{operator} {trigger}" for fuzzy matching
     candidates = [f"{e.operator} {e.trigger}" for e in entries]
 
-    # Fuzzy match: include operator prefix in query
-    # Query comes without prefix, so match against "when trigger" or "how trigger"
     matches = fuzzy.rank_matches(query, candidates, limit=1)
 
     if not matches:
-        msg = f"No match for '{query}'"
-        raise ResolveError(msg)
+        _handle_no_match(query, candidates)
 
     matched_candidate, _score = matches[0]
+    matching_entry = _load_matched_entry(matched_candidate, entries)
 
-    # Extract the operator and trigger from the matched candidate
-    parts = matched_candidate.split(" ", 1)
-    operator = parts[0]
-    trigger_text = parts[1] if len(parts) > 1 else ""
-
-    # Find the matching entry
-    matching_entry = None
-    for entry in entries:
-        if entry.operator == operator and entry.trigger == trigger_text:
-            matching_entry = entry
-            break
-
-    if not matching_entry:
-        msg = "Could not map matched candidate to entry"
-        raise ResolveError(msg)
-
-    # Extract section name from index (it points to the file)
-    # For now, assume the section name is the file name
     file_path = dec_dir / f"{matching_entry.section}.md"
 
     if not file_path.exists():
@@ -201,7 +248,7 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
         raise ResolveError(msg)
 
     # Build heading text and search for it in the file
-    heading_text = _build_heading(operator, trigger_text)
+    heading_text = _build_heading(matching_entry.operator, matching_entry.trigger)
     file_content = file_path.read_text()
 
     # Find the actual heading line (may be H2, H3, or H4)
