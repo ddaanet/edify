@@ -34,27 +34,34 @@
   - Agent created: .claude/agents/worktree-update-task.md
   - Command: `/orchestrate worktree-update` (after restart)
 
-- [ ] **Agentic process review and prose RCA** — Analyze why deliveries are "expensive, incomplete, buggy, sloppy, overdone" | opus
-  - Scope: worktree-skill execution process, not deliverables
-  - Signals: plan specified opus but session showed haiku, vacuous tests passed vet, vet checked presence not correctness
-  - Blocker cleared: methodology docs now on dev after worktree merge
-
-- [ ] **Workflow fixes** — Implement process improvements from RCA | sonnet
-  - Depends on: RCA completion
+- [ ] **Workflow improvements** — Process fixes from RCA + skill/fragment/orchestration cleanup | sonnet
+  - Depends on: RCA completion (for orchestrate-evolution refresh)
+  - Orchestrate evolution — `/plan-adhoc plans/orchestrate-evolution/design.md` (designed, stale Feb 10, refresh after RCA)
+  - Fragments cleanup — remove fragments duplicating skills/workflow
+  - Reflect skill output — RCA should produce pending tasks, not inline fixes
+  - Tool-batching.md — add Task tool parallelization guidance with examples
+  - Orchestrator delegate resume — resume delegates with incomplete work
+  - Agent output optimization — remove summarize/report language from agents
+  - Investigation prerequisite rule review
+  - Design skill: TDD non-code steps explicitly marked non-TDD
+  - Design skill: Phase C density checkpoint
 
 - [ ] **Consolidate learnings** — learnings.md at 312 lines (soft limit 80), 0 entries >=7 days | sonnet
   - Blocked on: memory redesign (/when, /how)
 
-- [ ] **Remove duplicate memory index entries on precommit** — Autofix or fail on duplicate index entries | sonnet
-  - Blocked on: memory redesign (/when, /how)
-
-- [ ] **Update design skill** — Two refinements: (1) TDD non-code steps: non-code artifacts explicitly marked non-TDD; (2) Phase C density checkpoint | sonnet
+- [ ] **Precommit validation improvements** — Expand precommit checks | sonnet
+  - Validate session.md pending tasks/worktree structure
+  - Reject references to tmp/ files in committed content
+  - Autofix or fail on duplicate memory index entries (blocked on memory redesign)
 
 - [ ] **Handoff skill memory consolidation worktree awareness** — Only consolidate memory in main repo or dedicated consolidation worktree | sonnet
+  - Blocked on: worktree-update delivery
 
-- [ ] **Commit skill optimizations** — Remove handoff gate, optimize with minimal custom script calls | sonnet
+- [ ] **Commit skill optimizations** — Remove handoff gate, optimize, branching fix | sonnet
   - Blocked on: worktree-update delivery (possible code reuse)
-  - Scripts live in claudeutils CLI (like _worktree), skill-specific, not for manual use
+  - Remove handoff gate, optimize with minimal custom script calls
+  - Commit Gate B — coverage ratio (artifacts:reports 1:1) not boolean
+  - Commit/handoff branching — move git branching point after precommit passes
 
 ### Recovered (consolidated)
 
@@ -66,17 +73,6 @@
 
 - [ ] **Continuation prepend** — `/design plans/continuation-prepend/problem.md` | sonnet
   - Plan: continuation-prepend | Status: requirements
-
-- [ ] **Workflow process improvements** — Skill/fragment/orchestration fixes | sonnet
-  - Orchestrate evolution — `/plan-adhoc plans/orchestrate-evolution/design.md` (designed, stale Feb 10, refresh after RCA)
-  - Fragments cleanup — remove fragments duplicating skills/workflow
-  - Reflect skill output — RCA should produce pending tasks, not inline fixes
-  - Tool-batching.md — add Task tool parallelization guidance with examples
-  - Commit Gate B — coverage ratio (artifacts:reports 1:1) not boolean
-  - Commit/handoff branching — move git branching point after precommit passes
-  - Orchestrator delegate resume — resume delegates with incomplete work
-  - Agent output optimization — remove summarize/report language from agents
-  - Investigation prerequisite rule review
 
 - [ ] **Codebase quality sweep** — Tests, deslop, factorization, dead code | sonnet
   - Review all tests for vacuous tests
@@ -93,16 +89,15 @@
   - History cleanup tooling — git history rewriting, reusable scripts
   - Rewrite agent-core ad-hoc scripts via TDD to claudeutils package
 
-- [ ] **Verify superseded RCAs** — Confirm fixes landed, close or reopen | sonnet
-  - RCA: Planning agents leave dirty tree — delegation.md may cover this
-  - RCA: Planning agent delegation inefficiency — execution-routing.md split may cover this
 
 ## Worktree Tasks
 
 - [ ] **Plan when-recall** → `wt/when-recall` — `/plan-tdd plans/when-recall/design.md` | sonnet
 - [x] **Handoff validation design** → `wt/handoff-validation` — killed, problems resolved by existing tooling
 - [x] **Evaluate requirements-skill** → `wt/requirements-skill` — complete, skill implemented
+- [ ] **Agentic process review and prose RCA** → `wt/process-review` — Analyze why deliveries are "expensive, incomplete, buggy, sloppy, overdone" | opus
 - [ ] **Error handling framework design** → `wt/error-handling` — `/design` | opus
+- [ ] **Verify superseded RCAs** → `wt/verify-rcas` — Confirm fixes landed, close or reopen | sonnet
 - [ ] **Update README.md** → `wt/readme` — sonnet
 
 ## Blockers / Gotchas
