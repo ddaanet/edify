@@ -172,7 +172,9 @@ def test_merge_idempotency(
     result = CliRunner().invoke(worktree, ["merge", "wt-feature"])
     # After successful merge, branch may be deleted or already merged
     # Accept either outcome (0 = re-runs cleanly, 2 = branch gone/already merged)
-    assert result.exit_code in (0, 2), f"Merge should succeed or be idempotent. Output: {result.output}"
+    assert result.exit_code in (0, 2), (
+        f"Merge should succeed or be idempotent. Output: {result.output}"
+    )
 
     # Verify no duplicate commits: final state should match single successful merge
     log_output = subprocess.run(
@@ -183,6 +185,10 @@ def test_merge_idempotency(
     ).stdout
 
     # Count merge commits related to feature-branch
-    feature_commits = [l for l in log_output.split("\n") if "feature" in l.lower()]
+    feature_commits = [
+        line for line in log_output.split("\n") if "feature" in line.lower()
+    ]
     # Should have the original feature commit plus at most one merge commit
-    assert len(feature_commits) <= 2, "Feature should appear at most twice (original + merge, no duplicates)"
+    assert len(feature_commits) <= 2, (
+        "Feature should appear at most twice (original + merge, no duplicates)"
+    )

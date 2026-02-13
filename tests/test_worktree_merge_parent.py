@@ -205,7 +205,9 @@ def test_merge_precommit_failure(
     # Mock precommit to fail
     original_run = subprocess.run
 
-    def mock_run_with_failure(*args: object, **kwargs: object) -> object:
+    def mock_run_with_failure(
+        *args: object, **kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
         cmd = args[0] if args else kwargs.get("args")
         if (
             isinstance(cmd, list)
@@ -214,16 +216,21 @@ def test_merge_precommit_failure(
             and len(cmd) > 1
             and cmd[1] == "precommit"
         ):
-            mock_result = subprocess.CompletedProcess(cmd, returncode=1)  # type: ignore[arg-type]
-            mock_result.stdout = ""  # type: ignore[attr-defined]
-            mock_result.stderr = "Precommit validation failed"  # type: ignore[attr-defined]
+            mock_result: subprocess.CompletedProcess[str] = subprocess.CompletedProcess(
+                cmd, returncode=1
+            )
+            mock_result.stdout = ""
+            mock_result.stderr = "Precommit validation failed"
             return mock_result
-        return original_run(*args, **kwargs)  # type: ignore[call-overload]
+        # Type system limitation: can't type *args/**kwargs forwarding perfectly
+        return original_run(*args, **kwargs)  # type: ignore[call-overload,no-any-return]
 
     monkeypatch.setattr(subprocess, "run", mock_run_with_failure)
 
     result = CliRunner().invoke(worktree, ["merge", "test-merge"])
-    assert result.exit_code == 1, f"merge should fail when precommit fails: {result.output}"
+    assert result.exit_code == 1, (
+        f"merge should fail when precommit fails: {result.output}"
+    )
     assert "Precommit" in result.output or "failed" in result.output.lower(), (
         f"Error message should mention precommit failure: {result.output}"
     )
