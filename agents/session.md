@@ -49,6 +49,11 @@
 - [ ] **Consolidate learnings** — learnings.md at 312 lines (soft limit 80), 0 entries >=7 days | sonnet
   - Blocked on: memory redesign (/when, /how)
 
+- [ ] **Worktree merge combines session context** — Confirm wt-merge combines pending tasks/jobs (not --ours) and requires agent review | sonnet
+  - Blocked on: worktree-update delivery
+
+- [ ] **Learning ages computation after consolidation** — Verify age calculation is correct when learnings are consolidated/rewritten | sonnet
+
 - [ ] **Precommit validation improvements** — Expand precommit checks | sonnet
   - Validate session.md pending tasks/worktree structure
   - Reject references to tmp/ files in committed content
