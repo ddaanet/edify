@@ -9,7 +9,12 @@
 
 Detection criteria in `agents/decisions/runbook-review.md` are TDD-specific (RED/GREEN/cycles terminology). General steps have equivalent failure modes (vacuity, density, dependency ordering) but no documented detection criteria. The review pipeline has two bypass paths: outline review (Phase 0.75) checks only general-step LLM failure modes, and fast-path (Phase 0.95) skips outline review entirely.
 
-**Root cause:** Documentation-driven review approach without enforcement of type-agnostic LLM failure mode detection at both outline and expanded levels.
+**Three-level root cause:**
+1. **Immediate:** runbook-review.md uses TDD-specific language
+2. **Proximate:** Per-phase typing introduced 4.5 hours after review criteria were created; downstream consumer update gap
+3. **Systemic:** No feature propagation checklist to ensure semantic consumers are updated when capabilities change
+
+**Key insight:** Manual review succeeded using TDD-specific axes by mentally translating terminology. This proves the axes ARE conceptually type-agnostic — they need language normalization, not parallel sections.
 
 **Impact:** General-step runbooks can pass plan-reviewer with vacuous steps, density issues, and ordering violations because review criteria only apply to TDD phases.
 
@@ -169,98 +174,88 @@ The skill directs agents to `runbook-review.md` for detection methodology, but t
 
 ## 4. Proposed Fixes
 
-### Fix 1: Add General-Step Detection Section to runbook-review.md
+### Fix 1: Normalize runbook-review.md to Type-Agnostic Language (REVISED)
 
 **File:** `agents/decisions/runbook-review.md`
 
-**Action:** Add section "General-Step Equivalents" after the four TDD axes:
+**Action:** Rewrite the four axes using type-agnostic language with type-specific detection patterns.
 
+**Pattern:** Lead with conceptual description (applies to both), then provide type-specific detection bullets using prefixes:
+- `**TDD:**` — TDD-specific detection pattern
+- `**General:**` — General-step-specific detection pattern
+- `**Both:**` — Universally applicable detection pattern
+
+**Example transformation:**
+
+**Before (TDD-specific):**
 ```markdown
-## .General-Step Detection Equivalents
+### Vacuous Cycles
 
-The four axes apply to general-step phases with adapted detection criteria.
+Cycles where RED tests don't constrain implementation. Haiku satisfies them with degenerate GREEN (structurally correct, behaviorally meaningless).
 
-### Vacuous Steps
-
-Steps that only create scaffolding without functional outcome. Haiku satisfies them with directory creation, echo statements, or structural changes that don't affect behavior.
-
-**Detection — a step is vacuous when any of:**
-- Step creates files/directories without adding functional content
-- Step output is template text or echo statements (no computation)
-- Step tests integration wiring (A calls B) when called function already verified
-- Step describes presentation changes (formatting, layout) without semantic effect
-
-**Action:** Merge into nearest behavioral step or elevate preamble.
-
-### Dependency Ordering (General)
-
-Steps that reference structures not yet created. Executing agent must either create them ad-hoc (scope creep) or assume their existence (coupling to future work).
-
-**Detection — ordering problem exists when:**
-- Step N modifies/extends structure created in step N+k (k>0)
-- Step N's implementation assumes data shape that later step establishes
-- Step references "newly created file" that doesn't exist until later step
-
-**Action:** Reorder foundation-first. If cross-phase: UNFIXABLE (outline revision needed).
-
-### Step Density
-
-Unnecessary steps that dilute focus and increase context pressure.
-
-**Detection — steps should collapse when:**
-- Two adjacent steps modify same file with <1 branch point difference in logic
-- Step adds single constant or trivial config change (≤5 lines)
-- Step exists solely for formatting/presentation separable from behavior
-- Entire phase has ≤3 steps, all Low complexity, modifying function that already exists
-
-**Action:** Collapse into adjacent step. For single-change steps, inline as preamble.
-
-### Checkpoint Spacing (applies to both)
-
-[Existing content unchanged — this criterion is already type-agnostic]
+**Detection — a cycle is vacuous when any of:**
+- RED can be satisfied by `import X; assert callable(X)` or structural assertion
+- GREEN adds ≤3 lines of non-branching code (no conditional, no state transformation)
+- Cycle tests integration wiring (A calls B) rather than behavior (given X, observe Y)
+- Cycle tests presentation format (output shape) rather than semantic correctness
 ```
 
-**Rationale:** Provides parallel detection methodology for general steps using same structure as TDD criteria.
+**After (type-agnostic):**
+```markdown
+### Vacuity
 
-### Fix 2: Update review-plan Skill to Use Type-Agnostic Criteria
+Items where tests or implementation don't constrain behavior. Haiku satisfies them with structural correctness without semantic meaning.
+
+**Detection — an item is vacuous when any of:**
+- **TDD:** RED can be satisfied by `import X; assert callable(X)` or structural assertion
+- **TDD:** GREEN adds ≤3 lines of non-branching code (no conditional, no state transformation)
+- **General:** Step creates scaffolding without functional content (mkdir, touch, echo stub)
+- **General:** Step produces template text with no computation
+- **Both:** Tests integration wiring (A calls B) rather than behavior (given X, observe Y)
+- **Both:** Tests presentation format (output shape) rather than semantic correctness
+
+**Action:** Eliminate or merge into nearest behavioral item.
+```
+
+Apply same pattern to:
+- **Dependency Ordering** → rewrite with TDD/General/Both patterns
+- **Cycle Density** → rename to "Density", rewrite with patterns
+- **Checkpoint Spacing** → already type-agnostic, minor rewording only
+
+Update document title and intro:
+- "Pre-execution review of TDD runbook outlines" → "Pre-execution review of runbook outlines (TDD and general)"
+
+**Rationale:**
+- Simpler than parallel sections (one definition, not two)
+- More maintainable (updates apply to both types)
+- Conceptually accurate (axes ARE the same, proven by manual review success)
+- Human already demonstrated successful mental translation
+
+### Fix 2: Simplify review-plan Skill References (REVISED)
 
 **File:** `agent-core/skills/review-plan/SKILL.md` lines 259-283
 
-**Action:** Expand section 11 with explicit detection patterns for both types:
+**Action:** Section 11 already references `agents/decisions/runbook-review.md`. Once Fix 1 normalizes that document to type-agnostic language, this skill's reference "just works" without modification.
+
+**Optional enhancement:** Add reminder that type-specific patterns exist:
 
 ```markdown
 ### 11. LLM Failure Modes (CRITICAL) — all phases
 
 Criteria from `agents/decisions/runbook-review.md` (four axes). Apply regardless of phase type.
 
-**11.1 Vacuity**
+Each axis provides type-specific detection patterns:
+- **TDD patterns:** For RED/GREEN/cycles (e.g., "RED satisfied by import X")
+- **General patterns:** For steps/implementation (e.g., "step creates scaffolding")
+- **Universal patterns:** Apply to both (e.g., "tests integration wiring not behavior")
 
-**TDD detection:**
-- Cycles where RED can pass with `assert callable(X)` or `import X`
-- GREEN adds ≤3 lines of non-branching code
-- Cycle tests integration wiring (A calls B) when B already tested
-
-**General detection:**
-- Steps creating scaffolding without functional outcome (mkdir, touch, echo stub)
-- Steps producing template text with no computation
-- Steps testing presentation format not semantic correctness
-
-**Fix:** Merge into nearest behavioral cycle/step
-
-**11.2 Dependency Ordering**
-
-[Apply same pattern — explicit TDD + General detection criteria]
-
-**11.3 Density**
-
-[Apply same pattern]
-
-**11.4 Checkpoint Spacing**
-
-[Existing content — already type-agnostic]
+**11.1 Vacuity** — See runbook-review.md for detection patterns
+**11.2 Dependency Ordering** — See runbook-review.md for detection patterns
+**11.3 Density** — See runbook-review.md for detection patterns
+**11.4 Checkpoint Spacing** — See runbook-review.md for detection patterns
 ```
 
-**Rationale:** Makes detection actionable for executing agents without requiring external reference lookup.
+**Rationale:** Type-agnostic source document eliminates need for duplication. Skill references authoritative criteria without expansion.
 
 ### Fix 3: Strengthen Outline Review Propagation
 
@@ -328,13 +323,14 @@ These should be re-validated after expansion — expansion can introduce new fai
 
 | File | Change Type | Complexity |
 |------|-------------|------------|
-| `agents/decisions/runbook-review.md` | Add section | Low — parallel structure to existing TDD axes |
-| `agent-core/skills/review-plan/SKILL.md` | Expand criteria | Medium — 4 detection patterns × 2 types |
+| `agents/decisions/runbook-review.md` | Rewrite axes (type-agnostic language) | Medium — normalize 4 axes, preserve grounding/sources |
+| `agent-core/skills/review-plan/SKILL.md` | Simplify criteria references | Low — type-agnostic criteria eliminate need for expansion |
 | `agent-core/agents/runbook-outline-review-agent.md` | Enhance guidance | Low — append to existing section |
 | `agent-core/skills/runbook/SKILL.md` | Add validation step | Low — 2-line addition to Phase 1, 5-line addition to Phase 0.95 |
-| `agent-core/agents/plan-reviewer.md` | Update references | Trivial — documentation pointer update |
+| `agent-core/agents/plan-reviewer.md` | Update references (minimal) | Trivial — documentation pointer update if needed |
+| `agents/decisions/feature-propagation.md` | Create checklist (systemic fix) | Low — new document, ~80 lines |
 
-**Estimated effort:** 2-3 cycles (1 documentation update cycle, 1 skill update cycle, 1 validation cycle).
+**Estimated effort:** 2-3 cycles (1 documentation normalization cycle, 1 skill update cycle, 1 validation cycle).
 
 ### Testing Strategy
 
@@ -431,22 +427,268 @@ Related but distinct issue. Vet over-escalation is judgment calibration (treatin
 
 ---
 
-## 8. Conclusion
+## 8. Deepening
 
-General-step detection gap is a **documentation-driven review pipeline issue**. Detection criteria exist (proven by manual review success and outline review general-step language) but are documented only in TDD-specific format. Review agents follow documentation literally, so TDD-specific criteria → no general-step detection.
+### 8.1 Why Are Criteria TDD-Specific? Timeline Analysis
 
-**Fixes are low-risk:** All are documentation/skill updates with no code changes. Parallel structure to existing TDD criteria minimizes implementation complexity.
+**Hypothesis:** Per-phase typing was introduced AFTER review criteria were written. This is a downstream consumer update gap.
 
-**Highest impact fix:** Fix 1 (add general-step detection to runbook-review.md). This is the authoritative source plan-reviewer references. Other fixes are transmission mechanisms for the criteria.
+**Timeline evidence:**
 
-**Fast-path is critical path:** Phase 0.95 bypass is the highest-risk gap. When outline promotes directly to runbook, it bypasses ALL downstream review. Outline review MUST validate LLM failure modes before promotion.
+| Date | Event | File |
+|------|-------|------|
+| 2026-02-12 11:00 | runbook-review.md created | `agents/decisions/runbook-review.md` |
+| 2026-02-12 14:51 | Per-phase typing designed | `plans/workflow-fixes/design.md` (commit b8b560d) |
+| 2026-02-12 15:24 | Per-phase typing shipped | Unified /runbook skill (commit 6d753f9) |
+
+**Analysis:**
+
+runbook-review.md was created 4.5 hours BEFORE per-phase typing was designed and shipped. The review criteria document predates the feature it needs to support.
+
+**From commit 6d753f9 message:**
+```
+- Unified /runbook skill with per-phase typing (2205→810 lines, 63% reduction)
+- review-plan skill extends review-tdd-plan with general + LLM failure mode criteria
+```
+
+The commit message claims "review-plan skill extends... with general + LLM failure mode criteria," but the extension was incomplete. The skill references `agents/decisions/runbook-review.md` (line 260 in review-plan skill: "Criteria from `agents/decisions/runbook-review.md`") which still contains TDD-specific language.
+
+**Downstream consumer update gap confirmed:**
+
+Per-phase typing required updates to:
+1. ✅ Runbook skill (Phase 1 expansion logic) — updated
+2. ✅ prepare-runbook.py (already supported both via header detection) — no change needed
+3. ✅ plan-reviewer agent definition (declares intent to check all phases) — updated
+4. ✅ review-plan skill (references criteria document) — updated
+5. ❌ **runbook-review.md (detection criteria themselves)** — NOT updated
+
+**Root cause refined:** Per-phase typing introduction created a new requirement (type-agnostic criteria) that was not propagated to the authoritative criteria document.
+
+### 8.2 Manual Review Succeeded — Axes Are Conceptually Type-Agnostic
+
+**Observation:** Human reviewer applied runbook-review.md axes to general steps by mentally translating TDD terminology.
+
+**Evidence from session.md:**
+```
+**Runbook review (manual, against runbook-review.md axes):**
+- 2 Medium: density (Steps 1.3+1.4 same file), vacuity (Step 1.2 echo stub)
+```
+
+The human detected vacuity ("Step 1.2 echo stub") and density ("Steps 1.3+1.4 same file") in general-step phases using TDD-specific criteria. This proves the axes ARE conceptually type-agnostic.
+
+**Translation performed:**
+
+| TDD-specific language | Human interpretation for general steps |
+|----------------------|---------------------------------------|
+| "Cycles where RED tests don't constrain implementation" | "Steps that only create scaffolding without functional outcome" |
+| "Cycle tests integration wiring (A calls B)" | "Step tests integration wiring (A calls B)" |
+| "GREEN adds ≤3 lines of non-branching code" | "Step implementation adds ≤3 lines of non-branching code" |
+| "Unnecessary cycles that dilute expansion quality" | "Unnecessary steps that dilute expansion quality" |
+
+**Implication for Fix 1:**
+
+The original proposal was:
+> Add section "General-Step Equivalents" after the four TDD axes with parallel detection criteria
+
+**Better approach:** Make existing axes type-agnostic by normalizing language.
+
+**Rationale:**
+1. **Simpler:** One section, not two parallel sections to maintain
+2. **More maintainable:** Updates apply to both types automatically
+3. **Conceptually accurate:** The axes ARE the same, only terminology differs
+4. **Proven:** Human already demonstrated successful translation
+
+**Revised Fix 1 proposal:**
+
+**Before (TDD-specific):**
+```markdown
+### Vacuous Cycles
+
+Cycles where RED tests don't constrain implementation.
+
+**Detection — a cycle is vacuous when any of:**
+- RED can be satisfied by `import X; assert callable(X)`
+- GREEN adds ≤3 lines of non-branching code
+- Cycle tests integration wiring (A calls B)
+```
+
+**After (type-agnostic):**
+```markdown
+### Vacuity
+
+Items where tests/implementation don't constrain behavior. Haiku satisfies them with structural correctness without semantic meaning.
+
+**Detection — an item is vacuous when any of:**
+- **TDD:** RED can be satisfied by `import X; assert callable(X)` or structural assertion
+- **TDD:** GREEN adds ≤3 lines of non-branching code (no conditional, no state transformation)
+- **General:** Step creates scaffolding without functional content (mkdir, touch, echo stub)
+- **General:** Step produces template text with no computation
+- **Both:** Tests integration wiring (A calls B) rather than behavior (given X, observe Y)
+- **Both:** Tests presentation format (output shape) rather than semantic correctness
+```
+
+**Pattern:** Lead with type-agnostic concept, provide type-specific detection patterns as bullets. "Both" indicators show universally applicable criteria.
+
+### 8.3 Meta Root Cause — No Propagation Checklist
+
+**Question:** Is this a one-off gap or a systemic pattern?
+
+**Analysis of feature introductions:**
+
+| Feature | Date Introduced | Downstream Consumers | Update Status |
+|---------|----------------|---------------------|---------------|
+| **Per-phase typing** | 2026-02-12 | 5 consumers | 4/5 updated (80%) |
+| **Continuation passing** | 2026-02-09 | Skills with tail-calls | Updated (commit 1f278b1 shows systematic doc sweep) |
+| **MCP tools** | ~2025-12 | Skills, agents | No propagation gaps observed |
+| **Rules files** | ~2026-01 | Agent definitions, CLAUDE.md | No propagation gaps observed |
+
+**Detailed analysis: Continuation passing**
+
+From commit 1f278b1 (2026-02-09):
+```
+- Create continuation-passing fragment (protocol, frontmatter, consumption, transport)
+- Update design.md: D-1 multi-skill only, D-3 skills own default-exit, D-6 remove Mode 1
+- Add continuation passing decisions to workflow-optimization.md
+- Update jobs.md: continuation-passing → complete
+- Fix invalidated learning (default exit ownership changed)
+- Vet checkpoint: 6 issues fixed (terminology consistency across all docs)
+```
+
+This commit shows systematic propagation:
+1. ✅ New fragment created (protocol documentation)
+2. ✅ Design doc updated (decisions refined)
+3. ✅ Workflow optimization doc updated (integration patterns)
+4. ✅ Invalidated learning fixed (downstream knowledge)
+5. ✅ Vet checkpoint caught 6 terminology consistency issues
+
+**Contrast with per-phase typing:**
+
+Continuation passing had a vet checkpoint that caught propagation issues. Per-phase typing did not have an explicit vet checkpoint checking "did all downstream consumers get updated?"
+
+**Evidence of checklist gap:**
+
+From workflow-fixes design (commit b8b560d):
+```
+**Changes by Artifact**
+
+- Unified /plan skill (merge plan-tdd + plan-adhoc with per-phase typing)
+- Review skill rename and expansion (review-tdd-plan → review-plan, add general + LLM failure mode criteria)
+- plan-reviewer agent definition
+- Pipeline contracts decision doc
+- Orchestrate unified completion
+- Design skill routing update
+- Workflow terminology updates (CLAUDE.md, fragments)
+- Vet skill context guidance
+- Deprecation of plan-tdd and plan-adhoc skills
+- Symlink synchronization (just sync-to-parent)
+```
+
+**Missing from "Changes by Artifact":** `agents/decisions/runbook-review.md`
+
+The design document listed 10 artifacts to update but did not include the review criteria document. This is a planning-time gap, not an execution-time gap.
+
+**Systemic pattern:**
+
+Continuation passing (15-step runbook) had explicit vet checkpoints at steps 6 and 15. The workflow-fixes plan (unified /runbook) did NOT have a vet checkpoint specifically for "review criteria language normalization."
+
+**Root cause of the root cause:**
+
+When introducing new capabilities:
+1. **Design identifies changed artifacts** — lists files to modify
+2. **Implementation executes changes** — updates listed files
+3. **No checklist validates:** "Did we find ALL downstream consumers?"
+
+The gap is between "artifacts we know about" (explicit list) and "artifacts that depend on changed semantics" (requires impact analysis).
+
+**Evidence this is systemic:**
+
+From agents/learnings.md:
+```
+## Pipeline transformation gap analysis
+- Anti-pattern: Patching individual artifacts when gaps are architectural (wrong routing, missing criteria, broken propagation)
+- Correct pattern: Map pipeline as transformations (T1-T6), identify defect types per transformation, verify review gates match defect types
+```
+
+This learning (from workflow-fixes work itself) identified "broken propagation" as an anti-pattern. The learning was recorded WHILE experiencing a propagation gap (runbook-review.md not updated). Meta-awareness without meta-solution.
+
+**Is there a checklist?**
+
+Searched for:
+- `git log --all --grep="propagation\|downstream\|consumer update\|checklist"` — no checklist commits
+- agents/decisions/ files — no "feature introduction checklist" document
+- CLAUDE.md fragments — no "propagation verification" fragment
+
+**Conclusion:** No propagation checklist exists. Impact analysis is ad-hoc.
+
+**Proposed systemic fix:**
+
+Create `agents/decisions/feature-propagation.md` with checklist:
+
+```markdown
+# Feature Propagation Checklist
+
+When introducing new capabilities (features, terminology changes, architectural patterns):
+
+## Phase 1: Impact Analysis
+
+- [ ] List direct consumers (files that reference the feature)
+- [ ] List semantic consumers (files that reference related concepts)
+- [ ] List downstream consumers (files that consume direct consumers)
+- [ ] Identify decision documents (agents/decisions/*.md)
+- [ ] Identify skill definitions (agent-core/skills/*/SKILL.md)
+- [ ] Identify agent definitions (agent-core/agents/*.md)
+- [ ] Identify fragments (agent-core/fragments/*.md)
+
+## Phase 2: Update Verification
+
+- [ ] Verify each consumer updated (grep for old terminology)
+- [ ] Check if any examples need updating
+- [ ] Validate cross-references still resolve
+- [ ] Check if learnings contradict new feature (invalidation)
+
+## Phase 3: Vet Checkpoint
+
+- [ ] Run vet-fix-agent on changed decision docs
+- [ ] Check terminology consistency across artifacts
+- [ ] Verify examples use new patterns
+- [ ] Confirm no stale references remain
+
+## Phase 4: Test Propagation
+
+- [ ] Create test case using new feature
+- [ ] Verify downstream consumers handle it correctly
+- [ ] Check error messages reference new terminology
+- [ ] Validate documentation discoverability
+```
+
+This checklist would have caught runbook-review.md (Phase 1: decision document with related concept "cycles" when introducing "per-phase typing").
+
+---
+
+## 9. Conclusion (Revised)
+
+General-step detection gap has THREE root causes:
+
+1. **Immediate:** runbook-review.md uses TDD-specific language (RED/GREEN/cycles)
+2. **Proximate:** Per-phase typing introduced 4.5 hours after review criteria were written; downstream consumer update gap
+3. **Systemic:** No feature propagation checklist to ensure all semantic consumers are updated
+
+**Fixes are low-risk with one revision:**
+
+Original Fix 1 proposed parallel "General-Step Equivalents" section. **Revised Fix 1:** Normalize existing axes to be type-agnostic using bullet patterns (TDD: ... / General: ... / Both: ...). This is simpler, more maintainable, and reflects the conceptual unity of the axes.
+
+**Highest impact fixes:**
+1. **Fix 1 (revised):** Normalize runbook-review.md language — authoritative source
+2. **Systemic fix:** Create feature-propagation.md checklist — prevents recurrence
+
+**Fast-path remains critical path:** Phase 0.95 bypass is still the highest-risk gap. When outline promotes directly to runbook, it bypasses ALL downstream review. Outline review MUST validate LLM failure modes before promotion.
 
 ---
 
 **Next steps:**
-1. Implement Fix 1 (runbook-review.md general-step criteria)
+1. Implement revised Fix 1 (normalize runbook-review.md to type-agnostic language)
 2. Test against known-bad general-step runbook
-3. Implement Fix 2 (review-plan skill expansion)
-4. Re-test for improved detection fidelity
-5. Implement Fixes 3-5 (outline review, fast-path validation)
+3. Implement Fix 2 (review-plan skill can reference type-agnostic criteria)
+4. Implement Fixes 3-5 (outline review, fast-path validation)
+5. **Systemic:** Create feature-propagation.md checklist
 6. Full pipeline test (outline → expansion → review for general-step phases)
