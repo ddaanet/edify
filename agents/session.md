@@ -91,6 +91,8 @@
   - History cleanup tooling — git history rewriting, reusable scripts
   - Rewrite agent-core ad-hoc scripts via TDD to claudeutils package
 
+
+- [ ] **Worktree-spawned task** — Task created inside worktree to test merge reconciliation | sonnet
 ## Worktree Tasks
 
 - [ ] **Plan when-recall** → `wt/when-recall` — blocked on validator fix | sonnet
