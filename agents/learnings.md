@@ -255,6 +255,12 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: After each step: git status check → if dirty, resume agent or vet-fix to commit → grep UNFIXABLE in vet reports
 - Rationale: Agents may complete work but leave uncommitted changes (especially after crashes)
 - Protocol: Step 3.3 in orchestrate skill - clean tree is hard requirement, no exceptions
+## Vet-fix-agent out-of-scope flagging
+- Anti-pattern: Vet-fix-agent flags explicitly out-of-scope items as UNFIXABLE
+- Correct pattern: Distinguish "deferred to next cycle" (expected, in scope statement) from "unfixable" (blocking issue)
+- Rationale: UNFIXABLE triggers escalation to user; out-of-scope items are expected and shouldn't block
+- Example: Cycle 0.6 vet flagged session filtering as UNFIXABLE despite "OUT: Session file filtering (next cycle)" in scope
+- Impact: Creates false positives in UNFIXABLE detection, requires manual judgment to continue
 ## Background agent crash recovery
 - Anti-pattern: Assume "failed" agent work is lost
 - Correct pattern: Check output files and git diff — agents complete work before classifyHandoffIfNeeded error fires
@@ -318,6 +324,79 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Example: Phase 2 vet flagged test file mismatch as "unfixable design decision" when solution was: check existing files, consolidate to test_worktree_cli.py, replace references
 - Root cause: Agents treat uncertainty as escalation trigger rather than scanning existing patterns for guidance
 - Impact: Creates false blocking issues, delays execution on mechanical fixes
+## Expansion re-introduces outline-level defects
+- Anti-pattern: Outline review catches vacuous cycles and density issues, but phase expansion re-introduces them without re-validation
+- Correct pattern: LLM failure mode checks (vacuity, dependency ordering, density, checkpoint spacing) must run at BOTH outline AND expanded phase levels
+- Evidence: plan-tdd Phase 1.5 specifies "No vacuous cycles" and "Foundation-first ordering" — outline was fixed. But expanded phases contain 3 vacuous cycles (1.1, 1.4, 5.3) and 1 missing requirement (jobs.md)
+- Root cause: tdd-plan-reviewer checks TDD discipline (prescriptive code, RED/GREEN) but not LLM failure modes. Different concern, different detection criteria.
+- Gap: Outline checks → expansion → phase review (TDD only) → final review (TDD only) — no LLM failure mode re-validation after expansion
+- Fix designed: `plans/workflow-fixes/outline.md` — add LLM failure mode detection to review-tdd-plan skill
+## Exploration agent false findings
+- Anti-pattern: Trust exploration agent file existence claims without verification
+- Correct pattern: Verify file existence claims from quiet-explore agents (ls, git ls-tree)
+- Evidence: Agent reported plan-tdd `references/*.md` as "not found in project" when files exist at `agent-core/skills/plan-tdd/references/` — verified via ls and git ls-tree HEAD
+- Root cause: Agent searched wrong directory or used wrong glob pattern
+- Impact: False finding was propagated to outline as "remove dead references" — user caught it by asking to check git history
+## vet-fix-agent rejects planning artifacts
+- Anti-pattern: Delegating planning artifact review (phase files, runbooks) to vet-fix-agent
+- Correct pattern: vet-fix-agent reviews implementation changes only. Planning artifacts need a plan-level reviewer (plan-reviewer agent)
+- Evidence: vet-fix-agent line 27: "Error: Wrong agent type... This agent reviews implementation changes, not planning artifacts"
+- Impact: plan-adhoc Point 1 delegates to vet-fix-agent for phase review — either errors or silently misroutes
+- Fix designed: `plans/workflow-fixes/outline.md` G1 — extend tdd-plan-reviewer → plan-reviewer for both TDD and adhoc artifacts
+## Pipeline transformation gap analysis
+- Anti-pattern: Patching individual artifacts when gaps are architectural (wrong routing, missing criteria, broken propagation)
+- Correct pattern: Map pipeline as transformations (T1-T6), identify defect types per transformation, verify review gates match defect types
+- Rationale: Each transformation can introduce specific defect types. Review gates must check for those specific defects, not generic quality
+- Example: T3 (outline → phase expansion) introduces vacuity/density. Current gate checks TDD discipline (wrong criteria) or routes to vet-fix-agent (wrong agent)
+- Key insight: Only inline recommendations propagate (Expansion Guidance pattern). Report recommendations are write-only dead-ends
+## Unify over patch architectural gaps
+- Anti-pattern: Patching G1-G7 individually within bifurcated architecture (/plan-tdd + /plan-adhoc)
+- Correct pattern: When >50% of code is shared and gaps trace to the bifurcation itself, unify first
+- Rationale: Patches add complexity to maintain; unification removes the root cause (6 of 7 gaps dissolved)
+- Decision catalyst: User observed real runbooks have mixed TDD + non-TDD phases — binary choice is artificial
+## Per-phase typing over per-runbook
+- Anti-pattern: Forcing entire runbook to be TDD or general
+- Correct pattern: Per-phase type tagging — each phase tagged `type: tdd` or `type: general`
+- Rationale: Real work mixes behavioral code (TDD) with infrastructure (general). Worktree runbook had TDD cycles for skill updates — wasteful
+- Per-step is over-granular (wouldn't mix within a phase), per-runbook forces binary choice
+## CLI skill name collision
+- Anti-pattern: Naming a skill `/plan` when `/plan` is a Claude Code CLI built-in (EnterPlanMode)
+- Correct pattern: Check CLI built-ins before naming skills. Used `/runbook` instead — aligns with terminology.
+- Scope: Any user-invocable skill name must not collide with CLI commands (/help, /plan, /review, /model, etc.)
+## Bootstrapping around broken workflow tools
+- Anti-pattern: Using /plan-adhoc to plan its own replacement — encodes old patterns into new
+- Correct pattern: When replacing a workflow tool, assess tier from design and execute directly if feasible
+- Evidence: Tier 2 assessment — prose artifacts, well-specified build order, no tests needed
+- Key insight: The design document IS the execution plan when work is well-specified
+## _git() helper reduces subprocess
+- Anti-pattern: Repeated `subprocess.run(["git", ...], capture_output=True, text=True, check=True).stdout.strip()` — 6 lines per call, formatter expands vertically
+- Correct pattern: Private `_git(*args, check=True, **kwargs) -> str` helper — 1 line per call, fits 88-char limit
+- Evidence: 24 calls replaced, 477→336 lines (30% reduction) in worktree cli.py
+- Ruff-friendly: Short function name + string args = most calls fit on single line without formatter expansion
+## Runbook planning file growth
+- Anti-pattern: Plan 37 TDD cycles adding to same files without projecting line growth or inserting split points
+- Correct pattern: Planning phase should estimate lines-per-cycle, project total growth, insert proactive file splits at phase boundaries
+- Evidence: 7+ refactor escalations, >1hr wall-clock on line-limit fixes alone across worktree-update runbook
+- Root cause: Planning requirements don't include file growth analysis — this is a gap in the planning pipeline, not execution
+- User directive: Needs RCA as planning requirements gap
+## Vet over-escalation persists post-overhaul
+- Repeated: 2026-02-12 (previously logged, still occurring)
+- Evidence: Phase 5 checkpoint flagged `create_worktree()` not extracted and `_git` naming as UNFIXABLE
+- Both were deferred design deviation (future phase) and stylistic naming (mechanical find-replace)
+- Pipeline overhaul (workflow-fixes) unified skills but didn't address vet judgment calibration
+- User directive: Needs planned work to fix
+## Opus for autonomous RCA delegation
+- Anti-pattern: Using sonnet for RCA delegation — accepts secondary summaries (session.md descriptions), misses primary source verification
+- Correct pattern: Use opus for RCA Task agents. Opus first-pass ≈ sonnet + one deepening round
+- Key delta: Opus reads actual artifacts (outline files, git history) where sonnet trusts summarized descriptions
+- Evidence: RCA #2 — sonnet said "no projection exists" (wrong), opus found projection in outline with wrong threshold (700 vs 400)
+- Evidence: RCA #3 — sonnet said "missing taxonomy" (WHAT), opus said "binary status model" (structural WHY)
+- Cost: ~30% more tokens per agent, but eliminates orchestrator deepening round (saves one full agent invocation)
+## Fixture shadowing creates dead code
+- Anti-pattern: Defining local function with same name as pytest fixture — function is unreachable dead code
+- Correct pattern: When conftest registers a fixture (via pytest_plugins), all test functions receiving that name get the fixture, not the local function
+- Evidence: `commit_file` defined locally in 3 test files, but all test functions already declared it as fixture parameter — local was never called
+- Detection: Grep for function definitions that duplicate fixture names, check if test functions use fixture injection
 ## Sonnet inadequate for conversation synthesis
 - Anti-pattern: Defaulting to sonnet for requirements extraction from complex conversations
 - Correct pattern: Use opus for extracting/synthesizing requirements from nuanced multi-turn discussions
