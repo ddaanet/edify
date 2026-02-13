@@ -18,11 +18,11 @@ def test_mode_detection(tmp_path: Path) -> None:
     testing_file = decisions_dir / "testing.md"
     testing_file.write_text("## Test Section\n\nTest content.\n")
 
-    section = resolve(".Test Section", str(index_file), str(decisions_dir))
+    section = resolve("when", ".Test Section", str(index_file), str(decisions_dir))
     assert "## Test Section" in section
     assert "Test content." in section
 
-    file_mode = resolve("..testing.md", str(index_file), str(decisions_dir))
+    file_mode = resolve("when", "..testing.md", str(index_file), str(decisions_dir))
     assert "## Test Section" in file_mode
     assert "Test content." in file_mode
 
@@ -50,13 +50,13 @@ def test_section_mode_resolves(tmp_path: Path) -> None:
         "Other content here.\n"
     )
 
-    result = resolve(".Mock Patching Pattern", str(index_file), str(decisions_dir))
+    result = resolve("when", ".Mock Patching Pattern", str(index_file), str(decisions_dir))
     assert "## Mock Patching Pattern" in result
     assert "Use exact match for restoration operations" in result
     assert "Prevents exploitation via command continuation" in result
     assert "## Next Section" not in result
 
-    result = resolve(".mock patching pattern", str(index_file), str(decisions_dir))
+    result = resolve("when", ".mock patching pattern", str(index_file), str(decisions_dir))
     assert "## Mock Patching Pattern" in result
 
 
@@ -71,12 +71,12 @@ def test_file_mode_resolves(tmp_path: Path) -> None:
     testing_file = decisions_dir / "testing.md"
     testing_file.write_text("## Test Section\n\nTest file content.\n")
 
-    result = resolve("..testing.md", str(index_file), str(decisions_dir))
+    result = resolve("when", "..testing.md", str(index_file), str(decisions_dir))
     assert "## Test Section" in result
     assert "Test file content." in result
 
     with pytest.raises(ResolveError):
-        resolve("..nonexistent.md", str(index_file), str(decisions_dir))
+        resolve("when", "..nonexistent.md", str(index_file), str(decisions_dir))
 
 
 def test_trigger_mode_resolves(tmp_path: Path) -> None:
@@ -103,11 +103,11 @@ def test_trigger_mode_resolves(tmp_path: Path) -> None:
         "Handle errors gracefully.\n"
     )
 
-    result = resolve("writing mock tests", str(index_file), str(decisions_dir))
+    result = resolve("when", "writing mock tests", str(index_file), str(decisions_dir))
     assert "# When Writing Mock Tests" in result
     assert "Mock tests prevent side effects" in result
 
-    result = resolve("mock test", str(index_file), str(decisions_dir))
+    result = resolve("when", "mock test", str(index_file), str(decisions_dir))
     assert "# When Writing Mock Tests" in result
 
 
@@ -143,7 +143,7 @@ def test_resolve_output_format(tmp_path: Path) -> None:
         "Prevents exploitation via command continuation.\n"
     )
 
-    result = resolve("writing mock tests", str(index_file), str(decisions_dir))
+    result = resolve("when", "writing mock tests", str(index_file), str(decisions_dir))
 
     assert "# When Writing Mock Tests" in result
     assert "Mock tests prevent side effects" in result
@@ -188,7 +188,7 @@ def test_trigger_not_found_suggests_matches(tmp_path: Path) -> None:
     )
 
     with pytest.raises(ResolveError) as exc_info:
-        resolve("nonexistent topic xyz", str(index_file), str(decisions_dir))
+        resolve("when", "nonexistent topic xyz", str(index_file), str(decisions_dir))
 
     error_msg = str(exc_info.value)
     assert "No match for" in error_msg
@@ -239,7 +239,7 @@ def test_trigger_suggestions_limited_to_three(tmp_path: Path) -> None:
     )
 
     with pytest.raises(ResolveError) as exc_info:
-        resolve("nonmatching query xyz", str(index_file), str(decisions_dir))
+        resolve("when", "nonmatching query xyz", str(index_file), str(decisions_dir))
 
     error_msg = str(exc_info.value)
     suggestion_count = error_msg.count("/when ")
@@ -268,7 +268,7 @@ def test_section_not_found_lists_headings(tmp_path: Path) -> None:
     )
 
     with pytest.raises(ResolveError) as exc_info:
-        resolve(".Nonexistent Section", str(index_file), str(decisions_dir))
+        resolve("when", ".Nonexistent Section", str(index_file), str(decisions_dir))
 
     error_msg = str(exc_info.value)
     assert "Section 'Nonexistent Section' not found." in error_msg
@@ -361,7 +361,7 @@ def test_file_not_found_lists_files(tmp_path: Path) -> None:
     )
 
     with pytest.raises(ResolveError) as exc_info:
-        resolve("..nonexistent.md", str(index_file), str(decisions_dir))
+        resolve("when", "..nonexistent.md", str(index_file), str(decisions_dir))
 
     error_msg = str(exc_info.value)
     assert "File 'nonexistent.md' not found in decision files." in error_msg
@@ -373,3 +373,41 @@ def test_file_not_found_lists_files(tmp_path: Path) -> None:
     cli_idx = error_msg.index("..cli.md")
     test_idx = error_msg.index("..testing.md")
     assert arch_idx < cli_idx < test_idx
+
+
+def test_operator_parameter_disambiguates(tmp_path: Path) -> None:
+    """Operator parameter distinguishes /when vs /how entries with same trigger.
+
+    When two entries have same trigger but different operators, the operator
+    parameter selects the correct one.
+    """
+    index_file = tmp_path / "test_index.md"
+    index_file.write_text(
+        "## testing\n\n"
+        "/when mock testing | behavioral\n"
+        "/how mock testing | procedural\n"
+    )
+
+    decisions_dir = tmp_path / "decisions"
+    decisions_dir.mkdir()
+
+    testing_file = decisions_dir / "testing.md"
+    testing_file.write_text(
+        "# Testing\n\n"
+        "## When Mock Testing\n\n"
+        "Behavioral guidance here.\n\n"
+        "## How to Mock Testing\n\n"
+        "Procedural steps here.\n"
+    )
+
+    # /when should resolve to "When Mock Testing"
+    when_result = resolve("when", "mock testing", str(index_file), str(decisions_dir))
+    assert "When Mock Testing" in when_result
+    assert "Behavioral guidance" in when_result
+    assert "Procedural steps" not in when_result
+
+    # /how should resolve to "How to Mock Testing"
+    how_result = resolve("how", "mock testing", str(index_file), str(decisions_dir))
+    assert "How to Mock Testing" in how_result
+    assert "Procedural steps" in how_result
+    assert "Behavioral guidance" not in how_result

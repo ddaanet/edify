@@ -10,13 +10,23 @@ class ResolveError(Exception):
     """Error during resolution."""
 
 
-def resolve(query: str, index_path: str, decisions_dir: str) -> str:
-    """Resolve query to decision file content via prefix-based routing."""
+def resolve(operator: str, query: str, index_path: str, decisions_dir: str) -> str:
+    """Resolve query to decision file content via prefix-based routing.
+
+    Args:
+        operator: The operator prefix ("when" or "how")
+        query: The search query
+        index_path: Path to memory index file
+        decisions_dir: Path to decisions directory
+
+    Returns:
+        Resolved content as string
+    """
     if query.startswith(".."):
         return _resolve_file(query[2:].strip(), decisions_dir)
     if query.startswith("."):
         return _resolve_section(query[1:].strip(), decisions_dir)
-    return _resolve_trigger(query, index_path, decisions_dir)
+    return _resolve_trigger(operator, query, index_path, decisions_dir)
 
 
 def _resolve_file(filename: str, decisions_dir: str) -> str:
@@ -144,27 +154,57 @@ def _handle_no_match(query: str, candidates: list[str]) -> None:
 
 
 def _load_matched_entry(matched_candidate: str, entries: list[WhenEntry]) -> WhenEntry:
-    """Find matching entry for candidate string."""
-    parts = matched_candidate.split(" ", 1)
-    operator = parts[0]
-    trigger_text = parts[1] if len(parts) > 1 else ""
+    """Find matching entry for candidate string.
 
+    The matched_candidate uses "how to" mapping, so we need to map it back
+    to the stored operator value when matching against entries.
+    """
+    # Parse candidate to extract operator and trigger
+    if matched_candidate.startswith("how to "):
+        operator_prefix = "how to"
+        trigger_text = matched_candidate[7:]  # len("how to ") = 7
+        original_operator = "how"
+    else:
+        parts = matched_candidate.split(" ", 1)
+        operator_prefix = parts[0]
+        trigger_text = parts[1] if len(parts) > 1 else ""
+        original_operator = operator_prefix
+
+    # Find entry with matching original operator and trigger
     for entry in entries:
-        if entry.operator == operator and entry.trigger == trigger_text:
+        if entry.operator == original_operator and entry.trigger == trigger_text:
             return entry
 
     msg = "Could not map matched candidate to entry"
     raise ResolveError(msg)
 
 
-def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
-    """Resolve trigger via fuzzy matching with navigation."""
+def _resolve_trigger(
+    operator: str, query: str, index_path: str, decisions_dir: str
+) -> str:
+    """Resolve trigger via fuzzy matching with navigation.
+
+    Args:
+        operator: The operator prefix ("when" or "how")
+        query: The search query
+        index_path: Path to memory index file
+        decisions_dir: Path to decisions directory
+
+    Returns:
+        Resolved content with navigation
+    """
     index_file = Path(index_path)
     dec_dir = Path(decisions_dir)
 
     entries = parse_index(index_file)
-    candidates = [f"{e.operator} {e.trigger}" for e in entries]
-    matches = fuzzy.rank_matches(query, candidates, limit=1)
+    # Build query with operator prefix for matching
+    operator_prefix = "how to" if operator == "how" else operator
+    query_with_operator = f"{operator_prefix} {query}"
+    # Build candidates with same operator mapping
+    candidates = [
+        f"{'how to' if e.operator == 'how' else e.operator} {e.trigger}" for e in entries
+    ]
+    matches = fuzzy.rank_matches(query_with_operator, candidates, limit=1)
 
     if not matches:
         _handle_no_match(query, candidates)
