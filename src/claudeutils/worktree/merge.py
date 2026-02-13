@@ -167,3 +167,8 @@ def merge(slug: str) -> None:
             "\n"
         )
         conflicts = [c for c in conflicts if c.strip()]
+
+        if "agent-core" in conflicts:
+            _git("checkout", "--ours", "agent-core")
+            _git("add", "agent-core")
+            conflicts = [c for c in conflicts if c != "agent-core"]
