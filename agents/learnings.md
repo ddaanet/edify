@@ -60,11 +60,6 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: `/when` (behavioral) and `/how` (procedural) only — these prescribe action, creating retrieval intention
 - Rationale: LLMs use what's in context or ignore it; they don't probe for definitions unless specifically instructed
 - Consequence: If a learning can't be phrased as `/when` or `/how`, it's either a fragment (ambient) or lacks actionable content
-## Fuzzy bridge: density and clarity
-- Anti-pattern: Index triggers must exactly match decision file headings (forces verbose triggers or cryptic headings)
-- Correct pattern: Index triggers fuzzy-compressed for density, headings stay as readable prose, fuzzy engine bridges the gap
-- Rationale: "how encode path" fuzzy-matches "How to encode paths" — index saves tokens, headings stay clear
-- Validator uses same fuzzy engine: each trigger must uniquely expand to one heading, each heading reachable by exactly one trigger
 ## Design skill lacks resume logic
 - Anti-pattern: Invoking `/design` when design is mid-flight — restarts from Phase A instead of resuming
 - Correct pattern: When design is in progress, manually continue from current phase (read outline, proceed to Phase B/C)
@@ -427,3 +422,38 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Constrain task names to `[a-zA-Z0-9 ]` — slug derivation is near-identity (lowercase + spaces→hyphens)
 - Rationale: Task names serve as git branch names, search keys (`git log -S`), and session identifiers — lossy transformation creates ambiguity
 - Example: "Upstream plugin-dev: document \`skills:\` frontmatter" → `upstream-plugin-dev-document-s` (truncated, information lost)
+## RED pass blast radius assessment
+- Anti-pattern: Handling unexpected RED pass as isolated cycle issue (skip or retry)
+- Correct pattern: Run blast radius across all remaining phase cycles — test each RED assertion against current state
+- Classification: over-implementation (commit test, skip GREEN), test flaw (rewrite assertions), correct (proceed)
+- Critical finding: Test flaws are deliverable defects — feature silently skipped when test passes for wrong reason
+- Example: Cycle 0.5 word-overlap tiebreaker passes due to boundary bonuses (212 vs 202), not word overlap
+- Protocol: `plans/orchestrate-evolution/reports/red-pass-blast-radius.md`
+## Common context signal competition
+- Anti-pattern: Phase-specific file paths and function names in global common context section of agent definition
+- Correct pattern: Common context must be phase-neutral (project conventions, package structure). Phase-specific paths belong in cycle step files only
+- Rationale: Persistent common context is stronger signal than one-time step file input. At haiku capability, persistent signal wins when step file task is semantically ambiguous
+- Evidence: 1/42 cycles derailed (3.5), caused by fuzzy.py paths in common context competing with resolver.py in step file
+- Fix: Strip phase-specific content from agent definition; plan-reviewer should flag phase-specific paths in common context
+## Vacuous assertion from skipped RED
+- Anti-pattern: Committing a test that never went RED without evaluating assertion strength
+- Correct pattern: When RED passes unexpectedly, verify assertions would catch the defect class — not just "doesn't crash" but "produces correct results"
+- Example: `assert isinstance(relevant, list)` passes on empty list — pipeline silently returns no matches but test passes
+- Detection: Check if key assertions distinguish "correct output" from "empty/default output"
+- Rationale: TDD RED phase proves the test can fail. Skipping RED means assertion quality is unverified
+## Vet-fix-agent commit discipline
+- Anti-pattern: Trust vet-fix-agent to commit its changes — it frequently doesn't
+- Correct pattern: Include explicit "Commit all changes and report before returning" in every vet delegation prompt
+- Evidence: Phases 2, 4, 6 checkpoints all left changes uncommitted, required resume to commit
+- Recurrence: Same root cause as "Delegation requires commit instruction" learning but specific to vet-fix-agent
+## Index exact keys not fuzzy
+- Anti-pattern: Using fuzzy matching in validator to bridge compressed triggers to verbose headings
+- Correct pattern: Index entry key must exactly match heading key — fuzzy matching is only for resolver runtime recovery
+- Rationale: Exact keys are deterministic and debuggable; fuzzy in validation creates invisible mismatches when scores drift below threshold
+- Impact: D-6 heading prefix (When/How to) creates key mismatch — entry key strips operator, heading key includes it
+- Invalidates: "Fuzzy bridge: density and clarity" learning (removed)
+## DP zero-ambiguity in subsequence matching
+- Anti-pattern: Initializing DP matrix with 0.0 for all cells — impossible states (i>0, j=0) indistinguishable from base case (i=0)
+- Correct pattern: Initialize score[i>0][j] with -inf, only score[0][j] = 0.0. Impossible subsequences propagate -inf
+- Rationale: When score[i-1][j-1] = 0 (no valid match for i-1 chars), transition score[i-1][j-1] + MATCH_SCORE produces positive score from nothing
+- Evidence: "when mock tests" scored 128.0 against candidate with no 'o' or 'k' — matched only 5 of 15 chars
