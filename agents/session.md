@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-13
 
-**Status:** Recovery runbook reviewed, fixed, prepared. Ready for orchestration after restart.
+**Status:** Worktree-update recovery complete — 5 findings fixed, checkpoint passed.
 
 ## Completed This Session
 
@@ -21,6 +21,15 @@
 - `prepare-runbook.py` generated: agent, 4 step files, orchestrator plan
 - Artifacts staged for commit
 
+**Runbook execution (worktree-update-recovery):**
+- All 4 steps executed successfully via worktree-update-task agent (haiku)
+- Step 1.1: Fixed C2 (THEIRS clean tree check) + C3 (agent-core setup recipe) — 3 commits
+- Step 1.2: Fixed M1 (continuation line leak) + M2 (case-sensitive regex) — 1 commit
+- Step 1.3: Added C4 (precommit failure test) — 1 commit
+- Step 1.4: Added C5 (merge idempotency test) — 1 commit
+- Phase 1 checkpoint: vet-fix-agent review passed, all findings fixed, no UNFIXABLE issues
+- Total: 6 commits (d39311d, 4616823, aa36497, 49a047c, 52a3b82, 1ef77aa)
+
 ## Prior Session (preserved)
 
 **Deliverable review of worktree-update:**
@@ -34,10 +43,6 @@
 - Manual review found 2M/2L — all fixed (this session)
 
 ## Pending Tasks
-
-- [ ] **Worktree-update recovery** — `/orchestrate worktree-update-recovery` | haiku | restart
-  - Runbook: `plans/worktree-update/runbook.md` (4 steps, prepared)
-  - Orchestrator: `plans/worktree-update/orchestrator-plan.md`
 
 - [ ] **RCA: Runbook review axes lack general-step detection** — Detection criteria in runbook-review.md are TDD-specific; general steps have equivalent failure modes (vacuity, density) with no documented criteria. Fast-path also bypasses outline review gate | sonnet
 
@@ -64,10 +69,10 @@
 
 ## Reference Files
 
-- `plans/worktree-update/runbook.md` — Recovery runbook (4 steps, prepared)
-- `plans/worktree-update/orchestrator-plan.md` — Orchestrator plan
+- `plans/worktree-update/runbook.md` — Recovery runbook (4 steps, executed)
 - `plans/worktree-update/reports/deliverable-review.md` — Consolidated review (5C/10M/24m + R1)
+- `plans/worktree-update/reports/checkpoint-1-vet.md` — Phase 1 checkpoint review (all fixed)
 - `plans/worktree-update/design.md` — Worktree implementation design (conformance baseline)
 
 ---
-*Handoff by Sonnet. Runbook prepared, restart required for orchestration.*
+*Handoff by Sonnet. Recovery complete, all findings fixed.*
