@@ -213,3 +213,41 @@ def test_recall_parser_when_format(tmp_path: Path) -> None:
     old_format_entry = next(e for e in result if e.key == "Old em-dash format")
     assert old_format_entry.referenced_file == "agents/decisions/testing.md"
     assert old_format_entry.description == "should be parsed too"
+
+
+def test_keyword_extraction_from_triggers(tmp_path: Path) -> None:
+    """Keywords extracted from trigger + extras in /when and /how format."""
+    index_file = tmp_path / "index.md"
+    index_file.write_text(
+        "# Memory Index\n\n"
+        "## agents/decisions/testing.md\n\n"
+        "/when writing mock tests | mock patch, test doubles\n"
+        "/how encode paths | path encoding, URL encoding\n"
+    )
+
+    result = parse_memory_index(index_file)
+
+    # Check /when entry — keywords from trigger + extras
+    when_entry = next(e for e in result if e.key == "writing mock tests")
+    # Trigger: "writing mock tests" + Extras: "mock patch, test doubles"
+    # Should include: writing, mock, tests, patch, doubles
+    # Should exclude: when (operator word), commas stripped
+    assert "writing" in when_entry.keywords
+    assert "mock" in when_entry.keywords
+    assert "tests" in when_entry.keywords
+    assert "patch" in when_entry.keywords
+    assert "test" in when_entry.keywords
+    assert "doubles" in when_entry.keywords
+    assert "when" not in when_entry.keywords
+
+    # Check /how entry — keywords from trigger + extras
+    how_entry = next(e for e in result if e.key == "encode paths")
+    # Trigger: "encode paths" + Extras: "path encoding, URL encoding"
+    # Should include: encode, paths, path, encoding, url
+    # Should exclude: how (operator word)
+    assert "encode" in how_entry.keywords
+    assert "paths" in how_entry.keywords
+    assert "path" in how_entry.keywords
+    assert "encoding" in how_entry.keywords
+    assert "url" in how_entry.keywords
+    assert "how" not in how_entry.keywords
