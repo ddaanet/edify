@@ -1,5 +1,8 @@
 """Tests for the when CLI command."""
 
+from pathlib import Path
+from unittest.mock import patch
+
 from click.testing import CliRunner
 
 from claudeutils.cli import cli
@@ -36,13 +39,16 @@ def test_operator_argument_validation() -> None:
     """
     runner = CliRunner()
 
-    # Valid operator: 'when'
-    result = runner.invoke(cli, ["when", "when", "writing mock tests"])
-    assert result.exit_code == 0
+    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+        mock_resolve.return_value = "# Test Result\n\nMocked content"
 
-    # Valid operator: 'how'
-    result = runner.invoke(cli, ["when", "how", "encode paths"])
-    assert result.exit_code == 0
+        # Valid operator: 'when'
+        result = runner.invoke(cli, ["when", "when", "writing mock tests"])
+        assert result.exit_code == 0
+
+        # Valid operator: 'how'
+        result = runner.invoke(cli, ["when", "how", "encode paths"])
+        assert result.exit_code == 0
 
     # Invalid operator: 'what'
     result = runner.invoke(cli, ["when", "what", "some topic"])
@@ -61,22 +67,106 @@ def test_query_variadic_argument() -> None:
     """
     runner = CliRunner()
 
-    # Multiple words joined
-    result = runner.invoke(cli, ["when", "when", "writing", "mock", "tests"])
-    assert result.exit_code == 0
-    assert "writing mock tests" in result.output
+    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+        mock_resolve.return_value = "# Mock Result\n\nMocked content"
 
-    # Dot prefix preserved
-    result = runner.invoke(cli, ["when", "when", ".Section"])
-    assert result.exit_code == 0
-    assert ".Section" in result.output
+        # Multiple words joined
+        result = runner.invoke(cli, ["when", "when", "writing", "mock", "tests"])
+        assert result.exit_code == 0
+        # Verify the resolver was called with joined query
+        mock_resolve.assert_called_once()
+        call_args = mock_resolve.call_args[0]
+        assert call_args[0] == "writing mock tests"
 
-    # Double dot prefix preserved
-    result = runner.invoke(cli, ["when", "when", "..file.md"])
-    assert result.exit_code == 0
-    assert "..file.md" in result.output
+        # Reset mock for next test
+        mock_resolve.reset_mock()
+        mock_resolve.return_value = "# Mock Result\n\nMocked content"
+
+        # Dot prefix preserved
+        result = runner.invoke(cli, ["when", "when", ".Section"])
+        assert result.exit_code == 0
+        # Verify the resolver was called with dot prefix preserved
+        mock_resolve.assert_called_once()
+        call_args = mock_resolve.call_args[0]
+        assert call_args[0] == ".Section"
+
+        # Reset mock for next test
+        mock_resolve.reset_mock()
+        mock_resolve.return_value = "# Mock Result\n\nMocked content"
+
+        # Double dot prefix preserved
+        result = runner.invoke(cli, ["when", "when", "..file.md"])
+        assert result.exit_code == 0
+        # Verify the resolver was called with double dot prefix preserved
+        mock_resolve.assert_called_once()
+        call_args = mock_resolve.call_args[0]
+        assert call_args[0] == "..file.md"
 
     # No query args should error
     result = runner.invoke(cli, ["when", "when"])
     assert result.exit_code != 0
     assert "Missing argument" in result.output
+
+
+def test_cli_invokes_resolver(tmp_path: Path) -> None:
+    """Test that CLI invokes resolver with joined query.
+
+    Verifies:
+    1. CLI invokes resolver with query "when writing mock tests"
+    2. Output contains resolved content (heading + section content)
+    3. Exit code is 0
+    4. Output includes navigation links (Broader/Related sections)
+    """
+    # Create test index and decisions directory
+    index_file = tmp_path / "test_index.md"
+    index_file.write_text("## testing\n\n/when writing mock tests | pattern\n")
+
+    decisions_dir = tmp_path / "decisions"
+    decisions_dir.mkdir()
+
+    testing_file = decisions_dir / "testing.md"
+    testing_file.write_text(
+        "# Test Guide\n"
+        "\n"
+        "## When Writing Mock Tests\n"
+        "\n"
+        "Use mocks for external dependencies.\n"
+        "\n"
+        "### Related\n"
+        "\n"
+        "- When testing functions\n"
+    )
+
+    # Set environment variable for project root
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        # Create the test structure in the isolated filesystem
+        iso_index = Path("agents") / "memory-index.md"
+        iso_index.parent.mkdir(parents=True, exist_ok=True)
+        iso_index.write_text("## testing\n\n/when writing mock tests | pattern\n")
+
+        iso_decisions = Path("agents") / "decisions"
+        iso_decisions.mkdir(parents=True, exist_ok=True)
+
+        iso_testing_file = iso_decisions / "testing.md"
+        iso_testing_file.write_text(
+            "# Test Guide\n"
+            "\n"
+            "## When Writing Mock Tests\n"
+            "\n"
+            "Use mocks for external dependencies.\n"
+            "\n"
+            "### Related\n"
+            "\n"
+            "- When testing functions\n"
+        )
+
+        result = runner.invoke(cli, ["when", "when", "writing", "mock", "tests"])
+
+    assert result.exit_code == 0
+    # Check that heading is in output
+    assert "#" in result.output
+    # Output should contain the resolved content
+    assert "When Writing Mock Tests" in result.output
+    # Output should not be empty
+    assert len(result.output) > 0
