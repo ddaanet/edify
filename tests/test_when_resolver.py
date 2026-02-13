@@ -411,3 +411,33 @@ def test_operator_parameter_disambiguates(tmp_path: Path) -> None:
     assert "How to Mock Testing" in how_result
     assert "Procedural steps" in how_result
     assert "Behavioral guidance" not in how_result
+
+
+def test_section_mode_resolves_h3_headings(tmp_path: Path) -> None:
+    """Section mode resolves H3+ headings, not just H2."""
+    index_file = tmp_path / "test_index.md"
+    index_file.write_text("## testing\n\n/when test | extra\n")
+
+    decisions_dir = tmp_path / "decisions"
+    decisions_dir.mkdir()
+
+    testing_file = decisions_dir / "testing.md"
+    testing_file.write_text(
+        "# Testing\n\n"
+        "## Test Patterns\n\n"
+        "Overview content.\n\n"
+        "### When Mock Testing\n\n"
+        "Mock testing guidance.\n\n"
+        "#### Specific Detail\n\n"
+        "Detailed content.\n"
+    )
+
+    # H3 heading should resolve
+    result = resolve("when", ".When Mock Testing", str(index_file), str(decisions_dir))
+    assert "### When Mock Testing" in result
+    assert "Mock testing guidance" in result
+
+    # H4 heading should resolve
+    result = resolve("when", ".Specific Detail", str(index_file), str(decisions_dir))
+    assert "#### Specific Detail" in result
+    assert "Detailed content" in result

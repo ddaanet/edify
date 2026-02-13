@@ -62,7 +62,7 @@ def _build_section_not_found_error(
 
     Args:
         query: Section query that was not found
-        heading_to_files: Map of lowercase heading to (file, original_heading) tuples
+        heading_to_files: Map of lowercase heading to (file, full_heading_line) tuples
 
     Returns:
         ResolveError with suggestions list (max 10 headings)
@@ -70,8 +70,10 @@ def _build_section_not_found_error(
     available_headings = []
     for heading_lower in sorted(heading_to_files.keys()):
         if heading_to_files[heading_lower]:
-            original_text = heading_to_files[heading_lower][0][1]
-            available_headings.append(f".{original_text}")
+            full_heading = heading_to_files[heading_lower][0][1]
+            # Extract text from full heading line (strip # markers)
+            heading_text = full_heading.lstrip("#").strip()
+            available_headings.append(f".{heading_text}")
 
     msg = f"Section '{query}' not found."
     if available_headings:
@@ -82,20 +84,25 @@ def _build_section_not_found_error(
 
 
 def _resolve_section(query: str, decisions_dir: str) -> str:
-    """Resolve heading to section content via case-insensitive lookup."""
+    """Resolve heading to section content via case-insensitive lookup.
+
+    Now supports H2, H3, H4, etc. headings (not just H2).
+    """
     dec_dir = Path(decisions_dir)
     heading_to_files: dict[str, list[tuple[Path, str]]] = {}
 
     for md_file in sorted(dec_dir.glob("*.md")):
         content = _read_file(md_file)
         for line in content.split("\n"):
-            if line.startswith("##") and not line.startswith("###"):
-                heading_text = line[2:].strip()
+            if line.startswith("##"):
+                # Extract heading text by stripping all leading # and whitespace
+                heading_text = line.lstrip("#").strip()
                 if heading_text:
                     heading_lower = heading_text.lower()
                     if heading_lower not in heading_to_files:
                         heading_to_files[heading_lower] = []
-                    heading_to_files[heading_lower].append((md_file, heading_text))
+                    # Store full heading line (with # markers) for extraction
+                    heading_to_files[heading_lower].append((md_file, line.strip()))
 
     query_lower = query.lower()
     if query_lower not in heading_to_files:
@@ -107,10 +114,10 @@ def _resolve_section(query: str, decisions_dir: str) -> str:
         msg = f"Ambiguous heading '{query}' found in: {files}"
         raise ResolveError(msg)
 
-    file_path, heading_text = matches[0]
-    content = _extract_section(file_path, f"## {heading_text}")
+    file_path, full_heading = matches[0]
+    content = _extract_section(file_path, full_heading)
     if not content:
-        msg = f"Failed to extract section '{heading_text}' from {file_path}"
+        msg = f"Failed to extract section '{full_heading}' from {file_path}"
         raise ResolveError(msg)
 
     return content
