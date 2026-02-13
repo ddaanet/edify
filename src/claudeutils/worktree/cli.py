@@ -121,12 +121,8 @@ def add_sandbox_dir(container: str, settings_path: str | Path) -> None:
 def initialize_environment(worktree_path: Path) -> None:
     """Invoke just setup if available."""
     try:
-        r = subprocess.run(["just", "--version"], capture_output=True, check=False)
-        just_available = r.returncode == 0
-    except FileNotFoundError:
-        just_available = False
-
-    if not just_available:
+        subprocess.run(["just", "--version"], capture_output=True, check=True)
+    except (FileNotFoundError, subprocess.CalledProcessError):
         click.echo("Warning: just command not found, skipping setup step", err=True)
         return
 
@@ -143,7 +139,7 @@ def initialize_environment(worktree_path: Path) -> None:
 
 @click.group(name="_worktree")
 def worktree() -> None:
-    """Manage git worktrees."""
+    """Worktree commands."""
 
 
 def _parse_worktree_list(porcelain: str, main_path: str) -> list[tuple[str, str, str]]:
@@ -272,7 +268,7 @@ def _setup_worktree(
 
 @worktree.command(name="clean-tree")
 def clean_tree() -> None:
-    """Verify tree is clean except session context files."""
+    """Verify clean tree except session context."""
     parent = _git("status", "--porcelain")
     submodule = _git("-C", "agent-core", "status", "--porcelain", check=False)
     exempt = {"session.md", "jobs.md", "learnings.md"}
@@ -298,7 +294,7 @@ def clean_tree() -> None:
 @click.option("--task", default="")
 @click.option("--session-md", default="agents/session.md")
 def new(slug: str | None, base: str, session: str, task: str, session_md: str) -> None:
-    """Create worktree at sibling -wt container with branch {slug}."""
+    """Create worktree in sibling container."""
     if task and slug:
         raise click.UsageError("slug and --task are mutually exclusive")  # noqa: TRY003
     if not task and not slug:
@@ -332,7 +328,7 @@ def new(slug: str | None, base: str, session: str, task: str, session_md: str) -
 @worktree.command(name="add-commit")
 @click.argument("files", nargs=-1, required=True)
 def add_commit(files: tuple[str, ...]) -> None:
-    """Stage and commit with stdin message."""
+    """Stage files, commit with stdin message."""
     _git("add", *list(files))
     try:
         _git("diff", "--quiet", "--cached")
@@ -383,7 +379,7 @@ def _remove_worktrees(
 @worktree.command()
 @click.argument("slug")
 def rm(slug: str) -> None:
-    """Remove worktree and branch."""
+    """Remove worktree and its branch."""
     worktree_path = wt_path(slug)
 
     if worktree_path.exists():
