@@ -1,52 +1,49 @@
 # Session Handoff: 2026-02-13
 
-**Status:** Merged 6 worktrees, swept completed plans, consolidated pending tasks, fixed justfile macOS compat.
+**Status:** Recovered lost tasks from merge session, fixed handoff skill to prevent future sub-item trimming.
 
 ## Completed This Session
 
-### Worktree Merges (6)
+**Task recovery from merge losses:**
+- Traced losses through git history (commit 888273e pre-merge vs 46ce109 post-merge)
+- Restored sub-items trimmed from 3 tasks: codebase quality sweep (4), feature prototypes (3), infrastructure scripts (2)
+- Restored detail from plugin migration (recovery/drift context) and commit skill optimizations
+- Incorporated 6 new tasks from worktree sessions never merged to main: 3 from when-recall (validator fix, migration, RED pass recovery), 3 from worktree (2 RCAs, agentic process review, 2 skill fixes)
+- Updated Worktree Tasks: added worktree-update + test-feature, enriched when-recall + error-handling with current state
 
-- `wt/handoff-validation` — killed, problems resolved by existing tooling
-- `wt/requirements-skill` — skill implemented (dual-mode extract/elicit, empirical grounding)
-- `wt/process-review` — RCA complete: root cause in planning skill (structural tests not behavioral), 5 recommendations
-- `wt/verify-rcas` — both RCAs confirmed fixed (delegation.md, execution-routing.md split)
-- `wt/readme` — README rewritten, doc-writing skill added to agent-core
-- `wt/recall-fix` — recall path matching bugs fixed, baseline reanalysis (0.2% recall over 200 sessions)
-
-### Completed Plan Sweep
-
-- Deleted 7 plan directories: worktree-skill, worktree-skill-fixes, handoff-validation, requirements-skill, workflow-skills-audit, reflect-rca-sequential-task-launch, memory-index-recall, process-review, plans/claude/
-- workflow-skills-audit: all 12 audit items already landed in unified runbook + design skills
-- reflect-rca-sequential-task-launch: subsumed into process-review RCA
-
-### Task Consolidation
-
-- Removed "Update plan-tdd skill" — superseded, content already in runbook skill (lines 387, 598-620)
-- Merged "Workflow fixes" + "Workflow process improvements" → "Workflow improvements"
-- Moved commit/handoff items (Gate B, branching) into "Commit skill optimizations"
-- Merged "Update design skill" into "Workflow improvements"
-- New pending: worktree merge context, learning ages computation, precommit validation improvements
-
-### Bug Fix
-
-- Fixed `grep -P` (Perl regex) in justfile — 3 occurrences replaced with `sed -n` for macOS compat
+**Handoff skill carry-forward fix:**
+- Root cause: handoff agent regenerated pending tasks from memory, trimming sub-items under deslop/conciseness pressure
+- Fix: SKILL.md Step 2 — pending tasks are carry-forward data (read existing, patch mutations only: mark complete, append new, update changed metadata)
+- Reinforced in references/template.md with "Pending Task Carry-Forward" section
+- Files changed: `agent-core/skills/handoff/SKILL.md`, `agent-core/skills/handoff/references/template.md`
 
 ## Pending Tasks
-
-- [ ] **Execute worktree-update runbook** — Run /orchestrate worktree-update | haiku | restart
-  - Plan: plans/worktree-update
-  - 40 TDD cycles across 7 phases
-  - Agent created: .claude/agents/worktree-update-task.md
-  - In progress in external worktree
 
 - [ ] **Workflow improvements** — Process fixes from RCA + skill/fragment/orchestration cleanup | sonnet
   - Depends on: RCA completion (for orchestrate-evolution refresh)
   - Orchestrate evolution — designed, stale Feb 10, refresh after RCA
-  - Fragments cleanup, reflect skill output, tool-batching.md, orchestrator delegate resume
-  - Agent output optimization, investigation prerequisite rule review
-  - Design skill: TDD non-code marking, Phase C density checkpoint
+  - Fragments cleanup — remove fragments duplicating skills/workflow
+  - Reflect skill output — RCA should produce pending tasks, not inline fixes
+  - Tool-batching.md — add Task tool parallelization guidance with examples
+  - Orchestrator delegate resume — resume delegates with incomplete work
+  - Agent output optimization — remove summarize/report language from agents
+  - Investigation prerequisite rule review
+  - Design skill: Phase C density checkpoint (TDD non-code marking handled by per-phase typing)
 
-- [ ] **Consolidate learnings** — learnings.md at 312 lines (soft limit 80) | sonnet
+- [ ] **Protocolize RED pass recovery** — Formalize orchestrator RED pass handling into orchestrate skill | sonnet
+  - Scope: Classification taxonomy, blast radius procedure, defect impact evaluation
+  - Reports: `plans/when-recall/reports/tdd-process-review.md`, `plans/orchestrate-evolution/reports/red-pass-blast-radius.md`
+
+- [ ] **RCA: Runbook planning missed file growth** — Planning phase should project file growth and insert split points | opus
+  - 400-line limit caused 7+ refactor escalations (>1hr wall-clock) during worktree-update
+  - Planning requirements gap, not execution issue
+
+- [ ] **RCA: Vet over-escalation persists post-overhaul** — Pipeline overhaul didn't fix vet UNFIXABLE over-escalation | sonnet
+  - Phase 5 checkpoint flagged design deviation and naming convention as UNFIXABLE
+
+- [ ] **Agentic process review and prose RCA** — Analyze why deliveries are "expensive, incomplete, buggy, sloppy, overdone" | opus
+
+- [ ] **Consolidate learnings** — learnings.md at 312+ lines (soft limit 80) | sonnet
   - Blocked on: memory redesign (/when, /how)
 
 - [ ] **Worktree merge combines session context** — Confirm wt-merge combines pending tasks/jobs (not --ours) and requires agent review | sonnet
@@ -64,26 +61,52 @@
 
 - [ ] **Commit skill optimizations** — Remove handoff gate, optimize, branching fix | sonnet
   - Blocked on: worktree-update delivery
-  - Commit Gate B — coverage ratio not boolean
-  - Commit/handoff branching — move git branching after precommit
+  - Remove handoff gate, optimize with minimal custom script calls
+  - Commit Gate B — coverage ratio (artifacts:reports 1:1) not boolean
+  - Commit/handoff branching — move git branching point after precommit passes
 
 - [ ] **Execute plugin migration** — Refresh outline then orchestrate | sonnet
   - Plan: plugin-migration | Status: planned (stale — Feb 9)
-  - Blocked on: worktree-update delivery
+  - Blocked on: worktree-update delivery (wt-* recipes change, justfile Phase 4 invalid)
+  - Recovery: design.md architecture valid, outline Phases 0-3/5-6 recoverable, Phase 4 needs rewrite against post-worktree-update justfile, expanded phases need regeneration
+  - Drift: 18 skills (was 16), 14 agents (was 12), justfile +250 lines rewritten
+
+- [ ] **Fix skill-based agents not using skills prolog section** — Agents duplicate content instead of referencing skills via `skills:` frontmatter | sonnet
+
+- [ ] **Upstream plugin-dev: document `skills:` frontmatter** — PR/issue to official Claude Code plugin-dev plugin for missing `skills` field | sonnet
 
 - [ ] **Continuation prepend** — `/design plans/continuation-prepend/problem.md` | sonnet
   - Plan: continuation-prepend | Status: requirements
 
 - [ ] **Codebase quality sweep** — Tests, deslop, factorization, dead code | sonnet
+  - Review all tests for vacuous tests
+  - Deslop entire codebase
+  - Review codebase for factorization
+  - Remove deprecated code — init_repo_with_commit() in conftest_git.py
 
 - [ ] **Feature prototypes** — Markdown preprocessor, session extraction, last-output | sonnet
+  - Redesign markdown preprocessor — multi-line inline markup parsing
+  - Session summary extraction prototype
+  - Rewrite last-output prototype with TDD as claudeutils subcommand
 
 - [ ] **Infrastructure scripts** — History tooling + agent-core script rewrites | sonnet
+  - History cleanup tooling — git history rewriting, reusable scripts
+  - Rewrite agent-core ad-hoc scripts via TDD to claudeutils package
 
 ## Worktree Tasks
 
-- [ ] **Plan when-recall** → `wt/when-recall` — `/plan-tdd plans/when-recall/design.md` | sonnet
-- [ ] **Error handling framework design** → `wt/error-handling` — `/design` | opus
+- [ ] **Execute worktree-update runbook + recovery** → `wt/worktree` — `/orchestrate worktree-update` | haiku | restart
+  - Plan: plans/worktree-update — 40 TDD cycles, 7 phases
+  - Recovery pending: 5 critical, 10 major findings from deliverable review
+  - Requirements: `plans/worktree-update/reports/deliverable-review.md`
+- [ ] **Plan when-recall** → `wt/when-recall` — blocked on validator fix | sonnet
+  - Fix validator for exact key matching (remove fuzzy, update _build_heading)
+  - Then migrate memory-index.md to /when format (152 entries)
+  - Findings: `plans/when-recall/reports/migration-findings.md`
+- [ ] **Error handling framework design** → `wt/error-handling` — Resume `/design` Phase B | opus
+  - Blocked on: workflow improvements
+  - Outline: `plans/error-handling/outline.md`
+- [ ] **Test feature** → `wt/test-feature`
 
 ## Blockers / Gotchas
 
