@@ -9,12 +9,16 @@
 - `check_collisions()`: Extracted `_resolve_entry_heading()` helper, merged two entry loops
 - All C901/PLR0912/PLR0915 warnings resolved, `just precommit` passes
 
+**Remember skill update:**
+- Updated `agent-core/skills/remember/SKILL.md` Step 4a to generate `/when` or `/how` format entries
+- Added trigger naming guidelines: plain prose, 2-5 words, optimize for discovery
+- Added operator selection guidance: `/when` for behavioral, `/how` for procedural
+- Includes key compression tool verification step
+- Implements FR-5 from when-recall design
+
 ## Pending Tasks
 
-- [x] **Refactor complex parsing functions** — Done
-- [x] **Migrate memory-index.md to /when format** — Done (529ffda)
-
-- [ ] **Update remember skill** | haiku
+- [x] **Update remember skill** | haiku
   - Generate `/when` or `/how` entries with trigger naming guidelines
   - Design spec: §Remember Skill Update
 
@@ -61,6 +65,7 @@
 
 - `plans/when-recall/reports/deliverable-review.md` — Findings that drove TDD cycles
 - `plans/when-recall/design.md` — Vetted design (ground truth)
+- `agent-core/skills/remember/SKILL.md` — Updated to generate `/when` or `/how` format entries
 - `src/claudeutils/validation/memory_index_helpers.py` — Contains `_strip_operator_prefix` helper and autofix logic needing update
 - `src/claudeutils/recall/index_parser.py` — Refactored: helpers extracted
 - `src/claudeutils/validation/memory_index_checks.py` — Refactored: helper extracted
