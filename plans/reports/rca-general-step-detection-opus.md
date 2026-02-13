@@ -8,11 +8,11 @@
 
 ## 1. Root Cause
 
-**The authoritative detection methodology document (`agents/decisions/runbook-review.md`) provides detection criteria exclusively in TDD terms. The review pipeline is documentation-driven: agents follow what the document says. Since the document says nothing about general steps, general-step defects pass undetected.**
+**`agents/decisions/runbook-review.md` was created 4.5 hours before per-phase typing shipped and was never updated afterward. The feature's artifact inventory treated it as a read-only reference rather than a semantic consumer requiring update. The TDD-specific language is not an intentional design choice — it is a creation-timing artifact.**
 
 The document has four axes (Vacuous Cycles, Dependency Ordering, Cycle Density, Checkpoint Spacing). Every heading, every detection bullet, and every example uses TDD terminology: "RED tests", "GREEN adds ≤3 lines", "cycles", "RED can be satisfied by `assert callable(X)`". General-step phases have identical failure modes (scaffolding-only steps, same-file density, forward dependencies) but zero documented detection patterns.
 
-This is not a missing feature — it is an asymmetric specification. The review-plan skill (`agent-core/skills/review-plan/SKILL.md` Section 11) already declares type-agnostic intent:
+This is a **downstream consumer update gap**, not an asymmetric specification. The review-plan skill (`agent-core/skills/review-plan/SKILL.md` Section 11) already declares type-agnostic intent:
 
 ```
 ### 11. LLM Failure Modes (CRITICAL) — all phases
@@ -289,3 +289,124 @@ An existing RCA exists at `plans/reports/rca-general-step-detection.md`. This op
 **Differing emphasis:**
 - Prior RCA proposes 5 fixes weighted toward transmission mechanisms (outline guidance propagation, runbook skill annotations). This analysis weights toward authoritative source restructuring (Fix 1 as dual-type with inline examples) and reference material (Fix 3)
 - Prior RCA's Fix 3 (strengthen outline review propagation) addresses a real gap but is a band-aid — the root fix is making detection criteria available at every review point, not propagating findings forward from outline review
+
+---
+
+## Deepening
+
+Three additional axes of investigation, prompted by the parallel sonnet RCA's timeline finding.
+
+### D1. Timeline Verification
+
+**Claim to verify:** `runbook-review.md` was created before per-phase typing was designed, making the root cause a downstream consumer update gap rather than a TDD-centric authorial choice.
+
+**Evidence from git history:**
+
+| Event | Commit | Timestamp | Delta |
+|-------|--------|-----------|-------|
+| `runbook-review.md` created | `2d29fc8` | 2026-02-12 11:00:05 +0100 | T+0h |
+| workflow-fixes design (per-phase typing begins) | `ca5eb5c` | 2026-02-12 13:49:26 +0100 | T+2h49m |
+| Unified /plan design complete | `b8b560d` | 2026-02-12 14:51:33 +0100 | T+3h51m |
+| Unification shipped (per-phase typing live) | `6d753f9` | 2026-02-12 15:24:24 +0100 | T+4h24m |
+
+**Confirmed.** `runbook-review.md` was created 4h24m before per-phase typing shipped. The file has exactly one commit in its entire history — the creation commit. It was never modified after per-phase typing was introduced.
+
+**Root cause revision:** The original Section 1 diagnosis ("TDD-specific language") is the proximate cause but not the root cause. The file was written in a TDD-only world — per-phase typing did not yet exist. When per-phase typing shipped 4.5 hours later, the workflow-fixes design (`plans/workflow-fixes/outline.md`) listed 10 artifacts to update but treated `runbook-review.md` as a read-only reference source, not as an artifact requiring update:
+
+- Line 20: "Add LLM failure mode detection criteria to review-tdd-plan skill (*reference* `agents/decisions/runbook-review.md` four-axis methodology)"
+- Line 82: "verify criteria completeness *against* `agents/decisions/runbook-review.md`"
+
+The design used `runbook-review.md` as a stable foundation to build upon, never questioning whether the foundation itself needed updating to match the new type model. The review-plan skill's Section 11 was written during workflow-fixes to add general-step bullets — but the authoritative source it references was never updated to match.
+
+**Corrected root cause:** This is a **downstream consumer update gap**. When per-phase typing shipped, the feature's artifact inventory treated `runbook-review.md` as immutable reference rather than a semantic consumer that needed updating. The TDD-specific language is not an intentional design choice — it is an artifact of creation timing.
+
+### D2. Fix Shape Reconsideration
+
+**Observation:** Manual review succeeded by mentally translating TDD terminology to general equivalents. This proves the four axes are conceptually type-agnostic — "vacuity" applies to any item that doesn't constrain implementation, regardless of whether the item is a TDD cycle or a general step.
+
+**Revised Fix 1 structure:** Instead of dual side-by-side sections, restructure each axis as:
+
+1. **Type-agnostic concept** (the axis definition, using "item" not "cycle")
+2. **TDD detection bullets** (existing content, anchored by `**TDD:**`)
+3. **General detection bullets** (new content, anchored by `**General:**`)
+
+This is simpler and more maintainable than the originally proposed structure for three reasons:
+
+- **Single definition per axis.** The conceptual definition ("items that don't constrain implementation") is written once, not duplicated across TDD and general sections. This prevents drift between parallel definitions.
+- **Additive change.** The existing TDD bullets remain verbatim under a `**TDD:**` label. Adding general support is purely additive — no existing content is rewritten, only relabeled and extended.
+- **Natural extension point.** If a third phase type is ever introduced (e.g., `type: integration`), detection bullets add under a new label within the same axis structure. No structural refactoring needed.
+
+**Revised example for Vacuity:**
+
+```markdown
+### Vacuity
+
+Items that don't constrain implementation. The executing agent satisfies them with
+degenerate output (structurally present, behaviorally meaningless).
+
+**Detection — an item is vacuous when any of:**
+
+**TDD:**
+- RED can be satisfied by `import X; assert callable(X)` or structural assertion
+- GREEN adds ≤3 lines of non-branching code (no conditional, no state transformation)
+- Cycle tests integration wiring (A calls B) rather than behavior (given X, observe Y)
+- Cycle tests presentation format (output shape) rather than semantic correctness
+
+**General:**
+- Step creates scaffolding without functional outcome (mkdir, echo, touch, stub recipe)
+- Step output is template text or stub with no computation or state transformation
+- Step modifies config/metadata without behavioral effect on execution
+- Step tests integration wiring when called function already verified in prior step
+
+**Action:** Eliminate, or merge into nearest behavioral item.
+```
+
+**Key differences from original Fix 1:**
+- Heading stays "### Vacuity" (not "### Vacuous Cycles" — normalize to concept)
+- Opening paragraph is type-agnostic (uses "items" and "executing agent")
+- TDD and General bullets are labeled subsections within one axis, not parallel sections
+- Action uses "item" not "cycle/step"
+
+This structure makes it mechanically impossible to check TDD criteria without also seeing the General criteria — they share the same heading and detection section.
+
+### D3. Meta Root Cause: Systemic Propagation Gap
+
+**Question:** Is the `runbook-review.md` gap an isolated incident or part of a pattern?
+
+**Evidence of systemic propagation failures:**
+
+| Feature | Shipped | Propagation Gap | Discovery |
+|---------|---------|----------------|-----------|
+| Per-phase typing (workflow-fixes) | `6d753f9` 2026-02-12 15:24 | `runbook-review.md` not updated | Manual review, 2026-02-13 |
+| Workflow unification (same plan) | `6d753f9` 2026-02-12 15:24 | Docs still reference `plan-tdd`, `plan-adhoc`, `tdd-plan-reviewer` | Separate commit `fe9c324` 2026-02-12 15:31 (7 min later, 20 name updates across 3 files) |
+| `implementation-notes.md` move | `5b9ea8a` 2026-02-04 17:03 | 9 files with stale path references | Follow-up commit, same session |
+
+**Pattern:** Features ship with an artifact inventory scoped to *producers* (skills, agents, configs that implement the feature) but not *semantic consumers* (documentation, methodology files, reference materials that assume the old semantics). The design phase identifies "what to build" and "what to update" but doesn't systematically identify "what references the old behavior."
+
+**Why this happens:** The design-to-runbook pipeline has no propagation analysis step. The workflow-fixes outline (commit `ca5eb5c`) lists "Fixes by Artifact" — 10 artifacts identified through exploration reports and known issues. But the exploration searched for *artifacts with problems*, not *artifacts that reference changed semantics*. `runbook-review.md` had no problems in isolation — its content was correct for TDD. The problem only emerged when per-phase typing changed the semantic context around it.
+
+**Analogy:** This is the documentation equivalent of a broken interface contract. The feature (per-phase typing) changed the "interface" (what phase types exist), but the "consumer" (`runbook-review.md`) was never notified. In code, a compiler catches this. In documentation, nothing catches it.
+
+**Proposed fix: Semantic consumer checklist**
+
+Add a propagation verification step to the design workflow (`/design` skill or `/runbook` skill Phase 0.75):
+
+**When a feature changes terminology, type systems, or behavioral semantics:**
+
+1. **Grep for old terminology** in `agents/decisions/`, `agent-core/skills/`, `agent-core/agents/`, and `agent-core/fragments/`
+2. **For each file referencing old terms:** Classify as producer (needs rewrite) or consumer (needs update)
+3. **Add consumers to artifact inventory** with explicit "update to new semantics" scope
+4. **Verify at review:** Outline review checks that all grep hits are covered in artifact list
+
+**Placement:** This belongs in the runbook outline review criteria (`agent-core/agents/runbook-outline-review-agent.md`) as a new check under "Execution Readiness":
+
+```markdown
+**Semantic propagation completeness** — When design introduces new terminology, type
+systems, or behavioral semantics: verify artifact inventory includes all files that
+reference old semantics. Use Grep to find references. Classify as producer (rewrite)
+or consumer (update). Flag missing consumers as Major issue.
+```
+
+**Scope note:** This check only applies to features that change shared semantics (new type systems, renamed concepts, changed interfaces). Purely additive features (new skill, new agent) don't require propagation analysis.
+
+**Cost-benefit:** The grep step adds ~2 minutes to outline review. The alternative is discovering stale consumers in production (this RCA) or in follow-up cleanup commits (`fe9c324`, `5b9ea8a`). The grep is cheaper.
