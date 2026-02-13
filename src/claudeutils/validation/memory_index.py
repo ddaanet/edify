@@ -41,12 +41,20 @@ def _extract_entry_key(line: str) -> str | None:
 
     Returns lowercase key for /when, /how, or em-dash formats, or None if
     invalid.
+
+    For /when and /how formats, key includes operator prefix:
+    - `/when X` → "when x"
+    - `/how X` → "how to x" (maps /how to "how to")
     """
     if line.startswith(("/when ", "/how ")):
-        # Parse /when or /how format: extract trigger before pipe
-        _, rest = line.split(" ", 1)
+        # Parse /when or /how format: extract operator and trigger before pipe
+        operator, rest = line.split(" ", 1)
         trigger = rest.split("|", 1)[0].strip() if "|" in rest else rest.strip()
-        return trigger.lower() if trigger else None
+        if not trigger:
+            return None
+        # Map /how to "how to" for heading matching
+        operator_prefix = "how to" if operator == "/how" else "when"
+        return f"{operator_prefix} {trigger}".lower()
     if " — " in line:
         # Parse em-dash format
         key = line.split(" — ")[0].strip()

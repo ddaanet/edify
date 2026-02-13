@@ -4,7 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.validation.memory_index import extract_index_entries, validate
+from claudeutils.validation.memory_index import (
+    _extract_entry_key,
+    extract_index_entries,
+    validate,
+)
 from claudeutils.validation.memory_index_helpers import EXEMPT_SECTIONS
 
 
@@ -27,7 +31,7 @@ def _write_index(tmp_path: Path, content: str) -> Path:
 def test_valid_index_with_matching_headers(tmp_path: Path, decisions_dir: Path) -> None:
     """Valid index with matching headers returns no errors."""
     (decisions_dir / "test-decision.md").write_text(
-        "# Test Decision\n\n## Decision One\nContent.\n\n## Decision Two\nMore.\n"
+        "# Test Decision\n\n## When Decision One\nContent.\n\n## When Decision Two\nMore.\n"
     )
     _write_index(
         tmp_path,
@@ -57,7 +61,7 @@ def test_orphan_semantic_header_error(tmp_path: Path, decisions_dir: Path) -> No
 def test_orphan_index_entry_error(tmp_path: Path, decisions_dir: Path) -> None:
     """Orphan index entry (no matching header) returns error."""
     (decisions_dir / "test-decision.md").write_text(
-        "# Test Decision\n\n## Existing Header\nContent.\n"
+        "# Test Decision\n\n## When Existing Header\nContent.\n"
     )
     _write_index(
         tmp_path,
@@ -71,13 +75,13 @@ def test_orphan_index_entry_error(tmp_path: Path, decisions_dir: Path) -> None:
     )
     errors = validate("agents/memory-index.md", tmp_path)
     assert len(errors) == 1
-    assert "orphan index entry 'nonexistent header'" in errors[0]
+    assert "orphan index entry 'when nonexistent header'" in errors[0]
 
 
 def test_duplicate_index_entries_error(tmp_path: Path, decisions_dir: Path) -> None:
     """Duplicate index entries return error."""
     (decisions_dir / "test-decision.md").write_text(
-        "# Test Decision\n\n## Test Header\nContent.\n"
+        "# Test Decision\n\n## When Test Header\nContent.\n"
     )
     _write_index(
         tmp_path,
@@ -100,8 +104,8 @@ def test_long_entry_no_error_new_format(tmp_path: Path, decisions_dir: Path) -> 
     Word count removed per D-9.
     """
     (decisions_dir / "test-decision.md").write_text(
-        "# Test Decision\n\n## Short\nContent.\n\n"
-        "## Long Entry With Many Words\nContent.\n"
+        "# Test Decision\n\n## When Short\nContent.\n\n"
+        "## When Long Entry With Many Words\nContent.\n"
     )
     _write_index(
         tmp_path,
@@ -140,10 +144,10 @@ Test Unique Header just some words without operator prefix
 def test_entry_in_wrong_section_autofixed(tmp_path: Path, decisions_dir: Path) -> None:
     """Entry in wrong section is autofixed (no error with autofix=True)."""
     (decisions_dir / "file-one.md").write_text(
-        "# File One\n\n## First Header\nContent.\n"
+        "# File One\n\n## When First Header\nContent.\n"
     )
     (decisions_dir / "file-two.md").write_text(
-        "# File Two\n\n## Second Header\nContent.\n"
+        "# File Two\n\n## When Second Header\nContent.\n"
     )
     index = _write_index(
         tmp_path,
@@ -165,8 +169,8 @@ def test_entry_in_wrong_section_autofixed(tmp_path: Path, decisions_dir: Path) -
 def test_entries_out_of_order_autofixed(tmp_path: Path, decisions_dir: Path) -> None:
     """Out-of-order entries are autofixed to match source file order."""
     (decisions_dir / "test-decision.md").write_text(
-        "# Test Decision\n\n## First Header\nContent.\n\n"
-        "## Second Header\nMore.\n\n## Third Header\nEven more.\n"
+        "# Test Decision\n\n## When First Header\nContent.\n\n"
+        "## When Second Header\nMore.\n\n## When Third Header\nEven more.\n"
     )
     index = _write_index(
         tmp_path,
@@ -194,7 +198,7 @@ def test_structural_header_entries_removed_by_autofix(
     """Structural header entries removed by autofix."""
     (decisions_dir / "test-decision.md").write_text(
         "# Test Decision\n\n## .Organizational Section\nStructural.\n\n"
-        "## Real Header\nSemantic.\n\n## Another Real Header\nMore semantic.\n"
+        "## When Real Header\nSemantic.\n\n## When Another Real Header\nMore semantic.\n"
     )
     index = _write_index(
         tmp_path,
@@ -219,7 +223,7 @@ def test_exempt_sections_removed_after_migration(
 ) -> None:
     """Exempt sections removed after migration (no longer exempt)."""
     (decisions_dir / "test-decision.md").write_text(
-        "# Test Decision\n\n## Test Header\nContent.\n"
+        "# Test Decision\n\n## When Test Header\nContent.\n"
     )
     index = _write_index(
         tmp_path,
@@ -242,7 +246,7 @@ def test_exempt_sections_removed_after_migration(
 def test_autofix_false_reports_all_issues(tmp_path: Path, decisions_dir: Path) -> None:
     """Autofix=False reports sorting issues as errors."""
     (decisions_dir / "file-one.md").write_text(
-        "# File One\n\n## First Header\nContent.\n\n## Second Header\nMore.\n"
+        "# File One\n\n## When First Header\nContent.\n\n## When Second Header\nMore.\n"
     )
     _write_index(
         tmp_path,
@@ -264,10 +268,10 @@ def test_duplicate_headers_across_files_error(
 ) -> None:
     """Duplicate headers across files return error."""
     (decisions_dir / "file-one.md").write_text(
-        "# File One\n\n## Duplicate Name\nContent.\n"
+        "# File One\n\n## When Duplicate Name\nContent.\n"
     )
     (decisions_dir / "file-two.md").write_text(
-        "# File Two\n\n## Duplicate Name\nDifferent.\n"
+        "# File Two\n\n## When Duplicate Name\nDifferent.\n"
     )
     _write_index(
         tmp_path,
@@ -283,16 +287,16 @@ def test_duplicate_headers_across_files_error(
 """,
     )
     errors = validate("agents/memory-index.md", tmp_path, autofix=False)
-    assert any("Duplicate header 'duplicate name'" in e for e in errors)
+    assert any("Duplicate header 'when duplicate name'" in e for e in errors)
 
 
 def test_multiple_autofix_issues_resolved(tmp_path: Path, decisions_dir: Path) -> None:
     """Multiple autofix issues resolved in single pass."""
     (decisions_dir / "file-one.md").write_text(
-        "# File One\n\n## First Header\nContent.\n\n## Second Header\nMore.\n"
+        "# File One\n\n## When First Header\nContent.\n\n## When Second Header\nMore.\n"
     )
     (decisions_dir / "file-two.md").write_text(
-        "# File Two\n\n## Third Header\nContent.\n"
+        "# File Two\n\n## When Third Header\nContent.\n"
     )
     index = _write_index(
         tmp_path,
@@ -331,7 +335,7 @@ def test_document_intro_exemption(tmp_path: Path, decisions_dir: Path) -> None:
     """Document intro content exempt from validation."""
     (decisions_dir / "test-decision.md").write_text(
         "# Test File\n\nIntro content before first real header\n\n"
-        "## Real Header\nActual content.\n"
+        "## When Real Header\nActual content.\n"
     )
     _write_index(
         tmp_path,
@@ -358,7 +362,7 @@ def test_validator_parses_when_format(tmp_path: Path) -> None:
 ## Testing Decisions
 
 /when writing mock tests | mock patch
-/how to structure fixtures | test fixtures
+/how structure fixtures | test fixtures
 /when mocking subprocess | error injection
 
 ## Implementation Notes
@@ -369,17 +373,17 @@ def test_validator_parses_when_format(tmp_path: Path) -> None:
 
     entries = extract_index_entries("agents/memory-index.md", tmp_path)
 
-    # Entry keyed by trigger text (lowercase)
-    assert "writing mock tests" in entries
-    assert entries["writing mock tests"][2] == "Testing Decisions"
+    # Entry keyed by operator + trigger text (lowercase)
+    assert "when writing mock tests" in entries
+    assert entries["when writing mock tests"][2] == "Testing Decisions"
 
-    # /how entries also parsed
-    assert "to structure fixtures" in entries
-    assert entries["to structure fixtures"][2] == "Testing Decisions"
+    # /how entries parsed with "how to" mapping
+    assert "how to structure fixtures" in entries
+    assert entries["how to structure fixtures"][2] == "Testing Decisions"
 
     # All /when and /how lines captured
-    assert "mocking subprocess" in entries
-    assert "choosing between approaches" in entries
+    assert "when mocking subprocess" in entries
+    assert "when choosing between approaches" in entries
 
     # Old em-dash format not parsed (should be empty for that line)
     entry_count = len(entries)
@@ -525,8 +529,8 @@ def test_word_count_removed(tmp_path: Path, decisions_dir: Path) -> None:
     - No word count errors in validation output
     """
     (decisions_dir / "test-decision.md").write_text(
-        "# Test Decision\n\n## A B\nContent.\n\n"
-        "## Very Long Trigger With Many Many Many Words In It\nMore.\n"
+        "# Test Decision\n\n## When A B\nContent.\n\n"
+        "## When Very Long Trigger With Many Many Many Words In It\nMore.\n"
     )
     _write_index(
         tmp_path,
@@ -571,3 +575,30 @@ def test_exempt_sections_updated(tmp_path: Path, decisions_dir: Path) -> None:
         f"Old exempt section names still in EXEMPT_SECTIONS: "
         f"{EXEMPT_SECTIONS & old_exempt_names}"
     )
+
+
+def test_extract_entry_key_operator_inclusion() -> None:
+    """Entry keys include operator prefix for disambiguation.
+
+    Design D-6: `/when X` → "When X", `/how X` → "How to X"
+    Entry keys must include operator to disambiguate same trigger with different
+    operators.
+
+    Assertions:
+    - `/when trigger text` → key is "when trigger text"
+    - `/how trigger text` → key is "how to trigger text" (maps /how → "how to")
+    - Em-dash format backward compatible (no operator prefix)
+    - Empty trigger returns None
+    """
+    # /when includes operator in key
+    assert _extract_entry_key("/when trigger text") == "when trigger text"
+
+    # /how maps to "how to" in key
+    assert _extract_entry_key("/how trigger text") == "how to trigger text"
+
+    # Em-dash format (no operator)
+    assert _extract_entry_key("key — description") == "key"
+
+    # Empty trigger
+    assert _extract_entry_key("/when ") is None
+    assert _extract_entry_key("/how ") is None
