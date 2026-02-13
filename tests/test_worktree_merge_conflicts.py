@@ -70,9 +70,7 @@ def test_merge_conflict_agent_core(
     _commit_file(repo_with_submodule, "main-file.txt", "main content\n", "Main change")
 
     # Also update agent-core on main to different commit
-    (repo_with_submodule / "agent-core" / "main-change.txt").write_text(
-        "main change\n"
-    )
+    (repo_with_submodule / "agent-core" / "main-change.txt").write_text("main change\n")
     subprocess.run(
         ["git", "add", "main-change.txt"],
         cwd=repo_with_submodule / "agent-core",

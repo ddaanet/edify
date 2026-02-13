@@ -150,6 +150,22 @@ def _resolve_learnings_md_conflict(conflicts: list[str]) -> list[str]:
     return [c for c in conflicts if c != "agents/learnings.md"]
 
 
+def _resolve_jobs_md_conflict(conflicts: list[str]) -> list[str]:
+    """Resolve agents/jobs.md conflict.
+
+    Keep ours (local plan status is authoritative). Returns updated conflict
+    list with jobs.md removed if present.
+    """
+    if "agents/jobs.md" not in conflicts:
+        return conflicts
+
+    _git("checkout", "--ours", "agents/jobs.md")
+    _git("add", "agents/jobs.md")
+    click.echo("jobs.md conflict: kept ours (local plan status)")
+
+    return [c for c in conflicts if c != "agents/jobs.md"]
+
+
 def merge(slug: str) -> None:
     """Prepare for merge: verify OURS and THEIRS clean tree."""
     r = subprocess.run(
@@ -239,3 +255,4 @@ def merge(slug: str) -> None:
 
         conflicts = _resolve_session_md_conflict(conflicts)
         conflicts = _resolve_learnings_md_conflict(conflicts)
+        conflicts = _resolve_jobs_md_conflict(conflicts)

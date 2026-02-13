@@ -74,8 +74,6 @@ def test_merge_parent_initiate(
     )
 
 
-
-
 def _commit_file(path: Path, filename: str, content: str, message: str) -> None:
     """Create, stage, and commit a file."""
     (path / filename).write_text(content)
