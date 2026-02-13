@@ -99,9 +99,7 @@ def _setup_diverged_submodule(
     Returns:
         Tuple of (agent_core_path, wt_submodule_commit)
     """
-    _commit_file(
-        repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore"
-    )
+    _commit_file(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
 
     agent_core_path = repo_with_submodule / "agent-core"
     _commit_file(
@@ -118,9 +116,7 @@ def _setup_diverged_submodule(
         check=True,
     ).stdout.strip()
 
-    _update_submodule_pointer(
-        repo_with_submodule, "Update agent-core pointer"
-    )
+    _update_submodule_pointer(repo_with_submodule, "Update agent-core pointer")
 
     subprocess.run(
         ["git", "branch", branch_name],
@@ -152,9 +148,7 @@ def _setup_diverged_submodule(
         check=True,
     )
     if not result.stdout.strip():
-        pytest.skip(
-            "Branch has no agent-core submodule entry (test incomplete)"
-        )
+        pytest.skip("Branch has no agent-core submodule entry (test incomplete)")
     wt_submodule_commit = result.stdout.split()[2]
 
     return agent_core_path, wt_submodule_commit
@@ -231,9 +225,7 @@ def test_merge_submodule_fetch(
 def _commit_file(path: Path, filename: str, content: str, message: str) -> None:
     """Create, stage, and commit a file."""
     (path / filename).write_text(content)
-    subprocess.run(
-        ["git", "add", filename], cwd=path, check=True, capture_output=True
-    )
+    subprocess.run(["git", "add", filename], cwd=path, check=True, capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", message], cwd=path, check=True, capture_output=True
     )
@@ -257,17 +249,11 @@ def _setup_merge_test_worktree(
     Returns:
         Tuple of (agent_core_path, main_commit, wt_commit)
     """
-    _commit_file(
-        repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore"
-    )
+    _commit_file(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
 
     agent_core_path = repo_with_submodule / "agent-core"
-    _commit_file(
-        agent_core_path, "base_change.txt", "base change", "Base change"
-    )
-    _update_submodule_pointer(
-        repo_with_submodule, "Update agent-core to base"
-    )
+    _commit_file(agent_core_path, "base_change.txt", "base change", "Base change")
+    _update_submodule_pointer(repo_with_submodule, "Update agent-core to base")
 
     subprocess.run(
         ["git", "branch", branch_name],
@@ -290,9 +276,7 @@ def _setup_merge_test_worktree(
         text=True,
         check=True,
     ).stdout.strip()
-    _update_submodule_pointer(
-        repo_with_submodule, "Update to main commit"
-    )
+    _update_submodule_pointer(repo_with_submodule, "Update to main commit")
 
     wt_agent_core = (
         repo_with_submodule.parent
@@ -300,9 +284,7 @@ def _setup_merge_test_worktree(
         / branch_name
         / "agent-core"
     )
-    _commit_file(
-        wt_agent_core, "wt_change.txt", "wt change", "Worktree change"
-    )
+    _commit_file(wt_agent_core, "wt_change.txt", "wt change", "Worktree change")
     wt_commit = subprocess.run(
         ["git", "-C", str(wt_agent_core), "rev-parse", "HEAD"],
         capture_output=True,
@@ -311,9 +293,7 @@ def _setup_merge_test_worktree(
     ).stdout.strip()
 
     wt_branch = (
-        repo_with_submodule.parent
-        / f"{repo_with_submodule.name}-wt"
-        / branch_name
+        repo_with_submodule.parent / f"{repo_with_submodule.name}-wt" / branch_name
     )
     _update_submodule_pointer(wt_branch, "Update wt pointer")
 

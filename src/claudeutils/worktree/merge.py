@@ -118,44 +118,52 @@ def merge(slug: str) -> None:
 
         local_commit = _git("-C", "agent-core", "rev-parse", "HEAD", check=False)
 
-        if wt_commit == local_commit:
-            return
-
-        result = subprocess.run(
-            [
-                "git",
-                "-C",
-                "agent-core",
-                "merge-base",
-                "--is-ancestor",
-                wt_commit,
-                local_commit,
-            ],
-            check=False,
-        )
-        if result.returncode == 0:
-            return
-
-        result = subprocess.run(
-            ["git", "-C", "agent-core", "cat-file", "-e", wt_commit],
-            check=False,
-        )
-        if result.returncode != 0:
-            wt_agent_core = wt_path(slug) / "agent-core"
-            _git(
-                "-C",
-                "agent-core",
-                "fetch",
-                str(wt_agent_core),
-                "HEAD",
+        if wt_commit != local_commit:
+            result = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    "agent-core",
+                    "merge-base",
+                    "--is-ancestor",
+                    wt_commit,
+                    local_commit,
+                ],
+                check=False,
             )
+            if result.returncode != 0:
+                result = subprocess.run(
+                    ["git", "-C", "agent-core", "cat-file", "-e", wt_commit],
+                    check=False,
+                )
+                if result.returncode != 0:
+                    wt_agent_core = wt_path(slug) / "agent-core"
+                    _git(
+                        "-C",
+                        "agent-core",
+                        "fetch",
+                        str(wt_agent_core),
+                        "HEAD",
+                    )
 
-        _git("-C", "agent-core", "merge", "--no-edit", wt_commit)
-        _git("add", "agent-core")
+                _git("-C", "agent-core", "merge", "--no-edit", wt_commit)
+                _git("add", "agent-core")
 
-        result = subprocess.run(
-            ["git", "diff", "--cached", "--quiet", "agent-core"],
-            check=False,
+                result = subprocess.run(
+                    ["git", "diff", "--cached", "--quiet", "agent-core"],
+                    check=False,
+                )
+                if result.returncode != 0:
+                    _git("commit", "-m", f"🔀 Merge agent-core from {slug}")
+
+    result = subprocess.run(
+        ["git", "merge", "--no-commit", "--no-ff", slug],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        conflicts = _git("diff", "--name-only", "--diff-filter=U", check=False).split(
+            "\n"
         )
-        if result.returncode != 0:
-            _git("commit", "-m", f"🔀 Merge agent-core from {slug}")
+        conflicts = [c for c in conflicts if c.strip()]
