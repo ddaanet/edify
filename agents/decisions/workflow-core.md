@@ -236,6 +236,7 @@ plans/<stream-name>/
 - Components are sequential (no parallelization benefit)
 - No model switching needed
 - **Sequence:** Delegate via Task tool (quiet-task/tdd-task) with context in prompts → vet agent → `/handoff --commit`
+- **Repetitive pattern variant:** ~15-20 cycles with same pattern qualifies as Tier 2 — plan cycle descriptions, delegate individually, checkpoint every 3-5 cycles. Full runbook overhead not justified for simple repetitive work
 
 **Tier 3 (Full Runbook):**
 - Multiple independent steps (parallelizable)

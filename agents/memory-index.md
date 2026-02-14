@@ -47,6 +47,11 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /how review delegation scope template | scope IN OUT changed files requirements
 /when UNFIXABLE escalation | fix-all pattern grep UNFIXABLE stop escalate
 /when phase type model | tdd general per-phase typing expansion review criteria
+/when vet escalation calibration | over-escalation pattern-matching not design
+/when vet flags out-of-scope items | DEFERRED vs UNFIXABLE distinction
+/when vet receives execution context | filesystem vs execution-time state
+/when vet-fix-agent rejects planning artifacts | plan-reviewer routing
+/when expansion reintroduces defects | LLM failure modes at both levels
 
 ## agents/decisions/deliverable-review.md
 
@@ -122,6 +127,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when ordering runbook dependencies
 /when evaluating cycle density
 /when spacing runbook checkpoints
+/when planning for file growth | lines-per-cycle projection split points
 
 ## agents/decisions/testing.md
 
@@ -133,6 +139,9 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when testing presentation vs behavior
 /when writing integration test assertions
 /how validate migration conformance
+/when preferring e2e over mocked subprocess | real git repos tmp_path
+/when asserting pipeline idempotency | preprocessor remark roundtrip
+/when detecting vacuous assertions from skipped RED | assertion strength
 
 ## agents/decisions/validation-quality.md
 
@@ -211,3 +220,49 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /how format runbook outlines
 /how implement continuation passing
 /when using hook based parsing
+
+## agents/decisions/orchestration-execution.md
+
+/when delegation requires commit instruction | agents leave tree dirty
+/when context defines scope boundary | structural not prose constraints
+/when deduplicating delegation prompts | shared file reference
+/when managing orchestration context | handoff not delegatable
+/when no post-dispatch communication available | fire-and-forget partitioning
+/when running post-step verification | git status UNFIXABLE grep
+/when planning is parallelizable | phase expansion concurrent agents
+/when stabilizing orchestrator model | sonnet before haiku optimization
+/when using opus for RCA delegation | primary source verification
+/when sonnet inadequate for synthesis | opus for multi-turn extraction
+/when no model tier introspection available | no API ask or use hook
+/when always scripting non-cognitive solutions | deterministic pattern-based
+/when script validates it should generate | metadata injection
+/when bootstrapping around broken tools | design as execution plan
+/when assessing RED pass blast radius | over-implementation test-flaw correct
+/when unifying over patching | shared code bifurcation root cause
+/when common context competes with step | phase-neutral only
+/when capturing requirements from conversation | capture over interview
+
+## agents/decisions/operational-practices.md
+
+/when placing deliverable artifacts | plans vs tmp referenced later
+/when requiring per-artifact vet coverage | batch momentum skip prevention
+/when launching task agents in parallel | single message batch
+/when background agents crash | check output files recovery
+/when refactoring agents need quality directives | deslop factorization
+/when exploration agents report false findings | verify file existence
+/when scrubbing learnings before design input | validate against evidence
+/when temporal validation required for analysis | git history correlation
+/when behavioral triggers beat passive knowledge | when how only
+/when enforcement cannot fix judgment | structural vs conversation-level
+/when no-op merge orphans branch | always create merge commit
+/when task names must be branch-suitable | alphanumeric constraint
+/when classifyHandoffIfNeeded bug occurs | foreground Task calls fail background works
+/when sub-agents cannot spawn sub-agents | Task MCP hooks unavailable
+/when extracting git helper functions | _git pattern subprocess reduction
+/when fixture shadowing creates dead code | pytest fixture vs local function
+/when test corpus defines correct behavior | fixtures are spec not workaround
+/when index keys must be exact | fuzzy only for runtime recovery
+/when DP matrix has zero-ambiguity | -inf initialization impossible states
+/when phase numbering is flexible | 0-based or 1-based detect from first
+/when checking self-referential modification | exclude plan own directory
+/when avoiding CLI skill name collision | check built-ins before naming

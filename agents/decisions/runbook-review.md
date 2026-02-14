@@ -74,3 +74,15 @@ Distance between quality gates. Without intermediate checkpoints, haiku drift ac
 - [Fan et al., 2025 — Tests as Prompt: WebApp1K](https://arxiv.org/html/2505.09027v1) — Instruction loss, pretraining bias, dependency ordering errors
 - [Mathews & Nagappan, ASE 2024 — TDD for Code Generation](https://arxiv.org/abs/2402.13521) — TDD effectiveness, remediation loop value, edge-case persistence
 - [Microsoft, 2025 — Taxonomy of Failure Modes in Agentic AI](https://www.microsoft.com/en-us/security/blog/2025/04/24/new-whitepaper-outlines-the-taxonomy-of-failure-modes-in-ai-agents/) — Task decomposition and sequencing failures
+
+## When Planning For File Growth
+
+**Decision Date:** 2026-02-12
+
+**Decision:** Planning phase should estimate lines-per-cycle, project total growth, insert proactive file splits at phase boundaries.
+
+**Anti-pattern:** Planning 37 TDD cycles adding to same files without projecting line growth or inserting split points.
+
+**Evidence:** 7+ refactor escalations, >1hr wall-clock on line-limit fixes alone across worktree-update runbook.
+
+**Root cause:** Planning requirements don't include file growth analysis — gap in the planning pipeline.

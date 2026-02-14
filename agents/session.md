@@ -1,30 +1,24 @@
-# Session Handoff: 2026-02-13
+# Session Handoff: 2026-02-14
 
-**Status:** when-recall merged, workflow-improvements worktree created.
+**Status:** Learnings consolidated (458→38 lines), 2 new decision files created.
 
 ## Completed This Session
 
-**Merged when-recall worktree:**
-- 42/42 TDD cycles, 8 phases — `/when` and `/how` memory recall system
-- cli.py conflict resolved (added `when_cmd` import/registration)
-- Cleaned untracked debris from failed first merge attempt (`git clean -fd`)
-- Tests verified: 855/856 pass (1 known xfail)
-- Worktree + branch removed, session.md and jobs.md updated
-- Committed deliverable-review skill symlink (was untracked, blocking merge)
-- Recovered 6 learnings lost by `--ours` merge resolution, removed stale "Fuzzy bridge" learning
-- Fixed memory-index operator prefixes (`/when`/`/how`) and `|` separator for pipeline-contracts entries
-
-**Worktree setup:**
-- Created `workflow-improvements` worktree for Workflow improvements task
+**Learnings consolidation:**
+- 67 learnings consolidated across 8 decision files (6 existing + 2 new)
+- 17 learnings dropped (superseded/redundant/already documented)
+- Created `agents/decisions/orchestration-execution.md` (179 lines) — delegation, model selection, scripting, TDD quality
+- Created `agents/decisions/operational-practices.md` (183 lines) — artifact management, agent reliability, git, implementation
+- Extended: pipeline-contracts.md (+62), testing.md (+34), runbook-review.md (+12), workflow-core.md (+1 Tier 2 refinement)
+- Updated memory-index.md with 40 new entries across 2 new file sections
+- Retained 6 learnings for continuity (tool batching, RED blast radius, common context, vacuous assertions, index keys, DP zero-ambiguity)
+- All decision files under 400-line limit, precommit passes
 
 ## Pending Tasks
 
 - [ ] **Protocolize RED pass recovery** — Formalize orchestrator RED pass handling into orchestrate skill | sonnet
   - Scope: Classification taxonomy, blast radius procedure, defect impact evaluation
   - Reports: `plans/when-recall/reports/tdd-process-review.md`, `plans/orchestrate-evolution/reports/red-pass-blast-radius.md`
-
-- [ ] **Consolidate learnings** — learnings.md at 458 lines (soft limit 80) | sonnet
-  - Blocker cleared: /when and /how merged from when-recall worktree
 
 - [ ] **Learning ages computation after consolidation** — Verify age calculation correct when learnings consolidated/rewritten | sonnet
 
@@ -40,7 +34,7 @@
   - Recovery: design.md architecture valid, outline Phases 0-3/5-6 recoverable, Phase 4 needs rewrite against post-worktree-update justfile, expanded phases need regeneration
   - Drift: 18 skills (was 16), 14 agents (was 12), justfile +250 lines rewritten
 
-- [ ] **Upstream plugin-dev: document `skills:` frontmatter** — PR/issue to official Claude Code plugin-dev plugin for missing `skills` field | sonnet
+- [ ] **Upstream plugin-dev: document skills frontmatter** — PR/issue to official Claude Code plugin-dev plugin for missing `skills` field | sonnet
 
 - [ ] **Continuation prepend** — `/design plans/continuation-prepend/problem.md` | sonnet
   - Plan: continuation-prepend | Status: requirements
@@ -99,9 +93,6 @@
 - `agents/decisions/deliverable-review.md` — ISO-grounded, use this one
 - Cleanup: delete review-methodology.md (confirmed fully superseded)
 
-**Learnings.md over soft limit:**
-- 428 lines — /when and /how now available, consolidation unblocked
-
 **wt-merge session reconciliation incomplete:**
 - merge.py has auto-resolvers for session.md, learnings.md, jobs.md
 - Session merge loses continuation lines (single-line set diff) → worktree-fixes FR-4
@@ -119,4 +110,4 @@
 - `plans/worktree-update/` — Runbook + reports (complete, merged)
 - `plans/when-recall/design.md` — Vetted design document
 - `agents/decisions/deliverable-review.md` — Post-execution review methodology
-- `plans/worktree-fixes/requirements.md` — Worktree fixes requirements (6 FRs, task naming + merge fixes + session automation)
+- `plans/worktree-fixes/requirements.md` — Worktree fixes requirements (6 FRs)

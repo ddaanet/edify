@@ -162,3 +162,37 @@ Standard TDD uses prose descriptions instead of full test code (per workflow-adv
 **Impact:** Behavioral equivalence verification beyond functional testing, with exact specifications preventing translation loss.
 
 **See also:** TDD RED Phase: Behavioral Verification (line 69) for assertion quality requirements that complement conformance testing.
+
+## When Preferring E2E Over Mocked Subprocess
+
+**Decision Date:** 2026-02-12
+
+**Decision:** E2E only with real git repos (tmp_path fixtures), mocking only for error injection.
+
+**Anti-pattern:** Dual test suite — e2e for behavior + mocked subprocess for speed.
+
+**Rationale:** Git with tmp_path is fast (milliseconds), subprocess mocks are implementation-coupled (command strings not outcomes), interesting bugs are state transitions that mocks can't catch.
+
+**Exception:** Mock subprocess for error injection only (lock files, permission errors).
+
+## When Asserting Pipeline Idempotency
+
+**Decision Date:** 2026-02-12
+
+**Decision:** Assert full pipeline idempotency — `(preprocessor → remark)²` produces same result.
+
+**Anti-pattern:** Pipeline test asserting remark output matches preprocessor expected fixtures.
+
+**Rationale:** Remark legitimately reformats (table padding, blank lines) — exact match conflates preprocessor correctness with formatter style.
+
+## When Detecting Vacuous Assertions From Skipped RED
+
+**Decision Date:** 2026-02-12
+
+**Decision:** When RED passes unexpectedly, verify assertions would catch the defect class.
+
+**Anti-pattern:** Committing a test that never went RED without evaluating assertion strength.
+
+**Example:** `assert isinstance(relevant, list)` passes on empty list — pipeline silently returns no matches.
+
+**Detection:** Check if key assertions distinguish "correct output" from "empty/default output".
