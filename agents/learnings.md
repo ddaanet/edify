@@ -355,3 +355,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Evidence: Sycophantic agreement and reasoning engagement are mechanistically distinct (arXiv 2509.21305); LLMs accept user framing in 90% of responses (ELEPHANT study)
 - Observed: Agent passed all discussion mode structural checks (assumptions, failure conditions, alternatives) while agreeing with every conclusion — ritual compliance, not genuine evaluation
 - Research: `plans/pushback/reports/pushback-improvement-research.md`
+## Compression removes redundancy
+- Correct pattern: Remove duplicate semantics between name and description; keep all information
+- Tolerated redundancy: Item name and its one-line description (Python object + docstring first line, CLI option + help text)
+- Generalizes beyond code: hook messages, index entries, section headers — anywhere name + description coexist
+- Example: `[DIRECTIVE: DISCUSS] Discussion mode — evaluate critically` → `[DISCUSS] Evaluate critically` (DIRECTIVE+DISCUSS+Discussion = 3× same concept)

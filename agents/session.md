@@ -1,36 +1,23 @@
 # Session Handoff: 2026-02-14
 
-**Status:** Pushback improvement complete. Three interventions implemented and vetted. Restart required for hook changes. Validation next.
+**Status:** Pushback validation pending. Hook messages compressed. Restart required for hook changes.
 
 ## Completed This Session
 
-**Pushback improvement design (full A→C):**
-- Outline: `plans/pushback-improvement/outline.md` — 3 interventions selected from 8 research techniques
-- Outline review: 7 minor fixes applied, no UNFIXABLE
-- User discussion: validated approach, discussed sequential awareness technique exclusion
-- Design: `plans/pushback-improvement/design.md` — exact replacement text for both files
-- Design vet (opus): 1 major fix (missing NFR-1 closing paragraph), 4 minor fixes, no UNFIXABLE
-- Checkpoint commit: 326c418
-- Three interventions: A) definition fix (conclusion-level tracking), B) disagree-first protocol, C) third-person reframing in hook
-- Design decisions D-8 through D-12 extend original D-1 through D-7
+**Pushback mechanism validation (manual):**
+- User tested pushback by proposing something already implemented (fragment for pushback rules) — agent correctly pushed back
+- Tested `d:` hook fire and inspected additionalContext vs systemMessage difference
+- Scenario 1 results filled into validation template (behavior correct, overly verbose)
 
-**Pushback improvement implementation (Tier 1 direct):**
-- Tier assessment: 2 files, ~32 lines, exact replacement text → Tier 1
-- Intervention A: `agent-core/fragments/pushback.md` Agreement Momentum section — conclusion-level tracking definition
-- Intervention B: `agent-core/fragments/pushback.md` Design Discussion Evaluation section — disagree-first protocol restructure
-- Intervention C: `agent-core/hooks/userpromptsubmit-shortcuts.py` _DISCUSS_EXPANSION constant — third-person reframing
-- Symlinks synced via `just sync-to-parent`
-- Vet review: plans/pushback-improvement/reports/implementation-review.md — no issues, mechanically correct
+**Hook message compression:**
+- Applied compression learning: remove redundancy while preserving information
+- `[SHORTCUT: X]` / `[DIRECTIVE: X]` → `[X]` across all COMMANDS and DIRECTIVES
+- Removed prose restating tag names: "Smart execute:", "Strict resume:", "Record pending task."
+- Trimmed filler: "all workflow" → just enumerated items, "entry point" → "entry"
+- Agent-directed behavioral instructions preserved (intentional reinforcement)
+- New learning added: compression = remove redundancy, preserve information (generalized from Python docstrings)
 
 ## Pending Tasks
-
-- [x] **Implement pushback improvement** — `/runbook plans/pushback-improvement/design.md` | sonnet
-  - Design: `plans/pushback-improvement/design.md`
-  - Two files: `agent-core/fragments/pushback.md`, `agent-core/hooks/userpromptsubmit-shortcuts.py`
-  - Mechanical text replacement — exact before/after text specified in design
-  - Single general phase, no TDD
-  - Symlink sync via `just sync-to-parent` after hook changes
-  - Requires restart after implementation
 
 - [ ] **Complete pushback validation** — Re-run all 4 scenarios after momentum fix | opus
   - Template: plans/pushback/reports/step-3-4-validation-template.md
@@ -61,6 +48,3 @@
 ## Next Steps
 
 Restart session for hook changes, then validate with opus using `plans/pushback/reports/step-3-4-validation-template.md`.
-
----
-*Handoff by Opus. Design complete, runbook next.*
