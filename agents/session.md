@@ -31,6 +31,16 @@
 - Added automation usage note, improved description triggers
 - Skill review: pass (0 critical, 0 major)
 
+**Deliverable review — DONE**
+- 3 parallel opus agents (code, test, prose) against design.md
+- 4 major findings, all fixed:
+  - session.py: `line in task_block.lines` → `line == task_block.lines[0]` (false match on continuation lines)
+  - session.py: added guard for `task_start_idx is None`
+  - test_worktree_merge_merge_head.py: added `git branch -d` assertion (FR-5 gap)
+  - SKILL.md: expanded allowed-tools for Mode C error recovery (git add/commit/submodule/branch/log)
+- 10 minor findings: 7 fixed (redundant rstrip, weak assertion, second-person voice, complexity), 3 deferred
+- Consolidated report: `plans/worktree-fixes/reports/deliverable-review.md`
+
 **Final state:** 879/880 + 1 xfail, precommit clean. All 5 FRs satisfied.
 
 ## Pending Tasks
@@ -62,6 +72,7 @@
 - `plans/worktree-fixes/reports/phase-*-vet.md` — Phase 0, 1, 2 vet reports
 - `plans/worktree-fixes/reports/phase-*-execution.md` — Phase 1 execution report
 - `plans/worktree-fixes/reports/phase-2-cycles-*.md` — Phase 2 cycle reports
+- `plans/worktree-fixes/reports/deliverable-review*.md` — Deliverable review (consolidated + 3 sub-reports)
 
 ## Next Steps
 

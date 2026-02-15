@@ -282,4 +282,4 @@ def test_move_task_to_worktree_multiline(tmp_path: Path) -> None:
     )
     # Task A's main line should not appear before Worktree Tasks
     pending_section = "\n".join(lines[pending_start : worktree_start or len(lines)])
-    assert "**Task A**" not in pending_section or "Task B" in pending_section
+    assert "**Task A**" not in pending_section

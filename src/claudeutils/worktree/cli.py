@@ -32,8 +32,7 @@ def derive_slug(task_name: str) -> str:
         msg = format_errors[0]
         raise ValueError(msg)
 
-    slug = re.sub(r"[^a-z0-9]+", "-", task_name.lower()).strip("-")
-    return slug.rstrip("-")
+    return re.sub(r"[^a-z0-9]+", "-", task_name.lower()).strip("-")
 
 
 def _filter_section(

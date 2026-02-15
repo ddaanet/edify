@@ -16,3 +16,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: `_find_git_root()` traversing parents of relative `Path("agents")` — loop exits at `Path(".")` without checking it
 - Correct pattern: Always `.resolve()` paths before parent traversal in `_find_git_root()` and similar functions
 - Rationale: `Path(".").parent == Path(".")` terminates the while loop before checking cwd for `.git`
+
+## Block matching by first line
+- Anti-pattern: `line in task_block.lines` — matches ANY line in the block (including continuation lines like `  - Plan: foo`), causing false positives if that text appears elsewhere in the file
+- Correct pattern: `line == task_block.lines[0]` — match only the unique task header line
+- Rationale: Continuation lines are often generic (indented metadata) and not unique; first line contains the `**TaskName**` identifier which is guaranteed unique

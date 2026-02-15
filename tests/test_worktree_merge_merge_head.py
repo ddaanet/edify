@@ -80,3 +80,14 @@ def test_phase4_merge_head_empty_diff(
     assert log_output.stdout.strip().startswith("🔀 Merge"), (
         f"Expected merge commit, got: {log_output.stdout}"
     )
+
+    # Verify git branch -d succeeds (branch is ancestor of HEAD after merge commit)
+    branch_delete = subprocess.run(
+        ["git", "branch", "-d", "test-branch"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert branch_delete.returncode == 0, (
+        f"git branch -d should succeed after merge commit: {branch_delete.stderr}"
+    )

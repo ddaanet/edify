@@ -131,18 +131,12 @@ def move_task_to_worktree(session_path: Path, task_name: str, slug: str) -> None
 
     # Find and extract task from Pending Tasks (or check if already in Worktree Tasks)
     pending_blocks = extract_task_blocks(content, section="Pending Tasks")
-    task_block = None
-    for block in pending_blocks:
-        if block.name == task_name:
-            task_block = block
-            break
+    task_block = next((b for b in pending_blocks if b.name == task_name), None)
 
     if task_block is None:
-        # Check if task already in Worktree Tasks (idempotency)
         worktree_blocks = extract_task_blocks(content, section="Worktree Tasks")
-        for block in worktree_blocks:
-            if block.name == task_name:
-                return
+        if any(b.name == task_name for b in worktree_blocks):
+            return
         msg = f"Task '{task_name}' not found in Pending Tasks or Worktree Tasks"
         raise ValueError(msg)
 
@@ -150,10 +144,14 @@ def move_task_to_worktree(session_path: Path, task_name: str, slug: str) -> None
     task_start_idx = None
     task_end_idx = None
     for i, line in enumerate(lines):
-        if line in task_block.lines:
+        if line == task_block.lines[0]:
             task_start_idx = i
             task_end_idx = i + len(task_block.lines)
             break
+
+    if task_start_idx is None:
+        msg = f"Task '{task_name}' block found but could not locate in file content"
+        raise ValueError(msg)
 
     # Add slug marker to first line
     first_line = task_block.lines[0]
