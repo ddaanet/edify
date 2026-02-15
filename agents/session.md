@@ -1,13 +1,17 @@
 # Session Handoff: 2026-02-15
 
-**Status:** workflow-improvements worktree merged to main.
+**Status:** RCA on design skill safety-check bypass. Two worktrees outstanding.
 
 ## Completed This Session
 
-**Merged workflow-improvements worktree:**
-- `_worktree merge` only merged submodule (known bug) — manual parent merge required
-- Cleaned untracked file debris from partial merge attempts (sandbox + `.claude/` writes)
-- Resolved 4 session file conflicts: jobs.md, learnings.md, memory-index.md, session.md
+**RCA: "Execute directly" disables safety checks:**
+- Deviation: `/design` triage → Simple → raw `cd` into worktrees, bypassing worktree skill and `just wt-merge` recipe
+- Root cause: "Simple" classification creates execution mode that rationalizes away ALL operational rules, not just design ceremony
+- Same mechanism as "Proceed" scope learning (vet checkpoints)
+- Fix: Design skill Simple path updated — now says "Check for applicable skills and project recipes first, then execute directly"
+- Learning appended to learnings.md with fix reference
+
+**Prior uncommitted:** `execution-routing.md` fragment updated (added "Check loaded context" as step 1, renumbered). Already matches loaded CLAUDE.md content.
 - Fixed 4 orphan memory-index entries (3 structural heading removals, 1 stale key update)
 - Integrated 7 new pending tasks and 17 new learnings from worktree
 - Added workflow-rca-fixes as complete in jobs.md (20 FRs, 6 phases, 16 steps)
@@ -146,7 +150,7 @@
 
 ## Next Steps
 
-Review pending tasks list for next work item.
+Original task (merge outstanding worktrees, remove ancestry-only merges) not yet started — use `/worktree` skill or `just wt-merge`.
 
 ## Reference Files
 

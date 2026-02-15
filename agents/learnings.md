@@ -473,3 +473,9 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Step validation sections say "Delegate to skill-reviewer" expecting execution agent to spawn plugin-dev agents
 - Correct pattern: Orchestrator delegates reviews from main session after execution agents commit
 - Rationale: Sub-agents can't spawn plugin-dev agents (skill-reviewer, agent-creator). Orchestrator has plugin-dev access, execution agents don't. Validation delegation is orchestrator responsibility, not execution agent responsibility.
+## "Execute directly" disables safety checks
+- Anti-pattern: Design skill triage → "Simple → execute directly" → skip skill checks, recipe checks, cwd rules
+- Correct pattern: "Execute directly" means skip design ceremony, not skip operational rules. Skill-check-first and recipe-check-first still apply.
+- Root cause: "Simple" classification creates execution mode that optimizes throughput by rationalizing away ALL friction, not just design-level ceremony
+- Same mechanism as "Proceed" scope (per-artifact vet learning) — any permission to accelerate gets generalized to skip everything
+- Fix: Design skill Simple path updated to say "Check for applicable skills and project recipes first, then execute directly"
