@@ -1,28 +1,16 @@
 # Session Handoff: 2026-02-15
 
-**Status:** RCA on skill primitive decomposition. One worktree remaining (error-handling).
+**Status:** Merged error-handling worktree. All worktrees cleared.
 
 ## Completed This Session
 
-**RCA: Skill primitive decomposition (4th instance of "execute directly" pattern):**
-- Trigger: Used `just wt-rm` instead of `claudeutils _worktree rm` during worktree merge
-- Root cause: "Execute directly" in design skill Simple path is a global throughput optimizer — agent decomposes skills into primitives and selects "simpler" one
-- Prior rule fixes (3 instances) failed: rules compete for attention weight, each new rule dilutes all others
-- Deeper: agent reads skill, understands internals, replays ad-hoc — makes skill into documentation not interface
-- Structural fix A: Removed primitives from context — curated CLAUDE.md recipe list (5 recipes, no wt-*)
-- Structural fix B: Design skill "execute directly" → "Skip design — all other operational rules remain in effect"
-- Infrastructure: Removed entire cache system (.cache/ dir, agent-core/Makefile, `cache` recipe, `gmake check` from precommit)
-
-**Worktree cleanup (partial):**
-- Removed remember-skill-update worktree (ancestry-only — no work products, just focused session)
-- Confirmed pushback worktree already gone (no branch exists)
-- error-handling merge still pending (interrupted by RCA)
+**Worktree merge (error-handling):**
+- Merged via `claudeutils _worktree merge error-handling`
+- Fixed precommit: task name length (31→25 chars), duplicate task entries from worktree+main having same task with different metadata
+- Cleaned up with `claudeutils _worktree rm error-handling`
+- Artifacts landed: `plans/error-handling/outline.md`, 2 explore reports, outline-review
 
 ## Pending Tasks
-
-- [ ] **Merge error-handling wt** — `wt merge error-handling` | sonnet
-  - Has real artifacts: outline.md, 2 explore reports, outline-review
-  - Use `claudeutils _worktree merge` (skill CLI), not justfile recipe
 
 - [ ] **Remember skill update** — Resume `/design` Phase B | sonnet
   - Requirements: `plans/remember-skill-update/requirements.md` (7 FRs, When/How prefix mandate)
@@ -121,7 +109,6 @@
   - Current hook blocks ALL bash when cwd wrong, including `cd` to restore — creates catch-22
 
 - [ ] **Error handling design** — Resume `/design` Phase B (outline review) then Phase C (full design) | opus
-  - Blocked: pending workflow improvements must land first
   - Outline: `plans/error-handling/outline.md`
   - Key decisions: D-1 CPS abort-and-record, D-2 task `[!]`/`[✗]` states, D-3 escalation acceptance criteria, D-5 rollback = revert to step start
 
@@ -137,14 +124,14 @@
 - Must manually remove entries from memory-index.md before running precommit
 - Autofix only handles placement, ordering, and structural entry removal — not orphans
 
-**Learnings.md bloated (486 lines, ~69 entries):**
+**Learnings.md bloated (491 lines, ~69 entries):**
 - Cannot consolidate: entries show 0 days (pushback merge reset dates)
 - Many entries may already be consolidated in pushback's permanent docs — need manual review
 - Title migration to When/How format (FR-7) should happen before or alongside consolidation
 
 ## Next Steps
 
-Merge error-handling worktree: `wt merge error-handling`
+Remember skill update: Resume `/design` Phase B discussion on outline.
 
 ## Reference Files
 
