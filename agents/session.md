@@ -9,7 +9,15 @@
 - Runbook outline created at `plans/worktree-fixes/runbook-outline.md`
 - Outline reviewed twice: round 1 (4 minor fixed), round 2 (5 minor fixed — cycle consolidation, test reference, duplicate sections)
 - RCA on review defects: 3 systemic patterns written to `workflow-improvements/plans/reports/rca-runbook-outline-review.md`
-- Outline ready for expansion, blocked on workflow-improvements process fixes
+
+**Phase 0 expansion + review:**
+- Phase 0 expanded to `plans/worktree-fixes/runbook-phase-0.md`
+- Manual review found 5 defects (1 critical, 2 major, 2 minor) — all fixed
+  - Critical: Cycle 0.5 RED can't fail (max_length=30 never truncates ≤25 char names) → restructured as `[REGRESSION]`
+  - Major: Wrong test file (test_worktree_cli.py doesn't exist → test_worktree_utils.py), wrong error type (NameError → ImportError)
+  - Minor: Prescriptive GREEN in Cycle 0.1 (regex approach contradicts minimal TDD) → deferred to Cycle 0.2
+- RCA: all 5 defects from expansion confabulating concrete details without codebase verification; plan-reviewer was never invoked
+- Fix: strengthened review-plan SKILL.md RED verification to require behavioral grounding against current code
 
 ## Pending Tasks
 
@@ -17,6 +25,7 @@
   - Plan: worktree-fixes | Status: outlined | **Blocked:** workflow-improvements
   - 5 FRs: task name constraints (FR-1), precommit validation (FR-2), session merge blocks (FR-4), merge commit fix (FR-5), session automation (FR-6)
   - 4 phases: P0 TDD (FR-1,2), P1 TDD (FR-4,5), P2 TDD (FR-6), P3 general (SKILL.md update)
+  - Phase 0 expanded and reviewed (6 cycles, 5 defects fixed). Remaining phases not yet expanded.
   - Outline reviewed (25 cycles + 4 steps), blocked on runbook generation process fixes
 
 - [ ] **Build pushback into conversation process** → `wt/pushback` — `/design plans/pushback/requirements.md` | opus
@@ -43,6 +52,7 @@
 - **Runbook generation blocked on workflow-improvements:** 3 process defects (behavioral vacuity detection, review integration, cross-reference verification) must land before `/runbook` expansion
   - RCA: `workflow-improvements/plans/reports/rca-runbook-outline-review.md`
   - Fixes needed in: `agents/decisions/runbook-review.md`, review-fix workflow, cross-reference verification
+- **Manual expansion bypasses plan-reviewer:** Phase 0 was hand-expanded outside `/runbook` pipeline → 5 defects from ungrounded confabulation. Always run plan-reviewer on expanded phase files.
 
 **All tasks with documentation must have in-tree file references.**
 
@@ -59,4 +69,4 @@
 
 ## Next Steps
 
-Unblock by landing workflow-improvements process fixes, then `/runbook plans/worktree-fixes/design.md`.
+Expand remaining phases (1–3), run plan-reviewer on each. Blocked on workflow-improvements for automated `/runbook` path.
