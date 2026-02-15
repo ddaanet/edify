@@ -13,12 +13,6 @@
 
 ## Pending Tasks
 
-- [ ] **Design remember skill update** — Resume `/design` Phase B (outline complete) | sonnet
-  - Outline: `plans/remember-skill-update/outline.md` (reviewed, ready for Phase B user discussion)
-  - Three concerns: trigger framing enforcement, title-trigger alignment, frozen-domain recall
-  - Key decisions pending: hyphen handling, agent duplication, frozen-domain priority
-  - Reports: `plans/remember-skill-update/reports/outline-review.md`, `plans/remember-skill-update/reports/explore-remember-skill.md`
-
 - [ ] **Organize plans/reports directory** — Separate persistent research from context-specific reports | sonnet
   - Currently 14 files mixing grounding research (reusable) with plan-specific reports (context-bound)
   - Define directory structure or naming convention for discoverability
@@ -71,6 +65,11 @@
 
 ## Worktree Tasks
 
+- [ ] **Design remember skill update** → `design-remember-skill-update` — Resume `/design` Phase B (outline complete) | sonnet
+  - Outline: `plans/remember-skill-update/outline.md` (reviewed, ready for Phase B user discussion)
+  - Three concerns: trigger framing enforcement, title-trigger alignment, frozen-domain recall
+  - Key decisions pending: hyphen handling, agent duplication, frozen-domain priority
+  - Reports: `plans/remember-skill-update/reports/outline-review.md`, `plans/remember-skill-update/reports/explore-remember-skill.md`
 - [ ] **Error handling framework design** → `wt/error-handling` — Resume `/design` Phase B | opus
   - Blocked on: workflow improvements
   - Outline: `plans/error-handling/outline.md`
