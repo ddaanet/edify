@@ -1,24 +1,17 @@
 # Session Handoff: 2026-02-15
 
-**Status:** Workflow RCA fixes complete — orchestration + deliverable review + fixes applied.
+**Status:** Fixed skill-loading directive gap in runbook skill.
 
 ## Completed This Session
 
-**Deliverable review (workflow-rca-fixes):**
-- Three parallel opus review agents: agent definitions, skill definitions, human documentation
-- Found 2 Critical, 8 Major, 14 Minor across 21 deliverables (5,748 lines)
-- Fixed 2C, 7M, 7m directly; 1M deferred (memory-index sync mechanism); 6m accepted
-- Critical fixes: non-existent `runbook-review-agent` → `plan-reviewer` in workflows-terminology.md; memory-index skill synced with canonical (3 entries missing, ordering fixed)
-- Major fixes: FR-18 added to outline-review-agent + plan-reviewer; general-patterns.md references added to runbook skill; agent-name validation expanded; vet enforcement Constraints field; orchestration-execution refactor agent path
-- Reports: `plans/workflow-rca-fixes/reports/deliverable-review*.md` (4 reports)
-- 11 files edited across agent-core/ and agents/decisions/
+**Skill-loading directive fix:**
+- RCA: runbook SKILL.md Phase 0.5 consumed "Required reading" from design Documentation Perimeter but ignored "Skill-loading directives" subsection
+- Root cause: no instruction for planner to invoke listed skills (e.g., `/plugin-dev:skill-development`)
+- Fix: added directive consumption line to Phase 0.5 in `agent-core/skills/runbook/SKILL.md`
+- Investigation: `tmp/skill-autoload-investigation.md`
 
 ## Pending Tasks
 
-- [ ] **RCA failures to load skills during /runbook** — Investigate why plugin-dev skills required explicit invocation | sonnet
-  - Context: /runbook skill documentation perimeter says "Load plugin-dev:skill-development before planning"
-  - Expected: Auto-load or clearer failure message when missing
-  - Actual: User had to manually invoke skills before runbook promotion could proceed
 - [ ] **Diagnostic opus review methodology** — New task from design discussion | `/requirements` | opus
   - Interactive post-vet RCA using domain-specific methodology + iterative deepening
   - Extends /reflect skill with proactive invocation, two-model separation, feedback loops
@@ -90,7 +83,7 @@
 
 ## Next Steps
 
-Review pending tasks list for next work item. Workflow RCA fixes plan is fully complete (orchestrated + deliverable-reviewed + fixed).
+Review pending tasks list for next work item.
 
 ---
-*Handoff by Sonnet. Deliverable review complete: 2C/7M/7m fixed across 11 files.*
+*Handoff by Sonnet.*
