@@ -45,14 +45,12 @@
 - Cycle 1.1: `extract_task_blocks()` and `find_section_bounds()` in new `session.py` (single-line tasks, section boundaries)
 - Cycle 1.2: `extract_task_blocks()` multi-line tasks with continuation lines
 - Cycle 1.3: `extract_task_blocks()` section filter (Pending vs Worktree)
-- Cycle 1.4: `_resolve_session_md_conflict()` uses `extract_task_blocks()`
-- Cycle 1.5: `_resolve_session_md_conflict()` preserves continuation lines
-- Cycle 1.6: `_resolve_session_md_conflict()` inserts with `find_section_bounds()`
-- Cycle 1.7: `_phase4` MERGE_HEAD detection logic
-- Cycle 1.8: `_phase4` always commits when merge in progress
-- Cycle 1.9: `_phase4` empty-diff merge creates commit, branch deletable
-- Cycle 1.10: `focus_session()` uses `extract_task_blocks()`
-- Cycle 1.11: `focus_session()` preserves continuation lines in focused session
+- Cycle 1.4: `_resolve_session_md_conflict()` block-based comparison preserving continuation lines
+- Cycle 1.5: `_resolve_session_md_conflict()` insertion point via `find_section_bounds()`
+- Cycle 1.6: `_phase4` MERGE_HEAD detection logic
+- Cycle 1.7: `_phase4` always commits when merge in progress (`--allow-empty`)
+- Cycle 1.8: `_phase4` empty-diff merge creates commit, branch deletable via `git branch -d`
+- Cycle 1.9: `focus_session()` uses `extract_task_blocks()` preserving continuation lines
 
 ### Phase 2: Session automation (type: tdd)
 
@@ -111,28 +109,30 @@
 | Phase | Cycles/Steps | Files Changed | Model |
 |-------|--------------|---------------|-------|
 | Phase 0 | 6 cycles | `cli.py`, `validation/tasks.py`, tests | haiku |
-| Phase 1 | 11 cycles | `session.py` (new), `merge.py`, `cli.py`, tests | haiku |
+| Phase 1 | 9 cycles | `session.py` (new), `merge.py`, `cli.py`, tests | haiku |
 | Phase 2 | 10 cycles | `cli.py`, `session.py`, tests | haiku |
 | Phase 3 | 4 steps | `SKILL.md` | haiku |
 
-**Total:** 27 cycles + 4 steps across 4 phases
+**Total:** 25 cycles + 4 steps across 4 phases
 
 ---
 
 ## Expansion Guidance
 
 **Phase 0:**
-- Parametrize valid/invalid character test cases (at least 8 cases: alphanumeric, space, period, hyphen, special chars, empty, whitespace-only, length boundary)
+- Parametrize valid/invalid character test cases aggressively (8+ cases: alphanumeric, space, period, hyphen, special chars, empty, whitespace-only, length boundary) — single parametrized test saves token overhead
 - `derive_slug()` tests must verify ValueError raised with clear message
 - Precommit integration test: create session.md with invalid task names, run validator, assert errors
 
 **Phase 1:**
-- Cycle 1.1 creates new module `src/claudeutils/worktree/session.py` with dataclass `TaskBlock` + both `extract_task_blocks()` and `find_section_bounds()` scaffolding
-- `extract_task_blocks()` needs careful boundary detection: next `- [ ]` task, next `## `, or EOF
+- Cycle 1.1 creates new module `src/claudeutils/worktree/session.py` with dataclass `TaskBlock` + both `extract_task_blocks()` and `find_section_bounds()` — consolidates existence checks for both utility functions (avoids vacuous scaffolding cycle for `find_section_bounds()`)
+- `extract_task_blocks()` needs careful boundary detection: next `- [ ]`/`- [x]`/`- [>]` task, next `## `, or EOF
+- Task block regex: `^- \[[ x>]\] \*\*(.+?)\*\*` (no em dash — unlike validation/tasks.py pattern, Worktree Tasks entries use `→ \`slug\`` not ` — `)
 - Test with realistic multi-line blocks from actual session.md examples
+- Cycles 1.6-1.8 (`_phase4`): Verify git state transitions explicitly (MERGE_HEAD presence/absence, branch ancestry via `git log --oneline`) not just function return values
 - `_phase4` test must verify `git branch -d` succeeds after empty-diff merge (integration check)
-- `focus_session()` tests verify full blocks preserved in output
-- Cycle 1.1 consolidates existence checks for both utility functions — avoid separate vacuous cycle for `find_section_bounds()`
+- `focus_session()` test verifies full blocks preserved in output
+- Cross-reference existing merge test pattern: `test_worktree_merge_conflicts.py::test_merge_conflict_session_md`
 
 **Phase 2:**
 - `move_task_to_worktree()` operates on main repo's session.md, not worktree copy
@@ -150,6 +150,7 @@
 - Follow existing test patterns in `tests/test_worktree_*.py` and `tests/test_validation_*.py`
 - No subprocess mocking except for error injection cases
 - Verify behavioral outcomes, not just structure (per TDD RED Phase guidance)
+- Design Key Decisions (lines 92-107 in this outline) should propagate to relevant cycle GREEN phases (explain WHY implementation matches design choice)
 
 **Checkpoints:**
 - After Phase 0: Full checkpoint (fix + vet + functional) — validation infrastructure must work before Phase 1 depends on it
@@ -177,26 +178,3 @@
 - Phase 1: Multi-line task blocks preserved in merge, empty-diff merges create commits
 - Phase 2: Task movement automated in `new --task` and `rm` commands
 - Phase 3: Skill documentation updated with automation behavior
-
----
-
-## Expansion Guidance (from outline review)
-
-The following recommendations from outline review should be incorporated during full runbook expansion:
-
-**Consolidation candidates:**
-- Phase 1 Cycle 1.1 consolidates module creation with both utility functions (extract_task_blocks + find_section_bounds) — avoid creating separate cycle for find_section_bounds alone (would be vacuous scaffolding test)
-
-**Cycle expansion:**
-- Phase 0: Parametrize validation character set tests aggressively (single test with 8+ parametrized cases saves runbook token overhead)
-- Phase 1 Cycles 1.7-1.9: Verify git state transitions explicitly (MERGE_HEAD presence/absence, branch ancestry via git log) not just function return values
-- All phases: Consider E2E-first pattern (establish behavioral target with integration test, then drill into edge cases with unit tests)
-
-**Checkpoint guidance:**
-- Phase 0 checkpoint is critical — Phase 1 depends on validation infrastructure working correctly (derive_slug fail-fast must catch invalid names before merge logic uses them)
-- All checkpoints should verify both code quality (line limits, precommit) and behavioral correctness (run affected E2E tests)
-
-**References to include:**
-- Cross-reference existing test patterns in cycle descriptions: `test_worktree_merge_conflicts.py::test_conflicting_pending_tasks` for merge tests, `test_validation_*.py` for precommit integration
-- Design Key Decisions (lines 92-107 in this outline) should propagate to relevant cycle GREEN phases (explain WHY implementation matches design choice)
-- Testing.md TDD guidance for RED phase behavioral verification (test behavior not structure)
