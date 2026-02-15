@@ -436,3 +436,59 @@ def test_new_task_mode_moves_task_to_worktree(
     assert "Implement feature X" in updated_session.split("## Worktree Tasks")[1]
     assert "→ `implement-feature-x`" in updated_session
     assert "Fix bug Y" in updated_session
+
+
+def test_rm_calls_remove_worktree_task_before_branch_delete(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Rm command calls remove_worktree_task before deleting branch."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+    init_repo(repo_path)
+
+    session_file = repo_path / "agents" / "session.md"
+    session_file.parent.mkdir(parents=True, exist_ok=True)
+    session_content = r"""# Session Handoff
+
+## Pending Tasks
+
+- [ ] **Other task** — `\`/runbook\`` | sonnet
+
+## Worktree Tasks
+
+- [ ] **Feature A** → `feature-a` — `\`/design\`` | haiku
+"""
+    session_file.write_text(session_content)
+
+    result = CliRunner().invoke(
+        worktree, ["new", "feature-a", "--session", str(session_file)]
+    )
+    assert result.exit_code == 0
+
+    worktree_path = wt_path("feature-a")
+    worktree_session = worktree_path / "agents" / "session.md"
+
+    worktree_session_content = r"""# Focused Session
+
+## Pending Tasks
+
+## Worktree Tasks
+"""
+    worktree_session.write_text(worktree_session_content)
+    subprocess.run(
+        ["git", "-C", str(worktree_path), "add", "agents/session.md"],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(worktree_path), "commit", "-m", "mark task complete"],
+        check=True,
+        capture_output=True,
+    )
+
+    result = CliRunner().invoke(worktree, ["rm", "feature-a"])
+    assert result.exit_code == 0
+
+    final_session = session_file.read_text()
+    assert "## Worktree Tasks" not in final_session or "Feature A" not in final_session

@@ -12,7 +12,11 @@ import click
 
 from claudeutils.validation.tasks import validate_task_name_format
 from claudeutils.worktree.merge import merge as merge_impl
-from claudeutils.worktree.session import extract_task_blocks, move_task_to_worktree
+from claudeutils.worktree.session import (
+    extract_task_blocks,
+    move_task_to_worktree,
+    remove_worktree_task,
+)
 from claudeutils.worktree.utils import _git, wt_path
 
 
@@ -349,6 +353,10 @@ def rm(slug: str) -> None:
         if status:
             count = len(status.strip().split("\n"))
             click.echo(f"Warning: worktree has {count} uncommitted files")
+
+    session_md_path = Path("agents/session.md")
+    if session_md_path.exists():
+        remove_worktree_task(session_md_path, slug, slug)
 
     if parent_reg or submodule_reg:
         _remove_worktrees(worktree_path, parent_reg, submodule_reg)
