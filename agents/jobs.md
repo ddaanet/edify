@@ -24,6 +24,7 @@ Plan lifecycle tracking. Updated when plans change status.
 | process-review | complete | RCA recovered to disk for workflow-improvements reference |
 | workflow-fixes | complete | Unified /runbook skill, plan-reviewer agent, review-plan skill, pipeline-contracts |
 | worktree-skill | complete | Design.md retained on disk for reference |
+| workflow-rca-fixes | complete | 6 phases, 16 steps, deliverable review done |
 | worktree-update | complete | 40 TDD cycles, recovery (C2-C5), merged to main |
 
 ## Complete (Archived)
