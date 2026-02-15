@@ -179,10 +179,10 @@ def test_merge_conflict_session_md_multiline_blocks(
     session = (repo_with_submodule / "agents" / "session.md").read_text()
     assert "Task B" in session, f"Task B missing: {session}"
     assert "Plan: foo | Status: planned" in session, (
-        f"Continuation 1 missing: {session}"
+        f"Task B continuation line 1 missing: {session}"
     )
     assert "Notes: Multi-line task block" in session, (
-        f"Continuation 2 missing: {session}"
+        f"Task B continuation line 2 missing: {session}"
     )
 
 

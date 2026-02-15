@@ -87,8 +87,10 @@ def _resolve_session_md_conflict(conflicts: list[str]) -> list[str]:
             for block in sorted(new_blocks, key=lambda b: b.name):
                 new_task_lines.extend(block.lines)
 
-            # Ensure blank line separation before next section header
-            # Add blank line after new tasks if not already present
+            # Ensure blank line separation before next section header.
+            # Add blank line after new tasks if:
+            # - next line exists and is not already blank, AND
+            # - new tasks don't already end with blank line
             if (
                 insertion_point < len(ours_lines)
                 and ours_lines[insertion_point] != ""
