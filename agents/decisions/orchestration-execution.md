@@ -113,7 +113,7 @@ Three escalation tiers for handling failures during runbook execution, ordered b
 
 **Distinction from local:** The design itself is flawed, not just the implementation approach. Local restructuring cannot resolve the problem.
 
-### Implementation Deferral
+### .Implementation Deferral
 
 FR-17 documents the three-tier escalation requirement. Concrete detection mechanisms, escalation protocols, and replanning handoff procedures are deferred to `wt/error-handling` worktree.
 
