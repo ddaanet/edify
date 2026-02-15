@@ -24,7 +24,7 @@ Items where RED tests don't constrain implementation (TDD) or steps produce no f
 **Behavioral vacuity detection:**
 - **TDD:** For each cycle pair (N, N+1) on the same function, verify N+1's RED assertion would fail given N's GREEN implementation. If not, cycles are behaviorally vacuous — N+1 adds no constraint beyond N.
 - **General:** For consecutive steps modifying the same artifact, verify step N+1 produces an outcome not achievable by extending step N's implementation alone. If achievable, steps should be merged.
-- **Heuristic (both types):** cycles/steps > LOC/20 signals consolidation needed — item count exceeds the behavioral surface area of the code.
+- **Heuristic (both types):** items > LOC/20 signals consolidation needed — item count exceeds the behavioral surface area of the code.
 
 **Action:** Eliminate, or merge into the nearest behavioral item.
 
