@@ -1,38 +1,20 @@
 # Session Handoff: 2026-02-15
 
-**Status:** Orchestration complete. All 20 FRs implemented across 6 phases.
+**Status:** Workflow RCA fixes complete — orchestration + deliverable review + fixes applied.
 
 ## Completed This Session
 
-**Runbook Execution (workflow-rca-fixes):**
-- Executed all 16 steps across 6 phases with opus/sonnet model routing
-- Phase 1: Skill composition (error-handling, memory-index skills; 5 agent frontmatter updates)
-- Phase 2: Review logic type-agnostic (runbook-review.md 5 axes, review-plan Section 11 General detection, runbook Phase 0.95 LLM gate)
-- Phase 3: Vet 4-status taxonomy (vet-taxonomy.md, vet-fix-agent investigation protocol, vet-requirement enforcement, orchestrate template)
-- Phase 4: Outline review enhancements (growth validation, semantic propagation, deliverable traceability)
-- Phase 5: Content edits (general-step references, design skill validations, workflows terminology, design-vet-agent criteria)
-- Phase 6: Cleanup (Phase 1.4 deletion, execution escalation documentation)
-- Model correction: 9 prose-heavy steps switched sonnet→opus during validation
-- Delegation pattern: main session handled all skill-reviewer/agent-creator validations (sub-agents can't spawn plugin-dev agents)
-- All 6 phase checkpoints passed, final vet review: 0 UNFIXABLE issues
-- 25 reports in plans/workflow-rca-fixes/reports/
-
-**Prior Sessions:**
-- Runbook promoted from outline (16 steps, 6 phases, all general type)
-- Outline generated and reviewed (runbook-outline-review-agent): 20 FRs mapped
-- Interactive opus review: 3 fixes applied, deliverable-level traceability added to Phase 4
-- Design complete: `plans/workflow-rca-fixes/design.md` (6 phases, 20 FRs)
-- Reports: `plans/workflow-rca-fixes/reports/` (exploration + review artifacts)
+**Deliverable review (workflow-rca-fixes):**
+- Three parallel opus review agents: agent definitions, skill definitions, human documentation
+- Found 2 Critical, 8 Major, 14 Minor across 21 deliverables (5,748 lines)
+- Fixed 2C, 7M, 7m directly; 1M deferred (memory-index sync mechanism); 6m accepted
+- Critical fixes: non-existent `runbook-review-agent` → `plan-reviewer` in workflows-terminology.md; memory-index skill synced with canonical (3 entries missing, ordering fixed)
+- Major fixes: FR-18 added to outline-review-agent + plan-reviewer; general-patterns.md references added to runbook skill; agent-name validation expanded; vet enforcement Constraints field; orchestration-execution refactor agent path
+- Reports: `plans/workflow-rca-fixes/reports/deliverable-review*.md` (4 reports)
+- 11 files edited across agent-core/ and agents/decisions/
 
 ## Pending Tasks
 
-- [x] **Workflow RCA fixes** — `agent-core/bin/prepare-runbook.py plans/workflow-rca-fixes/runbook.md` | sonnet
-  - Runbook: `plans/workflow-rca-fixes/runbook.md` (16 steps, 6 phases, reviewed and fixed)
-  - Design: `plans/workflow-rca-fixes/design.md` (20 FRs, 6 phases)
-  - Requirements: `plans/workflow-rca-fixes/requirements.md`
-  - Orchestrated: All 16 steps executed, all 6 phase checkpoints passed, final vet complete
-  - Key artifacts: vet-taxonomy.md, general-patterns.md, error-handling/memory-index skills
-  - Model routing applied: 9 steps opus (prose edits), 7 steps sonnet (mechanical)
 - [ ] **RCA failures to load skills during /runbook** — Investigate why plugin-dev skills required explicit invocation | sonnet
   - Context: /runbook skill documentation perimeter says "Load plugin-dev:skill-development before planning"
   - Expected: Auto-load or clearer failure message when missing
@@ -59,6 +41,10 @@
   - Agent output optimization — remove summarize/report language from agents
   - Investigation prerequisite rule review
   - Commit skill optimizations — remove handoff gate, Gate B coverage ratio, branching after precommit
+- [ ] **Memory-index skill auto-sync** — Sync memory-index/SKILL.md from canonical agents/memory-index.md on consolidation | sonnet
+  - Context: Deliverable review found skill drifted (3 entries missing, ordering wrong)
+  - Hook into /remember consolidation flow or add precommit check
+  - Prevents sub-agent discovery gaps when canonical index grows
 - [ ] **Commit CLI tool** — CLI for precommit/stage/commit across both modules | `/design` | sonnet
   - Modeled on worktree CLI pattern (mechanical ops in CLI, judgment in skill)
   - Single command: precommit → stage → commit in main + agent-core submodule
@@ -104,7 +90,7 @@
 
 ## Next Steps
 
-Review pending tasks list for next work item.
+Review pending tasks list for next work item. Workflow RCA fixes plan is fully complete (orchestrated + deliverable-reviewed + fixed).
 
 ---
-*Handoff by Sonnet. Orchestration complete: 16 steps, 6 phases, 20 FRs implemented.*
+*Handoff by Sonnet. Deliverable review complete: 2C/7M/7m fixed across 11 files.*

@@ -38,9 +38,9 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Evidence: "when mock tests" scored 128.0 against candidate with no 'o' or 'k' — matched only 5 of 15 chars
 ## Agent composition via skills frontmatter
 - `skills:` YAML frontmatter in agent definitions injects skill content as prompt
-- Only plan-reviewer currently uses it; all other agents lack project conventions
 - Pattern: wrap fragments as lightweight skills, reference via `skills:` in agent definitions
 - No build step needed — native mechanism, stays current automatically
+- 6 agents now use skills: (vet-fix-agent, design-vet-agent, outline-review-agent, plan-reviewer, refactor, runbook-outline-review-agent)
 ## Sub-agent memory recall transport
 - Sub-agents lack Skill tool, cannot invoke `/when` or `/how` skills
 - Pattern: inject memory index via `skills:` (discovery), recall via Bash (transport)
@@ -94,6 +94,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: referencing a downstream consumer of criteria (e.g., "same criteria as outline-review-agent") when the consumer hasn't been updated yet in the bootstrapping sequence
 - Correct pattern: reference the upstream source where criteria are defined (e.g., runbook-review.md), not agents/skills that consume them
 - Rationale: in reflexive bootstrapping, each tool is improved before downstream use. References must follow the dependency chain direction.
+## Deliverable review catches cross-cutting drift
+- Anti-pattern: relying solely on per-step vet reviews for quality assurance
+- Correct pattern: post-orchestration deliverable review catches inter-file consistency gaps (stale copies, broken references, missing cross-references) that per-step vet misses
+- Evidence: memory-index skill drifted during execution (3 entries missing); workflows-terminology.md referenced non-existent agent; runbook skill missing general-patterns.md reference
+- These were invisible to per-step vet because each step's artifacts were internally consistent
 ## Orchestrator handles validation delegation
 - Anti-pattern: Step validation sections say "Delegate to skill-reviewer" expecting execution agent to spawn plugin-dev agents
 - Correct pattern: Orchestrator delegates reviews from main session after execution agents commit

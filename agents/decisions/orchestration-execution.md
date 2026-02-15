@@ -94,7 +94,7 @@ Three escalation tiers for handling failures during runbook execution, ordered b
 
 **Trigger:** Implementation needs restructuring within the same design — refactoring, reorganization, or alternative approach that doesn't invalidate design assumptions.
 
-**Response:** Delegate to refactor agent within current phase. Design and runbook remain valid; only the implementation path changes.
+**Response:** Delegate to `refactor` agent (`agent-core/agents/refactor.md`) within current phase. Design and runbook remain valid; only the implementation path changes.
 
 **Distinction from item-level:** Problem is solvable without user input. Distinction from global: design assumptions still hold.
 
