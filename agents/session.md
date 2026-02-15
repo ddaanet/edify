@@ -12,6 +12,7 @@
 - Fixed `p:` directive in 3 files: hook expansion (defer write), CLAUDE.md notation (add model assessment), execute-rule description
 - S3 declared known limitation — agreement momentum detection hits prompt engineering ceiling. No persistent state across turns for self-monitoring agreement count. Research (arXiv 2509.21305) confirms sycophancy is mechanistically distinct.
 - S4 fix does not need re-validation — mechanical (removed contradictory instruction), clear mechanism
+- Fixed 4 stale test assertions: `[DIRECTIVE: DISCUSS]` → `[DISCUSS]`, `[SHORTCUT: #status]` → `[#status]`, verdict-first content checks
 
 **Prior sessions (scraping + verdict-first):**
 - Created `scripts/scrape-validation.py` — JSONL session scraper with tool call capture
