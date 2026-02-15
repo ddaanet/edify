@@ -63,6 +63,10 @@
   - History cleanup tooling — git history rewriting, reusable scripts
   - Rewrite agent-core ad-hoc scripts via TDD to claudeutils package
 
+
+- [ ] **Design behavioral intervention for nuanced conversational patterns** — `/design` | opus
+- [ ] **Inject missing main-guidance rules into agent definitions** — process improvements batch
+- [ ] **Update /remember to target agent definitions** — blocked on memory redesign
 ## Worktree Tasks
 
 - [ ] **Design remember skill update** → `design-remember-skill-update` — Resume `/design` Phase B (outline complete) | sonnet

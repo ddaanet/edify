@@ -19,6 +19,7 @@ Plan lifecycle tracking. Updated when plans change status.
 | worktree-fixes | requirements | Task name constraints, session merge blocks, merge commit fix (5 FRs) |
 | workwoods | requirements | Cross-tree worktree awareness, vet tracking, plan state inference, bidirectional merge |
 | pushback | requirements | Prevent yes-manning in design discussions |
+| pushback-improvement | designed | Design complete (from pushback worktree) |
 | remember-skill-update | requirements | Outline complete, Phase B discussion next (trigger framing, frozen-domain recall) |
 | process-review | complete | RCA recovered to disk for workflow-improvements reference |
 | workflow-fixes | complete | Unified /runbook skill, plan-reviewer agent, review-plan skill, pipeline-contracts |

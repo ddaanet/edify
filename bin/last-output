@@ -48,22 +48,20 @@ def find_latest_session(project_dir: Path) -> Path | None:
     return max(session_files, key=lambda f: f.stat().st_mtime)
 
 
-def extract_last_assistant_output(session_file: Path) -> str | None:
-    """Extract text content from last assistant message."""
+def extract_nth_assistant_output(session_file: Path, n: int = 1) -> str | None:
+    """Extract text content from nth-last assistant message (1=most recent)."""
     with session_file.open() as f:
         lines = f.readlines()
 
-    # Search backwards for assistant message with text content
+    found = 0
     for line in reversed(lines):
         try:
             entry = json.loads(line)
 
-            # Check if it's an assistant message
             message = entry.get('message', {})
             if message.get('role') != 'assistant':
                 continue
 
-            # Extract text content blocks
             content = message.get('content', [])
             if not isinstance(content, list):
                 continue
@@ -73,10 +71,12 @@ def extract_last_assistant_output(session_file: Path) -> str | None:
                 for c in content
                 if isinstance(c, dict) and c.get('type') == 'text'
             ]
+            joined = '\n\n'.join(text_blocks).strip()
 
-            if text_blocks:
-                # Join all text blocks with newlines
-                return '\n\n'.join(text_blocks)
+            if joined:
+                found += 1
+                if found == n:
+                    return joined
 
         except (json.JSONDecodeError, KeyError, AttributeError):
             continue
@@ -94,6 +94,13 @@ def main():
         type=Path,
     )
     parser.add_argument(
+        "n",
+        nargs="?",
+        type=int,
+        default=1,
+        help="Which output to retrieve: 1=latest (default), 2=previous, 3=before that",
+    )
+    parser.add_argument(
         "-d", "--directory",
         help="Project directory (default: current directory)",
         type=Path,
@@ -101,6 +108,10 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if args.n < 1:
+        print("Error: n must be >= 1", file=sys.stderr)
+        sys.exit(1)
 
     # Resolve to absolute path
     project_dir = args.directory.resolve()
@@ -111,10 +122,10 @@ def main():
         print("Error: No session files found", file=sys.stderr)
         sys.exit(1)
 
-    # Extract last output
-    output = extract_last_assistant_output(session_file)
+    # Extract nth output
+    output = extract_nth_assistant_output(session_file, args.n)
     if not output:
-        print("Error: No assistant messages found", file=sys.stderr)
+        print(f"Error: No assistant message found at position {args.n}", file=sys.stderr)
         sys.exit(1)
 
     # Write to file or stdout

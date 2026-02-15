@@ -12,12 +12,15 @@
 
 @agent-core/fragments/execute-rule.md
 
+@agent-core/fragments/pushback.md
+
 **Pending task notation:**
 
 When user says "pending: task description":
 - Do NOT execute the task now
-- Keep in context and write to session.md Pending Tasks section on next handoff
-- Acknowledge receipt: "Added to pending tasks"
+- Do NOT write to session.md immediately — task written during next handoff
+- Assess model tier (opus/sonnet/haiku) with reasoning
+- Respond: task name, model tier, restart flag if needed
 
 @agent-core/fragments/execution-routing.md
 
