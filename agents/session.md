@@ -82,9 +82,6 @@
 - [ ] **Error handling framework design** → `wt/error-handling` — Resume `/design` Phase B | opus
   - Blocked on: workflow improvements
   - Outline: `plans/error-handling/outline.md`
-- [ ] **Worktree fixes** → `worktree-fixes` — `/design plans/worktree-fixes/` | opus
-  - Plan: worktree-fixes | Status: requirements
-  - 6 FRs: task name constraints, precommit validation, migration, session merge blocks, merge commit fix, automate session edits
 - [ ] **Workflow improvements** → `workflow-improvements` — Process fixes from RCA + skill/fragment/orchestration cleanup | sonnet
   - RCA blocker resolved — reports at `plans/process-review/reports/rca-*-opus.md`
   - Input: `plans/orchestrate-evolution/design.md`, `plans/process-review/rca.md`
