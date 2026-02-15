@@ -84,24 +84,27 @@ def test_merge_conflict_agent_core(
     assert r.returncode != 0, "MERGE_HEAD should not exist after merge"
 
 
-def _setup_session_conflict(  # noqa: PLR0913
+def _setup_session_conflict(
     repo: Path,
     wt: Path,
-    main_session: str,
-    wt_base_session: str,
-    wt_updated_session: str,
-    main_updated_session: str,
+    sessions: dict[str, str],
 ) -> None:
-    """Set up session.md conflict scenario on both sides."""
+    """Set up session.md conflict scenario on both sides.
+
+    Args:
+        repo: Main repo path
+        wt: Worktree path
+        sessions: Dict with keys 'main', 'wt_base', 'wt_updated', 'main_updated'
+    """
     (repo / "agents").mkdir(exist_ok=True)
     (wt / "agents").mkdir(exist_ok=True)
 
-    _write_commit(repo, "agents/session.md", main_session, "Add session.md")
-    _write_commit(wt, "agents/session.md", wt_base_session, "Add session.md")
-    _write_commit(wt, "agents/session.md", wt_updated_session, "Update session.md")
+    _write_commit(repo, "agents/session.md", sessions["main"], "Add session.md")
+    _write_commit(wt, "agents/session.md", sessions["wt_base"], "Add session.md")
+    _write_commit(wt, "agents/session.md", sessions["wt_updated"], "Update session.md")
     _git("checkout", "main", cwd=repo)
     _write_commit(
-        repo, "agents/session.md", main_updated_session, "Update session.md on main"
+        repo, "agents/session.md", sessions["main_updated"], "Update session.md on main"
     )
 
 
@@ -120,10 +123,12 @@ def test_merge_conflict_session_md(
     _setup_session_conflict(
         repo_with_submodule,
         wt_path,
-        main_session=base,
-        wt_base_session=base,
-        wt_updated_session=base + "- [ ] **Task B** — `/runbook` | haiku\n",
-        main_updated_session="# Session\n\n- [ ] **Task A** — `/design` | opus\n",
+        {
+            "main": base,
+            "wt_base": base,
+            "wt_updated": base + "- [ ] **Task B** — `/runbook` | haiku\n",
+            "main_updated": "# Session\n\n- [ ] **Task A** — `/design` | opus\n",
+        },
     )
 
     result = CliRunner().invoke(worktree, ["merge", "test-merge"])
@@ -154,20 +159,22 @@ def test_merge_conflict_session_md_multiline_blocks(
     _setup_session_conflict(
         repo_with_submodule,
         wt_path,
-        main_session=base,
-        wt_base_session=base,
-        wt_updated_session=(
-            "# Session\n\n## Pending Tasks\n\n"
-            "- [ ] **Task A** — `/design` | sonnet\n"
-            "- [ ] **Task B** — `/runbook plans/foo/runbook.md` | haiku\n"
-            "  - Plan: foo | Status: planned\n"
-            "  - Notes: Multi-line task block\n\n"
-            "## Blockers\n"
-        ),
-        main_updated_session=(
-            "# Session\n\n## Pending Tasks\n\n"
-            "- [ ] **Task A** — `/design` | opus\n\n## Blockers\n"
-        ),
+        {
+            "main": base,
+            "wt_base": base,
+            "wt_updated": (
+                "# Session\n\n## Pending Tasks\n\n"
+                "- [ ] **Task A** — `/design` | sonnet\n"
+                "- [ ] **Task B** — `/runbook plans/foo/runbook.md` | haiku\n"
+                "  - Plan: foo | Status: planned\n"
+                "  - Notes: Multi-line task block\n\n"
+                "## Blockers\n"
+            ),
+            "main_updated": (
+                "# Session\n\n## Pending Tasks\n\n"
+                "- [ ] **Task A** — `/design` | opus\n\n## Blockers\n"
+            ),
+        },
     )
 
     result = CliRunner().invoke(worktree, ["merge", "test-merge"])
@@ -205,19 +212,21 @@ def test_merge_conflict_session_md_insertion_position(
     _setup_session_conflict(
         repo_with_submodule,
         wt_path,
-        main_session=base,
-        wt_base_session=base,
-        wt_updated_session=(
-            "# Session\n\n## Pending Tasks\n\n"
-            "- [ ] **Task A** — `/design` | sonnet\n"
-            "- [ ] **Task B** — `/runbook` | haiku\n\n"
-            "## Blockers / Gotchas\n\n- Some blocker note\n"
-        ),
-        main_updated_session=(
-            "# Session\n\n## Pending Tasks\n\n"
-            "- [ ] **Task A** — `/design` | opus\n\n"
-            "## Blockers / Gotchas\n\n- Some blocker note\n"
-        ),
+        {
+            "main": base,
+            "wt_base": base,
+            "wt_updated": (
+                "# Session\n\n## Pending Tasks\n\n"
+                "- [ ] **Task A** — `/design` | sonnet\n"
+                "- [ ] **Task B** — `/runbook` | haiku\n\n"
+                "## Blockers / Gotchas\n\n- Some blocker note\n"
+            ),
+            "main_updated": (
+                "# Session\n\n## Pending Tasks\n\n"
+                "- [ ] **Task A** — `/design` | opus\n\n"
+                "## Blockers / Gotchas\n\n- Some blocker note\n"
+            ),
+        },
     )
 
     result = CliRunner().invoke(worktree, ["merge", "test-merge"])

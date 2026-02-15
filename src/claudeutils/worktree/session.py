@@ -1,6 +1,7 @@
 """Session.md parsing and editing utilities."""
 
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -175,5 +176,81 @@ def move_task_to_worktree(session_path: Path, task_name: str, slug: str) -> None
     for line in modified_lines:
         lines.insert(insert_point, line)
         insert_point += 1
+
+    session_path.write_text("\n".join(lines))
+
+
+def _find_git_root(start_path: Path) -> Path:
+    """Find git repo root by searching for .git directory."""
+    current = start_path
+    while current != current.parent:
+        if (current / ".git").exists():
+            return current
+        current = current.parent
+    return start_path
+
+
+def _task_is_pending_in_branch(
+    task_name: str, worktree_branch: str, git_root: Path
+) -> bool:
+    """Check if task is in worktree branch's Pending Tasks."""
+    try:
+        branch_content = subprocess.run(
+            ["git", "show", f"{worktree_branch}:agents/session.md"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=str(git_root),
+        ).stdout
+    except subprocess.CalledProcessError:
+        return False
+
+    branch_blocks = extract_task_blocks(branch_content, section="Pending Tasks")
+    return any(block.name == task_name for block in branch_blocks)
+
+
+def remove_worktree_task(session_path: Path, slug: str, worktree_branch: str) -> None:
+    """Remove task from Worktree Tasks section based on branch completion state.
+
+    Args:
+        session_path: Path to session.md file
+        slug: Worktree slug to find task by
+        worktree_branch: Git branch name to check task completion state
+
+    Reads the worktree branch's session.md via git show to determine if the task
+    was completed (no longer in branch's Pending Tasks). If completed, removes the
+    entry from Worktree Tasks. If still pending, keeps the entry.
+    """
+    content = session_path.read_text()
+
+    # Find task in Worktree Tasks by slug marker
+    worktree_blocks = extract_task_blocks(content, section="Worktree Tasks")
+    task_block = None
+    for block in worktree_blocks:
+        if f"→ `{slug}`" in block.lines[0]:
+            task_block = block
+            break
+
+    if task_block is None:
+        return
+
+    # Extract task name
+    match = re.match(r"^- \[[ x>]\] \*\*(.+?)\*\*", task_block.lines[0])
+    if not match:
+        return
+    task_name = match.group(1)
+
+    # Check if task still pending in branch
+    git_root = _find_git_root(session_path.parent)
+    if _task_is_pending_in_branch(task_name, worktree_branch, git_root):
+        return
+
+    # Task completed, remove from Worktree Tasks
+    lines = content.split("\n")
+    for i, line in enumerate(lines):
+        if line in task_block.lines:
+            task_end_idx = i + len(task_block.lines)
+            del lines[i:task_end_idx]
+            break
 
     session_path.write_text("\n".join(lines))
