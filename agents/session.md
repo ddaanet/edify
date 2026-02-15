@@ -1,23 +1,20 @@
 # Session Handoff: 2026-02-15
 
-**Status:** Design outline, pushback merge, worktree setup, justfile tweak.
+**Status:** Requirements formalized for remember-skill-update, worktree reorganized.
 
 ## Completed This Session
 
-**Design remember skill update — Phase A (outline):**
-- Exploration report pre-existed: `plans/remember-skill-update/reports/explore-remember-skill.md`
-- Wrote outline covering two workstreams: title-trigger alignment (3 enforcement layers) + frozen-domain recall analysis
-- Outline reviewed by outline-review-agent — 4 major, 5 minor fixes applied
-- User reviewed outline, 3 key decisions surfaced for Phase B discussion
-- Spun off to worktree `design-remember-skill-update` for continued design
+**Remember skill update — requirements formalization:**
+- User required learning titles in "When ..." / "How to ..." format (matching decision file headings)
+- Identified 64 new entries since last consolidation (`8a62c85`) needing title migration
+- Captured as `plans/remember-skill-update/requirements.md` (7 FRs)
+- Key refinement vs outline: titles include When/How prefix, eliminating operator selection as agent judgment
+- Folded `learning-title-reformat` plan scope into remember-skill-update (created and deleted same session)
+- Removed old worktree `design-remember-skill-update` (branch force-deleted, outline preserved on main)
+- Created fresh worktree `remember-skill-update` with requirements.md
 
-**Pushback worktree merged:**
-- Precommit fix: added `pushback-improvement` plan to jobs.md (missing plan error)
-- Session state recovery: 3 tasks + 1 blocker lost by set-diff resolver (FR-4), manually restored
-- Pushback plan complete: two-layer anti-sycophancy (fragment + hook), validated S1/S2/S4, S3 known limitation
-
-**Justfile:**
-- Removed `-q` flag from pytest in precommit and lint recipes
+**Prior session (committed):**
+- Design outline for remember-skill-update Phase A, pushback merge, justfile tweak
 
 ## Pending Tasks
 
@@ -84,11 +81,13 @@
 
 ## Worktree Tasks
 
-- [ ] **Design remember skill update** → `design-remember-skill-update` — Resume `/design` Phase B (outline complete) | sonnet
-  - Outline: `plans/remember-skill-update/outline.md` (reviewed, ready for Phase B user discussion)
+- [ ] **Remember skill update** → `remember-skill-update` — Resume `/design` Phase B | sonnet
+  - Requirements: `plans/remember-skill-update/requirements.md` (7 FRs, When/How prefix mandate)
+  - Outline: `plans/remember-skill-update/outline.md` (reviewed, Phase B discussion next)
   - Three concerns: trigger framing enforcement, title-trigger alignment, frozen-domain recall
   - Key decisions pending: hyphen handling, agent duplication, frozen-domain priority
   - Reports: `plans/remember-skill-update/reports/outline-review.md`, `plans/remember-skill-update/reports/explore-remember-skill.md`
+  - Immediate sub-task: Migrate 64 learning titles to When/How format (FR-7)
 - [ ] **Error handling framework design** → `wt/error-handling` — Resume `/design` Phase B | opus
   - Blocked on: workflow improvements
   - Outline: `plans/error-handling/outline.md`
@@ -137,7 +136,7 @@
 - Merge unioned both files — all worktree entries show 0 days (merge commit date)
 - Cannot consolidate: 0 entries ≥7 active days despite 5x soft limit
 - Many entries may already be consolidated in pushback's permanent docs — need manual review
-- Run `/remember` manually or wait for entries to age past 7-day threshold
+- Title migration to When/How format (FR-7) should happen before or alongside consolidation
 
 **Pushback S3 agreement momentum:**
 - Known limitation — prompt-level self-monitoring can't detect agreement momentum without persistent state across turns
@@ -145,6 +144,7 @@
 
 ## Reference Files
 
+- `plans/remember-skill-update/requirements.md` — 7 FRs (When/How prefix, validation, migration)
 - `plans/remember-skill-update/outline.md` — Design outline (reviewed, Phase B ready)
 - `plans/remember-skill-update/reports/explore-remember-skill.md` — Full pipeline exploration
 - `plans/reports/memory-index-actionability-review.md` — Opus actionability review of all index entries

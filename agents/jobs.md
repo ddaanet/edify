@@ -20,7 +20,7 @@ Plan lifecycle tracking. Updated when plans change status.
 | workwoods | requirements | Cross-tree worktree awareness, vet tracking, plan state inference, bidirectional merge |
 | pushback | complete | Two-layer anti-sycophancy: fragment + hook, S1/S2/S4 validated |
 | pushback-improvement | designed | Design complete (from pushback worktree) |
-| remember-skill-update | requirements | Outline complete, Phase B discussion next (trigger framing, frozen-domain recall) |
+| remember-skill-update | requirements | Outline + requirements.md complete, Phase B discussion next |
 | process-review | complete | RCA recovered to disk for workflow-improvements reference |
 | workflow-fixes | complete | Unified /runbook skill, plan-reviewer agent, review-plan skill, pipeline-contracts |
 | worktree-skill | complete | Design.md retained on disk for reference |
