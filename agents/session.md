@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-15
 
-**Status:** Organized reports directory, merging worktree-fixes.
+**Status:** Reports organized, worktree-fixes merged (manual recovery required).
 
 ## Completed This Session
 
@@ -9,7 +9,13 @@
 - Deleted 5 orphaned execution/debug reports (git history preserves)
 - `plans/reports/` now contains only shared research (2 files)
 - Updated all cross-references (session.md, internal RCA refs)
-- Convention enforced: `plans/<plan>/reports/` = plan-specific, `plans/reports/` = shared research
+
+**Merged worktree-fixes (25 TDD cycles, 4 phases, 5 FRs):**
+- `_worktree merge` only merged submodule — parent branch (19 commits) not merged
+- Manual recovery: recreated branch from `7305d24`, `git merge worktree-fixes`
+- `checkout --ours` on session files lost 2 learnings + 1 task — recovered manually
+- Renamed 7 task names to comply with new 25-char validation (FR-1)
+- 884 tests passing (24 new from worktree-fixes)
 
 ## Pending Tasks
 
@@ -105,11 +111,6 @@
 - `agents/decisions/review-methodology.md` — sonnet-generated, user distrusts, do NOT use
 - `agents/decisions/deliverable-review.md` — ISO-grounded, use this one
 - Cleanup: delete review-methodology.md (confirmed fully superseded)
-
-**wt-merge session reconciliation incomplete:**
-- merge.py has auto-resolvers for session.md, learnings.md, jobs.md
-- Session merge loses continuation lines (single-line set diff) → worktree-fixes FR-4
-- No-op merge skips commit → orphan branch → worktree-fixes FR-5
 
 **workflow-improvements worktree has stale RCA paths:**
 - Worktree references `plans/reports/rca-*-opus.md` — moved to `plans/process-review/reports/`
