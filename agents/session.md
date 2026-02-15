@@ -8,6 +8,9 @@
 - Removed 5 consolidated learnings from `agents/learnings.md` (duplicated in decisions files)
 - Kept 1 open-research learning (Tool batching unsolved)
 
+**Model selection fix:**
+- Phase 3 (SKILL.md prose edits): haiku → opus (substantial prose edits require opus)
+
 **Runbook planning:**
 - Tier 3 assessment: 4 phases, 25 TDD cycles + 4 general steps
 - Runbook outline created at `plans/worktree-fixes/runbook-outline.md`

@@ -75,7 +75,7 @@
 
 **Scope:** Documentation update
 **Complexity:** Low
-**Model:** haiku
+**Model:** opus
 
 **Steps:**
 
@@ -111,7 +111,7 @@
 | Phase 0 | 6 cycles | `cli.py`, `validation/tasks.py`, tests | haiku |
 | Phase 1 | 9 cycles | `session.py` (new), `merge.py`, `cli.py`, tests | haiku |
 | Phase 2 | 10 cycles | `cli.py`, `session.py`, tests | haiku |
-| Phase 3 | 4 steps | `SKILL.md` | haiku |
+| Phase 3 | 4 steps | `SKILL.md` | opus |
 
 **Total:** 25 cycles + 4 steps across 4 phases
 
