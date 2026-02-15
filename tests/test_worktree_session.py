@@ -1,5 +1,8 @@
 """Tests for worktree session.md parsing."""
 
+from pathlib import Path
+
+from claudeutils.worktree.cli import focus_session
 from claudeutils.worktree.session import extract_task_blocks, find_section_bounds
 
 
@@ -121,3 +124,33 @@ def test_extract_section_filter() -> None:
     # Extract all tasks (no filter)
     all_tasks = extract_task_blocks(content, section=None)
     assert len(all_tasks) == 4
+
+
+def test_focus_session_multiline(tmp_path: Path) -> None:
+    """Focus session preserves continuation lines from task block."""
+    session_content = """# Session Handoff
+
+## Pending Tasks
+
+- [ ] **My task** — `/design plans/my-task/` | sonnet
+  - Plan: my-task | Status: designed
+  - Note: some detail
+
+- [ ] **Other task** — `/runbook plans/other/` | haiku
+
+## Blockers / Gotchas
+
+- Something about My task
+- Something unrelated
+"""
+    session_path = tmp_path / "session.md"
+    session_path.write_text(session_content)
+
+    result = focus_session("My task", session_path)
+
+    assert "- [ ] **My task** — `/design plans/my-task/` | sonnet" in result
+    assert "- Plan: my-task | Status: designed" in result
+    assert "- Note: some detail" in result
+    assert "Other task" not in result
+    assert "Something about My task" in result
+    assert "Something unrelated" not in result

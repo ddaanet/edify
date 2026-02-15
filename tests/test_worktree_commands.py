@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import _remove_worktrees, focus_session, worktree
+from claudeutils.worktree.cli import _remove_worktrees, worktree
 from claudeutils.worktree.utils import wt_path
 
 
@@ -397,33 +397,3 @@ def test_rm_safe_branch_deletion(
     assert result.exit_code == 0
     assert "Branch unmerged-slug has unmerged changes" in result.output
     assert "git branch -D unmerged-slug" in result.output
-
-
-def test_focus_session_multiline(tmp_path: Path) -> None:
-    """Focus session preserves continuation lines from task block."""
-    session_content = """# Session Handoff
-
-## Pending Tasks
-
-- [ ] **My task** — `/design plans/my-task/` | sonnet
-  - Plan: my-task | Status: designed
-  - Note: some detail
-
-- [ ] **Other task** — `/runbook plans/other/` | haiku
-
-## Blockers / Gotchas
-
-- Something about My task
-- Something unrelated
-"""
-    session_path = tmp_path / "session.md"
-    session_path.write_text(session_content)
-
-    result = focus_session("My task", session_path)
-
-    assert "- [ ] **My task** — `/design plans/my-task/` | sonnet" in result
-    assert "- Plan: my-task | Status: designed" in result
-    assert "- Note: some detail" in result
-    assert "Other task" not in result
-    assert "Something about My task" in result
-    assert "Something unrelated" not in result

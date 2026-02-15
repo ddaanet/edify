@@ -13,12 +13,7 @@ def test_phase4_merge_head_empty_diff(
     monkeypatch: pytest.MonkeyPatch,
     mock_precommit: None,
 ) -> None:
-    """Verify _phase4 creates commit when MERGE_HEAD exists but no staged
-    changes.
-
-    Simulates empty-diff merge: MERGE_HEAD present, no staged changes.
-    Current implementation skips commit, leaving MERGE_HEAD orphaned.
-    """
+    """Verify _phase4 commits with MERGE_HEAD present and empty diff."""
     monkeypatch.chdir(repo_with_submodule)
 
     # Set up initial state

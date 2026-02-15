@@ -4,42 +4,44 @@
 
 ## Completed This Session
 
-**Learnings maintenance:**
-- Removed 5 consolidated learnings from `agents/learnings.md` (duplicated in decisions files)
-- Kept 1 open-research learning (Tool batching unsolved)
+**Phase 0: Task name constraints (FR-1, FR-2) — DONE**
+- 6 TDD cycles executed via haiku tdd-task agent
+- `validate_task_name_format()` added to `validation/tasks.py` (char set, length, empty checks)
+- `derive_slug()` updated: calls validation, removes `max_length` param (lossless)
+- Precommit integration: `validate()` calls format check on all task names
+- 5 existing task names renamed to comply with 25-char limit
+- Tests extracted to `tests/test_validation_task_format.py` (line limit)
+- Vet: all issues fixed, no UNFIXABLE
 
-**Model selection fix:**
-- Phase 3 (SKILL.md prose edits): haiku → opus (substantial prose edits require opus)
+**Phase 1: Merge fixes (FR-4, FR-5) — DONE (vet pending)**
+- 9 TDD cycles: 4 via sonnet, 4 via sonnet, 1 via haiku
+- New module `src/claudeutils/worktree/session.py`: `TaskBlock`, `extract_task_blocks()`, `find_section_bounds()`
+- `_resolve_session_md_conflict()` rewritten: block-based comparison, uses `find_section_bounds()` for insertion
+- `_phase4_merge_commit_and_precommit()` rewritten: MERGE_HEAD detection, `--allow-empty` for empty-diff merges
+- `focus_session()` refactored to use `extract_task_blocks()`
+- Test file compression: `test_worktree_merge_conflicts.py` 678→260 lines (helper functions, shared setup)
+- `test_focus_session_multiline` moved to `test_worktree_session.py`
+- New `tests/test_worktree_merge_merge_head.py` for MERGE_HEAD tests
+- `just dev` passes (869/870 + 1 xfail)
 
-**Runbook planning:**
-- Tier 3 assessment: 4 phases, 25 TDD cycles + 4 general steps
-- Runbook outline created at `plans/worktree-fixes/runbook-outline.md`
-- Outline reviewed twice: round 1 (4 minor fixed), round 2 (5 minor fixed — cycle consolidation, test reference, duplicate sections)
-- RCA on review defects: 3 systemic patterns written to `workflow-improvements/plans/reports/rca-runbook-outline-review.md`
-
-**Phase 0 expansion + review:**
-- Phase 0 expanded to `plans/worktree-fixes/runbook-phase-0.md`
-- Manual review found 5 defects (1 critical, 2 major, 2 minor) — all fixed
-  - Critical: Cycle 0.5 RED can't fail (max_length=30 never truncates ≤25 char names) → restructured as `[REGRESSION]`
-  - Major: Wrong test file (test_worktree_cli.py doesn't exist → test_worktree_utils.py), wrong error type (NameError → ImportError)
-  - Minor: Prescriptive GREEN in Cycle 0.1 (regex approach contradicts minimal TDD) → deferred to Cycle 0.2
-- RCA: all 5 defects from expansion confabulating concrete details without codebase verification; plan-reviewer was never invoked
-- Fix: strengthened review-plan SKILL.md RED verification to require behavioral grounding against current code
+**SKILL.md attempted then reverted:**
+- Phase 3 prose edits applied inline, skill-reviewer found critical: automation claims reference unimplemented code
+- Reverted all 4 SKILL.md edits — must follow Phase 2
 
 ## Pending Tasks
 
-- [ ] **Worktree fixes** — `/runbook plans/worktree-fixes/design.md` | sonnet
-  - Plan: worktree-fixes | Status: outlined | **Blocked:** workflow-improvements
-  - 5 FRs: task name constraints (FR-1), precommit validation (FR-2), session merge blocks (FR-4), merge commit fix (FR-5), session automation (FR-6)
-  - 4 phases: P0 TDD (FR-1,2), P1 TDD (FR-4,5), P2 TDD (FR-6), P3 general (SKILL.md update)
-  - Phase 0 expanded and reviewed (6 cycles, 5 defects fixed). Remaining phases not yet expanded.
-  - Outline reviewed (25 cycles + 4 steps), blocked on runbook generation process fixes
+- [>] **Worktree fixes** — Phase 1 vet + Phase 2 + Phase 3 remaining | sonnet
+  - Plan: worktree-fixes | Status: executing
+  - Phase 0: complete (6 cycles, vetted)
+  - Phase 1: complete (9 cycles, vet pending)
+  - Phase 2: not started (10 cycles: session automation FR-6)
+  - Phase 3: not started (4 SKILL.md edits, inline after Phase 2)
 
-- [ ] **Build pushback into conversation process** → `wt/pushback` — `/design plans/pushback/requirements.md` | opus
+- [ ] **Build pushback** → `wt/pushback` — `/design plans/pushback/requirements.md` | opus
 - [ ] **Codebase quality sweep** — Tests, deslop, factorization, dead code | sonnet
 - [ ] **Continuation prepend** — `/design plans/continuation-prepend/problem.md` | sonnet
 - [ ] **Design workwoods** — `/design plans/workwoods/requirements.md` | opus
-- [ ] **Error handling framework design** → `wt/error-handling` — Resume `/design` Phase B | opus
+- [ ] **Error handling design** → `wt/error-handling` — Resume `/design` Phase B | opus
 - [ ] **Execute plugin migration** — Refresh outline then orchestrate | sonnet
 - [ ] **Feature prototypes** — Markdown preprocessor, session extraction, last-output | sonnet
 - [ ] **Handoff consol scope** — Only consolidate in main repo or dedicated worktree | sonnet
@@ -50,30 +52,30 @@
 - [ ] **RED pass recovery** — Formalize orchestrator RED pass handling into orchestrate skill | sonnet
 - [ ] **Upstream skills field** — PR/issue to official Claude Code plugin-dev plugin for missing `skills` field | sonnet
 - [ ] **Workflow improvements** → `workflow-improvements` — Process fixes from RCA + skill/fragment/orchestration cleanup | sonnet
-- [ ] **Worktree fixes** → `worktree-fixes` — `/design plans/worktree-fixes/` | opus
+
 ## Blockers / Gotchas
 
-- Session merge loses continuation lines (single-line set diff) → worktree-fixes FR-4
-- No-op merge skips commit → orphan branch → worktree-fixes FR-5
-- Phase 1 is largest phase (9 cycles: session.py + merge.py + cli.py focus_session + phase4 MERGE_HEAD)
-- **Runbook generation blocked on workflow-improvements:** 3 process defects (behavioral vacuity detection, review integration, cross-reference verification) must land before `/runbook` expansion
-  - RCA: `workflow-improvements/plans/reports/rca-runbook-outline-review.md`
-  - Fixes needed in: `agents/decisions/runbook-review.md`, review-fix workflow, cross-reference verification
-- **Manual expansion bypasses plan-reviewer:** Phase 0 was hand-expanded outside `/runbook` pipeline → 5 defects from ungrounded confabulation. Always run plan-reviewer on expanded phase files.
-
-**All tasks with documentation must have in-tree file references.**
+- Phase 1 vet still needed before Phase 2 can start
+- Phase 3 SKILL.md edits must follow Phase 2 (automation code must exist before skill claims it)
+- **Do NOT use `/runbook` or `/orchestrate`** — pipeline is blocked on workflow-improvements. Execute directly:
+  - TDD phases: delegate to `tdd-task` agent with outline + design context (no expanded runbook needed)
+  - Skill edits: apply inline, then run `skill-reviewer` agent
+  - Phase 1 was executed from `runbook-outline.md` + `design.md` without expansion — same approach for Phase 2
 
 ## Reference Files
 
 - `plans/worktree-fixes/requirements.md` — 5 FRs (FR-3 dropped, FR-6 added)
-- `plans/worktree-fixes/design.md` — Design document (vetted, ready for runbook)
-- `plans/worktree-fixes/runbook-outline.md` — Runbook outline (reviewed, ready for expansion)
-- `plans/worktree-fixes/reports/explore-worktree-code.md` — Codebase exploration (function signatures, test patterns)
-- `plans/worktree-fixes/reports/design-review.md` — Design vet report (all issues fixed)
-- `plans/worktree-fixes/reports/runbook-outline-review.md` — Outline review round 1 (4 minor fixed)
-- `plans/worktree-fixes/reports/runbook-outline-review-2.md` — Outline review round 2 (5 minor fixed, 4 recommendations)
-- `workflow-improvements/plans/reports/rca-runbook-outline-review.md` — RCA: 3 systemic patterns in outline generation/review
+- `plans/worktree-fixes/design.md` — Design document
+- `plans/worktree-fixes/runbook-outline.md` — Runbook outline
+- `plans/worktree-fixes/runbook-phase-0.md` — Phase 0 expanded runbook
+- `plans/worktree-fixes/reports/phase-0-execution.md` — Phase 0 execution report
+- `plans/worktree-fixes/reports/phase-0-vet.md` — Phase 0 vet report
+- `plans/worktree-fixes/reports/phase-1-execution.md` — Phase 1 execution report
+- `plans/worktree-fixes/reports/explore-worktree-code.md` — Codebase exploration
 
 ## Next Steps
 
-Expand remaining phases (1–3), run plan-reviewer on each. Blocked on workflow-improvements for automated `/runbook` path.
+1. Vet Phase 1 (vet-fix-agent with scope: session.py, merge.py, cli.py focus_session, _phase4)
+2. Execute Phase 2: 10 TDD cycles (move_task_to_worktree, remove_worktree_task, CLI wiring)
+3. Phase 2 checkpoint (fix + vet + functional)
+4. Phase 3: SKILL.md prose edits inline + skill-reviewer
