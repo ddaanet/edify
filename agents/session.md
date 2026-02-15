@@ -1,30 +1,23 @@
 # Session Handoff: 2026-02-15
 
-**Status:** Memory index actionability improvements complete. 24 key renames, 18 removals, 4 additions across 12 files.
+**Status:** Design remember skill update — Phase A complete (outline reviewed), ready for Phase B discussion.
 
 ## Completed This Session
 
-**Memory index actionability improvements:**
-- 24 index entry keys renamed from root-cause/jargon to symptom-oriented phrasing (old keys preserved as pipe synonyms)
-  - Examples: `transformation table` → `choosing review gate`, `prose gates` → `prevent skill steps from being skipped`, `task names must be branch-suitable` → `naming tasks for worktrees`
-- 18 entries removed: 6 meta-index (about maintaining the index itself), 5 dead/archival, 4 dead, 3 dedup merges
-- 4 entries added: 2 for defense-in-depth.md (new semantic headings added), 1 deliverable-review.md expansion, dedup merges
-- 24 corresponding heading renames across 8 decision files (validator requires key-heading match)
-- 17 headings marked structural (`.` prefix) in 6 decision files for entries being removed
-- Report: `plans/reports/memory-index-actionability-review.md`
-- Precommit passes, all 855/856 tests pass (1 xfail)
-
-**Not addressed (remaining from original task):**
-- Frozen-domain passive recall mechanism — needs design, rule files unreliable per prior discussion
-- Enforce behavioral trigger framing at learning staging time — folded into new design task below
+**Design remember skill update — Phase A (outline):**
+- Exploration report pre-existed: `plans/remember-skill-update/reports/explore-remember-skill.md`
+- Wrote outline covering two workstreams: title-trigger alignment (3 enforcement layers) + frozen-domain recall analysis
+- Outline reviewed by outline-review-agent — 4 major, 5 minor fixes applied
+- User reviewed outline, 3 key decisions surfaced for Phase B discussion
+- Spinning off to worktree for continued design work
 
 ## Pending Tasks
 
-- [ ] **Design remember skill update** — `/design` based on index actionability findings | sonnet
-  - Trigger framing: enforce symptom-oriented keys at learning staging time (not `/when` format but behavioral trigger framing)
-  - Learning headers in learnings.md should conform to memory-index trigger constraints to prevent consolidation rephrasing
-  - Frozen-domain passive recall mechanism — explore alternatives to rule files (code comments, hooks)
-  - Input: this session's key renames as examples of good vs bad triggers
+- [ ] **Design remember skill update** — Resume `/design` Phase B (outline complete) | sonnet
+  - Outline: `plans/remember-skill-update/outline.md` (reviewed, ready for Phase B user discussion)
+  - Three concerns: trigger framing enforcement, title-trigger alignment, frozen-domain recall
+  - Key decisions pending: hyphen handling, agent duplication, frozen-domain priority
+  - Reports: `plans/remember-skill-update/reports/outline-review.md`, `plans/remember-skill-update/reports/explore-remember-skill.md`
 
 - [ ] **Organize plans/reports directory** — Separate persistent research from context-specific reports | sonnet
   - Currently 14 files mixing grounding research (reusable) with plan-specific reports (context-bound)
@@ -125,8 +118,8 @@
 
 ## Reference Files
 
+- `plans/remember-skill-update/outline.md` — Design outline (reviewed, Phase B ready)
+- `plans/remember-skill-update/reports/explore-remember-skill.md` — Full pipeline exploration
 - `plans/reports/memory-index-actionability-review.md` — Opus actionability review of all index entries
-- `plans/when-recall/reports/corpus-analysis.md` — Index corpus analysis (entry patterns, compatibility)
 - `plans/when-recall/reports/baseline-recall-analysis.md` — 2.9% baseline recall measurement
-- `plans/when-recall/design.md` — When-recall system design
 - `agents/decisions/deliverable-review.md` — Post-execution review methodology
