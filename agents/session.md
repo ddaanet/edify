@@ -1,14 +1,18 @@
 # Session Handoff: 2026-02-15
 
-**Status:** Fixed skill-loading directive gap in runbook skill.
+**Status:** Skill-loading fix committed. Workflow improvements task triaged.
 
 ## Completed This Session
 
-**Skill-loading directive fix:**
-- RCA: runbook SKILL.md Phase 0.5 consumed "Required reading" from design Documentation Perimeter but ignored "Skill-loading directives" subsection
-- Root cause: no instruction for planner to invoke listed skills (e.g., `/plugin-dev:skill-development`)
-- Fix: added directive consumption line to Phase 0.5 in `agent-core/skills/runbook/SKILL.md`
-- Investigation: `tmp/skill-autoload-investigation.md`
+**Skill-loading directive fix (committed: 3c81326):**
+- Runbook Phase 0.5 now consumes "Skill-loading directives" from design Documentation Perimeter
+- Root cause: planner read directive text but had no instruction to invoke listed skills
+- Fix: 1-line addition to `agent-core/skills/runbook/SKILL.md`
+
+**Workflow improvements currency review:**
+- Assessed all 8 sub-items against current codebase state
+- Dropped 2: fragments cleanup (superseded — no duplication found), investigation prerequisite rule (complete)
+- Report: `tmp/workflow-improvements-currency.md`
 
 ## Pending Tasks
 
@@ -26,14 +30,12 @@
   - Pattern used: orchestrator handled reviews from main session after agents committed
   - Fix: Update validation language to match orchestrator responsibility
 - [ ] **Workflow improvements** — Remaining sub-items not captured in workflow-rca-fixes | sonnet
-  - Orchestrate evolution — designed, stale Feb 10, refresh after RCA
-  - Fragments cleanup — remove fragments duplicating skills/workflow
-  - Reflect skill output — RCA should produce pending tasks, not inline fixes
+  - Orchestrate evolution — designed, ready for `/runbook` (design refreshed Feb 13)
+  - Reflect skill output — RCA should produce pending tasks, not inline fixes (3 exit paths exist, inline still default)
   - Tool-batching.md — add Task tool parallelization guidance with examples
-  - Orchestrator delegate resume — resume delegates with incomplete work
-  - Agent output optimization — remove summarize/report language from agents
-  - Investigation prerequisite rule review
-  - Commit skill optimizations — remove handoff gate, Gate B coverage ratio, branching after precommit
+  - Orchestrator delegate resume — resume delegates with incomplete work (no mechanism exists)
+  - Agent output optimization — remove summarize/report language from agents (scope unclear)
+  - Commit skill optimizations — remove handoff gate, Gate B coverage ratio, branching after precommit (needs clarification)
 - [ ] **Memory-index skill auto-sync** — Sync memory-index/SKILL.md from canonical agents/memory-index.md on consolidation | sonnet
   - Context: Deliverable review found skill drifted (3 entries missing, ordering wrong)
   - Hook into /remember consolidation flow or add precommit check
@@ -59,6 +61,10 @@
 - [ ] **Model tier awareness hook** — Hook injecting "Response by Opus/Sonnet/Haiku" into context | sonnet | restart
 - [ ] **Precommit validation improvements** — Expand precommit checks | sonnet
 - [ ] **Protocolize RED pass recovery** — Formalize orchestrator RED pass handling into orchestrate skill | sonnet
+- [ ] **Update vet requirement proportionality** — Trivial edits to existing artifacts shouldn't require full vet-fix-agent delegation | sonnet
+  - Context: 1-line bullet addition to runbook skill triggered full vet agent, user flagged as pointless
+  - Needs: proportionality threshold in vet-requirement.md fragment (e.g., trivial edits exempt)
+  - Also review Gate B in commit skill — same over-application pattern
 - [ ] **Upstream plugin-dev: document skills frontmatter** — PR/issue to official Claude Code plugin-dev plugin for missing `skills` field | sonnet
 
 ## Worktree Tasks
