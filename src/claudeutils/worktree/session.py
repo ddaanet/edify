@@ -129,7 +129,7 @@ def move_task_to_worktree(session_path: Path, task_name: str, slug: str) -> None
     content = session_path.read_text()
     lines = content.split("\n")
 
-    # Find and extract task from Pending Tasks
+    # Find and extract task from Pending Tasks (or check if already in Worktree Tasks)
     pending_blocks = extract_task_blocks(content, section="Pending Tasks")
     task_block = None
     for block in pending_blocks:
@@ -138,7 +138,12 @@ def move_task_to_worktree(session_path: Path, task_name: str, slug: str) -> None
             break
 
     if task_block is None:
-        msg = f"Task '{task_name}' not found in Pending Tasks"
+        # Check if task already in Worktree Tasks (idempotency)
+        worktree_blocks = extract_task_blocks(content, section="Worktree Tasks")
+        for block in worktree_blocks:
+            if block.name == task_name:
+                return
+        msg = f"Task '{task_name}' not found in Pending Tasks or Worktree Tasks"
         raise ValueError(msg)
 
     # Find the task block in the lines list to remove it
@@ -165,10 +170,9 @@ def move_task_to_worktree(session_path: Path, task_name: str, slug: str) -> None
         # Create Worktree Tasks section after Pending Tasks
         pending_bounds = find_section_bounds("\n".join(lines), "Pending Tasks")
         insert_idx = pending_bounds[1] if pending_bounds else len(lines)
-        lines.insert(insert_idx, "")
-        lines.insert(insert_idx + 1, "## Worktree Tasks")
-        lines.insert(insert_idx + 2, "")
-        insert_point = insert_idx + 3
+        lines.insert(insert_idx, "## Worktree Tasks")
+        lines.insert(insert_idx + 1, "")
+        insert_point = insert_idx + 2
     else:
         insert_point = worktree_bounds[1]
 
@@ -176,24 +180,27 @@ def move_task_to_worktree(session_path: Path, task_name: str, slug: str) -> None
     for line in modified_lines:
         lines.insert(insert_point, line)
         insert_point += 1
+    # Add blank line after task block
+    lines.insert(insert_point, "")
 
     session_path.write_text("\n".join(lines))
 
 
 def _find_git_root(start_path: Path) -> Path:
     """Find git repo root by searching for .git directory."""
-    current = start_path
+    current = start_path.resolve()
     while current != current.parent:
         if (current / ".git").exists():
             return current
         current = current.parent
-    return start_path
+    msg = f"No git repository found from {start_path}"
+    raise ValueError(msg)
 
 
-def _task_is_pending_in_branch(
+def _task_is_in_pending_section(
     task_name: str, worktree_branch: str, git_root: Path
 ) -> bool:
-    """Check if task is in worktree branch's Pending Tasks."""
+    """Check if task is in worktree branch's Pending Tasks section."""
     try:
         branch_content = subprocess.run(
             ["git", "show", f"{worktree_branch}:agents/session.md"],
@@ -242,13 +249,14 @@ def remove_worktree_task(session_path: Path, slug: str, worktree_branch: str) ->
 
     # Check if task still pending in branch
     git_root = _find_git_root(session_path.parent)
-    if _task_is_pending_in_branch(task_name, worktree_branch, git_root):
+    if _task_is_in_pending_section(task_name, worktree_branch, git_root):
         return
 
     # Task completed, remove from Worktree Tasks
+    # Find task block starting line by matching first line
     lines = content.split("\n")
     for i, line in enumerate(lines):
-        if line in task_block.lines:
+        if line == task_block.lines[0]:
             task_end_idx = i + len(task_block.lines)
             del lines[i:task_end_idx]
             break

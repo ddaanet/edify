@@ -287,7 +287,11 @@ def new(slug: str | None, base: str, session: str, task: str, session_md: str) -
             raise SystemExit(1)
         _setup_worktree(path, slug, base, session, task)
         if task:
-            move_task_to_worktree(Path(session_md), task, slug)
+            session_md_path = Path(session_md)
+            if not session_md_path.exists():
+                click.echo(f"Error: session.md not found at {session_md}", err=True)
+                raise SystemExit(1)
+            move_task_to_worktree(session_md_path, task, slug)
     finally:
         if temp_session_file:
             Path(temp_session_file).unlink(missing_ok=True)

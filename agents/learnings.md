@@ -11,3 +11,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Hookify rules add per-tool-call context bloat (session bloat)
 - Cost-benefit unclear: planning tokens for batching may exceed cached re-read savings
 - Pending exploration: contextual block with contract (batch-level hook rules)
+
+## Vet introduces path bugs
+- Anti-pattern: `_find_git_root()` traversing parents of relative `Path("agents")` — loop exits at `Path(".")` without checking it
+- Correct pattern: Always `.resolve()` paths before parent traversal in `_find_git_root()` and similar functions
+- Rationale: `Path(".").parent == Path(".")` terminates the while loop before checking cwd for `.git`
