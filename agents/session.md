@@ -77,8 +77,6 @@
 - [ ] **Error handling framework design** → `wt/error-handling` — Resume `/design` Phase B | opus
   - Blocked on: workflow improvements
   - Outline: `plans/error-handling/outline.md`
-- [ ] **Build pushback into conversation process** → `wt/pushback` — `/design plans/pushback/requirements.md` | opus
-  - Plan: pushback | Status: requirements
 - [ ] **Worktree fixes** → `worktree-fixes` — `/design plans/worktree-fixes/` | opus
   - Plan: worktree-fixes | Status: requirements
   - 6 FRs: task name constraints, precommit validation, migration, session merge blocks, merge commit fix, automate session edits
