@@ -1,30 +1,18 @@
 # Session Handoff: 2026-02-15
 
-**Status:** Reports organized, worktree-fixes merged, workflow-improvements merged.
+**Status:** workflow-improvements worktree merged to main.
 
 ## Completed This Session
 
-**Organized plans/reports directory:**
-- Moved 7 RCA reports → `plans/process-review/reports/` (plan that produced them)
-- Deleted 5 orphaned execution/debug reports (git history preserves)
-- `plans/reports/` now contains only shared research (2 files)
-- Updated all cross-references (session.md, internal RCA refs)
-
-**Merged worktree-fixes (25 TDD cycles, 4 phases, 5 FRs):**
-- `_worktree merge` only merged submodule — parent branch (19 commits) not merged
-- Manual recovery: recreated branch from `7305d24`, `git merge worktree-fixes`
-- `checkout --ours` on session files lost 2 learnings + 1 task — recovered manually
-- Renamed 7 task names to comply with new 25-char validation (FR-1)
-- 884 tests passing (24 new from worktree-fixes)
-
-**Merged workflow-improvements (workflow-rca-fixes: 20 FRs, 6 phases, 16 steps):**
-- Skill-loading directive fix in runbook skill
-- Skill composition via `skills:` frontmatter (6 agents updated)
-- Type-agnostic review in plan-reviewer and runbook-review.md
-- Vet 4-status taxonomy (FIXED/DEFERRED/OUT-OF-SCOPE/UNFIXABLE)
-- Outline review agent enhancements (growth/propagation/traceability)
-- Content edits: design skill, workflows-terminology, vet-requirement.md
-- 17 new learnings from worktree
+**Merged workflow-improvements worktree:**
+- `_worktree merge` only merged submodule (known bug) — manual parent merge required
+- Cleaned untracked file debris from partial merge attempts (sandbox + `.claude/` writes)
+- Resolved 4 session file conflicts: jobs.md, learnings.md, memory-index.md, session.md
+- Fixed 4 orphan memory-index entries (3 structural heading removals, 1 stale key update)
+- Integrated 7 new pending tasks and 17 new learnings from worktree
+- Added workflow-rca-fixes as complete in jobs.md (20 FRs, 6 phases, 16 steps)
+- Removed "Blocked on: workflow improvements" from error-handling worktree task
+- 884 tests passing, precommit OK
 
 ## Pending Tasks
 
@@ -155,6 +143,10 @@
 **Pushback S3 agreement momentum:**
 - Known limitation — prompt-level self-monitoring can't detect agreement momentum without persistent state across turns
 - Not pursuing further (arXiv 2509.21305 confirms sycophancy is mechanistically distinct)
+
+## Next Steps
+
+Review pending tasks list for next work item.
 
 ## Reference Files
 
