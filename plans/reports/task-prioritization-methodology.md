@@ -98,7 +98,7 @@ Three sub-dimensions, take the maximum:
 
 ## Job Size
 
-Estimated cost to advance the task to completion. Scored on Fibonacci scale (1, 2, 3, 5, 8, 13).
+Estimated cost to advance the task to completion. Scored on Fibonacci scale (1, 2, 3, 5, 8).
 
 Two sub-dimensions, summed:
 
@@ -115,6 +115,8 @@ Two sub-dimensions, summed:
 **Evidence source:** jobs.md status column.
 
 ### Context Recovery Cost
+
+Capped at 5 — recovery cost rarely warrants an 8; the highest practical cost is cross-session research.
 
 | Score | Criteria                                                                      |
 | ----- | ----------------------------------------------------------------------------- |
@@ -147,7 +149,7 @@ Tasks that modify their own execution path need special handling (manual verific
 
 Tasks with low conflict (no shared plan directory, no shared target files, no dependency) can run in concurrent worktrees.
 
-Conflict check: `diff <(task A target files) <(task B target files)` — empty diff = parallelizable.
+Conflict check: compare target file sets between tasks — empty intersection means parallelizable.
 
 ---
 
