@@ -21,9 +21,9 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Root cause: "Simple" classification creates execution mode that optimizes throughput by rationalizing away ALL friction, not just design-level ceremony
 - Fix: Design skill Simple path updated to say "Check for applicable skills and project recipes first, then execute directly"
 ## When orchestrator handles review delegation
-- Anti-pattern: Step validation sections say "Delegate to skill-reviewer" expecting execution agent to spawn plugin-dev agents
-- Correct pattern: Orchestrator delegates reviews from main session after execution agents commit
-- Rationale: Sub-agents can't spawn plugin-dev agents (skill-reviewer, agent-creator). Orchestrator has plugin-dev access, execution agents don't. Validation delegation is orchestrator responsibility, not execution agent responsibility.
+- Anti-pattern: Expecting execution agents to delegate review (to any reviewer, not just plugin-dev)
+- Correct pattern: Orchestrator delegates ALL reviews after execution agents commit
+- Rationale: (1) Sub-agents lack Task and Skill tools — cannot delegate to any reviewer. (2) All reviews must be delegated to prevent implementer bias — implementer never reviews own work. Domain-specific routing: vet-fix-agent (code), skill-reviewer (skills), agent-creator (agents), plan-reviewer (planning), vet-fix-agent + doc-writing skill (human docs). See artifact review routing table in pipeline-contracts.md.
 ## When deliverable review catches drift
 - Anti-pattern: Relying solely on per-step vet reviews for quality assurance
 - Correct pattern: Post-orchestration deliverable review catches inter-file consistency gaps (stale copies, broken references, missing cross-references) that per-step vet misses

@@ -148,6 +148,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 ## agents/decisions/pipeline-contracts.md
 
 /when choosing review gate | transformation table artifact type T1-T6 pipeline stages
+/when routing artifact review | reviewer per artifact type skill-reviewer agent-creator vet-fix orchestrator delegation
 /how review delegation scope template | scope IN OUT changed files requirements
 /when UNFIXABLE escalation | fix-all pattern grep UNFIXABLE stop escalate
 /when declaring phase type | tdd or general per-phase typing model expansion review

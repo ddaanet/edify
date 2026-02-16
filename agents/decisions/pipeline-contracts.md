@@ -13,6 +13,25 @@ Centralized I/O contracts for the design-to-deliverable pipeline. Authoritative 
 | T5 | Runbook → Step artifacts | runbook.md | steps/step-*.md, agent | Generation errors | prepare-runbook.py | Automated validation |
 | T6 | Steps → Implementation | step-*.md | Code/artifacts | Wrong behavior, stubs, drift | vet-fix-agent (checkpoints) | Scope IN/OUT, design alignment |
 
+## When Routing Artifact Review
+
+Per-step validation routes to domain-specific reviewers based on artifact type.
+
+| Artifact Type | Reviewer |
+|--------------|----------|
+| Code, tests | vet-fix-agent |
+| Skills (SKILL.md, references/) | skill-reviewer |
+| Agent definitions | agent-creator (review+autofix prompt) |
+| Design documents | design-vet-agent (opus) |
+| Planning artifacts (runbooks, phases) | plan-reviewer |
+| Human documentation (README, fragments) | vet-fix-agent + doc-writing skill (writing style guidance) |
+
+**Orchestrator handles all review delegation.** Sub-agents lack Task and Skill tools — they cannot delegate to any reviewer. All reviews must be delegated to prevent implementer bias (implementer never reviews own work). The execution agent commits; the orchestrator reads the validation section and delegates the review.
+
+**Fix pattern:** All reviewers apply all fixes (critical, major, minor). Caller greps for UNFIXABLE.
+
+**Cross-reference:** `agents/decisions/deliverable-review.md` defines review axes per artifact type.
+
 ## How To Review Delegation Scope Template
 
 Every review delegation must include execution context (per `agent-core/fragments/vet-requirement.md`):
