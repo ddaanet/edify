@@ -143,3 +143,33 @@ def _latest_commit(tree_path: Path) -> tuple[str, int]:
         timestamp = 0
 
     return (subject, timestamp)
+
+
+def _is_dirty(tree_path: Path) -> bool:
+    """Check if git worktree has uncommitted changes.
+
+    Args:
+        tree_path: Path to git repository
+
+    Returns:
+        True if there are uncommitted changes (modified tracked files), False otherwise.
+        Untracked files are ignored.
+    """
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(tree_path),
+            "status",
+            "--porcelain",
+            "--untracked-files=no",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        return False
+
+    return bool(result.stdout.strip())

@@ -7,6 +7,7 @@ from pathlib import Path
 from claudeutils.planstate.aggregation import (
     TreeInfo,
     _commits_since_handoff,
+    _is_dirty,
     _latest_commit,
     _parse_worktree_list,
 )
@@ -60,6 +61,65 @@ def test_main_tree_detection() -> None:
     # Third tree is worktree
     assert result[2].is_main is False
     assert result[2].slug == "worktree-2"
+
+
+def test_dirty_state_detection(tmp_path: Path) -> None:
+    """Detect dirty state using git status --porcelain --untracked-files=no."""
+    # Setup: Create git repo with clean state
+    repo_path = tmp_path / "test_repo"
+    repo_path.mkdir()
+    repo_str = str(repo_path)
+
+    subprocess.run(
+        ["git", "init"],
+        cwd=repo_str,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=repo_str,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test User"],
+        cwd=repo_str,
+        check=True,
+        capture_output=True,
+    )
+
+    # Create and commit tracked file
+    tracked_file = repo_path / "tracked.txt"
+    tracked_file.write_text("initial content\n")
+    subprocess.run(
+        ["git", "add", "tracked.txt"],
+        cwd=repo_str,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Initial commit"],
+        cwd=repo_str,
+        check=True,
+        capture_output=True,
+    )
+
+    # Clean state: should return False
+    result = _is_dirty(repo_path)
+    assert result is False
+
+    # Dirty state: modify tracked file without staging
+    tracked_file.write_text("modified content\n")
+    result = _is_dirty(repo_path)
+    assert result is True
+
+    # Untracked ignored: create untracked file, still False after reverting
+    tracked_file.write_text("initial content\n")
+    untracked_file = repo_path / "untracked.txt"
+    untracked_file.write_text("untracked content\n")
+    result = _is_dirty(repo_path)
+    assert result is False
 
 
 def test_git_metadata_helpers(tmp_path: Path) -> None:
