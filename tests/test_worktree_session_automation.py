@@ -72,6 +72,19 @@ def test_rm_calls_remove_worktree_task_before_branch_delete(
 - [ ] **Feature A** → `feature-a` — `/design` | haiku
 """
     session_file.write_text(session_content)
+    # Track session.md on main (matches production state)
+    subprocess.run(
+        ["git", "add", "agents/session.md"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "track session"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
 
     result = CliRunner().invoke(
         worktree, ["new", "feature-a", "--session", str(session_file)]
@@ -95,6 +108,14 @@ def test_rm_calls_remove_worktree_task_before_branch_delete(
     )
     subprocess.run(
         ["git", "-C", str(worktree_path), "commit", "-m", "mark task complete"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Merge branch so rm guard allows removal
+    subprocess.run(
+        ["git", "merge", "feature-a", "--no-edit"],
+        cwd=repo_path,
         check=True,
         capture_output=True,
     )
@@ -128,6 +149,19 @@ def test_rm_e2e_removes_completed_task_from_worktree_tasks(
 - [ ] **Complete the feature** → `complete-the-feature` — `/runbook` | haiku
 """
     session_file.write_text(session_content)
+    # Track session.md on main (matches production state)
+    subprocess.run(
+        ["git", "add", "agents/session.md"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "track session"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
 
     result = CliRunner().invoke(
         worktree, ["new", "complete-the-feature", "--session", str(session_file)]
@@ -159,9 +193,35 @@ def test_rm_e2e_removes_completed_task_from_worktree_tasks(
         capture_output=True,
     )
 
+    # Merge branch (--no-ff to preserve main's content in merge commit)
+    subprocess.run(
+        ["git", "merge", "complete-the-feature", "--no-ff", "--no-edit"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    # Restore main's session.md after merge (production merge command handles this;
+    # raw git merge does not)
+    task_line = (
+        "- [ ] **Complete the feature** → `complete-the-feature` — `/runbook` | haiku\n"
+    )
+    session_file.write_text(session_content.replace(task_line, ""))
+    subprocess.run(
+        ["git", "add", "agents/session.md"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "restore session after merge"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
     result = CliRunner().invoke(worktree, ["rm", "complete-the-feature"])
     assert result.exit_code == 0
-    assert "Removed worktree complete-the-feature" in result.output
+    assert "Removed complete-the-feature" in result.output
 
     final_session = session_file.read_text()
     assert "## Worktree Tasks" in final_session

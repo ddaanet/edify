@@ -101,7 +101,8 @@ def test_merge_submodule_fetch(
     ) -> MagicMock | object:
         if args and isinstance(args[0], list):
             cmd = args[0]
-            if "merge-base" in cmd:
+            if "merge-base" in cmd and "-C" in cmd and "agent-core" in cmd:
+                # Only intercept submodule merge-base, not parent validation
                 merge_base_calls.append(cmd)
                 result_obj = MagicMock()
                 result_obj.returncode = 1

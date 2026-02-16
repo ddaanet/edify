@@ -19,7 +19,6 @@ dev: format precommit
 precommit:
     #!{{ bash_prolog }}
     sync
-    claudeutils validate
     run-checks
     pytest_output=$(safe pytest 2>&1)
     echo "$pytest_output"

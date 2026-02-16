@@ -17,7 +17,16 @@ from claudeutils.worktree.session import (
     move_task_to_worktree,
     remove_worktree_task,
 )
-from claudeutils.worktree.utils import _git, wt_path
+from claudeutils.worktree.utils import (
+    _classify_branch,
+    _get_worktree_path_for_branch,
+    _git,
+    _is_branch_merged,
+    _parse_worktree_list,
+    _probe_registrations,
+    _remove_worktrees,
+    wt_path,
+)
 
 
 def derive_slug(task_name: str) -> str:
@@ -120,26 +129,6 @@ def initialize_environment(worktree_path: Path) -> None:
 @click.group(name="_worktree")
 def worktree() -> None:
     """Worktree commands."""
-
-
-def _parse_worktree_list(porcelain: str, main_path: str) -> list[tuple[str, str, str]]:
-    """Parse git worktree list --porcelain, exclude main."""
-    if not porcelain:
-        return []
-    lines, entries, i = porcelain.split("\n"), [], 0
-    while i < len(lines):
-        if not lines[i].startswith("worktree "):
-            i += 1
-            continue
-        path, branch, i = lines[i].split(maxsplit=1)[1], "", i + 1
-        while i < len(lines) and lines[i]:
-            if lines[i].startswith("branch "):
-                branch = lines[i].split(maxsplit=1)[1]
-            i += 1
-        i += 1
-        if path != main_path:
-            entries.append((Path(path).name, branch, path))
-    return entries
 
 
 @worktree.command()
@@ -307,36 +296,6 @@ def add_commit(files: tuple[str, ...]) -> None:
         click.echo(_git("commit", "-m", click.get_text_stream("stdin").read()))
 
 
-def _probe_registrations(worktree_path: Path) -> tuple[bool, bool]:
-    """Check parent and submodule worktree registration."""
-    parent_list = _git("worktree", "list", "--porcelain", check=False)
-    submodule_list = _git(
-        "-C", "agent-core", "worktree", "list", "--porcelain", check=False
-    )
-    parent_reg = str(worktree_path) in parent_list
-    submodule_reg = str(worktree_path / "agent-core") in submodule_list
-    return parent_reg, submodule_reg
-
-
-def _remove_worktrees(
-    worktree_path: Path,
-    parent_registered: bool,  # noqa: FBT001
-    submodule_registered: bool,  # noqa: FBT001
-) -> None:
-    """Remove worktrees (submodule first, force flag)."""
-    if submodule_registered:
-        _git(
-            "-C",
-            "agent-core",
-            "worktree",
-            "remove",
-            "--force",
-            str(worktree_path / "agent-core"),
-        )
-    if parent_registered:
-        _git("worktree", "remove", "--force", str(worktree_path))
-
-
 @worktree.command()
 @click.argument("slug")
 def merge(slug: str) -> None:
@@ -344,18 +303,69 @@ def merge(slug: str) -> None:
     merge_impl(slug)
 
 
+def _guard_branch_removal(slug: str) -> tuple[bool, str | None]:
+    """Check if branch can be removed safely.
+
+    Returns (branch_exists, removal_type) where removal_type is "merged",
+    "focused", or None (branch doesn't exist). Raises click.Abort for unmerged
+    real history or orphan branches.
+    """
+    branch_check = subprocess.run(
+        ["git", "rev-parse", "--verify", slug],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if branch_check.returncode != 0:
+        return False, None
+
+    if _is_branch_merged(slug):
+        return True, "merged"
+
+    count, is_focused = _classify_branch(slug)
+    if count == 1 and is_focused:
+        return True, "focused"
+
+    if count == 0:
+        click.echo(
+            f"Branch {slug} is orphaned (no common ancestor). Merge first.",
+            err=True,
+        )
+    else:
+        click.echo(
+            f"Branch {slug} has {count} unmerged commit(s). Merge first.",
+            err=True,
+        )
+    raise click.Abort
+
+
+def _delete_branch(slug: str, removal_type: str | None) -> None:
+    """Delete branch and emit success message."""
+    delete_flag = "-D" if removal_type == "focused" else "-d"
+    r = subprocess.run(
+        ["git", "branch", delete_flag, slug],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if r.returncode != 0 and "not found" not in r.stderr.lower():
+        click.echo(f"Branch {slug} deletion failed: {r.stderr.strip()}", err=True)
+
+
 @worktree.command()
 @click.argument("slug")
 def rm(slug: str) -> None:
     """Remove worktree and its branch."""
-    worktree_path = wt_path(slug)
+    branch_exists, removal_type = _guard_branch_removal(slug)
+
+    worktree_path = _get_worktree_path_for_branch(slug) or wt_path(slug)
     parent_reg, submodule_reg = _probe_registrations(worktree_path)
 
     if worktree_path.exists():
         status = _git("-C", str(worktree_path), "status", "--porcelain", check=False)
         if status:
-            count = len(status.strip().split("\n"))
-            click.echo(f"Warning: worktree has {count} uncommitted files")
+            n = len(status.strip().split("\n"))
+            click.echo(f"Warning: worktree has {n} uncommitted files")
 
     session_md_path = Path("agents/session.md")
     if session_md_path.exists():
@@ -363,20 +373,22 @@ def rm(slug: str) -> None:
 
     if parent_reg or submodule_reg:
         _remove_worktrees(worktree_path, parent_reg, submodule_reg)
-    else:
-        _git("worktree", "prune")
-
-    r = subprocess.run(
-        ["git", "branch", "-d", slug], capture_output=True, text=True, check=False
-    )
-    if r.returncode != 0 and "not found" not in r.stderr.lower():
-        click.echo(f"Branch {slug} has unmerged changes — use: git branch -D {slug}")
 
     if worktree_path.exists():
         shutil.rmtree(worktree_path)
+
+    _git("worktree", "prune")
 
     container = worktree_path.parent
     if container.exists() and not list(container.iterdir()):
         container.rmdir()
 
-    click.echo(f"Removed worktree {slug}")
+    if branch_exists:
+        _delete_branch(slug, removal_type)
+
+    if removal_type == "merged":
+        click.echo(f"Removed {slug}")
+    elif removal_type == "focused":
+        click.echo(f"Removed {slug} (focused session only)")
+    else:
+        click.echo(f"Removed worktree {slug}")

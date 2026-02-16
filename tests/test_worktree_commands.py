@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import _remove_worktrees, worktree
-from claudeutils.worktree.utils import wt_path
+from claudeutils.worktree.cli import worktree
+from claudeutils.worktree.utils import _remove_worktrees, wt_path
 
 
 def test_package_import() -> None:
@@ -394,6 +394,7 @@ def test_rm_safe_branch_deletion(
     )
 
     result = CliRunner().invoke(worktree, ["rm", "unmerged-slug"])
-    assert result.exit_code == 0
-    assert "Branch unmerged-slug has unmerged changes" in result.output
-    assert "git branch -D unmerged-slug" in result.output
+    assert result.exit_code == 1
+    assert "unmerged commit(s). Merge first." in result.output
+    # FR-5: no destructive suggestions
+    assert "git branch -D" not in result.output

@@ -59,3 +59,35 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Segment by origin. `p:` directives (n=29) distribute evenly (34.5% prepend). Workflow continuations dominate the prepend signal. Different insertion policies needed per origin type.
 - Evidence: Session scraping + git correlation across 337 sessions, 506 commits. Handoff skill says "append" but agents correctly override for both populations.
 - Implication: Handoff skill should say "insert at estimated priority position" not "append" — agents already exercise good judgment.
+## When running multi-reviewer diagnostics
+- Anti-pattern: Running a single reviewer and trusting all findings. Exploration agents produce false positives from over-reading (e.g., "line number wrong" when insertion point was correct); opus reviewers miss implementation-level issues (e.g., helper function return value semantics).
+- Correct pattern: Run 3+ independent reviewers in parallel (opus review, exploration, inline RCA against source code). Cross-reference findings — real issues appear in multiple or survive verification against source. False positives get filtered by disagreement.
+- Evidence: 3-way review of runbook-phase-1.md found 8 real issues (each reviewer found unique ones) and filtered 2 false positives. Exploration flagged "critical" line number issue that was correct; opus missed `_git()` return value issue only caught by reading source code directly.
+## When performing root cause analysis
+- Anti-pattern: Finding first cause and jumping to solution (e.g., "expansion has defects → add more review rounds")
+- Correct pattern: Multi-layer RCA with explicit stops between layers. L1: what are the symptoms? L2: what caused them? STOP. L3: why was that cause allowed? STOP. Only then does the fix address the cause, not the symptoms.
+- Evidence: Merge data loss RCA — L1: bugs in code. L2: haiku generated safety-critical code. L3: delegation model assigns by type not risk + no review gate covers behavioral safety. Fix: model floor for Tier 1 steps AND safety criteria in vet.
+## When building custom pipeline infrastructure
+- Anti-pattern: Building custom review/workflow infrastructure without checking what the platform already ships
+- Correct pattern: Inventory platform-provided plugins and features first. Build custom only for gaps. Anthropic ships 28 official plugins including code-review, feature-dev, security-guidance, commit-commands, claude-md-management.
+- Rationale: Custom infrastructure diverges from platform evolution. Official plugins get maintained, updated, and integrated. Reinvention wastes effort and creates maintenance burden.
+## When searching adjacent domains
+- Anti-pattern: Narrowing search to one domain after user feedback (e.g., "not security?" → drop all security searches). Interpreting correction as exclusion rather than asking for clarification.
+- Correct pattern: When user questions missing coverage ("not X?"), they may mean "why no X?" not "exclude X." Safety and security are adjacent — both warrant research even when the triggering incident is one or the other.
+- Evidence: User said "not security?" meaning "why aren't you searching for security too?" — interpreted as "this isn't about security" and dropped security entirely.
+## When git operation fails
+- Anti-pattern: Attributing git failure to a plausible-sounding restriction without reading the error message. Confabulated "git refuses to merge with active worktree" (false). Actual cause: untracked session.md on main would be overwritten by merge. Built reasoning chain on false premise, deleted test coverage to work around the non-existent limitation.
+- Correct pattern: Read actual error output. Reproduce with a minimal case before restructuring. Test failures that seem like infrastructure problems may reveal real production bugs — the test was correctly detecting that `new --session` leaves session.md untracked on main.
+- Deeper pattern: Confabulation served as license to stop investigating. A "can't be fixed" explanation converts a solvable problem into an unsolvable one, justifying coverage-reducing workarounds.
+## When selecting model for TDD execution
+- Anti-pattern: Assigning model by task type (execution = haiku) without considering reasoning complexity. Haiku over-implemented step 1-2, building guard logic meant for 6 subsequent steps.
+- Correct pattern: Assign model by complexity type: pattern complexity (regexp, wiring, flags) → haiku fine; state machine complexity (git ancestry, merge state) → sonnet minimum; synthesis complexity (trade-offs, architecture) → opus. Classification happens during /runbook expansion, not at orchestration time.
+- Related: TDD granularity doesn't help haiku — each step is "simple" but haiku can't stay within scope. Batching code+tests per phase at sonnet produces fewer, better tests with opus review.
+## When precommit fails
+- Anti-pattern: Rationalizing past precommit failure ("lint issues are pre-existing", "my changes are clean"). Deeper: `just precommit` was broken for 9 days (~845 commits) due to non-existent `claudeutils validate` command. No agent noticed because failure was rationalized or bypassed each time.
+- Correct pattern: Precommit is a gate. If it fails, fix before committing. A broken gate is worse than no gate — creates false confidence across all subsequent commits.
+- Systemic: No health check verifies gates themselves are functional. Pipeline assumes `just precommit` works. Silent breakage accumulates unverified commits.
+## When test setup steps fail
+- Anti-pattern: Using `subprocess.run(..., check=True, capture_output=True)` in test setup — CalledProcessError shows command and exit code but stderr is swallowed. Opaque failures invite confabulation.
+- Correct pattern: Test setup should produce self-diagnosing failures. Either use `check=False` + explicit assertion with stderr, or use a helper that surfaces stderr on failure.
+- Evidence: `git merge` failed with "untracked working tree files would be overwritten" but test only showed `CalledProcessError: exit status 1`.

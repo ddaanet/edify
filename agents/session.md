@@ -126,6 +126,18 @@
   - Opus review findings to incorporate during expansion: `plans/worktree-merge-data-loss/reports/runbook-outline-review-opus.md`
 - [ ] **Worktree skill adhoc mode** — Add mode for creating worktree from specific commit without task tracking | sonnet
 
+- [ ] **Explore Anthropic plugins** — Install all 28 official plugins, explore code-review/security-guidance/feature-dev/superpowers for safety+security relevance, map against custom pipeline | sonnet | restart
+  - Repo: `github.com/anthropics/claude-plugins-official`
+  - Focus: what's directly relevant to safety and security review
+  - Overlap analysis started in prior session — see git history
+- [ ] **Ground state-machine review criteria** — Research how to validate state coverage in plan review (model checking, state transition coverage) | opus
+- [ ] **Pre-merge untracked file fix** — `new --session` leaves session.md untracked on main, causing merge failure when branch tracks it. Either commit session.md during `new`, or handle in merge flow | sonnet
+- [ ] **Safety review expansion** — Implement pipeline changes from grounding research | opus
+  - Input: `plans/reports/safety-review-grounding.md`
+  - Scope: delegation.md model floor for Tier 1/2 steps, vet safety criteria S-1–S-6, vet security criteria Sec-1–Sec-4, deliverable review chain analysis C-1–C-3
+  - Depends on: Explore Anthropic plugins (don't build what Anthropic ships)
+- [ ] **Test diagnostic helper** — Replace `subprocess.run(..., check=True)` in test setup with helper that surfaces stderr on failure | sonnet
+
 ## Worktree Tasks
 
 - [ ] **Error handling design** → `error-handling-design` — Resume `/design` Phase B (outline review) then Phase C (full design) | opus

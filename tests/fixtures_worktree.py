@@ -1,4 +1,4 @@
-"""Worktree-specific pytest fixtures."""
+"""Worktree-specific pytest fixtures and helpers."""
 
 import subprocess
 from collections.abc import Callable
@@ -6,6 +6,79 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
+
+# ── Shared helpers (not fixtures, import directly) ──────────────────────
+
+
+def _run_git(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    """Run git command in repo."""
+    return subprocess.run(
+        ["git", *args],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def make_repo_with_branch(  # noqa: PLR0913
+    repo_dir: Path,
+    init_fn: Callable[[Path], None],
+    branch: str = "test-branch",
+    *,
+    files: dict[str, str] | None = None,
+    empty_msg: str | None = None,
+    n_commits: int = 0,
+    diverge: bool = False,
+    merge: bool = False,
+) -> None:
+    """Init repo, create branch with commits, optionally diverge/merge.
+
+    Default: one file commit ("file.txt") on branch.
+    """
+    repo_dir.mkdir(exist_ok=True)
+    if not (repo_dir / ".git").exists():
+        init_fn(repo_dir)
+    _run_git(repo_dir, "checkout", "-b", branch)
+    if empty_msg:
+        _run_git(repo_dir, "commit", "--allow-empty", "-m", empty_msg)
+    elif files:
+        for fname, content in files.items():
+            (repo_dir / fname).write_text(content)
+            _run_git(repo_dir, "add", fname)
+            _run_git(repo_dir, "commit", "-m", f"Add {fname}")
+    elif n_commits > 0:
+        for i in range(n_commits):
+            (repo_dir / f"file-{i}.txt").write_text(f"content {i}")
+            _run_git(repo_dir, "add", f"file-{i}.txt")
+            _run_git(repo_dir, "commit", "-m", f"Commit {i}")
+    else:
+        (repo_dir / "file.txt").write_text("branch content")
+        _run_git(repo_dir, "add", ".")
+        _run_git(repo_dir, "commit", "-m", "branch commit")
+    _run_git(repo_dir, "checkout", "main")
+    if diverge:
+        (repo_dir / "other.txt").write_text("main content")
+        _run_git(repo_dir, "add", ".")
+        _run_git(repo_dir, "commit", "-m", "main commit")
+    if merge:
+        _run_git(repo_dir, "merge", "--no-edit", branch)
+
+
+def add_worktree(repo_dir: Path, slug: str) -> Path:
+    """Create git worktree for slug, return worktree path."""
+    wt_dir = repo_dir / "wt" / slug
+    wt_dir.parent.mkdir(parents=True, exist_ok=True)
+    _run_git(repo_dir, "worktree", "add", str(wt_dir), slug)
+    return wt_dir
+
+
+def last_commit_subject(repo_dir: Path) -> str:
+    """Get the subject line of the last commit."""
+    return _run_git(repo_dir, "log", "-1", "--format=%s").stdout.strip()
+
+
+# ── Fixtures ────────────────────────────────────────────────────────────
 
 
 @pytest.fixture

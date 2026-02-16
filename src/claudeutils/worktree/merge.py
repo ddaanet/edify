@@ -1,12 +1,13 @@
 """Worktree merge operations."""
 
 import subprocess
+import sys
 from pathlib import Path
 
 import click
 
 from claudeutils.worktree.session import extract_task_blocks, find_section_bounds
-from claudeutils.worktree.utils import _git, wt_path
+from claudeutils.worktree.utils import _git, _is_branch_merged, wt_path
 
 
 def _check_clean_for_merge(
@@ -258,6 +259,35 @@ def _phase3_merge_parent(slug: str) -> None:
         raise SystemExit(1)
 
 
+def _validate_merge_result(slug: str) -> None:
+    """Validate merge result: verify slug is ancestor of HEAD.
+
+    Also emits diagnostic warning if HEAD has fewer than 2 parents.
+    """
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", slug, "HEAD"],
+        check=False,
+    )
+
+    if result.returncode != 0:
+        sys.stderr.write(f"Error: branch {slug} not fully merged\n")
+        raise SystemExit(2)
+
+    # Diagnostic: Check parent count
+    parent_output = subprocess.run(
+        ["git", "cat-file", "-p", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+
+    parent_count = len(
+        [line for line in parent_output.split("\n") if line.startswith("parent ")]
+    )
+    if parent_count < 2:
+        sys.stderr.write(f"Warning: merge commit has {parent_count} parent(s)\n")
+
+
 def _phase4_merge_commit_and_precommit(slug: str) -> None:
     """Phase 4: Commit merge and run precommit validation.
 
@@ -282,7 +312,19 @@ def _phase4_merge_commit_and_precommit(slug: str) -> None:
     if merge_in_progress:
         _git("commit", "--allow-empty", "-m", f"🔀 Merge {slug}")
     elif staged_check.returncode != 0:
+        if not _is_branch_merged(slug):
+            sys.stderr.write(
+                "Error: merge state lost — MERGE_HEAD absent, branch not merged\n"
+            )
+            raise SystemExit(2)
         _git("commit", "-m", f"🔀 Merge {slug}")
+    # No MERGE_HEAD, no staged changes
+    elif not _is_branch_merged(slug):
+        sys.stderr.write("Error: nothing to commit and branch not merged\n")
+        raise SystemExit(2)
+        # Branch is merged, nothing to commit — skip commit, continue to validation
+
+    _validate_merge_result(slug)
 
     precommit_result = subprocess.run(
         ["just", "precommit"],
