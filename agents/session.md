@@ -1,23 +1,34 @@
 # Session Handoff: 2026-02-16
 
-**Status:** Parallel worktrees set up for top 3 opus design tasks. Skill sandbox fix applied.
+**Status:** Vet proportionality merged. Commit skill allowlist fix applied. worktree-merge-data-loss blocked on lint debt. 4 worktrees active.
 
 ## Completed This Session
 
-**Worktree skill sandbox fix:**
-- Added `dangerouslyDisableSandbox: true` annotations to all mutation commands in SKILL.md (`new`, `merge`, `rm`)
-- Updated `agent-core/fragments/sandbox-exemptions.md` — corrected worktree section to document mutation bypass requirement
-- Root cause: `_worktree new` writes `.claude/settings.local.json` (sandbox allowlist), sandbox blocks it
+**Worktree skill fixes:**
+- Sandbox bypass annotations on all mutation commands (`new`, `merge`, `rm`) in SKILL.md and sandbox-exemptions.md
+- Mode C step 3: `_worktree rm` session.md cleanup now amends merge commit (not separate commit)
+
+**Vet proportionality (merged from worktree):**
+- Proportionality threshold in `vet-requirement.md` — self-review for ≤5 lines, ≤2 files, additive/corrective
+- Commit skill Gate B updated with trivial-edit path
+
+**Commit skill allowlist fix:**
+- Removed batched `exec/set-xeuo` patterns — individual Bash calls for permission allowlist compatibility
+- Added "one command per Bash call" constraint to Critical Constraints
+
+**worktree-merge-data-loss merge attempted, reverted:**
+- Merge succeeded but precommit failed: 70 ruff violations, 3 files over 400-line limit
+- `git reset --hard` to pre-merge state, worktree still active with branch intact
+- Lint debt must be fixed in worktree before next merge attempt
 
 **Parallel worktree setup:**
-- Created 3 worktrees for top independent opus tasks: vet-proportionality, error-handling-design, design-workwoods
-- Cleaned stale worktree debris (orphaned branches/directories from prior failed attempts in both parent and submodule)
-- Model tier correction: all 3 tasks are design-tier opus (vet proportionality was incorrectly sonnet — fragments are behavioral contracts)
+- Created worktrees for error-handling-design, design-workwoods, worktree-rm-amend
+- Cleaned stale debris from prior failed attempts (orphaned branches in parent + submodule)
+- Model tier corrections: fragment authoring and design recovery are opus, not sonnet
 
 ## Pending Tasks
 
 <!-- Priority order per plans/reports/prioritization-2026-02-16.md -->
-
 
 - [ ] **Remaining workflow items** — Sub-items not captured in workflow-rca-fixes | sonnet
   - Orchestrate evolution — designed, ready for `/runbook` (design refreshed Feb 13)
@@ -124,7 +135,6 @@
 
 ## Worktree Tasks
 
-
 - [ ] **Error handling design** → `error-handling-design` — Resume `/design` Phase B (outline review) then Phase C (full design) | opus
   - Outline: `plans/error-handling/outline.md`
   - Key decisions: D-1 CPS abort-and-record, D-2 task `[!]`/`[✗]` states, D-3 escalation acceptance criteria, D-5 rollback = revert to step start
@@ -137,6 +147,11 @@
   - Also address lint debt from worktree-merge-data-loss branch before merge
 
 ## Blockers / Gotchas
+
+**worktree-merge-data-loss blocked on lint debt:**
+- 70 ruff violations across 5 files, 3 files over 400-line limit
+- Merge reverted — branch intact at `worktree-merge-data-loss` worktree
+- Must fix in worktree, re-commit, then re-attempt merge
 
 **Diagnostic review methodology converging:**
 - Taxonomy, iteration protocol, priming template designed in conversation
@@ -160,7 +175,7 @@
 
 ## Next Steps
 
-3 opus worktrees active for parallel design work. Next in main: Remaining workflow items (sonnet).
+4 worktrees active. In main: Remaining workflow items (sonnet). worktree-merge-data-loss needs lint fixes before merge.
 
 ## Reference Files
 
