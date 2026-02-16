@@ -12,6 +12,10 @@
 
 **Estimated Complexity:** High (git interaction correctness requires real-repo tests)
 
+**Weak Orchestrator Metadata:**
+- Total Cycles: 7
+- Restart required: No
+
 ---
 
 ## Cycle 3.1: Parse `git worktree list --porcelain` output

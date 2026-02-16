@@ -17,6 +17,10 @@
 
 **Estimated Complexity:** Medium (validator + mechanical removals)
 
+**Weak Orchestrator Metadata:**
+- Total Steps: 11 (4 TDD cycles + 7 general steps)
+- Restart required: No
+
 ---
 
 ## TDD Portion (Cycles 6.1-6.4)
@@ -217,7 +221,7 @@
 
 ### Step 6.5: Create agents/plan-archive.md via jobs.md migration
 
-**Model:** **Opus** (synthesis task — writing meaningful summaries for 48 plans from git history)
+**Model:** Opus (synthesis task — writing meaningful summaries for 48 plans from git history)
 
 **Objective:** Migrate completed plans from jobs.md to rich archive format.
 
@@ -296,16 +300,15 @@ Read design skill Phase A.1 (research phase) to locate jobs.md loading.
 
 ---
 
-### Step 6.8: Remove non-code jobs.md references and delete file
+### Step 6.8: Remove non-code jobs.md references (CLAUDE.md, focus_session)
 
-**Model:** Haiku (mechanical removal — grep, delete lines, delete file)
+**Model:** Haiku (mechanical removal — grep, delete lines)
 
 **Files:**
 - `CLAUDE.md` - Remove @agents/jobs.md reference
-- `agents/jobs.md` - Delete file
 - Any focus_session() references (conditional)
 
-**Objective:** Remove all non-code jobs.md references and delete the file.
+**Objective:** Remove non-code, non-validator jobs.md references.
 
 **Implementation:**
 
@@ -315,16 +318,13 @@ Read design skill Phase A.1 (research phase) to locate jobs.md loading.
    - If not found or no jobs.md references: no action needed
 3. Verify plan-archive.md created and populated (Step 6.5 complete)
 4. Verify all consumers updated (Steps 6.6-6.7 complete)
-5. Delete agents/jobs.md
 
 **Expected Outcome:**
 - CLAUDE.md contains no jobs.md references
-- agents/jobs.md file no longer exists
 - focus_session() has no jobs.md references (or function doesn't exist)
 
 **Validation:**
 - Grep CLAUDE.md for "jobs.md" → no matches
-- `ls agents/jobs.md` → file not found
 - `rg "def focus_session.*jobs" --type py` → no matches
 
 ---
@@ -360,23 +360,28 @@ Read design skill Phase A.1 (research phase) to locate jobs.md loading.
 
 ---
 
-### Step 6.10: Remove all jobs.md references from merge.py
+### Step 6.10: Remove all jobs.md references from merge.py and delete jobs.md
 
-**Model:** Sonnet (code cleanup)
+**Model:** Sonnet (code cleanup + file deletion)
 
-**File:** `src/claudeutils/worktree/merge.py`
+**Files:**
+- `src/claudeutils/worktree/merge.py` - Remove jobs.md conflict resolution and exempt paths
+- `agents/jobs.md` - Delete file
 
-**Objective:** Remove jobs.md conflict resolution and exempt path references.
+**Objective:** Remove jobs.md conflict resolution, exempt path references, and delete the file.
 
 **Implementation:**
 
 1. Remove _resolve_jobs_md_conflict() function (lines 143-156)
 2. Remove call to _resolve_jobs_md_conflict() in _phase3_merge_parent() (line 251)
 3. Remove "agents/jobs.md" from exempt_paths set in _phase1_validate_clean_trees() (line 179)
+4. Delete agents/jobs.md (all validators and consumers already removed)
 
-**Expected Outcome:** No jobs.md references in merge.py.
+**Expected Outcome:** No jobs.md references in merge.py. agents/jobs.md deleted.
 
-**Validation:** Grep merge.py for "jobs" → no matches.
+**Validation:**
+- Grep merge.py for "jobs" → no matches
+- `ls agents/jobs.md` → file not found
 
 ---
 

@@ -12,7 +12,9 @@
 
 **Estimated Complexity:** Low-Medium (CLI output formatting with backward compatibility)
 
-**Total Steps:** 4 cycles
+**Weak Orchestrator Metadata:**
+- Total Cycles: 4
+- Restart required: No
 
 ---
 

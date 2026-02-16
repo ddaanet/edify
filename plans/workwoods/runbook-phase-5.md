@@ -17,6 +17,10 @@
 
 **Estimated Complexity:** High (merge refactor + coordinated skill edits)
 
+**Weak Orchestrator Metadata:**
+- Total Steps: 11 (8 TDD cycles + 3 general steps)
+- Restart required: No
+
 **CRITICAL: Verify worktree-merge-data-loss deployment before starting this phase.**
 
 ---

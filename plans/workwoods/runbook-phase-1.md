@@ -17,7 +17,7 @@
 **Estimated Complexity:** Medium (new module setup with clear requirements)
 
 **Weak Orchestrator Metadata:**
-- Total Steps: 5
+- Total Cycles: 5
 - Restart required: No
 
 ---
@@ -119,21 +119,13 @@
 **Approach:** Check highest priority first, set status on first match, continue collecting all artifacts
 
 **Changes:**
-- File: `src/claudeutils/planstate/__init__.py`
-  Action: Create module with public API exports (infer_state, list_plans)
-  Location hint: New file
-
-- File: `src/claudeutils/planstate/models.py`
-  Action: Define PlanState dataclass (name, status, next_action, gate, artifacts fields)
-  Location hint: New file
-
 - File: `src/claudeutils/planstate/inference.py`
   Action: Implement full artifact detection priority chain in infer_state()
-  Location hint: New file, check ready → planned → designed → requirements
+  Location hint: Existing file (from Cycle 1.1), check ready → planned → designed → requirements
 
 - File: `tests/test_planstate_inference.py`
-  Action: Create parametrized test with @pytest.mark.parametrize covering all 4 status levels
-  Location hint: New file, use tmp_path fixture
+  Action: Add parametrized test with @pytest.mark.parametrize covering all 4 status levels
+  Location hint: Existing file (from Cycle 1.1), use tmp_path fixture
 
 **Verify GREEN:** `pytest tests/test_planstate_inference.py::test_status_priority_detection -v`
 **Verify no regression:** `pytest tests/test_planstate_inference.py -v`
