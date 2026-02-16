@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-16
 
-**Status:** Merged parallel worktrees, discovered worktree merge data loss bug.
+**Status:** Worktree merge data loss design — outline complete through Phase B, ready for design generation.
 
 ## Completed This Session
 
@@ -12,13 +12,12 @@
 - handoff-memory-naming: trigger naming guidance added to handoff skill (d52d392)
 - review-runbook-delegation: artifact review routing table in pipeline-contracts.md, updated learning, memory-index entry (063add3, recovered in 1438fbc)
 
-**Worktree merge data loss — observed behavior:**
-- `claudeutils _worktree merge review-runbook-delegation` reported success (exit 0, "Precommit passed")
-- `git branch -D` reported "unmerged changes" on the branch
-- Parent repo files changed in worktree branch (pipeline-contracts.md, learnings.md, memory-index.md) were not present in main after merge
-- Submodule (agent-core) changes merged correctly
-- Cherry-pick of worktree branch tip (063add3) recovered the lost changes
-- handoff-memory-naming merge was unaffected (only changed agent-core + session.md)
+**Worktree merge data loss — design Phase A+B:**
+- Explored merge logic (`merge.py` 4-phase architecture) and git history (commit graph, DAG analysis)
+- Reports: `plans/worktree-merge-data-loss/reports/explore-merge-logic.md`, `explore-git-history.md`
+- Outline reviewed by outline-review-agent, iterated through Phase B discussion
+- Two root causes identified (see outline)
+- Outline: `plans/worktree-merge-data-loss/outline.md` — ready for Phase C (design generation)
 
 ## Pending Tasks
 
@@ -125,12 +124,12 @@
   - No hook reviewer exists; no doc reviewer exists (readme skill is creation, not review)
   - Precedent: agent-creator repurposed for review via prompting (`/when agent-creator reviews agents`)
 
-- [ ] **Worktree merge data loss** — Fix `_worktree merge` dropping parent repo changes | sonnet
-  - Observed: merge exits 0, submodule merged, parent repo files from worktree branch absent
-  - Observed: `git branch -D` reports "unmerged changes" after merge tool claims success
-  - Reproduction: worktree branch with changes in both agent-core/ and parent repo files
-  - Recovery was manual cherry-pick of branch tip (063add3 → 1438fbc)
-  - Do NOT guess at root cause — investigate `src/claudeutils/worktree/cli.py` merge logic
+- [ ] **Worktree merge data loss** — Resume `/design` Phase C (generate design) | sonnet
+  - Outline: `plans/worktree-merge-data-loss/outline.md` (Phase B complete)
+  - Two root causes: (1) merge doesn't include parent repo changes, (2) `rm` CLI suggests `git branch -D` which agents follow
+  - Three tracks: removal safety guard, skill update, merge correctness investigation
+  - Key decisions: D-1 focused-session detection via marker text, D-2 `rm` exit codes, D-3 no destructive instructions in CLI output
+  - Reports: `plans/worktree-merge-data-loss/reports/` (explore-merge-logic, explore-git-history, outline-review)
 
 
 
@@ -158,7 +157,7 @@
 
 ## Next Steps
 
-Worktree merge data loss or remember skill update.
+Worktree merge data loss Phase C (design generation) or remember skill update Phase B.
 
 ## Reference Files
 
