@@ -455,12 +455,9 @@ def rm(slug: str) -> None:
         container.rmdir()
 
     if branch_exists:
-        # Choose deletion flag based on removal type
         if removal_type == "focused":
-            # Force delete for focused-session-only branches
             delete_flag = "-D"
         else:
-            # Safe delete for merged branches
             delete_flag = "-d"
 
         r = subprocess.run(
