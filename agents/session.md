@@ -18,6 +18,7 @@
 
 <!-- Priority order per plans/reports/prioritization-2026-02-16.md -->
 
+
 - [ ] **Remaining workflow items** — Sub-items not captured in workflow-rca-fixes | sonnet
   - Orchestrate evolution — designed, ready for `/runbook` (design refreshed Feb 13)
   - Reflect skill output — RCA should produce pending tasks, not inline fixes
@@ -130,6 +131,10 @@
 
 - [ ] **Design workwoods** → `design-workwoods` — `/design plans/workwoods/requirements.md` | opus
   - Plan: workwoods | Status: requirements
+
+- [ ] **Worktree rm amend** → `worktree-rm-amend` — Script amend into `_worktree rm` when HEAD is merge commit | `/design` | sonnet
+  - Option B from discussion: rm detects merge commit via parent count, stages+amends session.md
+  - Also address lint debt from worktree-merge-data-loss branch before merge
 
 ## Blockers / Gotchas
 
