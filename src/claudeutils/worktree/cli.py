@@ -339,9 +339,8 @@ def _remove_worktrees(
 
 def _is_merge_commit() -> bool:
     """Return True if HEAD is a merge commit (has 2+ parents)."""
-    output = _git("rev-list", "--parents", "-n", "1", "HEAD")
-    parts = output.split()
-    # Output: "<commit> <parent1> [<parent2> ...]" — need 3+ parts for merge
+    # rev-list --parents: "<commit> <parent1> [<parent2> ...]"
+    parts = _git("rev-list", "--parents", "-n", "1", "HEAD").split()
     return len(parts) >= 3
 
 
@@ -369,8 +368,6 @@ def rm(slug: str) -> None:
     session_md_path = Path("agents/session.md")
     if session_md_path.exists():
         remove_worktree_task(session_md_path, slug, slug)
-
-        # If HEAD is a merge commit and session.md was modified, amend it
         if _is_merge_commit():
             status_output = _git(
                 "status", "--porcelain", "agents/session.md", check=False

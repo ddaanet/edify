@@ -177,13 +177,6 @@ def test_rm_amends_merge_commit_when_session_modified(
 
     # Verify we're on a merge commit
     assert _is_merge_commit()
-    # Get parent commits to verify merge structure is preserved
-    subprocess.run(
-        ["git", "rev-list", "--parents", "-n", "1", "HEAD"],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout.strip().split()
     merge_msg = subprocess.run(
         ["git", "log", "-1", "--format=%B"],
         capture_output=True,
@@ -247,9 +240,6 @@ def test_rm_does_not_amend_on_normal_commit(
 
     # HEAD is a normal commit (1 parent, not merge)
     assert not _is_merge_commit()
-    subprocess.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
-    ).stdout.strip()
 
     # Create worktree and remove it
     worktree_path = _create_worktree(repo_path, "test-feature", init_repo)
@@ -259,33 +249,7 @@ def test_rm_does_not_amend_on_normal_commit(
     result = runner.invoke(worktree, ["rm", "test-feature"])
     assert result.exit_code == 0
 
-    # HEAD should have CHANGED (new commit from worktree creation, not amended)
-    # Key: session.md modification should be left unstaged, not amended
-    subprocess.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
-    ).stdout.strip()
-
-    # If amend happened incorrectly, HEAD would change from the worktree-creation commit
-    # Verify session.md is modified but NOT committed (left as working tree change)
-    subprocess.run(
-        ["git", "status", "--porcelain", "agents/session.md"],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout.strip()
-    # Should be modified in working tree (M) if task was removed, or empty if not
-    # The key assertion: no amend happened (commit count didn't change unexpectedly)
-    int(
-        subprocess.run(
-            ["git", "rev-list", "--count", "HEAD"],
-            capture_output=True,
-            text=True,
-            check=True,
-        ).stdout.strip()
-    )
-    # init (1) + "Add session" (2) + worktree creation commit (3)
-    # If amend happened, count would still be 3 but HEAD hash would differ
-    # from post-worktree-creation state — but that's hard to test precisely.
+    # If amend happened incorrectly, the task removal would be in HEAD commit
     # Instead, verify session.md in HEAD still has the task (was NOT amended in)
     session_in_head = subprocess.run(
         ["git", "show", "HEAD:agents/session.md"],

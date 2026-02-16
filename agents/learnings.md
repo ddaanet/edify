@@ -59,3 +59,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Segment by origin. `p:` directives (n=29) distribute evenly (34.5% prepend). Workflow continuations dominate the prepend signal. Different insertion policies needed per origin type.
 - Evidence: Session scraping + git correlation across 337 sessions, 506 commits. Handoff skill says "append" but agents correctly override for both populations.
 - Implication: Handoff skill should say "insert at estimated priority position" not "append" — agents already exercise good judgment.
+## When delegating safety-critical code
+- Anti-pattern: Trusting haiku to implement off-by-one-sensitive logic without verification. `_is_merge_commit()` used `len(parts) >= 2` — correct for the root-commit test case but wrong for every normal commit (rev-list output includes the commit hash itself, so 1-parent commit has 2 parts).
+- Correct pattern: Verify haiku's implementation of index/count logic. Ensure tests cover the **common case** (normal commit with 1 parent), not just edge cases (root commit with 0 parents). The test that passed was testing the wrong boundary.
+- Evidence: Would have amended every non-root commit during `rm`, not just merge commits. Test only caught root vs merge, missing the most frequent case.
+- Fix: `>= 2` → `>= 3`, added `test_rm_does_not_amend_on_normal_commit` negative test.
