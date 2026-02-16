@@ -3,6 +3,7 @@
 Parsing and combining planning artifacts.
 """
 
+from pathlib import Path
 from typing import NamedTuple
 
 
@@ -11,6 +12,8 @@ class TreeInfo(NamedTuple):
 
     path: str
     branch: str
+    is_main: bool
+    slug: str | None
 
 
 def _parse_worktree_list(output: str) -> list[TreeInfo]:
@@ -20,10 +23,12 @@ def _parse_worktree_list(output: str) -> list[TreeInfo]:
         output: git worktree list --porcelain format output
 
     Returns:
-        List of TreeInfo objects with path and branch fields.
+        List of TreeInfo objects with path, branch, is_main, and slug fields.
         Branch ref is stripped of "refs/heads/" prefix.
+        First tree is marked as main (is_main=True, slug=None).
+        Other trees have is_main=False and slug extracted from path basename.
     """
-    result = []
+    trees = []
     lines = output.split("\n")
 
     current_path = None
@@ -40,8 +45,18 @@ def _parse_worktree_list(output: str) -> list[TreeInfo]:
             else:
                 current_branch = ref
         elif line == "" and current_path is not None and current_branch is not None:
-            result.append(TreeInfo(path=current_path, branch=current_branch))
+            trees.append((current_path, current_branch))
             current_path = None
             current_branch = None
+
+    result = []
+    for idx, (path, branch) in enumerate(trees):
+        if idx == 0:
+            # First tree is main
+            result.append(TreeInfo(path=path, branch=branch, is_main=True, slug=None))
+        else:
+            # Other trees have slug extracted from path basename
+            slug = Path(path).name
+            result.append(TreeInfo(path=path, branch=branch, is_main=False, slug=slug))
 
     return result
