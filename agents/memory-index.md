@@ -18,6 +18,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 
 
 
+
 ## agents/decisions/cli.md
 
 /when getting current working directory
@@ -101,8 +102,8 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when background agents crash | check output files recovery
 /when refactoring agents need quality directives | deslop factorization
 /when exploration agents report false findings | verify file existence
-/when diagnosing review agent quality gaps | 2x2 experiment model tier input content controlled test
 /when scrubbing learnings before design input | validate against evidence
+/when diagnosing review agent quality gaps | 2x2 experiment model tier input content controlled test
 /when temporal validation required for analysis | git history correlation
 /when no-op merge orphans branch | always create merge commit
 /when naming tasks for worktrees | branch-suitable alphanumeric constraint
