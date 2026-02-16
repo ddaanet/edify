@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-16
 
-**Status:** Workwoods runbook planning complete — 6 phases written, 4/6 reviews passed.
+**Status:** Workwoods runbook planning complete — 6 phases written, all reviews passed.
 
 ## Completed This Session
 
@@ -16,19 +16,13 @@
   - Phase 4: wt-ls CLI upgrade (6 TDD cycles) → 5baf2a3
   - Phase 5: Merge strategies + skill update (10 TDD cycles + 3 general steps) → 6616840
   - Phase 6: jobs.md elimination + archive (6 TDD cycles + 9 general steps) → 327f30f
-- Phase reviews: 1-4 complete, all show 0 unfixable issues
-- Phase reviews: 5-6 running in background (agents acf5aae, abbb0e9)
+- Phase reviews: All 6 complete, 0 unfixable issues across all reports
 
 **Prior sessions:**
 - Design Phase C: Generated design.md, design-vet-agent review passed (9bb995a)
 - Phase A+B: Outline + discussion rounds, 8 decisions converged (b514cd0)
 
 ## Pending Tasks
-
-- [ ] **Check Phase 5-6 reviews** — Verify no UNFIXABLE issues | sonnet
-  - Reports: `plans/workwoods/reports/phase-5-review.md`, `phase-6-review.md`
-  - Agents: acf5aae (Phase 5), abbb0e9 (Phase 6)
-  - Expected: 0 unfixable (Phases 1-4 all passed)
 
 - [ ] **Prepare workwoods** — Run prepare-runbook.py to create execution files | sonnet
   - Command: `agent-core/bin/prepare-runbook.py plans/workwoods/` (requires `dangerouslyDisableSandbox: true`)
@@ -56,10 +50,7 @@
 
 ## Next Steps
 
-1. Read Phase 5-6 review reports when background agents complete
-2. Grep reports for "UNFIXABLE" — if found, escalate; if none, proceed
-3. Run `agent-core/bin/prepare-runbook.py plans/workwoods/` with sandbox bypass
-4. Restart session, paste `/orchestrate workwoods` from clipboard
+Run `agent-core/bin/prepare-runbook.py plans/workwoods/` with sandbox bypass, then restart and `/orchestrate workwoods`.
 
 ---
 *Handoff by Sonnet. Runbook planning complete, ready for prepare-runbook.py.*
