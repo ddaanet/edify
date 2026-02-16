@@ -5,31 +5,54 @@ from pathlib import Path
 from .models import PlanState
 
 
+def _collect_artifacts(plan_dir: Path) -> set[str]:
+    """Collect all recognized artifacts in the plan directory."""
+    artifacts = set()
+
+    # Baseline artifacts
+    for filename in ["requirements.md", "design.md", "outline.md", "problem.md"]:
+        if (plan_dir / filename).exists():
+            artifacts.add(filename)
+
+    # Runbook phase files
+    for phase_file in sorted(plan_dir.glob("runbook-phase-*.md")):
+        artifacts.add(phase_file.name)
+
+    # Ready-state artifacts
+    if (plan_dir / "steps").is_dir():
+        artifacts.add("steps")
+    if (plan_dir / "orchestrator-plan.md").exists():
+        artifacts.add("orchestrator-plan.md")
+
+    return artifacts
+
+
+def _determine_status(plan_dir: Path) -> str:
+    """Determine status by priority: ready > planned > designed > requirements."""
+    if (plan_dir / "steps").is_dir() and (plan_dir / "orchestrator-plan.md").exists():
+        return "ready"
+    if list(plan_dir.glob("runbook-phase-*.md")):
+        return "planned"
+    if (plan_dir / "design.md").exists():
+        return "designed"
+    return "requirements"
+
+
 def infer_state(plan_dir: Path) -> PlanState | None:
     """Infer plan state from directory artifacts.
 
     Scans for recognized artifacts and returns PlanState or None if no artifacts
-    found.
+    found. Status priority: ready > planned > designed > requirements
     """
     if not plan_dir.exists():
         return None
 
-    artifacts = set()
-
-    if (plan_dir / "requirements.md").exists():
-        artifacts.add("requirements.md")
-    if (plan_dir / "design.md").exists():
-        artifacts.add("design.md")
-    if (plan_dir / "outline.md").exists():
-        artifacts.add("outline.md")
-    if (plan_dir / "problem.md").exists():
-        artifacts.add("problem.md")
-
+    artifacts = _collect_artifacts(plan_dir)
     if not artifacts:
         return None
 
     name = plan_dir.name
-    status = "requirements"
+    status = _determine_status(plan_dir)
     next_action = f"/design plans/{name}/requirements.md"
 
     return PlanState(
