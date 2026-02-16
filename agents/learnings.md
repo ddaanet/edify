@@ -95,3 +95,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Assigning sonnet/haiku to prose edits on skills, fragments, and agent definitions based on "edit complexity" rather than artifact type
 - Correct pattern: Apply design-decisions.md directive: "Workflow/skill/agent edits: opus required." Prose instructions consumed by LLMs require nuanced understanding — wording directly determines downstream agent behavior
 - Evidence: Tier 2 plan assigned sonnet to skill/fragment edits, haiku to agent audit. User corrected: all were prose edits to architectural artifacts requiring opus
+## When placing quality gates
+- Anti-pattern: Ambient rules in always-loaded fragments (vet-requirement.md) telling agents to review artifacts. Unenforceable — agents rationalize skipping under momentum. Sub-agents don't see CLAUDE.md fragments at all.
+- Correct pattern: Gate at the chokepoint (commit). Scripted check (file classification + report existence) blocks mechanically. No judgment needed at the gate. Orchestrator handles mid-pipeline vet delegation separately.
+- Rationale: Ambient rules without enforcement are aspirational. Gating at commit captures all work. ~100 lines of always-loaded context eliminated for no behavioral loss.

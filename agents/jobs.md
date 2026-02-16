@@ -32,6 +32,7 @@ Plan lifecycle tracking. Updated when plans change status.
 Use `git log --all --online -- plans/<name>/` to find commits, `git show <hash>:<path>` to retrieve files.
 
 **Recent:**
+- `remaining-workflow-items` — 5 FRs: reflect task output, tool-batching, delegate resume, agent output, commit simplification
 - `worktree-merge-data-loss` — Removal guard + merge correctness (13 TDD cycles, deliverable review)
 - `grounding-skill` — Ground skill with diverge-converge research procedure
 - `pushback` — Two-layer anti-sycophancy: fragment + hook, S1/S2/S4 validated

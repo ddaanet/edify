@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-16
 
-**Status:** 2 worktrees merged (merge-data-loss, rm-amend). Deliverable review complete. 3 worktrees active. Backlog re-scored (27 tasks).
+**Status:** 3 worktrees merged (merge-data-loss, rm-amend, remaining-workflow-items). 2 worktrees active. Vet gate discussion: script Gate B, remove ambient vet fragment.
 
 ## Completed This Session
 
@@ -29,6 +29,16 @@
 - Conflict: SKILL.md Gate A/B — branch deleted both, kept Gate B from main with proportionality update
 - Artifacts: `plans/remaining-workflow-items/requirements.md`, `plans/remaining-workflow-items/reports/vet-review.md`
 
+**Vet gate discussion (design decision):**
+- Commit Gate A (session freshness) removed — handoff timing is user's decision
+- Commit Gate B (vet checkpoint) kept but should be scripted (file classification + report existence check)
+- Ambient vet requirement (`vet-requirement.md` fragment in CLAUDE.md) should be removed:
+  - Unenforceable (aspirational rule, no gating mechanism)
+  - Sub-agents don't see CLAUDE.md fragments — only fires in main session
+  - Redundant: orchestrator handles vet via pipeline-contracts.md, commit gate catches interactive work
+  - ~100 lines loaded every session for no enforcement value
+- Execution context template + UNFIXABLE protocol → move to on-demand reference (memory index)
+
 ## Pending Tasks
 
 <!-- Priority order per plans/reports/prioritization-2026-02-16.md (rev 2) -->
@@ -43,6 +53,10 @@
   - Plan: plugin-migration | Status: planned (stale — Feb 9)
   - Recovery: design.md architecture valid, outline Phases 0-3/5-6 recoverable, Phase 4 needs rewrite against post-worktree-update justfile, expanded phases need regeneration
   - Drift: 19 skills (was 16), 14 agents (was 12), justfile +250 lines rewritten
+
+- [ ] **Script commit vet gate** — Replace prose Gate B with scripted check (file classification + vet report existence) | sonnet
+  - Part of commit skill optimization (FR-5 partially landed — Gate A removed, Gate B still prose)
+  - Also: remove `vet-requirement.md` from CLAUDE.md `@`-references, move execution context template to memory index
 
 - [ ] **Commit CLI tool** — CLI for precommit/stage/commit across both modules | `/design` | sonnet
   - Modeled on worktree CLI pattern (mechanical ops in CLI, judgment in skill)
@@ -173,7 +187,7 @@
 
 ## Next Steps
 
-Next: Address merge data loss review (sonnet). 2 worktrees active (error-handling-design, design-workwoods). Learnings at 95/80 lines — run `/remember` soon.
+Next: Address merge data loss review (sonnet). 2 worktrees active (error-handling-design, design-workwoods). Learnings at 97/80 lines — run `/remember` soon.
 
 ## Reference Files
 
