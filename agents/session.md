@@ -133,6 +133,14 @@
 - [ ] **Workflow formal analysis** — Formal verification of agent workflow | `/requirements` then `/design` | opus
   - Candidates: TLA+ (temporal), Alloy (structural), Petri nets (visual flow)
 
+- [ ] **Design-to-deliverable** — Design session for tmux-like session clear/model switch/restart automation | opus | restart
+- [ ] **Expand runbook** — `/runbook plans/worktree-merge-data-loss/design.md` | sonnet
+  - Outline reviewed and fixed, ready for full phase expansion
+  - Phase 1: 13 TDD cycles (Track 1 removal guard + Track 2 merge correctness), haiku execution
+  - Phase 2: 1 general step (SKILL.md Mode C), haiku execution
+  - Opus review findings to incorporate during expansion: `plans/worktree-merge-data-loss/reports/runbook-outline-review-opus.md`
+- [ ] **Worktree skill adhoc mode** — Add mode for creating worktree from specific commit without task tracking | sonnet
+
 ## Worktree Tasks
 
 - [ ] **Worktree merge data loss** → `worktree-merge-data-loss` — Resume `/design` Phase C (generate design) | sonnet

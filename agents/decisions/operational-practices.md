@@ -60,6 +60,49 @@ Agent reliability patterns, artifact management, implementation practices, and k
 
 **Rationale:** Learnings are session-scoped observations, not verified invariants — can be stale or wrong.
 
+### When Diagnosing Review Agent Quality Gaps
+
+**Decision Date:** 2026-02-16
+
+**Problem:** Review agent produces defective fixes. Need to isolate whether the cause is model tier, input content, delegation prompt, or agent instructions.
+
+**Diagnostic procedure (2×2 controlled experiment):**
+
+1. **Identify the defect** in the review agent's output. Note the specific confabulation or error.
+
+2. **Recover the pre-review artifact** from git history (`git show <commit>:<path>`). This is the input the review agent received.
+
+3. **Create test worktrees** at the pre-review commit (`just wt-new <name> <commit>`). One per experimental condition.
+
+4. **Run the review at the alternate model tier** (e.g., opus if original was sonnet). Use the same agent type. Compare: does the alternate model avoid the defect?
+
+5. **Run the original model on the alternate artifact** (cross condition). If the original outline was sonnet-generated, run sonnet review on opus-generated outline. Isolates input content as a variable.
+
+6. **Extract delegation prompts** from session transcripts to control for prompt quality:
+   ```python
+   # Parse .jsonl session file for Task tool calls
+   for msg in session:
+       for block in msg.content:
+           if block.type == 'tool_use' and block.name == 'Task':
+               print(block.input.prompt)
+   ```
+   Session files at `~/.claude/projects/<project-path>/<session-id>.jsonl`.
+
+7. **Analyze the 2×2 matrix:**
+
+   | | Model A review | Model B review |
+   |---|---|---|
+   | **Model A input** | original | controlled |
+   | **Model B input** | controlled | controlled |
+
+   - Column difference = model tier effect
+   - Row difference = input content effect
+   - Prompt comparison = delegation quality effect (eliminated if equivalent)
+
+**Artifacts to preserve:** Commit test worktree results before cleanup. Merge test branches with `--no-ff` then revert changes to preserve commit history without polluting the working tree.
+
+**When to apply:** After interactive review catches defects that automated review missed. The diagnostic determines whether to change model tier, agent instructions, or both.
+
 ## .Architectural Principles
 
 ### When Temporal Validation Required For Analysis

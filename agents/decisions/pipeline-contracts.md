@@ -7,7 +7,7 @@ Centralized I/O contracts for the design-to-deliverable pipeline. Authoritative 
 | # | Transformation | Input | Output | Defect Types | Review Gate | Review Criteria |
 |---|---------------|-------|--------|-------------|-------------|----------------|
 | T1 | Requirements → Design | requirements.md or inline | design.md | Incomplete, infeasible | design-vet-agent (opus) | Architecture, feasibility, completeness |
-| T2 | Design → Outline | design.md | runbook-outline.md | Missing reqs, wrong decomposition | runbook-outline-review-agent | Requirements coverage, phase structure, LLM failure modes |
+| T2 | Design → Outline | design.md | runbook-outline.md | Missing reqs, wrong decomposition, ungrounded corrections | runbook-outline-review-agent (opus) | Requirements coverage, phase structure, LLM failure modes |
 | T3 | Outline → Phase files | runbook-outline.md | runbook-phase-N.md | Vacuity, prescriptive code, density | plan-reviewer | Type-aware: TDD discipline + general quality + LLM failure modes |
 | T4 | Phase files → Runbook | runbook-phase-*.md | runbook.md | Cross-phase inconsistency | plan-reviewer (holistic) | Cross-phase consistency, numbering, metadata |
 | T5 | Runbook → Step artifacts | runbook.md | steps/step-*.md, agent | Generation errors | prepare-runbook.py | Automated validation |
@@ -126,3 +126,23 @@ Type does NOT affect: tier assessment, outline generation, consolidation gates, 
 **Root cause:** plan-reviewer checks TDD discipline but not LLM failure modes after expansion.
 
 **Gap:** Outline checks → expansion → phase review (TDD only) → no LLM failure mode re-validation.
+
+## When Outline Review Produces Ungrounded Corrections
+
+**Decision Date:** 2026-02-16
+
+**Decision:** Outline review agent runs at opus (was sonnet). Added grounding constraint to fix-all policy.
+
+**Problem:** Sonnet review agent's fix-all policy generates plausible but ungrounded corrections — confabulated operation sequences, removed design-specified features, fabricated file sizes.
+
+**Evidence:** 2x2 controlled experiment (generator × reviewer model):
+- Sonnet review on sonnet outline: confabulated rm() operation list contradicting design flow diagram
+- Sonnet review on opus outline: removed design-specified diagnostic logging as "vacuous", fabricated utils.py size (150 vs actual 38 lines)
+- Opus review on both outlines: grounded in source material, no confabulations
+- Delegation prompts: structurally equivalent across all conditions (eliminated as variable)
+
+**Root cause:** Sonnet identifies non-problems as problems ("vague integration guidance" when design has the detail), then confabulates fixes. The outline is a structural document that references the design; the review agent treated it as standalone.
+
+**Fix:** (1) Model tier: opus for outline review — once per plan, errors propagate to all execution steps. (2) Grounding constraint: expansion guidance must reference design sections, not reproduce implementation detail.
+
+**Experimental branches:** `runbook-opus-test` (opus generation + opus review), `runbook-sonnet-test` (opus generation + sonnet review). Session transcript: `6f7636e0-2455-406b-bc2b-49bd74b98db1`.
