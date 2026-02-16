@@ -272,3 +272,155 @@ def test_classify_orphan_branch(
     count, is_focused = _classify_branch("orphan-test")
     assert count == 0, f"Expected count=0 for orphan branch but got {count}"
     assert is_focused is False, f"Expected is_focused=False but got {is_focused}"
+
+
+def test_rm_refuses_unmerged_real_history(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Verify rm refuses unmerged branches with real history.
+
+    Tests that worktree rm refuses to remove branches with unmerged commits
+    (not just focused-session markers) and orphan branches.
+    """
+    from click.testing import CliRunner
+
+    from claudeutils.worktree.cli import worktree
+
+    repo_path = tmp_path / "test-repo"
+    repo_path.mkdir()
+    init_repo(repo_path)
+    monkeypatch.chdir(repo_path)
+
+    runner = CliRunner()
+
+    # Scenario A: Real history branch with 2 unmerged commits
+    subprocess.run(
+        ["git", "checkout", "-b", "real-unmerged"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    (repo_path / "file1.txt").write_text("content 1")
+    subprocess.run(
+        ["git", "add", "file1.txt"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Commit 1"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    (repo_path / "file2.txt").write_text("content 2")
+    subprocess.run(
+        ["git", "add", "file2.txt"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Commit 2"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Switch back to main
+    subprocess.run(
+        ["git", "checkout", "main"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Create worktree for real-unmerged
+    worktree_path = repo_path / "wt" / "real-unmerged"
+    worktree_path.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["git", "worktree", "add", str(worktree_path), "real-unmerged"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Call worktree rm real-unmerged
+    result = runner.invoke(worktree, ["rm", "real-unmerged"])
+
+    # Verify exit code is 1 (refused)
+    assert result.exit_code == 1, f"Expected exit code 1 but got {result.exit_code}"
+
+    # Verify stderr message
+    assert (
+        "Branch real-unmerged has 2 unmerged commit(s). Merge first." in result.output
+    ), f"Expected error message not found in: {result.output}"
+
+    # Verify worktree directory still exists
+    assert worktree_path.exists(), "Worktree directory was removed but should exist"
+
+    # Verify branch still exists
+    branch_check = subprocess.run(
+        ["git", "rev-parse", "--verify", "real-unmerged"],
+        cwd=repo_path,
+        capture_output=True,
+    )
+    assert branch_check.returncode == 0, "Branch was removed but should exist"
+
+    # Scenario B: Orphan branch
+    subprocess.run(
+        ["git", "checkout", "--orphan", "orphan-branch"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    (repo_path / "orphan-file.txt").write_text("orphan content")
+    subprocess.run(
+        ["git", "add", "orphan-file.txt"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Orphan commit"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Switch back to main
+    subprocess.run(
+        ["git", "checkout", "main"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Create worktree for orphan-branch
+    worktree_path_orphan = repo_path / "wt" / "orphan-branch"
+    subprocess.run(
+        ["git", "worktree", "add", str(worktree_path_orphan), "orphan-branch"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Call worktree rm orphan-branch
+    result = runner.invoke(worktree, ["rm", "orphan-branch"])
+
+    # Verify exit code is 1 (refused)
+    assert result.exit_code == 1, f"Expected exit code 1 but got {result.exit_code}"
+
+    # Verify stderr message
+    assert (
+        "Branch orphan-branch is orphaned (no common ancestor). Merge first."
+        in result.output
+    ), f"Expected orphan error message not found in: {result.output}"
+
+    # Verify branch still exists
+    branch_check_orphan = subprocess.run(
+        ["git", "rev-parse", "--verify", "orphan-branch"],
+        cwd=repo_path,
+        capture_output=True,
+    )
+    assert branch_check_orphan.returncode == 0, "Orphan branch was removed but should exist"

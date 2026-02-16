@@ -17,7 +17,7 @@ from claudeutils.worktree.session import (
     move_task_to_worktree,
     remove_worktree_task,
 )
-from claudeutils.worktree.utils import _git, wt_path
+from claudeutils.worktree.utils import _git, _is_branch_merged, wt_path
 
 
 def derive_slug(task_name: str) -> str:
@@ -373,6 +373,32 @@ def merge(slug: str) -> None:
 @click.argument("slug")
 def rm(slug: str) -> None:
     """Remove worktree and its branch."""
+    # Guard: refuse removal of unmerged real history
+    branch_check = subprocess.run(
+        ["git", "rev-parse", "--verify", slug],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if branch_check.returncode == 0:
+        # Branch exists - check if merged
+        if not _is_branch_merged(slug):
+            # Not merged - check if it's just the focused-session marker
+            count, is_focused = _classify_branch(slug)
+            if count != 1 or not is_focused:
+                # Real history or orphan - refuse removal
+                if count == 0:
+                    click.echo(
+                        f"Branch {slug} is orphaned (no common ancestor). Merge first.",
+                        err=True,
+                    )
+                else:
+                    click.echo(
+                        f"Branch {slug} has {count} unmerged commit(s). Merge first.",
+                        err=True,
+                    )
+                raise click.Abort()
+
     worktree_path = wt_path(slug)
     parent_reg, submodule_reg = _probe_registrations(worktree_path)
 
