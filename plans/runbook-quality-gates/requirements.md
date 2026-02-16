@@ -4,14 +4,14 @@
 
 ### Functional Requirements
 
-**FR-1: Post-expansion simplification pass**
-After Phase 1 expansion completes (all phase files written and per-phase reviewed), run a simplification pass that:
-- Detects identical-pattern cycles eligible for parametrized consolidation (e.g., 4 cycles adding one artifact type each → 1 parametrized cycle)
-- Detects independent functions in the same module that can batch into a single cycle (e.g., 3 git helper functions → 1-2 cycles)
-- Detects sequential additions to the same output loop or data structure that can merge (e.g., 4 formatting lines → 2 cycles)
-- Applies consolidation: rewrites affected phase files, renumbers cycles/steps, updates metadata
+**FR-1: Outline-level simplification pass**
+After Phase 0.85 outline consolidation completes, run a simplification pass on the outline that:
+- Detects identical-pattern items eligible for parametrized consolidation (e.g., 4 items adding one artifact type each → 1 parametrized item)
+- Detects independent functions in the same module that can batch into a single item (e.g., 3 git helper functions → 1-2 items)
+- Detects sequential additions to the same output loop or data structure that can merge (e.g., 4 formatting lines → 2 items)
+- Applies consolidation: rewrites outline with consolidated items, renumbers, updates requirements mapping
 
-**Acceptance:** Given workwoods runbook (55 items pre-optimization), simplification pass produces ~43 items with correct renumbering and no stale cross-references.
+**Acceptance:** Given an outline with redundant patterns (e.g., workwoods-scale: 4 identical-pattern items for same function), simplification produces consolidated outline with correct renumbering and preserved requirements mapping.
 
 **FR-2: Model selection review**
 Review model tags across all phases against task complexity criteria:

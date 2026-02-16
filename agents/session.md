@@ -165,6 +165,14 @@
   - `git add agents/session.md` returned exit 128 during `_resolve_session_md_conflict` in `_phase3_merge_parent`
   - Now that error handling is fixed, we can reproduce and see the actual git error message
 
+- [ ] **Runbook model assignment** — apply design-decisions.md directive (opus for skill/fragment/agent edits)
+  - Partially landed via remaining-workflow-items merge
+- [x] **Runbook quality gates Phase A** — completed (Tier 1 direct, all 6 deliverables + reviews)
+- [ ] **Runbook quality gates Phase B** — TDD for validate-runbook.py (4 subcommands) | sonnet
+  - Depends on Phase A merge (SKILL.md references script)
+  - Graceful degradation bridges gap (NFR-2)
+  - model-tags, lifecycle, test-counts, red-plausibility
+
 ## Worktree Tasks
 
 - [ ] **Error handling design** → `error-handling-design` — Resume `/design` Phase B (outline review) then Phase C (full design) | opus

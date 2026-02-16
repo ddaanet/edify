@@ -160,6 +160,8 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when vet-fix-agent rejects planning artifacts | plan-reviewer routing
 /when reviewing expanded phases | expansion reintroduces defects regression LLM failure modes
 /when outline review produces ungrounded corrections | confabulated operation sequence fabricated fix-all sonnet opus
+/when simplifying runbook outlines | pattern consolidation identical-pattern batching
+/when validating runbook pre-execution | model-tags lifecycle test-counts red-plausibility structural
 
 ## agents/decisions/project-config.md
 

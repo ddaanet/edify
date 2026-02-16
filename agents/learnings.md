@@ -107,3 +107,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Planning 4 identical-pattern cycles separately (e.g., 4 status levels each adding one artifact check to the same function), then optimizing post-hoc.
 - Correct pattern: Detect identical patterns during Phase 1 expansion and consolidate upfront. Indicators: same function modified, same test structure, only the fixture data differs. Parametrized cycle with table of inputs replaces N separate RED/GREEN rounds.
 - Evidence: Workwoods P1 cycles 1.2-1.5, P5 cycles 5.5-5.7, P4 cycles 4.3-4.6 all exhibited this pattern. Post-hoc optimization saved 12 items but required 5 parallel agents + holistic re-review.
+## When choosing consolidation timing
+- Anti-pattern: Consolidating after expensive expansion (Phase 1.5 on expanded phase files). Wastes expansion cost on items that will be merged.
+- Correct pattern: Consolidate at the earliest pipeline point where patterns are detectable. Identical patterns (same function, varying fixture data) are visible from outline titles — expanded RED/GREEN detail not needed for detection.
+- Evidence: Workwoods patterns ("add artifact detection for status A/B/C/D") detectable from outline one-liners. Moving consolidation from Phase 1.5 to outline level (after Phase 0.85) saves expansion cost for ~12 items.
+## When splitting validation into mechanical and semantic
+- Anti-pattern: Bundling deterministic checks (file path → model mapping) with judgment-based checks (task complexity assessment) in a single agent pass.
+- Correct pattern: Script handles deterministic checks (Phase 3.5 subcommand, blocking). Agent enriches existing review for semantic checks (plan-reviewer criteria, advisory). Different enforcement layers for different failure modes — defense-in-depth.
+- Evidence: FR-2 model review split. File path matching (agent-core/skills/ → opus) is scriptable with zero false positives. Semantic complexity ("is this synthesis?") requires plan-reviewer judgment during existing Phase 1 per-phase review.

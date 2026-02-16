@@ -1,0 +1,1 @@
+../../agent-core/agents/runbook-simplification-agent.md
