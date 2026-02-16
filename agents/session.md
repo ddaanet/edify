@@ -12,22 +12,19 @@
   - Design vet by design-vet-agent: 3 major, 3 minor, all FIXED
   - Updated requirements.md FR-1 to match D-1 decision (outline-level, not post-expansion)
 
-**Artifacts:**
-- `plans/runbook-quality-gates/design.md` — design document (post-vet, 2-phase delivery)
-- `plans/runbook-quality-gates/requirements.md` — updated FR-1 text
-- `plans/runbook-quality-gates/reports/design-review.md` — design vet report
-- `plans/runbook-quality-gates/outline.md` — design outline (earlier session)
-- `plans/runbook-quality-gates/reports/explore-pipeline.md` — pipeline exploration
-- `plans/runbook-quality-gates/reports/explore-validation.md` — validation infrastructure
-- `plans/runbook-quality-gates/reports/outline-review.md` — outline review report
+**Runbook quality gates Phase A execution (Tier 1 direct):**
+- Created `agent-core/agents/runbook-simplification-agent.md` — new agent (FR-1)
+- Edited `agent-core/skills/runbook/SKILL.md` — Phase 0.86 + Phase 3.5 sections, process overview
+- Edited `agent-core/skills/review-plan/SKILL.md` — Section 12: Model Assignment Review (FR-2 semantic)
+- Edited `agent-core/agents/plan-reviewer.md` — model assignment line in Review Criteria (FR-2 semantic)
+- Edited `agents/decisions/pipeline-contracts.md` — T2.5, T4.5 transformation rows (NFR-1)
+- Edited `agents/memory-index.md` — 2 new entries for simplification and validation
+- Reviews: agent-creator (6 fixes), skill-reviewer ×2 (3 fixes runbook SKILL.md, 2 fixes review-plan SKILL.md)
+- `just sync-to-parent` run, precommit passing
 
 ## Pending Tasks
 
-- [ ] **Runbook quality gates Phase A** — `/runbook plans/runbook-quality-gates/design.md` | opus | restart
-  - Prose edits: simplification agent, SKILL.md, review-plan, plan-reviewer, pipeline-contracts, memory-index
-  - All architectural artifacts → opus required
-  - Load `plugin-dev:agent-development` before planning (simplification agent creation)
-  - After merge: schedule Phase B separately
+- [x] **Runbook quality gates Phase A** — completed (Tier 1 direct, all 6 deliverables + reviews)
 - [ ] **Runbook quality gates Phase B** — TDD for validate-runbook.py (4 subcommands) | sonnet
   - Depends on Phase A merge (SKILL.md references script)
   - Graceful degradation bridges gap (NFR-2)
@@ -37,8 +34,9 @@
 
 ## Blockers / Gotchas
 
-- Learnings file at 116/80 lines — consolidation not yet triggered (0 entries ≥7 days). Will trigger on next active day.
+- Learnings file at 117/80 lines — consolidation not yet triggered (0 entries ≥7 days). Will trigger on next active day.
+- Phase A created new agent definition (`runbook-simplification-agent.md`) — restart needed for discovery
 
 ## Next Steps
 
-- `/runbook plans/runbook-quality-gates/design.md` — Plan Phase A (prose edits). Design complete, restart needed for agent definition delivery.
+- Merge Phase A to main, then schedule Phase B (`/design` or `/runbook` for validate-runbook.py TDD)
