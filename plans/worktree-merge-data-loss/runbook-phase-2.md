@@ -63,7 +63,7 @@ None — prose-only addition to documentation.
 3. **Verify** content matches design specification (design.md line 162)
 4. **Verify** no unintended changes to surrounding steps
 
-**Design Reference:** design.md lines 158-163 (Track 3: Skill Update)
+**Design Reference:** design.md lines 158-164 (Track 3: Skill Update)
 
 **Relationship to Phase 1:** Depends on Phase 1 Track 1 guard implementation (Cycles 1.1-1.8). The `rm` command will now exit 1 when branch has unmerged real history. This step documents that new behavior in the skill that orchestrates merge+rm.
 

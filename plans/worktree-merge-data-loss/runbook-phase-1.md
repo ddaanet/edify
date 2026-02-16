@@ -36,7 +36,7 @@
 - Execute `git merge-base --is-ancestor <slug> HEAD`
 - Return True if exit code 0 (branch is ancestor of HEAD)
 - Return False if exit code 1 (branch not ancestor)
-- Use existing `_git()` helper with `check=False`
+- Use `subprocess.run` directly (not `_git()`) — `_git()` returns `stdout.strip()`, not returncode. Codebase pattern for exit code checks uses `subprocess.run` directly (see merge.py line 269, cli.py line 370).
 
 **Approach:** Single subprocess call with exit code check. Design specifies this exact command (design.md line 41).
 
@@ -149,14 +149,19 @@
 **Test:** `test_rm_refuses_unmerged_real_history` in `tests/test_worktree_rm_guard.py`
 
 **Assertions:**
-- Create branch with 2 unmerged commits (real history, not focused-session marker)
-- Call `worktree rm <slug>` via CliRunner
-- Exit code is 1 (refused)
-- Stderr contains: `"Branch {slug} has 2 unmerged commit(s). Merge first."`
-- Worktree directory still exists (not removed)
-- Branch still exists: `git rev-parse --verify <slug>` succeeds
+- Scenario A (real history): Create branch with 2 unmerged commits (not focused-session marker)
+  - Call `worktree rm <slug>` via CliRunner
+  - Exit code is 1 (refused)
+  - Stderr contains: `"Branch {slug} has 2 unmerged commit(s). Merge first."`
+  - Worktree directory still exists (not removed)
+  - Branch still exists: `git rev-parse --verify <slug>` succeeds
+- Scenario B (orphan): Create orphan branch (`git checkout --orphan`), commit on it
+  - Call `worktree rm <slug>` via CliRunner
+  - Exit code is 1 (refused)
+  - Stderr contains: `"Branch {slug} is orphaned (no common ancestor). Merge first."`
+  - Branch still exists
 
-**Expected failure:** Exit code 0 (current behavior proceeds with removal) or wrong exit code
+**Expected failure:** Exit code 0 (current behavior proceeds with removal) for both scenarios
 
 **Why it fails:** Guard logic not implemented — rm proceeds unconditionally
 
@@ -205,7 +210,7 @@
 - Exit code is 0 (success)
 - Branch deleted: `git rev-parse --verify <slug>` fails
 - Stdout contains: `"Removed {slug}"` (no qualifier like "focused session only")
-- Verify `git branch -d` was used (safe delete, not force)
+- Branch was merged before deletion (safe delete with `-d` succeeds for merged branches; no force required)
 
 **Expected failure:** Output contains `"Removed worktree {slug}"` instead of expected `"Removed {slug}"` (current code at line 382 includes "worktree" in message)
 
@@ -249,7 +254,7 @@
 - Exit code is 0 (success)
 - Branch deleted: `git rev-parse --verify <slug>` fails
 - Stdout contains: `"Removed {slug} (focused session only)"` (design.md line 82)
-- Verify `git branch -D` was used (force delete required for unmerged)
+- Branch deleted despite being unmerged (force delete required — `-d` alone would fail for unmerged branch)
 
 **Expected failure:** Exit code 1 (guard refuses) or wrong message/deletion method
 
@@ -265,7 +270,7 @@
 - In guard logic (from Cycle 1.4):
   - If branch not merged AND focused-session-only (count == 1 and focused == True):
     - Allow removal to proceed
-  - Track removal type: merged vs focused-session-only
+  - Track removal type: set local variable `removal_type` (`"merged"` or `"focused"`) before proceeding — used by branch deletion code (Cycles 1.5-1.6) to choose `-d` vs `-D` flag and success message
 - For focused-session-only: use `git branch -D <slug>` (force delete)
 - Success message: `"Removed {slug} (focused session only)"`
 
@@ -301,7 +306,7 @@
   - Worktree directory still exists on disk
   - Branch still exists
   - Session.md task NOT removed
-  - `_probe_registrations` NOT called (verify via mock or side effect absence)
+  - `_probe_registrations` NOT called (verify via side effect absence: no worktree prune or removal occurred)
 
 **Expected failure:** Side effects occur despite guard refusal — session.md task removed, worktree directory deleted, or `_probe_registrations` called. This tests the integration ordering, not the guard logic itself (which was added in Cycles 1.4-1.6).
 
@@ -352,9 +357,9 @@
 - Assert `"git branch -D"` NOT in stderr
 - Run against CURRENT code to verify RED failure
 
-**Expected failure:** Output contains `"git branch -D"` string from old branch delete fallback code (the `subprocess.run(["git", "branch", "-d", slug])` block with its error message)
+**Expected failure:** Output contains `"git branch -D"` string from old branch delete fallback code (cli.py:373). The focused-session scenario is most likely to trigger it: the branch is unmerged, so the old `git branch -d` at line 369 fails, and line 373 emits the destructive suggestion. If Cycles 1.5-1.6 already replaced this code path, RED may pass for all scenarios — in that case, the GREEN phase is a no-op cleanup verification and the test remains as a regression guard.
 
-**Why it fails:** Old branch delete fallback code still present — emits destructive suggestion when `-d` fails
+**Why it fails:** Old branch delete fallback code still present — emits destructive suggestion when `-d` fails for unmerged branches
 
 **Verify RED:** `pytest tests/test_worktree_rm_guard.py::test_rm_no_destructive_suggestions -v`
 
@@ -508,7 +513,7 @@
 - After `if merge_in_progress:` and `elif staged_check.returncode != 0:`
 - Add `else:` (no MERGE_HEAD, no staged changes)
   - Check if branch merged: `_is_branch_merged(slug)`
-  - If merged: skip silently (nothing to do — already merged)
+  - If merged: skip commit (nothing to commit — already merged). Function continues to validation/precommit.
   - If not merged: stderr `"Error: nothing to commit and branch not merged"` + exit 2
 
 **Approach:** Add third branch to handle edge case. Design specifies exact logic (design.md lines 111-115).
