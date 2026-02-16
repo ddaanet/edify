@@ -11,7 +11,7 @@ class VetChain:
     report: str | None
     stale: bool = False
     source_mtime: float = 0.0
-    report_mtime: float | None = 0.0
+    report_mtime: float | None = None
 
 
 @dataclass
