@@ -1,14 +1,21 @@
 # Session: Worktree — Worktree merge data loss
 
-**Status:** Focused worktree for parallel execution.
+**Status:** Runbook outline complete, reviewed. Expansion next.
 
 ## Completed This Session
 
-- Design document generated and vetted (`plans/worktree-merge-data-loss/design.md`)
-  - Three tracks: removal safety guard (cli.py rm), merge correctness (merge.py Phase 4), skill update (SKILL.md Mode C)
-  - Design review: Ready, 1 major + 2 minor issues fixed by vet, no UNFIXABLE
-  - Report: `plans/worktree-merge-data-loss/reports/design-review.md`
-  - Checkpoint commit: 9f7c51e
+**Design (prior session):**
+- Design document vetted: `plans/worktree-merge-data-loss/design.md` (commit 9f7c51e)
+
+**Runbook planning (Phase 0.75):**
+- Tier assessment: Tier 3 (Full Runbook) — 3 tracks, ~11 TDD cycles, shared helpers
+- Runbook outline generated: `plans/worktree-merge-data-loss/runbook-outline.md` (commit 67bc97d)
+  - Phase 1 (TDD, 11 cycles): removal guard (Track 1) + merge correctness (Track 2)
+  - Phase 2 (general, 1 step): SKILL.md Mode C update (Track 3)
+  - FR-1 through FR-9 mapped to implementation cycles
+- Outline review: all fixes applied by runbook-outline-review-agent, no UNFIXABLE
+  - Report: `plans/worktree-merge-data-loss/reports/outline-review-fix.md`
+  - Key fixes: consolidated Cycle 1.9+1.10 (diagnostic logging merged), added Track labels to integration tests, enhanced RED assertions for integration cycles, added Expansion Guidance section
 
 - Runbook outline generated and reviewed (`plans/worktree-merge-data-loss/runbook-outline.md`)
   - Tier 3 assessment: Full runbook (13 TDD cycles, 2 independent tracks)
