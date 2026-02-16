@@ -711,3 +711,149 @@ def test_rm_guard_prevents_destruction(
         "Worktree not in git worktree list (prune may have run, indicating "
         "_probe_registrations was called despite guard refusal)"
     )
+
+
+def test_rm_no_destructive_suggestions(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Verify rm never suggests destructive git commands in output.
+
+    Tests that worktree rm does not emit "git branch -D" suggestions in
+    stdout or stderr for any scenario:
+    - Merged branch removal (success case)
+    - Focused-session-only removal (success case)
+    - Guard refusal (error case)
+
+    This is a regression test for FR-5: CLI should refuse destructive operations,
+    not suggest them.
+    """
+    from click.testing import CliRunner
+
+    from claudeutils.worktree.cli import worktree
+
+    repo_path = tmp_path / "test-repo"
+    repo_path.mkdir()
+    init_repo(repo_path)
+    monkeypatch.chdir(repo_path)
+
+    runner = CliRunner()
+
+    # Scenario 1: Merged branch removal (success)
+    subprocess.run(
+        ["git", "checkout", "-b", "merged-test"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    (repo_path / "merged.txt").write_text("merged content")
+    subprocess.run(
+        ["git", "add", "merged.txt"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Merged commit"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "checkout", "main"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "merge", "merged-test", "--no-edit"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    worktree_path_merged = repo_path / "wt" / "merged-test"
+    worktree_path_merged.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["git", "worktree", "add", str(worktree_path_merged), "merged-test"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    result_merged = runner.invoke(worktree, ["rm", "merged-test"])
+    assert "git branch -D" not in result_merged.output, (
+        f"Merged branch removal suggested 'git branch -D': {result_merged.output}"
+    )
+
+    # Scenario 2: Focused-session-only removal (success)
+    subprocess.run(
+        ["git", "checkout", "-b", "focused-test"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "--allow-empty", "-m", "Focused session for focused-test"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "checkout", "main"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    worktree_path_focused = repo_path / "wt" / "focused-test"
+    subprocess.run(
+        ["git", "worktree", "add", str(worktree_path_focused), "focused-test"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    result_focused = runner.invoke(worktree, ["rm", "focused-test"])
+    assert "git branch -D" not in result_focused.output, (
+        f"Focused-session removal suggested 'git branch -D': {result_focused.output}"
+    )
+
+    # Scenario 3: Guard refusal (error)
+    subprocess.run(
+        ["git", "checkout", "-b", "unmerged-test"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    (repo_path / "unmerged.txt").write_text("unmerged content")
+    subprocess.run(
+        ["git", "add", "unmerged.txt"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Unmerged commit"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "checkout", "main"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    worktree_path_unmerged = repo_path / "wt" / "unmerged-test"
+    subprocess.run(
+        ["git", "worktree", "add", str(worktree_path_unmerged), "unmerged-test"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    result_unmerged = runner.invoke(worktree, ["rm", "unmerged-test"])
+    assert "git branch -D" not in result_unmerged.output, (
+        f"Guard refusal suggested 'git branch -D': {result_unmerged.output}"
+    )
