@@ -78,6 +78,10 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Assigning model by task type (execution = haiku) without considering reasoning complexity. Haiku over-implemented step 1-2, building guard logic meant for 6 subsequent steps.
 - Correct pattern: Assign model by complexity type: pattern complexity (regexp, wiring, flags) → haiku fine; state machine complexity (git ancestry, merge state) → sonnet minimum; synthesis complexity (trade-offs, architecture) → opus. Classification happens during /runbook expansion, not at orchestration time.
 - Related: TDD granularity doesn't help haiku — each step is "simple" but haiku can't stay within scope. Batching code+tests per phase at sonnet produces fewer, better tests with opus review.
+## When precommit fails
+- Anti-pattern: Rationalizing past precommit failure ("lint issues are pre-existing", "my changes are clean"). Deeper: `just precommit` was broken for 9 days (~845 commits) due to non-existent `claudeutils validate` command. No agent noticed because failure was rationalized or bypassed each time.
+- Correct pattern: Precommit is a gate. If it fails, fix before committing. A broken gate is worse than no gate — creates false confidence across all subsequent commits.
+- Systemic: No health check verifies gates themselves are functional. Pipeline assumes `just precommit` works. Silent breakage accumulates unverified commits.
 ## When test setup steps fail
 - Anti-pattern: Using `subprocess.run(..., check=True, capture_output=True)` in test setup — CalledProcessError shows command and exit code but stderr is swallowed. Opaque failures invite confabulation.
 - Correct pattern: Test setup should produce self-diagnosing failures. Either use `check=False` + explicit assertion with stderr, or use a helper that surfaces stderr on failure.
