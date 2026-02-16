@@ -81,24 +81,8 @@ def test_rm_calls_remove_worktree_task_before_branch_delete(
     worktree_path = wt_path("feature-a")
     worktree_session = worktree_path / "agents" / "session.md"
 
-    worktree_session_content = """# Focused Session
-
-## Pending Tasks
-
-## Worktree Tasks
-"""
-    worktree_session.write_text(worktree_session_content)
-    subprocess.run(
-        ["git", "-C", str(worktree_path), "add", "agents/session.md"],
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "-C", str(worktree_path), "commit", "-m", "mark task complete"],
-        check=True,
-        capture_output=True,
-    )
-
+    # Branch has only the focused-session marker commit (from `new`),
+    # so guard allows removal (focused-session-only path)
     result = CliRunner().invoke(worktree, ["rm", "feature-a"])
     assert result.exit_code == 0
 
@@ -141,27 +125,11 @@ def test_rm_e2e_removes_completed_task_from_worktree_tasks(
     assert "## Pending Tasks" in worktree_content
     assert "Complete the feature" in worktree_content
 
-    worktree_session_completed = """# Focused Session
-
-## Pending Tasks
-
-## Blockers / Gotchas
-"""
-    worktree_session.write_text(worktree_session_completed)
-    subprocess.run(
-        ["git", "-C", str(worktree_path), "add", "agents/session.md"],
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "-C", str(worktree_path), "commit", "-m", "complete task"],
-        check=True,
-        capture_output=True,
-    )
-
+    # Branch has only the focused-session marker commit (from `new`),
+    # so guard allows removal (focused-session-only path)
     result = CliRunner().invoke(worktree, ["rm", "complete-the-feature"])
     assert result.exit_code == 0
-    assert "Removed worktree complete-the-feature" in result.output
+    assert "Removed complete-the-feature" in result.output
 
     final_session = session_file.read_text()
     assert "## Worktree Tasks" in final_session
