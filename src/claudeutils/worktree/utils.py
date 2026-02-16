@@ -144,3 +144,9 @@ def _remove_worktrees(
         )
     if parent_registered:
         _git("worktree", "remove", "--force", str(worktree_path))
+
+
+def _is_merge_commit() -> bool:
+    """Return True if HEAD has 2+ parents."""
+    parts = _git("rev-list", "--parents", "-n", "1", "HEAD").split()
+    return len(parts) >= 3

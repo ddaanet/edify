@@ -22,6 +22,7 @@ from claudeutils.worktree.utils import (
     _get_worktree_path_for_branch,
     _git,
     _is_branch_merged,
+    _is_merge_commit,
     _parse_worktree_list,
     _probe_registrations,
     _remove_worktrees,
@@ -299,22 +300,15 @@ def add_commit(files: tuple[str, ...]) -> None:
 @worktree.command()
 @click.argument("slug")
 def merge(slug: str) -> None:
-    """Merge worktree branch: validate, resolve submodule, merge parent."""
+    """Merge worktree branch back to main."""
     merge_impl(slug)
 
 
 def _guard_branch_removal(slug: str) -> tuple[bool, str | None]:
-    """Check if branch can be removed safely.
-
-    Returns (branch_exists, removal_type) where removal_type is "merged",
-    "focused", or None (branch doesn't exist). Raises click.Abort for unmerged
-    real history or orphan branches.
-    """
+    """Check if branch can be removed safely."""
     branch_check = subprocess.run(
         ["git", "rev-parse", "--verify", slug],
-        capture_output=True,
-        text=True,
-        check=False,
+        capture_output=True, text=True, check=False,
     )
     if branch_check.returncode != 0:
         return False, None
@@ -340,16 +334,30 @@ def _guard_branch_removal(slug: str) -> tuple[bool, str | None]:
 
 
 def _delete_branch(slug: str, removal_type: str | None) -> None:
-    """Delete branch and emit success message."""
     delete_flag = "-D" if removal_type == "focused" else "-d"
     r = subprocess.run(
         ["git", "branch", delete_flag, slug],
-        capture_output=True,
-        text=True,
-        check=False,
+        capture_output=True, text=True, check=False,
     )
     if r.returncode != 0 and "not found" not in r.stderr.lower():
         click.echo(f"Branch {slug} deletion failed: {r.stderr.strip()}", err=True)
+
+
+def _update_session_and_amend(slug: str) -> bool:
+    session_md_path = Path("agents/session.md")
+    if not session_md_path.exists():
+        return False
+    remove_worktree_task(session_md_path, slug, slug)
+    if not _is_merge_commit():
+        return False
+    status_output = _git(
+        "status", "--porcelain", "agents/session.md", check=False
+    )
+    if not status_output.strip():
+        return False
+    _git("add", "agents/session.md")
+    _git("commit", "--amend", "--no-edit")
+    return True
 
 
 @worktree.command()
@@ -357,7 +365,6 @@ def _delete_branch(slug: str, removal_type: str | None) -> None:
 def rm(slug: str) -> None:
     """Remove worktree and its branch."""
     branch_exists, removal_type = _guard_branch_removal(slug)
-
     worktree_path = _get_worktree_path_for_branch(slug) or wt_path(slug)
     parent_reg, submodule_reg = _probe_registrations(worktree_path)
 
@@ -367,9 +374,7 @@ def rm(slug: str) -> None:
             n = len(status.strip().split("\n"))
             click.echo(f"Warning: worktree has {n} uncommitted files")
 
-    session_md_path = Path("agents/session.md")
-    if session_md_path.exists():
-        remove_worktree_task(session_md_path, slug, slug)
+    amended = _update_session_and_amend(slug)
 
     if parent_reg or submodule_reg:
         _remove_worktrees(worktree_path, parent_reg, submodule_reg)
@@ -386,9 +391,10 @@ def rm(slug: str) -> None:
     if branch_exists:
         _delete_branch(slug, removal_type)
 
+    suffix = " Merge commit amended." if amended else ""
     if removal_type == "merged":
-        click.echo(f"Removed {slug}")
+        click.echo(f"Removed {slug}{suffix}")
     elif removal_type == "focused":
-        click.echo(f"Removed {slug} (focused session only)")
+        click.echo(f"Removed {slug} (focused session only){suffix}")
     else:
-        click.echo(f"Removed worktree {slug}")
+        click.echo(f"Removed worktree {slug}{suffix}")
