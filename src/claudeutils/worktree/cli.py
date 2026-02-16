@@ -337,6 +337,31 @@ def _remove_worktrees(
         _git("worktree", "remove", "--force", str(worktree_path))
 
 
+def _classify_branch(slug: str) -> tuple[int, bool]:
+    """Classify branch by commit count and focused session marker.
+
+    Returns (commit_count, is_focused) where:
+    - commit_count: number of commits between merge-base and branch tip
+    - is_focused: True only if count==1 and message is "Focused session for {slug}"
+
+    For orphan branches (no merge-base): returns (0, False)
+    """
+    try:
+        merge_base = _git("merge-base", "HEAD", slug, check=True)
+    except subprocess.CalledProcessError:
+        return (0, False)
+
+    count_str = _git("rev-list", "--count", f"{merge_base}..{slug}")
+    count = int(count_str)
+
+    is_focused = False
+    if count == 1:
+        msg = _git("log", "-1", "--format=%s", slug)
+        is_focused = msg == f"Focused session for {slug}"
+
+    return (count, is_focused)
+
+
 @worktree.command()
 @click.argument("slug")
 def merge(slug: str) -> None:
