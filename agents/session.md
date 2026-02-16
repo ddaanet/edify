@@ -1,34 +1,24 @@
 # Session Handoff: 2026-02-16
 
-**Status:** Worktree merge data loss merged. Pending task assessment for agent rename.
+**Status:** Precommit improvements implemented (3/4 items). Vet proportionality next.
 
 ## Completed This Session
 
-**Worktree merge data loss sync:**
-- Merged changes from worktree-merge-data-loss to main (sync point, branch remains active)
-- 11 files synced (813+ insertions): design.md, runbook-outline.md, 3 review reports
-- Submodule pointer updated (192101f → 993d786): outline-review-agent.md model tier fix (sonnet → opus)
-- Parent repo changes: operational-practices.md diagnostic procedure (+43 lines), pipeline-contracts.md ungrounded corrections decision (+22 lines)
-- Memory index: 2 new entries (diagnosing quality gaps, ungrounded corrections)
-- Session.md: 3 new tasks from worktree (Design-to-deliverable, Expand runbook, Worktree skill adhoc mode)
-- Phase 2 submodule commit required manual `dangerouslyDisableSandbox: true` after sandbox failure
-- Validation: all expected changes present, worktree continues with runbook expansion
-
-**Parallel worktree cleanup:**
-- Created 5 worktrees (precommit-improvements, vet-proportionality, remaining-workflow-items, commit-cli-tool, memory-index-auto-sync)
-- Removed all 5 immediately per user request (workflow patch incoming)
-- Pattern repeated: CLI `rm` suggested `git branch -D` for unmerged branches, agent followed suggestion
-- No real data lost (only focused-session commits), but same anti-pattern as documented in learnings
+**Precommit improvements (3/4 items):**
+- Two new validators: `session_refs.py` (tmp/ reference rejection), `session_structure.py` (worktree format, cross-section uniqueness, reference file existence)
+- 42 new tests across both validators, all passing
+- Registered in CLI: `claudeutils validate session-refs`, `claudeutils validate session-structure`
+- Pattern refinement: `\btmp/[a-zA-Z0-9][a-zA-Z0-9._/-]*` avoids sentence-ending `tmp/.` false positives
+- Remaining item (duplicate memory-index autofix) blocked on memory redesign — unchanged
 
 ## Pending Tasks
 
 <!-- Priority order per plans/reports/prioritization-2026-02-16.md -->
 
-- [ ] **Precommit improvements** — Expand precommit checks | sonnet
-  - Validate session.md references point to versioned files (reject tmp/ references) — recurring failure mode
-  - Validate session.md pending tasks/worktree structure
-  - Reject references to tmp/ files in all committed content
-  - Autofix or fail on duplicate memory index entries (blocked on memory redesign)
+- [x] **Precommit improvements** — Expand precommit checks | sonnet
+  - ✅ session_refs.py: tmp/ reference rejection in session.md, learnings.md, jobs.md
+  - ✅ session_structure.py: worktree task format, cross-section uniqueness, reference file existence
+  - Remaining: autofix/fail on duplicate memory index entries (blocked on memory redesign)
 
 - [ ] **Vet proportionality** — Trivial edits shouldn't require full vet-fix-agent delegation | sonnet
   - 1-line bullet addition to runbook skill triggered full vet agent
@@ -169,7 +159,7 @@
 
 ## Next Steps
 
-Assess rename vet-fix/vet agents task (sonnet, restart). Pattern from pipeline-contracts: review tier ≥ generator tier. User noted conflict risk nullified by plugin.
+Vet proportionality — proportionality threshold for trivial edits. Then remaining workflow items.
 
 ## Reference Files
 
