@@ -13,7 +13,7 @@ from claudeutils.worktree.utils import _git, _is_branch_merged, wt_path
 def _format_git_error(e: subprocess.CalledProcessError) -> str:
     """Format git error with command, exit code, and stderr."""
     cmd_str = " ".join(str(arg) for arg in e.cmd)
-    stderr = e.stderr.rstrip('\n') if e.stderr else "(no error output)"
+    stderr = e.stderr.rstrip("\n") if e.stderr else "(no error output)"
     return (
         f"Git command failed: {cmd_str}\n"
         f"Exit code: {e.returncode}\n"
@@ -27,7 +27,7 @@ def _check_clean_for_merge(
     exempt_paths: set[str] | None = None,
     label: str = "main",
 ) -> None:
-    """Verify clean tree for merge (path=dir to check, exempt_paths=allowed dirty files, label=error context)."""
+    """Verify clean tree for merge."""
     parent_cmd = ["-C", str(path)] if path else []
     parent_cmd.extend(["status", "--porcelain", "--untracked-files=no"])
     parent = _git(*parent_cmd, check=False)
@@ -68,11 +68,7 @@ def _extract_section_bullets(content: str, header: str) -> list[str]:
     if bounds is None:
         return []
     lines = content.split("\n")
-    return [
-        line
-        for line in lines[bounds[0] + 1 : bounds[1]]
-        if line.startswith("- ")
-    ]
+    return [line for line in lines[bounds[0] + 1 : bounds[1]] if line.startswith("- ")]
 
 
 def _merge_session_contents(ours: str, theirs: str) -> str:
@@ -124,10 +120,7 @@ def _merge_session_contents(ours: str, theirs: str) -> str:
 
 
 def _resolve_session_md_conflict(conflicts: list[str]) -> list[str]:
-    """Resolve session.md conflict: keep ours, merge new tasks/blockers from theirs.
-
-    Three-tier staging: git add → hash-object+update-index → checkout --ours (recovers from staging failure).
-    """
+    """Resolve session.md conflict: keep ours, merge new content from theirs."""
     if "agents/session.md" not in conflicts:
         return conflicts
 
