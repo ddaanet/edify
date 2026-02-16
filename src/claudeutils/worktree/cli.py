@@ -337,6 +337,13 @@ def _remove_worktrees(
         _git("worktree", "remove", "--force", str(worktree_path))
 
 
+def _is_merge_commit() -> bool:
+    """Return True if HEAD is a merge commit (has 2+ parents)."""
+    output = _git("rev-list", "--parents", "-n", "1", "HEAD")
+    parts = output.split()
+    return len(parts) >= 2
+
+
 @worktree.command()
 @click.argument("slug")
 def merge(slug: str) -> None:

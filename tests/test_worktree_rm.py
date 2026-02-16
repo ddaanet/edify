@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
+from claudeutils.worktree.cli import _is_merge_commit, worktree
 
 
 def _create_worktree(
@@ -99,3 +99,34 @@ def test_rm_branch_only(
         "error" not in result.output.lower()
         or "no such file" not in result.output.lower()
     )
+
+
+def test_rm_detects_merge_commit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Detects merge commit via parent count."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+
+    init_repo(repo_path)
+
+    # Normal commit has 1 parent
+    assert not _is_merge_commit()
+
+    # Create another branch and merge to create merge commit
+    subprocess.run(
+        ["git", "checkout", "-b", "feature"], check=True, capture_output=True
+    )
+    (repo_path / "feature.txt").write_text("feature content")
+    subprocess.run(["git", "add", "feature.txt"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Feature commit"], check=True, capture_output=True
+    )
+    subprocess.run(["git", "checkout", "main"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "merge", "--no-ff", "feature"], check=True, capture_output=True
+    )
+
+    # Merge commit has 2 parents
+    assert _is_merge_commit()

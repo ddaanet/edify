@@ -189,9 +189,7 @@ class TestValidate:
     def test_worktree_format_error(self, tmp_path: Path) -> None:
         """Worktree task without arrow detected."""
         (tmp_path / "session.md").write_text(
-            "# Session\n\n"
-            "## Worktree Tasks\n\n"
-            "- [ ] **My Task** \u2014 missing arrow\n"
+            "# Session\n\n## Worktree Tasks\n\n- [ ] **My Task** \u2014 missing arrow\n"
         )
         errors = validate("session.md", tmp_path)
         assert len(errors) == 1
