@@ -10,11 +10,19 @@
   - Report: `plans/worktree-merge-data-loss/reports/design-review.md`
   - Checkpoint commit: 9f7c51e
 
+- Runbook outline generated and reviewed (`plans/worktree-merge-data-loss/runbook-outline.md`)
+  - Tier 3 assessment: Full runbook (13 TDD cycles, 2 independent tracks)
+  - Phase 1: Track 1 (cycles 1.1-1.8 removal guard), Track 2 (cycles 1.9-1.13 merge correctness)
+  - Phase 2: SKILL.md Mode C update (1 step)
+  - Automated review: 4 major + 4 minor issues fixed, all FIXED (no UNFIXABLE)
+  - Report: `plans/worktree-merge-data-loss/reports/runbook-outline-review.md`
+  - Checkpoint commit: 1d03b8b
+
 ## Pending Tasks
 
-- [ ] **Worktree merge data loss** — `/runbook plans/worktree-merge-data-loss/design.md` | sonnet
+- [ ] **Outline review** — Interactive opus review of outline grounded in `agents/runbook-review-guide.md` | opus | restart
+  - Outline: `plans/worktree-merge-data-loss/runbook-outline.md` (automated review complete)
+  - Automated review found 3 concerns: Phase 1 size (13 cycles), Cycle 1.8 vacuity, Cycle 1.13 TDD discipline
+  - After interactive review, proceed with phase expansion or outline revision
   - Design: `plans/worktree-merge-data-loss/design.md` (vetted, ready)
-  - Phase 1 (TDD): removal guard + merge correctness — cli.py, merge.py, utils.py
-  - Phase 2 (general): skill update — SKILL.md Mode C
-  - Key decisions: D-1 marker text detection, D-2 exit codes (0/1/2), D-3 no destructive output, D-4 MERGE_HEAD checkpoint, D-5 ancestry validation, D-6 guard before destruction, D-7 shared helper in utils.py
-  - Reports: `plans/worktree-merge-data-loss/reports/` (explore-merge-logic, explore-git-history, outline-review, design-review)
+  - Reports: `plans/worktree-merge-data-loss/reports/` (outline-review, design-review)
