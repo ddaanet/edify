@@ -13,7 +13,10 @@ def test_phase4_refuses_single_parent_when_unmerged(tmp_path: Path) -> None:
     repo_dir.mkdir()
     subprocess.run(["git", "init"], cwd=repo_dir, check=True, capture_output=True)
     subprocess.run(
-        ["git", "config", "user.name", "Test"], cwd=repo_dir, check=True, capture_output=True
+        ["git", "config", "user.name", "Test"],
+        cwd=repo_dir,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "config", "user.email", "test@test.com"],
@@ -37,7 +40,10 @@ def test_phase4_refuses_single_parent_when_unmerged(tmp_path: Path) -> None:
         ["git", "branch", "test-branch"], cwd=repo_dir, check=True, capture_output=True
     )
     subprocess.run(
-        ["git", "checkout", "test-branch"], cwd=repo_dir, check=True, capture_output=True
+        ["git", "checkout", "test-branch"],
+        cwd=repo_dir,
+        check=True,
+        capture_output=True,
     )
 
     # Make changes on branch
@@ -102,8 +108,8 @@ def test_phase4_refuses_single_parent_when_unmerged(tmp_path: Path) -> None:
 
     # Call Phase 4 - expecting it to exit with code 2 and no commit
     import os
-    from unittest.mock import patch, MagicMock
     import subprocess as real_subprocess
+    from unittest.mock import MagicMock, patch
 
     original_cwd = os.getcwd()
     exit_code = 0
@@ -124,7 +130,9 @@ def test_phase4_refuses_single_parent_when_unmerged(tmp_path: Path) -> None:
     try:
         os.chdir(repo_dir)
         # Patch the subprocess.run call that runs "just precommit"
-        with patch("claudeutils.worktree.merge.subprocess.run", side_effect=selective_mock):
+        with patch(
+            "claudeutils.worktree.merge.subprocess.run", side_effect=selective_mock
+        ):
             try:
                 _phase4_merge_commit_and_precommit("test-branch")
             except SystemExit as e:
@@ -162,7 +170,10 @@ def test_phase4_allows_already_merged(tmp_path: Path) -> None:
     repo_dir.mkdir()
     subprocess.run(["git", "init"], cwd=repo_dir, check=True, capture_output=True)
     subprocess.run(
-        ["git", "config", "user.name", "Test"], cwd=repo_dir, check=True, capture_output=True
+        ["git", "config", "user.name", "Test"],
+        cwd=repo_dir,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "config", "user.email", "test@test.com"],
@@ -186,7 +197,10 @@ def test_phase4_allows_already_merged(tmp_path: Path) -> None:
         ["git", "branch", "test-branch"], cwd=repo_dir, check=True, capture_output=True
     )
     subprocess.run(
-        ["git", "checkout", "test-branch"], cwd=repo_dir, check=True, capture_output=True
+        ["git", "checkout", "test-branch"],
+        cwd=repo_dir,
+        check=True,
+        capture_output=True,
     )
 
     # Make changes on branch
@@ -246,8 +260,8 @@ def test_phase4_allows_already_merged(tmp_path: Path) -> None:
 
     # Call Phase 4 - expecting it to exit with code 0 and create commit
     import os
-    from unittest.mock import patch, MagicMock
     import subprocess as real_subprocess
+    from unittest.mock import MagicMock, patch
 
     original_cwd = os.getcwd()
     exit_code = None
@@ -268,7 +282,9 @@ def test_phase4_allows_already_merged(tmp_path: Path) -> None:
     try:
         os.chdir(repo_dir)
         # Patch the subprocess.run call that runs "just precommit"
-        with patch("claudeutils.worktree.merge.subprocess.run", side_effect=selective_mock):
+        with patch(
+            "claudeutils.worktree.merge.subprocess.run", side_effect=selective_mock
+        ):
             try:
                 _phase4_merge_commit_and_precommit("test-branch")
                 exit_code = 0
@@ -301,18 +317,23 @@ def test_phase4_allows_already_merged(tmp_path: Path) -> None:
 
 
 def test_phase4_handles_no_merge_head_no_staged(tmp_path: Path) -> None:
-    """Phase 4 handles no MERGE_HEAD + no staged changes: exit 2 if unmerged, skip if merged."""
-    from claudeutils.worktree.merge import _phase4_merge_commit_and_precommit
+    """Phase 4 handles no MERGE_HEAD + no staged changes: exit 2 if unmerged,
+    skip if merged."""
     import os
-    from unittest.mock import patch, MagicMock
     import subprocess as real_subprocess
+    from unittest.mock import MagicMock, patch
+
+    from claudeutils.worktree.merge import _phase4_merge_commit_and_precommit
 
     # Scenario A: Branch exists, no MERGE_HEAD, no staged changes, branch NOT merged
     repo_dir_a = tmp_path / "repo_a"
     repo_dir_a.mkdir()
     subprocess.run(["git", "init"], cwd=repo_dir_a, check=True, capture_output=True)
     subprocess.run(
-        ["git", "config", "user.name", "Test"], cwd=repo_dir_a, check=True, capture_output=True
+        ["git", "config", "user.name", "Test"],
+        cwd=repo_dir_a,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "config", "user.email", "test@test.com"],
@@ -333,10 +354,16 @@ def test_phase4_handles_no_merge_head_no_staged(tmp_path: Path) -> None:
 
     # Create branch
     subprocess.run(
-        ["git", "branch", "test-branch"], cwd=repo_dir_a, check=True, capture_output=True
+        ["git", "branch", "test-branch"],
+        cwd=repo_dir_a,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
-        ["git", "checkout", "test-branch"], cwd=repo_dir_a, check=True, capture_output=True
+        ["git", "checkout", "test-branch"],
+        cwd=repo_dir_a,
+        check=True,
+        capture_output=True,
     )
 
     # Make changes on branch
@@ -367,7 +394,6 @@ def test_phase4_handles_no_merge_head_no_staged(tmp_path: Path) -> None:
     assert staged_check_a.returncode == 0, "No staged changes should be present"
 
     # Verify branch NOT merged
-    from claudeutils.worktree.utils import _is_branch_merged
 
     merge_check_a = subprocess.run(
         ["git", "merge-base", "--is-ancestor", "test-branch", "HEAD"],
@@ -388,7 +414,6 @@ def test_phase4_handles_no_merge_head_no_staged(tmp_path: Path) -> None:
     # Call Phase 4 - expecting exit code 2
     original_cwd = os.getcwd()
     exit_code_a = None
-    stderr_a = ""
 
     # Save reference to real subprocess.run before patching
     real_run = real_subprocess.run
@@ -405,7 +430,9 @@ def test_phase4_handles_no_merge_head_no_staged(tmp_path: Path) -> None:
 
     try:
         os.chdir(repo_dir_a)
-        with patch("claudeutils.worktree.merge.subprocess.run", side_effect=selective_mock):
+        with patch(
+            "claudeutils.worktree.merge.subprocess.run", side_effect=selective_mock
+        ):
             try:
                 _phase4_merge_commit_and_precommit("test-branch")
                 exit_code_a = 0
@@ -424,9 +451,7 @@ def test_phase4_handles_no_merge_head_no_staged(tmp_path: Path) -> None:
     ).stdout.strip()
 
     # Assertions for Scenario A
-    assert exit_code_a == 2, (
-        f"Scenario A: Expected exit code 2, got {exit_code_a}"
-    )
+    assert exit_code_a == 2, f"Scenario A: Expected exit code 2, got {exit_code_a}"
     assert commit_after_a == commit_before_a, (
         f"Scenario A: No commit should be created, but commit changed from '{commit_before_a}' to '{commit_after_a}'"
     )
@@ -436,7 +461,10 @@ def test_phase4_handles_no_merge_head_no_staged(tmp_path: Path) -> None:
     repo_dir_b.mkdir()
     subprocess.run(["git", "init"], cwd=repo_dir_b, check=True, capture_output=True)
     subprocess.run(
-        ["git", "config", "user.name", "Test"], cwd=repo_dir_b, check=True, capture_output=True
+        ["git", "config", "user.name", "Test"],
+        cwd=repo_dir_b,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "config", "user.email", "test@test.com"],
@@ -457,10 +485,16 @@ def test_phase4_handles_no_merge_head_no_staged(tmp_path: Path) -> None:
 
     # Create branch
     subprocess.run(
-        ["git", "branch", "test-branch"], cwd=repo_dir_b, check=True, capture_output=True
+        ["git", "branch", "test-branch"],
+        cwd=repo_dir_b,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
-        ["git", "checkout", "test-branch"], cwd=repo_dir_b, check=True, capture_output=True
+        ["git", "checkout", "test-branch"],
+        cwd=repo_dir_b,
+        check=True,
+        capture_output=True,
     )
 
     # Make changes on branch
@@ -518,7 +552,9 @@ def test_phase4_handles_no_merge_head_no_staged(tmp_path: Path) -> None:
 
     try:
         os.chdir(repo_dir_b)
-        with patch("claudeutils.worktree.merge.subprocess.run", side_effect=selective_mock):
+        with patch(
+            "claudeutils.worktree.merge.subprocess.run", side_effect=selective_mock
+        ):
             try:
                 _phase4_merge_commit_and_precommit("test-branch")
                 exit_code_b = 0
@@ -537,9 +573,7 @@ def test_phase4_handles_no_merge_head_no_staged(tmp_path: Path) -> None:
     ).stdout.strip()
 
     # Assertions for Scenario B
-    assert exit_code_b == 0, (
-        f"Scenario B: Expected exit code 0, got {exit_code_b}"
-    )
+    assert exit_code_b == 0, f"Scenario B: Expected exit code 0, got {exit_code_b}"
     assert commit_after_b == commit_before_b, (
         f"Scenario B: No commit should be created (already merged), but commit changed from '{commit_before_b}' to '{commit_after_b}'"
     )
@@ -547,17 +581,21 @@ def test_phase4_handles_no_merge_head_no_staged(tmp_path: Path) -> None:
 
 def test_validate_merge_result(tmp_path: Path) -> None:
     """Post-merge ancestry validation ensures slug is ancestor of HEAD."""
-    from claudeutils.worktree.merge import _validate_merge_result
     import os
     import sys
     from io import StringIO
+
+    from claudeutils.worktree.merge import _validate_merge_result
 
     # Scenario A: Valid merge - slug IS ancestor of HEAD
     repo_dir_a = tmp_path / "repo_a"
     repo_dir_a.mkdir()
     subprocess.run(["git", "init"], cwd=repo_dir_a, check=True, capture_output=True)
     subprocess.run(
-        ["git", "config", "user.name", "Test"], cwd=repo_dir_a, check=True, capture_output=True
+        ["git", "config", "user.name", "Test"],
+        cwd=repo_dir_a,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "config", "user.email", "test@test.com"],
@@ -578,10 +616,16 @@ def test_validate_merge_result(tmp_path: Path) -> None:
 
     # Create branch
     subprocess.run(
-        ["git", "branch", "test-branch"], cwd=repo_dir_a, check=True, capture_output=True
+        ["git", "branch", "test-branch"],
+        cwd=repo_dir_a,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
-        ["git", "checkout", "test-branch"], cwd=repo_dir_a, check=True, capture_output=True
+        ["git", "checkout", "test-branch"],
+        cwd=repo_dir_a,
+        check=True,
+        capture_output=True,
     )
 
     # Make changes on branch
@@ -627,14 +671,19 @@ def test_validate_merge_result(tmp_path: Path) -> None:
 
     # Assertions for Scenario A
     assert exit_code_a == 0, f"Expected exit code 0, got {exit_code_a}"
-    assert "Error" not in stderr_output_a, f"Should not have errors, got: {stderr_output_a}"
+    assert "Error" not in stderr_output_a, (
+        f"Should not have errors, got: {stderr_output_a}"
+    )
 
     # Scenario B: Invalid merge - slug NOT ancestor of HEAD
     repo_dir_b = tmp_path / "repo_b"
     repo_dir_b.mkdir()
     subprocess.run(["git", "init"], cwd=repo_dir_b, check=True, capture_output=True)
     subprocess.run(
-        ["git", "config", "user.name", "Test"], cwd=repo_dir_b, check=True, capture_output=True
+        ["git", "config", "user.name", "Test"],
+        cwd=repo_dir_b,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "config", "user.email", "test@test.com"],
@@ -655,10 +704,16 @@ def test_validate_merge_result(tmp_path: Path) -> None:
 
     # Create branch
     subprocess.run(
-        ["git", "branch", "test-branch"], cwd=repo_dir_b, check=True, capture_output=True
+        ["git", "branch", "test-branch"],
+        cwd=repo_dir_b,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
-        ["git", "checkout", "test-branch"], cwd=repo_dir_b, check=True, capture_output=True
+        ["git", "checkout", "test-branch"],
+        cwd=repo_dir_b,
+        check=True,
+        capture_output=True,
     )
 
     # Make changes on branch
@@ -706,7 +761,10 @@ def test_validate_merge_result(tmp_path: Path) -> None:
     repo_dir_c.mkdir()
     subprocess.run(["git", "init"], cwd=repo_dir_c, check=True, capture_output=True)
     subprocess.run(
-        ["git", "config", "user.name", "Test"], cwd=repo_dir_c, check=True, capture_output=True
+        ["git", "config", "user.name", "Test"],
+        cwd=repo_dir_c,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "config", "user.email", "test@test.com"],
@@ -727,7 +785,10 @@ def test_validate_merge_result(tmp_path: Path) -> None:
 
     # Create branch at same commit (fast-forward scenario)
     subprocess.run(
-        ["git", "branch", "test-branch"], cwd=repo_dir_c, check=True, capture_output=True
+        ["git", "branch", "test-branch"],
+        cwd=repo_dir_c,
+        check=True,
+        capture_output=True,
     )
 
     # Make a single-parent commit on main
@@ -741,7 +802,6 @@ def test_validate_merge_result(tmp_path: Path) -> None:
     )
 
     # Call validation - should pass ancestry but warn about single parent
-    exit_code_c = 0
     stderr_c = StringIO()
 
     try:
@@ -750,8 +810,8 @@ def test_validate_merge_result(tmp_path: Path) -> None:
         sys.stderr = stderr_c
         try:
             _validate_merge_result("test-branch")
-        except SystemExit as e:
-            exit_code_c = e.code
+        except SystemExit:
+            pass
         finally:
             sys.stderr = old_stderr
     finally:
@@ -767,21 +827,25 @@ def test_validate_merge_result(tmp_path: Path) -> None:
 
 def test_merge_preserves_parent_repo_files(tmp_path: Path) -> None:
     """Full merge flow preserves both parent repo and submodule files."""
+    import os
+    import subprocess as real_subprocess
+    from unittest.mock import MagicMock, patch
+
     from claudeutils.worktree.merge import (
         _phase1_validate_clean_trees,
         _phase3_merge_parent,
         _phase4_merge_commit_and_precommit,
     )
-    import os
-    from unittest.mock import patch, MagicMock
-    import subprocess as real_subprocess
 
     # Set up parent repo
     parent_repo = tmp_path / "parent"
     parent_repo.mkdir()
     subprocess.run(["git", "init"], cwd=parent_repo, check=True, capture_output=True)
     subprocess.run(
-        ["git", "config", "user.name", "Test"], cwd=parent_repo, check=True, capture_output=True
+        ["git", "config", "user.name", "Test"],
+        cwd=parent_repo,
+        check=True,
+        capture_output=True,
     )
     subprocess.run(
         ["git", "config", "user.email", "test@test.com"],
@@ -792,7 +856,9 @@ def test_merge_preserves_parent_repo_files(tmp_path: Path) -> None:
 
     # Initial commit
     (parent_repo / "initial.txt").write_text("initial content")
-    subprocess.run(["git", "add", "."], cwd=parent_repo, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "add", "."], cwd=parent_repo, check=True, capture_output=True
+    )
     subprocess.run(
         ["git", "commit", "-m", "initial"],
         cwd=parent_repo,
@@ -815,7 +881,9 @@ def test_merge_preserves_parent_repo_files(tmp_path: Path) -> None:
     parent_change_file.write_text("parent repo change")
 
     # Commit changes in worktree branch
-    subprocess.run(["git", "add", "."], cwd=worktree_dir, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "add", "."], cwd=worktree_dir, check=True, capture_output=True
+    )
     subprocess.run(
         ["git", "commit", "-m", "worktree changes"],
         cwd=worktree_dir,
@@ -842,7 +910,9 @@ def test_merge_preserves_parent_repo_files(tmp_path: Path) -> None:
 
     try:
         os.chdir(parent_repo)
-        with patch("claudeutils.worktree.merge.subprocess.run", side_effect=selective_mock):
+        with patch(
+            "claudeutils.worktree.merge.subprocess.run", side_effect=selective_mock
+        ):
             _phase1_validate_clean_trees("test-branch")
             # Skip phase 2 - no submodule
             _phase3_merge_parent("test-branch")

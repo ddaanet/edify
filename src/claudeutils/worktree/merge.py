@@ -282,7 +282,9 @@ def _validate_merge_result(slug: str) -> None:
         check=True,
     ).stdout
 
-    parent_count = len([line for line in parent_output.split("\n") if line.startswith("parent ")])
+    parent_count = len(
+        [line for line in parent_output.split("\n") if line.startswith("parent ")]
+    )
     if parent_count < 2:
         sys.stderr.write(f"Warning: merge commit has {parent_count} parent(s)\n")
 
@@ -319,15 +321,12 @@ def _phase4_merge_commit_and_precommit(slug: str) -> None:
             )
             raise SystemExit(2)
         _git("commit", "-m", f"🔀 Merge {slug}")
-    else:
-        # No MERGE_HEAD, no staged changes
-        if not _is_branch_merged(slug):
-            import sys
+    # No MERGE_HEAD, no staged changes
+    elif not _is_branch_merged(slug):
+        import sys
 
-            sys.stderr.write(
-                "Error: nothing to commit and branch not merged\n"
-            )
-            raise SystemExit(2)
+        sys.stderr.write("Error: nothing to commit and branch not merged\n")
+        raise SystemExit(2)
         # Branch is merged, nothing to commit — skip commit, continue to validation
 
     _validate_merge_result(slug)

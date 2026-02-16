@@ -230,8 +230,8 @@ def test_classify_orphan_branch(
 ) -> None:
     """Verify orphan branch classification (no common ancestor).
 
-    Tests that _classify_branch handles orphan branches (no merge-base)
-    by returning (0, False) to treat as real history.
+    Tests that _classify_branch handles orphan branches (no merge-base) by
+    returning (0, False) to treat as real history.
     """
     repo_path = tmp_path / "test-repo"
     repo_path.mkdir()
@@ -279,8 +279,8 @@ def test_rm_refuses_unmerged_real_history(
 ) -> None:
     """Verify rm refuses unmerged branches with real history.
 
-    Tests that worktree rm refuses to remove branches with unmerged commits
-    (not just focused-session markers) and orphan branches.
+    Tests that worktree rm refuses to remove branches with unmerged commits (not
+    just focused-session markers) and orphan branches.
     """
     from click.testing import CliRunner
 
@@ -362,6 +362,7 @@ def test_rm_refuses_unmerged_real_history(
     # Verify branch still exists
     branch_check = subprocess.run(
         ["git", "rev-parse", "--verify", "real-unmerged"],
+        check=False,
         cwd=repo_path,
         capture_output=True,
     )
@@ -420,10 +421,13 @@ def test_rm_refuses_unmerged_real_history(
     # Verify branch still exists
     branch_check_orphan = subprocess.run(
         ["git", "rev-parse", "--verify", "orphan-branch"],
+        check=False,
         cwd=repo_path,
         capture_output=True,
     )
-    assert branch_check_orphan.returncode == 0, "Orphan branch was removed but should exist"
+    assert branch_check_orphan.returncode == 0, (
+        "Orphan branch was removed but should exist"
+    )
 
 
 def test_rm_allows_merged_branch(
@@ -499,15 +503,16 @@ def test_rm_allows_merged_branch(
     # Verify branch was deleted
     branch_check = subprocess.run(
         ["git", "rev-parse", "--verify", "merged-branch"],
+        check=False,
         cwd=repo_path,
         capture_output=True,
     )
     assert branch_check.returncode != 0, "Branch should be deleted"
 
     # Verify output contains expected message (without "worktree" qualifier)
-    assert (
-        "Removed merged-branch" in result.output
-    ), f"Expected 'Removed merged-branch' in output but got: {result.output}"
+    assert "Removed merged-branch" in result.output, (
+        f"Expected 'Removed merged-branch' in output but got: {result.output}"
+    )
 
 
 def test_rm_allows_focused_session_only(
@@ -515,9 +520,9 @@ def test_rm_allows_focused_session_only(
 ) -> None:
     """Verify rm allows focused-session-only branch removal with force delete.
 
-    Tests that worktree rm allows removal of unmerged branches that contain
-    only the focused-session marker commit, using git branch -D (force delete)
-    and outputs appropriate success message.
+    Tests that worktree rm allows removal of unmerged branches that contain only
+    the focused-session marker commit, using git branch -D (force delete) and
+    outputs appropriate success message.
     """
     from click.testing import CliRunner
 
@@ -571,21 +576,23 @@ def test_rm_allows_focused_session_only(
     # Verify branch was deleted (force delete required)
     branch_check = subprocess.run(
         ["git", "rev-parse", "--verify", "test-branch"],
+        check=False,
         cwd=repo_path,
         capture_output=True,
     )
     assert branch_check.returncode != 0, "Branch should be deleted"
 
     # Verify output contains expected message
-    assert (
-        "Removed test-branch (focused session only)" in result.output
-    ), f"Expected 'Removed test-branch (focused session only)' in output but got: {result.output}"
+    assert "Removed test-branch (focused session only)" in result.output, (
+        f"Expected 'Removed test-branch (focused session only)' in output but got: {result.output}"
+    )
 
 
 def test_rm_guard_prevents_destruction(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
-    """Verify rm guard prevents ALL destructive operations for unmerged real history.
+    """Verify rm guard prevents ALL destructive operations for unmerged real
+    history.
 
     Tests integration ordering: when guard refuses removal (exit 1), NONE of the
     following should execute:
@@ -664,8 +671,7 @@ def test_rm_guard_prevents_destruction(
     session_md_path = repo_path / "agents" / "session.md"
     session_md_path.parent.mkdir(parents=True, exist_ok=True)
     session_md_path.write_text(
-        "# Session\n\n## Worktree Tasks\n\n"
-        "- [ ] **Test Task** → `guard-test`\n"
+        "# Session\n\n## Worktree Tasks\n\n- [ ] **Test Task** → `guard-test`\n"
     )
 
     # Call worktree rm guard-test
@@ -684,6 +690,7 @@ def test_rm_guard_prevents_destruction(
     # 2. Branch still exists
     branch_check = subprocess.run(
         ["git", "rev-parse", "--verify", "guard-test"],
+        check=False,
         cwd=repo_path,
         capture_output=True,
     )

@@ -313,7 +313,7 @@ def _get_worktree_path_for_branch(slug: str) -> Path | None:
     lines = list_output.split("\n")
 
     worktree_path = None
-    for i, line in enumerate(lines):
+    for _i, line in enumerate(lines):
         if line.startswith("worktree "):
             worktree_path = Path(line[len("worktree ") :])
         elif line.startswith("branch ") and worktree_path:
@@ -423,7 +423,7 @@ def rm(slug: str) -> None:
                         f"Branch {slug} has {count} unmerged commit(s). Merge first.",
                         err=True,
                     )
-                raise click.Abort()
+                raise click.Abort
 
     # Get actual worktree path from git, fall back to wt_path() if not found
     worktree_path = _get_worktree_path_for_branch(slug)
