@@ -120,13 +120,7 @@
 
 ## Worktree Tasks
 
-- [ ] **Review runbook delegation** → `review-runbook-delegation` — Update validation language to match orchestrator responsibility | sonnet
-  - Step validation sections say "Delegate to skill-reviewer" but execution agents can't spawn plugin-dev agents
-  - Fix: validation delegation is orchestrator responsibility, not execution agent
 
-- [ ] **Handoff memory naming** → `handoff-memory-naming` — Add trigger naming guidance to handoff skill's learning-writing section | sonnet
-  - Principle: triggers match activity at decision point, broadest verb, no self-assessment terms
-  - Same principle as `/when choosing name`: discovery and recall over precision
 
 ## Blockers / Gotchas
 
