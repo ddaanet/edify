@@ -1,17 +1,24 @@
 # Session Handoff: 2026-02-16
 
-**Status:** Closed stale task, set up parallel worktrees.
+**Status:** Merged parallel worktrees, discovered worktree merge data loss bug.
 
 ## Completed This Session
 
 **Outline agent Write perm — verified stale:**
 - Write permission existed in outline-review-agent since creation (commit d87adc2)
-- Design skill A.6 delegation template always included report path
 - No changes needed; marked complete
 
-**Worktree setup:**
-- Created worktrees for parallel group: handoff-memory-naming, review-runbook-delegation
-- Recreated handoff-memory-naming (prior stale worktree removed)
+**Parallel worktree tasks:**
+- handoff-memory-naming: trigger naming guidance added to handoff skill (d52d392)
+- review-runbook-delegation: artifact review routing table in pipeline-contracts.md, updated learning, memory-index entry (063add3, recovered in 1438fbc)
+
+**Worktree merge data loss — observed behavior:**
+- `claudeutils _worktree merge review-runbook-delegation` reported success (exit 0, "Precommit passed")
+- `git branch -D` reported "unmerged changes" on the branch
+- Parent repo files changed in worktree branch (pipeline-contracts.md, learnings.md, memory-index.md) were not present in main after merge
+- Submodule (agent-core) changes merged correctly
+- Cherry-pick of worktree branch tip (063add3) recovered the lost changes
+- handoff-memory-naming merge was unaffected (only changed agent-core + session.md)
 
 ## Pending Tasks
 
@@ -118,7 +125,12 @@
   - No hook reviewer exists; no doc reviewer exists (readme skill is creation, not review)
   - Precedent: agent-creator repurposed for review via prompting (`/when agent-creator reviews agents`)
 
-## Worktree Tasks
+- [ ] **Worktree merge data loss** — Fix `_worktree merge` dropping parent repo changes | sonnet
+  - Observed: merge exits 0, submodule merged, parent repo files from worktree branch absent
+  - Observed: `git branch -D` reports "unmerged changes" after merge tool claims success
+  - Reproduction: worktree branch with changes in both agent-core/ and parent repo files
+  - Recovery was manual cherry-pick of branch tip (063add3 → 1438fbc)
+  - Do NOT guess at root cause — investigate `src/claudeutils/worktree/cli.py` merge logic
 
 
 
@@ -146,7 +158,7 @@
 
 ## Next Steps
 
-Complete worktree tasks (handoff-memory-naming, review-runbook-delegation), then merge back.
+Worktree merge data loss or remember skill update.
 
 ## Reference Files
 
