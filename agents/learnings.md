@@ -99,3 +99,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Ambient rules in always-loaded fragments (vet-requirement.md) telling agents to review artifacts. Unenforceable — agents rationalize skipping under momentum. Sub-agents don't see CLAUDE.md fragments at all.
 - Correct pattern: Gate at the chokepoint (commit). Scripted check (file classification + report existence) blocks mechanically. No judgment needed at the gate. Orchestrator handles mid-pipeline vet delegation separately.
 - Rationale: Ambient rules without enforcement are aspirational. Gating at commit captures all work. ~100 lines of always-loaded context eliminated for no behavioral loss.
+## When reviewing runbooks after expansion
+- Anti-pattern: Relying on text-based review (plan-reviewer) to catch all runbook defects. Text review validates TDD discipline, prescriptive code, vacuity — but misses execution-time concerns.
+- Correct pattern: Add structural validation after text review: (1) file lifecycle graph (create→modify ordering), (2) RED plausibility (expected failures valid given prior GREEN), (3) test count reconciliation (checkpoint numbers match test functions). File lifecycle and test count are deterministic (scriptable). RED plausibility may need LLM judgment.
+- Evidence: Holistic review caught formatting/metadata issues and one dependency ordering bug, but would not have caught an "already-passing RED" from cycle consolidation.
+## When batching runbook cycles
+- Anti-pattern: Planning 4 identical-pattern cycles separately (e.g., 4 status levels each adding one artifact check to the same function), then optimizing post-hoc.
+- Correct pattern: Detect identical patterns during Phase 1 expansion and consolidate upfront. Indicators: same function modified, same test structure, only the fixture data differs. Parametrized cycle with table of inputs replaces N separate RED/GREEN rounds.
+- Evidence: Workwoods P1 cycles 1.2-1.5, P5 cycles 5.5-5.7, P4 cycles 4.3-4.6 all exhibited this pattern. Post-hoc optimization saved 12 items but required 5 parallel agents + holistic re-review.

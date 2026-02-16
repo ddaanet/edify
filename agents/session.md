@@ -158,6 +158,24 @@
 - [ ] **Orchestrate evolution** — `/runbook plans/orchestrate-evolution/design.md` | sonnet
   - Design.md complete, vet in progress, planning next (design refreshed Feb 13)
 
+- [ ] **Design quality gates** — `/design plans/runbook-quality-gates/` | opus | restart
+  - Requirements at `plans/runbook-quality-gates/requirements.md`
+  - 3 open questions: script vs agent (Q-1), insertion point (Q-2), mandatory vs opt-in (Q-3)
+  - Moderate complexity — may route to Tier 2 planning
+- [ ] **Execute workwoods** — `/orchestrate workwoods` | sonnet | restart
+  - Restart required: prepare-runbook.py creates new agent definition
+  - Execution dependency: Verify worktree-merge-data-loss Track 1+2 deployed before Phase 5
+  - 33 TDD cycles + 10 general steps across 6 phases
+  - Checkpoints: Light after Phases 1-4, full after Phases 5-6
+- [ ] **Pre-exec workwoods checks** — File lifecycle + RED plausibility + test count reconciliation | sonnet
+  - Highest value: RED plausibility (silent failures from batching)
+  - FR-3/4/5 from runbook-quality-gates requirements describe these checks
+  - Run before prepare-runbook.py
+- [ ] **Prepare workwoods** — Run prepare-runbook.py to create execution files | sonnet
+  - Command: `agent-core/bin/prepare-runbook.py plans/workwoods/` (requires `dangerouslyDisableSandbox: true`)
+  - Generates: `.claude/agents/workwoods-task.md`, `plans/workwoods/steps/*.md`, `orchestrator-plan.md`
+  - Copy to clipboard: `echo -n "/orchestrate workwoods" | pbcopy`
+
 ## Worktree Tasks
 
 - [ ] **Error handling design** → `error-handling-design` — Resume `/design` Phase B (outline review) then Phase C (full design) | opus
