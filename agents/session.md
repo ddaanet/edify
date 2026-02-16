@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-16
 
-**Status:** Pruned completed plan directories, corrected stale jobs.md statuses.
+**Status:** Added provenance tracking to requirements and design skills.
 
 ## Completed This Session
 
@@ -18,9 +18,14 @@
 - worktree-skill → orchestrate-evolution (regression test examples)
 - worktree-update → workwoods (integration dependency for FR-4, FR-5, R1)
 
+**Grounding refs in skills:**
+- Design skill: Added `/ground` integration point in Phase A.3-4, References section to output format (backward-looking provenance, distinct from Documentation Perimeter)
+- Requirements skill: Added References section to standard format template (3 typed examples), provenance guidance in section rules
+- Parallel skill-reviewer agents: both passed, 3 minor fixes applied (placeholder standardization, expanded template, grammar)
+
 ## Pending Tasks
 
-- [ ] **Grounding refs in skills** — Update requirements and design skills to explicitly reference grounding research or external references | sonnet
+- [x] **Grounding refs in skills** — Track research artifacts and external references that informed requirements and design (not limited to grounding) | sonnet
 
 - [ ] **Interactive review skill** — Update deliverable-review skill so review runs interactively, not delegated (benefits from full context) | sonnet
 
@@ -165,7 +170,7 @@
 
 ## Next Steps
 
-Remember skill update: Resume `/design` Phase B with outline discussion.
+Interactive review skill or design skill outline gate — both small skill edits.
 
 ## Reference Files
 
