@@ -130,7 +130,7 @@ def test_next_action_derivation(
 
 
 def test_list_plans_directory_scanning(tmp_path: Path) -> None:
-    """Test list_plans scans directory and returns valid plans, excluding reports and empty dirs."""
+    """Test list_plans scans, excludes reports and empty dirs."""
     plans_dir = tmp_path / "plans"
     plans_dir.mkdir()
 
