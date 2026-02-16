@@ -272,16 +272,11 @@ discuss: after fence should match"""
         assert "systemMessage" in output_s
         # Both should contain the expansion text
         assert "[#status]" in output_s["systemMessage"]
-        assert (
-            "[#status]" in output_s["hookSpecificOutput"]["additionalContext"]
-        )
+        assert "[#status]" in output_s["hookSpecificOutput"]["additionalContext"]
 
         # Scenario 4: Tier 1 command x → exact match unchanged
         output_x = call_hook("x")
         assert "hookSpecificOutput" in output_x
         assert "systemMessage" in output_x
         assert "[#execute]" in output_x["systemMessage"]
-        assert (
-            "[#execute]"
-            in output_x["hookSpecificOutput"]["additionalContext"]
-        )
+        assert "[#execute]" in output_x["hookSpecificOutput"]["additionalContext"]

@@ -36,3 +36,23 @@ def wt_path(slug: str, create_container: bool = False) -> Path:  # noqa: FBT001,
     if create_container and not parent_name.endswith("-wt"):
         container_path.mkdir(parents=True, exist_ok=True)
     return container_path / slug
+
+
+def _is_branch_merged(slug: str) -> bool:
+    """Check if a branch is merged into current HEAD.
+
+    Uses git merge-base --is-ancestor to determine if the branch is an ancestor
+    of the current HEAD (indicating it has been merged).
+
+    Args:
+        slug: Branch name to check
+
+    Returns:
+        True if the branch is an ancestor of HEAD (merged), False otherwise
+    """
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", slug, "HEAD"],
+        check=False,
+        capture_output=True,
+    )
+    return result.returncode == 0
