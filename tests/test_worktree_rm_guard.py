@@ -508,3 +508,75 @@ def test_rm_allows_merged_branch(
     assert (
         "Removed merged-branch" in result.output
     ), f"Expected 'Removed merged-branch' in output but got: {result.output}"
+
+
+def test_rm_allows_focused_session_only(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Verify rm allows focused-session-only branch removal with force delete.
+
+    Tests that worktree rm allows removal of unmerged branches that contain
+    only the focused-session marker commit, using git branch -D (force delete)
+    and outputs appropriate success message.
+    """
+    from click.testing import CliRunner
+
+    from claudeutils.worktree.cli import worktree
+
+    repo_path = tmp_path / "test-repo"
+    repo_path.mkdir()
+    init_repo(repo_path)
+    monkeypatch.chdir(repo_path)
+
+    runner = CliRunner()
+
+    # Create branch with exactly 1 commit: the focused-session marker
+    subprocess.run(
+        ["git", "checkout", "-b", "test-branch"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "--allow-empty", "-m", "Focused session for test-branch"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Switch back to main
+    subprocess.run(
+        ["git", "checkout", "main"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Create worktree for test-branch
+    worktree_path = repo_path / "wt" / "test-branch"
+    worktree_path.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["git", "worktree", "add", str(worktree_path), "test-branch"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Call worktree rm test-branch
+    result = runner.invoke(worktree, ["rm", "test-branch"])
+
+    # Verify exit code is 0 (success)
+    assert result.exit_code == 0, f"Expected exit code 0 but got {result.exit_code}"
+
+    # Verify branch was deleted (force delete required)
+    branch_check = subprocess.run(
+        ["git", "rev-parse", "--verify", "test-branch"],
+        cwd=repo_path,
+        capture_output=True,
+    )
+    assert branch_check.returncode != 0, "Branch should be deleted"
+
+    # Verify output contains expected message
+    assert (
+        "Removed test-branch (focused session only)" in result.output
+    ), f"Expected 'Removed test-branch (focused session only)' in output but got: {result.output}"

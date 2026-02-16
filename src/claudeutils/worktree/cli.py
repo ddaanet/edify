@@ -392,7 +392,7 @@ def rm(slug: str) -> None:
     """Remove worktree and its branch."""
     # Guard: refuse removal of unmerged real history
     branch_exists = False
-    is_merged = False
+    removal_type = None  # "merged" or "focused"
     branch_check = subprocess.run(
         ["git", "rev-parse", "--verify", slug],
         capture_output=True,
@@ -403,10 +403,15 @@ def rm(slug: str) -> None:
         branch_exists = True
         # Branch exists - check if merged
         is_merged = _is_branch_merged(slug)
-        if not is_merged:
+        if is_merged:
+            removal_type = "merged"
+        else:
             # Not merged - check if it's just the focused-session marker
             count, is_focused = _classify_branch(slug)
-            if count != 1 or not is_focused:
+            if count == 1 and is_focused:
+                # Focused-session-only - allow removal with force
+                removal_type = "focused"
+            else:
                 # Real history or orphan - refuse removal
                 if count == 0:
                     click.echo(
@@ -450,13 +455,27 @@ def rm(slug: str) -> None:
         container.rmdir()
 
     if branch_exists:
+        # Choose deletion flag based on removal type
+        if removal_type == "focused":
+            # Force delete for focused-session-only branches
+            delete_flag = "-D"
+        else:
+            # Safe delete for merged branches
+            delete_flag = "-d"
+
         r = subprocess.run(
-            ["git", "branch", "-d", slug], capture_output=True, text=True, check=False
+            ["git", "branch", delete_flag, slug],
+            capture_output=True,
+            text=True,
+            check=False,
         )
         if r.returncode != 0 and "not found" not in r.stderr.lower():
-            click.echo(f"Branch {slug} has unmerged changes — use: git branch -D {slug}")
+            click.echo(f"Branch {slug} deletion failed: {r.stderr.strip()}", err=True)
 
-    if is_merged:
+    # Output appropriate success message
+    if removal_type == "merged":
         click.echo(f"Removed {slug}")
+    elif removal_type == "focused":
+        click.echo(f"Removed {slug} (focused session only)")
     else:
         click.echo(f"Removed worktree {slug}")
