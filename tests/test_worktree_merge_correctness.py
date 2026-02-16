@@ -763,3 +763,112 @@ def test_validate_merge_result(tmp_path: Path) -> None:
     assert "Warning: merge commit has 1 parent(s)" in stderr_output_c, (
         f"Should have single-parent warning, got: {stderr_output_c}"
     )
+
+
+def test_merge_preserves_parent_repo_files(tmp_path: Path) -> None:
+    """Full merge flow preserves both parent repo and submodule files."""
+    from claudeutils.worktree.merge import (
+        _phase1_validate_clean_trees,
+        _phase3_merge_parent,
+        _phase4_merge_commit_and_precommit,
+    )
+    import os
+    from unittest.mock import patch, MagicMock
+    import subprocess as real_subprocess
+
+    # Set up parent repo
+    parent_repo = tmp_path / "parent"
+    parent_repo.mkdir()
+    subprocess.run(["git", "init"], cwd=parent_repo, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.name", "Test"], cwd=parent_repo, check=True, capture_output=True
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "test@test.com"],
+        cwd=parent_repo,
+        check=True,
+        capture_output=True,
+    )
+
+    # Initial commit
+    (parent_repo / "initial.txt").write_text("initial content")
+    subprocess.run(["git", "add", "."], cwd=parent_repo, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "initial"],
+        cwd=parent_repo,
+        check=True,
+        capture_output=True,
+    )
+
+    # Create worktree directory and branch
+    worktree_dir = tmp_path / "wt" / "test"
+    worktree_dir.mkdir(parents=True)
+    subprocess.run(
+        ["git", "worktree", "add", "-b", "test-branch", str(worktree_dir)],
+        cwd=parent_repo,
+        check=True,
+        capture_output=True,
+    )
+
+    # Make changes in worktree: parent repo file
+    parent_change_file = worktree_dir / "parent-change.txt"
+    parent_change_file.write_text("parent repo change")
+
+    # Commit changes in worktree branch
+    subprocess.run(["git", "add", "."], cwd=worktree_dir, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "worktree changes"],
+        cwd=worktree_dir,
+        check=True,
+        capture_output=True,
+    )
+
+    # Return to main repo for merge
+    # Run merge flow (Phases 1, 3, 4 - skip phase 2 as no submodule)
+    original_cwd = os.getcwd()
+
+    # Save reference to real subprocess.run before patching
+    real_run = real_subprocess.run
+
+    # Create a mock for just precommit
+    mock_precommit = MagicMock()
+    mock_precommit.returncode = 0
+    mock_precommit.stderr = ""
+
+    def selective_mock(cmd, **kwargs):
+        if cmd[0] == "just" and "precommit" in cmd:
+            return mock_precommit
+        return real_run(cmd, **kwargs)
+
+    try:
+        os.chdir(parent_repo)
+        with patch("claudeutils.worktree.merge.subprocess.run", side_effect=selective_mock):
+            _phase1_validate_clean_trees("test-branch")
+            # Skip phase 2 - no submodule
+            _phase3_merge_parent("test-branch")
+            _phase4_merge_commit_and_precommit("test-branch")
+    finally:
+        os.chdir(original_cwd)
+
+    # Verify parent repo file exists in main after merge
+    merged_parent_file = parent_repo / "parent-change.txt"
+    assert merged_parent_file.exists(), "Parent repo file should exist after merge"
+
+    # Verify merge commit has 2 parents
+    parents = subprocess.run(
+        ["git", "log", "-1", "--format=%p", "HEAD"],
+        cwd=parent_repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    parent_count = len(parents.split())
+    assert parent_count == 2, f"Merge commit should have 2 parents, got {parent_count}"
+
+    # Verify branch is ancestor of HEAD
+    ancestry_check = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", "test-branch", "HEAD"],
+        cwd=parent_repo,
+        check=False,
+    )
+    assert ancestry_check.returncode == 0, "test-branch should be ancestor of HEAD"
