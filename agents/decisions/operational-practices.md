@@ -211,3 +211,18 @@ Agent reliability patterns, artifact management, implementation practices, and k
 **Decision:** Check CLI built-ins before naming skills.
 
 **Scope:** /help, /plan, /review, /model, /clear, /compact, and other built-in commands.
+
+### When Choosing Name
+
+**Decision:** Prioritize human discovery and recall over thematic alignment or cleverness.
+
+**Applies to:** Skill names (slash commands), agent names, command names — any user-facing identifier the human must remember or search for.
+
+**Priority order:**
+1. **Discoverability** — The word the user thinks of when they need the capability should match the handle. "I need to ground this" → `/ground`, not `/found`.
+2. **Recall** — Short, common words beat etymologically precise ones. If a user can't remember the name after one use, it's wrong.
+3. **Thematic alignment** — Nice to have (e.g., construction metaphors pairing with a plugin named "edify"), but never at the cost of discoverability.
+
+**Anti-pattern:** Choosing `/found` (Latin *fundare*, pairs with "edify") over `/ground` (the word people actually use when describing the need).
+
+**Test:** "What word would someone type if they needed this capability and didn't know the command existed?" That word is the name.

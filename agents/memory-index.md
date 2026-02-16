@@ -69,7 +69,6 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when treating commits as sync points
 /when deciding to commit interactively
 /when git branch rename writes config | sandbox config write failure
-/when choosing naming convention format
 /when reading design classification tables
 /how format runbook phase headers
 /how prevent skill steps from being skipped | prose gates no tool call D+B hybrid
@@ -118,6 +117,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when phase numbering is flexible | 0-based or 1-based detect from first
 /when checking self-referential modification | exclude plan own directory
 /when avoiding CLI skill name collision | check built-ins before naming
+/when choosing name | public handles discovery recall over cleverness
 
 ## agents/decisions/orchestration-execution.md
 

@@ -1,32 +1,49 @@
 # Session Handoff: 2026-02-16
 
-**Status:** When/how resolution bug fixed. Case-insensitive heading matching now works for hyphenated triggers.
+**Status:** Ground skill created, trigger naming principle established, learnings cleaned up.
 
 ## Completed This Session
 
-**Prioritization skill:**
-- Created `agent-core/skills/prioritize/SKILL.md` (~700 words) + `references/scoring-tables.md` (~950 words)
-- WSJF-adapted methodology: CoD (Workflow Friction + Decay Pressure + Compound Risk Reduction) / Job Size (Marginal Effort + Context Recovery Cost)
-- Output: priority-ordered table + parallel batches with scheduling modifiers
-- Skill-reviewer passed — 3 fixes applied: criteria duplication eliminated, trigger phrases expanded, CRC cap documented
+**Ground skill:**
+- Created `agent-core/skills/ground/SKILL.md` (~650 words) + `references/grounding-criteria.md` (~700 words)
+- 4-phase procedure: Scope → Diverge (parallel internal + external) → Converge → Output
+- Trigger on claim type per D-1: methodological, framework, taxonomic, best-practice claims
+- Skill-reviewer passed — 1 fix applied: removed duplicated quality label table (progressive disclosure)
+- Outline reviewed by outline-review-agent, all issues fixed
+- Design.md skipped — outline had sufficient specificity for direct implementation
 - Synced via `just sync-to-parent`
 
-**When/how resolution bug fix:**
-- Fixed case-insensitive heading matching for hyphenated triggers (e.g., "agent-creator")
-- Root cause: Two comparison sites with inconsistent strategies — line 245 used case-sensitive `endswith()`, line 291 had partial fix
-- Solution: Extracted `_heading_matches()` helper for centralized case-insensitive comparison
-- Bonus fix: Output now uses actual heading capitalization from file instead of imperfect `_build_heading()` output
-- TDD: Created `tests/test_when_resolver_hyphenated.py`, all 47 tests pass
-- End-to-end verified: `/when agent-creator reviews agents` now resolves correctly
-- Resolves pending task "How-resolve section lookup failure"
+**Naming convention decision:**
+- Added `/when choosing name` to `agents/decisions/operational-practices.md` under `.Naming Patterns`
+- Principle: prioritize human discovery and recall over thematic alignment or cleverness
+- Fixed orphan memory-index entry (was pointing at implementation-notes.md, moved to operational-practices.md)
+
+**Trigger naming cleanup:**
+- Renamed "When synthesizing ungrounded methodology" → "When writing methodology" (activity, no self-assessment)
+- Renamed "When resuming killed agents" → "When relaunching similar task" (situation, not action)
+- Removed "When outline suffices as design" (task, not knowledge — captured in pending task)
+- Added "When naming triggers" learning capturing the systemic principle
+
+**Prototype report:**
+- `plans/reports/prototype-review-capture-script.md` — sub-agent output capture for third-party agents lacking Write permission
+- Scope distinction: own agents get Write directly (pending task), third-party agents need capture mechanism
+
+**Name brainstorm:**
+- `tmp/grounding-skill-names.md` — 24 candidates across 2 rounds (opus)
+- Selected `/ground` — discoverability over edify thematic pairing
 
 ## Pending Tasks
 
-- [ ] **Grounding skill** — Create plugin skill for research-anchored methodology synthesis | sonnet
-  - Research: `plans/reports/ground-skill-research-synthesis.md` (Double Diamond + Rapid Review + RAG grounding)
-  - Pattern: Scope → Diverge (parallel internal brainstorm/explore + external web research) → Converge → Output
-  - Parameterized: internal branch type (brainstorm/explore), model tier, research breadth, output format
-  - Grounding quality label: Strong/Moderate/Thin/None attached to output
+- [ ] **Design skill outline gate** — Update /design skill to add direct execution gate after outline validated | sonnet
+  - When outline has sufficient specificity, skip Phase C (design generation) and implement directly
+  - Discovered during ground skill: outline was the design
+
+- [ ] **Outline agent Write perm** — Add Write permission to outline-review-agent, update design skill to specify report path | sonnet | restart
+  - Prototype use case for third-party agents is separate (plans/reports/prototype-review-capture-script.md)
+
+- [ ] **Handoff memory naming** — Add trigger naming guidance to handoff skill's learning-writing section | sonnet
+  - Principle: triggers match activity at decision point, broadest verb, no self-assessment terms
+  - Same principle as `/when choosing name`: discovery and recall over precision
 
 - [ ] **Remember skill update** — Resume `/design` Phase B | sonnet
   - Requirements: `plans/remember-skill-update/requirements.md` (7 FRs, When/How prefix mandate)
@@ -35,6 +52,7 @@
   - Key decisions pending: hyphen handling, agent duplication, frozen-domain priority
   - Reports: `plans/remember-skill-update/reports/outline-review.md`, `plans/remember-skill-update/reports/explore-remember-skill.md`
   - Learnings consolidation done (491→32 lines) — FR-7 migration partially addressed via consolidation
+  - **New scope:** `/remember` consolidation should validate trigger names before graduating to `/when` entries
 
 - [ ] **Rename remember skill** — Test brainstorm-name agent, pick new name, update all references | sonnet | restart
 
@@ -155,12 +173,14 @@
 
 ## Next Steps
 
-Grounding skill: Create skill using `plans/reports/ground-skill-research-synthesis.md` as reference, following same pattern as prioritize skill.
+Remember skill update: Resume `/design` Phase B with outline discussion. New scope addition: trigger name validation during consolidation.
 
 ## Reference Files
 
 - `plans/reports/task-prioritization-methodology.md` — WSJF-adapted prioritization methodology
 - `plans/reports/ground-skill-research-synthesis.md` — Grounding skill research synthesis (Double Diamond + Rapid Review + RAG)
+- `plans/reports/prototype-review-capture-script.md` — Sub-agent output capture prototype (third-party agents)
+- `plans/grounding-skill/outline.md` — Ground skill design outline (8 decisions)
 - `plans/remember-skill-update/requirements.md` — 7 FRs (When/How prefix, validation, migration)
 - `plans/remember-skill-update/outline.md` — Design outline (reviewed, Phase B ready)
 - `plans/error-handling/outline.md` — Error handling design outline (Phase A complete)
