@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 
 from claudeutils.worktree.session import extract_task_blocks, find_section_bounds
-from claudeutils.worktree.utils import _git, wt_path
+from claudeutils.worktree.utils import _git, _is_branch_merged, wt_path
 
 
 def _check_clean_for_merge(
@@ -282,6 +282,13 @@ def _phase4_merge_commit_and_precommit(slug: str) -> None:
     if merge_in_progress:
         _git("commit", "--allow-empty", "-m", f"🔀 Merge {slug}")
     elif staged_check.returncode != 0:
+        if not _is_branch_merged(slug):
+            import sys
+
+            sys.stderr.write(
+                "Error: merge state lost — MERGE_HEAD absent, branch not merged\n"
+            )
+            raise SystemExit(2)
         _git("commit", "-m", f"🔀 Merge {slug}")
 
     precommit_result = subprocess.run(
