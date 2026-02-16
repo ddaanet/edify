@@ -58,3 +58,15 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Running a single reviewer and trusting all findings. Exploration agents produce false positives from over-reading (e.g., "line number wrong" when insertion point was correct); opus reviewers miss implementation-level issues (e.g., helper function return value semantics).
 - Correct pattern: Run 3+ independent reviewers in parallel (opus review, exploration, inline RCA against source code). Cross-reference findings — real issues appear in multiple or survive verification against source. False positives get filtered by disagreement.
 - Evidence: 3-way review of runbook-phase-1.md found 8 real issues (each reviewer found unique ones) and filtered 2 false positives. Exploration flagged "critical" line number issue that was correct; opus missed `_git()` return value issue only caught by reading source code directly.
+## When performing root cause analysis
+- Anti-pattern: Finding first cause and jumping to solution (e.g., "expansion has defects → add more review rounds")
+- Correct pattern: Multi-layer RCA with explicit stops between layers. L1: what are the symptoms? L2: what caused them? STOP. L3: why was that cause allowed? STOP. Only then does the fix address the cause, not the symptoms.
+- Evidence: Merge data loss RCA — L1: bugs in code. L2: haiku generated safety-critical code. L3: delegation model assigns by type not risk + no review gate covers behavioral safety. Fix: model floor for Tier 1 steps AND safety criteria in vet.
+## When building custom pipeline infrastructure
+- Anti-pattern: Building custom review/workflow infrastructure without checking what the platform already ships
+- Correct pattern: Inventory platform-provided plugins and features first. Build custom only for gaps. Anthropic ships 28 official plugins including code-review, feature-dev, security-guidance, commit-commands, claude-md-management.
+- Rationale: Custom infrastructure diverges from platform evolution. Official plugins get maintained, updated, and integrated. Reinvention wastes effort and creates maintenance burden.
+## When searching adjacent domains
+- Anti-pattern: Narrowing search to one domain after user feedback (e.g., "not security?" → drop all security searches). Interpreting correction as exclusion rather than asking for clarification.
+- Correct pattern: When user questions missing coverage ("not X?"), they may mean "why no X?" not "exclude X." Safety and security are adjacent — both warrant research even when the triggering incident is one or the other.
+- Evidence: User said "not security?" meaning "why aren't you searching for security too?" — interpreted as "this isn't about security" and dropped security entirely.
