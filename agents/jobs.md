@@ -20,6 +20,7 @@ Plan lifecycle tracking. Updated when plans change status.
 | worktree-skill | complete | Design.md retained on disk for reference |
 | worktree-update | complete | 40 TDD cycles, recovery (C2-C5), merged to main |
 | worktree-merge-data-loss | complete | 13 TDD cycles + 1 general step, merged to main, deliverable review done |
+| runbook-quality-gates | requirements | Outline complete, Phase C (design generation) next. 6 FRs, dedicated simplification agent + validation script |
 | workwoods | requirements | Cross-tree worktree awareness, vet tracking, plan state inference, bidirectional merge |
 | prototypes | requirements | Session extraction feature gap, multi-project scanning |
 | remaining-workflow-items | complete | 5 FRs: reflect task output, tool-batching, delegate resume, agent output, commit simplification |
