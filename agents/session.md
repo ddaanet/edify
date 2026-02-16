@@ -1,20 +1,40 @@
 # Session Handoff: 2026-02-16
 
-**Status:** Consolidated learnings.md (491→32 lines). All worktrees cleared.
+**Status:** Established grounded task prioritization methodology (WSJF-adapted) and grounding skill research synthesis. Two new skills pending creation.
 
 ## Completed This Session
 
-**Learnings consolidation (`/remember`):**
-- Consolidated 69 entries from `agents/learnings.md` across 6 decision files
-- 17 new entries added: operational-practices (3), implementation-notes (4), orchestration-execution (2), project-config (4), workflow-optimization (2), workflow-advanced (2)
-- 17 memory index entries added, all validated by precommit
-- ~46 entries removed (already consolidated in prior sessions, verified by existing index mappings)
-- 6 entries dropped (incident-specific without generalizable principle)
-- 5 entries retained with When/How prefix format per remember-skill-update design
-- Fixed validator key-heading mismatches: `/how X` maps to `"how to X"` internally, headings must include "To", keys must NOT
-- Compressed workflow-advanced.md (418→400 lines) by removing redundant sub-headers
+**Task prioritization research & methodology:**
+- Researched prioritization frameworks: WSJF, RICE, ICE, CD3, Lean Value/Effort, MoSCoW, Eisenhower (6 web searches, 2 web fetches)
+- Opus brainstorm produced 13 project-specific evaluation axes (defect compounding, artifact readiness, downstream unblock, knowledge decay, model tier cost, workflow friction, parallelizability, bootstrap risk, decision reversibility, restart amortization, agent reliability, context locality, consolidation pressure)
+- Selected WSJF as base framework — CoD decomposed into Workflow Friction + Decay Pressure + Compound Risk Reduction, with project-specific Fibonacci scoring tables
+- Scored all 27 pending tasks; top 5: precommit improvements (4.5), vet proportionality (3.8), remember skill update (3.2), RED pass protocol (3.2), review runbook delegation (3.0)
+- Report: `plans/reports/task-prioritization-methodology.md`
+
+**Grounding skill research & design:**
+- Researched: Double Diamond (Design Council 2005), Rapid Review (evidence synthesis), RAG-as-grounding (LLM hallucination mitigation)
+- Synthesized 4-phase procedure: Scope → Diverge (parallel internal + external) → Converge → Output
+- Grounding quality labels (Strong/Moderate/Thin/None) from Rapid Review's rigor/speed tradeoff acknowledgment
+- Report: `plans/reports/ground-skill-research-synthesis.md`
+
+**Design discussions:**
+- Both methodologies should be skills (not decision documents) for plugin portability
+- Grounding skill should itself be grounded (meta-recursive — applied its own methodology)
+- Research deliverables belong in plans/reports/, not tmp/
 
 ## Pending Tasks
+
+- [ ] **Prioritization skill** — Create plugin skill for WSJF-adapted backlog scoring | sonnet
+  - Research: `plans/reports/task-prioritization-methodology.md` (WSJF adapted with project-specific CoD decomposition)
+  - Methodology: Workflow Friction + Decay Pressure + Compound Risk Reduction / Job Size
+  - Scheduling modifiers: model tier cohort, restart batching, self-referential flag, parallelizability
+  - Skill output: priority-ordered table + parallel batches
+
+- [ ] **Grounding skill** — Create plugin skill for research-anchored methodology synthesis | sonnet
+  - Research: `plans/reports/ground-skill-research-synthesis.md` (Double Diamond + Rapid Review + RAG grounding)
+  - Pattern: Scope → Diverge (parallel internal brainstorm/explore + external web research) → Converge → Output
+  - Parameterized: internal branch type (brainstorm/explore), model tier, research breadth, output format
+  - Grounding quality label: Strong/Moderate/Thin/None attached to output
 
 - [ ] **Remember skill update** — Resume `/design` Phase B | sonnet
   - Requirements: `plans/remember-skill-update/requirements.md` (7 FRs, When/How prefix mandate)
@@ -136,10 +156,12 @@
 
 ## Next Steps
 
-Remember skill update: Resume `/design` Phase B discussion on outline.
+Prioritization skill: Create skill using `plans/reports/task-prioritization-methodology.md` as reference, following plugin-dev:skill-development process.
 
 ## Reference Files
 
+- `plans/reports/task-prioritization-methodology.md` — WSJF-adapted prioritization methodology
+- `plans/reports/ground-skill-research-synthesis.md` — Grounding skill research synthesis (Double Diamond + Rapid Review + RAG)
 - `plans/remember-skill-update/requirements.md` — 7 FRs (When/How prefix, validation, migration)
 - `plans/remember-skill-update/outline.md` — Design outline (reviewed, Phase B ready)
 - `plans/error-handling/outline.md` — Error handling design outline (Phase A complete)

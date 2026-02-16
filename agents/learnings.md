@@ -29,3 +29,12 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Post-orchestration deliverable review catches inter-file consistency gaps (stale copies, broken references, missing cross-references) that per-step vet misses
 - Evidence: memory-index skill drifted during execution (3 entries missing); workflows-terminology.md referenced non-existent agent; runbook skill missing general-patterns.md reference
 - These were invisible to per-step vet because each step's artifacts were internally consistent
+## When synthesizing ungrounded methodology
+- Anti-pattern: Producing scoring frameworks, evaluation axes, or "best practice" documents from internal reasoning alone — yields confabulated methodologies with subjective weights and ungrounded criteria
+- Correct pattern: Diverge-converge with parallel branches: internal (opus brainstorm for project-specific dimensions) + external (web search for established frameworks). Synthesize by mapping internal dimensions onto external skeleton.
+- Evidence: First prioritization attempt produced subjective weights ("Highest/High/Medium") and 0-3 scores without defined criteria. After grounding in WSJF research, methodology used Fibonacci scoring with observable evidence sources.
+- Fix: Grounding skill (pending creation) encodes this as mandatory procedure for methodological/framework/best-practice outputs
+## When research deliverables misplaced
+- Anti-pattern: Writing research synthesis documents to tmp/ — they're ephemeral and won't survive across sessions
+- Correct pattern: Research deliverables that inform future work go to plans/reports/ (persistent, tracked). Only scratch computation goes to tmp/.
+- Rationale: tmp/ is gitignored. Research synthesis is a reusable artifact referenced by skill creation and future prioritization runs.
