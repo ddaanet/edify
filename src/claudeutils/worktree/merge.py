@@ -27,13 +27,7 @@ def _check_clean_for_merge(
     exempt_paths: set[str] | None = None,
     label: str = "main",
 ) -> None:
-    """Verify clean tree for merge.
-
-    Args:
-        path: Directory to check (None = current directory)
-        exempt_paths: Paths to exempt from dirty check (None = strict mode)
-        label: Location label for error messages
-    """
+    """Verify clean tree for merge (path=dir to check, exempt_paths=allowed dirty files, label=error context)."""
     parent_cmd = ["-C", str(path)] if path else []
     parent_cmd.extend(["status", "--porcelain", "--untracked-files=no"])
     parent = _git(*parent_cmd, check=False)
@@ -68,60 +62,92 @@ def _check_clean_for_merge(
         raise SystemExit(1)
 
 
-def _resolve_session_md_conflict(conflicts: list[str]) -> list[str]:
-    """Resolve agents/session.md conflict.
+def _extract_section_bullets(content: str, header: str) -> list[str]:
+    """Extract top-level bullet lines from a named section."""
+    bounds = find_section_bounds(content, header)
+    if bounds is None:
+        return []
+    lines = content.split("\n")
+    return [
+        line
+        for line in lines[bounds[0] + 1 : bounds[1]]
+        if line.startswith("- ")
+    ]
 
-    Keep ours and extract new tasks from theirs. Returns updated conflict list
-    with session.md removed if present.
+
+def _merge_session_contents(ours: str, theirs: str) -> str:
+    """Merge session.md contents.
+
+    Keep ours, add new tasks and blockers from theirs.
+    """
+    ours_blocks = extract_task_blocks(ours)
+    theirs_blocks = extract_task_blocks(theirs)
+    ours_names = {b.name for b in ours_blocks}
+    new_blocks = [b for b in theirs_blocks if b.name not in ours_names]
+
+    result_lines = ours.split("\n")
+
+    # Insert new tasks
+    if new_blocks:
+        new_task_lines: list[str] = []
+        for block in sorted(new_blocks, key=lambda b: b.name):
+            new_task_lines.extend(block.lines)
+
+        bounds = find_section_bounds(ours, "Pending Tasks")
+        if bounds is not None:
+            insertion_point = bounds[1]
+            if (
+                insertion_point < len(result_lines)
+                and result_lines[insertion_point] != ""
+                and (not new_task_lines or new_task_lines[-1] != "")
+            ):
+                new_task_lines.append("")
+            result_lines[insertion_point:insertion_point] = new_task_lines
+        else:
+            result_lines.extend(["", "## Pending Tasks", "", *new_task_lines])
+
+    # Merge blockers
+    result_so_far = "\n".join(result_lines)
+    ours_bullets = _extract_section_bullets(result_so_far, "Blockers / Gotchas")
+    theirs_bullets = _extract_section_bullets(theirs, "Blockers / Gotchas")
+    new_bullets = [b for b in theirs_bullets if b not in ours_bullets]
+
+    if new_bullets:
+        result_lines = result_so_far.split("\n")
+        bounds = find_section_bounds(result_so_far, "Blockers / Gotchas")
+        if bounds is not None:
+            result_lines[bounds[1] : bounds[1]] = new_bullets
+        else:
+            result_lines.extend(["", "## Blockers / Gotchas", "", *new_bullets])
+
+    return "\n".join(result_lines)
+
+
+def _resolve_session_md_conflict(conflicts: list[str]) -> list[str]:
+    """Resolve session.md conflict: keep ours, merge new tasks/blockers from theirs.
+
+    Three-tier staging: git add → hash-object+update-index → checkout --ours (recovers from staging failure).
     """
     if "agents/session.md" not in conflicts:
         return conflicts
 
     ours_content = _git("show", ":2:agents/session.md", check=False)
     theirs_content = _git("show", ":3:agents/session.md", check=False)
+    merged = _merge_session_contents(ours_content, theirs_content)
 
-    # Extract task blocks from both sides (all pending tasks)
-    # Handles both modern (with "## Pending Tasks") and legacy (tasks at root)
-    ours_blocks = extract_task_blocks(ours_content)
-    theirs_blocks = extract_task_blocks(theirs_content)
-
-    # Compare by task name to find new tasks
-    ours_names = {b.name for b in ours_blocks}
-    new_blocks = [b for b in theirs_blocks if b.name not in ours_names]
-
-    if new_blocks:
-        bounds = find_section_bounds(ours_content, "Pending Tasks")
-        ours_lines = ours_content.split("\n")
-
-        if bounds is not None:
-            # Insert full task blocks (all lines) before next section
-            insertion_point = bounds[1]
-            new_task_lines = []
-            for block in sorted(new_blocks, key=lambda b: b.name):
-                new_task_lines.extend(block.lines)
-
-            # Ensure blank line separation before next section header.
-            # Add blank line after new tasks if:
-            # - next line exists and is not already blank, AND
-            # - new tasks don't already end with blank line
-            if (
-                insertion_point < len(ours_lines)
-                and ours_lines[insertion_point] != ""
-                and (not new_task_lines or new_task_lines[-1] != "")
-            ):
-                new_task_lines.append("")
-
-            ours_lines[insertion_point:insertion_point] = new_task_lines
-        else:
-            # Create Pending Tasks section if missing
-            new_task_lines = []
-            for block in sorted(new_blocks, key=lambda b: b.name):
-                new_task_lines.extend(block.lines)
-            ours_lines.extend(["", "## Pending Tasks", "", *new_task_lines])
-        ours_content = "\n".join(ours_lines)
-
-    Path("agents/session.md").write_text(ours_content)
-    _git("add", "agents/session.md")
+    try:
+        Path("agents/session.md").write_text(merged)
+        _git("add", "agents/session.md")
+    except subprocess.CalledProcessError:
+        try:
+            # Stage via hash-object (bypasses git add)
+            blob_hash = _git("hash-object", "-w", "agents/session.md")
+            _git("update-index", "--cacheinfo", f"100644,{blob_hash},agents/session.md")
+            click.echo("session.md: staged via hash-object (git add failed)", err=True)
+        except subprocess.CalledProcessError:
+            click.echo("session.md: resolution failed, falling back to ours", err=True)
+            _git("checkout", "--ours", "agents/session.md")
+            _git("add", "agents/session.md")
 
     return [c for c in conflicts if c != "agents/session.md"]
 
@@ -250,6 +276,17 @@ def _phase3_merge_parent(slug: str) -> None:
     )
     if result.returncode == 0:
         return
+
+    # Distinguish merge conflict (MERGE_HEAD exists) from merge abort
+    merge_head = subprocess.run(
+        ["git", "rev-parse", "--verify", "MERGE_HEAD"],
+        capture_output=True,
+        check=False,
+    )
+    if merge_head.returncode != 0:
+        stderr = result.stderr.strip() if result.stderr else "unknown error"
+        click.echo(f"Merge failed: {stderr}", err=True)
+        raise SystemExit(1)
 
     conflicts = _git("diff", "--name-only", "--diff-filter=U", check=False).split("\n")
     conflicts = [c for c in conflicts if c.strip()]
