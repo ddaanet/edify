@@ -580,3 +580,134 @@ def test_rm_allows_focused_session_only(
     assert (
         "Removed test-branch (focused session only)" in result.output
     ), f"Expected 'Removed test-branch (focused session only)' in output but got: {result.output}"
+
+
+def test_rm_guard_prevents_destruction(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Verify rm guard prevents ALL destructive operations for unmerged real history.
+
+    Tests integration ordering: when guard refuses removal (exit 1), NONE of the
+    following should execute:
+    - session.md task removal
+    - worktree directory deletion
+    - _probe_registrations call
+    - git branch deletion
+
+    This is a regression test for the original incident where these operations
+    happened despite guard refusal.
+    """
+    from click.testing import CliRunner
+
+    from claudeutils.worktree.cli import worktree
+
+    repo_path = tmp_path / "test-repo"
+    repo_path.mkdir()
+    init_repo(repo_path)
+    monkeypatch.chdir(repo_path)
+
+    runner = CliRunner()
+
+    # Create branch with 2 unmerged commits (real history, not focused)
+    subprocess.run(
+        ["git", "checkout", "-b", "guard-test"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    (repo_path / "file1.txt").write_text("content 1")
+    subprocess.run(
+        ["git", "add", "file1.txt"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Commit 1"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    (repo_path / "file2.txt").write_text("content 2")
+    subprocess.run(
+        ["git", "add", "file2.txt"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Commit 2"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Switch back to main
+    subprocess.run(
+        ["git", "checkout", "main"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Create worktree directory
+    worktree_path = repo_path / "wt" / "guard-test"
+    worktree_path.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["git", "worktree", "add", str(worktree_path), "guard-test"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # Add task to session.md
+    session_md_path = repo_path / "agents" / "session.md"
+    session_md_path.parent.mkdir(parents=True, exist_ok=True)
+    session_md_path.write_text(
+        "# Session\n\n## Worktree Tasks\n\n"
+        "- [ ] **Test Task** → `guard-test`\n"
+    )
+
+    # Call worktree rm guard-test
+    result = runner.invoke(worktree, ["rm", "guard-test"])
+
+    # Verify exit code is 1 (guard refused)
+    assert result.exit_code == 1, f"Expected exit code 1 but got {result.exit_code}"
+
+    # NEGATIVE ASSERTIONS (regression test for incident)
+
+    # 1. Worktree directory still exists on disk
+    assert worktree_path.exists(), (
+        "Worktree directory was removed but should exist (guard should prevent deletion)"
+    )
+
+    # 2. Branch still exists
+    branch_check = subprocess.run(
+        ["git", "rev-parse", "--verify", "guard-test"],
+        cwd=repo_path,
+        capture_output=True,
+    )
+    assert branch_check.returncode == 0, (
+        "Branch was removed but should exist (guard should prevent deletion)"
+    )
+
+    # 3. Session.md task NOT removed
+    session_content = session_md_path.read_text()
+    assert "→ `guard-test`" in session_content, (
+        "Session.md task was removed but should exist (guard should prevent modification)"
+    )
+
+    # 4. _probe_registrations NOT called (verify via side effect absence)
+    # If probe was called, worktree prune would have happened. Check that worktree
+    # is still registered (proving prune didn't run).
+    list_output = subprocess.run(
+        ["git", "worktree", "list", "--porcelain"],
+        cwd=repo_path,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    assert str(worktree_path) in list_output, (
+        "Worktree not in git worktree list (prune may have run, indicating "
+        "_probe_registrations was called despite guard refusal)"
+    )
