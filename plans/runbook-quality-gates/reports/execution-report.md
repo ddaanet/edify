@@ -117,3 +117,14 @@
 - Files modified: `agent-core/bin/validate-runbook.py` (added `check_red_plausibility`, updated `write_report` to include `Ambiguous:` in summary, implemented `cmd_red_plausibility`), `tests/test_validate_runbook.py` (added `test_red_plausibility_happy_path`)
 - Stop condition: none
 - Decision made: none
+
+### Cycle 4.2: red-plausibility violation 2026-02-18
+- Status: GREEN_VERIFIED
+- Test command: `pytest tests/test_validate_runbook.py::test_red_plausibility_violation -v`
+- RED result: FAIL as expected (AssertionError — exit code 0 not 1; Cycle 4.1 executor pre-implemented violation detection but did not track creating cycle ID in violation message; `assert "1.1" in content` failed)
+- GREEN result: PASS
+- Regression check: 11/11 passed
+- Refactoring: precommit passes, no warnings
+- Files modified: `agent-core/bin/validate-runbook.py` (changed `created_names: set[str]` to `dict[str, str]` mapping name → creating cycle_id; updated violation message to include creating cycle ID; used `setdefault` for accumulation), `tests/test_validate_runbook.py` (added `VIOLATION_RED_IMPLAUSIBLE` import, `test_red_plausibility_violation`), `tests/fixtures/validate_runbook_fixtures.py` (added `VIOLATION_RED_IMPLAUSIBLE` fixture)
+- Stop condition: none
+- Decision made: none

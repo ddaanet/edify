@@ -12,6 +12,7 @@ from tests.fixtures.validate_runbook_fixtures import (
     VIOLATION_LIFECYCLE_DUPLICATE_CREATE,
     VIOLATION_LIFECYCLE_MODIFY_BEFORE_CREATE,
     VIOLATION_MODEL_TAGS,
+    VIOLATION_RED_IMPLAUSIBLE,
     VIOLATION_TEST_COUNTS,
     VIOLATION_TEST_COUNTS_PARAMETRIZED,
 )
@@ -280,6 +281,42 @@ def test_red_plausibility_happy_path(
     content = report_path.read_text()
     assert "**Result:** PASS" in content
     assert "Failed: 0" in content
+    assert "Ambiguous: 0" in content
+
+
+def test_red_plausibility_violation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Red-plausibility: function created in prior GREEN causes exit 1 FAIL report."""
+    monkeypatch.chdir(tmp_path)
+    runbook = tmp_path / "red-implausible.md"
+    runbook.write_text(VIOLATION_RED_IMPLAUSIBLE)
+
+    monkeypatch.setattr(
+        sys, "argv", ["validate-runbook", "red-plausibility", str(runbook)]
+    )
+    try:
+        main()
+        exit_code = 0
+    except SystemExit as exc:
+        exit_code = exc.code if isinstance(exc.code, int) else 1
+
+    assert exit_code == 1
+
+    report_path = (
+        tmp_path
+        / "plans"
+        / "red-implausible"
+        / "reports"
+        / "validation-red-plausibility.md"
+    )
+    assert report_path.exists(), f"Report not found at {report_path}"
+    content = report_path.read_text()
+    assert "**Result:** FAIL" in content
+    assert "widget" in content
+    assert "1.1" in content
+    assert "1.2" in content
+    assert "Failed: 1" in content
     assert "Ambiguous: 0" in content
 
 

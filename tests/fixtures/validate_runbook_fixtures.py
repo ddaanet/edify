@@ -181,6 +181,62 @@ title: Parametrized Test Counts Runbook
 ---
 """
 
+VIOLATION_RED_IMPLAUSIBLE = """\
+---
+title: Red Implausible Runbook
+---
+
+# Phase 1: Core module (type: tdd)
+
+---
+
+## Cycle 1.1: create widget
+
+**Execution Model**: Sonnet
+
+**RED Phase:**
+
+**Test:** `test_create_widget`
+
+**Verify RED:** `pytest tests/test_example.py::test_create_widget -v`
+
+---
+
+**GREEN Phase:**
+
+**Changes:**
+- File: `src/widget.py`
+  Action: Create
+
+**Verify GREEN:** `pytest tests/test_example.py::test_create_widget -v`
+
+---
+
+## Cycle 1.2: use widget
+
+**Execution Model**: Sonnet
+
+**RED Phase:**
+
+**Test:** `test_use_widget`
+
+**Expected failure:** ImportError on 'widget' not importable
+
+**Verify RED:** `pytest tests/test_example.py::test_use_widget -v`
+
+---
+
+**GREEN Phase:**
+
+**Changes:**
+- File: `src/widget.py`
+  Action: Modify
+
+**Verify GREEN:** `pytest tests/test_example.py::test_use_widget -v`
+
+---
+"""
+
 VIOLATION_TEST_COUNTS = """\
 ---
 title: Test Counts Violation Runbook
