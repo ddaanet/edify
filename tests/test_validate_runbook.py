@@ -155,6 +155,30 @@ def test_model_tags_violation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     assert "Failed: 1" in content
 
 
+def test_lifecycle_happy_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Lifecycle on valid runbook exits 0 and writes a PASS report."""
+    monkeypatch.chdir(tmp_path)
+    runbook = tmp_path / "valid-tdd.md"
+    runbook.write_text(VALID_TDD)
+
+    monkeypatch.setattr(sys, "argv", ["validate-runbook", "lifecycle", str(runbook)])
+    try:
+        main()
+        exit_code = 0
+    except SystemExit as exc:
+        exit_code = exc.code if isinstance(exc.code, int) else 1
+
+    assert exit_code == 0
+
+    report_path = (
+        tmp_path / "plans" / "valid-tdd" / "reports" / "validation-lifecycle.md"
+    )
+    assert report_path.exists(), f"Report not found at {report_path}"
+    content = report_path.read_text()
+    assert "**Result:** PASS" in content
+    assert "Failed: 0" in content
+
+
 def test_scaffold_cli() -> None:
     """Script exposes four subcommands and exits 1 when invoked without one."""
     result = subprocess.run(
