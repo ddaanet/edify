@@ -41,7 +41,6 @@ def test_format_git_error_handles_missing_stderr() -> None:
 
 def test_merge_cli_surfaces_git_error(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
     """CLI merge command surfaces git error without traceback."""
-    # Create a git repo
     repo = tmp_path / "repo"
     repo.mkdir()
     subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
@@ -58,7 +57,6 @@ def test_merge_cli_surfaces_git_error(tmp_path: Path, monkeypatch: MonkeyPatch) 
         capture_output=True,
     )
 
-    # Create initial commit
     (repo / "file.txt").write_text("content")
     subprocess.run(
         ["git", "add", "file.txt"], cwd=repo, check=True, capture_output=True
@@ -67,15 +65,10 @@ def test_merge_cli_surfaces_git_error(tmp_path: Path, monkeypatch: MonkeyPatch) 
         ["git", "commit", "-m", "Initial"], cwd=repo, check=True, capture_output=True
     )
 
-    # Change to repo directory
     monkeypatch.chdir(repo)
-
-    # Run merge on non-existent branch
     runner = CliRunner()
     result = runner.invoke(worktree, ["merge", "nonexistent-branch"])
 
-    # Should fail with clean error (not traceback)
-    # Exit code 2 = branch not found (per merge.py:182)
     assert result.exit_code == 2
     assert "Branch nonexistent-branch not found" in result.output
     assert "Traceback" not in result.output
@@ -83,16 +76,13 @@ def test_merge_cli_surfaces_git_error(tmp_path: Path, monkeypatch: MonkeyPatch) 
 
 def test_git_helper_preserves_stderr_in_exception(tmp_path: Path) -> None:
     """_git() raises CalledProcessError with stderr populated."""
-    # Create a git repo
     repo = tmp_path / "repo"
     repo.mkdir()
     subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
 
-    # Try to add non-existent file
     with pytest.raises(subprocess.CalledProcessError) as exc_info:
         _git("-C", str(repo), "add", "nonexistent.txt")
 
-    # Verify stderr is present
     assert exc_info.value.stderr is not None
     assert (
         "pathspec" in exc_info.value.stderr.lower()
@@ -100,11 +90,10 @@ def test_git_helper_preserves_stderr_in_exception(tmp_path: Path) -> None:
     )
 
 
-def test_merge_conflict_surfaces_git_error(
+def test_merge_aborts_cleanly_when_untracked_file_blocks(
     tmp_path: Path, monkeypatch: MonkeyPatch
 ) -> None:
-    """Merge with conflict surfaces git error, not traceback."""
-    # Create a git repo with conflicting changes
+    """Merge detects abort (untracked file) and reports error."""
     repo = tmp_path / "repo"
     repo.mkdir()
     subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
@@ -121,7 +110,71 @@ def test_merge_conflict_surfaces_git_error(
         capture_output=True,
     )
 
-    # Create file on main
+    (repo / "agents").mkdir()
+    (repo / "agents" / "session.md").write_text("# Base\n")
+    subprocess.run(["git", "add", "."], cwd=repo, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Init"], cwd=repo, check=True, capture_output=True
+    )
+
+    subprocess.run(
+        ["git", "checkout", "-b", "feature"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+    )
+    (repo / "agents" / "session.md").write_text("# Branch\n")
+    subprocess.run(["git", "add", "."], cwd=repo, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Branch"], cwd=repo, check=True, capture_output=True
+    )
+
+    subprocess.run(
+        ["git", "checkout", "main"], cwd=repo, check=True, capture_output=True
+    )
+    subprocess.run(
+        ["git", "rm", "--cached", "agents/session.md"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Remove tracking"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+    )
+    (repo / "agents" / "session.md").write_text("# Untracked\n")
+
+    monkeypatch.chdir(repo)
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["merge", "feature"])
+
+    assert result.exit_code != 0
+    assert "Traceback" not in result.output
+    assert "Merge failed" in result.output or "untracked" in result.output.lower()
+
+
+def test_merge_conflict_surfaces_git_error(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Merge with conflict surfaces git error, not traceback."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.name", "Test"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+    )
+
     (repo / "file.txt").write_text("main content")
     subprocess.run(
         ["git", "add", "file.txt"], cwd=repo, check=True, capture_output=True
@@ -130,7 +183,6 @@ def test_merge_conflict_surfaces_git_error(
         ["git", "commit", "-m", "Main"], cwd=repo, check=True, capture_output=True
     )
 
-    # Create branch with different content
     subprocess.run(
         ["git", "checkout", "-b", "branch"], cwd=repo, check=True, capture_output=True
     )
@@ -142,7 +194,6 @@ def test_merge_conflict_surfaces_git_error(
         ["git", "commit", "-m", "Branch"], cwd=repo, check=True, capture_output=True
     )
 
-    # Go back to main and create conflicting change
     subprocess.run(
         ["git", "checkout", "main"], cwd=repo, check=True, capture_output=True
     )
@@ -154,15 +205,10 @@ def test_merge_conflict_surfaces_git_error(
         ["git", "commit", "-m", "Main 2"], cwd=repo, check=True, capture_output=True
     )
 
-    # Change to repo directory
     monkeypatch.chdir(repo)
-
-    # Attempt merge - should fail with conflict
     runner = CliRunner()
     result = runner.invoke(worktree, ["merge", "branch"])
 
-    # Should report conflict, not crash with traceback
     assert result.exit_code != 0
     assert "Traceback" not in result.output
-    # Either clean error message or conflict abort message
     assert "conflict" in result.output.lower() or "aborted" in result.output.lower()

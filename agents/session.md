@@ -183,10 +183,6 @@
   - Plan: workwoods | Status: requirements
 
 
-- [ ] **Worktree merge errors** → `worktree-merge-errors` — Catch exceptions in merge CLI, report errors without stack traces; surface failed command output | sonnet
-  - Stack traces on merge errors are user-hostile; report cause and recovery steps instead
-  - `_git()` CalledProcessError swallows stderr — surface the actual git error message (thought this was already done in merge-data-loss work)
-  - Reproduce: `git add agents/session.md` returned exit 128 during `_resolve_session_md_conflict` in `_phase3_merge_parent`. Merge of `remaining-workflow-items` worktree, 2026-02-16. Branch had 1 post-merge commit (683fc7d). Conflict on both `agent-core` (submodule) and `agents/session.md`. Main at 9bb45d0, merge result at 5e024c2.
 
 - [ ] **Runbook skill fixes** → `runbook-skill-fixes` — Batch: model assignment (opus for architectural artifacts), design quality gates | opus
   - Runbook model assignment: apply design-decisions.md directive (opus for skill/fragment/agent edits) — partially landed via remaining-workflow-items merge
