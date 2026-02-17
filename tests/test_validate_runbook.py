@@ -106,7 +106,7 @@ def test_model_tags_happy_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     runbook = tmp_path / "my-runbook.md"
     runbook.write_text(VALID_TDD)
 
-    sys.argv = ["validate-runbook", "model-tags", str(runbook)]
+    monkeypatch.setattr(sys, "argv", ["validate-runbook", "model-tags", str(runbook)])
     try:
         main()
         exit_code = 0
@@ -130,7 +130,7 @@ def test_model_tags_violation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     runbook = tmp_path / "violation-runbook.md"
     runbook.write_text(VIOLATION_MODEL_TAGS)
 
-    sys.argv = ["validate-runbook", "model-tags", str(runbook)]
+    monkeypatch.setattr(sys, "argv", ["validate-runbook", "model-tags", str(runbook)])
     try:
         main()
         exit_code = 0
