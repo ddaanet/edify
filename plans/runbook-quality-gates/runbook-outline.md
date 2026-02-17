@@ -23,7 +23,8 @@
 | FR-5 | Phase 3 | 3.1–3.3 | test-counts subcommand |
 | FR-4 (structural) | Phase 4 | 4.1–4.3 | red-plausibility subcommand |
 | FR-4 (semantic, exit 2) | Phase 4 | 4.3 | exit code 2 for ambiguous |
-| NFR-2 (incremental) | Phase 5 | 5.1–5.2 | --skip flags, graceful degradation |
+| FR-6 (scaling) | — | — | Addressed by design: mandatory uniform execution for all Tier 3 runbooks |
+| NFR-2 (incremental) | Phase 5 | 5.1 | --skip flags + directory input (consolidated) |
 | NFR-1 (integration) | All | 1.1, 5.1 | argparse CLI, directory input |
 
 ---
@@ -32,9 +33,9 @@
 
 ### Phase 1: Script infrastructure + `model-tags` subcommand (type: tdd)
 
-Complexity: Medium | Target: `agent-core/bin/validate-runbook.py` (new), `tests/test_validate_runbook.py` (new), `tests/fixtures/runbooks/` (new directory)
+Complexity: Medium | Target: `agent-core/bin/validate-runbook.py` (new), `tests/test_validate_runbook.py` (new)
 
-**Context:** D-7 resolved — import `parse_frontmatter`, `extract_cycles`, `extract_sections`, `assemble_phase_files`, `extract_file_references` from `prepare-runbook.py` via `importlib.util.spec_from_file_location`.
+**Context:** D-7 resolved — import `parse_frontmatter`, `extract_cycles`, `extract_sections`, `assemble_phase_files`, `extract_file_references`, `extract_step_metadata` from `prepare-runbook.py` via `importlib.util.spec_from_file_location`.
 
 - Cycle 1.1: Script scaffold — argparse with 4 subcommands, importlib import of prepare-runbook.py functions, report writer, exit codes
 - Cycle 1.2: model-tags — happy path (no violations, exit 0, report written to `plans/<job>/reports/validation-model-tags.md`)
@@ -45,6 +46,7 @@ Checkpoint after Phase 1: Run `just test tests/test_validate_runbook.py`
 ### Phase 2: `lifecycle` subcommand (type: tdd)
 
 Complexity: Medium | Target: `agent-core/bin/validate-runbook.py` (modify), `tests/test_validate_runbook.py` (modify)
+Depends on: Phase 1 (script scaffold, importlib infrastructure, report writer)
 
 - Cycle 2.1: lifecycle — happy path (correct create→modify ordering, exit 0)
 - Cycle 2.2: lifecycle — modify-before-create violation (file modified before created in runbook, exit 1)
@@ -55,6 +57,7 @@ Checkpoint after Phase 2: Run `just test tests/test_validate_runbook.py`
 ### Phase 3: `test-counts` subcommand (type: tdd)
 
 Complexity: Medium | Target: `agent-core/bin/validate-runbook.py` (modify), `tests/test_validate_runbook.py` (modify)
+Depends on: Phase 1 (script scaffold, importlib infrastructure, report writer)
 
 - Cycle 3.1: test-counts — happy path (checkpoint "All 3 tests pass" with 3 `**Test:**` fields, exit 0)
 - Cycle 3.2: test-counts — count mismatch (checkpoint claims 5 when 3 tests exist, exit 1)
@@ -65,6 +68,7 @@ Checkpoint after Phase 3: Run `just test tests/test_validate_runbook.py`
 ### Phase 4: `red-plausibility` subcommand (type: tdd)
 
 Complexity: High | Target: `agent-core/bin/validate-runbook.py` (modify), `tests/test_validate_runbook.py` (modify)
+Depends on: Phase 1 (script scaffold, importlib infrastructure, report writer)
 
 - Cycle 4.1: red-plausibility — happy path (RED function not created in prior GREENs, exit 0)
 - Cycle 4.2: red-plausibility — clear violation (function created in prior GREEN, RED expects ImportError on same function, exit 1)
@@ -75,29 +79,30 @@ Checkpoint after Phase 4: Run `just test tests/test_validate_runbook.py`
 ### Phase 5: Integration — directory input and --skip flags (type: tdd)
 
 Complexity: Low | Target: `agent-core/bin/validate-runbook.py` (modify), `tests/test_validate_runbook.py` (modify)
+Depends on: Phases 1-4 (all 4 subcommands implemented -- integration exercises them together)
+1 cycle (consolidated from 2: directory input + skip flags are same-module argparse additions)
 
-- Cycle 5.1: directory input — assemble runbook-phase-*.md files and run all checks (existing assembly via `assemble_phase_files`)
-- Cycle 5.2: `--skip-*` flags — `--skip-lifecycle`, `--skip-test-counts`, `--skip-red-plausibility` skip respective checks (NFR-2)
+- Cycle 5.1: directory input + skip flags — assemble runbook-phase-*.md files and run all checks (existing assembly via `assemble_phase_files`); `--skip-model-tags`, `--skip-lifecycle`, `--skip-test-counts`, `--skip-red-plausibility` skip respective checks (NFR-2). Parametrized test covers each skip flag.
 
-Final checkpoint: Run `just test tests/test_validate_runbook.py` — all 14 tests pass
+Final checkpoint: Run `just test tests/test_validate_runbook.py` — all tests pass (count depends on parametrization decisions during expansion)
 
 ---
 
 ## Fixture Plan
 
-All fixtures in `tests/fixtures/runbooks/`:
+Fixtures are inline strings in `tests/test_validate_runbook.py` (not separate `.md` files). Simpler for parametrization, no file I/O in tests. Exception: directory-input test (Cycle 5.1) uses `tmp_path` with real files.
 
-| Fixture File | Used By | Purpose |
+| Fixture Constant | Used By | Purpose |
 |---|---|---|
-| `valid_tdd.md` | phases 1–4 happy path | Valid TDD runbook, passes all checks |
-| `valid_general.md` | phase 1 (model-tags) | General steps, correct model tags, no TDD |
-| `violation_model_tags.md` | phase 1.3 | Skill file with `haiku` Execution Model |
-| `violation_lifecycle_modify_before_create.md` | phase 2.2 | File modified before created in earlier cycle |
-| `violation_lifecycle_duplicate_create.md` | phase 2.3 | File created in two separate cycles |
-| `violation_test_counts.md` | phase 3.2 | Checkpoint claims 5 when 3 tests defined |
-| `violation_test_counts_parametrized.md` | phase 3.3 | test_foo[param1]/[param2] counted correctly |
-| `violation_red_implausible.md` | phase 4.2 | RED expects ImportError on fn created in prior GREEN |
-| `ambiguous_red_plausibility.md` | phase 4.3 | Function exists, behavior test ambiguous |
+| `VALID_TDD` | phases 1–4 happy path | Valid TDD runbook, passes all checks |
+| `VALID_GENERAL` | phase 1 (model-tags) | General steps, correct model tags, no TDD |
+| `VIOLATION_MODEL_TAGS` | cycle 1.3 | Skill file with `haiku` Execution Model |
+| `VIOLATION_LIFECYCLE_MODIFY_BEFORE_CREATE` | cycle 2.2 | File modified before created in earlier cycle |
+| `VIOLATION_LIFECYCLE_DUPLICATE_CREATE` | cycle 2.3 | File created in two separate cycles |
+| `VIOLATION_TEST_COUNTS` | cycle 3.2 | Checkpoint claims 5 when 3 tests defined |
+| `VIOLATION_TEST_COUNTS_PARAMETRIZED` | cycle 3.3 | test_foo[param1]/[param2] counted correctly |
+| `VIOLATION_RED_IMPLAUSIBLE` | cycle 4.2 | RED expects ImportError on fn created in prior GREEN |
+| `AMBIGUOUS_RED_PLAUSIBILITY` | cycle 4.3 | Function exists, behavior test ambiguous |
 
 ---
 
@@ -107,7 +112,7 @@ All fixtures in `tests/fixtures/runbooks/`:
 ```
 importlib.util.spec_from_file_location("prepare_runbook", Path(__file__).parent / "prepare-runbook.py")
 ```
-Reuse: `parse_frontmatter`, `extract_cycles`, `extract_sections`, `assemble_phase_files`, `extract_file_references`
+Reuse: `parse_frontmatter`, `extract_cycles`, `extract_sections`, `assemble_phase_files`, `extract_file_references`, `extract_step_metadata`
 
 **Parsing targets for each subcommand:**
 - model-tags: `**Execution Model**:` tags + `File:` references in Changes sections
@@ -127,14 +132,25 @@ Reuse: `parse_frontmatter`, `extract_cycles`, `extract_sections`, `assemble_phas
 
 ## Expansion Guidance
 
-**Cycle 1.1 (scaffold):** Start here. Test should verify: (a) script imports without error, (b) `--help` shows 4 subcommands, (c) missing subcommand exits with code 1. Report writer function signature: `write_report(subcommand, path, violations, ambiguous=None)` → writes to `plans/<job>/reports/validation-{subcommand}.md`. Note: `<job>` derived from path stem.
+The following recommendations should be incorporated during full runbook expansion.
 
-**Fixture strategy:** Create fixtures inline as strings in test file (not separate .md files). Simpler for parametrization, no file I/O in tests. Exception: directory-input test (Phase 5.1) needs real temp files — use `tmp_path` pytest fixture.
+**Cycle 1.1 (scaffold):** Start here. Test should verify: (a) script imports without error, (b) `--help` shows 4 subcommands, (c) missing subcommand exits with code 1. Report writer function signature: `write_report(subcommand, path, violations, ambiguous=None)` → writes to `plans/<job>/reports/validation-{subcommand}.md`. Note: `<job>` derived from path stem. The `model-tags` subcommand needs `extract_step_metadata` (line 539 in prepare-runbook.py) — include in importlib block.
 
-**Cross-phase dependency:** All subcommand implementations share the importlib import block. Cycle 1.1 establishes this; cycles 1.2+ depend on it. Declare `Depends on: Cycle 1.1` in cycles 2.1, 3.1, 4.1.
+**Cross-phase dependency:** All subcommand implementations share the importlib import block. Cycle 1.1 establishes this; cycles 1.2+ depend on it. Dependency declarations added to phase headers.
 
-**Checkpoint claims parsing:** Pattern to detect: `"All \d+ tests? pass"` or `"\d+ tests? pass"`. Location in runbook: often in `**Verify GREEN:**` or explicit checkpoint sections.
+**Checkpoint claims parsing:** Pattern to detect: `"All \d+ tests? pass"` or `"\d+ tests? pass"`. Location in runbook: often in `**Verify GREEN:**` or explicit checkpoint sections. See design Architecture > validate-runbook.py > Subcommand: `test-counts` for full spec.
 
-**Test parametrization:** Use `@pytest.mark.parametrize` for violation fixture pairs. Each subcommand test: valid fixture → exit 0, violation fixture → exit 1. Reduces boilerplate.
+**Test parametrization:** Use `@pytest.mark.parametrize` for violation fixture pairs. Each subcommand test: valid fixture → exit 0, violation fixture → exit 1. Do not hardcode final test counts in checkpoints — parametrization decisions during expansion determine unique function count.
 
-**Phase 5.2 (--skip flags):** These are argparse defaults, not full subcommand implementations. Test: `validate-runbook.py lifecycle --skip-lifecycle <path>` exits 0 without parsing. Low complexity — merge into single cycle with 5.1 if total cycle count warrants consolidation.
+**Consolidation applied:**
+- Phase 5 merged from 2 cycles to 1. Skip flags are argparse-only additions tested via parametrization alongside directory input.
+
+**Growth projection:**
+- `validate-runbook.py`: ~40 lines scaffold (argparse, importlib, report writer) + ~50 lines per subcommand (model-tags, lifecycle, test-counts, red-plausibility) + ~20 lines integration = ~260 lines projected. Under 350-line threshold.
+- `test_validate_runbook.py`: ~20 lines fixture constants + ~15 lines per test function x ~13 cycles + ~30 lines helpers = ~245 lines projected. Under 350-line threshold.
+- No split needed for either file.
+
+**References to include:**
+- Design Architecture > validate-runbook.py section for subcommand specs
+- Design D-7 for importlib approach
+- `prepare-runbook.py` lines 539–572 for `extract_step_metadata` signature and regex

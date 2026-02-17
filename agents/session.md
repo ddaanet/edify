@@ -1,15 +1,20 @@
 # Session Handoff: 2026-02-17
 
-**Status:** Merge data loss review complete (3 major findings fixed). 3 worktrees active.
+**Status:** Quality gates Phase B outline complete (13 TDD cycles). Phase A fully done. 3 worktrees active.
 
 ## Completed This Session
 
-**Address merge data loss review (all 3 major findings):**
-- Major 1: `_delete_branch` now raises `SystemExit(2)` on unexpected failure (cli.py)
-- Major 2: `sys.stderr.write` → `click.echo(..., err=True)` across merge.py (4 calls), removed `sys` import. Tests migrated from fragile StringIO stderr-swap to `capsys`
-- Major 3: SKILL.md Mode C now dispatches on rm exit 2 (escalate to user)
-- Test fix: amend tests used unrealistic workflow — branch created at merge commit instead of as merged parent. After amend, orphaned branch caused `-d` to fail. Fixed tests to merge the worktree branch (realistic flow preserves parent reachability through amend)
-- Minor: `initialize_environment` → `_initialize_environment` (private), rm output condensed
+**Runbook quality gates — Phase B planning (through Phase 0.86):**
+- Confirmed Phase A fully complete (all 6 architectural artifacts in worktree): simplification agent, SKILL.md Phase 0.86 + 3.5, review-plan Section 12, plan-reviewer model assignment, pipeline-contracts T2.5/T4.5, memory-index entries
+- Tier assessment: Tier 3 (14 TDD cycles, 4 subcommands, cross-cycle fixture dependencies)
+- Phase 0.5: Codebase discovery — prepare-runbook.py importable (line 985 `__main__` guard), D-7 resolved (importlib approach)
+- Phase 0.75: Generated `runbook-outline.md` — 5 phases, 14 cycles
+- Outline review (opus): 7 issues fixed (3 major: missing `extract_step_metadata`, fixture strategy contradiction, FR-6 mapping gap; 4 minor: missing `--skip-model-tags`, dependencies, hardcoded count, duplicate guidance)
+- Phase 0.85: Phase 5 has external dependencies → skip consolidation
+- Phase 0.86: Simplification agent merged Phase 5 cycles 5.1+5.2 → single 5.1 (14→13 cycles)
+- Stopped before Phase 0.9 (complexity check)
+
+**Runbook model assignment:** Complete — Phase A edits to SKILL.md, review-plan, plan-reviewer, pipeline-contracts, memory-index all landed opus requirements for architectural artifacts
 
 ## Pending Tasks
 
@@ -130,11 +135,12 @@
   - `git add agents/session.md` returned exit 128 during `_resolve_session_md_conflict` in `_phase3_merge_parent`
   - Now that error handling is fixed, we can reproduce and see the actual git error message
 
-- [ ] **Runbook model assignment** — apply design-decisions.md directive (opus for skill/fragment/agent edits)
-  - Partially landed via remaining-workflow-items merge
-- [ ] **Runbook quality gates Phase B** — TDD for validate-runbook.py (4 subcommands) | sonnet
-  - Depends on Phase A merge (SKILL.md references script)
-  - Graceful degradation bridges gap (NFR-2)
+- [x] **Runbook model assignment** — apply design-decisions.md directive (opus for skill/fragment/agent edits)
+  - Landed via Phase A edits in runbook-skill-fixes worktree
+- [ ] **Runbook quality gates Phase B** — Resume `/runbook` Phase 0.9+ then expand and assemble | sonnet
+  - Outline complete (13 cycles, 5 phases), reviewed, simplified
+  - Next: Phase 0.9 (complexity check) → 0.95 (sufficiency check) → Phase 1 (expansion) → Phase 2-4
+  - Reports: `plans/runbook-quality-gates/reports/runbook-outline-review.md`, `simplification-report.md`
   - model-tags, lifecycle, test-counts, red-plausibility
 
 ## Worktree Tasks
@@ -146,11 +152,10 @@
 - [ ] **Design workwoods** → `design-workwoods` — `/design plans/workwoods/requirements.md` | opus
   - Plan: workwoods | Status: designed (runbook planned, 33 TDD + 10 general steps)
 
-- [ ] **Runbook skill fixes** → `runbook-skill-fixes` — Batch: model assignment (opus for architectural artifacts), design quality gates | opus
-  - Runbook model assignment: apply design-decisions.md directive (opus for skill/fragment/agent edits) — partially landed via remaining-workflow-items merge
-  - Design quality gates: `/design plans/runbook-quality-gates/` | restart
-    - Requirements at `plans/runbook-quality-gates/requirements.md`
-    - 3 open questions: script vs agent (Q-1), insertion point (Q-2), mandatory vs opt-in (Q-3)
+- [ ] **Runbook skill fixes** → `runbook-skill-fixes` — Quality gates Phase B: resume `/runbook` expansion | sonnet
+  - Model assignment: complete (Phase A landed all directives)
+  - Quality gates Phase B: outline done (13 TDD cycles), resume at Phase 0.9
+  - Next: `/runbook plans/runbook-quality-gates/design.md` — continue from Phase 0.9 (complexity check)
 
 ## Blockers / Gotchas
 
@@ -175,7 +180,7 @@
 
 ## Next Steps
 
-Next: Execute plugin migration (opus) or Script commit vet gate (sonnet). 3 worktrees active (error-handling-design, design-workwoods, runbook-skill-fixes). Learnings at 122/80 lines — run `/remember` soon.
+Next in this worktree: Resume `/runbook` Phase 0.9+ for quality gates Phase B (continue expansion of `plans/runbook-quality-gates/runbook-outline.md`). On main: Execute plugin migration (opus) or Script commit vet gate (sonnet). 3 worktrees active. Learnings at 122/80 lines — run `/remember` soon.
 
 ## Reference Files
 
@@ -187,3 +192,6 @@ Next: Execute plugin migration (opus) or Script commit vet gate (sonnet). 3 work
 - `agents/decisions/deliverable-review.md` — Post-execution review methodology
 - `plans/reports/safety-review-grounding.md` — Safety review grounding research
 - `plans/runbook-quality-gates/design.md` — Quality gates design (6 FRs, simplification agent)
+- `plans/runbook-quality-gates/runbook-outline.md` — Phase B outline (13 TDD cycles, 5 phases, reviewed+simplified)
+- `plans/runbook-quality-gates/reports/runbook-outline-review.md` — Outline review (7 issues, all FIXED)
+- `plans/runbook-quality-gates/reports/simplification-report.md` — Simplification (14→13 cycles)
