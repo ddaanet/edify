@@ -126,3 +126,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 ## When safety checks fail in tests
 - Anti-pattern: Weakening a safety check (`-d` to `-D`) to make tests pass. If `git branch -d` correctly identifies unreachable commits, the problem is upstream (test scenario or code ordering), not in the check itself.
 - Correct pattern: Understand why the safety check fires. If the test scenario is unrealistic, fix the test. If code creates the problem (e.g., amend before delete), fix the ordering. Safety checks that detect merge parent loss are critical — suppressing them masks data loss.
+## When testing CLI tools
+- Anti-pattern: Testing CLI via subprocess invocation or calling `main()` with SystemExit catching. Fragile, slow, conflates process-level concerns with behavior testing.
+- Correct pattern: Use Click test harness (`click.testing.CliRunner`). Invokes CLI in-process, captures output and exit code, supports isolated filesystem. Tests run faster and assertions are cleaner.
+- Applies to: Any CLI built with Click (or adaptable for argparse via similar test runner patterns).
+## When editing runbook step or agent files
+- Anti-pattern: Editing `.claude/agents/<plan>-task.md` directly — it's a generated file assembled by prepare-runbook.py from tdd-task.md baseline + Common Context from phase-1 + phase content
+- Correct pattern: Edit the source (phase files in `plans/<job>/`), then re-run prepare-runbook.py to regenerate the agent file and step files. Common Context lives in runbook-phase-1.md only — phases 2–5 don't have their own copy.
+- Evidence: Edit rejected 3 times because target was the generated output, not the source.

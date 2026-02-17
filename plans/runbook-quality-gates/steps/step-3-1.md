@@ -21,7 +21,7 @@
 - Report contains `**Result:** PASS`
 - Report `Summary` shows `Failed: 0`
 
-**Fixture:** `VALID_TDD` — reuse from Phase 1/2; must include a RED phase with `**Test:** \`test_foo\`` and checkpoint "All 1 tests pass". If the fixture defined in earlier tests lacks these test-counts fields, augment it or create a separate `VALID_TDD_WITH_TEST_COUNTS` fixture for Phase 3 tests.
+**Fixture:** `VALID_TDD` — per Common Context spec, already includes `**Test:** \`test_foo\`` and checkpoint "All 1 tests pass".
 
 **Expected failure:** `AssertionError` — `test-counts` handler is still a stub; no report written.
 

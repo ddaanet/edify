@@ -12,6 +12,8 @@ Actions when stopped: 1) Document in reports/cycle-{X}-{Y}-notes.md 2) Test pass
 - Use Read/Write/Edit/Grep tools (not Bash for file ops)
 - Report errors explicitly (never suppress)
 
+**Test approach:** Invoke `main()` (catching `SystemExit` for exit code) for each subcommand test — assertions cover exit code AND report content through the production call path. Direct `check_*` function calls are not the test interface. Exception: Cycle 1.1 scaffold test uses subprocess for `--help` verification.
+
 **Design:** `plans/runbook-quality-gates/design.md`
 
 **Requirements:**

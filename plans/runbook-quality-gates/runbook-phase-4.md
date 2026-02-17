@@ -145,8 +145,8 @@
 
 **Changes:**
 - File: `agent-core/bin/validate-runbook.py`
-  Action: Add ambiguous classification in `check_red_plausibility` RED-phase block; update handler exit logic (exit 2 for ambiguous-only, exit 1 for violations)
-  Location hint: Inside `check_red_plausibility`, after violation check
+  Action: Add ambiguous classification in `check_red_plausibility` RED-phase block; update handler exit logic (exit 2 for ambiguous-only, exit 1 for violations); extend `write_report` to render `**Result:** AMBIGUOUS`, `## Ambiguous` section, and `Ambiguous:` count in Summary when `ambiguous` parameter is non-empty
+  Location hint: Inside `check_red_plausibility` (after violation check) and `write_report` (ambiguous rendering path)
 
 **Verify GREEN:** `pytest tests/test_validate_runbook.py::test_red_plausibility_ambiguous -v`
 **Verify no regression:** `just test tests/test_validate_runbook.py`

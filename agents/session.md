@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-17
 
-**Status:** Quality gates Phase B fully planned (13 TDD cycles, 5 phases). Ready for orchestration. 3 worktrees active.
+**Status:** Quality gates Phase B review fixes applied, artifacts regenerated. Ready for orchestration.
 
 ## Completed This Session
 
@@ -19,6 +19,13 @@
 - Phase 3.5: Skipped (validate-runbook.py doesn't exist yet — graceful degradation per NFR-2)
 - Phase 4: prepare-runbook.py created 13 step files + agent + orchestrator plan
 
+**Runbook review + fixes (this session):**
+- 3-layer review (baseline agent, Common Context, phase files) against runbook-evolution FR-3
+- Major #1: Cycle 3.1 fixture hedge contradicted Common Context VALID_TDD spec → removed
+- Major #2: Cycle 4.3 write_report changes for AMBIGUOUS format unspecified → added to Changes
+- Minor #3: Test approach (main() invocation vs function calls) unspecified → added to Common Context
+- Regenerated agent + step files via prepare-runbook.py to propagate fixes
+
 **Prior session (through Phase 0.86):**
 - Phase A complete (6 architectural artifacts), Tier 3 assessment, outline (5 phases, 13 cycles), outline review, simplification
 
@@ -31,7 +38,7 @@
 
 - [ ] **Runbook skill fixes** → `runbook-skill-fixes` — `/orchestrate runbook-quality-gates` | sonnet | restart
   - Phase B fully planned: 13 TDD cycles, 5 phases, all reviews passed
-  - Agent: `.claude/agents/runbook-quality-gates-task.md` (created by prepare-runbook.py)
+  - Agent: `.claude/agents/runbook-quality-gates-task.md` (regenerated with review fixes)
   - Next: Restart session, paste `/orchestrate runbook-quality-gates` from clipboard
 
 ## Blockers / Gotchas
