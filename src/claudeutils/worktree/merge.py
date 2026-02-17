@@ -7,7 +7,6 @@ from pathlib import Path
 import click
 
 from claudeutils.worktree.resolve import (
-    resolve_jobs_md,
     resolve_learnings_md,
     resolve_session_md,
 )
@@ -85,7 +84,6 @@ def _phase1_validate_clean_trees(slug: str) -> None:
     _check_clean_for_merge(
         exempt_paths={
             "agents/session.md",
-            "agents/jobs.md",
             "agents/learnings.md",
             "agent-core",
         }
@@ -169,7 +167,6 @@ def _phase3_merge_parent(slug: str) -> None:
 
     conflicts = resolve_session_md(conflicts)
     conflicts = resolve_learnings_md(conflicts)
-    conflicts = resolve_jobs_md(conflicts)
 
     if conflicts:
         _git("merge", "--abort")

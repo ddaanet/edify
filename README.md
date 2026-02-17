@@ -60,8 +60,8 @@ framework maintains persistent project memory across sessions:
   instead of pre-loading everything
 - **decisions/** — architectural and implementation decisions, one heading per
   topic. The permanent record that learnings graduate into
-- **jobs.md** — plan lifecycle tracking (`requirements` → `designed` → `planned`
-  → `complete`)
+- **plan-archive.md** — completed plan summaries, loaded on demand during design
+  research and diagnostic sessions
 
 `claudeutils validate` enforces consistency across these files — cross-reference
 integrity, format conventions, key uniqueness.

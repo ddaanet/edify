@@ -23,20 +23,16 @@ def _check_plan_consistency(plan_dir: Path) -> list[str]:
 
     errors: list[str] = []
 
-    if (plan_dir / "steps").is_dir() and not list(
-        plan_dir.glob("runbook-phase-*.md")
-    ):
+    if (plan_dir / "steps").is_dir() and not list(plan_dir.glob("runbook-phase-*.md")):
         errors.append(
-            f"Plan '{plan_dir.name}' has steps/"
-            " without runbook-phase-*.md files"
+            f"Plan '{plan_dir.name}' has steps/ without runbook-phase-*.md files"
         )
 
     if (plan_dir / "orchestrator-plan.md").exists() and not (
         plan_dir / "steps"
     ).is_dir():
         errors.append(
-            f"Plan '{plan_dir.name}' has orchestrator-plan.md"
-            " without steps/ directory"
+            f"Plan '{plan_dir.name}' has orchestrator-plan.md without steps/ directory"
         )
 
     return errors

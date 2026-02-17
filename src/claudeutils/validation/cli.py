@@ -7,7 +7,6 @@ import click
 
 from claudeutils.validation.common import find_project_root
 from claudeutils.validation.decision_files import validate as validate_decision_files
-from claudeutils.validation.jobs import validate as validate_jobs
 from claudeutils.validation.learnings import validate as validate_learnings
 from claudeutils.validation.memory_index import validate as validate_memory_index
 from claudeutils.validation.planstate import validate as validate_planstate
@@ -68,7 +67,6 @@ def _run_all_validators(root: Path) -> dict[str, list[str]]:
         root,
     )
     _run_validator("decisions", validate_decision_files, all_errors, root)
-    _run_validator("jobs", validate_jobs, all_errors, root)
     _run_validator("planstate", validate_planstate, all_errors, root)
     _run_validator("session-refs", validate_session_refs, all_errors, root)
     _run_validator(
@@ -141,17 +139,6 @@ def decisions() -> None:
     """Validate decision files."""
     root = find_project_root(Path.cwd())
     errors = validate_decision_files(root)
-    if errors:
-        for error in errors:
-            click.echo(error, err=True)
-        sys.exit(1)
-
-
-@validate.command()
-def jobs() -> None:
-    """Validate jobs.md."""
-    root = find_project_root(Path.cwd())
-    errors = validate_jobs(root)
     if errors:
         for error in errors:
             click.echo(error, err=True)

@@ -133,15 +133,3 @@ def resolve_learnings_md(conflicts: list[str]) -> list[str]:
     _git("add", "agents/learnings.md")
 
     return [c for c in conflicts if c != "agents/learnings.md"]
-
-
-def resolve_jobs_md(conflicts: list[str]) -> list[str]:
-    """Resolve agents/jobs.md conflict: keep ours."""
-    if "agents/jobs.md" not in conflicts:
-        return conflicts
-
-    _git("checkout", "--ours", "agents/jobs.md")
-    _git("add", "agents/jobs.md")
-    click.echo("jobs.md conflict: kept ours (local plan status)")
-
-    return [c for c in conflicts if c != "agents/jobs.md"]

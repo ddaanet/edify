@@ -235,7 +235,7 @@ def clean_tree() -> None:
     """Verify clean tree except session context."""
     parent = _git("status", "--porcelain")
     submodule = _git("-C", "agent-core", "status", "--porcelain", check=False)
-    exempt = {"session.md", "jobs.md", "learnings.md"}
+    exempt = {"session.md", "learnings.md"}
     dirty = [
         line
         for line in (parent + submodule).rstrip().split("\n")

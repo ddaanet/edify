@@ -115,3 +115,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Bundling deterministic checks (file path → model mapping) with judgment-based checks (task complexity assessment) in a single agent pass.
 - Correct pattern: Script handles deterministic checks (Phase 3.5 subcommand, blocking). Agent enriches existing review for semantic checks (plan-reviewer criteria, advisory). Different enforcement layers for different failure modes — defense-in-depth.
 - Evidence: FR-2 model review split. File path matching (agent-core/skills/ → opus) is scriptable with zero false positives. Semantic complexity ("is this synthesis?") requires plan-reviewer judgment during existing Phase 1 per-phase review.
+## When resuming interrupted orchestration
+- Anti-pattern: Using `just precommit` as state assessment after ceiling crash → chasing cascading failures reactively → bypassing recipes under accumulated momentum (used `uv run ruff check` instead of `just check`)
+- Correct pattern: Resume from last runbook checkpoint. Run checkpoint verification commands (designed as diagnostic inventory). Systematically fix remaining items. Verify with project recipes.
+- Root cause chain: No ceiling recovery protocol → debugging-as-assessment → reactive fix mode → recipe bypass under urgency
+- Fix: Added ceiling recovery scenario to orchestrate skill (chokepoint enforcement, not ambient rule)

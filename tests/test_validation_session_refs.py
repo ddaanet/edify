@@ -81,7 +81,6 @@ class TestValidate:
         agents = self._make_agents_dir(tmp_path)
         (agents / "session.md").write_text("# Session\n\n## Pending Tasks\n")
         (agents / "learnings.md").write_text("# Learnings\n")
-        (agents / "jobs.md").write_text("# Jobs\n")
         assert validate(tmp_path) == []
 
     def test_tmp_ref_in_session(self, tmp_path: Path) -> None:
@@ -105,14 +104,6 @@ class TestValidate:
         errors = validate(tmp_path)
         assert len(errors) == 1
         assert "learnings.md" in errors[0]
-
-    def test_tmp_ref_in_jobs(self, tmp_path: Path) -> None:
-        """Tmp/ reference in jobs.md detected."""
-        agents = self._make_agents_dir(tmp_path)
-        (agents / "jobs.md").write_text("# Jobs\n\nReport: tmp/job-report.md\n")
-        errors = validate(tmp_path)
-        assert len(errors) == 1
-        assert "jobs.md" in errors[0]
 
     def test_missing_files_no_error(self, tmp_path: Path) -> None:
         """Missing session files produce no errors."""

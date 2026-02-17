@@ -1,6 +1,6 @@
 """Reject tmp/ file references in session tracking files.
 
-Session files (session.md, learnings.md, jobs.md) document persistent
+Session files (session.md, learnings.md) document persistent
 state across sessions. References to tmp/ paths are ephemeral
 (gitignored) and break when sessions restart.
 
@@ -18,7 +18,6 @@ TMP_REF_PATTERN = re.compile(r"\btmp/[a-zA-Z0-9][a-zA-Z0-9._/\-]*")
 SESSION_FILES = [
     "agents/session.md",
     "agents/learnings.md",
-    "agents/jobs.md",
 ]
 
 
