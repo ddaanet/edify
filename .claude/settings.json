@@ -5,6 +5,7 @@
   },
   "permissions": {
     "allow": [
+      "Write(.claude/*)",
       "Bash(git:*)",
       "Bash(wc:*)",
       "Bash(claudeutils:*)",
@@ -22,6 +23,9 @@
       "WebSearch"
     ],
     "deny": [
+      "Write(.claude/skills/*)",
+      "Write(.claude/agents/*)",
+      "Write(.claude/hooks/*)",
       "NotebookEdit",
       "Bash(git push:*)",
       "Bash(just release:*)",
