@@ -254,6 +254,35 @@ def test_test_counts_parametrized(
     assert "Failed: 0" in content
 
 
+def test_red_plausibility_happy_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Red-plausibility on VALID_TDD exits 0 and writes a PASS report."""
+    monkeypatch.chdir(tmp_path)
+    runbook = tmp_path / "valid-tdd.md"
+    runbook.write_text(VALID_TDD)
+
+    monkeypatch.setattr(
+        sys, "argv", ["validate-runbook", "red-plausibility", str(runbook)]
+    )
+    try:
+        main()
+        exit_code = 0
+    except SystemExit as exc:
+        exit_code = exc.code if isinstance(exc.code, int) else 1
+
+    assert exit_code == 0
+
+    report_path = (
+        tmp_path / "plans" / "valid-tdd" / "reports" / "validation-red-plausibility.md"
+    )
+    assert report_path.exists(), f"Report not found at {report_path}"
+    content = report_path.read_text()
+    assert "**Result:** PASS" in content
+    assert "Failed: 0" in content
+    assert "Ambiguous: 0" in content
+
+
 def test_scaffold_cli() -> None:
     """Script exposes four subcommands and exits 1 when invoked without one."""
     result = subprocess.run(

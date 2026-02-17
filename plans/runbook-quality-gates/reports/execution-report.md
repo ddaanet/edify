@@ -104,3 +104,16 @@
 - Files modified: `agent-core/bin/validate-runbook.py` (strip parametrize bracket suffix in name-collection loop), `tests/test_validate_runbook.py` (added `test_test_counts_parametrized`; imported `VIOLATION_TEST_COUNTS_PARAMETRIZED`), `tests/fixtures/validate_runbook_fixtures.py` (added `VIOLATION_TEST_COUNTS_PARAMETRIZED` fixture)
 - Stop condition: none
 - Decision made: none
+
+## Phase 4: `red-plausibility` subcommand
+
+### Cycle 4.1: red-plausibility happy path 2026-02-18
+- Status: GREEN_VERIFIED
+- Test command: `pytest tests/test_validate_runbook.py::test_red_plausibility_happy_path -v`
+- RED result: FAIL as expected (AssertionError — report not found; `cmd_red_plausibility` was a stub that exits 0 without writing a report)
+- GREEN result: PASS
+- Regression check: 10/10 passed
+- Refactoring: shortened docstring to fit line limit; precommit passes, no warnings
+- Files modified: `agent-core/bin/validate-runbook.py` (added `check_red_plausibility`, updated `write_report` to include `Ambiguous:` in summary, implemented `cmd_red_plausibility`), `tests/test_validate_runbook.py` (added `test_red_plausibility_happy_path`)
+- Stop condition: none
+- Decision made: none
