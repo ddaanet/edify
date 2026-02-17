@@ -1,37 +1,47 @@
 # Session Handoff: 2026-02-17
 
-**Status:** Workwoods post-orchestration review complete. Vet fixes + 2 new tests applied. Deliverable review next.
+**Status:** Workwoods deliverable review complete. 1 critical + 7 major findings. Prose fixes needed before merge to main.
 
 ## Completed This Session
 
-**Post-orchestration review (parallel agents):**
-- Vet-fix-agent final review: 1 critical bug FIXED (slug not propagated through merge call chain — blocker tagging `[from: slug]` was silently no-op), 1 major + 3 minor FIXED, 2 DEFERRED
-- TDD process review: 92% RED compliance, 88% REFACTOR compliance, 72% per-cycle commit discipline
-- Reports: `plans/workwoods/reports/final-vet.md`, `plans/workwoods/reports/tdd-process-review.md`
+**Deliverable review (3 parallel opus agents + interactive cross-cutting):**
+- Inventory: 28 active files + 2 deleted, 5652 lines across code/test/prose/config
+- Layer 1: Three opus review agents — code (4 major), test (4 major), prose (1 critical + 2 major)
+- Layer 2: Cross-cutting analysis caught prioritize skill breakage (jobs.md refs) and next-action design spec error
+- Consolidated report: `plans/workwoods/reports/deliverable-review.md`
+- Per-type reports: `deliverable-review-code.md`, `deliverable-review-test.md`, `deliverable-review-prose.md`
 
-**Vet fixes applied (6 files):**
-- `resolve.py` + `merge.py`: slug propagation through call chain (critical bug)
-- `planstate/__init__.py`: complete public API exports (aggregate_trees, get_vet_status, AggregatedStatus, TreeInfo)
-- `validation/__init__.py`: add validate_session_refs export
-- `planstate/vet.py`: tighten phase glob pattern `*{n}*` → `*-{n}-*`, remove unreachable guard
+**Key findings:**
+- C-1: Design SKILL.md A.1 missing plan-archive.md loading (D-8 read path absent)
+- M-1: Worktree SKILL.md Mode C contradicts Usage Notes (auto-rm vs preserve)
+- M-2: Handoff SKILL.md Principles contradict Step 6 ("no archive files" vs plan-archive.md)
+- M-3: Prioritize skill references deleted `agents/jobs.md` — broken at runtime
+- M-4: Gate computation only handles design.md stale (1 of 4 D-7 types)
+- M-5: Vet phase map hardcoded to 6 phases (plans with 7+ silently miss coverage)
+- M-6: TreeInfo missing most TreeStatus design fields → display.py duplicates git queries
+- M-7: Missing tests for outline-only, problem-only, VetStatus.any_stale
 
-**Deliverable fixes (2 new tests, +2 test count → 1026/1027):**
-- `test_worktree_merge_session_resolution.py` +133: integration test verifying slug flows through `resolve_session_md` into `_merge_session_contents` during real git merge conflict
-- `test_worktree_display_formatting.py` (new): gate rendering test via monkeypatched `aggregate_trees`, verifies Gate lines appear when PlanState.gate is set
-
-**Reverted agent error:** Delegated agent removed `_task_summary` from aggregation.py despite explicit instruction not to — function has 4 test callers and is designed infrastructure for FR-1 task summary (not yet wired to display layer). Reverted via `git checkout HEAD`.
-
-**Discussion outcomes (process fixes):**
-- Agreed: encode 2 process improvements (#1 drop execution reports → structured commit messages, #2 per-cycle commits for genuine RED failures)
-- Agreed: drop 4 rule restatements (#3-6 already implicit in TDD protocol)
-- Session scraping via `~/.claude/projects/` JSONL is viable for post-hoc TDD audit (persistent, structured, full tool calls). Thinking blocks are empty (stripped at persistence).
+**Prior session work (already committed):**
+- Post-orchestration vet fixes: slug propagation, public API exports, phase glob pattern
+- 2 new tests: merge session resolution, display formatting (1026/1027 passing)
+- TDD process review: 92% RED compliance, 88% REFACTOR compliance
 
 ## Pending Tasks
 
-- [ ] **Deliverable review** — workwoods post-orchestration deliverable review | sonnet
-  - Covers all production artifacts across phases 1-6
-  - Vet fixes and new tests included in scope
-  - Reports available: final-vet.md, tdd-process-review.md, deliverable-fixes.md
+- [ ] **Fix deliverable prose findings** — C-1 + M-1/M-2/M-3 prose edits | sonnet
+  - C-1: Add plan-archive.md to design SKILL.md A.1 hierarchy
+  - M-1: Update worktree SKILL.md Usage Notes line 126 (remove auto-cleanup claim)
+  - M-2: Update handoff SKILL.md Principles (acknowledge plan-archive.md)
+  - M-3: Update prioritize SKILL.md to use `list_plans()` instead of jobs.md
+  - Also: deduplicate worktree-skill entry in plan-archive.md, fix Mode C header
+  - Report: `plans/workwoods/reports/deliverable-review-prose.md`
+
+- [ ] **Fix deliverable code findings** — M-4/M-5/M-6/M-7 code + test gaps | sonnet
+  - M-4: Implement full gate priority chain in inference.py (4 gate types per D-7)
+  - M-5: Dynamic phase discovery in vet.py (replace hardcoded map)
+  - M-6: Populate TreeInfo with design-specified fields, remove display.py duplication
+  - M-7: Add tests for outline-only, problem-only, VetStatus.any_stale
+  - Reports: `deliverable-review-code.md`, `deliverable-review-test.md`
 
 - [ ] **Design quality gates** — `/design plans/runbook-quality-gates/` | opus | restart
   - Requirements at `plans/runbook-quality-gates/requirements.md`
@@ -45,23 +55,27 @@
 - From merged main content, not workwoods changes
 - Precommit passes (1026/1027, 1 xfail)
 
-**learnings.md at 124 lines (soft limit 80):**
+**learnings.md at 130 lines (soft limit 80):**
 - No entries at ≥7 active days — consolidation trigger not met
 - Will trigger on next session with aged entries
 
 **Gate wiring incomplete in display path:**
 - `list_plans()` → `infer_state()` never passes `vet_status_func`, so `PlanState.gate` is always None in production
-- Gate rendering is tested via monkeypatch but production path doesn't populate gates
-- Follow-up: wire `get_vet_status` through `aggregate_trees` → `list_plans` → `infer_state`
+- Gate rendering tested via monkeypatch but production path doesn't populate gates
+- Addressed by M-4 (gate computation) but wiring through aggregate_trees → list_plans → infer_state is separate
 
 **`_task_summary` not wired to display:**
 - Function exists and is tested (4 tests) but not called from `format_rich_ls`
-- Designed for FR-1 per-tree task summary display
-- Follow-up: wire into display layer
+- Addressed by M-6 (TreeInfo enrichment)
+
+**next-action design spec mismatch:**
+- Design says `/orchestrate plans/<name>/orchestrator-plan.md` for ready status
+- Implementation returns `/orchestrate {plan_name}` — matches actual `/orchestrate` skill contract
+- Design spec was wrong; implementation is correct. No code fix needed.
 
 ## Next Steps
 
-Run deliverable review for workwoods production artifacts.
+Fix deliverable prose findings (C-1 + M-1/M-2/M-3 — quick edits, ~30 min).
 
 ---
-*Handoff by Sonnet. Post-orchestration review complete. 1026/1027 tests passing.*
+*Handoff by Sonnet. Deliverable review complete. 1026/1027 tests passing.*
