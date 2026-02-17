@@ -6,7 +6,8 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import _parse_worktree_list, worktree
+from claudeutils.worktree.cli import worktree
+from claudeutils.worktree.utils import _parse_worktree_list
 
 
 def test_porcelain_flag_exists() -> None:

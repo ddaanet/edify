@@ -21,7 +21,7 @@ Plan lifecycle tracking. Updated when plans change status.
 | worktree-update | complete | 40 TDD cycles, recovery (C2-C5), merged to main |
 | runbook-quality-gates | requirements | Post-planning simplification + pre-execution validation gates |
 | worktree-merge-data-loss | planned | Design + outline synced to main, runbook expansion next (worktree active) |
-| workwoods | ready | Pre-exec validated, 33 steps + agent generated, awaiting orchestration |
+| workwoods | executing | Phases 1-4 done (21/33 steps), Phase 5-6 remaining |
 | prototypes | requirements | Session extraction feature gap, multi-project scanning |
 | remember-skill-update | requirements | Outline + requirements.md complete, Phase B discussion next |
 
