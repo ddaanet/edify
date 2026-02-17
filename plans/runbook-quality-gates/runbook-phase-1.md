@@ -1,3 +1,46 @@
+## Common Context
+
+**TDD Protocol:**
+Strict RED-GREEN-REFACTOR: 1) RED: Write failing test, 2) Verify RED, 3) GREEN: Minimal implementation, 4) Verify GREEN, 5) Verify Regression, 6) REFACTOR (optional)
+
+**Stop/Error Conditions (all cycles):**
+STOP IMMEDIATELY if: RED phase test passes (expected failure) • RED phase failure message doesn't match expected • GREEN phase tests don't pass after implementation • Any existing tests break (regression)
+
+Actions when stopped: 1) Document in reports/cycle-{X}-{Y}-notes.md 2) Test passes unexpectedly → Investigate if feature exists 3) Regression → STOP, report broken tests 4) Scope unclear → STOP, document ambiguity
+
+**Conventions:**
+- Use Read/Write/Edit/Grep tools (not Bash for file ops)
+- Report errors explicitly (never suppress)
+
+**Design:** `plans/runbook-quality-gates/design.md`
+
+**Requirements:**
+- FR-2 (mechanical): `model-tags` — artifact-type files must have opus Execution Model
+- FR-3: `lifecycle` — create→modify file dependency ordering
+- FR-4 (structural): `red-plausibility` — RED expectations vs prior GREEN state
+- FR-5: `test-counts` — checkpoint claims vs actual test function count
+- NFR-1: CLI integration — argparse with 4 subcommands, directory input
+- NFR-2: Incremental adoption — `--skip-*` flags per subcommand
+
+**Key Constraints:**
+- D-7: Import `prepare-runbook.py` functions via `importlib.util.spec_from_file_location("prepare_runbook", Path(__file__).parent / "prepare-runbook.py")`
+- Reusable functions: `parse_frontmatter`, `extract_cycles`, `extract_sections`, `assemble_phase_files`, `extract_file_references`, `extract_step_metadata`
+- Exit codes: 0=pass, 1=violations (blocking), 2=ambiguous (red-plausibility only)
+- Report path: `plans/<job>/reports/validation-{subcommand}.md`
+- `<job>` derived from: `Path(path).parent.name` (directory) or `Path(path).stem` (single file)
+
+**Project Paths:**
+- Script: `agent-core/bin/validate-runbook.py` (new)
+- Tests: `tests/test_validate_runbook.py` (new)
+- Import target: `agent-core/bin/prepare-runbook.py` (existing, `__main__` guard at line 985)
+
+**Fixture Plan:**
+- Inline string constants in test file (not separate .md files)
+- Exception: directory-input test (Cycle 5.1) uses `tmp_path` with real files
+- Fixture constant names: `VALID_TDD`, `VALID_GENERAL`, `VIOLATION_MODEL_TAGS`, `VIOLATION_LIFECYCLE_MODIFY_BEFORE_CREATE`, `VIOLATION_LIFECYCLE_DUPLICATE_CREATE`, `VIOLATION_TEST_COUNTS`, `VIOLATION_TEST_COUNTS_PARAMETRIZED`, `VIOLATION_RED_IMPLAUSIBLE`, `AMBIGUOUS_RED_PLAUSIBILITY`
+
+---
+
 # Phase 1: Script infrastructure + `model-tags` subcommand (type: tdd)
 
 **Target files:**
