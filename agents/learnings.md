@@ -133,4 +133,5 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 ## When importing artifacts from worktrees
 - Transport: `git show <branch>:<path>` from main — no cross-tree sandbox access needed. All worktrees share the git object store.
 - Scope: Only design.md and requirements.md are import candidates (small, authored). Runbooks (phase files, steps, orchestrator plans) are bulky, generated, implementation-oriented — require explicit intent, not casual import.
+- Ownership check: Before importing, verify no active worktree owns the target plan directory (`git worktree list` + check branch names). Importing into a worktree-owned plan creates merge conflicts when that worktree merges back.
 - Supersedes: "When worktree agents need cross-tree access" learning (additionalDirectories unnecessary for transport).
