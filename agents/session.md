@@ -1,14 +1,15 @@
 # Session Handoff: 2026-02-17
 
-**Status:** Runbook evolution outline started prematurely. Deliverable code findings still pending.
+**Status:** RCA completed on CLI tool usage deviation. Deliverable code findings still pending.
 
 ## Completed This Session
 
-**Runbook evolution outline (partial — premature start):**
-- Created outline at `plans/runbook-evolution/outline.md` (commit: d76a36a4)
-- Exploration report at `plans/runbook-evolution/reports/explore-skill-structure.md`
-- Outline covers FR-1 (prose atomicity), FR-2 (self-modification), FR-3 (testing diamond)
-- Not yet reviewed (outline-review-agent not yet run) — resume from Phase A.6
+**RCA: failure to use CLI for project state queries:**
+- Deviation: ad-hoc `python3 -c` scripts to call `list_plans()` instead of `claudeutils _worktree ls`
+- Root cause: execute-rule.md used Python function syntax → agent followed literally, skipping project-tooling check
+- Deeper cause: specific procedural instructions suppress cross-cutting operational rules (same class as "shortcuts bypass upstream steps")
+- Fix: execute-rule.md updated to reference CLI command, prohibit ad-hoc Python (uncommitted)
+- Learning added to `agents/learnings.md`: "When querying project state"
 
 ## Pending Tasks
 
@@ -40,7 +41,7 @@
 - From merged main content, not workwoods changes
 - Precommit passes (1026/1027, 1 xfail)
 
-**learnings.md at 133 lines (soft limit 80):**
+**learnings.md at 139 lines (soft limit 80):**
 - No entries at ≥7 active days — consolidation trigger not met
 
 **Gate wiring incomplete in display path:**
@@ -56,4 +57,4 @@
 Fix deliverable code findings (M-4/M-5/M-6/M-7). Deliverable fixes before pipeline improvements.
 
 ---
-*Handoff by Opus. Outline started, deliverable code fixes next.*
+*Handoff by Sonnet. RCA on CLI usage, deliverable code fixes next.*

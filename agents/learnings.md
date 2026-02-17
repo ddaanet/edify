@@ -132,3 +132,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Jumping to pipeline improvements (design runbook evolution) before fixing deliverable findings from the current orchestration
 - Correct pattern: Diagnostic/process review first, deliverable fixes second, pipeline improvements last. Current deliverable must be whole before improving the process that produced it.
 - Rationale: Unfixed deliverable findings accumulate as tech debt. Pipeline improvements don't retroactively fix the current deliverable. Fixing deliverables also validates the diagnostic — the fix confirms the finding was real.
+## When querying project state
+- Anti-pattern: Writing ad-hoc `python3 -c "..."` scripts to call library functions, guessing at attribute names across multiple attempts
+- Correct pattern: Use the project's CLI commands (`claudeutils _worktree ls` for plan/tree status). The CLI wraps library functions with formatting. Check existing CLI commands before writing ad-hoc Python.
+- Deeper pattern: Procedural instructions in fragments suppress cross-cutting operational rules. When a procedure says "call X()" the agent follows it literally, skipping the project-tooling check ("does a CLI/recipe already exist?"). Specific instructions must not suppress general operational rules — the check-for-existing-tools rule applies even when a procedure names a specific function.
+- Evidence: execute-rule.md said "Call `list_plans()`" → agent wrote ad-hoc Python → 3 failed attempts guessing attributes → 6-turn guided diagnostic from user. CLI existed the whole time.
