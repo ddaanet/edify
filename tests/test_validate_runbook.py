@@ -7,97 +7,20 @@ from pathlib import Path
 
 import pytest
 
+from tests.fixtures.validate_runbook_fixtures import (
+    VALID_TDD,
+    VIOLATION_LIFECYCLE_DUPLICATE_CREATE,
+    VIOLATION_LIFECYCLE_MODIFY_BEFORE_CREATE,
+    VIOLATION_MODEL_TAGS,
+    VIOLATION_TEST_COUNTS,
+)
+
 SCRIPT = Path(__file__).parent.parent / "agent-core" / "bin" / "validate-runbook.py"
 
 _spec = importlib.util.spec_from_file_location("validate_runbook", SCRIPT)
 _mod = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
 _spec.loader.exec_module(_mod)  # type: ignore[union-attr]
 main = _mod.main
-
-VIOLATION_MODEL_TAGS = """\
----
-title: Violation Runbook
----
-
-# Phase 1: Skills setup (type: tdd)
-
----
-
-## Cycle 1.1: add skill
-
-**Execution Model**: Haiku
-
-**GREEN Phase:**
-
-**Changes:**
-- File: `agent-core/skills/myskill/SKILL.md`
-  Action: Create
-
----
-"""
-
-VALID_TDD = """\
----
-title: Example Runbook
----
-
-# Phase 1: Core module (type: tdd)
-
-**Target files:**
-- `src/module.py` (new)
-
----
-
-## Cycle 1.1: scaffold
-
-**Execution Model**: Sonnet
-
-**RED Phase:**
-
-**Test:** `test_foo`
-
-Expects `ImportError` on `src.module`.
-
-**Expected failure:** `ImportError`
-
-**Verify RED:** `pytest tests/test_example.py::test_foo -v`
-
----
-
-**GREEN Phase:**
-
-**Changes:**
-- File: `src/module.py`
-  Action: Create
-
-**Verify GREEN:** `pytest tests/test_example.py::test_foo -v`
-
----
-
-## Cycle 1.2: extend
-
-**Execution Model**: Sonnet
-
-**RED Phase:**
-
-**Test:** `test_bar`
-
-**Verify RED:** `pytest tests/test_example.py::test_bar -v`
-
----
-
-**GREEN Phase:**
-
-**Changes:**
-- File: `src/module.py`
-  Action: Modify
-
-**Verify GREEN:** `pytest tests/test_example.py::test_bar -v`
-
-**Checkpoint:** All 2 tests pass.
-
----
-"""
 
 
 def test_model_tags_happy_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -153,29 +76,6 @@ def test_model_tags_violation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     assert "haiku" in content.lower()
     assert "**Expected:** opus" in content
     assert "Failed: 1" in content
-
-
-VIOLATION_LIFECYCLE_MODIFY_BEFORE_CREATE = """\
----
-title: Lifecycle Violation Runbook
----
-
-# Phase 1: Core module (type: tdd)
-
----
-
-## Cycle 1.1: scaffold
-
-**Execution Model**: Sonnet
-
-**GREEN Phase:**
-
-**Changes:**
-- File: `src/widget.py`
-  Action: Modify
-
----
-"""
 
 
 def test_lifecycle_modify_before_create(
@@ -235,45 +135,6 @@ def test_lifecycle_happy_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     assert "Failed: 0" in content
 
 
-VIOLATION_LIFECYCLE_DUPLICATE_CREATE = """\
----
-title: Duplicate Create Runbook
----
-
-# Phase 1: Core module (type: tdd)
-
----
-
-## Cycle 1.1: scaffold
-
-**Execution Model**: Sonnet
-
-**GREEN Phase:**
-
-**Changes:**
-- File: `src/module.py`
-  Action: Create
-
----
-
-# Phase 2: Extension (type: tdd)
-
----
-
-## Cycle 2.1: duplicate create
-
-**Execution Model**: Sonnet
-
-**GREEN Phase:**
-
-**Changes:**
-- File: `src/module.py`
-  Action: Create
-
----
-"""
-
-
 def test_lifecycle_duplicate_creation(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -327,55 +188,6 @@ def test_test_counts_happy_path(
     content = report_path.read_text()
     assert "**Result:** PASS" in content
     assert "Failed: 0" in content
-
-
-VIOLATION_TEST_COUNTS = """\
----
-title: Test Counts Violation Runbook
----
-
-# Phase 1: Core module (type: tdd)
-
----
-
-## Cycle 1.1: first test
-
-**Execution Model**: Sonnet
-
-**RED Phase:**
-
-**Test:** `test_alpha`
-
-**Verify RED:** `pytest tests/test_example.py::test_alpha -v`
-
----
-
-## Cycle 1.2: second test
-
-**Execution Model**: Sonnet
-
-**RED Phase:**
-
-**Test:** `test_beta`
-
-**Verify RED:** `pytest tests/test_example.py::test_beta -v`
-
----
-
-## Cycle 1.3: third test
-
-**Execution Model**: Sonnet
-
-**RED Phase:**
-
-**Test:** `test_gamma`
-
-**Verify RED:** `pytest tests/test_example.py::test_gamma -v`
-
-**Checkpoint:** All 5 tests pass.
-
----
-"""
 
 
 def test_test_counts_mismatch(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
