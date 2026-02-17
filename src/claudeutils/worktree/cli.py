@@ -143,12 +143,16 @@ def _parse_worktree_list(porcelain: str, main_path: str) -> list[tuple[str, str,
 
 
 @worktree.command()
-def ls() -> None:
+@click.option("--porcelain", is_flag=True, help="Machine-readable output")
+def ls(*, porcelain: bool) -> None:
     """List worktrees excluding main."""
     main_path = _git("rev-parse", "--show-toplevel")
-    porcelain = _git("worktree", "list", "--porcelain")
-    for slug, branch, path in _parse_worktree_list(porcelain, main_path):
-        click.echo(f"{slug}\t{branch}\t{path}")
+    porcelain_output = _git("worktree", "list", "--porcelain")
+    for slug, branch, path in _parse_worktree_list(porcelain_output, main_path):
+        if porcelain:
+            click.echo(f"{slug}\t{branch}\t{path}")
+        else:
+            click.echo(f"{slug}\t{branch}\t{path}")
 
 
 def _create_session_commit(slug: str, base: str, session: str) -> str:
