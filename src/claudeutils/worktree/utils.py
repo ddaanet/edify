@@ -39,17 +39,7 @@ def wt_path(slug: str, create_container: bool = False) -> Path:  # noqa: FBT001,
 
 
 def _is_branch_merged(slug: str) -> bool:
-    """Check if a branch is merged into current HEAD.
-
-    Uses git merge-base --is-ancestor to determine if the branch is an ancestor
-    of the current HEAD (indicating it has been merged).
-
-    Args:
-        slug: Branch name to check
-
-    Returns:
-        True if the branch is an ancestor of HEAD (merged), False otherwise
-    """
+    """Return True if slug is an ancestor of HEAD (merge-base --is-ancestor)."""
     result = subprocess.run(
         ["git", "merge-base", "--is-ancestor", slug, "HEAD"],
         check=False,
@@ -81,6 +71,43 @@ def _classify_branch(slug: str) -> tuple[int, bool]:
         is_focused = msg == f"Focused session for {slug}"
 
     return (count, is_focused)
+
+
+def _is_parent_dirty(exclude_path: str | None = None) -> bool:
+    """Return True if parent repo has staged/unstaged/untracked changes.
+
+    exclude_path: if given, skip status lines whose path starts with
+    Path(exclude_path).name + "/" (used to ignore the worktree container dir
+    when it appears as an untracked entry inside the repo).
+    """
+    output = _git("status", "--porcelain", check=False)
+    if not output:
+        return False
+
+    exclude_prefix = (Path(exclude_path).name + "/") if exclude_path else None
+    for line in output.strip().split("\n"):
+        if not line:
+            continue
+        path = line[3:]
+        if exclude_prefix and path.startswith(exclude_prefix):
+            continue
+        return True
+    return False
+
+
+def _is_submodule_dirty() -> bool:
+    """Return True if agent-core is dirty; False if absent or clean."""
+    submodule_path = Path("agent-core")
+    if not submodule_path.exists():
+        return False
+
+    result = subprocess.run(
+        ["git", "-C", "agent-core", "status", "--porcelain"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return bool(result.stdout.strip())
 
 
 def _parse_worktree_list(porcelain: str, main_path: str) -> list[tuple[str, str, str]]:

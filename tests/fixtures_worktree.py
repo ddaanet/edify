@@ -6,8 +6,33 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
+from click.testing import CliRunner
+
+from claudeutils.worktree.cli import worktree as worktree_cli
 
 # ── Shared helpers (not fixtures, import directly) ──────────────────────
+
+
+def _create_worktree(
+    repo_path: Path, slug: str, init_repo: Callable[[Path], None]
+) -> Path:
+    """Create worktree via CLI and return its path."""
+    runner = CliRunner()
+    result = runner.invoke(worktree_cli, ["new", slug])
+    assert result.exit_code == 0
+    container_path = repo_path.parent / f"{repo_path.name}-wt"
+    return container_path / slug
+
+
+def _branch_exists(name: str) -> bool:
+    """Check if branch exists."""
+    result = subprocess.run(
+        ["git", "branch", "--list", name],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return name in result.stdout
 
 
 def _run_git(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:

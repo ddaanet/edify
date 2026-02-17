@@ -20,6 +20,7 @@ Plan lifecycle tracking. Updated when plans change status.
 | worktree-skill | complete | Design.md retained on disk for reference |
 | worktree-update | complete | 40 TDD cycles, recovery (C2-C5), merged to main |
 | worktree-merge-data-loss | complete | 13 TDD cycles + 1 general step, merged to main, deliverable review done |
+| worktree-rm-safety | complete | 5 FRs: dirty check, exit code 2, --force, --confirm. Tier 2 TDD, 6 cycles + 1 general step |
 | runbook-quality-gates | designed | Design complete, 2-phase delivery: Phase A prose edits, Phase B TDD scripts. 6 FRs, simplification agent + validate-runbook.py |
 | workwoods | designed | Cross-tree worktree awareness, vet tracking, plan state inference, bidirectional merge |
 | worktree-rm-safety | requirements | Dirty tree detection + --force bypass for wt rm (5 FRs) |
