@@ -69,3 +69,16 @@
 - Files modified: `tests/test_validate_runbook.py` (added `VIOLATION_LIFECYCLE_DUPLICATE_CREATE` fixture and `test_lifecycle_duplicate_creation`)
 - Stop condition: none — RED passed unexpectedly due to over-implementation in prior cycle; feature correctness verified, proceeding
 - Decision made: Over-implementation in Cycle 2.2 satisfies Cycle 2.3 requirements; no additional implementation needed
+
+## Phase 3: `test-counts` subcommand
+
+### Cycle 3.1: test-counts happy path 2026-02-18
+- Status: GREEN_VERIFIED
+- Test command: `pytest tests/test_validate_runbook.py::test_test_counts_happy_path -v`
+- RED result: FAIL as expected (AssertionError — report not found; test-counts stub exits 0 without writing report)
+- GREEN result: PASS
+- Regression check: 7/7 passed
+- Refactoring: lint reformatted test file (argument alignment); precommit passes, no warnings
+- Files modified: `agent-core/bin/validate-runbook.py` (added `check_test_counts`, updated `cmd_test_counts` to call it), `tests/test_validate_runbook.py` (added `test_test_counts_happy_path`; updated `VALID_TDD` checkpoint from "All 1 tests pass" to "All 2 tests pass" to match actual test count)
+- Stop condition: none
+- Decision made: `VALID_TDD` checkpoint updated from claimed count 1 to 2 to match the 2 test functions (`test_foo`, `test_bar`) already present in the fixture; consistent with Common Context requirement that the fixture passes `test-counts`

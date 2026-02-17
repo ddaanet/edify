@@ -94,7 +94,7 @@ Expects `ImportError` on `src.module`.
 
 **Verify GREEN:** `pytest tests/test_example.py::test_bar -v`
 
-**Checkpoint:** All 1 tests pass.
+**Checkpoint:** All 2 tests pass.
 
 ---
 """
@@ -301,6 +301,32 @@ def test_lifecycle_duplicate_creation(
     assert "Cycle 1.1" in content
     assert "Cycle 2.1" in content
     assert "Failed: 1" in content
+
+
+def test_test_counts_happy_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Test-counts on VALID_TDD fixture exits 0 and writes PASS report."""
+    monkeypatch.chdir(tmp_path)
+    runbook = tmp_path / "valid-tdd.md"
+    runbook.write_text(VALID_TDD)
+
+    monkeypatch.setattr(sys, "argv", ["validate-runbook", "test-counts", str(runbook)])
+    try:
+        main()
+        exit_code = 0
+    except SystemExit as exc:
+        exit_code = exc.code if isinstance(exc.code, int) else 1
+
+    assert exit_code == 0
+
+    report_path = (
+        tmp_path / "plans" / "valid-tdd" / "reports" / "validation-test-counts.md"
+    )
+    assert report_path.exists(), f"Report not found at {report_path}"
+    content = report_path.read_text()
+    assert "**Result:** PASS" in content
+    assert "Failed: 0" in content
 
 
 def test_scaffold_cli() -> None:
