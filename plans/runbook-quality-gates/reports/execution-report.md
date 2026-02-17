@@ -23,3 +23,14 @@
 - Files modified: `agent-core/bin/validate-runbook.py` (added `ARTIFACT_PREFIXES`, `_is_artifact_path`, `check_model_tags`; updated `write_report` to include `**Result:**` and `Summary` section; wired `cmd_model_tags`), `tests/test_validate_runbook.py` (added `VALID_TDD` fixture, `test_model_tags_happy_path`)
 - Stop condition: none
 - Decision made: none
+
+### Cycle 1.3: model-tags violation detection 2026-02-17
+- Status: GREEN_VERIFIED
+- Test command: `pytest tests/test_validate_runbook.py::test_model_tags_violation -v`
+- RED result: FAIL as expected (AssertionError — `"**Expected:** opus"` not in report; violation message format lacked that string)
+- GREEN result: PASS
+- Regression check: 3/3 passed
+- Refactoring: lint reformatted docstring (shortened to fit one line); no structural changes
+- Files modified: `agent-core/bin/validate-runbook.py` (updated violation message format to include `**Expected:** opus`), `tests/test_validate_runbook.py` (added `VIOLATION_MODEL_TAGS` fixture, `test_model_tags_violation`)
+- Stop condition: none
+- Decision made: none
