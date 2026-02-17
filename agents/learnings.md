@@ -130,7 +130,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: `wt rm` removes worktree directory but leaves `.git/modules/agent-core/config` `core.worktree` pointing to the deleted directory. Also doesn't check if submodule branch has unmerged commits (parent repo branch merged but submodule branch diverged).
 - Correct pattern: `wt rm` must (1) restore submodule's `core.worktree` to main checkout path, (2) check submodule branch merge status before deletion. Both are data-loss vectors — stale config breaks all submodule operations, unmerged submodule branch loses commits.
 - Evidence: `git -C agent-core` failed with "cannot chdir to removed directory" after `wt rm runbook-skill-fixes`. Agent-core branch had 3 files of real diffs silently orphaned.
-## When worktree agents need cross-tree access
-- Anti-pattern: Assuming worktree sandbox allows writing to main's tree. `settings.local.json` `permissions.additionalDirectories` only includes the worktree container, not the main repo.
-- Correct pattern: `_worktree new` must add main repo path to worktree's `additionalDirectories`. Enables requirements transport, cross-tree plan creation, and future workwoods operations.
-- Implication: Any cross-tree write feature (requirements transport, blocker surfacing) requires this sandbox entry as prerequisite.
+## When importing artifacts from worktrees
+- Transport: `git show <branch>:<path>` from main — no cross-tree sandbox access needed. All worktrees share the git object store.
+- Scope: Only design.md and requirements.md are import candidates (small, authored). Runbooks (phase files, steps, orchestrator plans) are bulky, generated, implementation-oriented — require explicit intent, not casual import.
+- Supersedes: "When worktree agents need cross-tree access" learning (additionalDirectories unnecessary for transport).
