@@ -49,7 +49,7 @@ Dual-mode extract/elicit requirements skill with empirical grounding. Supports e
 
 ## worktree-skill
 
-Worktree skill implementation. 42/42 cycles completed, merged to dev. Modes A (new), B (parallel group), C (merge ceremony). Affected: agent-core/skills/worktree/.
+Worktree skill implementation. 42/42 cycles completed, merged to dev. Modes A (new), B (parallel group), C (merge ceremony). Design.md retained on disk for reference. Affected: agent-core/skills/worktree/.
 
 ## worktree-skill-fixes
 
@@ -142,10 +142,6 @@ RCA transcript for handoff-lite misuse. Documented failure mode where lite hando
 ## when-recall
 
 Memory recall system using /when and /how triggers. 12 phases, merged to main. Affected: src/claudeutils/when/, agent-core/skills/when/. Key decision: bash transport for sub-agent consumption.
-
-## worktree-skill
-
-Design.md retained on disk for reference. Original worktree skill design document preserved.
 
 ## worktree-update
 

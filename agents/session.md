@@ -1,33 +1,21 @@
 # Session Handoff: 2026-02-17
 
-**Status:** Runbook evolution requirements captured from process diagnostic discussion. Deliverable findings still pending.
+**Status:** Deliverable prose findings fixed. Code findings remain.
 
 ## Completed This Session
 
-**Process diagnostic (opus discussion):**
-- Diagnosed recurring deliverable gaps: two independent failure classes
-- Prose inconsistencies: caused by splitting edits to same prose file across steps. Fix: prose atomicity rule.
-- Missing wiring: components built/tested in isolation, production call paths never connected. Fix: testing diamond (integration-first).
-- Self-modification discipline: migration consistency (expand/contract) + bootstrapping ordering (existing decision, needs codification)
-- Testing diamond: integration tests as primary layer, unit tests only for combinatorial/edge cases. Replaces pyramid-shaped guidance.
-- Deferred: integration test bookend enforcement (observe diamond generation first)
-- Requirements captured: `plans/runbook-evolution/requirements.md`
-
-**Prior session work (already committed):**
-- Deliverable review: 1 critical + 7 major findings across code/test/prose
-- Post-orchestration vet fixes: slug propagation, public API exports, phase glob pattern
-- TDD process review: 92% RED compliance, 88% REFACTOR compliance
-- 1026/1027 tests passing
+**Deliverable prose fixes (C-1 + M-1/M-2/M-3 + minor):**
+- C-1: Added `plan-archive.md` to design SKILL.md A.1 Level 1 (conditional read for prior art)
+- M-1: Worktree SKILL.md Usage Notes — removed contradictory auto-cleanup claim
+- M-2: Handoff SKILL.md Principles — acknowledges plan-archive.md
+- M-3: Prioritize SKILL.md — `list_plans()` replaces deleted `agents/jobs.md`
+- Minor: Deduplicated worktree-skill in plan-archive.md, removed stale "cleanup" from Mode C header
+- Self-review: all edits ≤5 lines/file, additive/corrective prose only
+- Report: `plans/workwoods/reports/deliverable-review-prose.md`
 
 ## Pending Tasks
 
-- [ ] **Fix deliverable prose findings** — C-1 + M-1/M-2/M-3 prose edits | sonnet
-  - C-1: Add plan-archive.md to design SKILL.md A.1 hierarchy
-  - M-1: Update worktree SKILL.md Usage Notes line 126 (remove auto-cleanup claim)
-  - M-2: Update handoff SKILL.md Principles (acknowledge plan-archive.md)
-  - M-3: Update prioritize SKILL.md to use `list_plans()` instead of jobs.md
-  - Also: deduplicate worktree-skill entry in plan-archive.md, fix Mode C header
-  - Report: `plans/workwoods/reports/deliverable-review-prose.md`
+- [x] **Fix deliverable prose findings** — C-1 + M-1/M-2/M-3 prose edits | sonnet
 
 - [ ] **Fix deliverable code findings** — M-4/M-5/M-6/M-7 code + test gaps | sonnet
   - M-4: Implement full gate priority chain in inference.py (4 gate types per D-7)
@@ -73,4 +61,4 @@
 Fix deliverable code findings (M-4/M-5/M-6/M-7). Apply testing diamond: integration tests for wiring paths, unit tests for combinatorial gate types.
 
 ---
-*Handoff by Opus. Process diagnostic complete. Requirements captured.*
+*Handoff by Sonnet. Prose findings resolved.*
