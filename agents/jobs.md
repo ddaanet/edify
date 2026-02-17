@@ -21,7 +21,7 @@ Plan lifecycle tracking. Updated when plans change status.
 | worktree-update | complete | 40 TDD cycles, recovery (C2-C5), merged to main |
 | worktree-merge-data-loss | complete | 13 TDD cycles + 1 general step, merged to main, deliverable review done |
 | runbook-quality-gates | designed | Design complete, 2-phase delivery: Phase A prose edits, Phase B TDD scripts. 6 FRs, simplification agent + validate-runbook.py |
-| workwoods | requirements | Cross-tree worktree awareness, vet tracking, plan state inference, bidirectional merge |
+| workwoods | designed | Cross-tree worktree awareness, vet tracking, plan state inference, bidirectional merge |
 | prototypes | requirements | Session extraction feature gap, multi-project scanning |
 | remaining-workflow-items | complete | 5 FRs: reflect task output, tool-batching, delegate resume, agent output, commit simplification |
 | remember-skill-update | requirements | Outline + requirements.md complete, Phase B discussion next |

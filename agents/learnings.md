@@ -115,3 +115,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Bundling deterministic checks (file path → model mapping) with judgment-based checks (task complexity assessment) in a single agent pass.
 - Correct pattern: Script handles deterministic checks (Phase 3.5 subcommand, blocking). Agent enriches existing review for semantic checks (plan-reviewer criteria, advisory). Different enforcement layers for different failure modes — defense-in-depth.
 - Evidence: FR-2 model review split. File path matching (agent-core/skills/ → opus) is scriptable with zero false positives. Semantic complexity ("is this synthesis?") requires plan-reviewer judgment during existing Phase 1 per-phase review.
+## When resolving session.md conflicts during merge
+- Anti-pattern: Using `git checkout main -- agents/session.md` to resolve conflicts — discards all branch-side session data (new tasks, metadata) without verification
+- Correct pattern: After any session.md conflict resolution, read the full file and compare against known task list. Verify no tasks were dropped. Branch session.md may contain tasks added during worktree work that don't exist on main.
+- Evidence: "Simplify when-resolve CLI" task existed only in worktree-merge-errors branch session.md. `checkout main --` silently dropped it. Caught only because user requested explicit content verification.

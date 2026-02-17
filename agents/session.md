@@ -1,54 +1,53 @@
-# Session Handoff: 2026-02-16
+# Session Handoff: 2026-02-17
 
-**Status:** 3 worktrees merged (merge-data-loss, rm-amend, remaining-workflow-items). 2 worktrees active. Vet gate discussion: script Gate B, remove ambient vet fragment.
+**Status:** 4 worktrees merged, 3 active. Task reorganization: RED pass blocked on error-handling, runbook tasks batched.
 
 ## Completed This Session
 
-**worktree-merge-data-loss merged:**
-- Lint debt fixed in worktree (70 ruff violations, 3 files over 400-line limit)
-- Conflict resolved: `agent-core/skills/commit/SKILL.md` — main's separate-Bash-calls + branch's Gate bullet
-- 13 TDD cycles (Track 1 removal guard + Track 2 merge correctness) + 1 general step (SKILL.md Mode C)
-- Deliverable review (3 opus agents parallel): 0 critical, 3 major, 6 minor
-  - Root: incomplete exit 2 handling in `_delete_branch` (cli.py:351)
-  - Report: `plans/worktree-merge-data-loss/reports/deliverable-review.md`
+**remaining-workflow-items merged (model assignment):**
+- Post-merge commit (683fc7d) brought runbook model assignment: opus for skills/fragments/agents
+- Merge CLI failed with exit 128 during `_resolve_session_md_conflict` — manual conflict resolution
+- Vet report: `plans/remaining-workflow-items/reports/model-assignment-vet.md`
 
-**worktree-rm-amend merged:**
-- Auto-amend merge commit when `rm` modifies session.md on merge commit HEAD
-- Conflicts: `cli.py` (guard logic + amend feature combined), `scrape-validation.py` (lint reformatting)
-- `_is_merge_commit` moved to utils.py, `_update_session_and_amend` extracted as helper
-- Test assertions adapted for guard-aware output format
+**design-workwoods merged:**
+- 15 commits: design complete (6 phases, 8 decisions), runbook planned (33 TDD + 10 general steps)
+- jobs.md conflict auto-resolved (kept ours)
 
-**Backlog re-scored:** 27 tasks, rev 2. Expand runbook topped at 2.6 (now complete). Report: `plans/reports/prioritization-2026-02-16.md`
+**pretool-hook-cd-pattern merged + removed:**
+- Submodule-safety hook now allows `cd <project-root> && <cmd>` pattern
+- Fixes catch-22 where hook blocked all Bash including `cd` to restore cwd
+- Tests: `tests/test_submodule_safety.py`
+- Reports: `plans/pretool-hook-cd-pattern/reports/`
 
-**remaining-workflow-items merged:**
-- FR-1: Reflect skill exit paths — produce session.md task format instead of prose descriptions
-- FR-2: Tool-batching.md — Task tool parallelization section
-- FR-3: Delegation.md — Delegate Resume pattern (resume before relaunch, 15-message heuristic)
-- FR-4: Agent output audit — simplified verbose output in 3 agents (quiet-task, review-tdd-process, refactor)
-- FR-5: Commit skill — removed Gate A (session freshness), kept Gate B (vet checkpoint) with proportionality
-- Conflict: SKILL.md Gate A/B — branch deleted both, kept Gate B from main with proportionality update
-- Artifacts: `plans/remaining-workflow-items/requirements.md`, `plans/remaining-workflow-items/reports/vet-review.md`
+**worktree-merge-errors merged + removed:**
+- Merge CLI now reports errors with context instead of stack traces
+- `_git()` CalledProcessError now surfaces stderr in user-facing message
+- Session resolution fallback preserves branch data
+- Tests: `tests/test_worktree_merge_errors.py`, `tests/test_worktree_merge_session_resolution.py`
 
-**Vet gate discussion (design decision):**
-- Commit Gate A (session freshness) removed — handoff timing is user's decision
-- Commit Gate B (vet checkpoint) kept but should be scripted (file classification + report existence check)
-- Ambient vet requirement (`vet-requirement.md` fragment in CLAUDE.md) should be removed:
-  - Unenforceable (aspirational rule, no gating mechanism)
-  - Sub-agents don't see CLAUDE.md fragments — only fires in main session
-  - Redundant: orchestrator handles vet via pipeline-contracts.md, commit gate catches interactive work
-  - ~100 lines loaded every session for no enforcement value
-- Execution context template + UNFIXABLE protocol → move to on-demand reference (memory index)
+**runbook-skill-fixes merged (worktree kept):**
+- Design quality gates design complete, simplification agent created
+- Pipeline-contracts updated, memory-index updated
+- Runbook quality gates Phase A prose edits landed
+- Reports: `plans/runbook-quality-gates/reports/`
+
+**Task reorganization:**
+- RED pass protocol separated from runbook batch, blocked on error-handling design (D-3, D-5)
+- Runbook tasks batched into "Runbook skill fixes" (model assignment + design quality gates)
+- Pretool hook and worktree merge errors completed and removed from pending
+
+**Session data loss caught and fixed:**
+- `git checkout main -- agents/session.md` during conflict resolution dropped "Simplify when-resolve CLI" task — restored manually
+- Lesson: always verify session.md content after merge, not just diff
 
 ## Pending Tasks
 
 <!-- Priority order per plans/reports/prioritization-2026-02-16.md (rev 2) -->
 
-
 - [ ] **RED pass protocol** — Formalize orchestrator RED pass handling into orchestrate skill | sonnet
   - Blocked on: Error handling design (needs D-3 escalation criteria, D-5 rollback semantics)
   - Scope: Classification taxonomy, blast radius procedure, defect impact evaluation
   - Reports: `plans/when-recall/reports/tdd-process-review.md`, `plans/orchestrate-evolution/reports/red-pass-blast-radius.md`
-
 
 - [ ] **Address merge data loss review** — Fix 3 major findings from deliverable review | sonnet
   - Major 1: `_delete_branch` exit 2 on unexpected failure (cli.py:351)
@@ -157,6 +156,7 @@
 - [ ] **Orchestrate evolution** — `/runbook plans/orchestrate-evolution/design.md` | sonnet
   - Design.md complete, vet in progress, planning next (design refreshed Feb 13)
 
+- [ ] **Simplify when-resolve CLI** — Accept single argument with when/how prefix instead of two args, update skill prose | sonnet
 
 - [ ] **Debug failed merge** — Investigate the original merge failure (exit 128 during session.md conflict resolution) | sonnet
   - Context: Merge of `remaining-workflow-items` worktree on 2026-02-16
@@ -180,9 +180,7 @@
   - Key decisions: D-1 CPS abort-and-record, D-2 task `[!]`/`[✗]` states, D-3 escalation acceptance criteria, D-5 rollback = revert to step start
 
 - [ ] **Design workwoods** → `design-workwoods` — `/design plans/workwoods/requirements.md` | opus
-  - Plan: workwoods | Status: requirements
-
-
+  - Plan: workwoods | Status: designed (runbook planned, 33 TDD + 10 general steps)
 
 - [ ] **Runbook skill fixes** → `runbook-skill-fixes` — Batch: model assignment (opus for architectural artifacts), design quality gates | opus
   - Runbook model assignment: apply design-decisions.md directive (opus for skill/fragment/agent edits) — partially landed via remaining-workflow-items merge
@@ -191,6 +189,11 @@
     - 3 open questions: script vs agent (Q-1), insertion point (Q-2), mandatory vs opt-in (Q-3)
 
 ## Blockers / Gotchas
+
+**Transient git index.lock during merge:**
+- `claudeutils _worktree merge` hits `index.lock` race condition during multi-step git operations
+- Likely caused by file watcher (IDE/direnv) touching the index concurrently
+- Workaround: retry after brief pause, or complete merge manually after partial success
 
 **Diagnostic review methodology converging:**
 - Taxonomy, iteration protocol, priming template designed in conversation
@@ -208,7 +211,7 @@
 
 ## Next Steps
 
-Next: Address merge data loss review (sonnet). 2 worktrees active (error-handling-design, design-workwoods). Learnings at 97/80 lines — run `/remember` soon.
+Next: Address merge data loss review (sonnet). 3 worktrees active (error-handling-design, design-workwoods, runbook-skill-fixes). Learnings at 117/80 lines — run `/remember` soon.
 
 ## Reference Files
 
@@ -220,3 +223,4 @@ Next: Address merge data loss review (sonnet). 2 worktrees active (error-handlin
 - `agents/decisions/deliverable-review.md` — Post-execution review methodology
 - `plans/reports/safety-review-grounding.md` — Safety review grounding research
 - `plans/remaining-workflow-items/requirements.md` — 6 FRs (reflect, batching, delegation, agents, commit)
+- `plans/runbook-quality-gates/design.md` — Quality gates design (6 FRs, simplification agent)
