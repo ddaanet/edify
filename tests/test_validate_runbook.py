@@ -1,10 +1,100 @@
 """Tests for validate-runbook.py CLI scaffold."""
 
+import importlib.util
 import subprocess
 import sys
 from pathlib import Path
 
 SCRIPT = Path(__file__).parent.parent / "agent-core" / "bin" / "validate-runbook.py"
+
+_spec = importlib.util.spec_from_file_location("validate_runbook", SCRIPT)
+_mod = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
+_spec.loader.exec_module(_mod)  # type: ignore[union-attr]
+main = _mod.main
+
+VALID_TDD = """\
+---
+title: Example Runbook
+---
+
+# Phase 1: Core module (type: tdd)
+
+**Target files:**
+- `src/module.py` (new)
+
+---
+
+## Cycle 1.1: scaffold
+
+**Execution Model**: Sonnet
+
+**RED Phase:**
+
+**Test:** `test_foo`
+
+Expects `ImportError` on `src.module`.
+
+**Expected failure:** `ImportError`
+
+**Verify RED:** `pytest tests/test_example.py::test_foo -v`
+
+---
+
+**GREEN Phase:**
+
+**Changes:**
+- File: `src/module.py`
+  Action: Create
+
+**Verify GREEN:** `pytest tests/test_example.py::test_foo -v`
+
+---
+
+## Cycle 1.2: extend
+
+**Execution Model**: Sonnet
+
+**RED Phase:**
+
+**Test:** `test_bar`
+
+**Verify RED:** `pytest tests/test_example.py::test_bar -v`
+
+---
+
+**GREEN Phase:**
+
+**Changes:**
+- File: `src/module.py`
+  Action: Modify
+
+**Verify GREEN:** `pytest tests/test_example.py::test_bar -v`
+
+**Checkpoint:** All 1 tests pass.
+
+---
+"""
+
+
+def test_model_tags_happy_path(tmp_path: Path) -> None:
+    """Model-tags on a valid runbook exits 0 and writes a PASS report."""
+    runbook = tmp_path / "my-runbook.md"
+    runbook.write_text(VALID_TDD)
+
+    sys.argv = ["validate-runbook", "model-tags", str(runbook)]
+    try:
+        main()
+        exit_code = 0
+    except SystemExit as exc:
+        exit_code = exc.code if isinstance(exc.code, int) else 1
+
+    assert exit_code == 0
+
+    report_path = Path("plans") / "my-runbook" / "reports" / "validation-model-tags.md"
+    assert report_path.exists(), f"Report not found at {report_path}"
+    content = report_path.read_text()
+    assert "**Result:** PASS" in content
+    assert "Failed: 0" in content
 
 
 def test_scaffold_cli() -> None:
