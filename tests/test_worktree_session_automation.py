@@ -120,7 +120,7 @@ def test_rm_calls_remove_worktree_task_before_branch_delete(
         capture_output=True,
     )
 
-    result = CliRunner().invoke(worktree, ["rm", "feature-a"])
+    result = CliRunner().invoke(worktree, ["rm", "--confirm", "feature-a"])
     assert result.exit_code == 0
 
     final_session = session_file.read_text()
@@ -219,7 +219,7 @@ def test_rm_e2e_removes_completed_task_from_worktree_tasks(
         capture_output=True,
     )
 
-    result = CliRunner().invoke(worktree, ["rm", "complete-the-feature"])
+    result = CliRunner().invoke(worktree, ["rm", "--confirm", "complete-the-feature"])
     assert result.exit_code == 0
     assert "Removed complete-the-feature" in result.output
 

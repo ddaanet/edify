@@ -260,3 +260,50 @@ def remove_worktree_task(session_path: Path, slug: str, worktree_branch: str) ->
             break
 
     session_path.write_text("\n".join(lines))
+
+
+def _filter_section(
+    content: str, section_name: str, task_name: str, plan_dir: str | None
+) -> str:
+    """Filter section entries by task_name or plan_dir match."""
+    pattern = rf"## {re.escape(section_name)}\n\n(.*?)(?=\n## |\Z)"
+    if not (match := re.search(pattern, content, re.DOTALL)):
+        return ""
+
+    def is_relevant(entry: str) -> bool:
+        lo = entry.lower()
+        return task_name.lower() in lo or bool(plan_dir and plan_dir.lower() in lo)
+
+    lines = []
+    include = False
+    for line in match.group(1).split("\n"):
+        if line.startswith("- "):
+            include = is_relevant(line[2:].strip())
+            if include:
+                lines.append(line)
+        elif include and line.strip():
+            lines.append(line)
+    return f"## {section_name}\n\n" + "\n".join(lines) + "\n" if lines else ""
+
+
+def focus_session(task_name: str, session_md_path: str | Path) -> str:
+    """Filter session.md to task_name with relevant context sections."""
+    content = Path(session_md_path).read_text()
+    blocks = extract_task_blocks(content, section="Pending Tasks")
+    task_block = next((b for b in blocks if b.name == task_name), None)
+    if not task_block:
+        msg = f"Task '{task_name}' not found in session.md"
+        raise ValueError(msg)
+    task_lines_str = "\n".join(task_block.lines)
+    plan_dir = (
+        m.group(1) if (m := re.search(r"[Pp]lan:\s*(\S+)", task_lines_str)) else None
+    )
+    result = (
+        f"# Session: Worktree — {task_name}\n\n"
+        f"**Status:** Focused worktree for parallel execution.\n\n"
+        f"## Pending Tasks\n\n{task_lines_str}\n"
+    )
+    for section in ["Blockers / Gotchas", "Reference Files"]:
+        if filtered := _filter_section(content, section, task_name, plan_dir):
+            result += f"\n{filtered}"
+    return result

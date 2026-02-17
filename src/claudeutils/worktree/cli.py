@@ -13,8 +13,8 @@ import click
 from claudeutils.validation.tasks import validate_task_name_format
 from claudeutils.worktree.merge import _format_git_error
 from claudeutils.worktree.merge import merge as merge_impl
+from claudeutils.worktree.session import focus_session as focus_session  # noqa: PLC0414
 from claudeutils.worktree.session import (
-    extract_task_blocks,
     move_task_to_worktree,
     remove_worktree_task,
 )
@@ -41,52 +41,6 @@ def derive_slug(task_name: str) -> str:
         raise ValueError(format_errors[0])
     return re.sub(r"[^a-z0-9]+", "-", task_name.lower()).strip("-")
 
-
-def _filter_section(
-    content: str, section_name: str, task_name: str, plan_dir: str | None
-) -> str:
-    """Filter section entries by task_name or plan_dir match."""
-    pattern = rf"## {re.escape(section_name)}\n\n(.*?)(?=\n## |\Z)"
-    if not (match := re.search(pattern, content, re.DOTALL)):
-        return ""
-
-    def is_relevant(entry: str) -> bool:
-        lo = entry.lower()
-        return task_name.lower() in lo or bool(plan_dir and plan_dir.lower() in lo)
-
-    lines = []
-    include = False
-    for line in match.group(1).split("\n"):
-        if line.startswith("- "):
-            include = is_relevant(line[2:].strip())
-            if include:
-                lines.append(line)
-        elif include and line.strip():
-            lines.append(line)
-    return f"## {section_name}\n\n" + "\n".join(lines) + "\n" if lines else ""
-
-
-def focus_session(task_name: str, session_md_path: str | Path) -> str:
-    """Filter session.md to task_name with relevant context sections."""
-    content = Path(session_md_path).read_text()
-    blocks = extract_task_blocks(content, section="Pending Tasks")
-    task_block = next((b for b in blocks if b.name == task_name), None)
-    if not task_block:
-        msg = f"Task '{task_name}' not found in session.md"
-        raise ValueError(msg)
-    task_lines_str = "\n".join(task_block.lines)
-    plan_dir = (
-        m.group(1) if (m := re.search(r"[Pp]lan:\s*(\S+)", task_lines_str)) else None
-    )
-    result = (
-        f"# Session: Worktree — {task_name}\n\n"
-        f"**Status:** Focused worktree for parallel execution.\n\n"
-        f"## Pending Tasks\n\n{task_lines_str}\n"
-    )
-    for section in ["Blockers / Gotchas", "Reference Files"]:
-        if filtered := _filter_section(content, section, task_name, plan_dir):
-            result += f"\n{filtered}"
-    return result
 
 
 def add_sandbox_dir(container: str, settings_path: str | Path) -> None:
@@ -346,6 +300,24 @@ def _delete_branch(slug: str, removal_type: str | None) -> None:
         raise SystemExit(1)
 
 
+def _check_confirm(slug: str, confirm: bool) -> None:  # noqa: FBT001
+    if not confirm:
+        click.echo(
+            f"Use the worktree skill (wt merge {slug}) to remove worktrees safely. "
+            "Pass --confirm to invoke directly.",
+            err=True,
+        )
+        raise SystemExit(2)
+
+
+def _warn_if_dirty(worktree_path: Path) -> None:
+    if worktree_path.exists():
+        status = _git("-C", str(worktree_path), "status", "--porcelain", check=False)
+        if status:
+            n = len(status.strip().split("\n"))
+            click.echo(f"Warning: worktree has {n} uncommitted files")
+
+
 def _update_session_and_amend(slug: str) -> bool:
     session_md_path = Path("agents/session.md")
     if not session_md_path.exists():
@@ -363,18 +335,21 @@ def _update_session_and_amend(slug: str) -> bool:
 
 @worktree.command()
 @click.argument("slug")
-def rm(slug: str) -> None:
+@click.option(
+    "--confirm",
+    is_flag=True,
+    default=False,
+    help="Confirm direct invocation (bypass skill requirement)",
+)
+def rm(slug: str, confirm: bool) -> None:  # noqa: FBT001
     """Remove worktree and its branch."""
+    _check_confirm(slug, confirm)
+
     branch_exists, removal_type = _guard_branch_removal(slug)
     worktree_path = _get_worktree_path_for_branch(slug) or wt_path(slug)
     parent_reg, submodule_reg = _probe_registrations(worktree_path)
 
-    if worktree_path.exists():
-        status = _git("-C", str(worktree_path), "status", "--porcelain", check=False)
-        if status:
-            n = len(status.strip().split("\n"))
-            click.echo(f"Warning: worktree has {n} uncommitted files")
-
+    _warn_if_dirty(worktree_path)
     amended = _update_session_and_amend(slug)
 
     if parent_reg or submodule_reg:

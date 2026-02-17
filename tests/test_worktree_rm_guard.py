@@ -132,7 +132,7 @@ def test_rm_refuses_unmerged_real_history(
 
     # Scenario A: Real history with 2 unmerged commits
     wt_path = add_worktree(repo, "real-unmerged")
-    result = runner.invoke(worktree, ["rm", "real-unmerged"])
+    result = runner.invoke(worktree, ["rm", "--confirm", "real-unmerged"])
 
     assert result.exit_code == 2
     assert "has 2 unmerged commit(s). Merge first." in result.output
@@ -147,7 +147,7 @@ def test_rm_refuses_unmerged_real_history(
     _run_git(repo, "checkout", "main")
     add_worktree(repo, "orphan-branch")
 
-    result = runner.invoke(worktree, ["rm", "orphan-branch"])
+    result = runner.invoke(worktree, ["rm", "--confirm", "orphan-branch"])
     assert result.exit_code == 2
     assert "is orphaned (no common ancestor). Merge first." in result.output
 
@@ -163,7 +163,7 @@ def test_rm_allows_merged_branch(
     monkeypatch.chdir(repo)
 
     add_worktree(repo, "merged-branch")
-    result = CliRunner().invoke(worktree, ["rm", "merged-branch"])
+    result = CliRunner().invoke(worktree, ["rm", "--confirm", "merged-branch"])
 
     assert result.exit_code == 0
     assert not _branch_exists(repo, "merged-branch"), "Branch should be deleted"
@@ -186,7 +186,7 @@ def test_rm_allows_focused_session_only(
     monkeypatch.chdir(repo)
 
     add_worktree(repo, "test-branch")
-    result = CliRunner().invoke(worktree, ["rm", "test-branch"])
+    result = CliRunner().invoke(worktree, ["rm", "--confirm", "test-branch"])
 
     assert result.exit_code == 0
     assert not _branch_exists(repo, "test-branch"), "Branch should be deleted"
@@ -215,7 +215,7 @@ def test_rm_guard_prevents_destruction(
         "# Session\n\n## Worktree Tasks\n\n- [ ] **Test Task** → `guard-test`\n"
     )
 
-    result = CliRunner().invoke(worktree, ["rm", "guard-test"])
+    result = CliRunner().invoke(worktree, ["rm", "--confirm", "guard-test"])
     assert result.exit_code == 2
 
     assert wt_path.exists(), "Worktree directory should survive guard refusal"
@@ -250,7 +250,7 @@ def test_rm_no_destructive_suggestions(
         merge=True,
     )
     add_worktree(repo, "merged-test")
-    result = runner.invoke(worktree, ["rm", "merged-test"])
+    result = runner.invoke(worktree, ["rm", "--confirm", "merged-test"])
     assert "git branch -D" not in result.output
 
     # Scenario 2: Focused-session-only removal (success)
@@ -261,7 +261,7 @@ def test_rm_no_destructive_suggestions(
         empty_msg="Focused session for focused-test",
     )
     add_worktree(repo, "focused-test")
-    result = runner.invoke(worktree, ["rm", "focused-test"])
+    result = runner.invoke(worktree, ["rm", "--confirm", "focused-test"])
     assert "git branch -D" not in result.output
 
     # Scenario 3: Guard refusal (error)
@@ -272,7 +272,7 @@ def test_rm_no_destructive_suggestions(
         files={"unmerged.txt": "unmerged content"},
     )
     add_worktree(repo, "unmerged-test")
-    result = runner.invoke(worktree, ["rm", "unmerged-test"])
+    result = runner.invoke(worktree, ["rm", "--confirm", "unmerged-test"])
     assert "git branch -D" not in result.output
 
 
@@ -287,7 +287,7 @@ def test_rm_guard_exits_2(
     monkeypatch.chdir(repo)
 
     add_worktree(repo, "guard-test-br")
-    result = CliRunner().invoke(worktree, ["rm", "guard-test-br"])
+    result = CliRunner().invoke(worktree, ["rm", "--confirm", "guard-test-br"])
 
     assert result.exit_code == 2
     assert "has 2 unmerged commit(s). Merge first." in result.output

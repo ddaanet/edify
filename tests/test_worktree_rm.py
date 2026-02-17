@@ -13,28 +13,7 @@ from claudeutils.worktree.utils import (
     _is_parent_dirty,
     _is_submodule_dirty,
 )
-
-
-def _create_worktree(
-    repo_path: Path, slug: str, init_repo: Callable[[Path], None]
-) -> Path:
-    """Create worktree and return its path."""
-    runner = CliRunner()
-    result = runner.invoke(worktree, ["new", slug])
-    assert result.exit_code == 0
-    container_path = repo_path.parent / f"{repo_path.name}-wt"
-    return container_path / slug
-
-
-def _branch_exists(name: str) -> bool:
-    """Check if branch exists."""
-    result = subprocess.run(
-        ["git", "branch", "--list", name],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return name in result.stdout
+from tests.fixtures_worktree import _branch_exists, _create_worktree
 
 
 def test_is_parent_dirty(
@@ -68,7 +47,7 @@ def test_rm_basic(
     assert worktree_path.exists()
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["rm", "test-feature"])
+    result = runner.invoke(worktree, ["rm", "--confirm", "test-feature"])
 
     assert result.exit_code == 0
     assert not worktree_path.exists()
@@ -89,7 +68,7 @@ def test_rm_dirty_warning(
     (worktree_path / "newfile.txt").write_text("uncommitted")
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["rm", "test-feature"])
+    result = runner.invoke(worktree, ["rm", "--confirm", "test-feature"])
 
     assert result.exit_code == 0
     assert not worktree_path.exists()
@@ -114,7 +93,7 @@ def test_rm_branch_only(
     assert _branch_exists("test-feature")
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["rm", "test-feature"])
+    result = runner.invoke(worktree, ["rm", "--confirm", "test-feature"])
 
     assert result.exit_code == 0
     assert not _branch_exists("test-feature")
@@ -212,7 +191,7 @@ def test_rm_amends_merge_commit_when_session_modified(
     assert worktree_path.exists()
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["rm", "test-feature"])
+    result = runner.invoke(worktree, ["rm", "--confirm", "test-feature"])
 
     assert result.exit_code == 0
 
@@ -267,7 +246,7 @@ def test_rm_does_not_amend_on_normal_commit(
     assert worktree_path.exists()
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["rm", "test-feature"])
+    result = runner.invoke(worktree, ["rm", "--confirm", "test-feature"])
     assert result.exit_code == 0
 
     # If amend happened incorrectly, the task removal would be in HEAD commit
@@ -324,7 +303,7 @@ def test_rm_output_indicates_amend(
     assert worktree_path.exists()
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["rm", "test-feature"])
+    result = runner.invoke(worktree, ["rm", "--confirm", "test-feature"])
 
     assert result.exit_code == 0
     assert "merge commit amended" in result.output.lower()
@@ -345,11 +324,31 @@ def test_rm_output_indicates_amend(
     worktree_path2 = _create_worktree(repo_path, "another-feature", init_repo)
     assert worktree_path2.exists()
 
-    result2 = runner.invoke(worktree, ["rm", "another-feature"])
+    result2 = runner.invoke(worktree, ["rm", "--confirm", "another-feature"])
     assert result2.exit_code == 0
     assert "amend" not in result2.output.lower()
     assert "removed" in result2.output.lower()
     assert "another-feature" in result2.output.lower()
+
+
+def test_rm_refuses_without_confirm(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Refuses removal without --confirm flag."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+
+    init_repo(repo_path)
+    worktree_path = _create_worktree(repo_path, "test-feature", init_repo)
+    assert worktree_path.exists()
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["rm", "test-feature"])
+
+    assert result.exit_code == 2
+    assert "confirm" in result.output.lower() or "skill" in result.output.lower()
+    assert worktree_path.exists()
 
 
 def test_is_submodule_dirty(
