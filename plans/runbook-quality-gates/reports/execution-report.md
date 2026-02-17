@@ -139,3 +139,16 @@
 - Files modified: `agent-core/bin/validate-runbook.py` (changed `created_names: set[str]` to `dict[str, str]` mapping name → creating cycle_id; updated violation message to include creating cycle ID; used `setdefault` for accumulation), `tests/test_validate_runbook.py` (added `VIOLATION_RED_IMPLAUSIBLE` import, `test_red_plausibility_violation`), `tests/fixtures/validate_runbook_fixtures.py` (added `VIOLATION_RED_IMPLAUSIBLE` fixture)
 - Stop condition: none
 - Decision made: none
+
+## Phase 5: Directory input + skip flags
+
+### Cycle 5.1: directory input + skip flags 2026-02-18
+- Status: GREEN_VERIFIED
+- Test command: `pytest tests/test_validate_runbook.py::test_integration_directory_input tests/test_validate_runbook.py::test_integration_skip_flag -v`
+- RED result: FAIL as expected (`AttributeError: 'tuple' object has no attribute 'split'` for directory input; exit code 2 for unrecognized skip flags)
+- GREEN result: PASS (5/5)
+- Regression check: 17/17 passed
+- Refactoring: Extracted integration tests to `test_validate_runbook_integration.py` to resolve 509-line limit warning on `test_validate_runbook.py`; precommit passes clean
+- Files modified: `agent-core/bin/validate-runbook.py` (fixed `assemble_phase_files` tuple unpacking in all 4 handlers; added `--skip-*` flags to each subparser; extended `write_report` with `skipped` param; fixed directory report path to write inside directory), `tests/test_validate_runbook_integration.py` (created: integration tests for directory input and skip flags), `tests/test_validate_runbook.py` (removed integration tests moved to new file), `plans/runbook-quality-gates/reports/execution-report.md` (this entry)
+- Stop condition: none
+- Decision made: `write_report` for directory input writes to `<directory>/reports/` (not `plans/<job>/reports/`) per step spec; file split resolves line limit warning without architectural changes
