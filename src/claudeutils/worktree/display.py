@@ -3,6 +3,8 @@
 import subprocess
 from pathlib import Path
 
+from claudeutils.planstate.aggregation import aggregate_trees
+
 
 def format_tree_header(
     display_name: str, branch: str, path: str, _main_path: str
@@ -86,7 +88,7 @@ def _parse_worktree_entries(
 
 
 def format_rich_ls(main_path: str, porcelain_output: str) -> str:
-    """Format rich ls output with headers for all trees."""
+    """Format rich ls output with headers for all trees and their plans."""
     result = subprocess.run(
         ["git", "-C", main_path, "rev-parse", "--abbrev-ref", "HEAD"],
         capture_output=True,
@@ -95,7 +97,28 @@ def format_rich_ls(main_path: str, porcelain_output: str) -> str:
     )
     main_branch = result.stdout.strip() if result.returncode == 0 else "main"
 
+    # Aggregate plans across all trees
+    aggregated = aggregate_trees(Path(main_path))
+
     lines = [format_tree_header("main", main_branch, main_path, main_path)]
+
+    # Add plans and gates for main tree
+    for plan in aggregated.plans:
+        if plan.tree_path == main_path:
+            lines.append(f"  Plan: {plan.name} [{plan.status}] → {plan.next_action}")
+            if plan.gate:
+                lines.append(f"  Gate: {plan.gate}")
+
     for slug, branch, path in _parse_worktree_entries(porcelain_output, main_path):
         lines.append(format_tree_header(slug, branch, path, main_path))
+
+        # Add plans and gates for this worktree
+        for plan in aggregated.plans:
+            if plan.tree_path == path:
+                lines.append(
+                    f"  Plan: {plan.name} [{plan.status}] → {plan.next_action}"
+                )
+                if plan.gate:
+                    lines.append(f"  Gate: {plan.gate}")
+
     return "\n".join(lines)

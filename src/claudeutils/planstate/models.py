@@ -35,3 +35,4 @@ class PlanState:
     next_action: str
     gate: str | None
     artifacts: set[str]
+    tree_path: str | None = None

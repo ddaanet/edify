@@ -281,6 +281,7 @@ def aggregate_trees(repo_root: Path) -> AggregatedStatus:
         plans_dir = tree_path / "plans"
         tree_plans = list_plans(plans_dir)
         for plan in tree_plans:
+            plan.tree_path = tree.path
             if plan.name not in plans_dict:
                 plans_dict[plan.name] = plan
 
@@ -292,6 +293,7 @@ def aggregate_trees(repo_root: Path) -> AggregatedStatus:
         plans_dir = tree_path / "plans"
         tree_plans = list_plans(plans_dir)
         for plan in tree_plans:
+            plan.tree_path = tree.path
             plans_dict[plan.name] = plan
 
     # Convert dict to sorted list
