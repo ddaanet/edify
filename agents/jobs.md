@@ -23,8 +23,8 @@ Plan lifecycle tracking. Updated when plans change status.
 | worktree-rm-safety | complete | 5 FRs: dirty check, exit code 2, --force, --confirm. Tier 2 TDD, 6 cycles + 1 general step |
 | runbook-quality-gates | designed | Design complete, 2-phase delivery: Phase A prose edits, Phase B TDD scripts. 6 FRs, simplification agent + validate-runbook.py |
 | workwoods | designed | Cross-tree worktree awareness, vet tracking, plan state inference, bidirectional merge |
-| worktree-rm-safety | requirements | Dirty tree detection + --force bypass for wt rm (5 FRs) |
 | prototypes | requirements | Session extraction feature gap, multi-project scanning |
+| runbook-evolution | requirements | Prose atomicity, testing diamond, self-modification discipline (5 FRs) |
 | remaining-workflow-items | complete | 5 FRs: reflect task output, tool-batching, delegate resume, agent output, commit simplification |
 | remember-skill-update | requirements | Outline + requirements.md complete, Phase B discussion next |
 

@@ -1,28 +1,32 @@
 # Session Handoff: 2026-02-17
 
-**Status:** Worktree infrastructure fixes + rm safety requirements captured. 4 worktrees active.
+**Status:** Merged worktree-rm-safety-gate, imported runbook-evolution requirements, added Tier 2 directives. 3 worktrees active.
 
 ## Completed This Session
 
-**Fix stale agent-core submodule after worktree removal:**
-- `wt rm runbook-skill-fixes` left `.git/modules/agent-core/config` `core.worktree` pointing to removed directory — broke all `git -C agent-core` commands
-- Fix: manually edited config to `../../../agent-core`, merged orphaned agent-core branch (3 files with real diffs: claude-config-layout.md, submodule-safety.py, worktree/SKILL.md)
-- Root cause: `wt rm` removes worktree directory but doesn't restore submodule config when the worktree held the submodule's main worktree reference
+**Worktree-rm-safety-gate merge:**
+- Merged branch with 5 FRs (dirty check, exit 2, --force bypass, skill confirmation)
+- Conflict on `plans/worktree-rm-safety/requirements.md` — pre-resolved (workwoods import collided with branch version)
+- Precommit fix: condensed cli.py rm output (401→400 lines), updated 2 test assertions
+- Worktree removed, branch deleted
 
-**Cross-tree sandbox access for worktrees:**
-- `_worktree new` now adds main repo to worktree's `permissions.additionalDirectories` (cli.py + justfile)
-- Enables worktree agents to write to main's tree (requirements transport, cross-tree operations)
-- Test updated: `test_new_sandbox_registration` asserts main repo path in worktree sandbox dirs
+**Git show transport pattern:**
+- Discovered `git show <branch>:<path>` as cross-tree transport — eliminates need for sandbox `additionalDirectories`
+- Imported `plans/runbook-evolution/requirements.md` from design-workwoods worktree
+- Discussed: not a skill, should be CLI subcommand (`_worktree import`) if formalized
 
-**Worktree RM safety gate requirements:**
-- Captured 5 FRs in `plans/worktree-rm-safety/requirements.md`
-- FR-1/2: detect uncommitted changes in parent + submodule; FR-3: exit 2 convention; FR-4: --force bypass; FR-5: skill layer confirmation
-- Created worktree `worktree-rm-safety-gate` for implementation
+**Tier 2 directives:**
+- Added `learn: <text>` — append to agents/learnings.md
+- Added `q: <text>` — quick question, terse response
+- Both in `agent-core/fragments/execute-rule.md`
+
+**Reflect RCA — merge conflict prediction:**
+- Imported file into plan dir owned by active worktree → predictable conflict on merge
+- Learning added: ownership check before `git show` import
 
 ## Pending Tasks
 
 <!-- Priority order per plans/reports/prioritization-2026-02-16.md (rev 2) -->
-
 
 - [ ] **RED pass protocol** — Formalize orchestrator RED pass handling into orchestrate skill | sonnet
   - Blocked on: Error handling design (needs D-3 escalation criteria, D-5 rollback semantics)
@@ -147,10 +151,17 @@
   - model-tags, lifecycle, test-counts, red-plausibility
 
 - [ ] **Cross-tree requirements transport** — `/requirements` skill writes to main tree from worktree | sonnet
-  - Sandbox access landed (main repo in worktree's additionalDirectories)
-  - Remaining: requirements skill path flag/auto-detection, main path resolution via `git worktree list`
+  - Transport solved: `git show <branch>:<path>` from main (no sandbox needed)
+  - Remaining: requirements skill path flag/auto-detection, optional CLI subcommand (`_worktree import`)
   - Workwoods impact: planstate `infer_state()` will auto-discover plans — no jobs.md write needed post-workwoods
-  - Pre-workwoods: write requirements.md + append jobs.md line (interim)
+
+- [ ] **Runbook evolution** — `/design plans/runbook-evolution/requirements.md` | opus
+  - Plan: runbook-evolution | Status: requirements
+  - 5 FRs: prose atomicity, self-modification discipline, testing diamond, deferred enforcement, test migration
+
+- [ ] **Revert cross-tree sandbox access** — Remove `additionalDirectories` code from `_worktree new` | sonnet
+  - Superseded by git show transport — sandbox access unnecessary for cross-tree operations
+  - Affects: cli.py `_setup_worktree()`, justfile, `test_new_sandbox_registration`
 
 ## Worktree Tasks
 
@@ -166,21 +177,17 @@
   - Design quality gates: `/design plans/runbook-quality-gates/` | restart
     - Requirements at `plans/runbook-quality-gates/requirements.md`
 
-- [ ] **Worktree RM safety gate** → `worktree-rm-safety-gate` — `/design plans/worktree-rm-safety/` | sonnet
-  - Plan: worktree-rm-safety | Status: requirements
-  - 5 FRs: dirty check (parent+submodule), exit 2, --force bypass, skill confirmation
-
 ## Blockers / Gotchas
+
+**Merge tool aborts on conflict (skill mismatch):**
+- `_worktree merge` aborts and returns clean tree on conflict
+- Worktree skill Mode C step 4 documents resolution assuming in-progress merge state
+- Workaround: pre-resolve conflict (commit resolution separately), then re-run merge
 
 **Transient git index.lock during merge:**
 - `claudeutils _worktree merge` hits `index.lock` race condition during multi-step git operations
 - Likely caused by file watcher (IDE/direnv) touching the index concurrently
 - Workaround: retry after brief pause, or complete merge manually after partial success
-
-**Diagnostic review methodology converging:**
-- Taxonomy, iteration protocol, priming template designed in conversation
-- Opus critique validated approach, identified haiku paradox (resolved: discovery at capable tier, pre-assembled context for haiku)
-- Methodology skill + design-vet-agent integration planned as follow-on task
 
 **Validator orphan entries not autofixable:**
 - Marking headings structural (`.` prefix) causes `check_orphan_entries` non-autofixable error
@@ -189,7 +196,6 @@
 **`wt rm` leaves stale submodule config:**
 - Removing a worktree can leave `.git/modules/agent-core/config` `core.worktree` pointing to the deleted directory
 - Breaks all `git -C agent-core` operations on main until manually fixed
-- Related to worktree-rm-safety work — rm needs submodule awareness
 
 **Memory index `/how` operator mapping:**
 - `/how X` in index → internally becomes `"how to X"` for heading matching
@@ -198,7 +204,7 @@
 
 ## Next Steps
 
-Next: Execute plugin migration (opus) or Script commit vet gate (sonnet). 4 worktrees active (error-handling-design, design-workwoods, runbook-skill-fixes, worktree-rm-safety-gate). Learnings at 128/80 lines — run `/remember` soon.
+Next: Execute plugin migration (opus) or Script commit vet gate (sonnet). 3 worktrees active (error-handling-design, design-workwoods, runbook-skill-fixes). Learnings at 137/80 lines — run `/remember` soon.
 
 ## Reference Files
 
@@ -210,3 +216,4 @@ Next: Execute plugin migration (opus) or Script commit vet gate (sonnet). 4 work
 - `agents/decisions/deliverable-review.md` — Post-execution review methodology
 - `plans/reports/safety-review-grounding.md` — Safety review grounding research
 - `plans/runbook-quality-gates/design.md` — Quality gates design (6 FRs, simplification agent)
+- `plans/runbook-evolution/requirements.md` — Runbook evolution (5 FRs, testing diamond, prose atomicity)
