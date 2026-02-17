@@ -47,3 +47,14 @@
 - Files modified: `agent-core/bin/validate-runbook.py` (added `check_lifecycle`, updated `cmd_lifecycle` to call it), `tests/test_validate_runbook.py` (added `test_lifecycle_happy_path`)
 - Stop condition: none
 - Decision made: none
+
+### Cycle 2.2: lifecycle modify-before-create 2026-02-18
+- Status: GREEN_VERIFIED
+- Test command: `pytest tests/test_validate_runbook.py::test_lifecycle_modify_before_create -v`
+- RED result: FAIL as expected (AssertionError — exit_code 0 != 1; first-occurrence modify not flagged by prior implementation)
+- GREEN result: PASS
+- Regression check: 5/5 passed
+- Refactoring: lint reformatted test file (argument alignment); precommit passes, no warnings
+- Files modified: `agent-core/bin/validate-runbook.py` (added modify-first-occurrence violation inside `check_lifecycle`), `tests/test_validate_runbook.py` (added `VIOLATION_LIFECYCLE_MODIFY_BEFORE_CREATE` fixture and `test_lifecycle_modify_before_create`)
+- Stop condition: none
+- Decision made: none

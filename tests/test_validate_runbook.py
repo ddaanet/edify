@@ -155,6 +155,62 @@ def test_model_tags_violation(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     assert "Failed: 1" in content
 
 
+VIOLATION_LIFECYCLE_MODIFY_BEFORE_CREATE = """\
+---
+title: Lifecycle Violation Runbook
+---
+
+# Phase 1: Core module (type: tdd)
+
+---
+
+## Cycle 1.1: scaffold
+
+**Execution Model**: Sonnet
+
+**GREEN Phase:**
+
+**Changes:**
+- File: `src/widget.py`
+  Action: Modify
+
+---
+"""
+
+
+def test_lifecycle_modify_before_create(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Lifecycle: modify-before-create exits 1 with FAIL report."""
+    monkeypatch.chdir(tmp_path)
+    runbook = tmp_path / "lifecycle-violation.md"
+    runbook.write_text(VIOLATION_LIFECYCLE_MODIFY_BEFORE_CREATE)
+
+    monkeypatch.setattr(sys, "argv", ["validate-runbook", "lifecycle", str(runbook)])
+    try:
+        main()
+        exit_code = 0
+    except SystemExit as exc:
+        exit_code = exc.code if isinstance(exc.code, int) else 1
+
+    assert exit_code == 1
+
+    report_path = (
+        tmp_path
+        / "plans"
+        / "lifecycle-violation"
+        / "reports"
+        / "validation-lifecycle.md"
+    )
+    assert report_path.exists(), f"Report not found at {report_path}"
+    content = report_path.read_text()
+    assert "**Result:** FAIL" in content
+    assert "src/widget.py" in content
+    assert "Cycle 1.1" in content
+    assert "no prior creation found" in content
+    assert "Failed: 1" in content
+
+
 def test_lifecycle_happy_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Lifecycle on valid runbook exits 0 and writes a PASS report."""
     monkeypatch.chdir(tmp_path)
