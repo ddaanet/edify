@@ -189,9 +189,9 @@
 - `infer_state(plan_dir).gate is None` when no vet_status_func provided (default behavior)
 - Mock VetStatus with `VetChain(source="design.md", report="reports/design-review.md", stale=True, source_mtime=200.0, report_mtime=100.0)`
 
-**Expected failure:** `AttributeError: 'PlanState' object has no attribute 'gate'` (field doesn't exist in dataclass)
+**Expected failure:** `AssertionError: assert None == "design vet stale — re-vet before planning"` (gate field exists but not populated from vet status)
 
-**Why it fails:** Gate field not populated, no integration point for vet status
+**Why it fails:** Gate field exists in PlanState (from Cycle 1.1) with default None, but no vet status integration populates it
 
 **Verify RED:** `pytest tests/test_planstate_inference.py::test_gate_attachment_with_mock -v`
 
@@ -237,9 +237,9 @@
 - `list_plans(tmp_path / "nonexistent")` returns empty list `[]` (no exception for missing directory)
 - Result list item names match directory names: `[ps.name for ps in result] == ["plan-a", "plan-b"]` (sorted)
 
-**Expected failure:** `NameError: name 'list_plans' is not defined` (function doesn't exist)
+**Expected failure:** `AssertionError: assert 0 == 2` or similar (list_plans stub from Cycle 1.1 returns empty list for populated directory)
 
-**Why it fails:** Helper function not implemented
+**Why it fails:** list_plans() exists from Cycle 1.1 but only as stub returning [] — no directory scanning implemented
 
 **Verify RED:** `pytest tests/test_planstate_inference.py::test_list_plans_directory_scanning -v`
 

@@ -27,7 +27,7 @@ def test_worktree_command_group() -> None:
 def test_ls_empty(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
-    """Empty when no worktrees."""
+    """Shows main tree when no worktrees."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
@@ -35,13 +35,14 @@ def test_ls_empty(
 
     result = CliRunner().invoke(worktree, ["ls"])
     assert result.exit_code == 0
-    assert result.output == ""
+    assert "main (main)" in result.output
+    assert "○  clean" in result.output
 
 
 def test_ls_multiple_worktrees(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
-    """Parses porcelain, extracts slug and branch."""
+    """Rich mode outputs main tree and worktree headers."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
@@ -66,14 +67,11 @@ def test_ls_multiple_worktrees(
     result = CliRunner().invoke(worktree, ["ls"])
     assert result.exit_code == 0
 
-    lines = result.output.strip().split("\n")
-    line_a = lines[0].split("\t")
-    line_b = lines[1].split("\t")
-
-    assert line_a[0] == "task-a"
-    assert line_a[1] == "refs/heads/task-a"
-    assert line_b[0] == "task-b"
-    assert line_b[1] == "refs/heads/task-b"
+    # Rich mode outputs headers: main tree first, then worktrees
+    assert "main (main)" in result.output
+    assert "task-a (task-a)" in result.output
+    assert "task-b (task-b)" in result.output
+    assert "○  clean" in result.output or "●" in result.output
 
 
 def test_session_precommit(

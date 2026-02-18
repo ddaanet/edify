@@ -173,7 +173,7 @@ def repo_with_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path
     Returns the main repo path. The repo has:
     - Initial commit with README.md
     - agent-core submodule initialized
-    - agents/session.md, agents/jobs.md, agents/learnings.md committed
+    - agents/session.md, agents/learnings.md committed
     """
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
@@ -242,7 +242,6 @@ def repo_with_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path
     agents_dir = repo_path / "agents"
     agents_dir.mkdir()
     (agents_dir / "session.md").write_text("# Session\n")
-    (agents_dir / "jobs.md").write_text("# Jobs\n")
     (agents_dir / "learnings.md").write_text("# Learnings\n")
     subprocess.run(["git", "add", "agents/"], check=True, capture_output=True)
     subprocess.run(

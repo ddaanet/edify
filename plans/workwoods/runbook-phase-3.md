@@ -266,15 +266,15 @@
 - Deduplication precedence: main tree plan overrides worktree plan (main wins on conflict)
 - Verification: Uses actual list_plans() function (from Phase 1), not mocked
 
-**Expected failure:** AggregatedStatus.plans contains only main tree plans, or contains duplicate plan-c entries
+**Expected failure:** `ImportError: cannot import name 'aggregate_trees'` or `NameError` (function not yet created — Cycles 3.1-3.5 only created private helpers)
 
-**Why it fails:** Per-tree plan scanning not implemented
+**Why it fails:** aggregate_trees() public function doesn't exist yet; this cycle creates it
 
 **Verify RED:** `pytest tests/test_planstate_aggregation.py::test_per_tree_plan_discovery -v`
 
 **GREEN Phase:**
 
-**Implementation:** Run list_plans() for each tree's plans/ directory, aggregate results
+**Implementation:** Create aggregate_trees() function, run list_plans() for each tree's plans/ directory, aggregate results
 
 **Behavior:**
 - For each tree_path in worktrees:
@@ -287,8 +287,8 @@
 
 **Changes:**
 - File: `src/claudeutils/planstate/aggregation.py`
-  Action: Add plan discovery loop in aggregate_trees()
-  Location hint: After tree iteration, before return
+  Action: Create aggregate_trees() public function with plan discovery loop (uses helpers from Cycles 3.1-3.5)
+  Location hint: New public function composing _parse_worktree_list, _commits_since_handoff, _latest_commit, _is_dirty, _task_summary
 
 - File: `tests/test_planstate_aggregation.py`
   Action: Create test with main + worktree, both having plans/ directories

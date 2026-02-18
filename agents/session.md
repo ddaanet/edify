@@ -1,45 +1,31 @@
 # Session Handoff: 2026-02-18
 
-**Status:** Fixed justfile merge abort-on-conflict (FR-2), scoped design skill exploration directive. Ready to merge design-workwoods with fixed tooling. 3 worktrees active.
+**Status:** Merged design-workwoods (0d8ff779). Planstate, rich ls, section-based merge, vet tracking landed. Post-merge fix: deleted jobs.md (workwoods intent), recovered 5 worktree learnings. 2 worktrees active.
 
 ## Completed This Session
 
-**Fixed justfile `wt-merge` abort-on-conflict:**
-- Removed `git merge --abort` + `git clean -fd` from remaining-conflicts block (justfile:303-309)
-- Now reports conflicts to stderr and exits code 3, leaves merge in progress
-- Implements FR-2 of worktree-merge-resilience for justfile (Python merge.py fix deferred to post-workwoods merge — workwoods refactored merge.py, would conflict)
+**Merged design-workwoods worktree (0d8ff779):**
+- `just wt-merge design-workwoods` with sandbox bypass — justfile left merge in progress (exit 3)
+- Single conflict: cli.py `_guard_branch_removal` — workwoods ternary style + main's `SystemExit(2)`
+- Agent-core submodule fast-forwarded to e20a4a5
+- 1048/1049 tests pass (1 xfail)
 
-**Fixed design skill A.2 exploration directive:**
-- Scoped from absolute ("Opus must not grep/glob/browse directly") to conditional
-- Delegate when open-ended or spanning unknown files; read directly when ≤3 known files
-- Resolves conflict with execution-routing.md ("do it directly if feasible")
+**Post-merge context verification:**
+- Caught jobs.md kept by `checkout --ours` — workwoods designed planstate to replace it, deleted
+- Recovered 5 worktree learnings dropped by ours resolution (orchestration, vet, delegation, ordering, CLI queries)
+- All 4 worktree tasks confirmed present on main (no task loss)
 
 **Prior session (carried forward):**
-- Worktree merge resilience requirements: `plans/worktree-merge-resilience/requirements.md` (5 FRs)
-- RCA on merge workaround escalation: "tool fails → I become the tool" pattern, 82 orphaned files root cause
-- Agent-core submodule conflict resolved: b3b6f5b (workwoods version), parent pointer not yet updated
+- Fixed justfile `wt-merge` abort-on-conflict (FR-2)
+- Scoped design skill A.2 exploration directive
+- Worktree merge resilience requirements: `plans/worktree-merge-resilience/requirements.md`
 
 ## Pending Tasks
 
 <!-- Priority order per plans/reports/prioritization-2026-02-16.md (rev 2) -->
 
-- [ ] **Merge design-workwoods** — Manual merge with conflict resolution | sonnet
-  - Agent-core submodule: already resolved (b3b6f5b), parent pointer needs updating (`git add agent-core && git commit`)
-  - Parent repo: cli.py has 3 conflict regions (imports, `_guard_branch_removal`, `_delete_branch`)
-  - `just wt-merge` recipe (line 199) also aborts on source conflicts — same limitation as Python tool
-  - **Procedure:** Run `just wt-merge design-workwoods` with `dangerouslyDisableSandbox: true` — justfile now leaves merge in progress on conflicts (exit 3). Resolve cli.py, `git add`, `git commit`
-  - **CRITICAL:** Never run `git merge` without `dangerouslyDisableSandbox: true` — partial checkout + sandbox failure deposits orphaned files
-  - **cli.py conflict resolution (3 regions):**
-    - Imports: remove `_format_git_error` and `extract_task_blocks`, add `format_rich_ls` (from display), keep `focus_session` re-export, keep `_is_parent_dirty`/`_is_submodule_dirty`
-    - `_guard_branch_removal`: take workwoods ternary style + main's `SystemExit(2)`
-    - `_delete_branch`: take workwoods compact formatting + main's `SystemExit(1)`
-  - **Context loss risk:** This session analyzed both versions in full. Next session must re-read both sides (`git show design-workwoods:src/claudeutils/worktree/cli.py` vs main) if conflict details unclear
-  - After merge: `just precommit`, then `wt-rm design-workwoods` when ready
+- [x] **Merge design-workwoods** — 0d8ff779, cli.py conflict resolved
 
-- [ ] **Worktree merge resilience** — `/design plans/worktree-merge-resilience/requirements.md` | opus
-  - Plan: worktree-merge-resilience | Status: requirements
-  - 5 FRs: submodule conflict pass-through, leave merge in progress, untracked file handling, conflict context output, idempotent resume
-  - Addresses root cause of merge difficulties observed this session
 
 - [ ] **Fix worktree rm dirty check** — Must not fail if parent repo is dirty, only if target worktree is dirty | sonnet
 
@@ -172,11 +158,8 @@
 - [ ] **Cross-tree requirements transport** — `/requirements` skill writes to main tree from worktree | sonnet
   - Transport solved: `git show <branch>:<path>` from main (no sandbox needed)
   - Remaining: requirements skill path flag/auto-detection, optional CLI subcommand (`_worktree import`)
-  - Workwoods impact: planstate `infer_state()` will auto-discover plans — no jobs.md write needed post-workwoods
+  - Planstate `infer_state()` now auto-discovers plans (workwoods merged) — no jobs.md write needed
 
-- [ ] **Runbook evolution** — `/design plans/runbook-evolution/requirements.md` | opus
-  - Plan: runbook-evolution | Status: requirements
-  - 5 FRs: prose atomicity, self-modification discipline, testing diamond, deferred enforcement, test migration
 
 - [ ] **Revert cross-tree sandbox access** — Remove `additionalDirectories` code from `_worktree new` | sonnet
   - Superseded by git show transport — sandbox access unnecessary for cross-tree operations
@@ -185,11 +168,7 @@
 - [ ] **Design quality gates** — `/design plans/runbook-quality-gates/` | opus | restart
   - Requirements at `plans/runbook-quality-gates/requirements.md`
   - 3 open questions: script vs agent (Q-1), insertion point (Q-2), mandatory vs opt-in (Q-3)
-- [ ] **Design runbook evolution** — `/design plans/runbook-evolution/` | opus | restart
-  - Requirements at `plans/runbook-evolution/requirements.md`
-  - Outline exists at `plans/runbook-evolution/outline.md` — resume from Phase A.6 (outline review)
-  - Scope: runbook SKILL.md generation directives only
-- [x] **Fix deliverable code findings** — M-4/M-5/M-6/M-7 code + test gaps
+
 - [ ] **Migrate test suite to diamond** — needs scoping | depends on runbook evolution design
   - Existing 1027 tests, separate design from runbook evolution
   - Different scope and execution profile
@@ -200,31 +179,39 @@
   - Outline: `plans/error-handling/outline.md`
   - Key decisions: D-1 CPS abort-and-record, D-2 task `[!]`/`[✗]` states, D-3 escalation acceptance criteria, D-5 rollback = revert to step start
 
-- [ ] **Design workwoods** → `design-workwoods` — Merge pending (see "Merge design-workwoods" task above) | opus
-  - Plan: workwoods | Status: designed (runbook planned, 33 TDD + 10 general steps)
-
 - [ ] **Runbook skill fixes** → `runbook-skill-fixes` — Batch: model assignment, design quality gates | opus
   - Runbook model assignment: apply design-decisions.md directive (opus for skill/fragment/agent edits) — partially landed
   - Design quality gates: `/design plans/runbook-quality-gates/` | restart
     - Requirements at `plans/runbook-quality-gates/requirements.md`
 
+<!-- design-workwoods removed: merged (84c3029d), wt-rm clean -->
+
+- [ ] **Design runbook evolution** → `design-runbook-evolution` — `/design plans/runbook-evolution/` | opus | restart
+  - Requirements at `plans/runbook-evolution/requirements.md`
+  - Outline exists at `plans/runbook-evolution/outline.md` — resume from Phase A.6 (outline review)
+  - Scope: runbook SKILL.md generation directives only
+  - 5 FRs: prose atomicity, self-modification discipline, testing diamond, deferred enforcement, test migration
+
+- [ ] **Worktree merge resilience** → `worktree-merge-resilience` — `/design plans/worktree-merge-resilience/requirements.md` | opus
+  - Plan: worktree-merge-resilience | Status: requirements
+  - 5 FRs: submodule conflict pass-through, leave merge in progress, untracked file handling, conflict context output, idempotent resume
+  - Addresses root cause of merge difficulties observed this session
+
 ## Blockers / Gotchas
 
 **Merge tool aborts on conflict (Python only — justfile fixed):**
-- `_worktree merge` still aborts and returns clean tree on source conflicts (fix deferred to post-workwoods merge)
+- `_worktree merge` still aborts and returns clean tree on source conflicts
 - `just wt-merge` now leaves merge in progress, exits code 3 (FR-2 implemented)
-- Python merge.py fix blocked by workwoods refactoring (extracted resolve.py) — would create merge conflict
+- Python merge.py fix now unblocked (workwoods merged, resolve.py available)
 - Requirements for remaining FRs: `plans/worktree-merge-resilience/requirements.md`
 
 **Never run `git merge` without sandbox bypass:**
 - `git merge` without `dangerouslyDisableSandbox: true` partially checks out files, hits sandbox, leaves 80+ orphaned untracked files
-- These orphaned files block subsequent merge attempts
 - Always use `dangerouslyDisableSandbox: true` for any merge operation
 
 **Transient git index.lock during merge:**
 - `claudeutils _worktree merge` hits `index.lock` race condition during multi-step git operations
 - Likely caused by file watcher (IDE/direnv) touching the index concurrently
-- Workaround: retry after brief pause, or complete merge manually after partial success
 
 **Validator orphan entries not autofixable:**
 - Marking headings structural (`.` prefix) causes `check_orphan_entries` non-autofixable error
@@ -243,14 +230,14 @@
 - `src/claudeutils/cli.py` has 12 FIXME/TODO/antipattern comments from user code review
 - `git checkout -- src/claudeutils/cli.py` to discard, or preserve as reference for quality-infrastructure design
 
-**Agent-core submodule pointer mismatch:**
-- agent-core HEAD at b3b6f5b (merge commit with SKILL.md resolution)
-- Parent repo pointer still at pre-merge commit (reset reverted the pointer update)
-- Next merge Phase 2 will detect this as already-resolved and skip
+**Merge ours resolution loses worktree content:**
+- `just wt-merge` uses `checkout --ours` for session.md, learnings.md, jobs.md
+- Drops worktree-side changes silently (learnings, completed work, design intent like deletions)
+- Must verify post-merge: compare `git show <branch>:<file>` against merged result
 
 ## Next Steps
 
-Next: Merge design-workwoods (sonnet). Justfile fixed — use `just wt-merge design-workwoods` with `dangerouslyDisableSandbox: true`. Will exit 3 on cli.py conflicts; resolve, `git add`, `git commit`. Post-merge: apply same fix to refactored merge.py. Learnings at 152/80 lines — run `/remember` urgently. 3 worktrees active.
+Next: `wt-rm design-workwoods` to clean up merged worktree. Learnings at 175/80 lines — run `/remember` when entries reach 7 days. 2 worktrees active (error-handling-design, runbook-skill-fixes).
 
 ## Reference Files
 
@@ -259,8 +246,6 @@ Next: Merge design-workwoods (sonnet). Justfile fixed — use `just wt-merge des
 - `plans/quality-infrastructure/requirements.md` — 4 FRs: deslop restructuring, code density decisions, vet rename, code refactoring
 - `plans/reports/code-density-grounding.md` — Grounded research on exception handling + Black formatter interaction
 - `plans/error-handling/outline.md` — Error handling design outline (Phase A complete)
-- `agents/decisions/deliverable-review.md` — Post-execution review methodology
-- `plans/reports/safety-review-grounding.md` — Safety review grounding research
 - `plans/runbook-quality-gates/design.md` — Quality gates design (6 FRs, simplification agent)
 - `plans/runbook-evolution/requirements.md` — Runbook evolution (5 FRs, testing diamond, prose atomicity)
 - `plans/remember-skill-update/requirements.md` — 7 FRs (When/How prefix, validation, migration)

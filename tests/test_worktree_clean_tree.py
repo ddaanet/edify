@@ -14,15 +14,14 @@ def test_clean_tree_session_files_exempt(
 ) -> None:
     """Clean-tree exits 0 when only session context files are modified.
 
-    Integration test verifying that agents/session.md, agents/jobs.md, and
-    agents/learnings.md are exempted from dirty tree checks.
+    Integration test verifying that agents/session.md and agents/learnings.md
+    are exempted from dirty tree checks.
     """
     monkeypatch.chdir(repo_with_submodule)
 
     # Modify session files
     agents_dir = repo_with_submodule / "agents"
     (agents_dir / "session.md").write_text("# Session\nModified\n")
-    (agents_dir / "jobs.md").write_text("# Jobs\nModified\n")
     (agents_dir / "learnings.md").write_text("# Learnings\nModified\n")
 
     # Run clean-tree command
@@ -115,7 +114,7 @@ def test_merge_ours_clean_tree(
     Verifies that the merge command:
     - Exits 1 when main repo has uncommitted changes (except session files)
     - Exits 1 when submodule has uncommitted changes
-    - Allows session.md, jobs.md, learnings.md to be dirty
+    - Allows session.md, learnings.md to be dirty
     - Both parent and submodule are checked
     """
     monkeypatch.chdir(repo_with_submodule)
@@ -145,12 +144,7 @@ def test_merge_ours_clean_tree(
     result = runner.invoke(worktree, ["merge", "test-slug"])
     assert result.exit_code != 1 or "Clean tree required" not in result.output
 
-    # Test 3: Jobs file dirty → should pass (exempted)
-    (repo_with_submodule / "agents" / "jobs.md").write_text("# Modified jobs\n")
-    result = runner.invoke(worktree, ["merge", "test-slug"])
-    assert result.exit_code != 1 or "Clean tree required" not in result.output
-
-    # Test 4: Learnings dirty → should pass (exempted)
+    # Test 3: Learnings dirty → should pass (exempted)
     (repo_with_submodule / "agents" / "learnings.md").write_text(
         "# Modified learnings\n"
     )
@@ -176,7 +170,7 @@ def test_merge_theirs_clean_tree(
 
     Verifies that the merge command checks THEIRS (worktree):
     - Exits 1 when worktree has ANY uncommitted changes (including session files)
-    - No exemption for session.md, jobs.md, learnings.md in worktree
+    - No exemption for session.md, learnings.md in worktree
     - Exits 1 when worktree submodule has uncommitted changes
     - Both worktree parent and submodule are checked with strict rules
     """

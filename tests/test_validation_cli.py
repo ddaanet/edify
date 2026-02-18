@@ -18,7 +18,7 @@ def test_validate_all_validators(tmp_path: Path) -> None:
         patch("claudeutils.validation.cli.validate_memory_index", return_value=[]),
         patch("claudeutils.validation.cli.validate_tasks", return_value=[]),
         patch("claudeutils.validation.cli.validate_decision_files", return_value=[]),
-        patch("claudeutils.validation.cli.validate_jobs", return_value=[]),
+        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
         patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate"])
@@ -88,15 +88,15 @@ def test_validate_decisions_subcommand(tmp_path: Path) -> None:
     assert result.exit_code == 0
 
 
-def test_validate_jobs_subcommand(tmp_path: Path) -> None:
-    """Test that 'claudeutils validate jobs' runs only jobs validator."""
+def test_validate_planstate_subcommand(tmp_path: Path) -> None:
+    """Test 'claudeutils validate planstate' subcommand."""
     runner = CliRunner()
 
     with (
-        patch("claudeutils.validation.cli.validate_jobs", return_value=[]),
+        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
         patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
     ):
-        result = runner.invoke(cli, ["validate", "jobs"])
+        result = runner.invoke(cli, ["validate", "planstate"])
 
     assert result.exit_code == 0
 
@@ -113,7 +113,7 @@ def test_validate_exit_code_1_on_failure(tmp_path: Path) -> None:
         patch("claudeutils.validation.cli.validate_memory_index", return_value=[]),
         patch("claudeutils.validation.cli.validate_tasks", return_value=[]),
         patch("claudeutils.validation.cli.validate_decision_files", return_value=[]),
-        patch("claudeutils.validation.cli.validate_jobs", return_value=[]),
+        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
         patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate"])
@@ -133,7 +133,7 @@ def test_validate_error_output_to_stderr(tmp_path: Path) -> None:
         patch("claudeutils.validation.cli.validate_memory_index", return_value=[]),
         patch("claudeutils.validation.cli.validate_tasks", return_value=[]),
         patch("claudeutils.validation.cli.validate_decision_files", return_value=[]),
-        patch("claudeutils.validation.cli.validate_jobs", return_value=[]),
+        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
         patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate"])
@@ -191,7 +191,7 @@ def test_validate_all_mode_multiple_errors(tmp_path: Path) -> None:
         ),
         patch("claudeutils.validation.cli.validate_tasks", return_value=[]),
         patch("claudeutils.validation.cli.validate_decision_files", return_value=[]),
-        patch("claudeutils.validation.cli.validate_jobs", return_value=[]),
+        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
         patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate"])
@@ -230,7 +230,7 @@ def test_validate_all_mode_no_short_circuit(tmp_path: Path) -> None:
         ),
         patch("claudeutils.validation.cli.validate_tasks", return_value=[]),
         patch("claudeutils.validation.cli.validate_decision_files", return_value=[]),
-        patch("claudeutils.validation.cli.validate_jobs", return_value=[]),
+        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
         patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate"])

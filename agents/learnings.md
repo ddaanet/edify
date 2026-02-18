@@ -152,3 +152,25 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Running `git merge` without `dangerouslyDisableSandbox: true`. Git's ort strategy partially checks out files from the incoming branch into the working tree BEFORE completing the merge. If it hits a sandbox restriction mid-checkout, the merge fails but the partially-checked-out files remain as untracked debris. Subsequent merge attempts fail because "untracked working tree files would be overwritten."
 - Correct pattern: Never run `git merge` directly — use `claudeutils _worktree merge` which handles sandbox bypass. If the tool can't handle the merge, STOP and report. Don't fall back to raw git operations.
 - Deeper pattern: "Tool fails → I become the tool" — seamlessly replacing tool operations with manual commands, losing the tool's invariants (atomicity, sandbox handling, session.md updates, precommit validation). Each manual step is locally correct but collectively bypasses the pipeline's safety guarantees.
+## When resuming interrupted orchestration
+- Anti-pattern: Using `just precommit` as state assessment after ceiling crash → chasing cascading failures reactively → bypassing recipes under accumulated momentum (used `uv run ruff check` instead of `just check`)
+- Correct pattern: Resume from last runbook checkpoint. Run checkpoint verification commands (designed as diagnostic inventory). Systematically fix remaining items. Verify with project recipes.
+- Root cause chain: No ceiling recovery protocol → debugging-as-assessment → reactive fix mode → recipe bypass under urgency
+- Fix: Added ceiling recovery scenario to orchestrate skill (chokepoint enforcement, not ambient rule)
+## When vet flags unused code
+- Anti-pattern: Flagging code as "dead" based on production callers only. `_task_summary` had 4 test callers and was designed infrastructure for future wiring — vet recommended deletion.
+- Correct pattern: Check both production AND test callers before recommending removal. If tested, it's likely infrastructure awaiting integration. Verify the design intent (was it planned for future wiring?) before classifying as dead code.
+- Evidence: Delegated agent followed vet recommendation and deleted the function + tests. Required manual revert.
+## When delegating with corrections to prior analysis
+- Anti-pattern: Including "don't do X" alongside "do Y and Z" in delegation prompts. Agent read the vet report (which recommended X), saw it in changed files, and followed the report's recommendation despite the prompt saying otherwise.
+- Correct pattern: Exclude the wrong item entirely from delegation scope. Don't delegate "3 fixes but actually only do 2" — delegate 2 fixes. Remove conflicting signals by not mentioning the excluded item.
+- Rationale: Delegated agents receive context from both the prompt AND the files they read. When prompt contradicts file content, file content often wins because the agent encounters it during execution with recency bias.
+## When ordering post-orchestration tasks
+- Anti-pattern: Jumping to pipeline improvements (design runbook evolution) before fixing deliverable findings from the current orchestration
+- Correct pattern: Diagnostic/process review first, deliverable fixes second, pipeline improvements last. Current deliverable must be whole before improving the process that produced it.
+- Rationale: Unfixed deliverable findings accumulate as tech debt. Pipeline improvements don't retroactively fix the current deliverable. Fixing deliverables also validates the diagnostic — the fix confirms the finding was real.
+## When querying project state
+- Anti-pattern: Writing ad-hoc `python3 -c "..."` scripts to call library functions, guessing at attribute names across multiple attempts
+- Correct pattern: Use the project's CLI commands (`claudeutils _worktree ls` for plan/tree status). The CLI wraps library functions with formatting. Check existing CLI commands before writing ad-hoc Python.
+- Deeper pattern: Procedural instructions in fragments suppress cross-cutting operational rules. When a procedure says "call X()" the agent follows it literally, skipping the project-tooling check ("does a CLI/recipe already exist?"). Specific instructions must not suppress general operational rules — the check-for-existing-tools rule applies even when a procedure names a specific function.
+- Evidence: execute-rule.md said "Call `list_plans()`" → agent wrote ad-hoc Python → 3 failed attempts guessing attributes → 6-turn guided diagnostic from user. CLI existed the whole time.

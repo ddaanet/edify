@@ -11,7 +11,7 @@ from pathlib import Path
 import click
 
 from claudeutils.validation.tasks import validate_task_name_format
-from claudeutils.worktree.merge import _format_git_error
+from claudeutils.worktree.display import format_rich_ls
 from claudeutils.worktree.merge import merge as merge_impl
 from claudeutils.worktree.session import focus_session as focus_session  # noqa: PLC0414
 from claudeutils.worktree.session import (
@@ -82,12 +82,17 @@ def worktree() -> None:
 
 
 @worktree.command()
-def ls() -> None:
-    """List worktrees excluding main."""
+@click.option("--porcelain", is_flag=True, help="Machine-readable output")
+def ls(*, porcelain: bool) -> None:
+    """List worktrees and main tree."""
     main_path = _git("rev-parse", "--show-toplevel")
-    porcelain = _git("worktree", "list", "--porcelain")
-    for slug, branch, path in _parse_worktree_list(porcelain, main_path):
-        click.echo(f"{slug}\t{branch}\t{path}")
+    porcelain_output = _git("worktree", "list", "--porcelain")
+
+    if porcelain:
+        for slug, branch, path in _parse_worktree_list(porcelain_output, main_path):
+            click.echo(f"{slug}\t{branch}\t{path}")
+    else:
+        click.echo(format_rich_ls(main_path, porcelain_output))
 
 
 def _create_session_commit(slug: str, base: str, session: str) -> str:
@@ -184,7 +189,7 @@ def clean_tree() -> None:
     """Verify clean tree except session context."""
     parent = _git("status", "--porcelain")
     submodule = _git("-C", "agent-core", "status", "--porcelain", check=False)
-    exempt = {"session.md", "jobs.md", "learnings.md"}
+    exempt = {"session.md", "learnings.md"}
     dirty = [
         line
         for line in (parent + submodule).rstrip().split("\n")
@@ -253,7 +258,8 @@ def merge(slug: str) -> None:
     try:
         merge_impl(slug)
     except subprocess.CalledProcessError as e:
-        click.echo(_format_git_error(e), err=True)
+        stderr = e.stderr.strip() if isinstance(e.stderr, str) else ""
+        click.echo(f"git error: {stderr or e}", err=True)
         raise SystemExit(1) from None
 
 
@@ -275,26 +281,19 @@ def _guard_branch_removal(slug: str) -> tuple[bool, str | None]:
     if count == 1 and is_focused:
         return True, "focused"
 
-    if count == 0:
-        click.echo(
-            f"Branch {slug} is orphaned (no common ancestor). Merge first.",
-            err=True,
-        )
-    else:
-        click.echo(
-            f"Branch {slug} has {count} unmerged commit(s). Merge first.",
-            err=True,
-        )
+    msg = (
+        f"Branch {slug} is orphaned (no common ancestor). Merge first."
+        if count == 0
+        else f"Branch {slug} has {count} unmerged commit(s). Merge first."
+    )
+    click.echo(msg, err=True)
     raise SystemExit(2)
 
 
 def _delete_branch(slug: str, removal_type: str | None) -> None:
-    delete_flag = "-D" if removal_type == "focused" else "-d"
+    flag = "-D" if removal_type == "focused" else "-d"
     r = subprocess.run(
-        ["git", "branch", delete_flag, slug],
-        capture_output=True,
-        text=True,
-        check=False,
+        ["git", "branch", flag, slug], capture_output=True, text=True, check=False
     )
     if r.returncode != 0 and "not found" not in r.stderr.lower():
         click.echo(f"Branch {slug} deletion failed: {r.stderr.strip()}", err=True)

@@ -203,7 +203,7 @@ wt-merge name:
     wt_dir=$(wt-path "$slug")
 
     # Pre-checks: Clean tree (exempt session files)
-    session_exempt="agents/session.md agents/jobs.md agents/learnings.md"
+    session_exempt="agents/session.md agents/learnings.md"
     dirty=$(git status --porcelain | grep -vE "^.. ($(echo "$session_exempt" | tr ' ' '|'))$" || true)
     if [ -n "$dirty" ]; then
         echo "${RED}Dirty tree (non-session files):${NORMAL}" >&2
@@ -288,14 +288,6 @@ wt-merge name:
             echo "${RED}Warning: Manual learning merge needed${NORMAL}" >&2
             visible git checkout --ours agents/learnings.md
             visible git add agents/learnings.md
-        fi
-
-        # jobs.md: keep ours with status advancement
-        if echo "$conflicts" | grep -q "^agents/jobs.md$"; then
-            # Simplified: just keep ours for now (full logic needs parsing)
-            echo "${RED}Warning: Manual jobs.md merge needed${NORMAL}" >&2
-            visible git checkout --ours agents/jobs.md
-            visible git add agents/jobs.md
         fi
 
         # Check for any remaining conflicts
@@ -560,7 +552,7 @@ report () {
     # Usage: report "header" command args
     header=$1; shift
     set-tmpfile
-    safe "$@" > "$tmpfile"
+    safe "$@" &> "$tmpfile"
     if [ -s "$tmpfile" ]; then
         echo "${HEADER_STYLE}# $header${NORMAL}"
         cat "$tmpfile"

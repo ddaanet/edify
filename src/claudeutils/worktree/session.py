@@ -82,6 +82,42 @@ def extract_task_blocks(content: str, section: str | None = None) -> list[TaskBl
     return blocks
 
 
+def extract_blockers(content: str) -> list[list[str]]:
+    """Extract blocker items from Blockers / Gotchas section.
+
+    Returns list of blocker groups. Each group is a list of strings: first
+    element is the bullet line, remaining are continuation lines.
+    """
+    bounds = find_section_bounds(content, "Blockers / Gotchas")
+    if bounds is None:
+        return []
+
+    lines = content.split("\n")
+    section_lines = lines[bounds[0] + 1 : bounds[1]]
+    blockers: list[list[str]] = []
+    current: list[str] = []
+
+    for line in section_lines:
+        if line.startswith("- "):
+            if current:
+                blockers.append(current)
+            current = [line]
+        elif line.startswith("  ") and current:
+            current.append(line)
+        elif not line.strip():
+            # Blank line ends current blocker if one is in progress
+            if current:
+                blockers.append(current)
+                current = []
+        elif current:
+            current.append(line)
+
+    if current:
+        blockers.append(current)
+
+    return blockers
+
+
 def find_section_bounds(content: str, header: str) -> tuple[int, int] | None:
     """Find line bounds for a section header.
 

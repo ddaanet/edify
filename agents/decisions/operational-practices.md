@@ -151,7 +151,7 @@ Agent reliability patterns, artifact management, implementation practices, and k
 
 **Decision:** Require clean tree before merge/rebase operations. No `git stash` workarounds.
 
-**Exception:** Session context files (session.md, jobs.md, learnings.md) auto-committed as pre-step.
+**Exception:** Session context files (session.md, learnings.md) auto-committed as pre-step.
 
 **Rationale:** Stash is fragile (conflicts on pop, lost stashes). Clean tree forces explicit state management.
 
