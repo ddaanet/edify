@@ -279,6 +279,138 @@ def test_merge_resumes_from_parent_resolved(
     )
 
 
+def test_merge_continues_to_phase3_when_submodule_conflicts(
+    repo_with_submodule: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mock_precommit: None,
+) -> None:
+    """Test merge routes submodule_conflicts state to Phase 3.
+
+    When agent-core has MERGE_HEAD (mid-merge), calling merge(slug) should:
+    - Detect submodule_conflicts state (not clean)
+    - Skip the clean-tree check
+    - Route to Phase 3 (merge parent)
+    - Exit with code 0 or 3 (not 1 from clean-tree check)
+    """
+    from claudeutils.worktree.merge import merge
+
+    monkeypatch.chdir(repo_with_submodule)
+
+    # Set up initial commit on main
+    (repo_with_submodule / "main.txt").write_text("main content\n")
+    subprocess.run(["git", "add", "main.txt"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Initial commit"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Create branch to merge
+    subprocess.run(
+        ["git", "checkout", "-b", "test-branch"],
+        check=True,
+        capture_output=True,
+    )
+    (repo_with_submodule / "branch.txt").write_text("branch content\n")
+    subprocess.run(["git", "add", "branch.txt"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Add branch file"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Switch back to main
+    subprocess.run(
+        ["git", "checkout", "main"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Create a conflicting commit on agent-core
+    agent_core = repo_with_submodule / "agent-core"
+    (agent_core / "feature.py").write_text("main feature\n")
+    subprocess.run(
+        ["git", "-C", str(agent_core), "add", "feature.py"],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(agent_core), "commit", "-m", "Main feature"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Create another commit on agent-core to merge
+    subprocess.run(
+        ["git", "-C", str(agent_core), "checkout", "-b", "ac-feature"],
+        check=True,
+        capture_output=True,
+    )
+    (agent_core / "feature.py").write_text("branch feature\n")
+    subprocess.run(
+        ["git", "-C", str(agent_core), "add", "feature.py"],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(agent_core), "commit", "-m", "Branch feature"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Switch back to main on agent-core
+    subprocess.run(
+        ["git", "-C", str(agent_core), "checkout", "main"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Put agent-core in mid-merge state with NO conflicts
+    merge_result = subprocess.run(
+        ["git", "-C", str(agent_core), "merge", "--no-commit", "--no-ff", "ac-feature"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    # The merge should succeed (no real conflicts, just different content we allow)
+    if merge_result.returncode != 0:
+        # If there are conflicts, resolve them
+        subprocess.run(
+            ["git", "-C", str(agent_core), "checkout", "--ours", "feature.py"],
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(agent_core), "add", "feature.py"],
+            check=True,
+            capture_output=True,
+        )
+
+    # Verify agent-core has MERGE_HEAD
+    merge_head_check = subprocess.run(
+        ["git", "-C", str(agent_core), "rev-parse", "--verify", "MERGE_HEAD"],
+        check=False,
+        capture_output=True,
+    )
+    assert merge_head_check.returncode == 0, "agent-core should have MERGE_HEAD"
+
+    # Test _detect_merge_state directly - should return submodule_conflicts after GREEN
+    # For RED, it will return clean (test will fail)
+    state = _detect_merge_state("test-branch")
+    assert state == "submodule_conflicts", (
+        f"Expected submodule_conflicts state, got {state}"
+    )
+
+    # Invoke merge() via CliRunner - should NOT exit with code 1 from clean-tree check
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["merge", "test-branch"])
+
+    assert result.exit_code in (0, 3), (
+        f"Expected exit code 0 or 3, got {result.exit_code}. "
+        f"Output: {result.output}"
+    )
+
+
 def test_merge_reports_and_exits_3_when_parent_conflicts(
     repo_with_submodule: Path,
     monkeypatch: pytest.MonkeyPatch,

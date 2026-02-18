@@ -40,6 +40,15 @@ def _detect_merge_state(slug: str) -> str:
     if _is_branch_merged(slug):
         return "merged"
 
+    submodule_merge_head = subprocess.run(
+        ["git", "-C", "agent-core", "rev-parse", "--verify", "MERGE_HEAD"],
+        capture_output=True,
+        check=False,
+    )
+
+    if submodule_merge_head.returncode == 0:
+        return "submodule_conflicts"
+
     merge_head = subprocess.run(
         ["git", "rev-parse", "--verify", "MERGE_HEAD"],
         capture_output=True,
