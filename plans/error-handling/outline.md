@@ -47,9 +47,14 @@ Layers are ordered by implementation dependency: prevention and taxonomy provide
 - **Failed/canceled task cleanup:** Persist until user explicitly resolves. Failed/canceled tasks are blockers — trimming them on handoff would lose the signal that something needs attention. Different from completed tasks.
 - **CPS retry count:** 0 retries (abort-and-record). User resumes with `r`. Add targeted retry for specific cases only if they prove common in practice. Consistent with "build for current requirements, extend when needed."
 
-## Open Questions
+## Resolved Questions (continued)
 
-- **Timeout calibration:** Blanket timeout value TBD — requires historical session exploration to calibrate from actual step durations. Determines whether a single threshold suffices or per-step-type variance requires differentiated timeouts. Orchestration is unattended (user focuses on other work), so human timeout is not a substitute. Temporal uses per-activity timeouts as prior art.
+- **Timeout calibration (Q1):** Empirical analysis of 938 clean Task calls across 967 sessions (sleep-inflated outliers filtered via seconds-per-tool-use heuristic). Two independent failure modes require independent guards:
+  - **Spinning (high activity, no convergence):** `max_turns` parameter on Task tool. Clean data: p90=40, p95=52, p99=73, max=129. Threshold: ~150 max_turns. Actionable now — parameter already exists.
+  - **Hanging (no activity, wall-clock grows):** Duration timeout. Clean data: p90=225s, p95=301s, p99=485s, max=855s. Requires Claude Code infrastructure support (not currently controllable by project).
+  - Per-type variance exists (claude-code-guide p50=23s vs design-vet-agent p50=164s) but a single blanket `max_turns` suffices — the spinning failure mode is type-independent. Per-type refinement deferred until false positives observed.
+  - Data: `plans/prototypes/agent-duration-analysis.py` (rerunnable as data accumulates)
+  - Sleep detection: entries with >30s/tool flagged as laptop-suspend artifacts (normal p50=6.6s/tool). 13 of 951 entries flagged, all confirmed artifacts.
 
 ## Scope Boundaries
 
@@ -75,7 +80,7 @@ Layers are ordered by implementation dependency: prevention and taxonomy provide
 - Error classification is tier-aware: sonnet/opus execution agents self-classify and report classified error; haiku execution agents report raw errors, orchestrator classifies
 - Acceptance criteria for escalation resolution (precommit passes, tree clean, output validates)
 - Rollback strategy: revert to last clean commit before failed step
-- Timeout handling required — orchestration is unattended (user focuses on design/workflow work elsewhere). Human-in-the-loop timeout is not a substitute. Blanket threshold TBD pending historical calibration.
+- Timeout: two independent guards for two failure modes. (1) `max_turns` ~150 on Task calls catches spinning agents (actionable now). (2) Duration timeout ~600s catches hanging agents (requires Claude Code support, deferred). Calibrated from 938 clean observations — see Resolved Questions Q1.
 
 **2. Task Lifecycle (Layer 3)**
 - Extended state notation: `[ ]` pending, `[>]` in-progress, `[x]` complete, `[!]` blocked, `[✗]` failed, `[–]` canceled

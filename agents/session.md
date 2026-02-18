@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-18
 
-**Status:** Error handling outline grounded against 5 established frameworks. Discussion corrections applied. Timeout calibration next.
+**Status:** Timeout calibration complete. Q1 resolved empirically. Outline updated. Ready for `/design` Phase B (outline review).
 
 ## Completed This Session
 
@@ -30,24 +30,34 @@
 **Skill fix:**
 - /ground skill: retain substantial internal branch files (>100 lines) as evidence artifacts in plans/reports/
 
+**Timeout calibration (Q1 resolved):**
+- Built prototype: `plans/prototypes/agent-duration-analysis.py` — scans all 967 sessions, extracts Task tool call durations and tool use counts
+- Sleep detection heuristic: entries with >30s/tool flagged as laptop-suspend artifacts (normal p50=6.6s/tool). 13/951 entries flagged, all confirmed artifacts.
+- Two independent failure modes identified: spinning (high tool count, no convergence) vs hanging (low activity, high wall-clock)
+- Clean data (n=938): duration p95=301s p99=485s max=855s; tool uses p95=52 p99=73 max=129
+- `max_turns` ~150 on Task calls catches spinning agents — actionable now, parameter exists
+- Duration timeout ~600s catches hanging agents — requires Claude Code infrastructure support, deferred
+- Outline updated with resolved Q1, architecture section updated
+
 ## Pending Tasks
 
-- [ ] **Error handling design** — Timeout calibration, then resume `/design` Phase B (outline review) → Phase C (full design) | opus
-  - Outline: `plans/error-handling/outline.md` (grounded, discussion corrections applied)
+- [ ] **Error handling design** — Resume `/design` Phase B (outline review) → Phase C (full design) | opus
+  - Outline: `plans/error-handling/outline.md` (grounded, all Qs resolved)
   - Grounding report: `plans/reports/error-handling-grounding.md`
   - Key decisions: D-1 CPS abort-and-record (0 retries), D-2 task `[!]`/`[✗]`/`[–]` states, D-3 escalation `just precommit`, D-5 rollback git-atomic-snapshot, D-6 hook protocol
-  - **Next micro-step:** Calibrate timeout from historical step durations before continuing design
-  - Open: Q1 timeout threshold (blanket vs per-type, pending calibration data)
+  - Q1 resolved: `max_turns` ~150 for spinning, duration timeout deferred (needs CC support)
+  - Calibration data: `plans/prototypes/agent-duration-analysis.py`
 
 ## Reference Files
 
-- `plans/error-handling/outline.md` — Error handling design outline (grounded)
+- `plans/error-handling/outline.md` — Error handling design outline (grounded, all Qs resolved)
 - `plans/reports/error-handling-grounding.md` — Grounding report (5 frameworks, Moderate quality)
 - `plans/error-handling/reports/explore-error-handling.md` — Original gap analysis
+- `plans/prototypes/agent-duration-analysis.py` — Timeout calibration prototype (rerunnable)
 
 ## Next Steps
 
-Calibrate timeout from historical session data: mine step execution durations to determine whether blanket or per-type thresholds needed. Then continue `/design` Phase B outline review and Phase C full design.
+Continue `/design` Phase B (outline review via outline-review-agent) → Phase C (full design). All open questions resolved — outline is ready for review.
 
 ---
-*Handoff by Sonnet. Outline grounded and corrected, ready for timeout calibration.*
+*Handoff by Sonnet. Timeout calibration complete, outline updated, all questions resolved.*

@@ -67,3 +67,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Segment by origin. `p:` directives (n=29) distribute evenly (34.5% prepend). Workflow continuations dominate the prepend signal. Different insertion policies needed per origin type.
 - Evidence: Session scraping + git correlation across 337 sessions, 506 commits. Handoff skill says "append" but agents correctly override for both populations.
 - Implication: Handoff skill should say "insert at estimated priority position" not "append" — agents already exercise good judgment.
+## When measuring agent durations
+- Anti-pattern: Computing duration as timestamp delta between tool_use and tool_result — includes laptop sleep time, producing 10-hour "outliers" that are artifacts
+- Correct pattern: Use `duration_ms` from Task result metadata when available (post-W06 2026, ~42% coverage). For all entries with both duration and tool_uses, validate via seconds-per-tool-use rate (normal p50=6.6s/tool). Flag entries >30s/tool as sleep-inflated.
+- Rationale: `duration_ms` is wall-clock computed by CLI process — suspended process = inflated time. Cross-referencing with tool_uses exposes the inflation. 13/951 entries flagged, all confirmed artifacts.
+## When designing timeout mechanisms
+- Anti-pattern: Treating "dual signal" (time OR tool count) as reducing false positives. OR-logic is the union of both kill zones — it increases false positives vs either threshold alone.
+- Correct pattern: Time and tool count address independent failure modes. Spinning (high activity, no convergence) → `max_turns`. Hanging (no activity, high wall-clock) → duration timeout. Independent guards, not a combined signal.
+- Evidence: OR(600s, 90 turns) would false-positive on the 855s/75-tool legitimate agent AND the 495s/129-tool agent. AND logic misses fast spinners.
