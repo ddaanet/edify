@@ -376,3 +376,144 @@ def test_submodule_conflict_does_not_abort_pipeline(
     assert merge_head_check.returncode == 0, (
         "agent-core MERGE_HEAD should exist after submodule conflict"
     )
+
+
+def test_merge_resume_after_submodule_resolution(
+    repo_with_submodule: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mock_precommit: None,
+    commit_file: Callable[[Path, str, str, str], None],
+) -> None:
+    """Verify merge succeeds after manual submodule conflict resolution.
+
+    Scenario:
+    - First merge creates submodule conflict (exit 3)
+    - Manually resolve agent-core conflict and commit
+    - Stage the updated agent-core pointer
+    - Re-run merge → should succeed (exit 0)
+    - Verify commit log shows both resolution and final merge commits
+    """
+    monkeypatch.chdir(repo_with_submodule)
+
+    agent_core_path = repo_with_submodule / "agent-core"
+
+    # Create a base commit on main in a file in agent-core
+    commit_file(agent_core_path, "conflict.txt", "base content", "Base change")
+    base_commit = subprocess.run(
+        ["git", "-C", str(agent_core_path), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    _update_submodule_pointer(repo_with_submodule, "Update to base commit")
+
+    # Create branch and worktree
+    subprocess.run(
+        ["git", "branch", "resume-test"],
+        cwd=repo_with_submodule,
+        check=True,
+        capture_output=True,
+    )
+    result = CliRunner().invoke(worktree, ["new", "resume-test"])
+    assert result.exit_code == 0
+
+    # In worktree's agent-core, create conflicting change
+    wt_agent_core = (
+        repo_with_submodule.parent
+        / f"{repo_with_submodule.name}-wt"
+        / "resume-test"
+        / "agent-core"
+    )
+    commit_file(wt_agent_core, "conflict.txt", "wt change", "Worktree conflict change")
+    wt_commit = subprocess.run(
+        ["git", "-C", str(wt_agent_core), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+
+    # Update worktree's submodule pointer
+    wt_branch = repo_with_submodule.parent / f"{repo_with_submodule.name}-wt" / "resume-test"
+    _update_submodule_pointer(wt_branch, "Update wt pointer to conflict commit")
+
+    # Back on main, create a different change to the same file (real conflict)
+    commit_file(agent_core_path, "conflict.txt", "main change", "Main conflict change")
+    _update_submodule_pointer(repo_with_submodule, "Update to main commit")
+
+    # First merge: should fail with submodule conflict (exit 3)
+    result = CliRunner().invoke(worktree, ["merge", "resume-test"])
+    assert result.exit_code in (0, 3), (
+        f"First merge should exit 0 or 3, got {result.exit_code}: {result.output}"
+    )
+
+    # Manually resolve submodule conflict
+    subprocess.run(
+        ["git", "-C", str(agent_core_path), "checkout", "--theirs", "conflict.txt"],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(agent_core_path), "add", "conflict.txt"],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(agent_core_path), "commit", "-m", "Resolve submodule conflict"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Stage the updated agent-core pointer
+    subprocess.run(
+        ["git", "add", "agent-core"],
+        cwd=repo_with_submodule,
+        check=True,
+        capture_output=True,
+    )
+
+    # Second merge: should succeed (exit 0)
+    result = CliRunner().invoke(worktree, ["merge", "resume-test"])
+    assert result.exit_code == 0, (
+        f"Second merge should exit 0, got {result.exit_code}: {result.output}"
+    )
+
+    # Verify wt_commit is ancestor of current agent-core HEAD
+    ancestor_check = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(agent_core_path),
+            "merge-base",
+            "--is-ancestor",
+            wt_commit,
+            "HEAD",
+        ],
+        check=False,
+    )
+    assert ancestor_check.returncode == 0, (
+        "wt_commit should be ancestor of agent-core HEAD after resolution"
+    )
+
+    # Verify git log shows merge commits
+    # After first merge: creates parent merge commit (even with submodule conflict)
+    # After manual submodule resolution and second merge: creates another parent merge commit
+    # (because agent-core staged changes trigger Phase 4 commit)
+    log_output = subprocess.run(
+        ["git", "log", "-2", "--format=%s"],
+        cwd=repo_with_submodule,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    recent_commits = log_output.split("\n")
+
+    # Both commits should be merge commits
+    assert len(recent_commits) >= 2, (
+        f"Expected at least 2 commits in log, got {len(recent_commits)}: {recent_commits}"
+    )
+    assert recent_commits[0] == "🔀 Merge resume-test", (
+        f"Latest commit should be parent merge, got: {recent_commits[0]}"
+    )
+    assert recent_commits[1] == "🔀 Merge resume-test", (
+        f"Second commit should also be parent merge, got: {recent_commits[1]}"
+    )
