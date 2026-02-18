@@ -179,6 +179,7 @@
   - Design skill: add Phase 0 requirements-clarity gate (well-specified → triage, underspecified → `/requirements`)
   - Discussion context in runbook-skill-fixes worktree session
 
+
 ## Worktree Tasks
 
 - [ ] **Error handling design** → `error-handling-design` — Resume `/design` Phase B (outline review) then Phase C (full design) | opus
@@ -192,16 +193,16 @@
 <!-- design-runbook-evolution removed: wt deleted, task back in Pending -->
 <!-- worktree-merge-resilience removed: wt deleted, task back in Pending -->
 
-- [ ] **Design runbook evolution** → `runbook-evolution` — `/design plans/runbook-evolution/` | opus | restart
-  - Requirements at `plans/runbook-evolution/requirements.md`
-  - Outline exists at `plans/runbook-evolution/outline.md` — resume from Phase A.6 (outline review)
-  - Scope: runbook SKILL.md generation directives only
-  - 5 FRs: prose atomicity, self-modification discipline, testing diamond, deferred enforcement, test migration
-
 - [ ] **Worktree merge resilience** → `worktree-merge-resilience` — `/design plans/worktree-merge-resilience/requirements.md` | opus
   - Plan: worktree-merge-resilience | Status: requirements
   - 5 FRs: submodule conflict pass-through, leave merge in progress, untracked file handling, conflict context output, idempotent resume
   - Addresses root cause of merge difficulties observed this session
+
+- [ ] **Design runbook evolution** → `design-runbook-evolution` — `/design plans/runbook-evolution/` | opus | restart
+  - Requirements at `plans/runbook-evolution/requirements.md`
+  - Outline exists at `plans/runbook-evolution/outline.md` — resume from Phase A.6 (outline review)
+  - Scope: runbook SKILL.md generation directives only
+  - 5 FRs: prose atomicity, self-modification discipline, testing diamond, deferred enforcement, test migration
 
 ## Blockers / Gotchas
 
