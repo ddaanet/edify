@@ -7,7 +7,8 @@ import pytest
 from click.testing import CliRunner
 
 from claudeutils.worktree.cli import worktree
-from claudeutils.worktree.merge import _detect_merge_state, merge
+from claudeutils.worktree.merge import merge
+from claudeutils.worktree.merge_state import _detect_merge_state
 from claudeutils.worktree.utils import _is_branch_merged
 
 

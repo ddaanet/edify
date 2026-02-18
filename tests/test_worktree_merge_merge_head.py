@@ -5,10 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.worktree.merge import (
-    _detect_merge_state,
-    _phase4_merge_commit_and_precommit,
-)
+from claudeutils.worktree.merge import _phase4_merge_commit_and_precommit
+from claudeutils.worktree.merge_state import _detect_merge_state
 
 
 def test_detect_state_merged(
