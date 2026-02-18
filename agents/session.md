@@ -1,60 +1,50 @@
 # Session Handoff: 2026-02-17
 
-**Status:** Quality gates Phase B review fixes applied, artifacts regenerated. Ready for orchestration.
+**Status:** Runbook-quality-gates orchestration complete. validate-runbook.py delivered with 13 TDD cycles, all vets clean.
 
 ## Completed This Session
 
-**Runbook quality gates — Phase B expansion (Phase 0.9 through Phase 4):**
-- Phase 0.9: Complexity check passed (13 cycles, 5 phases — under 25/10 limits, no callbacks)
-- Phase 0.95: Sufficiency check — not sufficient (5 phases, 13 cycles, lacks RED/GREEN detail)
-- Phase 1: Generated 5 phase files with full RED/GREEN cycle content
-- Per-phase reviews (5 parallel plan-reviewer agents): all issues fixed
-  - Phase 1: 1 major (speculative "Why it fails" replaced with accurate explanation)
-  - Phase 3: 1 critical (3.1 GREEN pre-implemented 3.3's parametrize stripping — RED plausibility fix)
-  - Phase 4: 1 major (created_names accumulation order — prior cycles only, not current cycle's own GREEN)
-  - Phase 5: 1 major (prescriptive argparse code in GREEN replaced with behavioral hints)
-- Phase 2: Common Context added (requirements, D-7 constraints, fixture plan); assembly validation passed
-- Phase 2.5: Skipped (13 items, compact)
-- Phase 3: Holistic review — 2 major (VALID_TDD cross-phase spec unified, skip-flag parametrization corrected), 1 minor (VALID_GENERAL removed as unused)
-- Phase 3.5: Skipped (validate-runbook.py doesn't exist yet — graceful degradation per NFR-2)
-- Phase 4: prepare-runbook.py created 13 step files + agent + orchestrator plan
+**Runbook-quality-gates orchestration (13 TDD cycles, 5 phases):**
+- Phase 1 (1.1-1.3): Script scaffold + model-tags — argparse, importlib, ARTIFACT_PREFIXES, violation detection
+- Phase 2 (2.1-2.3): Lifecycle — create→modify ordering, modify-before-create, duplicate creation. 2.3 RED passed immediately (2.2 over-implemented)
+- Phase 3 (3.1-3.3): Test-counts — checkpoint reconciliation, parametrized normalization. Refactor at 432 lines → fixtures extracted
+- Phase 4 (4.1-4.3): Red-plausibility — created_names tracking, import error detection, ambiguous classification (exit 2)
+- Phase 5 (5.1): Directory input via assemble_phase_files, --skip-{subcommand} flags
+- 4 phase checkpoint vets + final vet — all clean, no UNFIXABLE
+- TDD process review completed
 
-**Runbook review + fixes (this session):**
-- 3-layer review (baseline agent, Common Context, phase files) against runbook-evolution FR-3
-- Major #1: Cycle 3.1 fixture hedge contradicted Common Context VALID_TDD spec → removed
-- Major #2: Cycle 4.3 write_report changes for AMBIGUOUS format unspecified → added to Changes
-- Minor #3: Test approach (main() invocation vs function calls) unspecified → added to Common Context
-- Regenerated agent + step files via prepare-runbook.py to propagate fixes
+**Artifacts created:**
+- `agent-core/bin/validate-runbook.py` — 4 subcommands, directory input, skip flags
+- `tests/test_validate_runbook.py` — 12 unit tests
+- `tests/test_validate_runbook_integration.py` — integration tests
+- `tests/fixtures/validate_runbook_fixtures.py` — 7 fixture constants
 
-**Prior session (through Phase 0.86):**
-- Phase A complete (6 architectural artifacts), Tier 3 assessment, outline (5 phases, 13 cycles), outline review, simplification
+**Prior sessions (Phase A + Phase B planning):**
+- Phase A: 6 architectural artifacts, Tier 3 assessment
+- Phase B planning: outline, reviews, simplification, prepare-runbook.py artifacts
+- Runbook review + fixes: 3-layer review, 3 issues fixed, artifacts regenerated
 
 ## Pending Tasks
 
-- [x] **Runbook quality gates Phase B** — `/runbook` expansion complete, ready for orchestration
-  - 13 TDD cycles, 5 phases, all reviews passed, prepare-runbook.py artifacts created
+(None in this worktree)
 
 ## Worktree Tasks
 
-- [ ] **Runbook skill fixes** → `runbook-skill-fixes` — `/orchestrate runbook-quality-gates` | sonnet | restart
-  - Phase B fully planned: 13 TDD cycles, 5 phases, all reviews passed
-  - Agent: `.claude/agents/runbook-quality-gates-task.md` (regenerated with review fixes)
-  - Next: Restart session, paste `/orchestrate runbook-quality-gates` from clipboard
+- [x] **Runbook skill fixes** → `runbook-skill-fixes` — orchestration complete
 
 ## Blockers / Gotchas
 
-**Validator orphan entries not autofixable:**
-- Marking headings structural (`.` prefix) causes `check_orphan_entries` non-autofixable error
-- Must manually remove entries from memory-index.md before running precommit
+**Submodule .pyc cleanup after test runs:**
+- agent-core submodule has committed .pyc files that regenerate on import
+- Causes `-dirty` submodule state; workaround: `cd agent-core && git checkout -- bin/__pycache__/prepare-runbook.cpython-314.pyc`
 
 ## Next Steps
 
-Restart session, paste `/orchestrate runbook-quality-gates` from clipboard.
+Merge worktree to main: `wt merge runbook-skill-fixes`, then `wt-rm runbook-skill-fixes`.
 
 ## Reference Files
 
-- `plans/runbook-quality-gates/design.md` — Quality gates design (6 FRs, simplification agent)
-- `plans/runbook-quality-gates/runbook-outline.md` — Phase B outline (13 TDD cycles, 5 phases, reviewed+simplified)
-- `plans/runbook-quality-gates/orchestrator-plan.md` — Orchestrator plan (13 steps, 5 phase boundaries)
-- `plans/runbook-quality-gates/reports/review-holistic.md` — Holistic review (3 issues, all fixed)
-- `plans/runbook-quality-gates/reports/review-phase-{1..5}.md` — Per-phase reviews
+- `plans/runbook-quality-gates/design.md` — Quality gates design (6 FRs)
+- `plans/runbook-quality-gates/reports/vet-review.md` — Final vet review
+- `plans/runbook-quality-gates/reports/tdd-process-review.md` — TDD process analysis
+- `plans/runbook-quality-gates/reports/execution-report.md` — Per-cycle execution log
