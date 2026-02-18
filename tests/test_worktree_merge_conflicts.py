@@ -286,3 +286,71 @@ def test_merge_conflict_learnings_md(
     merged = (repo_with_submodule / "agents" / "learnings.md").read_text()
     assert "Common content (modified on main)" in merged
     assert "Learning B" in merged
+
+
+def test_conflict_output_contains_all_fields(
+    repo_with_submodule: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mock_precommit: None,
+    commit_file: Callable[[Path, str, str, str], None],
+) -> None:
+    """Conflict output contains diff stats, divergence, and hint."""
+    monkeypatch.chdir(repo_with_submodule)
+    commit_file(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
+
+    # Create a common base commit with src/feature.py
+    _write_commit(
+        repo_with_submodule,
+        "src/feature.py",
+        "def feature():\n    return 'base version'\n",
+        "Add feature base",
+    )
+
+    # Create branch with diverging change
+    _git("branch", "test-feature", cwd=repo_with_submodule)
+    result = CliRunner().invoke(worktree, ["new", "test-feature"])
+    assert result.exit_code == 0, f"new failed: {result.output}"
+    wt_path = repo_with_submodule.parent / f"{repo_with_submodule.name}-wt" / "test-feature"
+
+    # Branch: conflicting change to src/feature.py
+    _write_commit(
+        wt_path,
+        "src/feature.py",
+        "def feature():\n    return 'branch version'\n",
+        "Update feature on branch",
+    )
+
+    # Main: conflicting change to same file
+    _git("checkout", "main", cwd=repo_with_submodule)
+    _write_commit(
+        repo_with_submodule,
+        "src/feature.py",
+        "def feature():\n    return 'main version'\n",
+        "Update feature on main",
+    )
+
+    result = CliRunner().invoke(worktree, ["merge", "test-feature"])
+    assert result.exit_code == 3, f"merge should exit 3 on conflict: {result.output}"
+
+    # Assert output contains all required fields
+    output = result.output
+
+    # Conflicted filename
+    assert "src/feature.py" in output, f"Missing filename in: {output}"
+
+    # Conflict type (2-char status code) - could be UU, AU, DU, or other
+    assert any(code in output for code in ["UU", "AU", "DU", "AA", "UD", "DD"]), (
+        f"Missing conflict type in: {output}"
+    )
+
+    # Diff stat format (line with |)
+    assert "|" in output and "+++" in output, f"Missing diff stat in: {output}"
+
+    # Divergence format (starts with "Branch: ")
+    assert "Branch:" in output, f"Missing divergence info in: {output}"
+    assert "commits ahead" in output, f"Missing 'commits ahead' in: {output}"
+
+    # Hint line
+    assert "Resolve conflicts" in output, f"Missing 'Resolve conflicts' in: {output}"
+    assert "claudeutils _worktree merge" in output, f"Missing merge command in: {output}"
+    assert "test-feature" in output, f"Missing slug in hint: {output}"

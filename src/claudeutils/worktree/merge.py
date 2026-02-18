@@ -28,6 +28,48 @@ def _format_git_error(e: subprocess.CalledProcessError) -> str:
     )
 
 
+def _format_conflict_report(conflicts: list[str], slug: str) -> str:
+    """Format detailed conflict report with stats, divergence, and hint.
+
+    Args:
+        conflicts: List of conflicted file paths
+        slug: Worktree branch slug
+
+    Returns:
+        Formatted conflict report string
+    """
+    lines = [f"Conflicts in merge of `{slug}`:"]
+
+    for conflict_file in conflicts:
+        status = _git("status", "--short", "--", conflict_file, check=False)
+        status_code = status[:2] if status else "??"
+        lines.append(f"  {status_code} {conflict_file}")
+
+    lines.append("")
+
+    for conflict_file in conflicts:
+        stat = _git("diff", "--stat", "MERGE_HEAD", "--", conflict_file, check=False)
+        if stat:
+            for stat_line in stat.split("\n"):
+                if stat_line:
+                    lines.append(f"  {stat_line}")
+
+    lines.append("")
+
+    ahead = _git("rev-list", "--count", f"HEAD..{slug}", check=False)
+    behind = _git("rev-list", "--count", f"{slug}..HEAD", check=False)
+    lines.append(
+        f"Branch: {ahead} commits ahead, Main: {behind} commits ahead since merge-base"
+    )
+
+    lines.append("")
+    lines.append(
+        f"Resolve conflicts, git add, then re-run: claudeutils _worktree merge {slug}"
+    )
+
+    return "\n".join(lines)
+
+
 def _check_clean_for_merge(
     path: Path | None = None,
     exempt_paths: set[str] | None = None,
@@ -200,8 +242,7 @@ def _phase3_merge_parent(slug: str) -> None:
     conflicts = resolve_learnings_md(conflicts)
 
     if conflicts:
-        for conflict in conflicts:
-            click.echo(f"conflict: {conflict}")
+        click.echo(_format_conflict_report(conflicts, slug))
         raise SystemExit(3)
 
 
@@ -299,8 +340,7 @@ def merge(slug: str) -> None:
             "\n"
         )
         conflicts = [c for c in conflicts if c.strip()]
-        for conflict in conflicts:
-            click.echo(conflict)
+        click.echo(_format_conflict_report(conflicts, slug))
         raise SystemExit(3)
     elif state == "submodule_conflicts":
         _phase3_merge_parent(slug)
