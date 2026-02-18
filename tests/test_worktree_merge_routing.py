@@ -55,6 +55,36 @@ def _setup_diverged_branch(
     _commit_file(repo, "main2.txt", "main commit 2\n", "Second commit on main")
 
 
+def test_merge_merged_state_routes_through_phase1_2_4(
+    repo_with_submodule: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mock_precommit: None,
+) -> None:
+    """Test merge() with already-merged branch succeeds via Phase 1+2+4.
+
+    When branch is ancestor of HEAD, merge(slug) should:
+    - Detect 'merged' state
+    - Run Phase 1 (validate), Phase 2 (submodule no-op), Phase 4 (precommit)
+    - Exit with code 0
+    - Branch remains merged after call
+    """
+    monkeypatch.chdir(repo_with_submodule)
+
+    _commit_file(repo_with_submodule, "main.txt", "main content\n", "Initial commit")
+    _setup_diverged_branch(repo_with_submodule, "test-branch")
+
+    # Merge the branch first to create "merged" state
+    _run(repo_with_submodule, "merge", "--no-edit", "test-branch")
+    assert _is_branch_merged("test-branch"), "Branch should be merged before test"
+
+    _run(repo_with_submodule, "rev-parse", "HEAD").stdout.strip()
+
+    # Call merge() on already-merged branch — should succeed
+    merge("test-branch")
+
+    assert _is_branch_merged("test-branch"), "Branch should still be merged"
+
+
 def test_merge_resumes_from_parent_resolved(
     repo_with_submodule: Path,
     monkeypatch: pytest.MonkeyPatch,
