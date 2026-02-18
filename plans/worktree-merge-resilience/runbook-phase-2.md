@@ -78,14 +78,12 @@
 **Assertions:**
 - After manually resolving agent-core conflict and committing, re-running `merge(slug)` succeeds
 - Exit code is 0 (parent merge completes)
-- Git log shows submodule merge commit already present (from manual resolution), plus final parent merge commit
-- Phase 2 is effectively skipped: `wt_commit` is now an ancestor of agent-core HEAD → existing skip logic triggers (line 102: `wt_commit == local_commit` check, or `merge-base --is-ancestor` returns 0)
+- `git log --format=%s` shows exactly 2 commits since test start: the manual submodule resolution commit message and the final parent merge commit (🔀 Merge slug)
+- `git -C agent-core merge-base --is-ancestor <wt_commit> HEAD` returns 0 (wt_commit is now ancestor of agent-core HEAD after manual resolution)
 
-**Expected failure:** Before Phase 2 fix (but after Cycle 2.1 GREEN): on re-run, `_detect_merge_state` returns `"clean"` (no MERGE_HEAD after manual commit), runs full pipeline. Phase 2 skip logic should work. This cycle verifies the skip logic is correct after submodule manual resolution.
+**Expected failure:** Test does not exist yet — `pytest` reports `ERRORS: test_merge_resume_after_submodule_resolution not found`.
 
-Actually — the expected RED failure: If `_detect_merge_state` returns `"clean"` but Phase 2's skip logic doesn't recognize that `wt_commit` is now an ancestor (because we did a manual merge-commit, not a fast-forward), Phase 2 might attempt another merge. This cycle verifies `merge-base --is-ancestor` correctly identifies the already-merged submodule.
-
-**Why it fails:** Potential issue: the manual resolution commits `wt_commit` as a parent of agent-core HEAD (via `git -C agent-core merge --no-edit <wt_commit>`). After that, `merge-base --is-ancestor <wt_commit> <HEAD>` returns 0 → Phase 2 skip logic works. The RED writes the test; GREEN may already pass (skip logic existed before this change).
+**Why it fails:** Test is new. Once the test exists, Cycle 2.2 GREEN may pass immediately because the skip logic (`merge-base --is-ancestor` at lines 104-116) already handles the already-resolved case. This cycle is a regression guard: it verifies the pre-existing skip logic survives the Cycle 2.1 code change.
 
 **Verify RED:** `pytest tests/test_worktree_merge_submodule.py::test_merge_resume_after_submodule_resolution -v`
 

@@ -36,13 +36,13 @@
 
 **GREEN Phase:**
 
-**Implementation:** Add `_detect_merge_state(slug: str) -> str` to `merge.py`.
+**Implementation:** Add `_detect_merge_state(slug: str) -> str` to `merge.py` with only the `merged` and `clean` states. Submodule and parent MERGE_HEAD checks are added in later cycles.
 
 **Behavior:**
 - Check `_is_branch_merged(slug)` (already in utils.py) — return `"merged"` if True
-- Check agent-core MERGE_HEAD presence — return `"submodule_conflicts"` if found
-- Check parent MERGE_HEAD presence — if present: check `git diff --name-only --diff-filter=U` — return `"parent_resolved"` if empty, `"parent_conflicts"` if non-empty
 - Otherwise return `"clean"`
+
+Note: Detection of `submodule_conflicts`, `parent_resolved`, and `parent_conflicts` states is added in Cycles 1.2 and 1.4. This minimal implementation is sufficient to pass Cycle 1.1's test.
 
 **Changes:**
 - File: `src/claudeutils/worktree/merge.py`
@@ -78,14 +78,19 @@
 1. Create repo with branch that has a unique file (`branch-file.txt`) and main that has a conflicting change in another file
 2. Start merge manually: `subprocess.run(["git", "merge", "--no-commit", "--no-ff", slug], ...)`
 3. All auto-resolved — `git diff --name-only --diff-filter=U` returns empty (no conflicts)
-4. Monkeypatch chdir. Invoke `worktree merge slug` via CliRunner.
+4. Use `mock_precommit` fixture. Monkeypatch chdir. Invoke `worktree merge slug` via CliRunner.
 5. Assert exit 0 and merge commit created.
 
 **GREEN Phase:**
 
-**Implementation:** Rewrite `merge()` entry point to call `_detect_merge_state(slug)` and route.
+**Implementation:** Extend `_detect_merge_state(slug)` to detect parent MERGE_HEAD states, then rewrite `merge()` entry point to route based on detected state.
 
-**Behavior:**
+**Behavior for `_detect_merge_state` extension:**
+- After `merged` check: check parent MERGE_HEAD via `git rev-parse --verify MERGE_HEAD` (exit 0 = present)
+- If MERGE_HEAD present: check `git diff --name-only --diff-filter=U` — return `"parent_resolved"` if empty, `"parent_conflicts"` if non-empty
+- Otherwise return `"clean"` (submodule detection added in Cycle 1.4)
+
+**Behavior for `merge()` routing:**
 - If `"merged"`: call `_phase4_merge_commit_and_precommit(slug)` only
 - If `"parent_resolved"`: call `_phase4_merge_commit_and_precommit(slug)` only
 - If `"parent_conflicts"`: report unresolved conflicts and `raise SystemExit(3)` (stub — Phase 3 adds full behavior, Phase 4 adds formatted report)
@@ -93,6 +98,9 @@
 - If `"clean"`: run full pipeline `_phase1_validate_clean_trees` → `_phase2_resolve_submodule` → `_phase3_merge_parent` → `_phase4_merge_commit_and_precommit`
 
 **Changes:**
+- File: `src/claudeutils/worktree/merge.py`
+  Action: Extend `_detect_merge_state` body to check parent MERGE_HEAD (after the `_is_branch_merged` check); add `parent_resolved` and `parent_conflicts` return paths
+  Location hint: `_detect_merge_state` function added in Cycle 1.1
 - File: `src/claudeutils/worktree/merge.py`
   Action: Replace `merge()` body with state detection + routing dispatch
   Location hint: `merge()` function at end of file, lines 257–262
@@ -163,34 +171,37 @@
 **Assertions:**
 - When agent-core has MERGE_HEAD (submodule mid-merge), calling `merge(slug)` does not exit with "Clean tree required"
 - Agent-core MERGE_HEAD is present (test verifies the starting condition)
-- After call: either exit 0 (if parent merge auto-resolves), OR exit 3 (if parent conflicts), but NOT exit 1 from clean-tree check
+- `_detect_merge_state` returns `"submodule_conflicts"` when called directly with agent-core in mid-merge state (test this explicitly before the CliRunner call)
+- After CliRunner call: exit code is 0 or 3 (not 1), confirming state routing bypassed the clean-tree check
 
-**Expected failure:** `SystemExit(1)` with "Clean tree required" — current Phase 1 detects agent-core is dirty (staged files from mid-merge)
+**Expected failure:** `SystemExit(1)` with "Clean tree required" — current Phase 1 detects agent-core is dirty (staged files from mid-merge); additionally `_detect_merge_state` does not yet return `"submodule_conflicts"` (not implemented until this cycle's GREEN)
 
-**Why it fails:** `_check_clean_for_merge` checks submodule status; mid-merge submodule has staged changes.
+**Why it fails:** `_detect_merge_state` (as of Cycle 1.2) does not check agent-core MERGE_HEAD, so state is misclassified as `"clean"` and the full pipeline runs, hitting the clean-tree check.
 
 **Verify RED:** `pytest tests/test_worktree_merge_merge_head.py::test_merge_continues_to_phase3_when_submodule_conflicts -v`
 
 **Test setup:**
-1. Use `repo_with_submodule` fixture
+1. Use `repo_with_submodule` fixture (chdir already handled by fixture)
 2. Create branch on parent repo (no changes — just branch pointer)
 3. Manually put agent-core in mid-merge state: create a conflicting commit on agent-core, then `git -C agent-core merge --no-commit --no-ff <commit>` leaving it mid-merge with no conflicts (so parent Phase 3 can proceed)
-4. Monkeypatch chdir. Invoke `worktree merge slug` via CliRunner.
+4. Invoke `worktree merge slug` via CliRunner.
 5. Assert exit code is NOT 1 from clean-tree check (accept 0 or 3 as valid outcomes)
 
 **GREEN Phase:**
 
-**Implementation:** The routing from Cycle 1.2 dispatches `submodule_conflicts` to `_phase3_merge_parent` + `_phase4_merge_commit_and_precommit`. No additional code needed — this cycle tests existing routing.
+**Implementation:** Add submodule MERGE_HEAD check to `_detect_merge_state`, inserting it between the `merged` check and the parent MERGE_HEAD check (per D-5 detection order).
 
 **Behavior:**
-- `submodule_conflicts` route already added in Cycle 1.2 GREEN
-- Verify that `_detect_merge_state` correctly detects agent-core MERGE_HEAD
-- If `_detect_merge_state` doesn't yet check agent-core: add that check in detection order (before parent MERGE_HEAD check per D-5)
+- After `_is_branch_merged` check (returns `"merged"` if True):
+- Add: run `git -C agent-core rev-parse --verify MERGE_HEAD` (exit 0 = agent-core mid-merge) — return `"submodule_conflicts"` if found, before checking parent MERGE_HEAD
+- Rest of function unchanged (parent MERGE_HEAD → `parent_resolved`/`parent_conflicts`, else `"clean"`)
+
+This makes the full detection order match D-5: merged → submodule_conflicts → parent_resolved/parent_conflicts → clean.
 
 **Changes:**
 - File: `src/claudeutils/worktree/merge.py`
-  Action: Verify `_detect_merge_state` checks `git -C agent-core rev-parse --verify MERGE_HEAD` and returns `"submodule_conflicts"` when found (before checking parent MERGE_HEAD)
-  Location hint: `_detect_merge_state` body, second check after `_is_branch_merged`
+  Action: Insert `git -C agent-core rev-parse --verify MERGE_HEAD` check into `_detect_merge_state`, after `_is_branch_merged` and before the parent MERGE_HEAD check
+  Location hint: `_detect_merge_state` body, between `merged` return and parent MERGE_HEAD check
 
 **Verify GREEN:** `pytest tests/test_worktree_merge_merge_head.py::test_merge_continues_to_phase3_when_submodule_conflicts -v`
 **Verify no regression:** `pytest tests/ -k "merge" -x -v`
@@ -205,37 +216,35 @@
 **File:** `tests/test_worktree_merge_merge_head.py`
 
 **Assertions:**
-- `merge(slug)` on a clean repo with a diverged branch runs all phases:
-  - Phase 1: clean tree validated (no exception)
-  - Phase 2: submodule check runs (no-op if no submodule divergence)
-  - Phase 3: `git merge --no-commit --no-ff slug` runs
-  - Phase 4: merge commit created (HEAD has 2 parents), precommit passes
+- `merge(slug)` on a clean repo with a diverged branch produces a merge commit: `HEAD` has exactly 2 parents after the call
 - Exit code is 0
 - Merge commit message matches `f"🔀 Merge {slug}"`
 - `_is_branch_merged(slug)` returns True after call
 
-**Expected failure:** This test should already pass IF the state machine routes `clean` to the full pipeline. It becomes a regression test that the refactor didn't break the normal (clean) path.
+**Expected failure:** `AssertionError` — as of Cycle 1.4, `_detect_merge_state` is implemented but `merge()` still calls `_phase1_validate_clean_trees` → `_phase2_resolve_submodule` → `_phase3_merge_parent` → `_phase4_merge_commit_and_precommit` directly (the old linear chain), without routing through `_detect_merge_state`. Write this test after Cycle 1.4 GREEN but before wiring `clean` routing into `merge()`. The test verifies the `clean` path specifically: if `merge()` is not yet calling `_detect_merge_state` for routing, break the test by temporarily having `_detect_merge_state` return `"merged"` for any input — a 1-line change confirmed to fail this test — then revert after writing.
 
-**Why it fails (RED):** If `_detect_merge_state` incorrectly classifies a clean repo (e.g., returns `"merged"` for a non-merged branch), the merge commit would not be created. Write the test before verifying the full state machine — RED confirms state detection is correct.
+**Why it fails:** The `clean` routing path must be confirmed to exercise all 4 phases in order. Before Cycle 1.5 GREEN, this is enforced by verifying the test fails when `_detect_merge_state` short-circuits to `"merged"` (which would skip Phase 3, producing no merge commit or a fast-forward, failing the 2-parent check).
 
-**Verify RED:** `pytest tests/test_worktree_merge_merge_head.py::test_merge_clean_state_runs_full_pipeline -v`
+**Verify RED:** `pytest tests/test_worktree_merge_merge_head.py::test_merge_clean_state_runs_full_pipeline -v` (after applying the 1-line `_detect_merge_state` sabotage)
+
+**STOP condition for RED:** If the test passes without sabotage AND Cycle 1.2 routing was correctly wired, the `clean` assertion is too weak. Verify HEAD has exactly 2 parents, not just that exit code is 0.
 
 **Test setup:**
 1. Use `repo_with_submodule` and `mock_precommit` fixtures
 2. Create branch with one unique file commit
-3. Add a different commit on main (diverge)
-4. Monkeypatch chdir. Invoke `worktree merge slug` via CliRunner.
-5. Assert exit 0, merge commit with 2 parents, `_is_branch_merged` returns True.
+3. Add a different commit on main (diverge) so merge produces a real merge commit
+4. Invoke `worktree merge slug` via CliRunner (repo_with_submodule fixture already handles chdir).
+5. Assert exit 0, `len(parents_of_HEAD) == 2`, commit message starts with `"🔀 Merge"`, `_is_branch_merged(slug)` returns True.
 
 **GREEN Phase:**
 
-**Implementation:** The `clean` routing already in `merge()` from Cycle 1.2. Verify all 4 phases called in sequence for `clean` state.
+**Implementation:** Confirm that the `clean` routing path in `merge()` from Cycle 1.2 calls all 4 phases in sequence. Revert the RED-phase sabotage if applied.
 
 **Behavior:**
 - `clean` route: `_phase1_validate_clean_trees` → `_phase2_resolve_submodule` → `_phase3_merge_parent` → `_phase4_merge_commit_and_precommit`
-- No changes needed if Cycle 1.2 routing was correct
+- No new changes needed if Cycle 1.2 routing was correctly wired; revert sabotage if used for RED verification
 
-**Changes:** None (verification that routing is correct).
+**Changes:** Revert the 1-line sabotage in `_detect_merge_state` (if applied for RED phase). No other changes required.
 **Verify GREEN:** `pytest tests/test_worktree_merge_merge_head.py -v`
 **Verify no regression:** `pytest tests/ -k "merge" -v`
 
