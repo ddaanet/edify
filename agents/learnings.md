@@ -190,3 +190,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Step agents create report files (execution notes, diagnostics) but don't commit them, leaving untracked files that violate the "clean tree after every step" invariant.
 - Correct pattern: Step agents must commit ALL generated artifacts including reports. Orchestrator should not need to commit on behalf of step agents. If the step creates a report, the step's commit includes it.
 - Evidence: Cycles 2.2, 3.1 left report files uncommitted. Orchestrator committed them manually each time.
+## When scoping vet for cross-cutting invariants
+- Anti-pattern: Scoping vet "Changed files" to only files modified in the current phase. For cross-cutting design decisions (D-8 "all output to stdout", NFR-2 "no data loss"), the invariant domain spans the entire call graph, not just changed files.
+- Correct pattern: Add "Verification scope" to vet execution context listing all files that participate in the cross-cutting invariant. Identify via grep (e.g., `err=True` across merge call graph for D-8, `MERGE_HEAD` across all paths for lifecycle).
+- Evidence: resolve.py has `err=True` calls in the merge code path but wasn't in Phase 5's changed-files list. Precommit handler drops stdout but wasn't flagged because `err=True` removal was the vet criterion, not "all output reaches stdout."
+## When reviewing final orchestration checkpoint
+- Anti-pattern: Scoping the final phase vet to only that phase's changes, even when the checkpoint already performs cross-cutting audits (exit code audit traced all SystemExit calls). Selective application of cross-cutting methodology.
+- Correct pattern: Final checkpoint should include lifecycle audits for all stateful objects created during the implementation (MERGE_HEAD, staged content, lock files). Same methodology as exit code audit: trace through all code paths, flag any path that exits success with state still active.
+- Evidence: Phase 5 opus vet audited all 12 SystemExit calls (cross-cutting). Did not audit MERGE_HEAD lifecycle — same class of trace, just applied to git state instead of exit codes. Submodule MERGE_HEAD persists after successful parent merge (exit 0).
