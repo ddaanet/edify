@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-18
 
-**Status:** Re-prioritized backlog (42 tasks, rev 3). Orchestrate evolution blocked on runbook evolution. Worktree-merge-resilience created. Merging runbook-skill-fixes.
+**Status:** Re-prioritized backlog (42 tasks, rev 3). Merged runbook-skill-fixes (7ff7c081). 2 worktrees active.
 
 ## Completed This Session
 
@@ -10,9 +10,16 @@
 - Top actionable: design runbook evolution (2.5), worktree merge resilience (2.6), quality infrastructure reform (2.6)
 - 4 parallel batches identified, 6 blocked tasks mapped
 
+**Merged runbook-skill-fixes worktree (7ff7c081):**
+- validate-runbook.py: 4 subcommands (model-tags, lifecycle, test-counts, red-plausibility)
+- 20 tests, 5-phase TDD orchestration, deliverable review findings fixed
+- Conflicts resolved: jobs.md deleted (planstate replaces it), session/learnings via ours + manual extraction
+- Extracted: "Pipeline skill updates" task, 4 learnings (CLI testing, runbook editing, review conclusions, finding routing)
+- 1068 tests pass (up from 1048)
+
 **Worktree operations:**
 - Created worktree for worktree-merge-resilience (opus design session)
-- Cleaned up design-workwoods worktree (merged prior session)
+- Cleaned up design-workwoods and runbook-skill-fixes worktrees
 
 ## Pending Tasks
 
@@ -236,7 +243,7 @@
 
 ## Next Steps
 
-Merge runbook-skill-fixes worktree in progress. 3 worktrees active: error-handling-design, runbook-skill-fixes (merging), worktree-merge-resilience. Learnings at 175/80 lines — run `/remember` when entries reach 7 days.
+2 worktrees active: error-handling-design, worktree-merge-resilience. Learnings at 195/80 lines — run `/remember` when entries reach 7 days (0 entries ≥7 days currently).
 
 ## Reference Files
 
