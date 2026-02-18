@@ -209,6 +209,13 @@ def test_merge_conflict_surfaces_git_error(
     runner = CliRunner()
     result = runner.invoke(worktree, ["merge", "branch"])
 
-    assert result.exit_code != 0
+    assert result.exit_code == 3
     assert "Traceback" not in result.output
-    assert "conflict" in result.output.lower() or "aborted" in result.output.lower()
+    assert "conflict" in result.output.lower() or "file.txt" in result.output
+    assert "aborted" not in result.output.lower()
+    merge_head = subprocess.run(
+        ["git", "rev-parse", "--verify", "MERGE_HEAD"],
+        capture_output=True,
+        check=False,
+    )
+    assert merge_head.returncode == 0

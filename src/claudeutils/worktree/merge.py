@@ -219,11 +219,9 @@ def _phase3_merge_parent(slug: str) -> None:
     conflicts = resolve_learnings_md(conflicts)
 
     if conflicts:
-        _git("merge", "--abort")
-        _git("clean", "-fd")
-        conflict_list = ", ".join(conflicts)
-        click.echo(f"Merge aborted: conflicts in {conflict_list}")
-        raise SystemExit(1)
+        for conflict in conflicts:
+            click.echo(f"conflict: {conflict}")
+        raise SystemExit(3)
 
 
 def _validate_merge_result(slug: str) -> None:
