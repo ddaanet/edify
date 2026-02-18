@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-18
 
-**Status:** design-runbook-evolution merged (5 FRs complete, vet routing fixed); re-prioritization rev 4. 2 worktrees active.
+**Status:** design-runbook-evolution merged; worktree CLI change designed (outline complete, ready for /runbook). 2 worktrees active.
 
 ## Completed This Session
 
@@ -19,6 +19,12 @@
 - Top: Runbook quality gates Phase B (4.3), Runbook model assignment + Script commit vet gate (2.7)
 - Parallel Batch A (3 worktrees): Quality gates Phase B + Script commit vet gate + Worktree CLI
 
+**Worktree CLI default to --task (designed):**
+- Outline at `plans/worktree-cli-default/outline.md`
+- Positional = task name (session integration); `--branch` = bare slug OR slug override for long-name tasks; `--task` removed
+- 5 TDD cycles + 3 general steps (test update + SKILL.md prose)
+- Solves 29-char slug limit hit during parallel batch A setup
+
 ## Pending Tasks
 
 <!-- Priority order per plans/reports/prioritization-2026-02-18.md (rev 4) -->
@@ -35,9 +41,10 @@
   - Part of commit skill optimization (FR-5 partially landed — Gate A removed, Gate B still prose)
   - Also: remove `vet-requirement.md` from CLAUDE.md `@`-references, move execution context template to memory index
 
-- [ ] **Worktree CLI default to --task** — Make positional arg accept task name (default), add `--branch` for bare slug | sonnet
-  - Current: `_worktree new <slug>` or `--task "name"`. Target: positional = task name, `--branch` = bare slug
-  - RCA: bare slug form causes manual session.md reimplementation (learning: "When invoking CLI tools directly")
+- [ ] **Worktree CLI default to --task** — `/runbook plans/worktree-cli-default/outline.md` | sonnet
+  - Plan: worktree-cli-default | Status: designed
+  - Positional = task name; `--branch` = bare slug or slug override; `--task` removed
+  - `new "Task Name" --branch <slug>` form solves 29-char slug limit
 
 - [ ] **Commit CLI tool** — CLI for precommit/stage/commit across both modules | `/design` | sonnet
   - Modeled on worktree CLI pattern (mechanical ops in CLI, judgment in skill)
@@ -221,7 +228,7 @@
 
 ## Next Steps
 
-2 worktrees active: error-handling-design, worktree-merge-resilience. Learnings at 215/80 lines — 0 entries ≥7 days, consolidation not yet triggerable. Parallel Batch A ready: Quality gates Phase B + Script commit vet gate + Worktree CLI.
+2 worktrees active: error-handling-design, worktree-merge-resilience. Worktree CLI change designed — next: `/runbook plans/worktree-cli-default/outline.md`. Parallel Batch A blocked on slug limit until CLI fix lands; can proceed in sequence or use worktree with manual session.md. Integration-first-tests scoping outline at `plans/integration-first-tests/outline.md` (unscheduled).
 
 ## Reference Files
 
@@ -232,3 +239,4 @@
 - `plans/error-handling/outline.md` — Error handling design outline (Phase A complete)
 - `plans/runbook-quality-gates/design.md` — Quality gates design (6 FRs, simplification agent)
 - `plans/remember-skill-update/requirements.md` — 7 FRs (When/How prefix, validation, migration)
+- `plans/worktree-cli-default/outline.md` — CLI change design (positional=task, --branch=slug)
