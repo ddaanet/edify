@@ -5,7 +5,82 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.worktree.merge import _phase4_merge_commit_and_precommit
+from claudeutils.worktree.merge import _detect_merge_state, _phase4_merge_commit_and_precommit
+
+
+def test_detect_state_merged(
+    repo_with_submodule: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify _detect_merge_state returns 'merged' when branch is ancestor of HEAD."""
+    monkeypatch.chdir(repo_with_submodule)
+
+    # Set up repo: create initial commit
+    (repo_with_submodule / "file.txt").write_text("content\n")
+    subprocess.run(["git", "add", "file.txt"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Add file"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Create branch from current HEAD
+    subprocess.run(
+        ["git", "branch", "test-branch", "HEAD"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Merge the branch into main
+    subprocess.run(
+        ["git", "merge", "--no-edit", "test-branch"],
+        check=True,
+        capture_output=True,
+    )
+
+    # After merge, _detect_merge_state should return "merged"
+    state = _detect_merge_state("test-branch")
+    assert state == "merged", f"Expected 'merged', got '{state}'"
+
+    # Control: create an unmerged branch by:
+    # 1. Create a commit on main
+    (repo_with_submodule / "main_file.txt").write_text("main content\n")
+    subprocess.run(["git", "add", "main_file.txt"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Main commit"],
+        check=True,
+        capture_output=True,
+    )
+
+    # 2. Create unmerged-branch pointing to the previous commit (before main_file.txt)
+    subprocess.run(
+        ["git", "branch", "unmerged-branch", "HEAD~1"],
+        check=True,
+        capture_output=True,
+    )
+
+    # 3. Make a commit on unmerged-branch that won't be on main
+    subprocess.run(
+        ["git", "checkout", "unmerged-branch"],
+        check=True,
+        capture_output=True,
+    )
+    (repo_with_submodule / "unmerged.txt").write_text("unmerged content\n")
+    subprocess.run(["git", "add", "unmerged.txt"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Unmerged commit"],
+        check=True,
+        capture_output=True,
+    )
+
+    # 4. Check out main to leave unmerged-branch unmerged
+    subprocess.run(
+        ["git", "checkout", "main"],
+        check=True,
+        capture_output=True,
+    )
+    state_clean = _detect_merge_state("unmerged-branch")
+    assert state_clean == "clean", f"Expected 'clean', got '{state_clean}'"
 
 
 def test_phase4_merge_head_empty_diff(

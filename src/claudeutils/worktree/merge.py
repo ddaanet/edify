@@ -24,6 +24,25 @@ def _format_git_error(e: subprocess.CalledProcessError) -> str:
     )
 
 
+def _detect_merge_state(slug: str) -> str:
+    """Detect the current merge state for a branch.
+
+    Returns one of: "merged", "clean", "parent_resolved", "parent_conflicts", or
+    "submodule_conflicts".
+
+    Detection order (D-5):
+    1. merged: branch is ancestor of HEAD
+    2. submodule_conflicts: MERGE_HEAD exists in agent-core
+    3. parent_resolved: MERGE_HEAD exists in parent, no unresolved conflicts
+    4. parent_conflicts: MERGE_HEAD exists in parent, unresolved conflicts present
+    5. clean: none of the above
+    """
+    if _is_branch_merged(slug):
+        return "merged"
+
+    return "clean"
+
+
 def _check_clean_for_merge(
     path: Path | None = None,
     exempt_paths: set[str] | None = None,
