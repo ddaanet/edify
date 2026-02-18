@@ -6,8 +6,8 @@
 |---|---|---|---|---|
 | FR-1: Submodule conflict pass-through | 2 | 2.1, 2.2 | D-6 | — |
 | FR-2: Parent merge preservation | 3 | 3.1 | D-3 | — |
-| FR-3: Untracked file collision | 3 | 3.2, 3.3 | D-4 | — |
-| FR-4: Conflict context output | 4 | 4.1, 4.2 | D-8 | — |
+| FR-3: Untracked file collision | 3 | 3.2 | D-4 | Parametrized: same-content + different-content cases |
+| FR-4: Conflict context output | 4 | 4.1 | D-8 | Consolidated: all output fields in single cycle |
 | FR-5: Idempotent resume | 1 | 1.1–1.5 | D-5 | — |
 | NFR-1: Backward-compatible exit codes | 5 | 5.1 | D-1 | — |
 | NFR-2: No data loss | 3, 5 | 3.1, 5.1 | D-7 | Cross-cutting: Phase 3 removes abort, Step 5.1 audits all paths |
@@ -55,8 +55,12 @@ Updates existing tests:
 
 - Cycle 3.1: Source conflict → MERGE_HEAD preserved, no abort, exit 3 (FR-2, NFR-2) — updates `test_merge_conflict_surfaces_git_error` (integration: real conflict in non-session file, assert exit 3, assert MERGE_HEAD still present, assert no --abort)
   - Depends on: Cycles 1.3, 2.1 (state machine must handle parent_conflicts for re-run; Phase 2 pass-through must be stable)
-- Cycle 3.2: Untracked file same-content as incoming → `git add` + retry → merge proceeds to Phase 4 (FR-3, D-4) — updates `test_merge_aborts_cleanly_when_untracked_file_blocks` to cover same-content case (integration: untracked file on main with identical content to branch, assert exit 0, assert file tracked post-merge)
-- Cycle 3.3: Untracked file different-content → conflict markers in file + exit 3 (FR-3, D-4) — new test (integration: untracked file on main with different content from branch, assert exit 3, assert conflict markers in file, assert MERGE_HEAD present)
+- Cycle 3.2: Untracked file collision handling (parametrized) (FR-3, D-4) — updates `test_merge_aborts_cleanly_when_untracked_file_blocks` + new test. Two cases via parametrized fixture:
+  | Case | Untracked content | Expected exit | Post-condition |
+  |------|-------------------|---------------|----------------|
+  | same-content | identical to branch | 0 | file tracked post-merge, merge proceeds to Phase 4 |
+  | different-content | differs from branch | 3 | conflict markers in file, MERGE_HEAD present |
+  (integration: untracked file on main, `git add` + retry path for same-content; conflict path for different-content)
 
 **Depends on:** Cycles 1.3, 2.1 (Phase 3 behavior tested after Phase 1 routing is correct).
 **Affected files:** `src/claudeutils/worktree/merge.py`, `tests/test_worktree_merge_errors.py`
@@ -67,8 +71,11 @@ Updates existing tests:
 
 **Scope:** Add `_format_conflict_report(conflicts, slug)` function to `merge.py`. Called from Phase 3 before `raise SystemExit(3)` and from state machine `parent_conflicts` path. Output contract (FR-4): conflicted file list with conflict type (`git diff --name-only --diff-filter=U` + conflict type via `git status --short`), per-file diff stats (`git diff MERGE_HEAD -- <file>` stat), branch divergence summary (`git rev-list --count HEAD..slug` and `slug..HEAD`), hint line.
 
-- Cycle 4.1: Conflict output includes file list with conflict type and per-file diff stat (integration: trigger conflict, capture exit-3 output, assert file path + conflict type label + diff stat lines present)
-- Cycle 4.2: Conflict output includes branch divergence summary and hint text (integration: trigger conflict, assert commit count lines present on each side, assert hint contains "Resolve conflicts" and `claudeutils _worktree merge <slug>`)
+- Cycle 4.1: Conflict output format — file list, diff stats, divergence summary, hint (integration: trigger conflict, capture exit-3 output, assert all output fields):
+  - File path + conflict type label (both-modified, delete/modify)
+  - Per-file diff stat lines
+  - Branch divergence commit counts (each side)
+  - Hint containing "Resolve conflicts" and `claudeutils _worktree merge <slug>`
 
 **Depends on:** Cycle 3.1 (exit 3 path must exist before output format matters).
 **Affected files:** `src/claudeutils/worktree/merge.py`, `tests/test_worktree_merge_conflicts.py` or new `tests/test_worktree_merge_resilience.py`
@@ -120,7 +127,11 @@ The following recommendations should be incorporated during full runbook expansi
 - Projected cumulative: ~387 lines (exceeds 350-line threshold).
 - **Recommendation:** Monitor after Phase 3 GREEN. If merge.py exceeds 350 lines at Phase 3 checkpoint, extract `_format_conflict_report` and state detection into a separate `merge_state.py` module before Phase 4 expansion. Phase 4's `_format_conflict_report` is a natural extraction boundary (self-contained, no mutation).
 
-**Consolidation candidates:**
+**Consolidation applied:**
+- Cycles 3.2+3.3 → parametrized Cycle 3.2 (untracked file same-content vs different-content)
+- Cycles 4.1+4.2 → single Cycle 4.1 (all conflict output fields tested together)
+
+**Consolidation not applied:**
 - Cycles 1.1 and 1.2 are structurally similar (both route to Phase 4). Distinct git state setups justify separate cycles, but they can share fixture infrastructure during expansion (common `_setup_repo` helper).
 
 **Checkpoint guidance:**
