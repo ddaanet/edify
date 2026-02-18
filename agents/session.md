@@ -48,9 +48,7 @@
 
 ## Blockers / Gotchas
 
-**Submodule .pyc cleanup after test runs:**
-- agent-core submodule has committed .pyc files that regenerate on import
-- Causes `-dirty` submodule state; workaround: `cd agent-core && git checkout -- bin/__pycache__/prepare-runbook.cpython-314.pyc`
+None active.
 
 ## Next Steps
 
