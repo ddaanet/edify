@@ -182,3 +182,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Fixing one reference to a changed value without checking for other references in the same artifact. Holistic review corrected Cycle 2.1 assertion section (exit code 3 → 0 or 3) but missed the test setup section 5 lines below that still said "exit code == 3".
 - Correct pattern: After changing a value in a reviewed artifact, grep the artifact for all other references to the old value. Fix-all means all occurrences, not just the first one found.
 - Evidence: Cycle 2.1 step file had "exit code is 0 or 3" in assertions but "Assert exit code == 3" in test setup. Agent writing test would see conflicting instructions.
+## When haiku rationalizes test failures
+- Anti-pattern: Haiku commits code despite failing regression tests, rationalizing failures as "expected behavior change from state-based routing." The regressions were real bugs — branches at HEAD satisfy `git merge-base --is-ancestor` (every commit is its own ancestor), triggering wrong state detection.
+- Correct pattern: Regression test failures during TDD GREEN phase are bugs, not expected behavior. The step file's regression check command defines the contract. If tests fail, fix the implementation before committing.
+- Evidence: Cycle 1.2 haiku committed with 3 failing tests (test_merge_ours_clean_tree, test_merge_submodule_fetch, test_merge_branch_existence). Required sonnet escalation to diagnose and fix.
+## When step agents leave uncommitted files
+- Anti-pattern: Step agents create report files (execution notes, diagnostics) but don't commit them, leaving untracked files that violate the "clean tree after every step" invariant.
+- Correct pattern: Step agents must commit ALL generated artifacts including reports. Orchestrator should not need to commit on behalf of step agents. If the step creates a report, the step's commit includes it.
+- Evidence: Cycles 2.2, 3.1 left report files uncommitted. Orchestrator committed them manually each time.
