@@ -166,3 +166,112 @@ def test_phase4_merge_head_empty_diff(
     assert branch_delete.returncode == 0, (
         f"git branch -d should succeed after merge commit: {branch_delete.stderr}"
     )
+
+
+def test_merge_resumes_from_parent_resolved(
+    repo_with_submodule: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mock_precommit: None,
+) -> None:
+    """Test merge resumes from parent_resolved state.
+
+    Repo has MERGE_HEAD with no unresolved conflicts. merge(slug) should:
+    - Exit with code 0
+    - Create a merge commit (HEAD has 2+ parents)
+    - Not raise CalledProcessError from clean tree check
+    """
+    from claudeutils.worktree.merge import merge
+
+    monkeypatch.chdir(repo_with_submodule)
+
+    # Set up initial commit on main
+    (repo_with_submodule / "main.txt").write_text("main content\n")
+    subprocess.run(["git", "add", "main.txt"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Initial commit"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Create branch with unique file
+    subprocess.run(
+        ["git", "checkout", "-b", "feature-branch"],
+        check=True,
+        capture_output=True,
+    )
+    (repo_with_submodule / "branch-file.txt").write_text("branch content\n")
+    subprocess.run(["git", "add", "branch-file.txt"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Add branch file"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Switch back to main and make conflicting change in different file
+    subprocess.run(
+        ["git", "checkout", "main"],
+        check=True,
+        capture_output=True,
+    )
+    (repo_with_submodule / "other.txt").write_text("other content\n")
+    subprocess.run(["git", "add", "other.txt"], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Add other file"],
+        check=True,
+        capture_output=True,
+    )
+
+    # Start merge manually (not committed yet)
+    merge_result = subprocess.run(
+        ["git", "merge", "--no-commit", "--no-ff", "feature-branch"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert merge_result.returncode == 0, "Merge should succeed with auto-resolution"
+
+    # Verify no unresolved conflicts
+    conflicts = subprocess.run(
+        ["git", "diff", "--name-only", "--diff-filter=U"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert (
+        not conflicts.stdout.strip()
+    ), f"Expected no conflicts, got: {conflicts.stdout}"
+
+    # Verify MERGE_HEAD exists
+    merge_head_check = subprocess.run(
+        ["git", "rev-parse", "--verify", "MERGE_HEAD"],
+        check=False,
+        capture_output=True,
+    )
+    assert merge_head_check.returncode == 0, "MERGE_HEAD should exist"
+
+    # Invoke merge() - should succeed and create merge commit
+    merge("feature-branch")
+
+    # Verify MERGE_HEAD is gone
+    merge_head_after = subprocess.run(
+        ["git", "rev-parse", "--verify", "MERGE_HEAD"],
+        check=False,
+        capture_output=True,
+    )
+    assert merge_head_after.returncode != 0, (
+        "MERGE_HEAD should be removed after merge()"
+    )
+
+    # Verify merge commit was created (HEAD has 2+ parents)
+    log_output = subprocess.run(
+        ["git", "cat-file", "-p", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    parent_count = len(
+        [line for line in log_output.stdout.split("\n") if line.startswith("parent ")]
+    )
+    assert parent_count >= 2, (
+        f"Expected merge commit with 2+ parents, got {parent_count}"
+    )

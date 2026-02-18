@@ -40,6 +40,21 @@ def _detect_merge_state(slug: str) -> str:
     if _is_branch_merged(slug):
         return "merged"
 
+    merge_head = subprocess.run(
+        ["git", "rev-parse", "--verify", "MERGE_HEAD"],
+        capture_output=True,
+        check=False,
+    )
+
+    if merge_head.returncode == 0:
+        conflicts = _git("diff", "--name-only", "--diff-filter=U", check=False).split(
+            "\n"
+        )
+        conflicts = [c for c in conflicts if c.strip()]
+        if conflicts:
+            return "parent_conflicts"
+        return "parent_resolved"
+
     return "clean"
 
 
@@ -275,7 +290,20 @@ def _phase4_merge_commit_and_precommit(slug: str) -> None:
 
 def merge(slug: str) -> None:
     """Merge worktree branch: validate, resolve submodule, merge parent."""
-    _phase1_validate_clean_trees(slug)
-    _phase2_resolve_submodule(slug)
-    _phase3_merge_parent(slug)
-    _phase4_merge_commit_and_precommit(slug)
+    state = _detect_merge_state(slug)
+
+    if state == "merged":
+        _phase4_merge_commit_and_precommit(slug)
+    elif state == "parent_resolved":
+        _phase4_merge_commit_and_precommit(slug)
+    elif state == "parent_conflicts":
+        click.echo("Merge aborted: unresolved conflicts in parent merge")
+        raise SystemExit(3)
+    elif state == "submodule_conflicts":
+        _phase3_merge_parent(slug)
+        _phase4_merge_commit_and_precommit(slug)
+    else:  # clean
+        _phase1_validate_clean_trees(slug)
+        _phase2_resolve_submodule(slug)
+        _phase3_merge_parent(slug)
+        _phase4_merge_commit_and_precommit(slug)
