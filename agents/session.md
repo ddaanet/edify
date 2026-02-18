@@ -1,6 +1,6 @@
 # Session: Worktree — Design runbook evolution
 
-**Status:** Focused worktree for parallel execution.
+**Status:** Design complete, ready for direct execution of prose edits.
 
 ## Completed This Session
 
@@ -14,23 +14,34 @@
 - User decisions: rewrite existing anti-pattern entry (not append), leave xfail checkpoint unchanged
 - Report: `plans/runbook-evolution/reports/outline-review.md`
 
+**Design skill execution readiness gate:**
+- Missing gate: `/design` always routed to `/runbook` after sufficiency gate, even when execution was simple
+- Fix: execution readiness criteria inline in Outline Sufficiency Gate section — ≤3 files, prose/additive, insertion points identified, no cross-file coordination
+- C.5 references gate by heading name (not positional)
+- File: `agent-core/skills/design/SKILL.md`
+
 **Prototype:** `plans/prototypes/recover-agent-writes.py` — extracts Write calls from agent session logs
+
+**Design runbook evolution — design phase complete:**
+- `/design plans/runbook-evolution/` invoked → entry gate → sufficiency gate passed → execution readiness passed
+- Outline IS the design (no design.md needed)
 
 ## Pending Tasks
 
-- [ ] **Design runbook evolution** — `/design plans/runbook-evolution/` | opus
-  - Requirements at `plans/runbook-evolution/requirements.md`
-  - Outline reviewed, user decisions captured — re-run `/design` to validate new entry gate, then execute
-  - Entry gate should see sufficient outline → skip to Phase B → sufficiency gate → execute directly
-  - Scope: runbook SKILL.md generation directives only (2 files, prose edits)
-  - 5 FRs: prose atomicity, self-modification discipline, testing diamond, deferred enforcement, test migration
+- [ ] **Execute runbook evolution edits** — direct execution of outline.md prose edits | opus
+  - Design: `plans/runbook-evolution/outline.md` (outline = design, sufficiency gate passed)
+  - Requirements: `plans/runbook-evolution/requirements.md` (5 FRs)
+  - Scope: `agent-core/skills/runbook/SKILL.md` + `agent-core/skills/runbook/references/anti-patterns.md`
+  - Insertion points: lines 253 (Phase 0.75), 535 (TDD Cycle Planning), 791 (Testing Strategy section)
+  - User decisions: rewrite existing anti-pattern entry (not append), leave xfail checkpoint unchanged
+  - Execute edits → vet-fix-agent → `/handoff --commit`
 
 ## Blockers / Gotchas
 
-**learnings.md at 196 lines (soft limit 80):**
+**learnings.md at 207 lines (soft limit 80):**
 - No entries ≥7 active days — consolidation batch insufficient
 - Size trigger fires but nothing eligible for `/remember`
 
 ## Next Steps
 
-Re-run `/design plans/runbook-evolution/` in clean opus session. Validates entry gate: existing outline should skip ceremony and route to execution.
+Execute prose edits per outline.md in opus session. Read SKILL.md, make 3 insertions + anti-patterns.md edits, then vet.
