@@ -385,13 +385,13 @@ Add "## Error Handling" section after the "## Cooperative Skills" table and befo
 
 ---
 
-## Step 4.2: Add error handling cross-references to design/SKILL.md and runbook/SKILL.md
+## Step 4.2: Add error handling cross-references to all cooperative skills
 
-**Objective**: Add a brief error handling note to the Continuation section of design/SKILL.md and runbook/SKILL.md — directing each cooperative skill to abort and record in Blockers per the continuation-passing.md protocol.
-**Script Evaluation**: Small (≤25 lines — ~5 lines added to each of 2 files)
+**Objective**: Add a brief error handling note to the Continuation section of all four cooperative skills (design, runbook, orchestrate, handoff) — directing each to abort and record in Blockers per the continuation-passing.md protocol.
+**Script Evaluation**: Small (≤25 lines — ~5 lines added to each of 4 files)
 **Execution Model**: Opus (skill artifacts)
 
-**Prerequisite**: Read both `agent-core/skills/design/SKILL.md` and `agent-core/skills/runbook/SKILL.md` — locate the Continuation section in each.
+**Prerequisite**: Read all four skill files — `agent-core/skills/design/SKILL.md`, `agent-core/skills/runbook/SKILL.md`, `agent-core/skills/orchestrate/SKILL.md`, `agent-core/skills/handoff/SKILL.md` — locate the Continuation section in each (or identify where to add one).
 
 **Implementation**:
 In each skill's Continuation section, add a short error handling note immediately before or after the consumption protocol steps:
@@ -402,14 +402,16 @@ In each skill's Continuation section, add a short error handling note immediatel
 
 Do NOT duplicate the full protocol — these are cross-references only. The skills point to continuation-passing.md as the source of truth.
 
-**Expected Outcome**: Both design/SKILL.md and runbook/SKILL.md have the error handling note in their Continuation sections. Notes reference continuation-passing.md.
+**Expected Outcome**: All four cooperative skills (design, runbook, orchestrate, handoff) have the error handling note in or near their Continuation/tail-call section. Notes reference continuation-passing.md.
 
 **Error Conditions**:
-- If either skill does not have a Continuation section, add one modeled on orchestrate/SKILL.md's Continuation section, then add the error note
+- If a skill does not have a Continuation section, add the note adjacent to the existing tail-call or handoff invocation (do not restructure the skill's exit flow)
 
 **Validation**:
 - `grep "continuation-passing\|abort.*continuation\|Blockers" agent-core/skills/design/SKILL.md` returns match
 - `grep "continuation-passing\|abort.*continuation\|Blockers" agent-core/skills/runbook/SKILL.md` returns match
+- `grep "continuation-passing\|abort.*continuation\|Blockers" agent-core/skills/orchestrate/SKILL.md` returns match
+- `grep "continuation-passing\|abort.*continuation\|Blockers" agent-core/skills/handoff/SKILL.md` returns match
 
 ---
 
