@@ -1,20 +1,23 @@
 # Session Handoff: 2026-02-19
 
-**Status:** Skill optimization applied. Handoff 330→159 lines (52%), commit 237→133 lines (44%), template inlined, consolidation flow extracted.
+**Status:** Merged error-handling-design worktree. Two new pending tasks from discussion.
 
 ## Completed This Session
 
-**Skill prose optimization (Segment → Attribute → Compress):**
-- Handoff SKILL.md: 330→159 lines (52%). Template inlined, consolidation flow extracted to reference, conditional paths compressed, redundancy with execute-rule.md removed, learnings line count gate removed (→ SessionStart hook), discussion substance check added, tool-call batching (parallel wc + learning-ages)
-- Commit SKILL.md: 237→133 lines (44%). Critical Constraints and Context Gathering sections removed (redundant with always-loaded fragments), "separate Bash calls" consolidated from 3→1, one example removed, added `Bash(git diff:*)` to allowed-tools (pre-existing gap found by reviewer)
-- New: `references/consolidation-flow.md` (27 lines, extracted from handoff 4c)
-- Deleted: `references/template.md` (81 lines, inlined into handoff SKILL.md)
-- Parallel opus skill-reviewer reviews: handoff passed (2 fixes applied — D-6 dangling reference, learnings.md added to Reference), commit passed with pre-existing allowed-tools gaps noted (submodule subshells, pbcopy)
-- Methodology: `plans/reports/skill-optimization-grounding.md`. Actual reductions exceeded estimates (52%/44% vs 27%/24%) — grounding report was conservative on principles/trim/continuation sections
+**Worktree merge (error-handling-design):**
+- Merged into main (commit: 0c29361d)
+- Conflict: `agent-core/skills/handoff/SKILL.md` — resolved: HEAD's optimized structure + branch's task failure states (`[!]`, `[✗]`, `[–]`) into carry-forward rule
+- Learnings.md: 76 → 111 lines post-merge (36 genuine entries from branch, not duplicates)
+- Dead artifacts on branch (may have merged in): `.claude/agents/error-handling-task.md`, `plans/error-handling/steps/`, `plans/error-handling/orchestrator-plan.md`, `plans/error-handling/runbook.md`, `plans/error-handling/runbook-outline.md` — inline execution superseded runbook approach
+
+**Discussion conclusions:**
+- Precommit sentinel: next priority, trigger set includes conftest.py
+- Selective test rerun: rescoped to TDD cycle optimization — requires dependency analysis, not precommit-safe
+- Worktree merge learnings count: by entry (H2 count), inform-only — absorbed into merge-learnings-delta
 
 ## Pending Tasks
 
-<!-- Priority order per plans/reports/prioritization-2026-02-18.md (rev 4) -->
+- [ ] **Precommit test sentinel** — Sentinel file caches passing test suite; rerun only when python version, pyproject.toml, conftest.py, or src/ change | sonnet
 
 - [ ] **Handoff CLI tool** — Mechanical handoff+commit pipeline in CLI | `/design` | sonnet
   - Same pattern as worktree CLI: mechanical ops in CLI, judgment stays in agent
@@ -52,6 +55,7 @@
   - Plan: merge-learnings-delta | Status: requirements
   - 3 FRs: detect consolidation divergence, reconstruct correct file, handle edge cases
   - Main base + branch delta strategy (not ours, not theirs)
+  - **New scope:** Post-merge learnings count display (by H2 entry count, inform-only)
 
 - [ ] **Fix worktree rm dirty check** — Must not fail if parent repo is dirty, only if target worktree is dirty | sonnet
 
@@ -168,9 +172,14 @@
   - Design runbook evolution now complete — blocker lifted
   - Insights input: ping-pong TDD agent pattern — alternating tester/implementer agents with mechanical RED/GREEN gates between handoffs. Tester holds spec context (can't mirror code structure), implementer holds codebase context (can't over-implement beyond test demands). Resume-based context preservation avoids startup cost per cycle
 
+- [ ] **TDD cycle test optimization** — Selective test rerun during TDD cycles based on dependency analysis | sonnet
+  - Rescoped from precommit (too risky without dep analysis) to TDD-only
+  - Requires test dependency analysis to be reliable
+  - Related: orchestrate-evolution (TDD cycle mechanics)
+
 - [ ] **RED pass protocol** — Formalize orchestrator RED pass handling into orchestrate skill | sonnet
-  - Blocked on: Error handling design (needs D-3 escalation criteria, D-5 rollback semantics)
   - Scope: Classification taxonomy, blast radius procedure, defect impact evaluation
+  - Error handling design now merged — D-3 escalation criteria, D-5 rollback semantics available
 
 - [ ] **Safety review expansion** — Implement pipeline changes from grounding research | opus
   - Input: `plans/reports/safety-review-grounding.md`
@@ -183,19 +192,9 @@
   - Touches: design skill, outline format, runbook skill, prepare-runbook.py, orchestrate skill, plan-reviewer
   - Absorbs: Runbook model assignment, Fix prepare-runbook.py model override, Fix plan-reviewer model adequacy gap
 
-- [x] **Execute error-handling inline** — Validate inline workflow via error-handling outline | opus
-  - Phase 4: execute `plans/error-handling/outline.md` directly (orchestrator-direct)
-  - 7 files, ~250 lines additive prose, decisions pre-resolved (D-1–D-6, Q1)
-  - Supersedes "Orchestrate error handling" (prepared runbook artifacts unused)
 - [ ] **Worktree merge from main** — `/design plans/worktree-merge-from-main/` | sonnet
   - Requirements complete, 5 FRs, Q-1 resolved (`--from-main` flag)
   - Heavy unification with existing merge.py/resolve.py
-
-## Worktree Tasks
-
-- [ ] **Error handling design** → `error-handling-design` — Resume `/design` Phase B (outline review) then Phase C (full design) | opus
-  - Outline: `plans/error-handling/outline.md`
-  - Key decisions: D-1 CPS abort-and-record, D-2 task `[!]`/`[✗]` states, D-3 escalation acceptance criteria, D-5 rollback = revert to step start
 
 ## Blockers / Gotchas
 
@@ -232,12 +231,10 @@
 **Memory index `/how` operator mapping:**
 - `/how X` in index → internally becomes `"how to X"` for heading matching
 - Index keys must NOT include "to" — validator adds it automatically
-- `git merge` without `dangerouslyDisableSandbox: true` leaves 80+ orphaned untracked files [from: error-handling-design]
-- `.claude/agents/error-handling-task.md`, `plans/error-handling/steps/`, `plans/error-handling/orchestrator-plan.md`, `plans/error-handling/runbook.md`, `plans/error-handling/runbook-outline.md` [from: error-handling-design]
-- Inline execution validated the approach — these are dead artifacts [from: error-handling-design]
+
 ## Next Steps
 
-Handoff CLI tool is next high-priority task. Error-handling worktree still ready to merge.
+Precommit test sentinel is next priority. Error-handling-design worktree ready to remove (`wt-rm error-handling-design`).
 
 ## Reference Files
 

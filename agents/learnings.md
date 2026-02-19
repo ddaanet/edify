@@ -110,3 +110,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Updating only the authoritative definition section (type table, contract) but not downstream sections that enumerate existing variants. Leaves binary tdd/general language in 8+ locations across 3 skills.
 - Correct pattern: After updating the authoritative definition, grep all affected files for existing variant names (e.g., "tdd.*general", "both TDD and general") and update every enumeration site. Skill-reviewer catches these as propagation gaps.
 - Evidence: Skill-reviewer found 1 critical (Phase 0.75 outline generation wouldn't produce inline phases), 3 major (description triggering, When to Use, Phase 1 expansion branch missing), 4 minor enumeration sites — all in runbook/SKILL.md alone.
+## When comparing file versions across branches
+- Anti-pattern: Using `wc -l` equality to conclude files are identical. Same line count does not mean same content — entries can be added/removed/replaced while maintaining count.
+- Correct pattern: Diff content, not counts. `git diff <base>..<branch> -- <file>` or compare actual text. Line count is a size metric, not an identity check.
+- Evidence: Learnings.md had 62 lines on both merge base and branch → concluded "no changes." Post-merge found 36 genuine new entries from the branch.
