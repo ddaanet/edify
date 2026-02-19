@@ -163,6 +163,14 @@ Removal guard + merge correctness. 13 TDD cycles, deliverable review. Prevented 
 
 Cross-tree worktree awareness with planstate inference, aggregation, rich ls display, section-based merge strategies, and vet tracking. 33 TDD + 10 general steps. Eliminated jobs.md in favor of filesystem-based plan state inference. Affected: src/claudeutils/planstate/, src/claudeutils/worktree/display.py, src/claudeutils/worktree/resolve.py.
 
+## inline-phase-type
+
+Inline phase type across pipeline. 7 pipeline artifacts updated, 7 integration tests. Added inline as third phase type (alongside TDD and general) for prose edits without feedback loops. Key decisions: coordination complexity discriminator (D-5), vet proportionality (D-7). Affected: pipeline-contracts.md, workflow-optimization.md, runbook/SKILL.md, plan-reviewer.md, review-plan/SKILL.md, orchestrate/SKILL.md, prepare-runbook.py.
+
+## error-handling
+
+Error handling framework across 5 layers. 9 files (7 modified, 2 new), ~163 net lines. Unified error handling across orchestration, task lifecycle, and CPS chains. Key decisions: Avižienis fault/failure vocabulary, 5-category taxonomy (D-1), task error states blocked/failed/canceled (D-2), escalation acceptance criteria (D-3), revert-to-step-start rollback (D-5), hook degraded mode (D-6). Calibrated max_turns ~150 from 938 observations. Affected: agent-core/fragments/ (6 files), agent-core/skills/ (2 files), .claude/rules/.
+
 ## runbook-evolution
 
 5 FRs: prose atomicity (FR-1), self-modification discipline (FR-2a/2b), testing diamond (FR-3a-d). Additive prose edits to runbook SKILL.md (Testing Strategy section, Phase 0.75 verification, TDD Cycle Planning) and anti-patterns.md (4 new entries, 1 rewritten). Side fix: vet-requirement.md reviewer routing table. Affected: agent-core/skills/runbook/, agent-core/fragments/vet-requirement.md.

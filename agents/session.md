@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-19
 
-**Status:** Inline phase type implemented (Phases 1-3). All 7 pipeline artifacts updated, 7 integration tests green, 3 skill reviews applied.
+**Status:** Error handling framework executed inline (Phases 0-5). 9 files across 5 layers, vet passed (3 major FIXED, 0 UNFIXABLE).
 
 ## Completed This Session
 
@@ -10,25 +10,18 @@
 - Phase 3a: `orchestrate/SKILL.md` — Section 3.0 inline execution path, precommit error handling, vet proportionality (D-7), artifact verification for all-inline runbooks, "No inline logic" → "No ad-hoc logic" terminology fix.
 - Phase 3b: `prepare-runbook.py` — `'inline'` in valid_types, inline phase detection from `(type: inline)` headings, skip step-file generation, `Execution: inline` in orchestrator-plan.md, auto-detection for all-inline and mixed-with-inline runbooks. 7 integration tests (`tests/test_prepare_runbook_inline.py`).
 
-**Skill-reviewer validation (3 parallel agents):**
-- runbook/SKILL.md: 1 critical (Phase 0.75 missing inline in type enumeration), 3 major (description, When to Use, Phase 1 expansion branch), 4 minor — all fixed
-- review-plan/SKILL.md: 2 major ("(both)" ambiguity, Section 10.5↔11 relationship), 3 minor (report template) — all fixed
-- orchestrate/SKILL.md: 1 critical ("No inline logic" terminology collision), 3 major (precommit error handling, bash block, git diff target), 4 minor — all fixed
+**Error handling framework (inline execution, Phases 0-5):**
+- Phase 0: `prerequisite-validation.md` — Layer 0 framing (cross-system prevention points)
+- Phase 1: `error-classification.md` — Avižienis fault/failure vocabulary, Category 5 (inter-agent misalignment from MASFT FC2), retryable/non-retryable table per category (Temporal pattern), tier-aware classification (sonnet/opus self-classify, haiku reports raw), updated 5-category decision tree
+- Phase 2: `escalation-acceptance.md` (new) — D-3 acceptance criteria (precommit + clean tree + output validates), D-5 rollback protocol (revert to step start), dirty tree recovery, timeout handling (max_turns ~150 from Q1 calibration). `orchestrate/SKILL.md` — acceptance criteria reference, rollback, max_turns
+- Phase 3: `task-failure-lifecycle.md` (new) — D-2 state model (6 states: pending/in-progress/complete/blocked/failed/canceled), transitions, error context recording, persistence rules. `handoff/SKILL.md` — error state carry-forward. `execute-rule.md` — new notation markers, MODE 2 skip behavior
+- Phase 4: `continuation-passing.md` — D-1 abort-and-record (0 retries), pivot transactions (3 identified), orphaned continuation recovery protocol, skill-level error handling
+- Phase 5: `error-handling.md` — framework overview table (Layers 0-4), common patterns, D-6 hook error protocol (crash/timeout/invalid → non-fatal degraded mode). `.claude/rules/planning-work.md` — @-references for new fragments
+- Vet: 3 major FIXED (stale walkthrough contradicted tier-aware, stale 4→5 category count, MODE 2 missing skip behavior), 0 UNFIXABLE
 
 ## Pending Tasks
 
-- [x] **Collect delegation overhead data** — Measure Task roundtrip token cost, context per inline edit | sonnet
-  - Phase 0 of inline-phase-type
-  - Data: 938-observation dataset, session orchestration logs
-  - Output: grounded batching threshold or confirm orchestrator-direct suffices
-  - Design: `plans/inline-phase-type/outline.md`
-
-- [x] **Implement inline phase type** — Update 7 pipeline artifacts | sonnet
-  - Phases 1-3: pipeline-contracts.md, workflow-optimization.md, runbook/SKILL.md, plan-reviewer.md, review-plan/SKILL.md, orchestrate/SKILL.md, prepare-runbook.py
-  - All prose edits — inline-eligible by own discriminator
-  - Design: `plans/inline-phase-type/outline.md`
-
-- [ ] **Execute error-handling inline** — Validate inline workflow via error-handling outline | opus
+- [x] **Execute error-handling inline** — Validate inline workflow via error-handling outline | opus
   - Phase 4: execute `plans/error-handling/outline.md` directly (orchestrator-direct)
   - 7 files, ~250 lines additive prose, decisions pre-resolved (D-1–D-6, Q1)
   - Supersedes "Orchestrate error handling" (prepared runbook artifacts unused)
@@ -42,23 +35,20 @@
 **Never run `git merge` without sandbox bypass:**
 - `git merge` without `dangerouslyDisableSandbox: true` leaves 80+ orphaned untracked files
 
-**Prepared error-handling runbook artifacts superseded:**
-- `.claude/agents/error-handling-task.md`, `plans/error-handling/steps/`, `plans/error-handling/orchestrator-plan.md` — will not be used
-- Delete after inline execution validates the approach
+**Superseded error-handling runbook artifacts — delete now:**
+- `.claude/agents/error-handling-task.md`, `plans/error-handling/steps/`, `plans/error-handling/orchestrator-plan.md`, `plans/error-handling/runbook.md`, `plans/error-handling/runbook-outline.md`
+- Inline execution validated the approach — these are dead artifacts
 
 ## Reference Files
 
 - `plans/inline-phase-type/outline.md` — Design (validated, reviewed, user-refined)
-- `plans/inline-phase-type/reports/delegation-overhead-data.md` — Phase 0 data report
-- `plans/inline-phase-type/reports/explore-phase-typing.md` — Pipeline component analysis
-- `plans/inline-phase-type/reports/explore-decisions.md` — Decision basis
-- `plans/inline-phase-type/reports/outline-review.md` — Review (all fixed)
 - `plans/error-handling/outline.md` — Error handling design (inline execution source)
+- `plans/error-handling/reports/vet-review.md` — Vet review (3 major FIXED)
 - `plans/worktree-merge-from-main/requirements.md` — 5 FRs, Q-1 resolved
 
 ## Next Steps
 
-Execute error-handling inline (Phase 4). Then design worktree merge from main.
+Delete superseded error-handling runbook artifacts. Then design worktree merge from main.
 
 ---
-*Handoff by Sonnet. Phases 1-3 complete — inline phase type fully implemented across pipeline.*
+*Handoff by Opus. Error handling framework complete — 5-layer architecture across 9 files, inline execution validated.*
