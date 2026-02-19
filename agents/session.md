@@ -1,26 +1,20 @@
 # Session Handoff: 2026-02-19
 
-**Status:** Skill optimization grounding complete. Segment → Attribute → Compress methodology produced, execution deferred to next session.
+**Status:** Skill optimization applied. Handoff 330→159 lines (52%), commit 237→133 lines (44%), template inlined, consolidation flow extracted.
 
 ## Completed This Session
 
-**Skill optimization grounding (`/ground`):**
-- External research: LLMLingua (budget controller, differential compression by content type), ProCut (segment-then-prune via attribution), CompactPrompt, practical engineering consensus, agentic-specific patterns (5 searches, 3 fetches)
-- Internal brainstorm: opus agent produced 13 optimization dimensions (D-1 through D-13) with specific line ranges from both skills
-- Convergence: Segment → Attribute → Compress framework — 9 content categories, per-category compression budgets, 6 techniques (Delete, Consolidate, Extract, Inline, Condense, Batch, Defer)
-- User corrections: tool batching added as dimension, gitmoji inlining rejected (knowledge ceiling — agent picks from subset unaware better matches exist), sub-agent delegation dismissed (spawn overhead exceeds 77-line Read)
-- Deliverable: `plans/reports/skill-optimization-grounding.md` (Moderate grounding)
-- Estimated reductions: handoff ~330→240 lines (27%), commit ~237→180 lines (24%), template Read eliminated, gitmoji Read kept until CLI tool ships
+**Skill prose optimization (Segment → Attribute → Compress):**
+- Handoff SKILL.md: 330→159 lines (52%). Template inlined, consolidation flow extracted to reference, conditional paths compressed, redundancy with execute-rule.md removed, learnings line count gate removed (→ SessionStart hook), discussion substance check added, tool-call batching (parallel wc + learning-ages)
+- Commit SKILL.md: 237→133 lines (44%). Critical Constraints and Context Gathering sections removed (redundant with always-loaded fragments), "separate Bash calls" consolidated from 3→1, one example removed, added `Bash(git diff:*)` to allowed-tools (pre-existing gap found by reviewer)
+- New: `references/consolidation-flow.md` (27 lines, extracted from handoff 4c)
+- Deleted: `references/template.md` (81 lines, inlined into handoff SKILL.md)
+- Parallel opus skill-reviewer reviews: handoff passed (2 fixes applied — D-6 dangling reference, learnings.md added to Reference), commit passed with pre-existing allowed-tools gaps noted (submodule subshells, pbcopy)
+- Methodology: `plans/reports/skill-optimization-grounding.md`. Actual reductions exceeded estimates (52%/44% vs 27%/24%) — grounding report was conservative on principles/trim/continuation sections
 
 ## Pending Tasks
 
 <!-- Priority order per plans/reports/prioritization-2026-02-18.md (rev 4) -->
-
-- [ ] **Optimize handoff/commit prose** — Apply Segment → Attribute → Compress to both skills | sonnet
-  - Grounding: `plans/reports/skill-optimization-grounding.md` (methodology + segment inventories + compression budgets)
-  - Targets: conditional path extraction (~70 lines), redundancy removal (~35 lines), example condensation (~30 lines), tool-call batching, template.md inlining
-  - Gitmoji Read kept (knowledge ceiling blocks inlining; deferred to CLI tool)
-  - Also: remove learnings line count gate (moves to SessionStart hook), add discussion substance preservation check
 
 - [ ] **Handoff CLI tool** — Mechanical handoff+commit pipeline in CLI | `/design` | sonnet
   - Same pattern as worktree CLI: mechanical ops in CLI, judgment stays in agent
@@ -154,6 +148,8 @@
 - [ ] **Design-to-deliverable** — Design session for tmux-like session clear/model switch/restart automation | opus | restart
   - Insights input: headless mode (`claude -p`) as sub-agent delegation path — sub-agents can't spawn Task agents but can invoke headless CLI via Bash, addressing "sub-agents cannot spawn sub-agents" constraint
 
+- [ ] **Fix task-context.sh task list bloat** — Script outputs too much content, needs filtering/trimming | sonnet
+
 - [ ] **Infrastructure scripts** — History tooling + agent-core script rewrites | sonnet
 
 - [ ] **Diagnostic opus review** — Interactive post-vet RCA methodology | `/requirements` | opus
@@ -230,7 +226,7 @@
 - Index keys must NOT include "to" — validator adds it automatically
 ## Next Steps
 
-Execute skill optimization: read grounding report, apply Segment → Attribute → Compress to handoff SKILL.md and commit SKILL.md. Error-handling worktree still ready to merge.
+Handoff CLI tool is next high-priority task. Error-handling worktree still ready to merge.
 
 ## Reference Files
 
