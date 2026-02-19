@@ -37,7 +37,7 @@ model: opus
 
 **Files:** `agent-core/fragments/error-handling.md`, `agent-core/fragments/error-classification.md`
 **Model:** Opus (fragment artifacts)
-**Complexity:** Low-Medium — 3 prose additions to 2 existing fragments (~20 lines total)
+**Complexity:** Low-Medium — 2 prose additions to 2 existing fragments (~20 lines total)
 
 - **Step 1.1: Add prevention-first principle to error-handling.md**
   - Add "Prevention Layer (L0)" subsection after existing content
@@ -46,18 +46,11 @@ model: opus
   - Target: `agent-core/fragments/error-handling.md` — append new subsection
   - Verification: File grows by 4-6 lines; prerequisite-validation.md reference present; prevention-first principle stated
 
-- **Step 1.2: Extend error-classification.md — fault/failure vocabulary + Category 5**
-  - Add Avižienis FEF chain labeling: categories 1 (Prerequisite Failure) and 4 (Ambiguity Error) are **faults** (causes: environment fault, specification fault); categories 2 (Execution Error) and 3 (Unexpected Result) are **failures** (observations: service deviation, output deviation). Response differs: faults → prevention-oriented; failures → tolerance-oriented.
-  - Add Category 5: Inter-agent misalignment (MASFT FC2) — agent deviates from specification, ignores context, reasoning-action mismatch, premature termination, incomplete verification. Detection: existing review pipeline (no new mechanism). Add row to taxonomy table; add step 5 to decision tree; add common indicators section.
+- **Step 1.2: Extend error-classification.md — taxonomy, retryable dimension, tier-aware classification**
+  - Part A (taxonomy): Add Avižienis FEF chain labeling: categories 1 (Prerequisite Failure) and 4 (Ambiguity Error) are **faults** (causes: environment fault, specification fault); categories 2 (Execution Error) and 3 (Unexpected Result) are **failures** (observations: service deviation, output deviation). Response differs: faults → prevention-oriented; failures → tolerance-oriented. Add Category 5: Inter-agent misalignment (MASFT FC2) — agent deviates from specification, ignores context, reasoning-action mismatch, premature termination, incomplete verification. Detection: existing review pipeline (no new mechanism). Add row to taxonomy table; add step 5 to decision tree; add common indicators section.
+  - Part B (retryable dimension + tier-aware): Add retryable/non-retryable classification for each of the 5 categories: retryable = transient (env issue, timeout, write conflict); non-retryable = deterministic (missing file, design flaw, spec ambiguity). Add as column in taxonomy table OR as subsection immediately after table. Add tier-aware classification note at top of decision tree: sonnet/opus execution agents self-classify (report category + retryable/non-retryable); haiku agents report raw error, orchestrator classifies. Rationale: haiku lacks reliable judgment for classification.
   - Target: `agent-core/fragments/error-classification.md`
-  - Verification: Taxonomy table has 5 rows; fault/failure labels present on categories 1-4; Category 5 row exists with indicators; decision tree has step 5
-
-- **Step 1.3: Add retryable/non-retryable dimension + tier-aware classification to error-classification.md**
-  - Depends on: Step 1.2 (5-category taxonomy must exist first)
-  - Add retryable/non-retryable classification for each category: retryable = transient (env issue, timeout, write conflict); non-retryable = deterministic (missing file, design flaw, spec ambiguity). Add as column in taxonomy table OR as subsection immediately after table.
-  - Add tier-aware classification note at top of decision tree: sonnet/opus execution agents self-classify (report category + retryable/non-retryable); haiku agents report raw error, orchestrator classifies. Rationale: haiku lacks reliable judgment for classification.
-  - Target: `agent-core/fragments/error-classification.md`
-  - Verification: Each category has retryable/non-retryable label; tier-aware note at decision tree top
+  - Verification: Taxonomy table has 5 rows; fault/failure labels present on categories 1-4; Category 5 row exists with indicators; decision tree has step 5; each category has retryable/non-retryable label; tier-aware note at decision tree top
 
 ---
 
@@ -187,7 +180,7 @@ Phase 1 → [Phase 2 ∥ Phase 3] → Phase 4 → Phase 5
 - Needs Phase 2 (escalation-acceptance.md acceptance criteria) as conceptual reference (the "verification before resume" requirement in recovery idempotence)
 - Both Phase 2 and Phase 3 must complete before Phase 4 begins
 
-**Steps 1.2 and 1.3 both target error-classification.md:** Sequential within Phase 1. Step 1.3's agent reads the file as updated by Step 1.2 (after commit). The agent executing Step 1.3 should read the file first to see all Step 1.2 changes before adding.
+**Step 1.2 performs two sequential additions to error-classification.md:** Part A (taxonomy + Category 5) must complete before Part B (retryable dimension + tier-aware classification) — Part B classifies all 5 categories. Both parts execute within a single agent invocation; the agent applies Part A edits first, then Part B.
 
 **Phase 5 step 5.2 spans 5 files:** Agent reads each, appends See Also section, commits all changes together. Changes are additive only — no risk of conflicting with prior phase content.
 
