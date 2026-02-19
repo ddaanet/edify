@@ -1,31 +1,37 @@
-# Session Handoff: 2026-02-19
+# Session Handoff: 2026-02-20
 
-**Status:** Reorganized — archived 6 completed plans, batched overlapping tasks, top 10 prioritized, 30+ tasks moved to backlog.
+**Status:** 5 parallel worktrees created, stale worktree removed, compression detail loss recovered.
 
 ## Completed This Session
 
-**Plan archival:** Deleted 6 plan directories (completed or superseded):
-- when-recall, worktree-merge-resilience, worktree-update, workwoods (fully executed)
-- error-handling (inline execution superseded runbook)
-- claude (empty placeholder)
+**Parallel worktree setup:** Created 5 worktrees for independent sonnet tasks:
+- precommit-test-sentinel, worktree-rm-fixes, handoff-cli-tool, commit-cli-tool, orchestrate-evolution
+- Analysis: excluded restart tasks, opus tasks, and worktree-cli-default (code overlap with worktree-rm-fixes)
 
-**Task reorganization:**
-- Batched 3 worktree rm fixes into single task
-- Absorbed: Script commit vet gate → Commit CLI, Codebase quality sweep → Quality infrastructure, vet-invariant-scope + inline-phase-type → Pipeline skill updates, worktree-rm-safety → Worktree CLI default
-- Dropped stale tasks: Design quality gates + Runbook quality gates Phase B (both fully executed — validate-runbook.py implemented with 17/17 tests)
-- Moved 30+ tasks to `agents/backlog.md`
+**Stale worktree cleanup:** Removed `error-handling-design` worktree (`wt-rm`)
+
+**Compression detail recovery:** Session compression (commit `0418cedb`) lost contextual notes from 12 tasks. Recovered from `git show 0418cedb^:agents/session.md`:
+- Restored to session.md (5 tasks): Handoff CLI (domain boundaries, learnings flow, gitmoji validation), Worktree CLI default (scope expansion, ceremony removal), Pipeline skill updates (diamond TDD, discussion context), Quality infrastructure (grounding ref, subsumes detail), Orchestrate evolution (ping-pong TDD pattern)
+- Restored to backlog.md (7 tasks): Remember skill update, Cross-tree transport, Merge learnings delta, Execute plugin migration, Task agent guardrails, Design-to-deliverable, RED pass protocol, Session.md validator
+
+**Worktree outline updates:** Propagated recovered detail to worktree plan artifacts:
+- `handoff-cli-tool/outline.md`: D-4 domain boundary table, learnings flow, gitmoji validation approach
+- `orchestrate-evolution/design.md`: FR-8 ping-pong TDD agent pattern (deferred)
+- `orchestrate-evolution/outline.md`: FR-8 in out-of-scope section
 
 ## Pending Tasks
 
-
-
+- [ ] **When recall evaluation** — sonnet
+- [ ] **Diagnose compression detail loss** — RCA against commit `0418cedb` | sonnet
 
 
 - [ ] **PostToolUse auto-format hook** — PostToolUse hook on Write/Edit running formatter on changed file | sonnet | restart
 
 - [ ] **Worktree CLI default** — Positional = task name, `--branch` = bare slug | `/runbook plans/worktree-cli-default/outline.md` | sonnet
   - Plan: worktree-cli-default | Status: designed
-  - Absorbs: worktree-rm-safety (safety gates), Worktree Tasks section elimination
+  - `new "Task Name" --branch <slug>` form solves 29-char slug limit
+  - Scope expansion: Eliminate Worktree Tasks section, remove `_update_session_and_amend` ceremony, co-design with session.md validator
+  - Absorbs: worktree-rm-safety (safety gates), pre-merge untracked file fix (`new` leaves session.md untracked), worktree skill adhoc mode (covered by `--branch`)
 
 - [ ] **SessionStart status hook** — Bundled hook: dirty tree warning, learnings limit, stale worktree detection, model tier display, tip rotation | sonnet | restart
 
@@ -34,11 +40,15 @@
   - Orchestrate: `/deliverable-review` pending task at exit
   - Design skill: Phase 0 requirements-clarity gate
   - Absorbs: vet-invariant-scope, inline-phase-type
+  - Insights input: Diamond TDD definition needed at `/design` (direct execution path), `/runbook` (step generation), `tdd-task` agent (cycle execution)
+  - Discussion context in runbook-skill-fixes worktree session
 
 - [ ] **Quality infrastructure reform** — `/design plans/quality-infrastructure/requirements.md` | opus
   - Plan: quality-infrastructure | Status: requirements
   - 4 FRs: deslop restructuring, code density, vet rename, code refactoring
-  - Absorbs: Codebase quality sweep, integration-first-tests
+  - Grounding: `plans/reports/code-density-grounding.md`
+  - Subsumes: Rename vet agents (FR-3), Codebase quality sweep (FR-4)
+  - Absorbs: integration-first-tests
 
 ## Worktree Tasks
 
@@ -48,17 +58,20 @@
 
 - [ ] **Handoff CLI tool** → `handoff-cli-tool` — Mechanical handoff+commit pipeline in CLI | `/design` | sonnet
   - Same pattern as worktree CLI: mechanical ops in CLI, judgment stays in agent
-  - Inputs: status line, completed text, optional files, optional commit message with gitmoji
-  - Outputs (conditional): learnings age status, precommit result, git status+diff, worktree ls
+  - Inputs: status line (overwrite), completed text (overwrite committed / append uncommitted), optional files to add/remove, optional commit message with gitmoji
+  - Outputs (conditional): learnings age status, precommit result, git status+diff (skip if precommit red), worktree ls. Suppress "nothing to report" outputs
   - Cache on failure: inputs to state file, rerun without re-entering skill
-  - Gitmoji: embeddings + cosine similarity over 78 pre-computed vectors
+  - Domain boundaries: Handoff CLI owns status line + completed section + git ops + checks. Worktree CLI owns `→ slug` markers. Agent Edit owns: pending task mutations (insertion point = judgment), learnings append + invalidation, blockers, reference files
+  - Learnings flow: Agent writes learnings (Edit) → reviews for invalidation (semantic anchoring) → then calls CLI
+  - Gitmoji: embeddings + cosine similarity over 78 pre-computed vectors. Build initial script first, then validate against git log corpus (exact/acceptable/wrong match rates). Tune or reject based on empirical results
 
 - [ ] **Commit CLI tool** → `commit-cli-tool` — CLI for precommit/stage/commit across both modules | `/design` | sonnet
   - Absorbs: Script commit vet gate (Gate B → scripted check)
   - Single command: precommit → gate → stage → commit in main + agent-core submodule
 
 - [ ] **Orchestrate evolution** → `orchestrate-evolution` — `/runbook plans/orchestrate-evolution/design.md` | sonnet
-  - Design complete, ready for runbook planning
+  - Design complete (refreshed Feb 13), ready for runbook planning
+  - Insights input: ping-pong TDD agent pattern — alternating tester/implementer agents with mechanical RED/GREEN gates between handoffs. Tester holds spec context (can't mirror code structure), implementer holds codebase context (can't over-implement beyond test demands). Resume-based context preservation avoids startup cost per cycle
 
 ## Blockers / Gotchas
 
@@ -88,7 +101,7 @@
 
 ## Next Steps
 
-Precommit test sentinel is next. Error-handling-design worktree ready to remove (`wt-rm error-handling-design`).
+5 tasks in parallel worktrees. Work on whichever is ready.
 
 ## Reference Files
 

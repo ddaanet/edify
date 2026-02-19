@@ -114,3 +114,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Using `wc -l` equality to conclude files are identical. Same line count does not mean same content — entries can be added/removed/replaced while maintaining count.
 - Correct pattern: Diff content, not counts. `git diff <base>..<branch> -- <file>` or compare actual text. Line count is a size metric, not an identity check.
 - Evidence: Learnings.md had 62 lines on both merge base and branch → concluded "no changes." Post-merge found 36 genuine new entries from the branch.
+## When compressing session tasks
+- Anti-pattern: Reducing task descriptions to one-liners during session compression. Contextual notes (insights inputs, scope expansions, discussion conclusions, domain boundaries) exist only in session task notes — plan artifacts (requirements.md, design.md) don't contain them.
+- Correct pattern: Before compressing, classify each sub-item: (a) duplicates plan artifact content → safe to trim, (b) contextual-only (insights, scope decisions, validation approaches) → must preserve. Only trim category (a).
+- Evidence: Compression at `0418cedb` lost detail from 12 tasks. Recovery required `git show` against pre-compression commit. Handoff CLI lost domain boundaries + learnings flow + gitmoji validation; orchestrate evolution lost ping-pong TDD agent pattern; 7 backlog tasks reduced to stubs.
