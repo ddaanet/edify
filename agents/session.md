@@ -76,11 +76,10 @@
   - Hook into /remember consolidation flow or add precommit check
 
 - [ ] **Session.md validator** — Scripted precommit check for session.md format (like validate-memory-index.py) | sonnet
-  - Schema: allowed sections only (5 from handoff skill), correct ordering
-  - Task format: `- [ ] **Name** — ...` pattern, valid model tier
-  - Worktree markers: `→ \`slug\`` cross-referenced against `git worktree list`
-  - Reference validity: paths in Reference Files exist on disk, no `tmp/` references
-  - Depends on: Worktree CLI default to --task (format must be finalized first)
+  - Plan: session-validator | Status: requirements
+  - 5 FRs: section schema, task format, reference validity, worktree marker cross-ref, status line
+  - Prior handoff validation task was dropped (agent review impractical) — this is scripted/mechanical
+  - FR-2/FR-4 depend on worktree-cli-default (format finalization); FR-1/FR-3/FR-5 can proceed now
 
 - [ ] **Codebase quality sweep** — Tests, deslop, factorization, dead code | sonnet
   - Specific targets from quality-infrastructure FR-4: `_git_ok`, `_fail` helpers, 13 raw subprocess replacements, 18 SystemExit replacements, custom exception classes
@@ -236,6 +235,7 @@
 
 - `plans/reports/prioritization-2026-02-18.md` — WSJF task prioritization (rev 4, 43 tasks)
 - `plans/merge-learnings-delta/requirements.md` — Learnings merge reconciliation (3 FRs, Q-1 consolidation marker)
+- `plans/session-validator/requirements.md` — Session.md validator (5 FRs, precommit integration)
 - `plans/worktree-cli-default/outline.md` — CLI change design (positional=task, --branch=slug, Worktree Tasks elimination)
 - `plans/error-handling/outline.md` — Error handling design outline (Phase A complete)
 - `plans/runbook-quality-gates/design.md` — Quality gates design (6 FRs, simplification agent)
