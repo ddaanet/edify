@@ -1,29 +1,23 @@
-# Session Handoff: 2026-02-18
+# Session Handoff: 2026-02-19
 
-**Status:** worktree-merge-resilience merged. Parallel Batch A launched: 3 worktrees active (runbook-quality-gates-b, script-commit-vet-gate, worktree-cli-default).
+**Status:** Parallel Batch A active (4 worktrees total). Merge resilience complete. Discussion decisions captured: eliminate Worktree Tasks section, noun-based task naming.
 
 ## Completed This Session
 
-**design-runbook-evolution merge (SKILL.md + anti-patterns.md edits):**
-- SKILL.md: Testing Strategy section (integration-first diamond), TDD Cycle Planning integration-first guidance, Phase 0.75 prose atomicity + self-modification ordering bullets
-- Anti-patterns.md: rewritten "Missing integration cycles" entry, 3 new TDD entries (split prose, unit-only coverage, mocked subprocess), 1 new General entry (self-modification without expand/contract)
-- All 5 FRs (FR-1–FR-3d) traced; skill-reviewer: 0 critical, 0 major, 2 minor (1 fixed)
+**Merged worktree-merge-resilience:**
+- 3-phase merge succeeded, but `_update_session_and_amend` failed with exit 128 during `rm` (workaround: manual `git add` + `git commit --amend`, then `rm --confirm`)
+- Fixed learnings.md merge contamination: 222 → 67 lines (merge brought pre-consolidation content over main's consolidated version; rebuilt with main base + branch delta)
+- Created `plans/merge-learnings-delta/requirements.md` — 3 FRs for reconciling learnings.md during merges, open Q-1 on consolidation detection marker
 
-**Vet delegation routing (complete via design-runbook-evolution worktree):**
-- Routing table added to `agent-core/fragments/vet-requirement.md` (always-loaded, canonical)
-- Step 2 added to vet process: "Select reviewer from routing table" (mechanical gate)
-- pipeline-contracts.md deduplicated; fragments → default vet-fix-agent row separated
+**Launched Parallel Batch A (3 worktrees):**
+- `runbook-quality-gates-b` and `worktree-cli-default` created with bare slugs (29-char limit hit — `slug` and `--task` mutually exclusive in current CLI)
+- `script-commit-vet-gate` created via `--task` (22-char slug, within limit)
+- Manual session.md edits for bare-slug worktrees (no focused sessions)
 
-**Re-prioritization (rev 4, 43 tasks):**
-- `plans/reports/prioritization-2026-02-18.md` — 38 ranked + 5 blocked
-- Top: Runbook quality gates Phase B (4.3), Runbook model assignment + Script commit vet gate (2.7)
-- Parallel Batch A (3 worktrees): Quality gates Phase B + Script commit vet gate + Worktree CLI
-
-**Worktree CLI default to --task (designed):**
-- Outline at `plans/worktree-cli-default/outline.md`
-- Positional = task name (session integration); `--branch` = bare slug OR slug override for long-name tasks; `--task` removed
-- 5 TDD cycles + 3 general steps (test update + SKILL.md prose)
-- Solves 29-char slug limit hit during parallel batch A setup
+**Discussion decisions (captured in learnings.md):**
+- Eliminate Worktree Tasks section → inline `→ slug` markers in Pending Tasks. Scope folded into worktree-cli-default task.
+- Noun-based task naming → drop pipeline verbs (Design, Execute), keep nature verbs (Fix, Rename). Convention change for new tasks.
+- Session.md validator → new pending task (scripted precommit, depends on format finalization)
 
 ## Pending Tasks
 
@@ -31,7 +25,6 @@
 
 - [ ] **Runbook model assignment** — apply design-decisions.md directive (opus for skill/fragment/agent edits)
   - Partially landed via remaining-workflow-items merge
-
 
 - [ ] **Commit CLI tool** — CLI for precommit/stage/commit across both modules | `/design` | sonnet
   - Modeled on worktree CLI pattern (mechanical ops in CLI, judgment in skill)
@@ -44,6 +37,11 @@
 
 - [ ] **Continuation prepend** — `/design plans/continuation-prepend/problem.md` | sonnet
   - Plan: continuation-prepend | Status: requirements
+
+- [ ] **Merge learnings delta** — Reconcile learnings.md after merge when branch diverged before consolidation | sonnet
+  - Plan: merge-learnings-delta | Status: requirements
+  - 3 FRs: detect consolidation divergence, reconstruct correct file, handle edge cases
+  - Main base + branch delta strategy (not ours, not theirs)
 
 - [ ] **Fix worktree rm dirty check** — Must not fail if parent repo is dirty, only if target worktree is dirty | sonnet
 
@@ -76,6 +74,13 @@
 - [ ] **Memory-index auto-sync** — Sync memory-index/SKILL.md from canonical agents/memory-index.md on consolidation | sonnet
   - Deliverable review found skill drifted (3 entries missing, ordering wrong)
   - Hook into /remember consolidation flow or add precommit check
+
+- [ ] **Session.md validator** — Scripted precommit check for session.md format (like validate-memory-index.py) | sonnet
+  - Schema: allowed sections only (5 from handoff skill), correct ordering
+  - Task format: `- [ ] **Name** — ...` pattern, valid model tier
+  - Worktree markers: `→ \`slug\`` cross-referenced against `git worktree list`
+  - Reference validity: paths in Reference Files exist on disk, no `tmp/` references
+  - Depends on: Worktree CLI default to --task (format must be finalized first)
 
 - [ ] **Codebase quality sweep** — Tests, deslop, factorization, dead code | sonnet
   - Specific targets from quality-infrastructure FR-4: `_git_ok`, `_fail` helpers, 13 raw subprocess replacements, 18 SystemExit replacements, custom exception classes
@@ -177,12 +182,11 @@
   - Plan: worktree-cli-default | Status: designed
   - Positional = task name; `--branch` = bare slug or slug override; `--task` removed
   - `new "Task Name" --branch <slug>` form solves 29-char slug limit
+  - **Scope expansion:** Eliminate Worktree Tasks section — tasks stay in Pending with inline `→ slug` marker. Remove `_update_session_and_amend` ceremony. Update handoff skill, execute-rule.md, worktree SKILL.md. Co-design format with session.md validator requirements.
 
 - [ ] **Error handling design** → `error-handling-design` — Resume `/design` Phase B (outline review) then Phase C (full design) | opus
   - Outline: `plans/error-handling/outline.md`
   - Key decisions: D-1 CPS abort-and-record, D-2 task `[!]`/`[✗]` states, D-3 escalation acceptance criteria, D-5 rollback = revert to step start
-
-<!-- design-runbook-evolution merged: all 5 FRs complete (SKILL.md testing diamond, anti-patterns, vet routing table) -->
 
 - [ ] **Script commit vet gate** → `script-commit-vet-gate` — Replace prose Gate B with scripted check (file classification + vet report existence) | sonnet
   - Part of commit skill optimization (FR-5 partially landed — Gate A removed, Gate B still prose)
@@ -190,58 +194,49 @@
 
 ## Blockers / Gotchas
 
-**Merge tool aborts on conflict (Python only — justfile fixed):**
-- `_worktree merge` still aborts and returns clean tree on source conflicts
-- `just wt-merge` now leaves merge in progress, exits code 3 (FR-2 implemented)
-- Python merge.py fix now unblocked (workwoods merged, resolve.py available)
-- Requirements for remaining FRs: `plans/worktree-merge-resilience/requirements.md`
-
 **Never run `git merge` without sandbox bypass:**
 - `git merge` without `dangerouslyDisableSandbox: true` partially checks out files, hits sandbox, leaves 80+ orphaned untracked files
 - Always use `dangerouslyDisableSandbox: true` for any merge operation
 
-**Transient git index.lock during merge:**
-- `claudeutils _worktree merge` hits `index.lock` race condition during multi-step git operations
-- Likely caused by file watcher (IDE/direnv) touching the index concurrently
+**`_update_session_and_amend` exit 128 during rm:**
+- `_worktree rm` calls `_update_session_and_amend` which runs `git add agents/session.md` → exit 128
+- Root cause unclear — same command succeeds manually. Workaround: manual amend before `rm --confirm`
+- Related to existing "Debug failed merge" task (same exit 128 from `git add agents/session.md`)
 
-**Validator orphan entries not autofixable:**
-- Marking headings structural (`.` prefix) causes `check_orphan_entries` non-autofixable error
-- Must manually remove entries from memory-index.md before running precommit
+**`slug` and `--task` mutually exclusive in `_worktree new`:**
+- Cannot override slug for long task names while keeping session integration
+- Workaround: bare slug + manual session.md editing
+- Fix: worktree-cli-default task adds `--branch` flag
+
+**Merge ours resolution loses worktree content:**
+- `just wt-merge` uses `checkout --ours` for session.md, learnings.md
+- Drops worktree-side changes silently — must verify post-merge
+- Learnings.md: merge brings pre-consolidation content when branch diverged before `/remember`. See `plans/merge-learnings-delta/requirements.md`
 
 **`wt rm` blocks on dirty parent repo:**
 - `claudeutils _worktree rm` exits 2 if parent has uncommitted changes
 - Workaround: `git stash && wt rm && git stash pop`
 
 **`wt rm` leaves stale submodule config:**
-- Removing a worktree can leave `.git/modules/agent-core/config` `core.worktree` pointing to the deleted directory
+- `.git/modules/agent-core/config` `core.worktree` points to deleted directory
 - Breaks all `git -C agent-core` operations on main until manually fixed
+
+**Validator orphan entries not autofixable:**
+- Marking headings structural (`.` prefix) causes `check_orphan_entries` non-autofixable error
+- Must manually remove entries from memory-index.md before running precommit
 
 **Memory index `/how` operator mapping:**
 - `/how X` in index → internally becomes `"how to X"` for heading matching
-- Headings must include "To" (e.g., "How To Augment Agent Context")
 - Index keys must NOT include "to" — validator adds it automatically
-
-**User feedback annotations in working tree:**
-- `src/claudeutils/cli.py` has 12 FIXME/TODO/antipattern comments from user code review
-- `git checkout -- src/claudeutils/cli.py` to discard, or preserve as reference for quality-infrastructure design
-
-**Merge ours resolution loses worktree content:**
-- `just wt-merge` uses `checkout --ours` for session.md, learnings.md, jobs.md
-- Drops worktree-side changes silently — must verify post-merge: compare `git show <branch>:<file>` against merged result
-
-- **Never run `git merge` without sandbox bypass** — partial checkout + sandbox failure leaves orphaned files [from: worktree-merge-resilience]
-- **Learnings at 199 lines** — well over 80-line soft limit, but no entries old enough (≥7 active days) for consolidation batch. Will resolve as entries age. [from: worktree-merge-resilience]
 ## Next Steps
 
-2 worktrees active: error-handling-design, worktree-merge-resilience. Worktree CLI change designed — next: `/runbook plans/worktree-cli-default/outline.md`. Parallel Batch A blocked on slug limit until CLI fix lands; can proceed in sequence or use worktree with manual session.md. Integration-first-tests scoping outline at `plans/integration-first-tests/outline.md` (unscheduled).
+4 worktrees active: error-handling-design, runbook-quality-gates-b, script-commit-vet-gate, worktree-cli-default. Batch A work proceeds in parallel. On main: Runbook model assignment is the top unbranched task.
 
 ## Reference Files
 
 - `plans/reports/prioritization-2026-02-18.md` — WSJF task prioritization (rev 4, 43 tasks)
-- `plans/worktree-merge-resilience/requirements.md` — 5 FRs for merge conflict handling
-- `plans/quality-infrastructure/requirements.md` — 4 FRs: deslop restructuring, code density decisions, vet rename, code refactoring
-- `plans/reports/code-density-grounding.md` — Grounded research on exception handling + Black formatter interaction
+- `plans/merge-learnings-delta/requirements.md` — Learnings merge reconciliation (3 FRs, Q-1 consolidation marker)
+- `plans/worktree-cli-default/outline.md` — CLI change design (positional=task, --branch=slug, Worktree Tasks elimination)
 - `plans/error-handling/outline.md` — Error handling design outline (Phase A complete)
 - `plans/runbook-quality-gates/design.md` — Quality gates design (6 FRs, simplification agent)
-- `plans/remember-skill-update/requirements.md` — 7 FRs (When/How prefix, validation, migration)
-- `plans/worktree-cli-default/outline.md` — CLI change design (positional=task, --branch=slug)
+- `plans/quality-infrastructure/requirements.md` — 4 FRs: deslop restructuring, code density decisions, vet rename, code refactoring
