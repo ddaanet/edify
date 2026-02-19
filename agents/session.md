@@ -1,34 +1,26 @@
 # Session Handoff: 2026-02-19
 
-**Status:** Insights triage complete. 3 new fragments written, 5 new tasks added, 4 existing tasks annotated. Error-handling worktree ready to merge.
+**Status:** Skill optimization grounding complete. Segment → Attribute → Compress methodology produced, execution deferred to next session.
 
 ## Completed This Session
 
-**Insights report triage:**
-- Triaged 15 suggestions from `/insights` report
-- Discarded 4 superseded (merge instructions, CLI tools, inline execution, project tooling — all already have fragments)
-- Discarded 1 already-exists (upfront strategy confirmation = EnterPlanMode), 1 misunderstands methodology (parallel test tiers)
-- Routed 2 skill-specific: Diamond TDD definition → /design + /runbook + tdd-task; handoff substance preservation → Optimize handoff/commit prose
-- Inlined 3 as fragments (below)
-- Created 5 new tasks: PostToolUse auto-format hook, SessionStart status hook (absorbs Model tier awareness hook), Task agent guardrails, Cache expiration prototype
-- Annotated 4 existing tasks with insights input (Optimize handoff/commit prose, Pipeline skill updates, Orchestrate evolution, Design-to-deliverable)
-
-**Fragments written:**
-- `agent-core/fragments/no-confabulation.md` — never assert invented heuristics/criteria as facts. Wired into CLAUDE.md
-- `agent-core/fragments/source-not-generated.md` — always edit source files, never generated output. Wired into CLAUDE.md
-- `agent-core/fragments/tool-batching.md` — added Read-before-Edit precondition. Parallel tool call cascade failure is all-or-nothing (known bug #22264)
-
-**Research:**
-- Prompt cache TTL: API default 5min, Claude Code observed ~3min (#14628). No user config (#16442 closed as dupe). Debug logs at `~/.claude/debug/` may contain cache metrics
+**Skill optimization grounding (`/ground`):**
+- External research: LLMLingua (budget controller, differential compression by content type), ProCut (segment-then-prune via attribution), CompactPrompt, practical engineering consensus, agentic-specific patterns (5 searches, 3 fetches)
+- Internal brainstorm: opus agent produced 13 optimization dimensions (D-1 through D-13) with specific line ranges from both skills
+- Convergence: Segment → Attribute → Compress framework — 9 content categories, per-category compression budgets, 6 techniques (Delete, Consolidate, Extract, Inline, Condense, Batch, Defer)
+- User corrections: tool batching added as dimension, gitmoji inlining rejected (knowledge ceiling — agent picks from subset unaware better matches exist), sub-agent delegation dismissed (spawn overhead exceeds 77-line Read)
+- Deliverable: `plans/reports/skill-optimization-grounding.md` (Moderate grounding)
+- Estimated reductions: handoff ~330→240 lines (27%), commit ~237→180 lines (24%), template Read eliminated, gitmoji Read kept until CLI tool ships
 
 ## Pending Tasks
 
 <!-- Priority order per plans/reports/prioritization-2026-02-18.md (rev 4) -->
 
-- [ ] **Optimize handoff/commit prose** — Reduce token cost of handoff + commit skills | sonnet
-  - Immediate pain relief before CLI tools exist
-  - Target: fewer reads, less verbose protocol, streamlined steps
-  - Insights input: remove learnings line count gate (moves to SessionStart hook), add discussion substance preservation check
+- [ ] **Optimize handoff/commit prose** — Apply Segment → Attribute → Compress to both skills | sonnet
+  - Grounding: `plans/reports/skill-optimization-grounding.md` (methodology + segment inventories + compression budgets)
+  - Targets: conditional path extraction (~70 lines), redundancy removal (~35 lines), example condensation (~30 lines), tool-call batching, template.md inlining
+  - Gitmoji Read kept (knowledge ceiling blocks inlining; deferred to CLI tool)
+  - Also: remove learnings line count gate (moves to SessionStart hook), add discussion substance preservation check
 
 - [ ] **Handoff CLI tool** — Mechanical handoff+commit pipeline in CLI | `/design` | sonnet
   - Same pattern as worktree CLI: mechanical ops in CLI, judgment stays in agent
@@ -238,7 +230,7 @@
 - Index keys must NOT include "to" — validator adds it automatically
 ## Next Steps
 
-Error-handling worktree ready to merge. After merge: RED pass protocol unblocked, Task agent guardrails feeds into error-handling update.
+Execute skill optimization: read grounding report, apply Segment → Attribute → Compress to handoff SKILL.md and commit SKILL.md. Error-handling worktree still ready to merge.
 
 ## Reference Files
 

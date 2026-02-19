@@ -65,6 +65,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Git merge brings in the branch's full learnings.md (pre-consolidation content) over main's consolidated version. Branch diverged before consolidation; merge favors longer file.
 - Correct pattern: After merging a branch that diverged before a learnings consolidation, verify learnings.md line count. Only the delta (new entries added on branch after branch point) should be appended to main's consolidated version. Pre-consolidation content is already in permanent docs.
 - Evidence: This session — merge brought 199 lines (branch) over 30 lines (main consolidated). 175 lines were pre-consolidation duplicates. Only 24 lines were genuine new content.
+## When inlining reference file subsets for optimization
+- Anti-pattern: Inline a "top N" subset of a reference file (e.g., top-10 gitmoji) to avoid a Read call. Agent picks from the visible subset, unaware better matches exist in the full file. Creates a knowledge ceiling — the agent is confidently wrong.
+- Correct pattern: Either keep the full Read (agent sees all options) or move selection to a CLI tool (embeddings search over full corpus). Partial inlining is worse than both alternatives.
+- Rationale: Optimization must not degrade decision quality. The agent cannot know what it hasn't seen.
+
 ## When triaging external diagnostic suggestions
 - Anti-pattern: Treating diagnostic report output (e.g., /insights) as a backlog intake pipeline — every suggestion becomes a pending task. Inflates the task list just after compression.
 - Correct pattern: Triage by routing. Superseded → discard. Skill-specific → annotate existing skill task. Simple → inline immediately (write the fragment, don't defer it). Only genuinely new substantial work becomes standalone tasks.
