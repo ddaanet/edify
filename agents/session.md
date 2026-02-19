@@ -1,32 +1,41 @@
 # Session Handoff: 2026-02-19
 
-**Status:** Error handling runbook complete. Ready for `/orchestrate error-handling` after restart.
+**Status:** Inline phase type designed. Error-handling execution changed from runbook orchestration to inline-from-outline.
 
 ## Completed This Session
 
-**Error handling runbook — planning complete:**
-- Tier assessment: Tier 3 (5 phases, phases 2+3 independent/parallel, opus for all steps)
-- Phase 0.95 path: outline promoted to runbook directly (sufficiency check passed)
-- Simplification: Steps 1.2+1.3 merged (same file, sequential additions)
-- Holistic review (plan-reviewer): fixed Step 4.2 coverage gap (expanded to all 4 cooperative skills)
-- Artifacts prepared via prepare-runbook.py: 11 step files, orchestrator-plan.md, error-handling-task agent
-- Orchestrate command copied to clipboard: `/orchestrate error-handling`
+**Inline phase type design — complete:**
+- Reviewed error-handling runbook: all 11 steps are prose edits with no feedback loop; delegation ceremony costlier than the work
+- Discussion: prose edits have no implementation loop, runbook generation unneeded when outline is execution-ready, third phase type needed
+- Explored pipeline: prepare-runbook.py (valid_types, content auto-detection, step gen), plan-reviewer (type criteria), runbook skill (expansion branches), orchestrate skill (type-blind execution)
+- Explored decisions: type contract scope (expansion+review only), execution readiness gate (≤3 files heuristic), trivial phase fast path (informal)
+- Outline: 7 decisions (D-1–D-7), Q-1 resolved (mixed runbook auto-detection)
+- Outline reviewed: 2 major (Q-1, FR-5 criteria), 4 minor — all fixed
+- User refined: D-2 (type contract affects delegation model), D-3 (orchestrator-direct, batching deferred — ungrounded), grounding for thresholds
+- Sufficiency gate passed — outline IS the design
+
+**Error-handling runbook review:**
+- Opus model correct (all targets skills/fragments)
+- Phase boundary vet routes all to vet-fix-agent; skills should route to skill-reviewer (minor — deliverable review handles post-orchestration)
+- Orchestrator-plan.md missing parallelism annotation (moot if inline)
 
 ## Pending Tasks
 
-- [x] **Error handling implementation** — `/runbook plans/error-handling/outline.md` | sonnet
-  - 6 phases: prevention (L0), taxonomy (L1), orchestration (L2), task lifecycle (L3), CPS chains (L4), consolidation (L5)
-  - Creates: `escalation-acceptance.md`, `task-failure-lifecycle.md`
-  - Extends: `error-classification.md`, `orchestrate/SKILL.md`, `handoff/SKILL.md`, `continuation-passing.md`, `error-handling.md`
-  - Design: `plans/error-handling/outline.md`
+- [ ] **Collect delegation overhead data** — Measure Task roundtrip token cost, context per inline edit | sonnet
+  - Phase 0 of inline-phase-type
+  - Data: 938-observation dataset, session orchestration logs
+  - Output: grounded batching threshold or confirm orchestrator-direct suffices
+  - Design: `plans/inline-phase-type/outline.md`
 
-- [ ] **Orchestrate error handling** — `/orchestrate error-handling` | sonnet | restart
-  - 11 steps across 5 phases; phases 2+3 run in parallel
-  - All steps use opus (artifact-type override — all targets are skills/fragments)
-  - Parallelism: after Step 1.2 completes, Steps 2.1/2.2 and 3.1/3.2 can run concurrently
-  - Phase 4 depends on BOTH phases 2 and 3; Phase 5 depends on all prior
-  - Steps 2.1 and 3.1 CREATE new fragments (escalation-acceptance.md, task-failure-lifecycle.md) — subsequent steps depend on them
-  - prepare-runbook.py emitted expected warnings (files don't exist yet, created during execution)
+- [ ] **Implement inline phase type** — Update 7 pipeline artifacts | sonnet
+  - Phases 1-3: pipeline-contracts.md, workflow-optimization.md, runbook/SKILL.md, plan-reviewer.md, review-plan/SKILL.md, orchestrate/SKILL.md, prepare-runbook.py
+  - All prose edits — inline-eligible by own discriminator
+  - Design: `plans/inline-phase-type/outline.md`
+
+- [ ] **Execute error-handling inline** — Validate inline workflow via error-handling outline | opus
+  - Phase 4: execute `plans/error-handling/outline.md` directly (orchestrator-direct)
+  - 7 files, ~250 lines additive prose, decisions pre-resolved (D-1–D-6, Q1)
+  - Supersedes "Orchestrate error handling" (prepared runbook artifacts unused)
 
 - [ ] **Worktree merge from main** — `/design plans/worktree-merge-from-main/` | sonnet
   - Requirements complete, 5 FRs, Q-1 resolved (`--from-main` flag)
@@ -35,21 +44,25 @@
 ## Blockers / Gotchas
 
 **Never run `git merge` without sandbox bypass:**
-- `git merge` without `dangerouslyDisableSandbox: true` partially checks out files, hits sandbox, leaves 80+ orphaned untracked files
-- Always use `dangerouslyDisableSandbox: true` for any merge operation
+- `git merge` without `dangerouslyDisableSandbox: true` leaves 80+ orphaned untracked files
+
+**Prepared error-handling runbook artifacts superseded:**
+- `.claude/agents/error-handling-task.md`, `plans/error-handling/steps/`, `plans/error-handling/orchestrator-plan.md` — will not be used
+- Delete after inline execution validates the approach
 
 ## Reference Files
 
-- `plans/error-handling/runbook.md` — 11-step runbook ready for orchestration
-- `plans/error-handling/runbook-outline.md` — Outline (10 items, 5 phases; simplification report at reports/)
-- `plans/error-handling/outline.md` — Design (validated, grounded, reviewed ×2)
-- `plans/error-handling/reports/runbook-review.md` — Holistic review (1 major fix: Step 4.2 expanded)
+- `plans/inline-phase-type/outline.md` — Design (validated, reviewed, user-refined)
+- `plans/inline-phase-type/reports/explore-phase-typing.md` — Pipeline component analysis
+- `plans/inline-phase-type/reports/explore-decisions.md` — Decision basis
+- `plans/inline-phase-type/reports/outline-review.md` — Review (all fixed)
+- `plans/error-handling/outline.md` — Error handling design (inline execution source)
+- `plans/error-handling/runbook.md` — Error handling runbook (superseded)
 - `plans/worktree-merge-from-main/requirements.md` — 5 FRs, Q-1 resolved
-- `plans/worktree-merge-resilience/requirements.md` — Related: worktree→main direction
 
 ## Next Steps
 
-Restart session, paste `/orchestrate error-handling` from clipboard (already copied).
+Collect delegation overhead data (Phase 0). Then implement inline phase type (Phases 1-3). Then execute error-handling inline (Phase 4).
 
 ---
-*Handoff by Sonnet. Runbook planning complete, orchestration queued.*
+*Handoff by Sonnet. Inline phase type designed, error-handling approach changed to inline.*

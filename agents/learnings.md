@@ -40,3 +40,15 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Treating "dual signal" (time OR tool count) as reducing false positives. OR-logic is the union of both kill zones — it increases false positives vs either threshold alone.
 - Correct pattern: Time and tool count address independent failure modes. Spinning (high activity, no convergence) → `max_turns`. Hanging (no activity, high wall-clock) → duration timeout. Independent guards, not a combined signal.
 - Evidence: OR(600s, 90 turns) would false-positive on the 855s/75-tool legitimate agent AND the 495s/129-tool agent. AND logic misses fast spinners.
+## When all work is prose edits with pre-resolved decisions
+- Anti-pattern: Routing through full runbook pipeline (outline → runbook expansion → plan-reviewer → prepare-runbook.py → step files → orchestrate → per-step agents) when all phases are additive prose with no feedback loop.
+- Correct pattern: Recognize prose edits have no implementation loop — outcome determined by instruction + target file state. Execute inline from design outline. The delegation ceremony (agent startup, file re-reads, report write/read) costs more tokens than the edits.
+- Evidence: Error-handling runbook used 11 opus agents for ~250 lines of prose. Plan-reviewer caught a regression *introduced* by the runbook generation process (Step 4.2 dropped 2 of 4 skills the outline correctly listed).
+## When proposing thresholds without data
+- Anti-pattern: Deriving thresholds from reasoning (">2 inline phases → batch") or replacing one confabulated metric with a cleaner confabulated metric ("coordination complexity" replacing "≤3 files"). Cleaner confabulation is still confabulation.
+- Correct pattern: Ground thresholds in empirical data. If data doesn't exist, state the decision as ungrounded and defer until measurement. The No Estimates rule applies to operational thresholds, not just time/cost predictions.
+- Evidence: Proposed >2 threshold for inline batching, then replaced with "all-inline vs mixed" property check — both ungrounded. User corrected: measure Task delegation token overhead before committing to a threshold.
+## When execution readiness gate uses file count
+- Anti-pattern: Using ≤3 files as the discriminator for "design resolves to simple execution." File count is a proxy — 7 files with independent additive changes can be simpler than 2 files with interleaving structural changes.
+- Correct pattern: The underlying property is coordination complexity: all decisions pre-resolved + changes additive + cross-file deps phase-ordered + no implementation loops. File count correlates but doesn't determine.
+- Rationale: Supersedes the ≤3 files heuristic in the existing "When design resolves to simple execution" learning. The inline-phase-type design formalizes this as D-5.
