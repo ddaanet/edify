@@ -4,8 +4,9 @@
 
 ## Completed This Session
 
-**Worktree setup:**
-- Created focused worktrees: pipeline-skill-updates (opus), when-recall-evaluation (sonnet)
+- [x] **Pipeline skill updates** — design skill review gate fix, pending task capture wording, design-history noise audit, deslop 2 skills, batch decomposition in vet-requirement, verification scope in vet template
+- [x] **When recall evaluation**
+- Worktree setup: pipeline-skill-updates (opus), when-recall-evaluation (sonnet)
 
 ## Pending Tasks
 
@@ -46,28 +47,19 @@
 - [ ] **Session CLI tool** — `_session` group (handoff, status, commit) | sonnet
   - Plan: handoff-cli-tool | Status: designed
   - Combined outline at `plans/handoff-cli-tool/outline.md` (355 lines, 7 phases)
-  - Blocked on: Pipeline skill updates (fix pipeline leaks before running 7-phase runbook)
-  - After pipeline fixes: outline review → sufficiency gate → `/runbook`
+  - After pipeline fixes (done): outline review → sufficiency gate → `/runbook`
   - New requirement: commit subcommand must output shortened commit IDs (session scraping)
 
-- [ ] **Audit rules for design-history noise** — Scan fragments/skills for design history embedded in directives (rejected alternatives). Distinguish from functional motivation (why the rule exists) which stays. | opus
-- [ ] **Design skill review gate fix** — Apply transition-gated wording to Phase B step 4 in design/SKILL.md. Include motivation (review validates cross-cutting consistency that individual approvals don't check). | sonnet
-- [ ] **Deslop remaining skills** — Prose quality pass on skills not yet optimized (handoff and commit done) | sonnet
-- [ ] **Pending task capture wording** — Fix agent tendency to capture pending tasks verbatim instead of rewording with context from the discussion | opus
+- [x] **Audit rules for design-history noise** — completed in pipeline-improvements
+- [x] **Design skill review gate fix** — completed in pipeline-improvements
+- [x] **Pending task capture wording** — completed in pipeline-improvements
+- [ ] **Deslop remaining skills** — Prose quality pass on skills not yet optimized (handoff, commit, opus-design-question, next done) | sonnet
 
 - [x] **When recall evaluation** — sonnet
 
 ## Worktree Tasks
 
-- [ ] **Pipeline skill updates** → `pipeline-skill-updates` — `/design` | opus | restart
-  - PRIORITY: Fix pipeline before running large runbooks
-  - Orchestrate: `/deliverable-review` pending task at exit
-  - Design skill: Phase 0 requirements-clarity gate
-  - Absorbs: vet-invariant-scope, inline-phase-type
-  - Insights input: Diamond TDD definition needed at `/design` (direct execution path), `/runbook` (step generation), `tdd-task` agent (cycle execution)
-  - Discussion context in runbook-skill-fixes worktree session
-
-- [ ] **When recall evaluation** → `when-recall-evaluation` — sonnet
+(none — both merged)
 
 ## Blockers / Gotchas
 
@@ -101,7 +93,7 @@
 
 ## Next Steps
 
-Pipeline skill updates is the user-flagged priority — fix pipeline before running large runbooks. Hook batch `/runbook` is next after pipeline fixes.
+Pipeline skill updates merged. Hook batch `/runbook` is next. Session CLI tool unblocked.
 
 ## Reference Files
 

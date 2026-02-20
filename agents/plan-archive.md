@@ -167,6 +167,10 @@ Cross-tree worktree awareness with planstate inference, aggregation, rich ls dis
 
 Inline phase type across pipeline. 7 pipeline artifacts updated, 7 integration tests. Added inline as third phase type (alongside TDD and general) for prose edits without feedback loops. Key decisions: coordination complexity discriminator (D-5), vet proportionality (D-7). Affected: pipeline-contracts.md, workflow-optimization.md, runbook/SKILL.md, plan-reviewer.md, review-plan/SKILL.md, orchestrate/SKILL.md, prepare-runbook.py.
 
+## pipeline-skill-updates
+
+9 design decisions (D-1 through D-9) addressing pipeline closure gaps and vet scoping deficits. Additive prose edits to 7 files. Requirements-clarity gate (D-1), coordination complexity execution readiness (D-5), deliverable-review task creation (D-2/D-3), lifecycle audit (D-7), verification scope (D-4/D-9), resume completeness (D-8), TDD integration-first (D-6). Absorbed vet-invariant-scope and inline-phase-type designs. Affected: agent-core/skills/ (design, orchestrate, deliverable-review), agent-core/fragments/vet-requirement.md, agent-core/agents/ (outline-review-agent, tdd-task), agents/decisions/pipeline-contracts.md.
+
 ## brief-skill
 
 Cross-tree context transfer skill. Producer (`/brief <slug>`) writes timestamped entries to `plans/<plan>/brief.md`. Consumer integration via execute-rule.md task pickup. Affected: agent-core/skills/brief/, agent-core/fragments/execute-rule.md.

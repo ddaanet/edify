@@ -20,7 +20,7 @@ When user says "pending: task description":
 - Do NOT execute the task now
 - Do NOT write to session.md immediately — task written during next handoff
 - Assess model tier (opus/sonnet/haiku) with reasoning
-- Respond: task name, model tier, restart flag if needed
+- Respond: task name (noun-phrase, not verbatim user text), model tier, restart flag if needed
 
 @agent-core/fragments/execution-routing.md
 

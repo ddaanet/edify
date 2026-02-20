@@ -270,3 +270,24 @@ Inline phases in orchestrator-plan.md use `Execution: inline` (vs `Execution: st
 **Correct pattern:** Final checkpoint should include lifecycle audits for all stateful objects created during the implementation (MERGE_HEAD, staged content, lock files). Same methodology as exit code audit: trace through all code paths, flag any path that exits success with state still active.
 
 **Evidence:** Phase 5 opus vet audited all 12 SystemExit calls (cross-cutting) but did not audit MERGE_HEAD lifecycle — same class of trace applied to git state instead of exit codes.
+
+## When Adding Verification Scope To Vet Context
+
+**Decision Date:** 2026-02-20
+
+**Source:** D-4 (pipeline-skill-updates outline)
+
+**Rule:** Add "Verification scope" to vet execution context when design decisions specify cross-cutting invariants — constraints spanning the full call graph, not just changed files.
+
+**Indicators:**
+- Design decision says "all X must Y" (e.g., "all output to stdout")
+- NFR spans multiple modules (e.g., "no data loss across all code paths")
+- Invariant domain is broader than the changed-files list
+
+**Identification method:** Grep for the invariant pattern (e.g., `err=True` for output routing, `MERGE_HEAD` for state lifecycle) across the codebase.
+
+**Where documented:**
+- Operational (always-loaded): `agent-core/fragments/vet-requirement.md` — optional field in execution context
+- Rationale (decision record): this section
+
+**Evidence:** Phase 5 checkpoint audited exit codes cross-cuttingly but missed MERGE_HEAD lifecycle — vet scope was limited to changed files. resolve.py had relevant calls but wasn't in the changed-files list.
