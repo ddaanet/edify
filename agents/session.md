@@ -65,7 +65,6 @@
 ## Worktree Tasks
 
 
-- [ ] **Worktree rm fixes** → `worktree-rm-fixes` — Batch: (1) dirty check fails on parent instead of target worktree, (2) broken worktree from failed `new` (empty dir, exit 255), (3) `rm --confirm` skips submodule branch cleanup | sonnet
 
 - [ ] **Handoff CLI tool** → `handoff-cli-tool` — Mechanical handoff+commit pipeline in CLI | `/design` | sonnet
   - Same pattern as worktree CLI: mechanical ops in CLI, judgment stays in agent

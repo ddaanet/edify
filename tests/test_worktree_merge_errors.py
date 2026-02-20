@@ -8,8 +8,8 @@ from _pytest.monkeypatch import MonkeyPatch
 from click.testing import CliRunner
 
 from claudeutils.worktree.cli import worktree
+from claudeutils.worktree.git_ops import _git
 from claudeutils.worktree.merge import _format_git_error
-from claudeutils.worktree.utils import _git
 
 
 def test_format_git_error_includes_stderr() -> None:

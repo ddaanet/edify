@@ -1,6 +1,8 @@
-"""Shared worktree utilities."""
+"""Git and worktree operations."""
 
+import os
 import subprocess
+import tempfile
 from pathlib import Path
 
 
@@ -177,3 +179,74 @@ def _is_merge_commit() -> bool:
     """Return True if HEAD has 2+ parents."""
     parts = _git("rev-list", "--parents", "-n", "1", "HEAD").split()
     return len(parts) >= 3
+
+
+def _create_session_commit(slug: str, base: str, session: str) -> str:
+    """Create commit with session.md from file."""
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".index") as tmp:
+        env = {**os.environ, "GIT_INDEX_FILE": tmp.name}
+    try:
+        _git("read-tree", _git("rev-parse", f"{base}^{{tree}}"), env=env)
+        content = Path(session).read_text()
+        blob = _git("hash-object", "-w", "--stdin", input_data=content)
+        _git(
+            "update-index",
+            "--add",
+            "--cacheinfo",
+            f"100644,{blob},agents/session.md",
+            env=env,
+        )
+        return _git(
+            "commit-tree",
+            _git("write-tree", env=env),
+            "-p",
+            base,
+            "-m",
+            f"Focused session for {slug}",
+        )
+    finally:
+        Path(tmp.name).unlink(missing_ok=True)
+
+
+def _create_submodule_worktree(
+    project_root: str, worktree_path: Path, slug: str
+) -> None:
+    """Create agent-core submodule worktree if exists."""
+    agent_core = Path(project_root) / "agent-core"
+    if not agent_core.exists() or not (agent_core / ".git").exists():
+        return
+
+    try:
+        _git("-C", str(agent_core), "rev-parse", "--verify", slug)
+        flag = []
+    except subprocess.CalledProcessError:
+        flag = ["-b"]
+    _git(
+        "-C",
+        str(agent_core),
+        "worktree",
+        "add",
+        str(worktree_path / "agent-core"),
+        *flag,
+        slug,
+    )
+
+
+def _delete_submodule_branch(slug: str) -> str | None:
+    """Delete branch in agent-core submodule if it exists.
+
+    Returns a warning message string if deletion failed unexpectedly, None
+    otherwise.
+    """
+    agent_core = Path("agent-core")
+    if not agent_core.exists() or not (agent_core / ".git").exists():
+        return None
+    r = subprocess.run(
+        ["git", "-C", "agent-core", "branch", "-D", slug],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if r.returncode != 0 and "not found" not in r.stderr.lower():
+        return f"Submodule branch {slug} deletion failed: {r.stderr.strip()}"
+    return None

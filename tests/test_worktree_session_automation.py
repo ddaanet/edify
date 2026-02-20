@@ -8,7 +8,7 @@ import pytest
 from click.testing import CliRunner
 
 from claudeutils.worktree.cli import worktree
-from claudeutils.worktree.utils import wt_path
+from claudeutils.worktree.git_ops import wt_path
 
 
 def test_new_task_mode_moves_task_to_worktree(

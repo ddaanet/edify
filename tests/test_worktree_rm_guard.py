@@ -8,7 +8,7 @@ import pytest
 from click.testing import CliRunner
 
 from claudeutils.worktree.cli import _delete_branch, worktree
-from claudeutils.worktree.utils import _classify_branch, _is_branch_merged
+from claudeutils.worktree.git_ops import _classify_branch, _is_branch_merged
 from tests.fixtures_worktree import _run_git, add_worktree, make_repo_with_branch
 
 

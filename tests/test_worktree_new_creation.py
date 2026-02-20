@@ -126,3 +126,30 @@ def test_new_command_sibling_paths(
     assert result.exit_code == 0
     assert (container_path / "existing-branch").exists()
     assert "repo-wt/existing-branch" in result.output
+
+
+def test_new_cleans_up_on_git_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Cleans up empty directory when git worktree add fails."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+    init_repo(repo_path)
+
+    monkeypatch.setattr(
+        "claudeutils.worktree.cli._setup_worktree",
+        lambda *a, **kw: (_ for _ in ()).throw(
+            subprocess.CalledProcessError(255, "git worktree add")
+        ),
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["new", "test-feature"])
+
+    assert result.exit_code != 0
+
+    container = repo_path.parent / f"{repo_path.name}-wt"
+    wt = container / "test-feature"
+    assert not wt.exists(), "worktree directory should be cleaned up"
+    assert not container.exists(), "empty container should be cleaned up"

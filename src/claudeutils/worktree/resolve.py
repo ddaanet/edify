@@ -5,12 +5,12 @@ from pathlib import Path
 
 import click
 
+from claudeutils.worktree.git_ops import _git
 from claudeutils.worktree.session import (
     extract_blockers,
     extract_task_blocks,
     find_section_bounds,
 )
-from claudeutils.worktree.utils import _git
 
 
 def _merge_session_contents(ours: str, theirs: str, slug: str | None = None) -> str:

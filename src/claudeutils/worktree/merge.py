@@ -5,6 +5,7 @@ from pathlib import Path
 
 import click
 
+from claudeutils.worktree.git_ops import _git, _is_branch_merged, wt_path
 from claudeutils.worktree.merge_state import (
     _detect_merge_state,
     _recover_untracked_file_collision,
@@ -13,7 +14,6 @@ from claudeutils.worktree.resolve import (
     resolve_learnings_md,
     resolve_session_md,
 )
-from claudeutils.worktree.utils import _git, _is_branch_merged, wt_path
 
 
 def _format_git_error(e: subprocess.CalledProcessError) -> str:

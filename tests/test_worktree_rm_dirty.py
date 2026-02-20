@@ -8,8 +8,8 @@ import pytest
 from click.testing import CliRunner
 
 from claudeutils.worktree.cli import worktree
-from claudeutils.worktree.utils import _is_parent_dirty, _is_submodule_dirty
-from tests.fixtures_worktree import _create_worktree
+from claudeutils.worktree.git_ops import _is_parent_dirty, _is_submodule_dirty
+from tests.fixtures_worktree import _branch_exists, _create_worktree
 
 
 def test_is_parent_dirty(
@@ -68,10 +68,10 @@ def test_is_submodule_dirty(
     assert _is_submodule_dirty() is True
 
 
-def test_rm_blocks_on_dirty_parent(
+def test_rm_blocks_on_dirty_worktree(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
-    """Blocks removal if parent repo has uncommitted changes."""
+    """Blocks removal if target worktree has uncommitted changes."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
@@ -80,13 +80,36 @@ def test_rm_blocks_on_dirty_parent(
     worktree_path = _create_worktree(repo_path, "test-feature", init_repo)
     assert worktree_path.exists()
 
-    (repo_path / "dirty.txt").write_text("dirty content")
+    (worktree_path / "dirty.txt").write_text("dirty")
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["rm", "--confirm", "test-feature"])
 
     assert result.exit_code == 2
-    assert "uncommitted" in result.output.lower() or "parent" in result.output.lower()
+    assert "uncommitted" in result.output.lower()
+    assert worktree_path.exists(), "worktree should not be removed"
+
+
+def test_rm_allows_removal_with_dirty_parent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Allows removal when parent is dirty but target worktree is clean."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+
+    init_repo(repo_path)
+    worktree_path = _create_worktree(repo_path, "test-feature", init_repo)
+    assert worktree_path.exists()
+
+    (repo_path / "dirty.txt").write_text("dirty")
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["rm", "--confirm", "test-feature"])
+
+    assert result.exit_code == 0
+    assert not worktree_path.exists()
+    assert not _branch_exists("test-feature")
 
 
 def test_rm_blocks_on_dirty_submodule(
@@ -118,7 +141,7 @@ def test_rm_blocks_on_dirty_submodule(
 def test_rm_force_bypasses_dirty_check(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
-    """Force flag bypasses dirty check."""
+    """Force flag bypasses worktree dirty check."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
@@ -127,7 +150,7 @@ def test_rm_force_bypasses_dirty_check(
     worktree_path = _create_worktree(repo_path, "test-feature", init_repo)
     assert worktree_path.exists()
 
-    (repo_path / "dirty.txt").write_text("dirty")
+    (worktree_path / "dirty.txt").write_text("dirty")
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["rm", "--force", "test-feature"])

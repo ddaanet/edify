@@ -7,13 +7,13 @@ from pathlib import Path
 
 import pytest
 
+from claudeutils.worktree.git_ops import _is_branch_merged
 from claudeutils.worktree.merge import (
     _phase1_validate_clean_trees,
     _phase3_merge_parent,
     _phase4_merge_commit_and_precommit,
     _validate_merge_result,
 )
-from claudeutils.worktree.utils import _is_branch_merged
 from tests.fixtures_worktree import last_commit_subject, make_repo_with_branch
 
 
