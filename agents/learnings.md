@@ -133,3 +133,15 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Section C.5 said "Apply execution readiness criteria from Outline Sufficiency Gate." The sufficiency gate's framing ("The outline IS the design") only applies when design.md doesn't exist yet (deciding whether to skip Phase C). At C.5, design.md already exists — the back-reference imports wrong framing.
 - Correct pattern: Inline shared criteria at each usage site with context-appropriate framing. When two gates share criteria but have different preconditions, each site needs its own framing even if the criteria list is identical.
 - Evidence: Agent at C.5 produced "outline is sufficient, design.md IS the design" — nonsensical when design.md was the artifact just vetted.
+## When designing CLI tools for LLM callers
+- Anti-pattern: Using traditional CLI conventions (flags, short options, --help, positional args) for tools whose sole caller is an LLM agent. Quoting/escaping in bash heredocs is error-prone, multiline arguments need gymnastics.
+- Correct pattern: Structured markdown on stdin, structured markdown on stdout. LLM-native format — no quoting issues, natural multiline, extensible without code changes. Section-based parsing with known section names as boundaries.
+- Rationale: CLI conventions exist for human ergonomics (tab completion, discoverability). LLMs don't need any of that. They need a format they produce and consume natively.
+## When reusable components reference project paths
+- Anti-pattern: Hardcoding project-specific paths (e.g., `agent-core/skills/**`, `scripts/**`) in reusable packages or submodule code. Breaks when the component is used in another project.
+- Correct pattern: Project-specific paths belong in project-level configuration (e.g., `pyproject.toml`). Reusable code reads config, doesn't hardcode paths. Agent-core's gate concerns belong to agent-core, not the parent CLI.
+- Evidence: Gate B initially hardcoded `agent-core/skills/**` etc. in the CLI — would break agent-core reuse in other projects.
+## When CLI outputs errors consumed by LLM agents
+- Anti-pattern: Including suggested causes or recovery actions in error messages ("may have been committed already", "remove and retry"). LLM agents treat suggestions as instructions, enabling rationalization past real problems.
+- Correct pattern: Facts only — state what IS, not what MIGHT BE. For unrecoverable errors (data loss risk), include STOP directive. For recoverable errors, CLI handles recovery itself and surfaces a warning. Error taxonomy: Stop (clean-files, missing input) vs Warning+proceed (orphaned optional section).
+- Evidence: Clean-files error without STOP → agent removes file from list and confabulates "already committed." With STOP directive, agent reports to user instead.

@@ -43,6 +43,10 @@
 - [ ] **Orchestrate evolution** — `/runbook plans/orchestrate-evolution/design.md` | sonnet
   - Design complete with Phase 1 (foundation) + Phase 2 (ping-pong TDD), ready for runbook planning
 
+- [ ] **Commit CLI tool** — `/runbook plans/commit-cli-tool/outline.md` | sonnet
+  - Design complete. Outline serves as design (sufficiency gate passed — no full design.md needed)
+  - 5 phases: extract _git (general), parser+validation (TDD), gate (TDD), pipeline (TDD), integration (TDD)
+
 ## Worktree Tasks
 
 
