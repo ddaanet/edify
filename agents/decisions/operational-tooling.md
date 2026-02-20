@@ -253,6 +253,6 @@ Git workflow, platform constraints, code patterns, and naming conventions.
 
 **Anti-pattern:** Propagating the 25-char git branch slug limit to task naming time. Forces suboptimal prose keys for tasks that may never become worktrees.
 
-**Correct pattern:** Task names are prose keys (session management layer). Slug derivation is a worktree concern. When a derived slug is too long, provide a `--branch` override at invocation time.
+**Correct pattern:** Task names are prose keys (session management layer). Slug derivation is a worktree concern. When a derived slug is too long, provide a `--slug` override at invocation time. **Gap:** No `--slug` override exists yet — current workaround is bare `_worktree new <slug>` which loses session integration.
 
 **Rationale:** Layers should not share constraints. The enforcement point (worktree creation) is the right place to surface slug limits, not the point of task authoring.

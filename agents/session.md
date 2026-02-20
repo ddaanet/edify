@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-20
 
-**Status:** Learnings consolidated (24 entries → 6 decision files), operational-practices.md split for line limit.
+**Status:** Merged worktree-rm-fixes, created merge-resolution worktree, fixed multiple information errors.
 
 ## Completed This Session
 
@@ -27,6 +27,22 @@
 - operational-practices.md split → operational-practices.md (200 lines) + operational-tooling.md (258 lines) to resolve 400-line limit
 - "When All Work Is Prose Edits" merged into "When Design Resolves To Simple Execution" (subsumption, not independent gate)
 
+**Merged worktree-rm-fixes:**
+- Merge + rm worktree (3 bug fixes: dirty check, new cleanup, submodule branch)
+- Post-merge learnings cleanup: trimmed pre-consolidation duplicates (127→31 lines), kept 5 consolidated + 1 delta
+- Removed 2 fixed blockers (dirty parent, stale submodule config)
+- Discovered merge resolution bugs in `resolve.py`: learnings uses line-set-difference (should be ancestor-based H2 diff), blockers not removed (focused sessions strip blockers section)
+
+**Created merge-resolution worktree:**
+- New task absorbs copy-sentinel (both worktree creation fixes)
+- Bare slug due to 25-char limit (no `--slug` override exists)
+
+**Information corrections:**
+- `--branch` is for existing branches, not slug override — fixed in session.md + `operational-tooling.md` decision
+- Removed stale worktree-rm-safety absorbs (completed by worktree-rm-fixes)
+- Added `--slug` override and `--confirm` gate redesign to Worktree CLI default scope
+- Added merge resolution manual-check gotcha
+
 ## Pending Tasks
 
 - [ ] **When recall evaluation** — sonnet
@@ -37,9 +53,10 @@
 
 - [ ] **Worktree CLI default** — Positional = task name, `--branch` = bare slug | `/runbook plans/worktree-cli-default/outline.md` | sonnet
   - Plan: worktree-cli-default | Status: designed
-  - `new "Task Name" --branch <slug>` form solves 29-char slug limit
+  - `--branch` creates worktree from existing branch (no session.md handling)
   - Scope expansion: Eliminate Worktree Tasks section, remove `_update_session_and_amend` ceremony, co-design with session.md validator
-  - Absorbs: worktree-rm-safety (safety gates), pre-merge untracked file fix (`new` leaves session.md untracked), worktree skill adhoc mode (covered by `--branch`)
+  - Absorbs: pre-merge untracked file fix (`new` leaves session.md untracked), worktree skill adhoc mode (covered by `--branch`), `--slug` override for `--task` mode (25-char slug limit vs prose task names)
+  - `rm --confirm` gate: replace with merge-status check (is branch ancestor of HEAD?). Current gate provides no safety, gives wrong error message ("use wt merge" when user already merged), agent retries immediately with `--confirm`
 
 - [ ] **SessionStart status hook** — Bundled hook: dirty tree warning, learnings limit, stale worktree detection, model tier display, tip rotation | sonnet | restart
 
@@ -58,9 +75,6 @@
   - Subsumes: Rename vet agents (FR-3), Codebase quality sweep (FR-4)
   - Absorbs: integration-first-tests
 
-- [ ] **Copy sentinel on worktree new** — Copy `tmp/.test-sentinel` during `wt-new` so worktrees inherit cached test state | sonnet
-  - Diamond TDD: behavioral tests for sentinel copy, edge cases (missing sentinel, stale sentinel)
-  - Target: `wt-new` recipe in justfile
 
 ## Worktree Tasks
 
@@ -79,6 +93,12 @@
   - Absorbs: Script commit vet gate (Gate B → scripted check)
   - Single command: precommit → gate → stage → commit in main + agent-core submodule
 
+- [ ] **Merge resolution correctness** → `merge-resolution` — Fix learnings + blockers resolution in `resolve.py`, fix focused session creation | sonnet
+  - Learnings: use ancestor-based diff (not line-set-difference). Group by H2 entry. Append THEIRS additions (vs ancestor) to OURS. Fail if THEIRS removals don't apply cleanly to OURS
+  - Blockers: ancestor-based removal. Present in ancestor + absent in theirs → resolved, remove from ours
+  - Focused session creation: preserve blockers section (enables ancestor-based resolution), copy `tmp/.test-sentinel` (inherit cached test state)
+  - Target: `src/claudeutils/worktree/resolve.py`, focused session generator in worktree `new`
+
 - [ ] **Orchestrate evolution** → `orchestrate-evolution` — `/runbook plans/orchestrate-evolution/design.md` | sonnet
   - Design complete (refreshed Feb 13), ready for runbook planning
   - Insights input: ping-pong TDD agent pattern — alternating tester/implementer agents with mechanical RED/GREEN gates between handoffs. Tester holds spec context (can't mirror code structure), implementer holds codebase context (can't over-implement beyond test demands). Resume-based context preservation avoids startup cost per cycle
@@ -94,14 +114,10 @@
 **`slug` and `--task` mutually exclusive in `_worktree new`:**
 - Fix: worktree-cli-default adds `--branch` flag
 
-**Merge ours resolution loses worktree content:**
-- `just wt-merge` uses `checkout --ours` for session.md, learnings.md — verify post-merge
+**Merge resolution silently corrupts learnings and blockers:**
+- Learnings: line-set-difference reintroduces pre-consolidation entries when branch diverged before `/remember`. Blockers: focused sessions have no blockers section, so resolved blockers aren't detected
+- **Manual post-merge check required:** After `wt merge`, verify learnings.md for pre-consolidation duplicates (diff against ancestor) and blockers for items fixed by the branch's work
 
-**`wt rm` blocks on dirty parent repo:**
-- Workaround: `git stash && wt rm && git stash pop`
-
-**`wt rm` leaves stale submodule config:**
-- `.git/modules/agent-core/config` `core.worktree` points to deleted directory
 
 **Validator orphan entries not autofixable:**
 - Marking headings structural (`.` prefix) causes non-autofixable error in `check_orphan_entries`
@@ -111,7 +127,7 @@
 
 ## Next Steps
 
-5 tasks in parallel worktrees. Work on whichever is ready.
+5 worktrees active (handoff-cli-tool, commit-cli-tool, merge-resolution, orchestrate-evolution + precommit-test-sentinel if not yet merged). Work on whichever is ready.
 
 ## Reference Files
 
