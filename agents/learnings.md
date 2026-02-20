@@ -114,3 +114,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Using `wc -l` equality to conclude files are identical. Same line count does not mean same content — entries can be added/removed/replaced while maintaining count.
 - Correct pattern: Diff content, not counts. `git diff <base>..<branch> -- <file>` or compare actual text. Line count is a size metric, not an identity check.
 - Evidence: Learnings.md had 62 lines on both merge base and branch → concluded "no changes." Post-merge found 36 genuine new entries from the branch.
+## When review gates feel redundant after user-validated changes
+- Anti-pattern: Skipping procedural review (outline-review-agent) after redrafting because individual changes were user-validated in discussion. Implicit reasoning: "user approved each change → combined redraft doesn't need review."
+- Correct pattern: Review gates are non-negotiable checkpoints, not confidence-gated decisions. User validates *approach*; review agent validates *completeness, internal consistency, requirement coverage*. Combining multiple changes can introduce inconsistencies the individual discussions didn't surface.
+- Root cause: Inserting a confidence assessment step that doesn't exist in the procedure. The procedure says "after redraft → review," not "after redraft → assess whether review is needed."
