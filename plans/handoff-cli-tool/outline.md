@@ -1,26 +1,71 @@
-# Outline: Handoff CLI Tool
+# Session CLI Tool — Design Outline
 
-**Task:** Mechanical handoff pipeline in CLI, following the worktree CLI pattern.
+**Task:** `claudeutils _session` command group — mechanical CLI for handoff, commit, and status operations. Internal (underscore prefix, hidden from `--help`). Skills remain the user interface; CLI handles writes, validation, subprocess orchestration.
 
 ## Approach
 
-New `handoff/` subpackage under `src/claudeutils/` exposed as `claudeutils _handoff`. Single command that accepts agent-drafted markdown via stdin, writes it to session.md, and returns diagnostic output. Agent retains all judgment (what content to draft, learnings, pending task mutations). CLI handles mechanical writes and diagnostic gathering.
+Three subcommands under `_session`: `handoff` (session.md writes + diagnostics), `commit` (sole commit path, sandbox-blacklisted alternatives), `status` (pure data transformation for STATUS display). Each reads structured markdown, performs mechanical operations, returns markdown output. LLM judgment stays in skills.
 
-**Inputs (FR-1):** Markdown via stdin with `**Status:**` line marker and `## Completed This Session` heading. No other file inputs — all other session.md mutations (pending task edits, learnings, blockers, reference files) remain agent-owned.
+## Shared Infrastructure
 
-**Outputs (FR-2):** Markdown diagnostics to stdout. Learnings age status, precommit result, git status/diff (suppressed if precommit red means `just precommit` exits non-zero), worktree ls. Sections shown only when noteworthy — no "nothing to report" reporting.
+### S-1: Package structure
 
-**Remains manual (agent Edit):** Reference files update, pending task mutations, blockers, learnings append + invalidation, gitmoji selection, commit creation (FR-4 and commit pipeline deferred — see Scope OUT).
+```
+src/claudeutils/
+  git.py              NEW — shared git helpers (_git, _is_submodule_dirty)
+  session/
+    __init__.py
+    cli.py            Click group registered as `_session` in parent cli.py
+    parse.py          Session.md parser (shared: handoff writes, status reads)
+    handoff/
+      __init__.py
+      cli.py          Subcommand
+      pipeline.py     Pipeline + state caching
+      context.py      Diagnostic gathering
+    commit/
+      __init__.py
+      cli.py          Subcommand
+      gate.py         Vet gate (pyproject.toml patterns + report discovery)
+      parse.py        Markdown stdin parser (commit-specific format)
+    status/
+      __init__.py
+      cli.py          Subcommand
+      render.py       STATUS output formatting
+```
 
-## Command
+Registration: `cli.add_command(session_group)` in main `cli.py`, same pattern as worktree.
 
-### `claudeutils _handoff`
+### S-2: `_git()` extraction
 
-Single command, two modes — fresh (stdin has content) and resume (no stdin, reads state file):
+Move `_git()` and `_is_submodule_dirty()` from `worktree/utils.py` to `claudeutils/git.py`. Update worktree imports. Submodule operations: `"-C", "agent-core"` as leading args (existing codebase pattern).
 
-**Fresh** (stdin has content):
-```bash
-cat <<'EOF' | claudeutils _handoff
+### S-3: Error conventions
+
+All subcommands:
+- stdout: structured markdown (diagnostics, results)
+- stderr: errors (agent sees directly)
+- Exit codes: 0=success, 1=pipeline error (runtime failure), 2=input validation (malformed caller input)
+
+### S-4: Session.md parser
+
+Shared parser for session.md structure:
+- Status line (between `# Session Handoff:` and first `##`)
+- Completed section (under `## Completed This Session`)
+- Pending tasks with metadata (model, command, restart, plan directory)
+- Worktree tasks section
+- Plan directory associations
+
+Used by handoff (locate write targets) and status (read + format).
+
+---
+
+## `_session handoff`
+
+Two modes — fresh (stdin has content) and resume (no stdin, reads state file).
+
+### Input
+
+```markdown
 **Status:** Design Phase A complete — outline reviewed.
 
 ## Completed This Session
@@ -28,102 +73,283 @@ cat <<'EOF' | claudeutils _handoff
 **Handoff CLI tool design (Phase A):**
 - Produced outline
 - Review by outline-review-agent
-EOF
 ```
 
-1. Parse stdin for `**Status:**` marker and `## Completed This Session` heading
-2. Cache input to state file (before any mutation — enables safe retry)
-3. Write status to session.md (overwrite status line)
-4. Write completed to session.md (see committed detection below)
-5. Run `just precommit`
-   - On precommit failure (exit non-zero): output precommit result + learnings age + worktree ls (git status/diff suppressed per D-3), leave state file, exit code 1
-6. Output diagnostics (conditional — see D-3)
-- On success: delete state file
-- On other failure (write error, subprocess error): leave state file, exit with semantic code
+Required: `**Status:**` line marker and `## Completed This Session` heading.
 
-**Resume** (no stdin):
-```bash
-claudeutils _handoff
-```
+### Pipeline
 
-- Load input from `<project-root>/tmp/.handoff-state.json`
-- Re-execute pipeline from `step_reached`
-- Success: delete state file
-- Failure: leave state file, errors to stderr
+**Fresh:**
+1. Parse stdin for status marker and completed heading
+2. Cache input to state file (before first mutation — enables retry)
+3. Overwrite status line in session.md
+4. Write completed section (committed detection — see H-2)
+5. `just precommit`
+   - Failure: output precommit result + learnings age + worktree ls, leave state file, exit 1
+6. Output diagnostics (conditional — see H-3)
+7. Delete state file
 
-Agent doesn't re-enter handoff skill on retry — calls `claudeutils _handoff` directly.
+**Resume** (no stdin): load from state file, re-execute from `step_reached`. Agent calls `claudeutils _session handoff` directly on retry.
 
-## Key Decisions
-
-### D-1: Domain boundaries
+### H-1: Domain boundaries
 
 | Owner | Responsibility |
 |-------|---------------|
 | Handoff CLI | Session.md mechanical writes (status overwrite, completed section) + precommit + diagnostics + state caching |
 | Worktree CLI | `→ slug` markers |
-| Agent (Edit/Write) | Pending task mutations (insertion = judgment), learnings append + invalidation, blockers, reference files |
+| Agent (Edit/Write) | Pending task mutations, learnings append + invalidation, blockers, reference files |
 
-**Session.md write mechanics:**
-- **Status location:** Between first heading (`# Session Handoff:`) and first subheading (`## Completed`). Identified by `**Status:**` line marker. Overwrite in place.
-- **Completed location:** Content under `## Completed This Session` heading, bounded by next `##` heading.
-- **Committed detection:** Diff the completed section only against HEAD (`git diff HEAD -- agents/session.md`, extract completed section from both versions).
-  - No diff → overwrite (prior content committed, new content replaces it)
-  - Old content removed, new content present → append (agent cleared old entries, kept new uncommitted work)
-  - Old content preserved with additions → **undecided** (open question: should CLI append, overwrite, or error?)
-- CLI writes these two sections only. All other session.md sections are agent-owned.
+Learnings flow: agent writes learnings (Edit) → reviews for invalidation → calls CLI. Manual append before invalidation improves conflict detection via spatial proximity.
 
-**Learnings flow:** Agent writes learnings (Edit) → reviews combined file for invalidation (semantic anchoring) → then calls CLI. Manual append before invalidation improves conflict detection via spatial proximity.
+### H-2: Completed section write mode
 
-### D-2: State caching
+Diff completed section against HEAD (`git diff HEAD -- agents/session.md`, extract section from both):
 
-- Location: `<project-root>/tmp/.handoff-state.json` (project-relative; project root resolved from git toplevel)
+| Prior state | Behavior |
+|---|---|
+| No diff (first handoff or content committed) | Overwrite |
+| Old removed, new present (agent cleared old) | Append |
+| Old preserved with additions | Auto-strip committed content, keep new additions |
+
+Session.md write targets: status line and completed section only. All other sections agent-owned.
+
+### H-3: Diagnostic output
+
+| Diagnostic | Condition |
+|-----------|-----------|
+| Precommit result | Always |
+| Git status/diff | Precommit passed |
+| Learnings age | Any entries ≥7 active days (summary line only) |
+| Worktree ls | Worktrees exist |
+
+### H-4: State caching
+
+- Location: `<project-root>/tmp/.handoff-state.json`
 - Contents: `{"input_markdown": "...", "timestamp": "...", "step_reached": "..."}`
-- `step_reached` values: `"write_session"`, `"precommit"`, `"diagnostics"` — resume starts from failed step. `"write_session"` means session.md write failed (cache exists, safe to retry writes); `"precommit"` means write succeeded but precommit failed; `"diagnostics"` means precommit passed but diagnostic output failed.
-- Created at step 2 — before first mutation (enables clean retry if write fails at step 3 or 4)
-- Success: file deleted
-- Errors go to stderr (agent sees them directly); state file stores only resume position
+- `step_reached`: `"write_session"` | `"precommit"` | `"diagnostics"`
+- Created at step 2 (before mutation), deleted on success
 
-### D-3: Output format and suppression
+---
 
-Markdown to stdout. Errors to stderr (never mixed into stdout diagnostic output). Semantic exit codes: 0=success (pipeline complete, state file deleted), 1=pipeline error (session.md write failed, precommit failed, subprocess error), 2=guard/validation failure (stdin missing required markers, state file absent on resume).
+## `_session commit`
 
-**Output suppression rules:**
-- Precommit result: always shown (clean confirmation or failure details)
-- Git status/diff: suppressed if precommit red (noise until precommit passes)
-- Learnings age: summary status only (e.g., "3 entries ≥7 active days, 120 lines — consider /remember"), not the full learnings list. Suppressed if no entries have ≥7 active days.
-- Worktree ls: suppressed if no worktrees exist
+Sole commit path. Reads structured markdown on stdin, produces structured markdown on stdout.
 
-### D-4: Package structure
+Pipeline: validate → gate → precommit → stage → submodule commit → parent commit.
+
+### Input
+
+```markdown
+## Files
+- src/commit/cli.py
+- src/commit/gate.py
+- agent-core/fragments/vet-requirement.md
+
+## Options
+- no-vet
+
+## Submodule Message
+> 🤖 Update vet-requirement fragment
+>
+> - Add scripted gate classification reference
+
+## Message
+> ✨ Add commit CLI with scripted vet gate
+>
+> - Structured markdown I/O
+> - Submodule-aware commit pipeline
+```
+
+**Sections:**
+- `## Files` — required, first. Bulleted paths to stage (modifications, additions, deletions — `git add` handles all).
+- `## Options` — optional. `no-vet` (skip Gate B), `just-lint` (lint only). Unknown options → error (fail-fast).
+- `## Submodule Message` — conditionally required (see C-2). Blockquoted.
+- `## Message` — required, last. Blockquoted. Everything from `## Message` to EOF is message body — safe for content containing `## ` lines.
+
+Parsing: `## ` prefix matched against known section names. Unknown `## ` within blockquotes treated as message body.
+
+### Output
+
+Success:
+```markdown
+## Result
+commit: a7f38c2
+
+## Gate
+status: passed
+
+## Precommit
+status: passed
+```
+
+Gate failure — missing report:
+```markdown
+## Gate
+status: failed
+unvetted:
+- src/auth.py
+```
+
+Gate failure — stale report:
+```markdown
+## Gate
+status: failed
+reason: stale-report
+newest-change: src/auth.py (2026-02-20 14:32)
+newest-report: plans/foo/reports/vet-review.md (2026-02-20 12:15)
+```
+
+Precommit failure:
+```markdown
+## Gate
+status: passed
+
+## Precommit
+status: failed
+output: |
+  ruff check: 2 errors
+  ...
+```
+
+Clean-files error:
+```markdown
+## Error
+type: clean-files
+files:
+- src/config.py
+
+STOP: Listed files have no uncommitted changes. Do not remove files and retry.
+```
+
+Warning (commit proceeds, discrepancy surfaced):
+```markdown
+## Warning
+type: orphaned-submodule-message
+detail: Submodule message provided but no agent-core changes found. Section ignored.
+
+## Result
+commit: a7f38c2
+```
+
+Error taxonomy: **stop** (non-zero, no commit) for clean-files, missing submodule message, gate failure, precommit failure. **Warning + proceed** (zero exit) for orphaned submodule message.
+
+### C-1: Gate B — scripted vet check
+
+File classification by path pattern:
+```toml
+[tool.claudeutils.commit]
+require-review = [
+    "src/**/*.py",
+    "tests/**/*.py",
+    "scripts/**",
+    "bin/**",
+]
+```
+
+No patterns → gate passes (opt-in). Report discovery: `plans/*/reports/` matching `*vet*` or `*review*` (not `tmp/`). Freshness: mtime of newest production artifact vs newest report. Stale → fail.
+
+### C-2: Submodule coordination
+
+| agent-core in Files OR staged | Submodule Message present | Result |
+|---|---|---|
+| Yes | Yes | Commit submodule first |
+| Yes | No | **Stop** — needs message |
+| No | Yes | **Warning** — ignored |
+| No | No | Parent-only commit |
+
+Sequence: partition files → stage + commit submodule → stage pointer → commit parent.
+
+### C-3: Input validation
+
+Each path in Files must appear in `git status --porcelain`. Clean files → error with stop directive. A clean-listed file means the caller's model doesn't match reality (hallucinated edit, silent write failure).
+
+### C-4: Validation levels
+
+| Context | Validation | Option |
+|---------|-----------|--------|
+| Final commit | `just precommit` | (default) |
+| TDD GREEN WIP | `just lint` | `just-lint` |
+| First commit | Skip gate only | `no-vet` |
+| Combined | `just lint` + skip gate | `just-lint` + `no-vet` |
+
+No option to skip validation entirely.
+
+---
+
+## `_session status`
+
+Pure data transformation. Reads session.md + filesystem state, produces formatted STATUS output. No mutations, no stdin.
+
+### Pipeline
+
+1. Parse session.md (S-4 parser)
+2. `claudeutils _worktree ls` for plan states and worktree info
+3. Cross-reference plans with pending tasks → find unscheduled plans
+4. Detect parallel task groups
+5. Render STATUS format to stdout
+
+### Output
+
+Matches execute-rule.md MODE 1 format:
 
 ```
-src/claudeutils/handoff/
-├── __init__.py
-├── cli.py            # Click command, registered as `_handoff` in parent cli.py
-├── pipeline.py       # Pipeline + state caching; calls context.py for step 6 diagnostics
-└── context.py        # Diagnostic info gathering: invokes learning-ages.py, git status/diff, worktree ls
+Next: <first pending task>
+  `<command>`
+  Model: <model> | Restart: <yes/no>
 
-src/claudeutils/cli.py            # MODIFIED: add_command(handoff) registration
+Pending:
+- <task> (<model if non-default>)
+  - Plan: <dir> | Status: <status>
+
+Worktree:
+- <task> → <slug>
+
+Unscheduled Plans:
+- <plan> — <status>
+
+Parallel (N tasks, independent):
+  - task 1
+  - task 2
+  `wt` to set up worktrees
 ```
 
-## Open Questions
+### ST-1: Parallel group detection
 
-1. **Completed section: old content preserved with additions (USER DECISION NEEDED).** When the completed section has both the prior committed content AND new additions, should the CLI append (new content after old), overwrite (replace with stdin), or error (ambiguous state, let agent resolve)? This is the one unresolved committed-detection case — implementation cannot proceed without a decision on this branch.
+Independent when: no shared plan directory, no logical dependency (Blockers/Gotchas), compatible model tier, no restart requirement. Largest group only. Omit section if none.
+
+### ST-2: Graceful degradation
+
+Missing session.md → "No pending tasks." Old format (no metadata) → defaults. Empty sections omitted.
+
+---
 
 ## Scope
 
 **IN:**
-- `handoff/` subpackage with single CLI command (no subcommands)
-- Stdin markdown parsing (status marker + completed heading)
-- Session.md mechanical writes (status overwrite, completed section with committed detection)
-- Diagnostic output with conditional suppression
-- State caching for failure resume
-- Tests (CliRunner pattern, mock git repos)
+- `_session` command group (handoff, commit, status)
+- Shared session.md parser
+- `_git()` extraction to `claudeutils/git.py`
+- Handoff: stdin parsing, session.md writes, committed detection, diagnostics, state caching
+- Commit: stdin parsing, vet gate (pyproject.toml), input validation, submodule pipeline, structured output
+- Status: session.md parsing, plan cross-referencing, parallel detection, STATUS rendering
+- Tests (CliRunner + real git repos via tmp_path)
 - Registration in main `cli.py`
 
 **OUT:**
-- Commit pipeline (precommit gate → stage → commit) — separate `commit-cli-tool` worktree
-- Gitmoji auto-selection (FR-4: embedding/cosine similarity over pre-computed vectors) — deferred to `commit-cli-tool` worktree where it belongs; this tool only handles the handoff write + diagnostics pipeline, not commit creation
-- Integrated handoff+commit optimization — future work
-- Skill modifications (handoff skill updated in separate task)
-- Consolidation delegation (already exists in skill)
-- Pending task mutations, learnings, blockers, reference files (agent judgment via Edit)
+- Gate A (session freshness) — `/commit` skill (LLM judgment)
+- Commit message drafting, gitmoji selection — skill
+- Skill modifications (handoff/commit/status skills updated separately)
+- Pending task mutations, learnings, blockers, reference files — agent Edit
+- Consolidation delegation — existing skill
+
+**Skill integration (future):** After CLI exists, `/commit` skill simplifies to: Gate A (LLM) → discovery (`git status -vv`) → draft message + gitmoji → pipe to `_session commit`. Current skill steps collapse into one CLI call.
+
+## Phase Notes
+
+- Phase 1: `_git()` extraction + session.md parser — **general**
+- Phase 2: Status subcommand — **TDD** (pure function: session.md + filesystem → formatted output)
+- Phase 3: Handoff pipeline — **TDD** (stdin parsing, session.md writes, committed detection, state caching, diagnostics)
+- Phase 4: Commit parser + input validation — **TDD** (markdown parsing, file status check, submodule message consistency)
+- Phase 5: Commit vet gate — **TDD** (pyproject.toml patterns, file classification, report discovery + freshness)
+- Phase 6: Commit pipeline + output — **TDD** (staging, submodule coordination, structured output)
+- Phase 7: Integration tests — **TDD** (end-to-end across subcommands, real git repos)
