@@ -56,8 +56,6 @@ When user says "pending: task description":
 
 @agent-core/fragments/error-handling.md
 
-@agent-core/fragments/vet-requirement.md
-
 @agent-core/fragments/token-economy.md
 
 @agent-core/fragments/commit-skill-usage.md
@@ -73,12 +71,6 @@ When user says "pending: task description":
 @agent-core/fragments/tmp-directory.md
 
 ## Reference & Tooling
-
-@agent-core/fragments/bash-strict-mode.md
-
-@agent-core/fragments/sandbox-exemptions.md
-
-@agent-core/fragments/claude-config-layout.md
 
 @agent-core/fragments/design-decisions.md
 

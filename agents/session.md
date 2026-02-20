@@ -18,10 +18,7 @@
 
 - [ ] **Diagnose compression detail loss** — RCA against commit `0418cedb` | sonnet
 
-- [ ] **Context optimization** — Fragment demotion from CLAUDE.md | sonnet
-  - Plan: context-optimization | Status: designed
-  - Depends on: Hook batch (denylist + PreToolUse hook replace project-tooling.md)
-  - ~6.6k tokens demotable (26%), injection points in worktree/design/orchestrate/hook-dev/plugin-dev/token-efficient-bash skills
+- [x] **Context optimization** — ~5.8k tokens demoted from CLAUDE.md (vet-requirement, sandbox-exemptions, claude-config-layout, bash-strict-mode removed; error-handling + workflows-terminology trimmed)
 
 - [ ] **Worktree CLI default** — Positional = task name, `--branch` = bare slug | `/runbook plans/worktree-cli-default/outline.md` | sonnet
   - Plan: worktree-cli-default | Status: designed
