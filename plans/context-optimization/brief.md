@@ -34,7 +34,22 @@ Always-loaded fragments via CLAUDE.md @-references consume 25.5k tokens. This is
 ## Blocked items (not demotable yet)
 
 - **learnings.md (6.1k)** — Consolidation via /remember is premature. Entries need aging to confirm validity before graduating to permanent docs. 80-line soft limit is attention budget, not consolidation trigger.
-- **memory-index.md (3.7k)** — Grows linearly. Restructuring to tool-based lookup deferred until usage data exists (proactive scanning vs explicit /when /how invocation).
+
+## Unblocked: memory-index.md (3.7k tokens → demotable)
+
+**Usage data now exists** (from when-recall-evaluation worktree, 2026-02-20):
+
+- 801 sessions scanned across 71 project directories (main + worktrees)
+- `/when` invoked in 8 of 193 post-merge sessions (4.1%), 22 total calls
+- All clustered in one week — likely orchestration-prompted, not organic
+- Direct decision file reads unchanged: 21.2% pre → 21.8% post
+- Total improvement over baseline: 1.1× (noise)
+
+**Root cause:** `/when` requires metacognitive recognition ("I might be wrong about this decision") — same bottleneck as passive index scanning. Changing the action (Read → Skill) didn't change the recognition step. Agents confident in their approach don't seek contrary guidance.
+
+**Recommendation:** Demote memory-index.md from always-loaded. 3.7k tokens for 4.1% usage is the worst cost/benefit ratio in CLAUDE.md. The index still works as a backing store — `/when` skill loads it on demand. Removing it from context saves tokens without degrading recall (already near-zero organic usage).
+
+**Implication for hook batch:** If hook-based topic detection + forced injection lands (Phase 1 items 8-9), the hook script can query the index mechanically. The index becomes infrastructure for hooks, not agent-visible context. This reinforces demotion — the index serves code, not the agent's attention.
 
 ## Dependencies
 
@@ -55,4 +70,5 @@ NOT blocking `git commit` — /commit skill uses it internally. Deferred until S
 - Vet-requirement fragment is passive — never fires as ambient awareness. Commit skill gate is the actual enforcement. Remove entirely, no stub needed.
 - "Frequently useful" ≠ "always needed." Initial analysis was too conservative.
 - doc-writing and release-prep skills are rarely used but full-session when active. Include them in fragment dispatch analysis as injection targets.
-- ~20% savings near-term, ~30% after Session CLI unblocks vet-requirement and execute-rule demotion.
+- ~20% savings near-term → ~34% with memory-index demotion (+3.7k tokens), ~38% after Session CLI unblocks vet-requirement and execute-rule demotion.
+- Evidence: `tmp/when-recall-eval-report.md` and `tmp/when-recall-eval.py` in when-recall-evaluation worktree.

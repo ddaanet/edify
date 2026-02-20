@@ -55,6 +55,8 @@
 - [ ] **Deslop remaining skills** — Prose quality pass on skills not yet optimized (handoff and commit done) | sonnet
 - [ ] **Pending task capture wording** — Fix agent tendency to capture pending tasks verbatim instead of rewording with context from the discussion | opus
 
+- [x] **When recall evaluation** — sonnet
+
 ## Worktree Tasks
 
 - [ ] **Pipeline skill updates** → `pipeline-skill-updates` — `/design` | opus | restart
