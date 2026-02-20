@@ -169,10 +169,10 @@ def test_rm_command_path_resolution(
     assert not worktree_path.exists()
 
 
-def test_rm_command_dirty_tree_warning(
+def test_rm_command_blocks_dirty_worktree(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
-    """Rm command warns when worktree has uncommitted changes."""
+    """Rm command blocks when worktree has uncommitted changes."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
@@ -186,10 +186,9 @@ def test_rm_command_dirty_tree_warning(
     test_file.write_text("uncommitted content")
 
     result = CliRunner().invoke(worktree, ["rm", "--confirm", "test-slug"])
-    assert result.exit_code == 0
-    assert "Warning: worktree has" in result.output
-    assert "uncommitted files" in result.output
-    assert not worktree_path.exists()
+    assert result.exit_code == 2
+    assert "uncommitted" in result.output.lower()
+    assert worktree_path.exists(), "worktree should not be removed"
 
 
 def test_rm_worktree_registration_probing(

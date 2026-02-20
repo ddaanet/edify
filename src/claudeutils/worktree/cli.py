@@ -24,7 +24,6 @@ from claudeutils.worktree.utils import (
     _git,
     _is_branch_merged,
     _is_merge_commit,
-    _is_parent_dirty,
     _is_submodule_dirty,
     _parse_worktree_list,
     _probe_registrations,
@@ -228,7 +227,15 @@ def new(slug: str | None, base: str, session: str, task: str, session_md: str) -
         if (path := wt_path(slug, create_container=True)).exists():
             click.echo(f"Error: existing directory {path}", err=True)
             raise SystemExit(1)
-        _setup_worktree(path, slug, base, session, task)
+        try:
+            _setup_worktree(path, slug, base, session, task)
+        except (subprocess.CalledProcessError, OSError):
+            if path.exists():
+                shutil.rmtree(path)
+            container = path.parent
+            if container.exists() and not list(container.iterdir()):
+                container.rmdir()
+            raise
         if task:
             session_md_path = Path(session_md)
             if not session_md_path.exists():
@@ -300,6 +307,23 @@ def _delete_branch(slug: str, removal_type: str | None) -> None:
         raise SystemExit(1)
 
 
+def _delete_submodule_branch(slug: str) -> None:
+    """Delete branch in agent-core submodule if it exists."""
+    agent_core = Path("agent-core")
+    if not agent_core.exists() or not (agent_core / ".git").exists():
+        return
+    r = subprocess.run(
+        ["git", "-C", "agent-core", "branch", "-D", slug],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if r.returncode != 0 and "not found" not in r.stderr.lower():
+        click.echo(
+            f"Submodule branch {slug} deletion failed: {r.stderr.strip()}", err=True
+        )
+
+
 def _check_confirm(slug: str, confirm: bool) -> None:  # noqa: FBT001
     if not confirm:
         click.echo(
@@ -310,20 +334,21 @@ def _check_confirm(slug: str, confirm: bool) -> None:  # noqa: FBT001
         raise SystemExit(2)
 
 
-def _warn_if_dirty(worktree_path: Path) -> None:
-    if worktree_path.exists():
-        status = _git("-C", str(worktree_path), "status", "--porcelain", check=False)
-        if status:
-            n = len(status.strip().split("\n"))
-            click.echo(f"Warning: worktree has {n} uncommitted files")
-
-
 def _update_session_and_amend(slug: str) -> bool:
     session_md_path = Path("agents/session.md")
     if not session_md_path.exists():
         return False
     remove_worktree_task(session_md_path, slug, slug)
     if not _is_merge_commit():
+        return False
+    parent_status = _git("status", "--porcelain", check=False)
+    other_dirty = [
+        line
+        for line in parent_status.strip().split("\n")
+        if line and not line.endswith("agents/session.md")
+    ]
+    if other_dirty:
+        click.echo("Warning: skipping session amend (parent repo dirty)", err=True)
         return False
     status_output = _git("status", "--porcelain", "agents/session.md", check=False)
     if not status_output.strip():
@@ -354,13 +379,18 @@ def rm(slug: str, confirm: bool, force: bool) -> None:  # noqa: FBT001
 
     worktree_path = _get_worktree_path_for_branch(slug) or wt_path(slug)
     if not force:
-        if _is_parent_dirty(exclude_path=str(worktree_path.parent)):
-            click.echo(
-                "Parent repo has uncommitted changes. "
-                "Commit or stash before removing worktree.",
-                err=True,
+        if worktree_path.exists():
+            status = _git(
+                "-C", str(worktree_path), "status", "--porcelain", check=False
             )
-            raise SystemExit(2)
+            if status.strip():
+                n = len(status.strip().split("\n"))
+                click.echo(
+                    f"Worktree has {n} uncommitted file(s). "
+                    "Commit or stash before removing worktree.",
+                    err=True,
+                )
+                raise SystemExit(2)
         if _is_submodule_dirty():
             click.echo(
                 "Submodule (agent-core) has uncommitted changes. "
@@ -374,8 +404,6 @@ def rm(slug: str, confirm: bool, force: bool) -> None:  # noqa: FBT001
         branch_exists = True
         removal_type = "focused"
     parent_reg, submodule_reg = _probe_registrations(worktree_path)
-
-    _warn_if_dirty(worktree_path)
     amended = _update_session_and_amend(slug)
 
     if parent_reg or submodule_reg:
@@ -392,6 +420,7 @@ def rm(slug: str, confirm: bool, force: bool) -> None:  # noqa: FBT001
 
     if branch_exists:
         _delete_branch(slug, removal_type)
+        _delete_submodule_branch(slug)
     amend_note = " Merge commit amended." if amended else ""
     detail = " (focused session only)" if removal_type == "focused" else ""
     prefix = "Removed worktree" if removal_type is None else "Removed"

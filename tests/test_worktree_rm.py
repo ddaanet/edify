@@ -33,27 +33,6 @@ def test_rm_basic(
     assert "removed" in result.output.lower()
 
 
-def test_rm_dirty_warning(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
-) -> None:
-    """Warns about uncommitted changes but proceeds with removal."""
-    repo_path = tmp_path / "repo"
-    repo_path.mkdir()
-    monkeypatch.chdir(repo_path)
-
-    init_repo(repo_path)
-    worktree_path = _create_worktree(repo_path, "test-feature", init_repo)
-    (worktree_path / "newfile.txt").write_text("uncommitted")
-
-    runner = CliRunner()
-    result = runner.invoke(worktree, ["rm", "--confirm", "test-feature"])
-
-    assert result.exit_code == 0
-    assert not worktree_path.exists()
-    assert not _branch_exists("test-feature")
-    assert "uncommitted" in result.output.lower() or "warning" in result.output.lower()
-
-
 def test_rm_branch_only(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:

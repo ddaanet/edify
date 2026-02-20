@@ -158,3 +158,55 @@ def test_new_worktree_submodule(
         check=True,
     )
     assert result.stdout.strip() == "existing-feature"
+
+
+def test_rm_deletes_submodule_branch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    init_repo: Callable[[Path], None],
+    setup_repo_with_submodule: Callable[[Path, Callable[[Path], None]], None],
+) -> None:
+    """Rm --confirm deletes both parent and submodule branches."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+
+    setup_repo_with_submodule(repo_path, init_repo)
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["new", "test-feature"])
+    assert result.exit_code == 0
+
+    # Precondition: submodule branch exists
+    sub_branch = subprocess.run(
+        ["git", "-C", "agent-core", "branch", "--list", "test-feature"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert "test-feature" in sub_branch.stdout, "submodule branch should exist"
+
+    result = runner.invoke(worktree, ["rm", "--confirm", "test-feature"])
+    assert result.exit_code == 0
+
+    # Parent branch gone
+    parent_branch = subprocess.run(
+        ["git", "branch", "--list", "test-feature"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert "test-feature" not in parent_branch.stdout
+
+    # Submodule branch gone
+    sub_branch = subprocess.run(
+        ["git", "-C", "agent-core", "branch", "--list", "test-feature"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert "test-feature" not in sub_branch.stdout, "submodule branch should be deleted"
+
+    # Worktree directory removed
+    container_path = tmp_path / "repo-wt"
+    assert not (container_path / "test-feature").exists()
