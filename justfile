@@ -20,9 +20,7 @@ precommit:
     #!{{ bash_prolog }}
     sync
     run-checks
-    pytest_output=$(safe pytest 2>&1)
-    echo "$pytest_output"
-    if echo "$pytest_output" | grep -q "skipped"; then fail "Tests skipped — all tests must run"; fi
+    run-pytest
     run-line-limits
     report-end-safe "Precommit"
 
@@ -328,9 +326,7 @@ lint: format
     report "ruff check" ruff check -q --ignore=$ruff_ignores
     report "docformatter -c" docformatter -c src tests
     report "mypy" mypy
-    pytest_output=$(safe pytest 2>&1)
-    echo "$pytest_output"
-    if echo "$pytest_output" | grep -q "skipped"; then fail "Tests skipped — all tests must run"; fi
+    run-pytest
     report-end-safe "Lint"
 
 # Check code style
@@ -566,6 +562,31 @@ run-checks() {
     report "ruff check" ruff check -q
     report "docformatter -c" docformatter -c src tests
     report "mypy" mypy
+}
+
+run-pytest() {
+    # Test sentinel: skip pytest if inputs unchanged
+    local sentinel="tmp/.test-sentinel"
+    mkdir -p tmp
+    local current_hash
+    current_hash=$( {
+        python3 --version 2>&1
+        git ls-files -z src/ tests/ | sort -z | xargs -0 cat
+        cat pyproject.toml
+    } | cksum )
+    if [ -f "$sentinel" ] && [ "$(cat "$sentinel")" = "$current_hash" ]; then
+        echo "Tests cached (inputs unchanged)"
+        return
+    fi
+    local pytest_output pytest_failed=false
+    pytest_output=$(pytest 2>&1) || pytest_failed=true
+    echo "$pytest_output"
+    if echo "$pytest_output" | grep -q "skipped"; then fail "Tests skipped — all tests must run"; fi
+    if [ "$pytest_failed" = true ]; then
+        status=false
+    else
+        echo "$current_hash" > "$sentinel"
+    fi
 }
 
 run-line-limits() {

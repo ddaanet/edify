@@ -50,9 +50,12 @@
   - Subsumes: Rename vet agents (FR-3), Codebase quality sweep (FR-4)
   - Absorbs: integration-first-tests
 
+- [ ] **Copy sentinel on worktree new** — Copy `tmp/.test-sentinel` during `wt-new` so worktrees inherit cached test state | sonnet
+  - Diamond TDD: behavioral tests for sentinel copy, edge cases (missing sentinel, stale sentinel)
+  - Target: `wt-new` recipe in justfile
+
 ## Worktree Tasks
 
-- [ ] **Precommit test sentinel** → `precommit-test-sentinel` — Sentinel file caches passing test suite; rerun only when python version, pyproject.toml, conftest.py, or src/ change | sonnet
 
 - [ ] **Worktree rm fixes** → `worktree-rm-fixes` — Batch: (1) dirty check fails on parent instead of target worktree, (2) broken worktree from failed `new` (empty dir, exit 255), (3) `rm --confirm` skips submodule branch cleanup | sonnet
 
