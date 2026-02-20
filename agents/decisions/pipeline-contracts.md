@@ -226,3 +226,47 @@ Inline phases in orchestrator-plan.md use `Execution: inline` (vs `Execution: st
 **Anti-pattern:** Conditional dispatch based on fix size or "architectural" judgment (e.g., "small fix → direct, design gap → /requirements"). Reintroduces judgment at a stage that should be mechanical.
 
 **Correct pattern:** Unconditional `/design` for all findings. `/design` triage handles proportionality — simple fixes execute directly, complex ones get full treatment. No routing judgment at review time.
+
+## When Selecting Review Model
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Matching review model to author's model ("haiku wrote it → sonnet reviews it"). Also: blanket opus review because orchestrator is opus (inheritance makes everything opus).
+
+**Correct pattern:** Match review model to the correctness property being verified:
+- State machine routing, architectural wiring, design invariant compliance → opus
+- Behavioral changes within functions (check=False, abort removal) → sonnet
+- Prose artifacts consumed by LLMs → opus
+- Mechanical substitutions → sonnet (test pass/fail is sufficient signal)
+
+**Rationale:** Haiku can write state machine code that looks plausible but has subtle wiring errors. These are architectural properties that sonnet may accept. Conversely, opus reviewing grep-and-replace is waste.
+
+## When Holistic Review Applies Fixes
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Fixing one reference to a changed value without checking for other references in the same artifact.
+
+**Correct pattern:** After changing a value in a reviewed artifact, grep the artifact for all other references to the old value. Fix-all means all occurrences, not just the first one found.
+
+**Evidence:** Cycle 2.1 step file had "exit code is 0 or 3" in assertions but "Assert exit code == 3" in test setup — agent writing test would see conflicting instructions.
+
+## When Scoping Vet For Cross-Cutting Invariants
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Scoping vet "Changed files" to only files modified in the current phase. For cross-cutting design decisions (D-8 "all output to stdout", NFR-2 "no data loss"), the invariant domain spans the entire call graph.
+
+**Correct pattern:** Add "Verification scope" to vet execution context listing all files that participate in the cross-cutting invariant. Identify via grep (e.g., `err=True` across merge call graph for D-8).
+
+**Evidence:** resolve.py has `err=True` calls in the merge code path but wasn't in Phase 5's changed-files list.
+
+## When Reviewing Final Orchestration Checkpoint
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Scoping the final phase vet to only that phase's changes, even when the checkpoint already performs cross-cutting audits.
+
+**Correct pattern:** Final checkpoint should include lifecycle audits for all stateful objects created during the implementation (MERGE_HEAD, staged content, lock files). Same methodology as exit code audit: trace through all code paths, flag any path that exits success with state still active.
+
+**Evidence:** Phase 5 opus vet audited all 12 SystemExit calls (cross-cutting) but did not audit MERGE_HEAD lifecycle — same class of trace applied to git state instead of exit codes.

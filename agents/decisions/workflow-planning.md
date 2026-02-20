@@ -301,3 +301,13 @@ This is not full test code — it is precise prose that preserves the specificat
 **Extensibility:** New domain = validation skill file + rules file + planner awareness (3-step template, no framework)
 
 **Impact:** Domain-specific validation integrated into standard vet workflow without agent proliferation or orchestrator complexity.
+
+### When Adding A New Variant To An Enumerated System
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Updating only the authoritative definition section (type table, contract) but not downstream sections that enumerate existing variants.
+
+**Correct pattern:** After updating the authoritative definition, grep all affected files for existing variant names (e.g., "tdd.*general", "both TDD and general") and update every enumeration site.
+
+**Evidence:** Skill-reviewer found 1 critical (Phase 0.75 outline generation wouldn't produce inline phases), 3 major (description triggering, When to Use, Phase 1 expansion branch missing), 4 minor enumeration sites — all in runbook/SKILL.md alone.

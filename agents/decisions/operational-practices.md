@@ -1,6 +1,6 @@
 # Operational Practices
 
-Agent reliability patterns, artifact management, implementation practices, and known issues.
+Agent reliability patterns, artifact management, and implementation practices.
 
 ## .Artifact and Review Patterns
 
@@ -47,6 +47,16 @@ Agent reliability patterns, artifact management, implementation practices, and k
 **Correct pattern:** Include explicit deslop and factorization directives in refactor prompts.
 
 **Rationale:** Refactor agent focuses on warnings (line limits, complexity), doesn't proactively optimize for token efficiency.
+
+### When Triaging External Diagnostic Suggestions
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Treating diagnostic report output (e.g., /insights) as a backlog intake pipeline — every suggestion becomes a pending task. Inflates the task list just after compression.
+
+**Correct pattern:** Triage by routing. Superseded → discard. Skill-specific → annotate existing skill task. Simple → inline immediately (write the fragment, don't defer it). Only genuinely new substantial work becomes standalone tasks.
+
+**Evidence:** 15 suggestions triaged to 3 inlined fragments + 5 tasks + 4 annotations. Initial draft had 8 standalone tasks before user caught that fragments were single edits.
 
 ## .Agent Reliability Patterns
 
@@ -179,207 +189,12 @@ Only then does the fix address the cause, not the symptoms.
 
 **Rationale:** Writing agent can satisfy any structural check with wrong content.
 
-## .Git Workflow Patterns
+### When Inlining Reference File Subsets For Optimization
 
-### When Git Operation Fails
+**Decision Date:** 2026-02-19
 
-**Decision Date:** 2026-02-18
+**Anti-pattern:** Inline a "top N" subset of a reference file to avoid a Read call. Agent picks from the visible subset, unaware better matches exist in the full file. Creates a knowledge ceiling.
 
-**Anti-pattern:** Attributing git failure to a plausible-sounding restriction without reading the error message. Confabulating explanations ("git refuses to merge with active worktree" — false) creates false premises for subsequent decisions, deletes test coverage to work around non-existent limitations.
+**Correct pattern:** Either keep the full Read (agent sees all options) or move selection to a CLI tool (e.g., embeddings search over full corpus). Partial inlining is worse than both alternatives.
 
-**Correct pattern:** Read actual error output. Reproduce with a minimal case before restructuring. Test failures that seem like infrastructure problems may reveal real production bugs.
-
-**Deeper pattern:** Confabulation serves as license to stop investigating. A "can't be fixed" explanation converts a solvable problem into an unsolvable one, justifying coverage-reducing workarounds.
-
-### When No-Op Merge Orphans Branch
-
-**Decision Date:** 2026-02-12
-
-**Decision:** Always create merge commit when `git merge --no-commit` was initiated.
-
-**Rationale:** Without merge commit, branch is unreachable from HEAD → `git branch -d` rejects.
-
-### When Naming Tasks For Worktrees
-
-**Decision Date:** 2026-02-12
-
-**Decision:** Constrain task names to `[a-zA-Z0-9 ]` — slug derivation is near-identity.
-
-### When Requiring Clean Git Tree
-
-**Decision Date:** 2026-02-12
-
-**Decision:** Require clean tree before merge/rebase operations. No `git stash` workarounds.
-
-**Exception:** Session context files (session.md, learnings.md) auto-committed as pre-step.
-
-**Rationale:** Stash is fragile (conflicts on pop, lost stashes). Clean tree forces explicit state management.
-
-### When Failed Merge Leaves Debris
-
-**Decision Date:** 2026-02-12
-
-**Decision:** After merge abort, check for untracked files materialized during the attempt.
-
-**Anti-pattern:** Assume aborted merge is clean — retry fails with "untracked files would be overwritten."
-
-**Fix:** `git clean -fd -- <affected-dirs>` to remove debris, then retry.
-
-### When Git Lock Error Occurs
-
-**Decision Date:** 2026-02-12
-
-**Decision:** Stop on unexpected git lock error, report to user, wait for guidance. Never delete lock files.
-
-**Anti-pattern:** Agent removes `.git/index.lock` after git error suggests manual removal.
-
-**Rationale:** Lock may indicate active process; removal bypasses "stop on unexpected results" rule.
-
-## .Known Issues
-
-### When ClassifyHandoffIfNeeded Bug Occurs
-
-**Bug:** `ReferenceError: classifyHandoffIfNeeded is not defined` in Claude Code's SubagentStop processing.
-
-**Affected:** v2.1.27+. NOT fixed.
-
-**Scope:** Only `run_in_background=false` Task calls fail. `run_in_background=true` works.
-
-**Workaround:** Use `run_in_background=true` for Task calls.
-
-**GitHub issues:** #22087, #22544.
-
-## .Sub-agent Limitations
-
-### When Sub-Agents Cannot Spawn Sub-Agents
-
-**Limitation:** Task tool is unavailable in sub-agents. All delegation must originate from main session.
-
-**Also unavailable:** MCP tools (Context7), hooks.
-
-**Available:** Read, Grep, Glob, Bash, Write, Edit (direct tool use only).
-
-### When Resolving Session.md Conflicts During Merge
-
-**Decision Date:** 2026-02-18
-
-**Anti-pattern:** Using `git checkout main -- agents/session.md` to resolve conflicts — discards all branch-side session data (new tasks, metadata) without verification.
-
-**Correct pattern:** After any session.md conflict resolution, read the full file and compare against the known task list. Verify no tasks were dropped. Branch session.md may contain tasks added during worktree work that don't exist on main.
-
-**Evidence:** "Simplify when-resolve CLI" task existed only in worktree-merge-errors branch session.md. `checkout main --` silently dropped it. Caught only because user requested explicit content verification.
-
-### When Removing Worktrees With Submodules
-
-**Decision Date:** 2026-02-18
-
-**Anti-pattern:** `wt rm` removes worktree directory but leaves `.git/modules/agent-core/config` `core.worktree` pointing to the deleted directory. Also doesn't check if submodule branch has unmerged commits (parent repo branch merged but submodule branch diverged).
-
-**Correct pattern:** `wt rm` must (1) restore submodule's `core.worktree` to main checkout path, (2) check submodule branch merge status before deletion. Both are data-loss vectors — stale config breaks all submodule operations, unmerged submodule branch loses commits.
-
-**Evidence:** `git -C agent-core` failed with "cannot chdir to removed directory" after `wt rm runbook-skill-fixes`. Agent-core branch had 3 files of real diffs silently orphaned.
-
-### When Importing Artifacts From Worktrees
-
-**Decision Date:** 2026-02-18
-
-**Transport:** `git show <branch>:<path>` from main — no cross-tree sandbox access needed. All worktrees share the git object store.
-
-**Scope:** Only design.md and requirements.md are import candidates (small, authored). Runbooks (phase files, steps, orchestrator plans) are bulky, generated, implementation-oriented — require explicit intent, not casual import.
-
-**Ownership check:** Before importing, verify no active worktree owns the target plan directory (`git worktree list` + check branch names). Importing into a worktree-owned plan creates merge conflicts when that worktree merges back.
-
-**Supersedes:** "When worktree agents need cross-tree access" (additionalDirectories unnecessary for transport).
-
-### When Workaround Requires Creating Dependencies
-
-**Decision Date:** 2026-02-18
-
-**Anti-pattern:** Escalating workarounds for a tool limitation — each fix creates a new problem requiring another fix. Each step locally rational, trajectory absurd.
-
-**Stop condition:** If a workaround requires more than 2 steps or introduces new dependencies, stop and report the tool limitation. "Pre-resolve conflict" is bounded: edit conflicting regions of files that ALREADY EXIST on both sides. Creating new files, new modules, or new dependency chains means you've left "pre-resolution" and entered "manual reimplementation."
-
-**Deeper pattern:** Sunk cost momentum — each workaround invests more context, making "just one more fix" feel cheaper than stopping. The "stop on unexpected results" rule doesn't fire because each step is rationalized as part of the documented workaround path.
-
-**Evidence:** 6-step escalation chain during design-workwoods merge. Two commits on main, partially-created planstate module, still not merged.
-
-### When Recovering Agent Outputs
-
-**Decision Date:** 2026-02-18
-
-**Anti-pattern:** Manually reading agent session log and retyping content.
-
-**Correct pattern:** Script extraction from task output files. Agent Write calls are JSON-structured in `tmp/claude/.../tasks/<agent-id>.output`. Parse with jq or Python, recover deterministically.
-
-**Prototype:** `plans/prototypes/recover-agent-writes.py`
-
-## .Python Patterns
-
-### When Extracting Git Helper Functions
-
-**Pattern:** Private `_git(*args, check=True, **kwargs) -> str` helper — 1 line per call, fits 88-char limit.
-
-**Evidence:** 24 calls replaced, 477→336 lines (30% reduction) in worktree cli.py.
-
-### When Fixture Shadowing Creates Dead Code
-
-**Anti-pattern:** Defining local function with same name as pytest fixture — function is unreachable dead code.
-
-**Detection:** Grep for function definitions that duplicate fixture names, check if test functions use fixture injection.
-
-### When Test Corpus Defines Correct Behavior
-
-**Anti-pattern:** Rewriting fixtures to avoid triggering known bugs.
-
-**Correct pattern:** Fixtures define correct behavior — failing tests are the signal that code needs fixing.
-
-## .Memory Index Patterns
-
-### .When Index Keys Must Be Exact
-
-**Decision:** Index entry key must exactly match heading key — fuzzy matching is only for resolver runtime recovery.
-
-**Rationale:** Exact keys are deterministic and debuggable.
-
-### When DP Matrix Has Zero-Ambiguity
-
-**Decision:** Initialize DP matrix with -inf for impossible states, 0.0 only for base case.
-
-**Evidence:** "when mock tests" scored 128.0 against candidate with no matching chars — positive score from nothing.
-
-## .Runbook Validation Patterns
-
-### When Phase Numbering Is Flexible
-
-**Decision:** Detect starting phase number from first file, validate sequential from that base.
-
-**Rationale:** Design decisions may use 0-based or 1-based numbering.
-
-### When Checking Self-Referential Modification
-
-**Anti-pattern:** Runbook step uses `find plans/` — includes the executing plan's own directory.
-
-**Correct pattern:** Exclude plan's own directory or enumerate specific targets.
-
-## .Naming Patterns
-
-### When Avoiding CLI Skill Name Collision
-
-**Decision:** Check CLI built-ins before naming skills.
-
-**Scope:** /help, /plan, /review, /model, /clear, /compact, and other built-in commands.
-
-### When Choosing Name
-
-**Decision:** Prioritize human discovery and recall over thematic alignment or cleverness.
-
-**Applies to:** Skill names (slash commands), agent names, command names — any user-facing identifier the human must remember or search for.
-
-**Priority order:**
-1. **Discoverability** — The word the user thinks of when they need the capability should match the handle. "I need to ground this" → `/ground`, not `/found`.
-2. **Recall** — Short, common words beat etymologically precise ones. If a user can't remember the name after one use, it's wrong.
-3. **Thematic alignment** — Nice to have (e.g., construction metaphors pairing with a plugin named "edify"), but never at the cost of discoverability.
-
-**Anti-pattern:** Choosing `/found` (Latin *fundare*, pairs with "edify") over `/ground` (the word people actually use when describing the need).
-
-**Test:** "What word would someone type if they needed this capability and didn't know the command existed?" That word is the name.
+**Rationale:** Optimization must not degrade decision quality. The agent cannot know what it hasn't seen.

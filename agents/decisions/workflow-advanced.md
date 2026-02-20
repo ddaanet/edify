@@ -94,15 +94,27 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 ### How to Name Session Tasks
 
-**Decision Date:** 2026-02-04
+**Decision Date:** 2026-02-04 (updated 2026-02-19: noun-based naming, drop pipeline verbs)
 
-**Pattern:** Task names serve as identifiers (no hash tokens needed).
+**Pattern:** Task names are noun-based prose keys identifying *what changes*. Drop pipeline-stage verbs (Design, Plan, Execute, Implement). Keep nature verbs describing the work itself (Fix, Rename, Migrate, Simplify). Pipeline stage belongs in metadata (command field, plan status).
+
+**Anti-pattern:** Prefixing task names with pipeline-stage verbs ("Design X", "Execute X"). The verb encodes the *next action*, which grows stale as the task progresses through the pipeline.
 
 **Implementation:** git log -S for on-demand history search, case-insensitive matching.
 
 **Benefit:** Near-zero marginal cost, natural language keys, context recovery via task-context.sh.
 
 **Impact:** Task names are both human-readable and machine-searchable identifiers.
+
+### When Compressing Session Tasks
+
+**Decision Date:** 2026-02-20
+
+**Anti-pattern:** Reducing task descriptions to one-liners during session compression. Contextual notes (insights inputs, scope expansions, discussion conclusions, domain boundaries) exist only in session task notes — plan artifacts don't contain them.
+
+**Correct pattern:** Before compressing, classify each sub-item: (a) duplicates plan artifact content → safe to trim, (b) contextual-only (insights, scope decisions, validation approaches) → must preserve. Only trim category (a).
+
+**Evidence:** Compression at `0418cedb` lost detail from 12 tasks. Recovery required `git show` against pre-compression commit.
 
 ## .Commit Workflow Patterns
 

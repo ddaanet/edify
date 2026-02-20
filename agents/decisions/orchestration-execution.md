@@ -72,6 +72,16 @@ Patterns for delegation, orchestration protocol, model selection, and execution-
 
 **Rationale:** Review agents operate on filesystem state; uncommitted work may be stale or inconsistent.
 
+### When Step Agents Leave Uncommitted Files
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Step agents create report files (execution notes, diagnostics) but don't commit them, leaving untracked files that violate the "clean tree after every step" invariant.
+
+**Correct pattern:** Step agents must commit ALL generated artifacts including reports. If the step creates a report, the step's commit includes it.
+
+**Evidence:** Cycles 2.2, 3.1 left report files uncommitted. Orchestrator committed them manually each time.
+
 ## .Orchestration Protocol
 
 ### When Running Post-Step Verification
@@ -93,6 +103,22 @@ Patterns for delegation, orchestration protocol, model selection, and execution-
 **Evidence:** 8 concurrent sonnet agents produced correct output; git handled concurrent commits.
 
 **Constraint:** Per-phase review needs full outline context. Holistic review runs once after all phases complete.
+
+### When Assuming Interactive Context
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Assuming orchestration is interactive (user watching, can ctrl+c hung agents). Designing timeout as low-priority because "human-in-the-loop provides timeout for free."
+
+**Correct pattern:** Orchestration is unattended — user focuses elsewhere. Timeout is a real operational requirement, not a nice-to-have. Calibrate from historical data.
+
+### When Designing Timeout Mechanisms
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Treating "dual signal" (time OR tool count) as reducing false positives. OR-logic is the union of both kill zones — it increases false positives vs either threshold alone.
+
+**Correct pattern:** Time and tool count address independent failure modes. Spinning (high activity, no convergence) → `max_turns`. Hanging (no activity, high wall-clock) → duration timeout. Independent guards, not a combined signal.
 
 ## .Execution Escalation
 
@@ -176,6 +202,26 @@ FR-17 documents the three-tier escalation requirement. Concrete detection mechan
 **Decision:** Don't guess model tier. Ask, stay silent about it, or rely on external signal (hook).
 
 **Rationale:** No introspection API; agent consistently misidentifies as sonnet when running as opus.
+
+### When Haiku Rationalizes Test Failures
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Haiku commits code despite failing regression tests, rationalizing failures as "expected behavior change." The regressions were real bugs — branches at HEAD satisfy `git merge-base --is-ancestor`, triggering wrong state detection.
+
+**Correct pattern:** Regression test failures during TDD GREEN phase are bugs, not expected behavior. The step file's regression check command defines the contract.
+
+**Evidence:** Cycle 1.2 haiku committed with 3 failing tests. Required sonnet escalation to diagnose and fix.
+
+### When Classifying Errors By Tier
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Moving ALL error classification to orchestrator because haiku can't classify. Sweeping change that ignores capable agents.
+
+**Correct pattern:** Tier-aware classification — sonnet/opus execution agents self-classify and report classified error; haiku agents report raw errors for orchestrator to classify.
+
+**Rationale:** Execution agent has full error context (stack trace, file state). Transmitting to orchestrator for classification loses fidelity or costs tokens.
 
 ## .Scripting Principles
 
@@ -286,3 +332,25 @@ FR-17 documents the three-tier escalation requirement. Concrete detection mechan
 **Decision:** Primary mode is conversation-to-artifact capture; elicitation is secondary mode for cold-start.
 
 **Rationale:** User's actual need was "formalize what we just discussed" not "guide me through questions".
+
+## .Measurement Patterns
+
+### When Measuring Agent Durations
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Computing duration as timestamp delta between tool_use and tool_result — includes laptop sleep time, producing artifact "outliers."
+
+**Correct pattern:** Use `duration_ms` from Task result metadata when available. Cross-reference with tool_uses to validate: normal p50=6.6s/tool. Flag entries >30s/tool as sleep-inflated.
+
+**Evidence:** 13/951 entries flagged, all confirmed artifacts.
+
+### When Analyzing Sub-Agent Token Costs
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Treating `total_tokens` from CLI `<usage>` as fresh input cost. The field sums all token types (cache reads + writes + fresh) without decomposition.
+
+**Correct pattern:** Use main session first-turn `cache_creation_input_tokens` to measure system prompt size (~43K tokens p50). Use minimal-work agents (≤3 tool uses) for fixed overhead proxy.
+
+**Evidence:** 709 Task calls analyzed. Minimal-work agents: 35.7K total_tokens p50. Main session cache hit rate: 94-100% after warmup.

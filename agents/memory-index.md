@@ -114,6 +114,15 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when scrubbing learnings before design input | validate against evidence
 /when diagnosing review agent quality gaps | 2x2 experiment model tier input content controlled test
 /when temporal validation required for analysis | git history correlation
+/when relaunching similar task | resume prior agent id preserve context
+/when running multi-reviewer diagnostics | parallel independent cross-reference false positive
+/when performing root cause analysis | multi-layer stop between layers
+/when searching adjacent domains | correction not exclusion adjacent research
+/when inlining reference file subsets | knowledge ceiling partial visibility
+/when triaging external diagnostic suggestions | routing superseded annotate inline
+
+## agents/decisions/operational-tooling.md
+
 /when no-op merge orphans branch | always create merge commit
 /when naming tasks for worktrees | branch-suitable alphanumeric constraint
 /when requiring clean git tree | no stash fragile merge rebase
@@ -129,16 +138,17 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when checking self-referential modification | exclude plan own directory
 /when avoiding CLI skill name collision | check built-ins before naming
 /when choosing name | public handles discovery recall over cleverness
-/when relaunching similar task | resume prior agent id preserve context
-/when running multi-reviewer diagnostics | parallel independent cross-reference false positive
-/when performing root cause analysis | multi-layer stop between layers
-/when searching adjacent domains | correction not exclusion adjacent research
 /when git operation fails | read actual error confabulation license stop
 /when resolving session.md conflicts | verify tasks not dropped branch data
 /when removing worktrees with submodules | core.worktree restore submodule merge check
 /when importing artifacts from worktrees | git show branch transport scope ownership
 /when workaround requires creating dependencies | two-step limit stop report
 /when recovering agent outputs | task output files json extraction
+/when constraining task names for slug validity | layers dont share constraints
+/when tracking worktree tasks in session.md | inline marker filesystem query
+/when merging worktree with consolidated learnings | delta only post-consolidation
+/when comparing file versions across branches | diff content not line count
+/when CLI command fails and raw commands denied | routing signal use wrapper
 
 ## agents/decisions/orchestration-execution.md
 
@@ -169,6 +179,13 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when vet flags unused code | check test callers design intent before deleting
 /when delegating with corrections | exclude wrong item dont mention
 /when ordering post-orchestration tasks | diagnostic fixes improvements sequence
+/when step agents leave uncommitted files | clean tree report commit invariant
+/when assuming interactive context | orchestration unattended timeout real
+/when designing timeout mechanisms | independent guards spinning hanging
+/when haiku rationalizes test failures | regression green phase bugs
+/when classifying errors by tier | tier-aware self-classify report
+/when measuring agent durations | sleep inflation tool use rate
+/when analyzing sub-agent token costs | total_tokens cache decomposition
 
 ## agents/decisions/pipeline-contracts.md
 
@@ -190,6 +207,10 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when reviewing skill deliverable | cross-project context skill-reviewer interactive
 /when concluding reviews | severity counts pending task no merge-readiness
 /when routing implementation findings | unconditional design triage proportionality
+/when selecting review model | match model to correctness property
+/when holistic review applies fixes | grep all references fix-all occurrences
+/when scoping vet for cross-cutting invariants | verification scope full call graph
+/when reviewing final orchestration checkpoint | lifecycle audit stateful objects
 
 ## agents/decisions/project-config.md
 
@@ -267,6 +288,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /how name session tasks | prose keys task naming
 /when committing rca fixes
 /when running precommit validation
+/when compressing session tasks | classify sub-items contextual vs artifact
 
 ## agents/decisions/workflow-planning.md
 
@@ -286,6 +308,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /how write green phase descriptions
 /when verifying model analysis results
 /how implement domain validation
+/when adding a new variant to enumerated system | grep downstream enumeration sites
 
 ## agents/decisions/workflow-core.md
 
@@ -325,4 +348,4 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when using hook based parsing
 /when writing methodology | ground skill diverge converge external research
 /when design ceremony continues after uncertainty | two gates entry mid-stream
-/when design resolves to simple execution | execution readiness gate exit ramp
+/when design resolves to simple execution | execution readiness gate exit ramp prose inline

@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-20
 
-**Status:** 5 parallel worktrees created, stale worktree removed, compression detail loss recovered.
+**Status:** Learnings consolidated (24 entries → 6 decision files), operational-practices.md split for line limit.
 
 ## Completed This Session
 
@@ -18,6 +18,14 @@
 - `handoff-cli-tool/outline.md`: D-4 domain boundary table, learnings flow, gitmoji validation approach
 - `orchestrate-evolution/design.md`: FR-8 ping-pong TDD agent pattern (deferred)
 - `orchestrate-evolution/outline.md`: FR-8 in out-of-scope section
+
+**Learnings consolidation:** `/remember` inline — 24 entries consolidated, 1 dropped (redundant), 5 retained:
+- 6 decision files updated: workflow-optimization, pipeline-contracts, orchestration-execution, operational-practices, workflow-planning, workflow-advanced
+- 1 fragment extended: no-confabulation.md (threshold-specific guidance)
+- 21 memory index entries added
+- learnings.md: 123→27 lines
+- operational-practices.md split → operational-practices.md (200 lines) + operational-tooling.md (258 lines) to resolve 400-line limit
+- "When All Work Is Prose Edits" merged into "When Design Resolves To Simple Execution" (subsumption, not independent gate)
 
 ## Pending Tasks
 

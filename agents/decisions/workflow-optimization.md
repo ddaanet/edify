@@ -112,6 +112,8 @@ File count is a proxy — 7 files with independent additive changes can be simpl
 
 **Rationale:** Design can resolve complexity. A job correctly classified as Complex for design may produce Simple execution. The gate is subtractive (creates exit ramp), not additive (more ceremony).
 
+**Strongest signal:** All-prose phases with no feedback loop — execute inline from design outline. Delegation ceremony (agent startup, file re-reads, report write/read) exceeds edit cost. Evidence: error-handling runbook used 11 opus agents for ~250 lines of prose; plan-reviewer caught a regression *introduced* by the generation process.
+
 ## .Research and Methodology
 
 ### When Writing Methodology
