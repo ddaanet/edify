@@ -29,3 +29,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Trusting Edit tool "success" confirmation after Bash has modified the file. The tool reports success but the write doesn't persist — silently dropped.
 - Correct pattern: Use Write tool for files that need guaranteed writes, especially after Bash commands (sed, git mv) have touched the file in the same session. Also: git mv and sed on tracked files require `dangerouslyDisableSandbox: true`.
 - Evidence: Multiple Edit calls returned "success" on cli.py but cat confirmed no changes. Write tool succeeded on first attempt.
+## When editing skill files
+- Anti-pattern: Modifying skill `description` frontmatter without loading the platform skill guide first. Wrote action-first descriptions for 17 skills, then had to revert all 17 — `git checkout HEAD -- path/` would have been one command.
+- Correct pattern: Load `/plugin-dev:skill-development` before editing any skill file. The guide mandates "This skill should be used when..." (third-person with trigger phrases). `.claude/rules/skill-development.md` references the skill but doesn't inline the constraint. The H1 heading (not `description`) is what Claude Code displays in the skill picker — fix generic `<Name> Skill` titles there.
+- Evidence: 17 description edits + 17 reverts in same session. User noted git would have been cheaper.

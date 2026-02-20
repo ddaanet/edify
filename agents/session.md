@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-20
 
-**Status:** Implemented brief skill.
+**Status:** Standardized skill H1 headings across all 26 skills.
 
 ## Completed This Session
 
@@ -10,9 +10,10 @@
 - Skill-reviewer pass, self-reviewed execute-rule.md edit
 - Design decision: task pickup sufficient for consumer (resume-path gap is known limitation for v1)
 
-**Skill description format:**
-- Established action-first pattern for CLI display: `<functional purpose>. Triggers: "<phrase 1>", "<phrase 2>".`
-- Applied to brief skill; remaining skills need conversion
+**Skill H1 headings:**
+- CLI displays H1 heading (not frontmatter `description`) in the skill picker
+- Replaced all generic `<Name> Skill` H1s with descriptive verb phrases across 26 skills
+- Frontmatter `description` format: `plugin-dev:skill-development` mandates "This skill should be used when..." — do not change
 
 ## Pending Tasks
 
@@ -49,10 +50,7 @@
 - [x] **Brief skill** — Lightweight skill for cross-tree context transfer | sonnet
   - Plan: brief-skill | Status: complete
 
-- [ ] **Standardize skill descriptions** — Convert all skills from "This skill should be used when..." to action-first format with appended triggers | sonnet
-  - Pattern: `<functional purpose>. Triggers: "<phrase 1>", "<phrase 2>".`
-  - ~16 skills need conversion (design, next, error-handling, prioritize, how, when, ground, reflect, worktree, gitmoji, doc-writing, deliverable-review, remember, memory-index, token-efficient-bash, handoff)
-  - Already done: brief, shelve, commit, vet, orchestrate, release-prep, runbook, requirements, opus-design-question, handoff-haiku, plugin-dev-validation, project-conventions
+- [x] **Standardize skill descriptions** — Fixed H1 headings on all 26 skills; kept "This skill should be used when..." descriptions per plugin-dev:skill-development mandate | sonnet
 
 
 ## Worktree Tasks
