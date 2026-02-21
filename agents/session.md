@@ -27,7 +27,26 @@
 - Discussion: adopted single `lifecycle.md` (append-only) over 4 marker files — resolves review loop cycle without file deletion, provides audit trail
 - Outline at `plans/planstate-delivered/outline.md` serves as design (7 decisions, 3 phases, all affected files identified)
 
+**Quality infra reform — naming taxonomy + FR extraction:**
+- Agent naming brainstorm (3 rounds, opus): bespoke deliverable → artisan, exploration → scout, plan-specific → crew-* prefix, tdd-task → test-driver, runbook-simplification-agent → runbook-simplifier, test-hooks → hooks-tester
+- 8 plan-specific `.claude/agents/*-task.md` files marked for deletion (detritus)
+- FR-3 expanded to FR-3a/3b/3c/3d subsections; FR-4 extracted to `plans/codebase-sweep/requirements.md`
+- Grounding document reframed general-first; FR-2/FR-3 requirements refined
+
 ## Pending Tasks
+
+- [ ] **Quality infra reform** — `/design plans/quality-infrastructure/requirements.md` | opus
+  - Plan: quality-infrastructure | Status: requirements
+  - 3 FRs: deslop restructuring, code density decisions, agent rename
+  - Grounding: `plans/reports/code-density-grounding.md`
+  - Subsumes: Rename vet agents (FR-3a)
+  - Absorbs: integration-first-tests
+  - Discussion outcomes: noun-based naming (corrector/reviewer/auditor/artisan/scout/test-driver/crew-*), general-first grounding framing
+  - Open: empirical evaluation of reviewer (review-only) continued relevance
+
+- [ ] **Codebase sweep** — `/design plans/codebase-sweep/requirements.md` | sonnet
+  - Plan: codebase-sweep | Status: requirements
+  - _git_ok, _fail, exception cleanup — mechanical refactoring
 
 - [ ] **Planstate delivered status** — `/runbook plans/planstate-delivered/outline.md` | sonnet
   - Plan: planstate-delivered | Status: designed
@@ -70,12 +89,6 @@
   - `rm --confirm` gate: replace with merge-status check (is branch ancestor of HEAD?). Current gate provides no safety, gives wrong error message ("use wt merge" when user already merged), agent retries immediately with `--confirm`
 
 
-- [ ] **Quality infra reform** → `quality-infra-reform` — `/design plans/quality-infrastructure/requirements.md` | opus
-  - Plan: quality-infrastructure | Status: requirements
-  - 4 FRs: deslop restructuring, code density, vet rename, code refactoring
-  - Grounding: `plans/reports/code-density-grounding.md`
-  - Subsumes: Rename vet agents (FR-3), Codebase quality sweep (FR-4)
-  - Absorbs: integration-first-tests
 
 ## Backlog
 
@@ -190,6 +203,9 @@ Planstate delivered `/runbook` (outline = design, ready for planning). Hook batc
 - `plans/hook-batch/brief.md` — Original brief (pre-design)
 - `plans/handoff-cli-tool/brief.md` — Session CLI briefs (status subcommand + commit ID requirement)
 - `plans/worktree-cli-default/outline.md` — CLI change design (positional=task, --branch=slug)
-- `plans/quality-infrastructure/requirements.md` — 4 FRs: deslop, code density, vet rename, refactoring
+- `plans/quality-infrastructure/requirements.md` — 3 FRs: deslop, code density decisions, agent rename
+- `plans/quality-infrastructure/reports/agent-naming-brainstorm.md` — naming constraints and outcomes
+- `plans/codebase-sweep/requirements.md` — mechanical refactoring (_git_ok, _fail, exceptions)
+- `plans/reports/code-density-grounding.md` — reframed general-first
 - `plans/orchestrate-evolution/design.md` — Orchestration evolution design (ready for runbook)
 - `plans/handoff-cli-tool/outline.md` — Combined session CLI outline (handoff + commit + status)

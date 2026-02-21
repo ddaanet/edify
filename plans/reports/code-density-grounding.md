@@ -12,50 +12,45 @@ Date: 2026-02-18
 
 ## Adapted Methodology
 
-### Principle 1: Git State Queries Return Booleans
+### Principle 1: Expected State Checks Return Booleans
 
-**Problem:** Two inconsistent idioms for "does branch exist?" — raw subprocess LBYL (5-6 lines under Black) and EAFP try/except (5 lines, treats expected condition as exceptional).
+**General principle:** When a condition is a normal program state (not an exceptional event), check it with a boolean return, not an exception. EAFP is idiomatic for IO where failure is uncommon (Real Python, Python glossary), but expected states — existence checks, availability queries — are not exceptional (charlax/antipatterns: "Exception handling is for unexpected or exceptional events").
 
-**Grounding:** EAFP is idiomatic for IO operations where failure is uncommon (Real Python, Python glossary). But "branch doesn't exist" in worktree operations is a *normal program state*, not an exceptional event (charlax/antipatterns: "Exception handling is for unexpected or exceptional events"). Neither EAFP nor verbose LBYL is correct here.
+**Grounding:** Real Python EAFP/LBYL guide, Python glossary, charlax/antipatterns.
 
-**Solution:** `_git_ok(*args) -> bool` — boolean wrapper returning `returncode == 0`. Covers 13 of 15 raw subprocess sites. Two outliers needing stderr remain as raw calls.
+**Project instance:** Two inconsistent idioms for "does branch exist?" — raw subprocess LBYL (5-6 lines under Black) and EAFP try/except (treats expected condition as exceptional). Implemented as `_git_ok(*args) -> bool` — boolean wrapper returning `returncode == 0`. Covers 13 of 15 raw subprocess sites. Two outliers needing stderr remain as raw calls.
 
-**Evidence:** Internal audit found `_git()` already eliminates 20+ raw stdout calls. `_git_ok()` eliminates the remaining 13 returncode-only calls. Together they eliminate all raw `subprocess.run(["git", ...])` from cli.py and merge.py.
+### Principle 2: Consolidate Display and Exit
 
-### Principle 2: Error Exits Are Single Calls
+**General principle:** Error termination should be a single call, not a display+exit sequence. CLI frameworks recognize this — Click's `ClickException` and `UsageError` consolidate display+exit into a single raise (Click docs). When display and exit are separate statements, they drift apart (different messages, forgotten exits, inconsistent stderr routing).
 
-**Problem:** 18 instances of `click.echo(msg, err=True)` + `raise SystemExit(N)` across worktree module. 3-6 lines each under Black.
+**Grounding:** Click exception hierarchy docs. Alternative considered: `ClickException` subclass — rejected for this project because hardcoded exit codes (UsageError→2, Abort→1) don't map to the project's exit code semantics.
 
-**Grounding:** Click's own exception hierarchy (`ClickException`, `UsageError`) consolidates display+exit into a single raise (Click docs). But Click's built-in exceptions have hardcoded exit codes (UsageError→2, Abort→1) and require `@click.pass_context`. A module-level helper is more flexible.
+**Project instance:** 18 instances of `click.echo(msg, err=True)` + `raise SystemExit(N)` across worktree module. Implemented as `_fail(msg, code=1) -> Never` in utils.py. `Never` return type informs type checkers that control flow terminates.
 
-**Solution:** `_fail(msg, code=1) -> Never` in utils.py. Preserves exit code semantics (1=error, 2=safety gate). Type annotation `Never` informs type checkers that control flow terminates.
+### Principle 3: Formatter Expansion Signals Abstraction Need
 
-**Alternative considered:** Click's `ClickException` subclass with custom exit code. Rejected: adds class hierarchy overhead for what is a 3-line function. The project's exit code semantics (1 vs 2) don't map to Click's exception types.
-
-### Principle 3: Black Expansion Signals Abstraction Need
-
-**Problem:** Raw `subprocess.run()` with keyword args expands to 5-6 lines under Black. The `_git()` helper collapses these to 1 line, but callers bypass it when they need returncode instead of stdout.
+**General principle:** When a call site consistently takes 5+ lines after opinionated formatting, the call has too many parameters for inline use. Extract a helper whose defaults encode the common kwargs. Formatting tools expose complexity that manual formatting hides — a function that "looks fine" hand-formatted but explodes under Black has an API surface problem, not a formatting problem.
 
 **Grounding:** Black's formatting algorithm tries to fit calls on one line, falling back to one-arg-per-line (Black docs). Keyword arguments expand aggressively. Wrapper functions that encode default kwargs as policy reduce expansion (Black trailing comma spec).
 
-**Generalized rule:** When a call site consistently takes 5+ lines after Black formatting, the call has too many parameters for inline use. Extract a helper whose defaults encode the common kwargs.
+**Project instance:** Raw `subprocess.run()` with keyword args expands to 5-6 lines under Black. The `_git()` helper collapses stdout calls to 1 line, but callers bypass it when they need returncode. `_git_ok()` covers the returncode case.
 
 ### Principle 4: Exceptions for Exceptional Events Only
 
-**Problem:** `try: _git("rev-parse"...) except CalledProcessError:` used to check branch existence. `ValueError` raised for expected conditions (no session found, multiple matches).
+**General principle:** Exception handling is for unexpected or exceptional events (charlax/antipatterns, Medium anti-pattern article). If a condition is a normal program state, boolean returns or typed return values are cleaner than exceptions. Using broad exception types (`ValueError`) for expected conditions masks legitimate bugs under the same `except` clause.
 
-**Grounding:** Exception handling is for unexpected/exceptional events (charlax/antipatterns, Medium anti-pattern article). If a condition is a normal program state, LBYL or return values are cleaner. Raising `ValueError` for expected conditions allows `except ValueError` to catch legitimate bugs.
+**Grounding:** charlax/antipatterns error-handling guide, Medium exception-as-control-flow article, Real Python EAFP/LBYL.
 
-**Solution for subprocess:** `_git_ok()` returns boolean instead of raising.
-**Solution for domain errors:** Custom exception classes (e.g., `SessionNotFoundError`) instead of `ValueError`. Lint rule about "no hardcoded exception messages" is properly satisfied by custom classes, not circumvented by intermediate `msg` variables.
+**Project instance:** `try: _git("rev-parse"...) except CalledProcessError:` used to check branch existence → replaced with `_git_ok()` boolean. `ValueError` raised for expected conditions (no session found, multiple matches) → replaced with custom exception classes (`SessionNotFoundError`). Custom classes also properly satisfy lint rules about hardcoded exception messages — without the `msg` variable circumvention.
 
 ### Principle 5: Error Handling Layers Don't Overlap
 
-**Problem (from user feedback on cli.py):** Double error handling where exceptions are caught and messages printed at multiple levels — both at the failure site AND at a top-level handler.
+**General principle:** Each layer in the error handling chain has one responsibility. Failure site: collect context, raise typed exception. Top level: display, exit. When both layers print, you get duplicate output or conflicting messages. The `raise from` chain preserves the causal chain without duplicating display logic.
 
-**Grounding:** Error handling should follow a single-responsibility model. Failure site: collect context, raise typed exception. Top level: display, exit. When both layers print, you get duplicate output or conflicting messages. The "raise from" chain preserves the causal chain without duplicating display logic.
+**Grounding:** Single-responsibility principle applied to error handling. Standard pattern in well-structured CLI tools — framework-level exception handlers (Click, argparse) expect to own the display responsibility.
 
-**Rule:** Context collection at the failure site. Display at the top level. Never both.
+**Project instance:** Double error handling in cli.py — exceptions caught and messages printed at both the failure site and a top-level handler. Rule: context collection at the failure site, display at the top level, never both.
 
 ## Grounding Quality: Moderate
 
