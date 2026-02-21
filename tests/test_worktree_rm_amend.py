@@ -1,6 +1,5 @@
 """Tests for worktree rm amend safety — verifies amend targets correct merge."""
 
-import subprocess
 from collections.abc import Callable
 from pathlib import Path
 
@@ -9,7 +8,7 @@ from click.testing import CliRunner
 
 from claudeutils.worktree.cli import worktree
 from claudeutils.worktree.git_ops import _is_merge_commit
-from tests.fixtures_worktree import _create_worktree
+from tests.fixtures_worktree import _create_worktree, _git_setup
 
 
 def test_rm_does_not_amend_wrong_branch_merge(
@@ -28,24 +27,16 @@ def test_rm_does_not_amend_wrong_branch_merge(
     session_file.write_text(
         "## Worktree Tasks\n\n- [ ] **Task One** → `other-wt` — description\n"
     )
-    subprocess.run(["git", "add", "agents/session.md"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Add session"], check=True, capture_output=True
-    )
+    _git_setup("add", "agents/session.md")
+    _git_setup("commit", "-m", "Add session")
 
     # Create and merge "merged-branch" (a DIFFERENT branch, not "other-wt")
-    subprocess.run(
-        ["git", "checkout", "-b", "merged-branch"], check=True, capture_output=True
-    )
+    _git_setup("checkout", "-b", "merged-branch")
     (repo_path / "merged.txt").write_text("merged content")
-    subprocess.run(["git", "add", "merged.txt"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Merged branch commit"], check=True, capture_output=True
-    )
-    subprocess.run(["git", "checkout", "main"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "merge", "--no-ff", "merged-branch"], check=True, capture_output=True
-    )
+    _git_setup("add", "merged.txt")
+    _git_setup("commit", "-m", "Merged branch commit")
+    _git_setup("checkout", "main")
+    _git_setup("merge", "--no-ff", "merged-branch")
 
     assert _is_merge_commit()
 
@@ -54,18 +45,14 @@ def test_rm_does_not_amend_wrong_branch_merge(
     assert worktree_path.exists()
 
     # Record HEAD commit hash before rm
-    head_before = subprocess.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
-    ).stdout.strip()
+    head_before = _git_setup("rev-parse", "HEAD").strip()
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["rm", "--confirm", "other-wt"])
     assert result.exit_code == 0
 
     # HEAD should NOT have been amended — commit hash unchanged
-    head_after = subprocess.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
-    ).stdout.strip()
+    head_after = _git_setup("rev-parse", "HEAD").strip()
     assert head_before == head_after
     assert "amend" not in result.output.lower()
 
@@ -86,22 +73,16 @@ def test_rm_force_does_not_amend_merge_commit(
     session_file.write_text(
         "## Worktree Tasks\n\n- [ ] **Task One** → `force-wt` — description\n"
     )
-    subprocess.run(["git", "add", "agents/session.md"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "Add session"], check=True, capture_output=True
-    )
+    _git_setup("add", "agents/session.md")
+    _git_setup("commit", "-m", "Add session")
 
     # Create and merge a different branch to make HEAD a merge commit
-    subprocess.run(
-        ["git", "checkout", "-b", "some-feature"], check=True, capture_output=True
-    )
+    _git_setup("checkout", "-b", "some-feature")
     (repo_path / "feature.txt").write_text("feature")
-    subprocess.run(["git", "add", "feature.txt"], check=True, capture_output=True)
-    subprocess.run(["git", "commit", "-m", "Feature"], check=True, capture_output=True)
-    subprocess.run(["git", "checkout", "main"], check=True, capture_output=True)
-    subprocess.run(
-        ["git", "merge", "--no-ff", "some-feature"], check=True, capture_output=True
-    )
+    _git_setup("add", "feature.txt")
+    _git_setup("commit", "-m", "Feature")
+    _git_setup("checkout", "main")
+    _git_setup("merge", "--no-ff", "some-feature")
 
     assert _is_merge_commit()
 
@@ -109,17 +90,13 @@ def test_rm_force_does_not_amend_merge_commit(
     worktree_path = _create_worktree(repo_path, "force-wt", init_repo)
     assert worktree_path.exists()
 
-    head_before = subprocess.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
-    ).stdout.strip()
+    head_before = _git_setup("rev-parse", "HEAD").strip()
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["rm", "--force", "force-wt"])
     assert result.exit_code == 0
 
     # HEAD must not be amended
-    head_after = subprocess.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
-    ).stdout.strip()
+    head_after = _git_setup("rev-parse", "HEAD").strip()
     assert head_before == head_after
     assert "amend" not in result.output.lower()

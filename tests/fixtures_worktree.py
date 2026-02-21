@@ -46,6 +46,18 @@ def _run_git(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def _git_setup(*args: str) -> str:
+    """Run git command in test setup; surface stderr on failure.
+
+    Assumes cwd is set via monkeypatch.chdir. Returns stdout.
+    """
+    result = subprocess.run(["git", *args], capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        msg = f"git {' '.join(args)} failed (exit {result.returncode}): {result.stderr}"
+        raise RuntimeError(msg)
+    return result.stdout
+
+
 def make_repo_with_branch(  # noqa: PLR0913
     repo_dir: Path,
     init_fn: Callable[[Path], None],
