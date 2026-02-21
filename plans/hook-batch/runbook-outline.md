@@ -43,6 +43,7 @@
 - **Cycle 1.2:** r expansion — update COMMANDS['r'] to describe graduated lookup
 - **Cycle 1.3:** xc/hc compression — update COMMANDS['xc'] and COMMANDS['hc'] to compressed style
 - **Cycle 1.4:** Additive directive scanning — refactor `scan_for_directive` → collect all directives (D-7)
+- **Checkpoint:** After Cycle 1.4 — verify additive scanning works with existing d:/p: directives; regression-check Tier 1 shortcuts and Tier 3 continuation
 - **Cycle 1.5:** p: dual output — split p:/pending: to match d: dual-output pattern
 - **Cycle 1.6:** New directives — add b:/brainstorm:, q:/question:, learn: with dual output
 - **Cycle 1.7:** Skill-editing guard — EDIT_SKILL_PATTERN + EDIT_SLASH_PATTERN, additionalContext injection
@@ -173,7 +174,7 @@
   - Build combined additionalContext from all directive expansions (newline-separated)
   - Build combined systemMessage from all directive concise messages
   - Falls through to Tier 2.5 and Tier 3 after collecting directives (pattern guards and continuation also fire)
-- Depends on: Cycles 1.1, 1.2, 1.3 (refactor builds on stable COMMANDS and existing structure)
+- Depends on: Cycle 1.1 (main() Tier 1 structure must be stable before refactoring Tier 2)
 - Verification: `call_hook("d: discuss this\np: new task")` → additionalContext contains both DISCUSS and PENDING expansions
 
 **Cycle 1.5: p: dual output**
@@ -195,7 +196,7 @@
 - Verification: `call_hook("b: ideas for this")` → systemMessage `'[BRAINSTORM]...'`; `call_hook("q: what is X")` → systemMessage `'[QUICK]...'`; `call_hook("learn: pattern about Y")` → systemMessage `'[LEARN]...'`
 
 **Cycle 1.7: Skill-editing guard**
-- Target: new constants + new detection block in `main()` after Tier 2
+- Target: new constants + new detection block in `main()` as Tier 2.5 (after Tier 2, which now collects directives without returning — per Cycle 1.4)
 - Change:
   - Add `EDIT_SKILL_PATTERN` (editing verbs + skill/agent noun)
   - Add `EDIT_SLASH_PATTERN` (editing verbs + /skill-name)
@@ -220,12 +221,22 @@
 
 ---
 
+### Phase 1 Checkpoint Detail
+
+**Checkpoint after Cycle 1.4:**
+- Run full test suite: all existing tests must pass
+- Verify: `call_hook("d: discuss this\np: new task")` returns both expansions in additionalContext
+- Verify: `call_hook("s")` still returns status expansion (Tier 1 regression)
+- Verify: Tier 3 continuation parsing still works for non-shortcut, non-directive prompts
+
+---
+
 ### Phase 2 Cycle Detail
 
 **Cycle 2.1: Script structure and pass-through**
 - Target: new file `agent-core/hooks/pretooluse-recipe-redirect.py`
 - Change: Create script that reads stdin JSON, extracts `tool_input.command` (default ''), exits 0 silently on unknown command
-- Output format: same as userpromptsubmit hook — `{hookSpecificOutput: {hookEventName, additionalContext}}`
+- Output format: `{hookSpecificOutput: {hookEventName: "PreToolUse", additionalContext: "..."}}`
 - Verification: `echo '{"tool_name":"Bash","tool_input":{"command":"echo hello"}}' | python3 pretooluse-recipe-redirect.py` → no output, exit 0
 
 **Cycle 2.2: ln redirect**
@@ -240,6 +251,24 @@
   - `git merge` → "Use `claudeutils _worktree merge` instead of `git merge` (handles session resolution, submodule conflicts, and merge invariants)"
 - Verification: `git worktree add` → additionalContext contains 'claudeutils _worktree'; `git merge main` → additionalContext contains 'claudeutils _worktree merge'
 - Regression: `git status` → no output (not a redirect pattern)
+
+---
+
+### Phase 3 Step Detail
+
+**Step 3.1: Create auto-format script**
+- Target: new `agent-core/hooks/posttooluse-autoformat.sh`
+- Read stdin JSON, extract `file_path` from `tool_input` using `python3 -c` or `jq` (no raw Bash JSON parsing per D-2 rationale)
+- Skip if not `.py` file (extension check)
+- Run: `ruff check --fix-only --quiet "$file"` then `ruff format --quiet "$file"`
+- Run: `docformatter --in-place "$file"` if available (`which docformatter`)
+- Silent on success; stderr on failure (non-fatal, exit 0 regardless)
+
+**Step 3.2: Validate auto-format**
+- Create or use a test Python file with formatting issues
+- Pipe simulated PostToolUse JSON to script, verify file gets formatted
+- Verify non-.py files are skipped (no output, exit 0)
+- Verify missing ruff doesn't crash (graceful skip)
 
 ---
 
@@ -306,11 +335,11 @@
 **Step 5.3: Update sync-to-parent**
 - Target: `agent-core/justfile`, `sync-to-parent` recipe
 - Change: Append after existing symlink sync steps:
-  ```bash
+  ```just
   echo "Syncing hook configuration..."
-  python3 "$(dirname "$0")/bin/sync-hooks-config.py"
+  python3 agent-core/bin/sync-hooks-config.py
   ```
-- Note: sync-hooks-config.py writes settings.json; sandbox bypass required at invocation
+- Note: justfile recipes run from project root (not script directory). sync-hooks-config.py writes settings.json; sandbox bypass required at invocation
 
 **Step 5.4: Run sync-to-parent + verify**
 - Run `just sync-to-parent` with dangerouslyDisableSandbox
@@ -335,6 +364,35 @@
 
 ## Scope Boundaries
 
-**IN:** 9 UPS improvements, PreToolUse recipe-redirect, PostToolUse auto-format, SessionStart+Stop health, learning-ages --summary, hooks.json, sync-hooks-config.py, justfile update, restart verification
+**IN:** 8 UPS cycles (covering 9 feature items — b:, q:, learn: combined in Cycle 1.6), PreToolUse recipe-redirect, PostToolUse auto-format, SessionStart+Stop health, learning-ages --summary, hooks.json, sync-hooks-config.py, justfile update, restart verification
 
 **OUT:** Sandbox denylist configuration (manual), upstream #10373 fix, AskUserQuestion removal (done)
+
+---
+
+## Expansion Guidance
+
+The following recommendations should be incorporated during full runbook expansion:
+
+**Consolidation candidates:**
+- Cycles 1.2 (r expansion) and 1.3 (xc/hc compression) both modify COMMANDS dict string values with no branching logic. Consider merging into a single cycle during expansion. If kept separate, they can be expanded minimally (string replacement + verification).
+- Phase 3 has only 2 steps, both Low complexity. If expansion adds no substance beyond what Step Detail already specifies, keep the phase compact rather than inflating.
+
+**Cycle expansion:**
+- Cycle 1.4 is the most complex cycle — the scan_for_directive → scan_for_directives refactor changes return type, iteration behavior, and main() control flow. RED tests should cover: single directive, multiple directives, mixed directive+non-directive lines, section scoping (content between directives).
+- Cycle 1.6 adds 3 directives with 5 dict entries. RED should parametrize across all aliases rather than testing each individually.
+- Phase 2 cycles: verify that Cycle 2.1 tests pass-through for *all* non-redirect commands, not just `echo hello`. Include `git status`, `python3 script.py` as non-redirect verification.
+
+**Checkpoint guidance:**
+- Phase 1 checkpoint after Cycle 1.4 is mandatory — validates the additive scanning refactor before building on it.
+- Phase 5 Step 5.4 serves as integration checkpoint for the entire runbook.
+
+**Growth projection:**
+- `userpromptsubmit-shortcuts.py`: 839 lines → ~980 lines projected (17% growth). Well within limits; no split needed.
+- Test file: 282 lines + ~20 new test cases → ~400 lines projected. Monitor during expansion; if approaching 400 lines, split test classes into separate files by tier.
+
+**References to include:**
+- Cycle 1.4: see `scan_for_directive()` at line 156 of userpromptsubmit-shortcuts.py for current implementation
+- Cycle 1.1: see `main()` Tier 1 block at line 772 (`if prompt in COMMANDS`)
+- Cycle 1.7/1.8: see `userpromptsubmit-plan.md` items 6-7 for pattern specs
+- Phase 2: see `userpromptsubmit-plan.md` execution order for tier structure reference (note: D-7 supersedes its first-match-wins for Tier 2)
