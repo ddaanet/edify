@@ -14,6 +14,7 @@ model: haiku
 **Design ref:** `plans/hook-batch/outline.md` (Phase 5)
 
 **Prerequisites:**
+- Note: Step 5.3 requires Sonnet model (justfile edit requires careful placement and context); all other steps use phase default haiku.
 - Verify Phases 1-4 complete: all 5 hook scripts exist:
   - `agent-core/hooks/userpromptsubmit-shortcuts.py` (existing, Phase 1 modified)
   - `agent-core/hooks/pretooluse-recipe-redirect.py` (Phase 2)
