@@ -269,8 +269,7 @@ def test_gate_attachment_with_mock(tmp_path: Path) -> None:
 
 
 def test_lifecycle_status_detection(tmp_path: Path) -> None:
-    """Test lifecycle.md status detection takes priority over pre-ready
-    artifacts."""
+    """Test lifecycle.md status detection takes priority over pre-ready artifacts."""
     plan_dir = tmp_path / "test-plan"
     plan_dir.mkdir()
 
@@ -334,3 +333,27 @@ def test_next_action_post_ready_states(
     assert result is not None
     assert result.status == state
     assert result.next_action == expected_next_action
+
+
+def test_lifecycle_overrides_ready_state(tmp_path: Path) -> None:
+    """Test that lifecycle.md status overrides ready-state artifacts."""
+    plan_dir = tmp_path / "test-plan"
+    plan_dir.mkdir()
+
+    # Create ALL pre-ready artifacts
+    (plan_dir / "design.md").write_text("")
+    (plan_dir / "runbook-phase-1.md").write_text("")
+    (plan_dir / "steps").mkdir()
+    (plan_dir / "orchestrator-plan.md").write_text("")
+
+    # Add lifecycle.md with post-ready state
+    lifecycle_content = "2026-02-21 delivered — _worktree merge\n"
+    (plan_dir / "lifecycle.md").write_text(lifecycle_content)
+
+    result = infer_state(plan_dir)
+
+    assert result is not None
+    assert result.status == "delivered"  # NOT "ready"
+    assert "lifecycle.md" in result.artifacts
+    assert "steps" in result.artifacts
+    assert "orchestrator-plan.md" in result.artifacts
