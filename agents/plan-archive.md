@@ -182,3 +182,15 @@ Error handling framework across 5 layers. 9 files (7 modified, 2 new), ~163 net 
 ## runbook-evolution
 
 5 FRs: prose atomicity (FR-1), self-modification discipline (FR-2a/2b), testing diamond (FR-3a-d). Additive prose edits to runbook SKILL.md (Testing Strategy section, Phase 0.75 verification, TDD Cycle Planning) and anti-patterns.md (4 new entries, 1 rewritten). Side fix: vet-requirement.md reviewer routing table. Affected: agent-core/skills/runbook/, agent-core/fragments/vet-requirement.md.
+
+## brief-skill
+
+Cross-tree async context transfer skill. `/brief <slug>` writes timestamped entries to `plans/<plan>/brief.md` for worktree agents to read on pickup. Consumer integration via `git show main:plans/<plan>/brief.md` when plan dir only exists on main. Affected: agent-core/skills/brief/SKILL.md.
+
+## vet-invariant-scope
+
+3 prose changes to address vet pipeline gaps found during worktree-merge-resilience deliverable review. Added Verification scope field to vet execution context template (vet-requirement.md, pipeline-contracts.md), lifecycle audit criterion for final checkpoint (orchestrate/SKILL.md), resume completeness criterion (outline-review-agent.md). No code changes.
+
+## worktree-rm-safety
+
+Safety gates for `_worktree rm`: dirty tree check (parent + submodule), exit code 2 for guard refusal, `--force` bypass flag, no destructive suggestions in CLI output. Affected: src/claudeutils/worktree/cli.py, tests/test_worktree_rm_dirty.py, tests/test_worktree_rm.py.
