@@ -1,5 +1,6 @@
 """Conflict resolution strategies for worktree merge."""
 
+import re
 import subprocess
 from pathlib import Path
 
@@ -11,6 +12,57 @@ from claudeutils.worktree.session import (
     extract_task_blocks,
     find_section_bounds,
 )
+
+
+def _merge_blockers(
+    result_lines: list[str], ours: str, theirs: str, slug: str | None
+) -> None:
+    """Merge Blockers / Gotchas: deduplicate, tag, append.
+
+    Mutates result_lines in place. Tags theirs with [from: slug].
+    """
+    theirs_blockers = extract_blockers(theirs)
+    if not theirs_blockers:
+        return
+
+    # Strip [from: ...] tags so prior-merge tagged blockers still match
+    tag_re = re.compile(r"\s*\[from: [^\]]+\]")
+    ours_first_lines = {tag_re.sub("", b[0]) for b in extract_blockers(ours)}
+    new_blockers = [
+        b for b in theirs_blockers if tag_re.sub("", b[0]) not in ours_first_lines
+    ]
+    if not new_blockers:
+        return
+
+    tagged_lines: list[str] = []
+    for blocker in new_blockers:
+        first_line = blocker[0]
+        if slug:
+            first_line = f"{first_line} [from: {slug}]"
+        tagged_lines.append(first_line)
+        tagged_lines.extend(blocker[1:])
+
+    content = "\n".join(result_lines)
+    bounds = find_section_bounds(content, "Blockers / Gotchas")
+    if bounds is not None:
+        result_lines[bounds[1] : bounds[1]] = tagged_lines
+        return
+
+    # Insert before first section that follows Blockers in canonical order
+    insert_at = None
+    for after_section in ("Reference Files", "Next Steps"):
+        sb = find_section_bounds(content, after_section)
+        if sb is not None and (insert_at is None or sb[0] < insert_at):
+            insert_at = sb[0]
+    if insert_at is not None:
+        result_lines[insert_at:insert_at] = [
+            "## Blockers / Gotchas",
+            "",
+            *tagged_lines,
+            "",
+        ]
+    else:
+        result_lines.extend(["", "## Blockers / Gotchas", "", *tagged_lines])
 
 
 def _merge_session_contents(ours: str, theirs: str, slug: str | None = None) -> str:
@@ -52,25 +104,7 @@ def _merge_session_contents(ours: str, theirs: str, slug: str | None = None) -> 
         else:
             result_lines.extend(["", "## Pending Tasks", "", *new_task_lines])
 
-    # Blockers / Gotchas: evaluate strategy (tag + append)
-    theirs_blockers = extract_blockers(theirs)
-    if theirs_blockers:
-        tagged_lines: list[str] = []
-        for blocker in theirs_blockers:
-            first_line = blocker[0]
-            if slug:
-                first_line = f"{first_line} [from: {slug}]"
-            tagged_lines.append(first_line)
-            tagged_lines.extend(blocker[1:])
-
-        result_so_far = "\n".join(result_lines)
-        bounds = find_section_bounds(result_so_far, "Blockers / Gotchas")
-        if bounds is not None:
-            result_lines = result_so_far.split("\n")
-            result_lines[bounds[1] : bounds[1]] = tagged_lines
-        else:
-            result_lines = result_so_far.split("\n")
-            result_lines.extend(["", "## Blockers / Gotchas", "", *tagged_lines])
+    _merge_blockers(result_lines, ours, theirs, slug)
 
     return "\n".join(result_lines)
 

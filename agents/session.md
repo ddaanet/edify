@@ -63,6 +63,8 @@
 
 
 
+- [x] **Wt blocker merge fix** — `/design` | sonnet
+
 ## Worktree Tasks
 
 - [ ] **Wt blocker merge fix** → `wt-blocker-merge-fix` — `/design` | sonnet

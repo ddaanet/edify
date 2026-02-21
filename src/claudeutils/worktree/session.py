@@ -1,9 +1,10 @@
 """Session.md parsing and editing utilities."""
 
 import re
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+
+from claudeutils.worktree.git_ops import _git
 
 
 @dataclass
@@ -235,15 +236,14 @@ def _task_is_in_pending_section(
     task_name: str, worktree_branch: str, git_root: Path
 ) -> bool:
     """Check if task is in worktree branch's Pending Tasks section."""
-    try:
-        branch_content = subprocess.run(
-            ["git", "show", f"{worktree_branch}:agents/session.md"],
-            capture_output=True,
-            text=True,
-            check=True,
-            cwd=str(git_root),
-        ).stdout
-    except subprocess.CalledProcessError:
+    branch_content = _git(
+        "-C",
+        str(git_root),
+        "show",
+        f"{worktree_branch}:agents/session.md",
+        check=False,
+    )
+    if not branch_content:
         return False
 
     branch_blocks = extract_task_blocks(branch_content, section="Pending Tasks")
