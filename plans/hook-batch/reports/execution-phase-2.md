@@ -11,3 +11,15 @@
 - Files modified: `agent-core/hooks/pretooluse-recipe-redirect.py` (new), `tests/test_pretooluse_recipe_redirect.py` (new)
 - Stop condition: none
 - Decision made: none
+
+## Cycle 2.2: All Redirect Patterns (ln + git worktree + git merge) 2026-02-21
+
+- Status: GREEN_VERIFIED
+- Test command: `pytest tests/test_pretooluse_recipe_redirect.py::TestRedirectPatterns -v`
+- RED result: FAIL as expected — `KeyError: 'hookSpecificOutput'` on `test_ln_bare_command_redirect` (bare `ln` not matched by `startswith("ln ")`)
+- GREEN result: PASS — 9/9 tests pass (all TestRedirectPatterns + prior classes)
+- Regression check: 21/21 passed (test_userpromptsubmit_shortcuts.py + test_pretooluse_recipe_redirect.py)
+- Refactoring: Fixed D205 docstring wrapping (class + method), formatter stabilized; lint only has pre-existing RUF100 in fixtures_worktree.py
+- Files modified: `agent-core/hooks/pretooluse-recipe-redirect.py` (redirect logic: bare ln, git worktree without trailing space, messages updated), `tests/test_pretooluse_recipe_redirect.py` (added TestRedirectPatterns class with 5 tests)
+- Stop condition: none
+- Decision made: none

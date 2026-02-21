@@ -65,7 +65,7 @@ class TestScriptLoads:
     """Verify script file exists and loads without errors."""
 
     def test_script_loads(self) -> None:
-        """Script file exists and imports cleanly."""
+        """Hook path resolves and module imports without error."""
         assert HOOK_PATH.exists()
         _load_hook()
 
@@ -107,3 +107,93 @@ class TestOutputFormat:
         assert "additionalContext" in result["hookSpecificOutput"]
         assert result["hookSpecificOutput"]["additionalContext"] != ""
         assert "systemMessage" not in result
+
+
+class TestRedirectPatterns:
+    """All three redirect patterns fire with correct additionalContext."""
+
+    def test_ln_command_redirect(self) -> None:
+        """Ln redirects to just sync-to-parent."""
+        result = call_hook(
+            {
+                "tool_name": "Bash",
+                "tool_input": {"command": "ln -sf agent-core/skills .claude/skills"},
+            }
+        )
+        assert result
+        assert (
+            "just sync-to-parent" in result["hookSpecificOutput"]["additionalContext"]
+        )
+        assert result["hookSpecificOutput"]["hookEventName"] == "PreToolUse"
+        assert "systemMessage" not in result
+
+    def test_ln_bare_command_redirect(self) -> None:
+        """Bare ln with no args still redirects."""
+        result = call_hook({"tool_name": "Bash", "tool_input": {"command": "ln"}})
+        assert (
+            "just sync-to-parent" in result["hookSpecificOutput"]["additionalContext"]
+        )
+
+    def test_git_worktree_redirect(self) -> None:
+        """Git worktree redirects to _worktree, not _worktree merge."""
+        result = call_hook(
+            {
+                "tool_name": "Bash",
+                "tool_input": {"command": "git worktree add --detach ../my-task HEAD"},
+            }
+        )
+        assert result
+        assert (
+            "claudeutils _worktree" in result["hookSpecificOutput"]["additionalContext"]
+        )
+        assert (
+            "claudeutils _worktree merge"
+            not in result["hookSpecificOutput"]["additionalContext"]
+        )
+
+    def test_git_merge_redirect(self) -> None:
+        """Git merge redirects to claudeutils _worktree merge."""
+        result = call_hook(
+            {"tool_name": "Bash", "tool_input": {"command": "git merge main"}}
+        )
+        assert result
+        assert (
+            "claudeutils _worktree merge"
+            in result["hookSpecificOutput"]["additionalContext"]
+        )
+
+    def test_passthrough_non_redirect_commands(self) -> None:
+        """Non-redirect commands produce no output."""
+        assert (
+            call_hook({"tool_name": "Bash", "tool_input": {"command": "git status"}})
+            == {}
+        )
+        assert (
+            call_hook(
+                {"tool_name": "Bash", "tool_input": {"command": "git log --oneline"}}
+            )
+            == {}
+        )
+        assert (
+            call_hook({"tool_name": "Bash", "tool_input": {"command": "pytest tests/"}})
+            == {}
+        )
+        assert (
+            call_hook({"tool_name": "Bash", "tool_input": {"command": "just test"}})
+            == {}
+        )
+        assert (
+            call_hook(
+                {"tool_name": "Bash", "tool_input": {"command": "python3 script.py"}}
+            )
+            == {}
+        )
+        assert (
+            call_hook(
+                {
+                    "tool_name": "Bash",
+                    "tool_input": {"command": "git merge-base HEAD main"},
+                }
+            )
+            == {}
+        )

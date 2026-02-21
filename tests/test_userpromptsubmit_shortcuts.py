@@ -170,6 +170,21 @@ class TestPatternGuards:
         # CCG guard must also fire
         assert "claude-code-guide" in additional_context
 
+    def test_guard_combines_with_continuation(self) -> None:
+        """Pattern guard output combines with Tier 3 continuation."""
+        fake_registry = {
+            "handoff": {"cooperative": True, "default-exit": []},
+            "commit": {"cooperative": True, "default-exit": []},
+        }
+        with patch.object(hook, "build_registry", return_value=fake_registry):
+            result = call_hook("fix the skill /handoff and /commit")
+        assert result != {}
+        additional_context = result["hookSpecificOutput"]["additionalContext"]
+        # Tier 2.5: skill-editing guard must fire
+        assert "plugin-dev:skill-development" in additional_context
+        # Tier 3: continuation must also fire
+        assert "CONTINUATION" in additional_context
+
 
 class TestIntegration:
     """Integration tests verifying all enhancements work together."""
