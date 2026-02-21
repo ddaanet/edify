@@ -1,14 +1,10 @@
-The data confirms systematic issues. Here's my review.
-
----
-
 ## Runbook Review: hook-batch
 
 **Artifacts reviewed:** orchestrator-plan.md, runbook-outline.md, outline.md, 5 phase files, 16 step files, hook-batch-task.md agent
 
 ---
 
-### Critical Issues (2)
+### Critical Issues (3)
 
 **C1: All Phase 1 and Phase 2 step files have wrong execution model (haiku instead of sonnet)**
 
@@ -30,9 +26,26 @@ Phase 1 is behavioral changes to an 839-line script with additive scanning refac
 
 **Root cause:** Orchestrator plan interleaves Phase 2 and 3 steps, and prepare-runbook.py counted phase boundaries rather than using actual phase numbers from the source files.
 
+**C3: Phase 2 content loss — phase-level prerequisites and constraints missing from step files**
+
+Phase 2 (runbook-phase-2.md) has phase-level prerequisites and key decisions that are NOT in step-2-1 or step-2-2:
+
+Lost prerequisites:
+- "Read `userpromptsubmit-shortcuts.py` main() — understand hook output JSON structure" — agent executing Cycle 2.1 won't know to study the output format it needs to replicate
+- "Read `test_userpromptsubmit_shortcuts.py` lines 1-35 — understand `call_hook()` helper pattern. Replicate this pattern for the new test file." — the instruction to replicate the existing test helper pattern is absent
+- "Verify `pretooluse-recipe-redirect.py` does NOT exist yet"
+
+Lost constraints:
+- "NOT patterns: `python3` and `python` commands are denied in settings.json but have no project recipe equivalent — do NOT add redirect for these" — step-2-2 has `python3 script.py` in a passthrough test assertion, but the rationale and explicit prohibition are missing. A haiku agent could add python3 as a redirect pattern.
+
+Lost completion validation:
+- Phase 2 completion validation section (lines 222-240) including `git merge-base` false positive warning and stop conditions — not in any step file
+
+**Impact:** Phase 2 is a new file with a new test file. The prerequisite to study the existing test helper pattern and replicate it is critical — without it, the agent may invent a different test pattern instead of following the established `call_hook()` convention.
+
 ---
 
-### Major Issues (3)
+### Major Issues (4)
 
 **M1: Orchestrator plan PHASE_BOUNDARY labels misnumbered**
 
@@ -60,6 +73,23 @@ Phase 5 prerequisites: "Step 5.3 requires Sonnet model (justfile edit requires c
 
 If orchestrator reads line 4 (generated header), it dispatches haiku for a justfile edit that the phase author explicitly flagged as needing sonnet.
 
+**M4: Agent file embeds Phase 1 only — misleading context for Phases 2-5**
+
+hook-batch-task.md embeds Phase 1 content (prerequisites, key decisions, D-7 additive directives, Tier 1/2/3 structure). Steps from Phases 2-5 receive this Phase 1 context, which is irrelevant and potentially confusing — the agent "knows" about Phase 1's scan_for_directive refactor when executing Phase 4's health scripts or Phase 2's recipe-redirect.
+
+Phase 2-5 key decisions and prerequisites are neither in the agent's Common Context nor in the step files. Each phase has its own design decisions (D-1 through D-8) that guide implementation — the executing agent only sees Phase 1's.
+
+**M5: Completion validation sections lost from all phase files**
+
+Each phase file ends with success criteria and stop conditions that aren't extracted into any step file or the orchestrator plan. The orchestrator would need to read phase files at PHASE_BOUNDARY checkpoints, but the orchestrator plan doesn't reference them.
+
+Lost per phase:
+- Phase 1: line count check, stop conditions (RED fails to fail, GREEN passes without implementation, TestAnyLineMatching update)
+- Phase 2: success criteria, stop conditions (`git merge-base` false positive warning)
+- Phase 3: success criteria (execute permissions, edge case handling)
+- Phase 4: success criteria (flag file coordination verification)
+- Phase 5: success criteria (idempotency, existing hooks preserved, restart note)
+
 ---
 
 ### Minor Issues (3)
@@ -81,10 +111,25 @@ The agent's base model (haiku) contradicts the embedded phase requirement (sonne
 
 ---
 
+### Content Loss Summary: Phase Files vs Step Files
+
+| Phase | Step content self-contained? | Phase-level content lost |
+|-------|------------------------------|--------------------------|
+| 1 | Yes — embedded in agent | N/A (agent has Phase 1 context) |
+| 2 | **No** — prerequisites, NOT-patterns constraint, completion validation missing | Critical — new file needs pattern replication guidance |
+| 3 | Mostly yes — step prerequisites capture phase decisions | Framing only (key decision rationale) |
+| 4 | Mostly yes — step content includes flag file logic, health checks | Framing only (D-4 dual delivery rationale) |
+| 5 | Mostly yes — step prerequisites capture sandbox/dedup constraints | Phase-level "verify all 5 scripts exist" checklist |
+
+---
+
 ### Assessment
 
-**NEEDS_REVISION** — C1 and C2 must be fixed before execution. Dispatching haiku for Phase 1/2 TDD cycles on an 839-line behavioral script will produce the failure mode documented in learnings (haiku rationalizing test failures). The Phase metadata errors (C2) and boundary misnumbering (M1, M2) will cause wrong checkpoint criteria and context loading.
+**NEEDS_REVISION** — 3 critical, 5 major issues. C1 (wrong models) and C3 (Phase 2 content loss) are the highest-risk items. Dispatching haiku for Phase 1/2 TDD cycles will produce documented failure modes. Phase 2 step agents lacking the call_hook() replication prerequisite may invent incompatible test patterns.
 
-**Fix approach:** The source phase files are correct. The issues are all in generated artifacts (step files, orchestrator plan). Fixing the generation source won't help since prepare-runbook.py has already run. Options:
-- Regenerate: fix prepare-runbook.py's phase numbering and model propagation, re-run
-- Manual patch: update the 16 step files' Execution Model and Phase fields, fix orchestrator plan boundaries, de-interleave Phase 2/3
+**Fix approach:** Source phase files are correct. Issues are in generated artifacts (step files, orchestrator plan, agent file).
+
+Options:
+- **Regenerate:** Fix prepare-runbook.py's phase numbering and model propagation, re-run. Addresses C1, C2, M1 structurally. Does NOT address C3, M4, M5 (prepare-runbook.py's extraction design doesn't inject phase-level context into steps).
+- **Manual patch:** Update 16 step files (model + phase fields), fix orchestrator plan (de-interleave, renumber boundaries), inject Phase 2 prerequisites into step-2-1. Addresses all issues but is error-prone.
+- **Hybrid:** Fix prepare-runbook.py for C1/C2/M1, manually inject Phase 2 prerequisites into step-2-1 for C3, add phase file references to orchestrator plan PHASE_BOUNDARY comments for M5.

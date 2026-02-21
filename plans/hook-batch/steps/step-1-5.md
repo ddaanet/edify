@@ -1,7 +1,7 @@
 # Cycle 1.5
 
 **Plan**: `plans/hook-batch/runbook.md`
-**Execution Model**: haiku
+**Execution Model**: sonnet
 **Phase**: 1
 
 ---

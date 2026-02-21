@@ -1,8 +1,8 @@
 # Step 5.3
 
 **Plan**: `plans/hook-batch/runbook.md`
-**Execution Model**: haiku
-**Phase**: 4
+**Execution Model**: sonnet
+**Phase**: 5
 
 ---
 

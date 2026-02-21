@@ -2,7 +2,7 @@
 
 **Plan**: `plans/hook-batch/runbook.md`
 **Execution Model**: haiku
-**Phase**: 4
+**Phase**: 5
 
 ---
 
