@@ -185,6 +185,10 @@
 - Writes `.claude/settings.local.json` which is in sandbox deny list. Must use `dangerouslyDisableSandbox: true`.
 - Partial failure leaves orphaned branch with focused-session commit. Clean up with `_worktree rm --force <slug>`.
 
+- `/runbook` skill needs updates before it can process this outline [from: session-cli-tool]
+- Outline is ready — blocker is skill-side, not artifact-side [from: session-cli-tool]
+- learnings.md at 158 lines (>150 threshold), but consolidation was 1 day ago [from: session-cli-tool]
+- Should consolidate on main branch, not in worktree [from: session-cli-tool]
 ## Next Steps
 
 Hook batch executing in worktree. Quality infra reform `/runbook` next. Planstate delivered `/runbook`. 3 worktrees active (hook-batch, session-cli-tool, planstate-delivered). Submodule worktree refs fixed (core.worktree reset + `git worktree repair` + `git -C agent-core worktree add --detach`).

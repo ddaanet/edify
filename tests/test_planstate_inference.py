@@ -70,10 +70,7 @@ def test_status_priority_detection(
     expected_status: str,
     expected_artifacts: set[str],
 ) -> None:
-    """Test status detection with priority chain.
-
-    Priority order: ready > planned > designed > requirements
-    """
+    """Test status detection with priority chain."""
     plan_dir = tmp_path / "test-plan"
     plan_dir.mkdir()
 
@@ -243,12 +240,10 @@ def test_gate_attachment_with_mock(tmp_path: Path) -> None:
     plan_dir.mkdir()
     (plan_dir / "design.md").write_text("")
 
-    # Test with no vet_status_func (default behavior)
     result = infer_state(plan_dir)
     assert result is not None
     assert result.gate is None
 
-    # Test with mock VetStatus returning stale design chain
     mock_vet_status = Mock()
     mock_vet_status.chains = [
         Mock(
@@ -269,15 +264,12 @@ def test_gate_attachment_with_mock(tmp_path: Path) -> None:
 
 
 def test_lifecycle_status_detection(tmp_path: Path) -> None:
-    """Test lifecycle.md status detection takes priority over pre-ready
-    artifacts."""
+    """Lifecycle.md status overrides pre-ready artifact detection."""
     plan_dir = tmp_path / "test-plan"
     plan_dir.mkdir()
 
-    # Create design.md to establish pre-ready state (would normally be "designed")
     (plan_dir / "design.md").write_text("")
 
-    # Create lifecycle.md with post-ready state
     lifecycle_content = "2026-02-20 review-pending — /orchestrate\n"
     (plan_dir / "lifecycle.md").write_text(lifecycle_content)
 
@@ -322,11 +314,7 @@ def test_next_action_post_ready_states(
     """Test next_action derivation for post-ready states."""
     plan_dir = tmp_path / "test-plan"
     plan_dir.mkdir()
-
-    # Create design.md so plan directory is recognized as valid
     (plan_dir / "design.md").write_text("")
-
-    # Create lifecycle.md with the post-ready state
     (plan_dir / "lifecycle.md").write_text(lifecycle_content)
 
     result = infer_state(plan_dir)
@@ -341,13 +329,11 @@ def test_lifecycle_overrides_ready_state(tmp_path: Path) -> None:
     plan_dir = tmp_path / "test-plan"
     plan_dir.mkdir()
 
-    # Create ALL pre-ready artifacts
     (plan_dir / "design.md").write_text("")
     (plan_dir / "runbook-phase-1.md").write_text("")
     (plan_dir / "steps").mkdir()
     (plan_dir / "orchestrator-plan.md").write_text("")
 
-    # Add lifecycle.md with post-ready state
     lifecycle_content = "2026-02-21 delivered — _worktree merge\n"
     (plan_dir / "lifecycle.md").write_text(lifecycle_content)
 
@@ -361,18 +347,10 @@ def test_lifecycle_overrides_ready_state(tmp_path: Path) -> None:
 
 
 def test_lifecycle_review_loop_last_entry_wins(tmp_path: Path) -> None:
-    """Test review loop where last entry determines status.
-
-    The review cycle goes: review-pending → rework → review-pending → reviewed.
-    Each transition appends a new line. The last entry determines the status.
-    """
+    """Test review loop: last entry determines status."""
     plan_dir = tmp_path / "test-plan"
     plan_dir.mkdir()
-
-    # Create design.md so plan directory is recognized as valid
     (plan_dir / "design.md").write_text("")
-
-    # Create lifecycle.md with multiple entries simulating review loop
     lifecycle_content = (
         "2026-02-20 review-pending — /orchestrate\n"
         "2026-02-20 rework — /deliverable-review\n"
@@ -404,17 +382,10 @@ def test_lifecycle_review_loop_last_entry_wins(tmp_path: Path) -> None:
 def test_lifecycle_edge_cases(
     tmp_path: Path, lifecycle_content: str, expected_status: str
 ) -> None:
-    """Test edge case handling: empty, malformed, invalid state, trailing newlines.
-
-    All invalid cases fall back to pre-ready status (designed in this case).
-    """
+    """Test edge cases: invalid lifecycle content falls back to pre-ready."""
     plan_dir = tmp_path / "test-plan"
     plan_dir.mkdir()
-
-    # Create design.md to establish pre-ready state for fallback
     (plan_dir / "design.md").write_text("")
-
-    # Create lifecycle.md with specified content
     (plan_dir / "lifecycle.md").write_text(lifecycle_content)
 
     result = infer_state(plan_dir)

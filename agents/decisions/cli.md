@@ -16,11 +16,23 @@ CLI-specific patterns and conventions for claudeutils command-line interface.
 
 **Decision:** Print errors to stderr using `print(..., file=sys.stderr)` before `sys.exit(1)`
 
-**Rationale:** Standard Unix convention - errors to stderr, data to stdout
+**Applies to:** User-facing commands (`analyze`, `rules`, `tokens`) — standard Unix convention.
 
 **Examples:**
 - "No session found with prefix 'xyz'" → stderr, exit 1
 - "Multiple sessions match prefix 'abc'" → stderr, exit 1
+
+### When CLI Commands Are LLM-Native
+
+**Decision:** All output to stdout as structured markdown. Exit code carries success/failure signal. No stderr.
+
+**Applies to:** Internal commands consumed by LLM agents (`_session` group — underscore prefix, hidden from `--help`).
+
+**Rationale:** LLM callers consume stdout natively. stderr is invisible to the calling agent's structured parsing. Exit code is the only reliable signal channel. Structured markdown is the format LLMs produce and consume without quoting/escaping issues.
+
+**Format:** `**Header:** content` for key-value items, bulleted lists for multi-item output, `STOP:` directive for data-loss risk errors.
+
+**Distinction from user-facing:** User-facing commands follow Unix convention (stderr for errors, text/JSON format options). LLM-native commands follow agent convention (all stdout, markdown, exit codes).
 
 ### How to Configure Script Entry Points
 

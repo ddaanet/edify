@@ -25,7 +25,7 @@ src/claudeutils/
     commit/
       __init__.py
       cli.py          Subcommand
-      gate.py         Vet gate (pyproject.toml patterns + report discovery)
+      gate.py         Scripted vet check (pyproject.toml patterns + report discovery)
       parse.py        Markdown stdin parser (commit-specific format)
     status/
       __init__.py
@@ -39,12 +39,14 @@ Registration: `cli.add_command(session_group)` in main `cli.py`, same pattern as
 
 Move `_git()` and `_is_submodule_dirty()` from `worktree/utils.py` to `claudeutils/git.py`. Update worktree imports. Submodule operations: `"-C", "agent-core"` as leading args (existing codebase pattern).
 
-### S-3: Error conventions
+### S-3: Output and error conventions
 
 All subcommands:
-- stdout: structured markdown (diagnostics, results)
-- stderr: errors (agent sees directly)
-- Exit codes: 0=success, 1=pipeline error (runtime failure), 2=input validation (malformed caller input)
+- All output to stdout as structured markdown — results, diagnostics, AND errors
+- Exit code carries the semantic signal: 0=success, 1=pipeline error (runtime failure), 2=input validation (malformed caller input)
+- No stderr — LLM callers consume stdout; exit code determines success/failure
+
+Error output uses `**Header:** content` format (same as success). Stop errors include `STOP:` directive for data-loss risk cases. Aligns with worktree merge pattern (all output to stdout, exit code carries signal).
 
 ### S-4: Session.md parser
 
@@ -52,6 +54,7 @@ Shared parser for session.md structure:
 - Status line (between `# Session Handoff:` and first `##`)
 - Completed section (under `## Completed This Session`)
 - Pending tasks with metadata (model, command, restart, plan directory)
+- `→` markers on tasks: `→ slug` (branched to worktree), `→ wt` (destined for worktree, not yet branched)
 - Worktree tasks section
 - Plan directory associations
 
@@ -85,7 +88,7 @@ Required: `**Status:**` line marker and `## Completed This Session` heading.
 3. Overwrite status line in session.md
 4. Write completed section (committed detection — see H-2)
 5. `just precommit`
-   - Failure: output precommit result + learnings age + worktree ls, leave state file, exit 1
+   - Failure: output precommit result + learnings age, leave state file, exit 1
 6. Output diagnostics (conditional — see H-3)
 7. Delete state file
 
@@ -96,8 +99,8 @@ Required: `**Status:**` line marker and `## Completed This Session` heading.
 | Owner | Responsibility |
 |-------|---------------|
 | Handoff CLI | Session.md mechanical writes (status overwrite, completed section) + precommit + diagnostics + state caching |
-| Worktree CLI | `→ slug` markers |
-| Agent (Edit/Write) | Pending task mutations, learnings append + invalidation, blockers, reference files |
+| Worktree CLI | `→ slug` markers (set on `wt` branch-off) |
+| Agent (Edit/Write) | Pending task mutations, `→ wt` markers, learnings append + invalidation, blockers, reference files |
 
 Learnings flow: agent writes learnings (Edit) → reviews for invalidation → calls CLI. Manual append before invalidation improves conflict detection via spatial proximity.
 
@@ -120,7 +123,6 @@ Session.md write targets: status line and completed section only. All other sect
 | Precommit result | Always |
 | Git status/diff | Precommit passed |
 | Learnings age | Any entries ≥7 active days (summary line only) |
-| Worktree ls | Worktrees exist |
 
 ### H-4: State caching
 
@@ -135,7 +137,7 @@ Session.md write targets: status line and completed section only. All other sect
 
 Sole commit path. Reads structured markdown on stdin, produces structured markdown on stdout.
 
-Pipeline: validate → gate → precommit → stage → submodule commit → parent commit.
+Pipeline: validate → vet check → precommit → stage → submodule commit → parent commit.
 
 ### Input
 
@@ -154,7 +156,7 @@ Pipeline: validate → gate → precommit → stage → submodule commit → par
 > - Add scripted gate classification reference
 
 ## Message
-> ✨ Add commit CLI with scripted vet gate
+> ✨ Add commit CLI with scripted vet check
 >
 > - Structured markdown I/O
 > - Submodule-aware commit pipeline
@@ -162,7 +164,7 @@ Pipeline: validate → gate → precommit → stage → submodule commit → par
 
 **Sections:**
 - `## Files` — required, first. Bulleted paths to stage (modifications, additions, deletions — `git add` handles all).
-- `## Options` — optional. `no-vet` (skip Gate B), `just-lint` (lint only). Unknown options → error (fail-fast).
+- `## Options` — optional. `no-vet` (skip vet check), `just-lint` (lint only). Unknown options → error (fail-fast).
 - `## Submodule Message` — conditionally required (see C-2). Blockquoted.
 - `## Message` — required, last. Blockquoted. Everything from `## Message` to EOF is message body — safe for content containing `## ` lines.
 
@@ -170,70 +172,57 @@ Parsing: `## ` prefix matched against known section names. Unknown `## ` within 
 
 ### Output
 
-Success:
+All output to stdout as structured markdown. Exit code carries success/failure signal.
+
+Success (exit 0):
 ```markdown
-## Result
-commit: a7f38c2
-
-## Gate
-status: passed
-
-## Precommit
-status: passed
+- **Committed:** a7f38c2
+- **Vet check:** passed
+- **Precommit:** passed
 ```
 
-Gate failure — missing report:
+Vet check failure — unreviewed files (exit 1):
 ```markdown
-## Gate
-status: failed
-unvetted:
+**Vet check:** unreviewed files
 - src/auth.py
 ```
 
-Gate failure — stale report:
+Vet check failure — stale report (exit 1):
 ```markdown
-## Gate
-status: failed
-reason: stale-report
-newest-change: src/auth.py (2026-02-20 14:32)
-newest-report: plans/foo/reports/vet-review.md (2026-02-20 12:15)
+**Vet check:** stale report
+- Newest change: src/auth.py (2026-02-20 14:32)
+- Newest report: plans/foo/reports/vet-review.md (2026-02-20 12:15)
 ```
 
-Precommit failure:
+Precommit failure (exit 1):
 ```markdown
-## Gate
-status: passed
+- **Vet check:** passed
+- **Precommit:** failed
 
-## Precommit
-status: failed
-output: |
-  ruff check: 2 errors
-  ...
+ruff check: 2 errors
+...
 ```
 
-Clean-files error:
+Clean-files error (exit 2):
 ```markdown
-## Error
-type: clean-files
-files:
+**Error:** Listed files have no uncommitted changes
 - src/config.py
 
-STOP: Listed files have no uncommitted changes. Do not remove files and retry.
+STOP: Do not remove files and retry.
 ```
 
-Warning (commit proceeds, discrepancy surfaced):
+Warning + success (exit 0):
 ```markdown
-## Warning
-type: orphaned-submodule-message
-detail: Submodule message provided but no agent-core changes found. Section ignored.
+**Warning:** Submodule message provided but no agent-core changes found. Ignored.
 
-## Result
-commit: a7f38c2
+- **Committed:** a7f38c2
+- **Vet check:** passed
+- **Precommit:** passed
 ```
 
-Error taxonomy: **stop** (non-zero, no commit) for clean-files, missing submodule message, gate failure, precommit failure. **Warning + proceed** (zero exit) for orphaned submodule message.
+Error taxonomy: **stop** (non-zero, no commit) for clean-files, missing submodule message, vet check failure, precommit failure. **Warning + proceed** (zero exit) for orphaned submodule message.
 
-### C-1: Gate B — scripted vet check
+### C-1: Scripted vet check
 
 File classification by path pattern:
 ```toml
@@ -246,7 +235,7 @@ require-review = [
 ]
 ```
 
-No patterns → gate passes (opt-in). Report discovery: `plans/*/reports/` matching `*vet*` or `*review*` (not `tmp/`). Freshness: mtime of newest production artifact vs newest report. Stale → fail.
+No patterns → check passes (opt-in). Report discovery: `plans/*/reports/` matching `*vet*` or `*review*` (not `tmp/`). Freshness: mtime of newest production artifact vs newest report. Stale → fail.
 
 ### C-2: Submodule coordination
 
@@ -269,8 +258,8 @@ Each path in Files must appear in `git status --porcelain`. Clean files → erro
 |---------|-----------|--------|
 | Final commit | `just precommit` | (default) |
 | TDD GREEN WIP | `just lint` | `just-lint` |
-| First commit | Skip gate only | `no-vet` |
-| Combined | `just lint` + skip gate | `just-lint` + `no-vet` |
+| Pre-review (initial implementation, no vet report yet) | Skip vet check only | `no-vet` |
+| Combined | `just lint` + skip vet check | `just-lint` + `no-vet` |
 
 No option to skip validation entirely.
 
@@ -290,7 +279,7 @@ Pure data transformation. Reads session.md + filesystem state, produces formatte
 
 ### Output
 
-Matches execute-rule.md MODE 1 format:
+Matches execute-rule.md MODE 1 format. `Next:` selection skips tasks with any `→` marker (`→ slug` = branched, `→ wt` = destined for worktree but not yet branched).
 
 ```
 Next: <first pending task>
@@ -303,6 +292,7 @@ Pending:
 
 Worktree:
 - <task> → <slug>
+- <task> → wt
 
 Unscheduled Plans:
 - <plan> — <status>
@@ -313,13 +303,19 @@ Parallel (N tasks, independent):
   `wt` to set up worktrees
 ```
 
+### ST-0: Worktree-destined tasks
+
+Tasks marked `→ wt` in session.md are destined for worktree execution but not yet branched. Status renders them in the Worktree section alongside branched tasks (`→ slug`). `Next:` skips both — prevents inline execution of worktree-appropriate work. The `→ wt` marker is set by user/agent at task creation time (`p:` directive or prioritization).
+
 ### ST-1: Parallel group detection
 
-Independent when: no shared plan directory, no logical dependency (Blockers/Gotchas), compatible model tier, no restart requirement. Largest group only. Omit section if none.
+Independent when: no shared plan directory, no logical dependency (Blockers/Gotchas). Largest group only. Omit section if none. Model tier and restart are per-session concerns — worktree parallelism eliminates both constraints.
 
-### ST-2: Graceful degradation
+### ST-2: Preconditions and degradation
 
-Missing session.md → "No pending tasks." Old format (no metadata) → defaults. Empty sections omitted.
+Missing session.md → **fatal error** (exit 2). Session.md is the load-bearing file for task tracking — absence signals wrong cwd, corruption, or accidental deletion. Silent degradation to empty state masks data loss. Exit 2 per S-3: this is input validation (expected file missing), not a runtime pipeline failure.
+
+Old format (no metadata) → defaults. Empty sections omitted.
 
 ---
 
@@ -330,7 +326,7 @@ Missing session.md → "No pending tasks." Old format (no metadata) → defaults
 - Shared session.md parser
 - `_git()` extraction to `claudeutils/git.py`
 - Handoff: stdin parsing, session.md writes, committed detection, diagnostics, state caching
-- Commit: stdin parsing, vet gate (pyproject.toml), input validation, submodule pipeline, structured output
+- Commit: stdin parsing, scripted vet check (pyproject.toml), input validation, submodule pipeline, structured output
 - Status: session.md parsing, plan cross-referencing, parallel detection, STATUS rendering
 - Tests (CliRunner + real git repos via tmp_path)
 - Registration in main `cli.py`
@@ -350,6 +346,6 @@ Missing session.md → "No pending tasks." Old format (no metadata) → defaults
 - Phase 2: Status subcommand — **TDD** (pure function: session.md + filesystem → formatted output)
 - Phase 3: Handoff pipeline — **TDD** (stdin parsing, session.md writes, committed detection, state caching, diagnostics)
 - Phase 4: Commit parser + input validation — **TDD** (markdown parsing, file status check, submodule message consistency)
-- Phase 5: Commit vet gate — **TDD** (pyproject.toml patterns, file classification, report discovery + freshness)
+- Phase 5: Commit scripted vet check — **TDD** (pyproject.toml patterns, file classification, report discovery + freshness)
 - Phase 6: Commit pipeline + output — **TDD** (staging, submodule coordination, structured output)
 - Phase 7: Integration tests — **TDD** (end-to-end across subcommands, real git repos)
