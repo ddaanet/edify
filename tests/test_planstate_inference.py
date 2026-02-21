@@ -357,3 +357,32 @@ def test_lifecycle_overrides_ready_state(tmp_path: Path) -> None:
     assert "lifecycle.md" in result.artifacts
     assert "steps" in result.artifacts
     assert "orchestrator-plan.md" in result.artifacts
+
+
+def test_lifecycle_review_loop_last_entry_wins(tmp_path: Path) -> None:
+    """Test review loop where last entry determines status.
+
+    The review cycle goes: review-pending → rework → review-pending → reviewed.
+    Each transition appends a new line. The last entry determines the status.
+    """
+    plan_dir = tmp_path / "test-plan"
+    plan_dir.mkdir()
+
+    # Create design.md so plan directory is recognized as valid
+    (plan_dir / "design.md").write_text("")
+
+    # Create lifecycle.md with multiple entries simulating review loop
+    lifecycle_content = (
+        "2026-02-20 review-pending — /orchestrate\n"
+        "2026-02-20 rework — /deliverable-review\n"
+        "2026-02-21 review-pending — /deliverable-review\n"
+        "2026-02-21 reviewed — /deliverable-review\n"
+    )
+    (plan_dir / "lifecycle.md").write_text(lifecycle_content)
+
+    result = infer_state(plan_dir)
+
+    assert result is not None
+    assert result.status == "reviewed"  # Last entry wins
+    assert result.next_action == ""  # Reviewed → empty, per D-5
+    assert "lifecycle.md" in result.artifacts
