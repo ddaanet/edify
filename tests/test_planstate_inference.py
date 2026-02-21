@@ -266,3 +266,22 @@ def test_gate_attachment_with_mock(tmp_path: Path) -> None:
     result = infer_state(plan_dir, vet_status_func=mock_get_vet_status)
     assert result is not None
     assert result.gate == "design vet stale — re-vet before planning"
+
+
+def test_lifecycle_status_detection(tmp_path: Path) -> None:
+    """Test lifecycle.md status detection takes priority over pre-ready artifacts."""
+    plan_dir = tmp_path / "test-plan"
+    plan_dir.mkdir()
+
+    # Create design.md to establish pre-ready state (would normally be "designed")
+    (plan_dir / "design.md").write_text("")
+
+    # Create lifecycle.md with post-ready state
+    lifecycle_content = "2026-02-20 review-pending — /orchestrate\n"
+    (plan_dir / "lifecycle.md").write_text(lifecycle_content)
+
+    result = infer_state(plan_dir)
+
+    assert result is not None
+    assert result.status == "review-pending"
+    assert "lifecycle.md" in result.artifacts

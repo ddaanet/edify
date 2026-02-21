@@ -11,7 +11,13 @@ def _collect_artifacts(plan_dir: Path) -> set[str]:
     artifacts = set()
 
     # Baseline artifacts
-    for filename in ["requirements.md", "design.md", "outline.md", "problem.md"]:
+    for filename in [
+        "requirements.md",
+        "design.md",
+        "outline.md",
+        "problem.md",
+        "lifecycle.md",
+    ]:
         if (plan_dir / filename).exists():
             artifacts.add(filename)
 
@@ -28,8 +34,41 @@ def _collect_artifacts(plan_dir: Path) -> set[str]:
     return artifacts
 
 
+def _parse_lifecycle_status(plan_dir: Path) -> str | None:
+    """Parse lifecycle.md to extract current status.
+
+    Returns the status from the last non-empty line if valid, None otherwise.
+    Valid states: review-pending, rework, reviewed, delivered
+    """
+    lifecycle_file = plan_dir / "lifecycle.md"
+    if not lifecycle_file.exists():
+        return None
+
+    content = lifecycle_file.read_text()
+    lines = [line.strip() for line in content.split("\n") if line.strip()]
+
+    if not lines:
+        return None
+
+    # Parse last non-empty line: split on spaces, extract second token
+    last_line = lines[-1]
+    parts = last_line.split()
+    if len(parts) < 2:
+        return None
+
+    state = parts[1]
+    valid_states = {"review-pending", "rework", "reviewed", "delivered"}
+    return state if state in valid_states else None
+
+
 def _determine_status(plan_dir: Path) -> str:
-    """Status priority: ready > planned > designed > requirements."""
+    """Status priority: lifecycle > ready > planned > designed > requirements."""
+    # Check lifecycle.md first (post-ready states take priority)
+    lifecycle_status = _parse_lifecycle_status(plan_dir)
+    if lifecycle_status is not None:
+        return lifecycle_status
+
+    # Fall through to pre-ready detection
     if (plan_dir / "steps").is_dir() and (plan_dir / "orchestrator-plan.md").exists():
         return "ready"
     if list(plan_dir.glob("runbook-phase-*.md")):
