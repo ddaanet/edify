@@ -313,6 +313,77 @@ class TestAdditiveDirectives:
         assert "[DISCUSS]" in result["systemMessage"]
 
 
+class TestPatternGuards:
+    """Test Tier 2.5 pattern guards."""
+
+    def test_skill_editing_guard_verb_noun(self) -> None:
+        """Editing verb + skill/agent noun triggers skill-editing reminder."""
+        result = call_hook("fix the commit skill")
+        assert result != {}
+        assert (
+            "plugin-dev:skill-development"
+            in result["hookSpecificOutput"]["additionalContext"]
+        )
+        assert "systemMessage" not in result
+
+    def test_skill_editing_guard_slash_pattern(self) -> None:
+        """Slash-prefixed skill name with editing verb triggers reminder."""
+        result1 = call_hook("update /design description")
+        assert (
+            "plugin-dev:skill-development"
+            in result1["hookSpecificOutput"]["additionalContext"]
+        )
+        result2 = call_hook("improve /commit skill")
+        assert (
+            "plugin-dev:skill-development"
+            in result2["hookSpecificOutput"]["additionalContext"]
+        )
+
+    def test_ccg_guard_hooks_keyword(self) -> None:
+        """Platform keyword 'hooks' triggers CCG reminder."""
+        result = call_hook("how do hooks work")
+        assert result != {}
+        assert "claude-code-guide" in result["hookSpecificOutput"]["additionalContext"]
+        assert "systemMessage" not in result
+
+    def test_ccg_guard_platform_keywords(self) -> None:
+        """Various platform capability keywords trigger CCG reminder."""
+        assert (
+            "claude-code-guide"
+            in call_hook("configure a PreToolUse hook")["hookSpecificOutput"][
+                "additionalContext"
+            ]
+        )
+        assert (
+            "claude-code-guide"
+            in call_hook("set up MCP server")["hookSpecificOutput"]["additionalContext"]
+        )
+        assert (
+            "claude-code-guide"
+            in call_hook("add a slash command")["hookSpecificOutput"][
+                "additionalContext"
+            ]
+        )
+
+    def test_pattern_guard_no_false_positives(self) -> None:
+        """Non-matching prompts don't trigger guards."""
+        assert call_hook("fix the bug in parsing") == {}
+        assert call_hook("the skill level is high") == {}
+
+    def test_guard_additive_with_directive(self) -> None:
+        """Guard fires additively alongside directive output."""
+        result = call_hook("d: how do hooks work")
+        assert result != {}
+        additional_context = result["hookSpecificOutput"]["additionalContext"]
+        # DISCUSS directive must fire
+        assert (
+            "DISCUSS" in additional_context
+            or "Evaluate critically" in additional_context
+        )
+        # CCG guard must also fire
+        assert "claude-code-guide" in additional_context
+
+
 class TestIntegration:
     """Integration tests verifying all enhancements work together."""
 

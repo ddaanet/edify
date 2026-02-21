@@ -42,6 +42,20 @@
 - Stop condition: none
 - Decision made: none
 
+## Cycle 1.5: Pattern Guards (Skill-Editing + CCG) [2026-02-21]
+
+- Status: GREEN_VERIFIED
+- Test command: `pytest tests/test_userpromptsubmit_shortcuts.py::TestPatternGuards -v`
+- RED result: FAIL as expected — 5 failures (`result == {}` for guard prompts, `KeyError: 'hookSpecificOutput'`); 1 pass (no-false-positives correctly returns `{}`)
+- GREEN result: PASS — all 6 TestPatternGuards tests pass after adding 3 regex constants and Tier 2.5 detection block
+- Regression check: 19/19 passed (test_userpromptsubmit_shortcuts.py); 1111/1112 full suite (1 pre-existing xfail)
+- Refactoring: Shortened docstrings to fit 88-char line limit (same D205 issue as prior cycles)
+- Files modified:
+  - `agent-core/hooks/userpromptsubmit-shortcuts.py` — added `EDIT_SKILL_PATTERN`, `EDIT_SLASH_PATTERN`, `CCG_PATTERN` constants; refactored Tier 2 to not early-return (collects into `context_parts`/`system_parts`); added Tier 2.5 guard detection block; combined Tier 2 + Tier 2.5 outputs before single print+return
+  - `tests/test_userpromptsubmit_shortcuts.py` — added `TestPatternGuards` class with 6 tests
+- Stop condition: precommit reports test file exceeds 400-line limit (438 lines); escalating per protocol
+- Decision made: none
+
 ## Cycle 1.2: COMMANDS Dict String Updates (r, xc, hc) [2026-02-21]
 
 - Status: GREEN_VERIFIED
