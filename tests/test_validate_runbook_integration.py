@@ -297,9 +297,7 @@ def test_test_counts_interim_checkpoints_valid(
     runbook = tmp_path / "interim-valid.md"
     runbook.write_text(_VALID_INTERIM_CHECKPOINTS)
 
-    monkeypatch.setattr(
-        sys, "argv", ["validate-runbook", "test-counts", str(runbook)]
-    )
+    monkeypatch.setattr(sys, "argv", ["validate-runbook", "test-counts", str(runbook)])
     try:
         main()
         exit_code = 0
@@ -309,11 +307,7 @@ def test_test_counts_interim_checkpoints_valid(
     assert exit_code == 0
 
     report_path = (
-        tmp_path
-        / "plans"
-        / "interim-valid"
-        / "reports"
-        / "validation-test-counts.md"
+        tmp_path / "plans" / "interim-valid" / "reports" / "validation-test-counts.md"
     )
     assert report_path.exists(), f"Report not found at {report_path}"
     content = report_path.read_text()
@@ -329,9 +323,7 @@ def test_test_counts_interim_checkpoint_wrong(
     runbook = tmp_path / "interim-wrong.md"
     runbook.write_text(_VIOLATION_INTERIM_CHECKPOINT)
 
-    monkeypatch.setattr(
-        sys, "argv", ["validate-runbook", "test-counts", str(runbook)]
-    )
+    monkeypatch.setattr(sys, "argv", ["validate-runbook", "test-counts", str(runbook)])
     try:
         main()
         exit_code = 0
@@ -341,11 +333,7 @@ def test_test_counts_interim_checkpoint_wrong(
     assert exit_code == 1
 
     report_path = (
-        tmp_path
-        / "plans"
-        / "interim-wrong"
-        / "reports"
-        / "validation-test-counts.md"
+        tmp_path / "plans" / "interim-wrong" / "reports" / "validation-test-counts.md"
     )
     assert report_path.exists(), f"Report not found at {report_path}"
     content = report_path.read_text()
@@ -363,9 +351,7 @@ def test_model_tags_workflow_decision_file(
     runbook = tmp_path / "workflow-violation.md"
     runbook.write_text(_VIOLATION_MODEL_TAGS_WORKFLOW)
 
-    monkeypatch.setattr(
-        sys, "argv", ["validate-runbook", "model-tags", str(runbook)]
-    )
+    monkeypatch.setattr(sys, "argv", ["validate-runbook", "model-tags", str(runbook)])
     try:
         main()
         exit_code = 0

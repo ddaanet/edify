@@ -228,6 +228,37 @@ p: second directive"""
         assert "[DISCUSS]" in output_multi["systemMessage"]
 
 
+class TestTier1Commands:
+    """Test Tier 1 command matching on any prompt line."""
+
+    def test_tier1_shortcut_on_own_line_in_multiline_prompt(self) -> None:
+        """Shortcut on own line in multi-line prompt triggers expansion."""
+        result = call_hook("s\nsome additional context")
+        assert result != {}
+        assert "[#status]" in result["hookSpecificOutput"]["additionalContext"]
+        assert (
+            "[#execute]"
+            in call_hook("x\ndo the next thing")["hookSpecificOutput"][
+                "additionalContext"
+            ]
+        )
+        # Multi-line: additionalContext only, no systemMessage
+        assert "systemMessage" not in call_hook("s\nsome additional context")
+
+    def test_tier1_shortcut_exact_match_unchanged(self) -> None:
+        """Single-line match produces systemMessage + additionalContext."""
+        result_s = call_hook("s")
+        assert "[#status]" in result_s["systemMessage"]
+        assert "[#execute]" in call_hook("x")["systemMessage"]
+        assert "[#status]" in result_s["hookSpecificOutput"]["additionalContext"]
+
+    def test_tier1_no_false_positive_embedded(self) -> None:
+        """Shortcuts embedded in words or with trailing text do not trigger."""
+        assert call_hook("this is about status") == {}
+        assert call_hook("fix something") == {}
+        assert call_hook("  s  trailing space") == {}
+
+
 class TestIntegration:
     """Integration tests verifying all enhancements work together."""
 
