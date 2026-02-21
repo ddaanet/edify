@@ -11,6 +11,15 @@
 
 **Hook batch delivered:** 5 hooks deployed (UserPromptSubmit shortcuts, PreToolUse recipe-redirect, PostToolUse auto-format, SessionStart health, Stop health fallback). settings.json updated. Plan archived.
 
+**Session cleanup:**
+- Merged session-cli-tool (precommit fix: D205 + line limit in test_planstate_inference.py)
+- Merged hook-batch (learnings.md conflict: 8-line delta correctly appended)
+- Removed 3 worktrees (session-cli-tool, hook-batch, settings-json-diagnostic)
+- Session.md cleanup: removed stale blockers, orphaned `[from: ...]` merge artifacts, completed tasks, duplicate entries
+- Created 2 worktrees: wt-blocker-merge-fix, runbook-generation-fixes
+- New tasks: Wt rm amend safety, Wt blocker merge fix
+- Worktree CLI default: added sandbox removal scope (no more `additionalDirectories`)
+
 ## Pending Tasks
 
 - [ ] **Quality infra reform** — `/runbook plans/quality-infrastructure/outline.md` | sonnet
@@ -40,12 +49,6 @@
   - New requirement: commit subcommand must output shortened commit IDs
   - Blocked: runbook skill fixes needed before proceeding
 
-- [ ] **Runbook generation fixes** — `/design` | sonnet
-  - prepare-runbook.py: model propagation, phase numbering, phase context loss, single agent instead of per-phase
-  - Phase expansion: introduces defects requiring review+fix on every phase
-  - Orchestrator plan: unjustified interleaving
-  - Evidence: `plans/hook-batch/reports/runbook-pre-execution-review.md` (3 critical, 4 major, 3 minor)
-
 - [ ] **Deslop remaining skills** — Prose quality pass on skills not yet optimized | sonnet
 
 - [ ] **Merge artifact validation** — post-merge orphan detection in `_worktree merge` | sonnet
@@ -56,6 +59,7 @@
 - [ ] **Worktree CLI default** — `/runbook plans/worktree-cli-default/outline.md` | sonnet
   - Plan: worktree-cli-default | Status: designed
   - Absorbs: pre-merge untracked file fix, worktree skill adhoc mode, `--slug` override, `rm --confirm` gate fix
+  - Remove sandbox configuration from `_worktree new` — no more `additionalDirectories` in settings.local.json. All inter-tree operations via git or user-validated sandbox override
 
 
 - [ ] **Wt rm amend safety** — `/design` | sonnet
@@ -63,9 +67,18 @@
   - `--force` path (never merged) should never amend
   - Absorbed by worktree-cli-default if that runs first
 
-- [ ] **Wt blocker merge fix** — `/design` | sonnet
+## Worktree Tasks
+
+- [ ] **Wt blocker merge fix** → `wt-blocker-merge-fix` — `/design` | sonnet
   - `_worktree merge` appends branch blockers as raw bullets outside heading structure
   - Needs section-aware merge or post-merge cleanup
+
+- [ ] **Runbook generation fixes** → `runbook-generation-fixes` — `/design` | sonnet
+  - prepare-runbook.py: model propagation, phase numbering, phase context loss, single agent instead of per-phase
+  - Phase expansion: introduces defects requiring review+fix on every phase
+  - Orchestrator plan: unjustified interleaving
+  - Runbook skill prose: generation errors from skill instructions (separate from prepare-runbook.py)
+  - Evidence: `plans/hook-batch/reports/runbook-pre-execution-review.md` (3 critical, 4 major, 3 minor)
 
 ## Backlog
 
@@ -166,6 +179,7 @@
 
 **Runbook skill blocks Session CLI tool:**
 - `/runbook` skill needs updates before processing handoff-cli-tool outline
+
 ## Next Steps
 
 Quality infra reform `/runbook` next. Planstate delivered `/runbook`. No active worktrees.
