@@ -1,21 +1,23 @@
 # Session Handoff: 2026-02-21
 
-**Status:** Cleaned up 10 delivered plan directories. Verified runbook-quality-gates deliverables by content inspection (4 subcommands, 17 tests). Restored plugin-migration (not yet executed).
+**Status:** Planstate-delivered grounded and designed (outline = design). Lifecycle terminology validated against SmartBear Collaborator, CI/CD, VSM. Single `lifecycle.md` approach adopted over marker files.
 
 ## Completed This Session
 
-**Plan directory cleanup (10 removed):**
-- pipeline-skill-updates, context-optimization, worktree-rm-fixes, remaining-workflow-items, worktree-merge-data-loss, runbook-quality-gates, inline-phase-type, pretool-hook-cd-pattern, worktree-skill, integration-first-tests (absorbed into quality-infrastructure)
-- Verified runbook-quality-gates: `validate-runbook.py` (352 lines, 4 subcommands), 12 unit + 5 integration tests, `runbook-simplification-agent.md` — all substantive
-- User correction: plugin-migration not executed (restored), runbook-quality-gates required content verification before removal
+**Planstate delivered — grounding + design:**
+- Grounded lifecycle terminology: 5 web searches, 2 page fetches, opus internal brainstorm (`plans/reports/lifecycle-terminology-grounding.md`, `plans/reports/ground-internal-lifecycle.md`)
+- Two name changes: `defective` → `rework` (SmartBear/VSM precedent), `completed` → `reviewed` (cross-domain collision avoidance)
+- Outline produced, reviewed twice (R1 marker-file version, R2 lifecycle.md version)
+- Discussion: adopted single `lifecycle.md` (append-only) over 4 marker files — resolves review loop cycle without file deletion, provides audit trail
+- Outline at `plans/planstate-delivered/outline.md` serves as design (7 decisions, 3 phases, all affected files identified)
 
 ## Pending Tasks
 
-- [ ] **Planstate delivered status** — `/ground` then `/design plans/planstate-delivered/brief.md` | opus | restart
-  - Plan: planstate-delivered | Status: requirements
-  - Ground lifecycle terminology before design (kanban, DORA, CI/CD pipeline terms)
-  - Full lifecycle: requirements → designed → planned → ready → review-pending → completed → delivered
-  - Deliverable review as pre-merge gate (IN scope, with complexity shortcut)
+- [ ] **Planstate delivered status** — `/runbook plans/planstate-delivered/outline.md` | sonnet
+  - Plan: planstate-delivered | Status: designed
+  - Grounded lifecycle: `requirements → designed → planned → ready → review-pending → [rework ↔ review-pending] → reviewed → delivered`
+  - Single `lifecycle.md` per plan (append-only, last entry = status) replaces 4 marker files
+  - 3 phases: core inference (TDD), merge integration (TDD), skill/prose updates (general)
 
 - [ ] **Merge artifact validation** — post-merge orphan detection in `_worktree merge` | sonnet
   - Plan: worktree-merge-resilience | Diagnostic: `plans/worktree-merge-resilience/diagnostic.md`
@@ -94,11 +96,13 @@
 
 ## Next Steps
 
-Same priorities: planstate delivered `/ground` → `/design`, hook batch `/runbook`, session CLI tool `/runbook`. Plugin-migration at [ready] status — needs execution.
+Planstate delivered `/runbook` (outline = design, ready for planning). Hook batch `/runbook`. Session CLI tool `/runbook`.
 
 ## Reference Files
 
-- `plans/planstate-delivered/brief.md` — Plan lifecycle delivered status (7 decisions, grounding needed)
+- `plans/planstate-delivered/outline.md` — Plan lifecycle design (7 decisions, 3 phases, grounded terminology)
+- `plans/planstate-delivered/brief.md` — Original discussion decisions (pre-grounding)
+- `plans/reports/lifecycle-terminology-grounding.md` — Grounding research (SmartBear, CI/CD, VSM)
 - `plans/worktree-merge-resilience/diagnostic.md` — Merge artifact reproduction conditions
 - `plans/hook-batch/outline.md` — Hook batch outline (5 phases, 9 files, 8 decisions)
 - `plans/hook-batch/brief.md` — Original brief (pre-design)
