@@ -22,12 +22,6 @@
 
 ## Pending Tasks
 
-- [ ] **Quality infrastructure reform** — `/design plans/quality-infrastructure/requirements.md` | opus
-  - Plan: quality-infrastructure | Status: requirements
-  - 4 FRs: deslop restructuring, code density, vet rename, code refactoring
-  - Grounding: `plans/reports/code-density-grounding.md`
-  - Subsumes: Rename vet agents (FR-3), Codebase quality sweep (FR-4)
-  - Absorbs: integration-first-tests
 
 - [ ] **Orchestrate evolution** — `/runbook plans/orchestrate-evolution/design.md` | sonnet
   - Design complete with Phase 1 (foundation) + Phase 2 (ping-pong TDD), ready for runbook planning
@@ -71,6 +65,13 @@
 - [ ] **Tokens user config** → `tokens-user-config` — User config (`~/.config/claudeutils/`) for ANTHROPIC_API_KEY so `tokens` command works without env var | sonnet
   - Problem: setting ANTHROPIC_API_KEY in .envrc interferes with `claude` CLI auth
   - API token counting is free — only need key routing, not a local tokenizer
+
+- [ ] **Quality infra reform** → `quality-infra-reform` — `/design plans/quality-infrastructure/requirements.md` | opus
+  - Plan: quality-infrastructure | Status: requirements
+  - 4 FRs: deslop restructuring, code density, vet rename, code refactoring
+  - Grounding: `plans/reports/code-density-grounding.md`
+  - Subsumes: Rename vet agents (FR-3), Codebase quality sweep (FR-4)
+  - Absorbs: integration-first-tests
 
 ## Backlog
 
