@@ -252,6 +252,21 @@ class TestTier1Commands:
         assert "[#execute]" in call_hook("x")["systemMessage"]
         assert "[#status]" in result_s["hookSpecificOutput"]["additionalContext"]
 
+    def test_r_expansion_graduated_lookup(self) -> None:
+        """R expansion includes graduated lookup steps."""
+        result = call_hook("r")
+        additional_context = result["hookSpecificOutput"]["additionalContext"]
+        assert "conversation context" in additional_context
+        assert "session.md" in additional_context
+        assert "Error if no in-progress" not in additional_context
+
+    def test_xc_hc_bracket_compression(self) -> None:
+        """Xc and hc use bracket style."""
+        assert call_hook("xc")["systemMessage"].startswith("[execute, commit]")
+        assert call_hook("hc")["systemMessage"].startswith("[handoff, commit]")
+        assert "[#execute --commit]" not in call_hook("xc")["systemMessage"]
+        assert "[/handoff --commit]" not in call_hook("hc")["systemMessage"]
+
     def test_tier1_no_false_positive_embedded(self) -> None:
         """Shortcuts embedded in words or with trailing text do not trigger."""
         assert call_hook("this is about status") == {}
