@@ -1,55 +1,26 @@
 # Session Handoff: 2026-02-21
 
-**Status:** Consolidated backlog/todo into session.md. Created 6 worktrees. Verified and removed 3 more delivered plan directories (brief-skill, vet-invariant-scope, worktree-rm-safety). Planstate-delivered designed (outline = design, grounded terminology).
+**Status:** Quality infra reform designed (outline = design, 7 decisions, 3 phases). Ready for `/runbook`.
 
 ## Completed This Session
 
-**Task list consolidation:**
-- Deleted `agents/todo.md` — all items completed (unification ✅) or superseded (prompt-composer, handoff-discussion, task-agent-pattern)
-- Merged `agents/backlog.md` into session.md Backlog section, deleted source file
-- Removed 4 delivered items from backlog: worktree-skill, worktree-merge-data-loss, pretool-hook-cd-pattern, remaining-workflow-items
-- Removed absorbed task stubs from Pending (SessionStart status hook, PostToolUse auto-format hook)
-
-**Unscheduled plan assessment (3 delivered, removed):**
-- `brief-skill` — skill delivered at `agent-core/skills/brief/SKILL.md`
-- `vet-invariant-scope` — all 3 changes verified: Verification scope in vet-requirement.md + pipeline-contracts.md, lifecycle audit in orchestrate/SKILL.md, resume completeness in outline-review-agent.md
-- `worktree-rm-safety` — code delivered: `--force` flag, exit code 2, dirty tree checks, tests in worktree/cli.py
-
-**Worktree setup (6 created):**
-- planstate-delivered, merge-artifact-validation, hook-batch, compression-detail-loss, worktree-cli-default, tokens-user-config
-
-**New task:** Tokens user config — user config for ANTHROPIC_API_KEY (`.envrc` interferes with `claude` CLI auth, API token counting is free)
-
-**Planstate delivered — grounding + design:**
-- Grounded lifecycle terminology: 5 web searches, 2 page fetches, opus internal brainstorm (`plans/reports/lifecycle-terminology-grounding.md`, `plans/reports/ground-internal-lifecycle.md`)
-- Two name changes: `defective` → `rework` (SmartBear/VSM precedent), `completed` → `reviewed` (cross-domain collision avoidance)
-- Outline produced, reviewed twice (R1 marker-file version, R2 lifecycle.md version)
-- Discussion: adopted single `lifecycle.md` (append-only) over 4 marker files — resolves review loop cycle without file deletion, provides audit trail
-- Outline at `plans/planstate-delivered/outline.md` serves as design (7 decisions, 3 phases, all affected files identified)
-
-**Quality infra reform — naming taxonomy + FR extraction:**
-- Agent naming brainstorm (3 rounds, opus): bespoke deliverable → artisan, exploration → scout, plan-specific → crew-* prefix, tdd-task → test-driver, runbook-simplification-agent → runbook-simplifier, test-hooks → hooks-tester
-- 8 plan-specific `.claude/agents/*-task.md` files marked for deletion (detritus)
-- FR-3 expanded to FR-3a/3b/3c/3d subsections; FR-4 extracted to `plans/codebase-sweep/requirements.md`
-- Grounding document reframed general-first; FR-2/FR-3 requirements refined
-
-**Hook batch — runbook generation + pre-execution review:**
-- Runbook generated: 5 phases, 16 step files, agent definition, orchestrator plan
-- All phase-level reviews passed; holistic review passed
-- Pre-execution validation (model-tags/test-counts/red-plausibility) passed
-- Pre-execution review found 2 critical, 3 major, 3 minor issues in generated artifacts
-- Review: `plans/hook-batch/reports/runbook-pre-execution-review.md`
+**Quality infra reform — design (commit: 8e50563c):**
+- Outline produced with 7 design decisions (D-1 through D-7)
+- D-1: vet-agent deprecated (zero active call sites — `reports/explore-reviewer-usage.md`)
+- D-2: vet-taxonomy.md embed in corrector. D-3: code deslop via project-conventions skill
+- D-4: prose deslop → communication.md. D-5: phase ordering FR-3→FR-1→FR-2
+- D-6: vet-requirement→review-requirement. D-7: vet skill → review skill
+- Outline reviewed by outline-review-agent (3 major, 7 minor, all fixed)
+- Reviewer open question resolved: deprecate vet-agent, not rename
 
 ## Pending Tasks
 
-- [ ] **Quality infra reform** — `/design plans/quality-infrastructure/requirements.md` | opus
-  - Plan: quality-infrastructure | Status: requirements
-  - 3 FRs: deslop restructuring, code density decisions, agent rename
-  - Grounding: `plans/reports/code-density-grounding.md`
-  - Subsumes: Rename vet agents (FR-3a)
-  - Absorbs: integration-first-tests
-  - Discussion outcomes: noun-based naming (corrector/reviewer/auditor/artisan/scout/test-driver/crew-*), general-first grounding framing
-  - Open: empirical evaluation of reviewer (review-only) continued relevance
+- [ ] **Quality infra reform** — `/runbook plans/quality-infrastructure/outline.md` | sonnet
+  - Plan: quality-infrastructure | Status: designed
+  - 3 FRs: deslop restructuring (FR-1), code density decisions (FR-2), agent rename (FR-3)
+  - Phase 1: agent rename (general), Phase 2: deslop restructure (inline), Phase 3: code density (inline)
+  - Subsumes: Rename vet agents (FR-3a). Absorbs: integration-first-tests
+  - vet-agent deprecated (D-1), vet-taxonomy embedded (D-2), stale symlink cleanup in Phase 1f
 
 - [ ] **Codebase sweep** — `/design plans/codebase-sweep/requirements.md` | sonnet
   - Plan: codebase-sweep | Status: requirements
@@ -198,7 +169,7 @@
 
 ## Next Steps
 
-Planstate delivered `/runbook` (outline = design, ready for planning). Hook batch `/runbook`. Session CLI tool `/runbook`. 6 worktrees active.
+Quality infra reform `/runbook` next. Planstate delivered `/runbook`. Hook batch `/orchestrate`. 6 worktrees active.
 
 ## Reference Files
 
@@ -210,6 +181,9 @@ Planstate delivered `/runbook` (outline = design, ready for planning). Hook batc
 - `plans/hook-batch/brief.md` — Original brief (pre-design)
 - `plans/handoff-cli-tool/brief.md` — Session CLI briefs (status subcommand + commit ID requirement)
 - `plans/worktree-cli-default/outline.md` — CLI change design (positional=task, --branch=slug)
+- `plans/quality-infrastructure/outline.md` — Design outline (7 decisions, 3 phases, serves as design)
+- `plans/quality-infrastructure/reports/explore-reviewer-usage.md` — vet-agent zero-usage evidence
+- `plans/quality-infrastructure/reports/outline-review.md` — Review audit trail
 - `plans/quality-infrastructure/requirements.md` — 3 FRs: deslop, code density decisions, agent rename
 - `plans/quality-infrastructure/reports/agent-naming-brainstorm.md` — naming constraints and outcomes
 - `plans/codebase-sweep/requirements.md` — mechanical refactoring (_git_ok, _fail, exceptions)
