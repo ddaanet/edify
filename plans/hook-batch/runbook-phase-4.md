@@ -42,14 +42,16 @@ model: haiku
 
 **Implementation:**
 
-Add `--summary` detection at start of main():
+Add `--summary` detection AFTER the existing computation block (after line 193 where `entries_7plus` is computed, before the `print("# Learning Ages Report")` line). The flag branches the output path, not the computation:
 ```
+# --summary: branch output after computation, reuse existing variables
 if '--summary' in sys.argv:
-    # Run full computation (same as normal) but output one-liner then exit
-    [... compute all variables as usual ...]
-    # Output one-liner to stdout
-    [print one-liner summary]
+    [print one-liner summary using total_entries, entries_7plus, staleness_days]
     sys.exit(0)
+
+# Normal: full markdown report follows
+print("# Learning Ages Report")
+...
 ```
 
 One-liner output format:
@@ -74,15 +76,19 @@ python3 agent-core/bin/learning-ages.py agents/learnings.md --summary
 
 **Validation:**
 ```bash
-# Verify one-liner output
+# Verify one-liner output: exactly 1 line matching expected format
 output=$(python3 agent-core/bin/learning-ages.py agents/learnings.md --summary)
-echo "Lines: $(echo "$output" | wc -l)"
+lines=$(echo "$output" | wc -l | tr -d ' ')
+echo "Lines: $lines"  # Expected: 1
 echo "Content: $output"
-# Expected: Lines: 1, Content contains "entries"
+# Expected format A (prior consolidation): "<N> entries (<M> ≥7 days, consolidation <D>d ago)"
+# Expected format B (no prior consolidation): "<N> entries (<M> ≥7 days, no prior consolidation)"
+echo "$output" | grep -E "^[0-9]+ entries \([0-9]+ ≥7 days" || echo "FAIL: format mismatch"
 
-# Verify normal mode still works
+# Verify normal mode still works (no regression)
 python3 agent-core/bin/learning-ages.py agents/learnings.md | head -5
-# Expected: first lines of markdown report (unchanged behavior)
+# Expected: first line is "# Learning Ages Report" (unchanged behavior)
+python3 agent-core/bin/learning-ages.py agents/learnings.md | head -1 | grep -q "# Learning Ages Report" && echo "✓ Normal mode unchanged"
 ```
 
 ---
@@ -148,7 +154,7 @@ while IFS= read -r wt_path; do
     if [ "$age_days" -gt 7 ]; then
         stale_wt="$stale_wt\n  $(basename "$wt_path") (${age_days}d)"
     fi
-done < <(git worktree list --porcelain | grep "^worktree " | awk '{print $2}' | grep -v "^$(git rev-parse --show-toplevel)$")
+done < <(git worktree list --porcelain | grep "^worktree " | awk '{print $2}' | grep -v "^$(git rev-parse --show-toplevel)$" || true)
 ```
 
 **Output format:**
@@ -157,6 +163,8 @@ message="Session Health:\n${tree_status}\nLearnings: ${learnings_status}"
 [ -n "$stale_wt" ] && message="$message\n⚠️ Stale worktrees:$stale_wt"
 printf '{"systemMessage": "%s"}\n' "$(echo "$message" | sed 's/"/\\"/g')"
 ```
+
+Note: The `\n` in `message=` are literal backslash-n (not shell newlines) when using double-quoted strings in bash. This is intentional — the JSON value contains literal `\n` which Claude Code interprets as newlines in systemMessage rendering. Do NOT use `$'...'` syntax or actual shell newlines in the message variable, as those would break the JSON structure.
 
 Note: Use `$CLAUDE_PROJECT_DIR` for paths to learning-ages.py. This env var is set by Claude Code for command hooks.
 
@@ -195,7 +203,7 @@ echo '{"session_id": "verify-test"}' \
 
 **Objective:** Create `agent-core/hooks/stop-health-fallback.sh` that fires on every Stop event. If SessionStart already ran (flag file exists), skips. If not (new session, handles #10373), runs health checks and displays status.
 
-**Script Evaluation:** Small — flag file check logic + same health check calls as Step 4.2.
+**Script Evaluation:** Medium — flag file check + same 3 health checks as Step 4.2 (same complexity, just skipped when flag present). "Small" would only apply if the health checks were extracted to a shared helper.
 
 **Execution Model:** Haiku
 

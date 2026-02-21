@@ -109,6 +109,7 @@ Create `agent-core/hooks/hooks.json` with this content:
 - UserPromptSubmit entry already exists in settings.json — sync-hooks-config.py will dedup by command string
 - PreToolUse Bash matcher already exists (submodule-safety.py) — new recipe-redirect hook will be appended to existing matcher's hooks list
 - PostToolUse Write|Edit is new (existing is Write|Edit PreToolUse only; PostToolUse only has Bash matcher)
+- PostToolUse Bash matcher already exists (submodule-safety.py) — merge must preserve it; sync-hooks-config.py adds Write|Edit entry alongside existing Bash entry
 - SessionStart and Stop are new event types not currently in settings.json
 
 **Expected Outcome:** Valid JSON file at `agent-core/hooks/hooks.json`.
@@ -188,6 +189,8 @@ def find_settings_path():
 - JSON parse error → exit 1 with parse error message
 - Write failure → exit 1 (settings.json in denyWithinAllow; requires dangerouslyDisableSandbox)
 
+**Note:** This step requires `dangerouslyDisableSandbox: true` — all python3 calls are blocked by `Bash(python3:*)` deny rule.
+
 **Validation:**
 ```bash
 # Dry-run validation: parse the script
@@ -216,7 +219,7 @@ python3 -c 'import json; d=json.load(open(".claude/settings.json")); print(list(
 
 **Implementation:**
 
-Append to end of `sync-to-parent` recipe body (before the next recipe definition):
+Insert before `echo "Sync complete!"` at the end of the `sync-to-parent` recipe body (after the hooks section, before the closing echo):
 
 ```just
     echo "Syncing hook configuration..."
@@ -228,12 +231,13 @@ Notes:
 - `agent-core/bin/sync-hooks-config.py` path is relative to project root — correct
 - Recipe uses `#!/usr/bin/env bash` shebang with `set -euo pipefail` — script failure aborts sync
 - sync-hooks-config.py writes settings.json → requires dangerouslyDisableSandbox when running `just sync-to-parent`
+- The hooks section (symlink sync for hook scripts and hooks.json) already exists in sync-to-parent — insert the sync-hooks-config.py call AFTER the existing hooks section
 
 **Expected Outcome:** `sync-to-parent` recipe ends with hook config sync call. Running `just sync-to-parent` deploys both symlinks and hook configuration.
 
 **Error Conditions:**
-- sync-hooks-config.py fails → recipe exits non-zero; settings.json unchanged (atomic write or partial write?)
-  - Ensure sync-hooks-config.py writes atomically (write to temp file, rename) to prevent partial write if interrupted
+- sync-hooks-config.py fails → recipe exits non-zero (set -euo pipefail); settings.json unchanged if write failed
+  - Step 5.2 implementation must write atomically (write to temp file, rename to settings.json) to prevent partial write on interrupt — verify this is implemented in sync-hooks-config.py before running
 
 **Validation:**
 ```bash
@@ -297,6 +301,18 @@ if we_hooks:
     print("Write|Edit hooks:", cmds)
 '
 # Expected: pretooluse-block-tmp.sh and pretooluse-symlink-redirect.sh still present
+
+# Verify PostToolUse Bash (submodule-safety) preserved AND Write|Edit (autoformat) added
+python3 -c '
+import json
+d = json.load(open(".claude/settings.json"))
+ptu = d["hooks"].get("PostToolUse", [])
+bash_hooks = [e for e in ptu if e.get("matcher") == "Bash"]
+we_hooks = [e for e in ptu if e.get("matcher") == "Write|Edit"]
+print("PostToolUse Bash hooks:", [h["command"] for h in bash_hooks[0]["hooks"]] if bash_hooks else "MISSING")
+print("PostToolUse Write|Edit hooks:", [h["command"] for h in we_hooks[0]["hooks"]] if we_hooks else "MISSING")
+'
+# Expected: Bash has submodule-safety.py; Write|Edit has posttooluse-autoformat.sh
 
 # Verify UserPromptSubmit not duplicated
 python3 -c '
