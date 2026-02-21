@@ -1,10 +1,16 @@
 # Session Handoff: 2026-02-21
 
-**Status:** Quality infra reform designed (outline = design, 7 decisions, 3 phases). Ready for `/runbook`.
+**Status:** Merged 4 worktrees (tokens-user-config, planstate-delivered, quality-infra-reform, hook-batch). Created runbook generation fixes task.
 
 ## Completed This Session
 
-**Quality infra reform — design (commit: 8e50563c):**
+**Worktree merges (4):**
+- `tokens-user-config` — user_config.py module, tokens_cli.py config support, 2 test files. Worktree removed.
+- `planstate-delivered` — grounding reports, outline (serves as design), decision file updates. Worktree removed. Task back to Pending.
+- `quality-infra-reform` — naming brainstorm, FR-3 expansion, FR-4 extracted to codebase-sweep, grounding reframe. Worktree removed.
+- `hook-batch` — execution progress merge (per-phase agents, context files, Cycles 1.1-2.1, updated pre-execution review). Worktree kept (execution in progress).
+
+**Quality infra reform — design (prior session, commit: 8e50563c):**
 - Outline produced with 7 design decisions (D-1 through D-7)
 - D-1: vet-agent deprecated (zero active call sites — `reports/explore-reviewer-usage.md`)
 - D-2: vet-taxonomy.md embed in corrector. D-3: code deslop via project-conventions skill
@@ -42,6 +48,12 @@
   - After pipeline fixes (done): outline review → sufficiency gate → `/runbook`
   - New requirement: commit subcommand must output shortened commit IDs (session scraping)
 
+- [ ] **Runbook generation fixes** — `/design` | sonnet
+  - prepare-runbook.py: model propagation (defaults to agent base, not phase-specified), phase numbering (counts boundaries, not actual numbers), phase context not extracted to step files, single agent instead of per-phase
+  - Phase expansion: expansion agent introduces defects (wrong file refs, contradictory instructions, missing context from outline) requiring review+fix on every phase
+  - Orchestrator plan: unjustified phase interleaving
+  - Evidence: hook-batch pre-execution review — `plans/hook-batch/reports/runbook-pre-execution-review.md` (3 critical, 4 major, 3 minor)
+
 - [ ] **Deslop remaining skills** — Prose quality pass on skills not yet optimized (handoff, commit, opus-design-question, next done) | sonnet
 
 ## Worktree Tasks
@@ -52,9 +64,9 @@
   - Pattern: in-place edits + tail divergence → git appends modified line as duplicate
   - Also: focused-session section stripping → content leaks into wrong section
 
-- [ ] **Hook batch** → `hook-batch` — `/orchestrate plans/hook-batch/orchestrator-plan.md` | sonnet | restart
-  - Plan: hook-batch | Status: ready (pre-execution review has 2 critical fixes needed)
-  - 5 phases, 16 steps, agent + orchestrator plan generated
+- [>] **Hook batch** → `hook-batch` — `/orchestrate plans/hook-batch/orchestrator-plan.md` | sonnet | restart
+  - Plan: hook-batch | Status: executing (Phase 1 complete, Phase 2 Cycle 2.1 done)
+  - Pre-execution fixes applied: per-phase agents (hb-p1–hb-p5), context files, model/phase metadata fixed
   - Pre-execution review: `plans/hook-batch/reports/runbook-pre-execution-review.md`
 
 - [ ] **Diagnose compression detail loss** → `compression-detail-loss` — RCA against commit `0418cedb` | sonnet
@@ -163,13 +175,18 @@
 **SessionStart hook #10373 still open:**
 - Output discarded for new interactive sessions. Stop hook fallback designed in hook batch Phase 4.
 
+**Submodule worktree refs block new worktree creation:**
+- `git -C agent-core worktree add` validates ALL existing worktree refs. Stale relative paths (`../../../../../../claudeutils-wt/...`) fail validation, blocking creation of any new submodule worktree.
+- Recovery from accidental admin dir deletion: recreate dir, write `gitdir`/`commondir`/`HEAD`, `git reset HEAD` to rebuild index.
+- Root cause: agent-core merge into main created merge commit but didn't update worktree refs. Hook-batch agent-core worktree admin dir was deleted by agent (wrong `test -d` for submodule `.git` file), then recovered.
+
 **`_worktree new` requires sandbox bypass:**
 - Writes `.claude/settings.local.json` which is in sandbox deny list. Must use `dangerouslyDisableSandbox: true`.
 - Partial failure leaves orphaned branch with focused-session commit. Clean up with `_worktree rm --force <slug>`.
 
 ## Next Steps
 
-Quality infra reform `/runbook` next. Planstate delivered `/runbook`. Hook batch `/orchestrate`. 6 worktrees active.
+Hook batch executing in worktree. Quality infra reform `/runbook` next. Planstate delivered `/runbook`. 5 worktrees active (hook-batch, merge-artifact-validation, compression-detail-loss, worktree-cli-default, session-cli-tool). Worktree creation blocked by stale submodule worktree refs — see Blockers.
 
 ## Reference Files
 
