@@ -28,6 +28,20 @@
 - Stop condition: none
 - Decision made: Tier 2 retains `return` after printing (not fall-through to Tier 3) to avoid double JSON output; "no early return" refers to completing all directive collection before printing, not eliminating the return before Tier 3
 
+## Cycle 1.4: New Directives with Dual Output (p:, b:, q:, learn:) [2026-02-21]
+
+- Status: GREEN_VERIFIED
+- Test command: `pytest tests/test_userpromptsubmit_shortcuts.py::TestNewDirectives -v`
+- RED result: FAIL as expected — `test_p_directive_dual_output` got AssertionError (full expansion in systemMessage, not concise); b:/q:/learn: got KeyError (keys absent from DIRECTIVES)
+- GREEN result: PASS — all 5 TestNewDirectives tests pass after adding 3 expansion constants, updating DIRECTIVES dict, and updating Tier 2 dual-output dispatch
+- Regression check: 18/18 passed (test_userpromptsubmit_shortcuts.py); 1105/1106 full suite (1 pre-existing xfail)
+- Refactoring: _BRAINSTORM_EXPANSION text adjusted to avoid "converge"/"recommend" per test assertions (D-5 semantics: diverge-only mode)
+- Files modified:
+  - `agent-core/hooks/userpromptsubmit-shortcuts.py` — added `_BRAINSTORM_EXPANSION`, `_QUICK_EXPANSION`, `_LEARN_EXPANSION` constants; added 'b'/'brainstorm'/'q'/'question'/'learn' to DIRECTIVES; extended dual-output dispatch in main() to include p:/pending:/b:/brainstorm:/q:/question:/learn: with concise systemMessage
+  - `tests/test_userpromptsubmit_shortcuts.py` — added `TestNewDirectives` class with 5 tests
+- Stop condition: none
+- Decision made: none
+
 ## Cycle 1.2: COMMANDS Dict String Updates (r, xc, hc) [2026-02-21]
 
 - Status: GREEN_VERIFIED
