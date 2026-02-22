@@ -24,7 +24,7 @@ def test_new_submodule(
     setup_repo_with_submodule(repo_path, init_repo)
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["new", "test-feature"])
+    result = runner.invoke(worktree, ["new", "--branch", "test-feature"])
 
     assert result.exit_code == 0
 
@@ -76,7 +76,7 @@ def test_new_worktree_submodule(
 
     runner = CliRunner()
 
-    result = runner.invoke(worktree, ["new", "feature-x"])
+    result = runner.invoke(worktree, ["new", "--branch", "feature-x"])
     assert result.exit_code == 0
 
     container_path = tmp_path / "repo-wt"
@@ -109,7 +109,7 @@ def test_new_worktree_submodule(
     )
     assert str(submodule_path) in result.stdout
 
-    result = runner.invoke(worktree, ["new", "feature-y"])
+    result = runner.invoke(worktree, ["new", "--branch", "feature-y"])
     assert result.exit_code == 0
 
     worktree_path2 = container_path / "feature-y"
@@ -137,7 +137,7 @@ def test_new_worktree_submodule(
         capture_output=True,
     )
 
-    result = runner.invoke(worktree, ["new", "existing-feature"])
+    result = runner.invoke(worktree, ["new", "--branch", "existing-feature"])
     assert result.exit_code == 0
 
     worktree_path3 = container_path / "existing-feature"
@@ -174,7 +174,7 @@ def test_rm_deletes_submodule_branch(
     setup_repo_with_submodule(repo_path, init_repo)
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["new", "test-feature"])
+    result = runner.invoke(worktree, ["new", "--branch", "test-feature"])
     assert result.exit_code == 0
 
     # Precondition: submodule branch exists

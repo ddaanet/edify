@@ -87,7 +87,7 @@ def test_session_precommit(
     session_file.write_text("# Focused Session\n\nTask content")
 
     result = CliRunner().invoke(
-        worktree, ["new", "test-feature", "--session", str(session_file)]
+        worktree, ["new", "--branch", "test-feature", "--session", str(session_file)]
     )
     assert result.exit_code == 0
 
@@ -131,7 +131,7 @@ def test_task_mode_integration(
 """
     session_file.write_text(session_content)
 
-    result = CliRunner().invoke(worktree, ["new", "--task", "Implement feature X"])
+    result = CliRunner().invoke(worktree, ["new", "Implement feature X"])
     assert result.exit_code == 0
 
     lines = result.output.strip().split("\n")
@@ -158,7 +158,7 @@ def test_rm_command_path_resolution(
     monkeypatch.chdir(repo_path)
     init_repo(repo_path)
 
-    result = CliRunner().invoke(worktree, ["new", "test-slug"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-slug"])
     assert result.exit_code == 0
 
     worktree_path = wt_path("test-slug")
@@ -178,7 +178,7 @@ def test_rm_command_blocks_dirty_worktree(
     monkeypatch.chdir(repo_path)
     init_repo(repo_path)
 
-    result = CliRunner().invoke(worktree, ["new", "test-slug"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-slug"])
     assert result.exit_code == 0
 
     worktree_path = wt_path("test-slug")
@@ -197,7 +197,7 @@ def test_rm_worktree_registration_probing(
     """Rm command detects parent and submodule worktree registration states."""
     monkeypatch.chdir(repo_with_submodule)
 
-    result = CliRunner().invoke(worktree, ["new", "test-slug"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-slug"])
     assert result.exit_code == 0
 
     worktree_path = wt_path("test-slug")
@@ -286,7 +286,7 @@ def test_rm_post_removal_cleanup(
     monkeypatch.chdir(repo_path)
     init_repo(repo_path)
 
-    result = CliRunner().invoke(worktree, ["new", "test-slug"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-slug"])
     assert result.exit_code == 0
 
     worktree_path = wt_path("test-slug")
@@ -311,10 +311,10 @@ def test_rm_post_removal_cleanup_non_empty_container(
     monkeypatch.chdir(repo_path)
     init_repo(repo_path)
 
-    result = CliRunner().invoke(worktree, ["new", "test-slug-1"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-slug-1"])
     assert result.exit_code == 0
 
-    result = CliRunner().invoke(worktree, ["new", "test-slug-2"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-slug-2"])
     assert result.exit_code == 0
 
     worktree_path_1 = wt_path("test-slug-1")
@@ -342,7 +342,7 @@ def test_rm_post_removal_cleanup_idempotent(
     monkeypatch.chdir(repo_path)
     init_repo(repo_path)
 
-    result = CliRunner().invoke(worktree, ["new", "test-slug"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-slug"])
     assert result.exit_code == 0
 
     worktree_path = wt_path("test-slug")
@@ -366,14 +366,14 @@ def test_rm_safe_branch_deletion(
     monkeypatch.chdir(repo_path)
     init_repo(repo_path)
 
-    result = CliRunner().invoke(worktree, ["new", "test-slug"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-slug"])
     assert result.exit_code == 0
 
     result = CliRunner().invoke(worktree, ["rm", "--confirm", "test-slug"])
     assert result.exit_code == 0
     assert "Branch test-slug" not in result.output
 
-    result = CliRunner().invoke(worktree, ["new", "unmerged-slug"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "unmerged-slug"])
     assert result.exit_code == 0
 
     worktree_path = wt_path("unmerged-slug")

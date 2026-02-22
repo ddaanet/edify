@@ -44,7 +44,7 @@ def _setup_diverged_submodule(
     _update_submodule_pointer(repo_with_submodule, "Update agent-core pointer")
 
     _git("branch", branch_name, cwd=repo_with_submodule)
-    result = CliRunner().invoke(worktree, ["new", branch_name])
+    result = CliRunner().invoke(worktree, ["new", "--branch", branch_name])
     assert result.exit_code == 0
 
     _git("-C", str(agent_core_path), "reset", "--hard", base_commit)
@@ -155,7 +155,7 @@ def _setup_merge_test_worktree(
     _update_submodule_pointer(repo_with_submodule, "Update agent-core to base")
 
     _git("branch", branch_name, cwd=repo_with_submodule)
-    result = CliRunner().invoke(worktree, ["new", branch_name])
+    result = CliRunner().invoke(worktree, ["new", "--branch", branch_name])
     assert result.exit_code == 0
 
     commit_file(agent_core_path, "main_change.txt", "main change", "Main branch change")
@@ -265,7 +265,7 @@ def _setup_submodule_conflict(
     _update_submodule_pointer(repo_with_submodule, "Update to base commit")
 
     _git("branch", branch_name, cwd=repo_with_submodule)
-    result = CliRunner().invoke(worktree, ["new", branch_name])
+    result = CliRunner().invoke(worktree, ["new", "--branch", branch_name])
     assert result.exit_code == 0
 
     wt_container = repo_with_submodule.parent / f"{repo_with_submodule.name}-wt"

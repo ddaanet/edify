@@ -18,7 +18,7 @@ def _create_worktree(
 ) -> Path:
     """Create worktree via CLI and return its path."""
     runner = CliRunner()
-    result = runner.invoke(worktree_cli, ["new", slug])
+    result = runner.invoke(worktree_cli, ["new", "--branch", slug])
     assert result.exit_code == 0
     container_path = repo_path.parent / f"{repo_path.name}-wt"
     return container_path / slug

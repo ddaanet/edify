@@ -27,7 +27,7 @@ def _write_commit(path: Path, filepath: str, content: str, msg: str) -> None:
 def _setup_merge_worktree(repo: Path, slug: str = "test-merge") -> Path:
     """Create branch and worktree, return worktree path."""
     _git("branch", slug, cwd=repo)
-    result = CliRunner().invoke(worktree, ["new", slug])
+    result = CliRunner().invoke(worktree, ["new", "--branch", slug])
     assert result.exit_code == 0, f"new failed: {result.output}"
     return repo.parent / f"{repo.name}-wt" / slug
 
@@ -308,7 +308,7 @@ def test_conflict_output_contains_all_fields(
 
     # Create branch with diverging change
     _git("branch", "test-feature", cwd=repo_with_submodule)
-    result = CliRunner().invoke(worktree, ["new", "test-feature"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-feature"])
     assert result.exit_code == 0, f"new failed: {result.output}"
     wt_path = (
         repo_with_submodule.parent / f"{repo_with_submodule.name}-wt" / "test-feature"

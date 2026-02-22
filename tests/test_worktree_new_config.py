@@ -1,6 +1,5 @@
 """Tests for worktree new command - configuration and setup."""
 
-import json
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
@@ -9,42 +8,6 @@ import pytest
 from click.testing import CliRunner
 
 from claudeutils.worktree.cli import worktree
-
-
-def test_new_sandbox_registration(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
-) -> None:
-    """Registers container in main and worktree settings."""
-    repo_path = tmp_path / "repo"
-    repo_path.mkdir()
-    monkeypatch.chdir(repo_path)
-
-    init_repo(repo_path)
-
-    runner = CliRunner()
-    result = runner.invoke(worktree, ["new", "test-feature"])
-    assert result.exit_code == 0
-
-    container_path = tmp_path / "repo-wt"
-    main_settings = repo_path / ".claude" / "settings.local.json"
-    assert main_settings.exists()
-    with main_settings.open() as f:
-        dirs = json.load(f).get("permissions", {}).get("additionalDirectories", [])
-    assert str(container_path) in dirs
-
-    wt_settings = container_path / "test-feature" / ".claude" / "settings.local.json"
-    assert wt_settings.exists()
-    with wt_settings.open() as f:
-        wt_dirs = json.load(f).get("permissions", {}).get("additionalDirectories", [])
-    assert str(container_path) in wt_dirs
-    assert str(repo_path) in wt_dirs
-
-    runner.invoke(worktree, ["new", "test-feature-2"])
-    with main_settings.open() as f:
-        dirs_after = (
-            json.load(f).get("permissions", {}).get("additionalDirectories", [])
-        )
-    assert dirs_after.count(str(container_path)) == 1
 
 
 def test_new_environment_initialization(
@@ -75,7 +38,7 @@ def test_new_environment_initialization(
     monkeypatch.setattr("claudeutils.worktree.cli.subprocess.run", mock_run)
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["new", "test-setup"])
+    result = runner.invoke(worktree, ["new", "--branch", "test-setup"])
     assert result.exit_code == 0
 
     worktree_path = tmp_path / "repo-wt" / "test-setup"
@@ -87,10 +50,10 @@ def test_new_environment_initialization(
     )
 
 
-def test_new_task_option(
+def test_new_positional_task_name(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
-    """Creates worktree with --task option."""
+    """Positional arg creates worktree with session integration."""
     repo_path = tmp_path / "repo"
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
@@ -103,29 +66,27 @@ def test_new_task_option(
         "## Pending Tasks\n\n"
         "- [ ] **Implement feature** — `command` | sonnet\n"
         "  - Plan: plans/test-plan\n"
-        "- [ ] **Another task** — `command` | sonnet\n"
-        "  - Plan: plans/other-plan\n"
+    )
+    subprocess.run(
+        ["git", "add", "agents/session.md"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Add session"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
     )
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["new", "--task", "Implement feature"])
+    result = runner.invoke(worktree, ["new", "Implement feature"])
     assert result.exit_code == 0
     assert (tmp_path / "repo-wt" / "implement-feature").exists()
 
-    result = runner.invoke(worktree, ["new", "explicit-slug", "--task", "Another task"])
-    assert result.exit_code != 0
-    assert (
-        "mutually exclusive" in result.output.lower() or "both" in result.output.lower()
-    )
-
-    result = runner.invoke(
-        worktree, ["new", "--task", "Another task", "--session", "some-session.md"]
-    )
-    assert result.exit_code == 0
-    assert "warning" in result.output.lower() or "ignored" in result.output.lower()
-
     result = runner.invoke(worktree, ["new", "--help"])
-    assert "--task" in result.output
+    assert "--branch" in result.output
     assert "--session-md" in result.output
 
 
@@ -146,7 +107,8 @@ def test_new_session_handling_branch_reuse(
 
     runner = CliRunner()
     result = runner.invoke(
-        worktree, ["new", "test-feature", "--session", str(session_file)]
+        worktree,
+        ["new", "--branch", "test-feature", "--session", str(session_file)],
     )
 
     assert result.exit_code == 0
@@ -156,7 +118,7 @@ def test_new_session_handling_branch_reuse(
     container_path = tmp_path / "repo-wt"
     assert (container_path / "test-feature").exists()
 
-    result = runner.invoke(worktree, ["new", "new-branch"])
+    result = runner.invoke(worktree, ["new", "--branch", "new-branch"])
     assert result.exit_code == 0
     assert (container_path / "new-branch").exists()
 
@@ -189,7 +151,7 @@ def test_new_environment_init_failure(
     monkeypatch.setattr("claudeutils.worktree.cli.subprocess.run", mock_run)
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["new", "test-failure"])
+    result = runner.invoke(worktree, ["new", "--branch", "test-failure"])
     assert result.exit_code == 0
 
     worktree_path = tmp_path / "repo-wt" / "test-failure"
@@ -211,10 +173,10 @@ def test_new_container_idempotent(
     container_path.mkdir()
 
     runner = CliRunner()
-    result = runner.invoke(worktree, ["new", "test-idempotent"])
+    result = runner.invoke(worktree, ["new", "--branch", "test-idempotent"])
     assert result.exit_code == 0
 
     assert (container_path / "test-idempotent").exists()
-    result = runner.invoke(worktree, ["new", "test-idempotent-2"])
+    result = runner.invoke(worktree, ["new", "--branch", "test-idempotent-2"])
     assert result.exit_code == 0
     assert (container_path / "test-idempotent-2").exists()

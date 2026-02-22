@@ -35,7 +35,7 @@ def test_merge_branch_existence(
 
     # Test 3: Both branch and worktree directory exist
     subprocess.run(["git", "branch", "full-merge"], check=True, capture_output=True)
-    result = CliRunner().invoke(worktree, ["new", "full-merge"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "full-merge"])
     assert result.exit_code == 0
 
     result = CliRunner().invoke(worktree, ["merge", "full-merge"])

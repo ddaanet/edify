@@ -125,11 +125,6 @@ def _setup_worktree(
     _create_parent_worktree(worktree_path, slug, base, session)
     main_repo = _git("rev-parse", "--show-toplevel").strip()
     _create_submodule_worktree(main_repo, worktree_path, slug)
-    add_sandbox_dir(str(worktree_path.parent), ".claude/settings.local.json")
-    add_sandbox_dir(
-        str(worktree_path.parent), f"{worktree_path}/.claude/settings.local.json"
-    )
-    add_sandbox_dir(main_repo, f"{worktree_path}/.claude/settings.local.json")
     _initialize_environment(worktree_path)
     click.echo(f"{slug}\t{worktree_path}" if task else str(worktree_path))
 
@@ -171,35 +166,36 @@ def clean_tree() -> None:
 
 
 @worktree.command()
-@click.argument("slug", required=False)
+@click.argument("task_name", required=False)
+@click.option("--branch", default="")
 @click.option("--base", default="HEAD")
 @click.option("--session", default="")
-@click.option("--task", default="")
 @click.option("--session-md", default="agents/session.md")
-def new(slug: str | None, base: str, session: str, task: str, session_md: str) -> None:
+def new(
+    task_name: str | None, branch: str, base: str, session: str, session_md: str
+) -> None:
     """Create worktree in sibling container."""
-    if task and slug:
-        raise click.UsageError("slug and --task are mutually exclusive")  # noqa: TRY003
-    if not task and not slug:
-        raise click.UsageError("either slug or --task is required")  # noqa: TRY003
+    if not task_name and not branch:
+        raise click.UsageError("provide a task name or --branch <slug>")  # noqa: TRY003
     temp_session_file = None
     try:
-        if task:
-            slug = derive_slug(task)
+        if task_name:
+            slug = branch or derive_slug(task_name)
             with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".md") as f:
-                f.write(focus_session(task, session_md))
+                f.write(focus_session(task_name, session_md))
                 temp_session_file = session = f.name
-        assert slug is not None
+        else:
+            slug = branch
         if (path := wt_path(slug, create_container=True)).exists():
             click.echo(f"Error: existing directory {path}", err=True)
             raise SystemExit(1)
-        _setup_worktree_safe(path, slug, base, session, task)
-        if task:
+        _setup_worktree_safe(path, slug, base, session, task_name or "")
+        if task_name:
             session_md_path = Path(session_md)
             if not session_md_path.exists():
                 click.echo(f"Error: session.md not found at {session_md}", err=True)
                 raise SystemExit(1)
-            move_task_to_worktree(session_md_path, task, slug)
+            move_task_to_worktree(session_md_path, task_name, slug)
     finally:
         if temp_session_file:
             Path(temp_session_file).unlink(missing_ok=True)

@@ -35,7 +35,7 @@ def test_new_task_mode_moves_task_to_worktree(
 """
     session_file.write_text(session_content)
 
-    result = CliRunner().invoke(worktree, ["new", "--task", "Implement feature X"])
+    result = CliRunner().invoke(worktree, ["new", "Implement feature X"])
     assert result.exit_code == 0
 
     updated_session = session_file.read_text()
@@ -87,7 +87,7 @@ def test_rm_calls_remove_worktree_task_before_branch_delete(
     )
 
     result = CliRunner().invoke(
-        worktree, ["new", "feature-a", "--session", str(session_file)]
+        worktree, ["new", "--branch", "feature-a", "--session", str(session_file)]
     )
     assert result.exit_code == 0
 
@@ -164,7 +164,8 @@ def test_rm_e2e_removes_completed_task_from_worktree_tasks(
     )
 
     result = CliRunner().invoke(
-        worktree, ["new", "complete-the-feature", "--session", str(session_file)]
+        worktree,
+        ["new", "--branch", "complete-the-feature", "--session", str(session_file)],
     )
     assert result.exit_code == 0
 

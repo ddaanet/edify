@@ -36,7 +36,7 @@ def test_merge_parent_initiate(
         check=True,
         capture_output=True,
     )
-    result = CliRunner().invoke(worktree, ["new", "test-merge"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-merge"])
     assert result.exit_code == 0, f"new command should succeed, got: {result.output}"
 
     worktree_path = (
@@ -112,7 +112,7 @@ def test_merge_precommit_validation(
         check=True,
         capture_output=True,
     )
-    result = CliRunner().invoke(worktree, ["new", "test-merge"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-merge"])
     assert result.exit_code == 0, f"new command should succeed, got: {result.output}"
 
     worktree_path = (
@@ -183,7 +183,7 @@ def test_merge_precommit_failure(
         check=True,
         capture_output=True,
     )
-    result = CliRunner().invoke(worktree, ["new", "test-merge"])
+    result = CliRunner().invoke(worktree, ["new", "--branch", "test-merge"])
     assert result.exit_code == 0, f"new command should succeed, got: {result.output}"
 
     worktree_path = (
