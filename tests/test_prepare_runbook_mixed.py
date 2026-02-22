@@ -1,4 +1,4 @@
-"""Tests for assemble_phase_files phase header injection (RC-3 fix)."""
+"""Tests for phase numbering (RC-3) and model propagation (RC-1)."""
 
 import importlib.util
 import re

@@ -1,4 +1,4 @@
-"""Tests for orchestrator plan generation (RC-4 fix)."""
+"""Tests for orchestrator plan generation (D-5)."""
 
 import importlib.util
 from pathlib import Path

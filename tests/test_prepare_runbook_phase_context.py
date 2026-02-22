@@ -1,4 +1,4 @@
-"""Tests for extract_phase_preambles and phase context injection (RC-3)."""
+"""Tests for extract_phase_preambles and phase context injection (RC-2, D-2)."""
 
 import importlib.util
 from pathlib import Path
