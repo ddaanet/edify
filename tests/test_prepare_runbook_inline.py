@@ -20,8 +20,6 @@ validate_and_create = _mod.validate_and_create
 derive_paths = _mod.derive_paths
 
 
-# --- Fixtures ---
-
 MIXED_RUNBOOK = """\
 ---
 name: mixed-test
