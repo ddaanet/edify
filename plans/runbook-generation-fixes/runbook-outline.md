@@ -8,15 +8,15 @@
 | Requirement | Phase | Cycles | Notes |
 |-------------|-------|--------|-------|
 | RC-3/C2: Phase numbering off-by-one (9 of 16 step files) | Phase 1 | 1.1, 1.3 | Header injection fixes root cause |
-| RC-3/M1: PHASE_BOUNDARY misnumbered | Phase 1 | 1.4 | Cascades from C2 |
-| RC-3/M2: Unjustified interleaving from sort-based ordering | Phase 1 | 1.4 | Correct phase numbers eliminate sort-based interleaving |
+| RC-3/M1: PHASE_BOUNDARY misnumbered | Phase 1 | 1.3 | Cascades from C2 |
+| RC-3/M2: Unjustified interleaving from sort-based ordering | Phase 1 | 1.3 | Correct phase numbers eliminate sort-based interleaving |
 | Phase header preservation (no duplicates) | Phase 1 | 1.2 | Guard against re-injection |
 | RC-1/C1: Wrong execution models (frontmatter haiku default) | Phase 2 | 2.1, 2.2, 2.4 | Phase model parsed from header metadata |
 | RC-1/M3: Model header/body contradiction | Phase 2 | 2.2 | Phase model overrides frontmatter default |
 | RC-1/m3: Agent model conflict | Phase 2 | 2.4 | Agent frontmatter uses detected model |
 | D-1: Step-level model overrides phase model | Phase 2 | 2.3 | Priority chain verification |
-| RC-2/C3: Phase 2 content loss (prerequisites) | Phase 3 | 3.1, 3.2, 3.3 | Phase preamble extraction and injection |
-| RC-2/M4: Agent embeds Phase 1 only | Phase 3 | 3.2, 3.3 | Step/cycle files get phase context |
+| RC-2/C3: Phase 2 content loss (prerequisites) | Phase 3 | 3.1, 3.2 | Phase preamble extraction and injection |
+| RC-2/M4: Agent embeds Phase 1 only | Phase 3 | 3.2 | Step/cycle files get phase context |
 | RC-2/M5: Completion validation lost | Phase 3, 4 | 3.2, 4.1 | Phase context + orchestrator phase file refs |
 | D-5: PHASE_BOUNDARY phase file references | Phase 4 | 4.1 | Orchestrator can read phase-level constraints |
 | Phase-agent model mapping table | Phase 4 | 4.2 | Correct models from Phase 2 |
@@ -40,17 +40,13 @@ RC-3 fix. `assemble_phase_files()` injects `### Phase N:` headers from filenames
   - **GREEN:** The injection logic checks for existing headers before adding — skip injection when `### Phase N:` already present in file content.
   - Target: Same injection logic from Cycle 1.1
 
-- Cycle 1.3: Step phase metadata correct in mixed runbook
+- Cycle 1.3: Downstream phase metadata and orchestrator plan correct (verification)
   - Depends on: 1.1
-  - **RED:** Test full pipeline on a 5-phase mixed runbook (TDD + general + inline). Assert `step_phases` maps each step to correct phase number (especially phases 3-5, reproducing C2).
-  - **GREEN:** With phase headers injected by 1.1, `extract_sections()` line_to_phase mapping now sees correct phase boundaries. No additional code changes expected — the header injection fixes the root cause. If tests fail, `extract_sections()` phase detection (line ~320-332) is the investigation target.
-  - Target: `extract_sections()` phase detection (line ~320-332) — verification only
-
-- Cycle 1.4: Orchestrator plan correct PHASE_BOUNDARY labels
-  - Depends on: 1.3
-  - **RED:** Test orchestrator plan output for a 5-phase mixed runbook. Assert PHASE_BOUNDARY entries have correct phase numbers, no interleaving (M1, M2).
-  - **GREEN:** With correct `step_phases` from 1.3, `generate_default_orchestrator()` sorts items correctly. No additional code changes expected — correct phase numbers from upstream fix the sort ordering.
-  - Target: `generate_default_orchestrator()` (line ~743) — verification only
+  - **RED:** Test full pipeline on a 5-phase mixed runbook (TDD + general + inline):
+    - Assert `step_phases` maps each step to correct phase number (especially phases 3-5, reproducing C2)
+    - Assert orchestrator plan PHASE_BOUNDARY entries have correct phase numbers, no interleaving (M1, M2)
+  - **GREEN:** With phase headers injected by 1.1, `extract_sections()` line_to_phase mapping sees correct phase boundaries, and `generate_default_orchestrator()` sorts items correctly. No additional code changes expected — header injection fixes the root cause. If tests fail, investigation targets: `extract_sections()` phase detection (line ~320-332), `generate_default_orchestrator()` (line ~743).
+  - Target: `extract_sections()` (line ~320-332), `generate_default_orchestrator()` (line ~743) — verification only
 
 ### Phase 2: Model propagation (type: tdd, model: sonnet)
 
@@ -103,19 +99,15 @@ Post-Phase-1 state: assembled content contains `### Phase N:` headers, enabling 
   - **GREEN:** Implement `extract_phase_preambles()` — for each phase, extract content between `### Phase N:` header and first `## Step/Cycle` header. Return `{phase_num: preamble_text}`.
   - Target: New function in prepare-runbook.py
 
-- Cycle 3.2: Step files include phase context section
+- Cycle 3.2: Step and cycle files include phase context section
   - Depends on: 3.1
-  - **RED:** Test full pipeline on mixed runbook. Assert generated step files contain `## Phase Context` section with phase preamble content before the step body.
-  - **GREEN:** Modify `generate_step_file()` to accept optional `phase_context` parameter. Inject `## Phase Context\n\n{preamble}` after header metadata, before step content. In `validate_and_create()`: call `extract_phase_preambles()` on assembled content, then pass `phase_preambles.get(phase, '')` to step generation calls (line ~888-898).
-  - Target: `generate_step_file()` (line 687), `validate_and_create()` (line ~866 for extraction, ~888-898 for threading)
+  - **RED:** Test full pipeline on mixed runbook:
+    - Assert generated step files contain `## Phase Context` section with phase preamble content before the step body
+    - Assert generated TDD cycle files contain `## Phase Context` section with phase preamble
+  - **GREEN:** Modify both `generate_step_file()` and `generate_cycle_file()` to accept optional `phase_context` parameter. Inject `## Phase Context\n\n{preamble}` after header metadata, before content. In `validate_and_create()`: call `extract_phase_preambles()` on assembled content, pass `phase_preambles.get(phase, '')` to step generation calls (line ~888-898) and `phase_preambles.get(cycle['major'], '')` to cycle generation calls (line ~880-886).
+  - Target: `generate_step_file()` (line 687), `generate_cycle_file()` (line 716), `validate_and_create()` (line ~866 for extraction, ~880-898 for threading)
 
-- Cycle 3.3: Cycle files include phase context section
-  - Depends on: 3.1
-  - **RED:** Test TDD cycle files from mixed runbook. Assert cycle files contain `## Phase Context` section with phase preamble.
-  - **GREEN:** Modify `generate_cycle_file()` to accept optional `phase_context` parameter. Same injection pattern as 3.2. In `validate_and_create()`: pass `phase_preambles.get(cycle['major'], '')` to cycle generation calls (line ~880-886).
-  - Target: `generate_cycle_file()` (line 716), `validate_and_create()` (line ~880-886)
-
-- Cycle 3.4: Phase context preserved when phase has no preamble
+- Cycle 3.3: Phase context preserved when phase has no preamble
   - **RED:** Test phase that starts directly with `## Cycle 1.1:` after `### Phase 1:` header (no preamble text). Assert `extract_phase_preambles()` returns empty string for that phase. Assert generated step file does NOT contain `## Phase Context` section.
   - **GREEN:** `extract_phase_preambles()` returns empty string for phases with no preamble. `generate_step_file()` / `generate_cycle_file()` skip `## Phase Context` section when preamble is empty/whitespace-only.
   - Target: `extract_phase_preambles()`, `generate_step_file()`, `generate_cycle_file()`
@@ -186,7 +178,7 @@ This fixture exercises all code paths: general, TDD, inline, model inheritance, 
 - Phase 3 and 4 are lower risk — standard checkpoints at phase boundaries sufficient
 
 **Collapsible candidates:**
-- Cycles 1.3 and 1.4 are verification-only (no code changes expected). If both pass without changes, note as confirmation that header injection was sufficient.
+- Cycle 1.3 is verification-only (no code changes expected). If it passes without changes, note as confirmation that header injection was sufficient.
 - Cycle 2.3 is verification-only. If it passes without changes, the existing `extract_step_metadata()` priority logic is confirmed correct.
 
 **`validate_and_create()` threading:**
