@@ -11,7 +11,7 @@
 | FR-3b: execution renames | 1 | 1.1, 1.4 | 5 renames |
 | FR-3c: plan-specific deletions | 1 | 1.3 | 8 .claude/agents/ files |
 | FR-3: skill + fragment renames | 1 | 1.5 | vet→review dir, vet-requirement→review-requirement |
-| FR-3: terminology propagation | 1 | 1.6 | ~25 files, substitution table |
+| FR-3: terminology propagation | 1 | 1.6 | ~30 files, substitution table |
 | FR-3: symlink sync + verification | 1 | 1.7 | Stale removal, sync, grep |
 | FR-1: prose rules → communication.md | 2 | inline | 5 rules merged |
 | FR-1: code rules → project-conventions | 2 | inline | Missing rule added, skill frontmatter |
@@ -24,7 +24,7 @@
 ### Phase 1: Agent Rename (type: general)
 
 **Objective:** Rename 11 agent files, embed taxonomy, delete deprecated agents and plan-specific detritus, propagate all name changes across codebase, regenerate symlinks.
-**Complexity:** High (~37 files touched, cross-codebase coordination)
+**Complexity:** High (~43 files touched, cross-codebase coordination)
 **Checkpoint:** full
 
 - Step 1.1: Batch rename agent definition files
@@ -88,7 +88,7 @@
 - Step 1.6: Propagate name changes across codebase
   - Depends on: Steps 1.1, 1.2, 1.4, 1.5 (all renames, embeds, and internal updates complete)
   - Apply full substitution table across all files below. For each file: Read, apply all applicable substitutions (agent names + terminology), Edit.
-  - **Skills** (9 files):
+  - **Skills** (11 files):
     - agent-core/skills/commit/SKILL.md — vet-requirement → review-requirement
     - agent-core/skills/design/SKILL.md — design-vet-agent → design-corrector
     - agent-core/skills/deliverable-review/SKILL.md — vet-fix-agent → corrector
@@ -98,13 +98,18 @@
     - agent-core/skills/runbook/SKILL.md — runbook-outline-review-agent, plan-reviewer, runbook-simplification-agent, vet-fix-agent
     - agent-core/skills/runbook/references/examples.md — vet delegation examples
     - agent-core/skills/runbook/references/general-patterns.md — vet patterns
-  - **Decision files** (6 files):
+    - agent-core/skills/remember/SKILL.md — /vet reference
+    - agent-core/skills/memory-index/SKILL.md — vet-fix-agent reference
+  - **Decision files** (9 files):
     - agents/decisions/pipeline-contracts.md — vet-fix-agent routing, reviewer table
     - agents/decisions/operational-practices.md — vet delegation learnings
     - agents/decisions/workflow-optimization.md — design-vet-agent, vet context reuse
-    - agents/decisions/workflow-advanced.md — vet delegation
     - agents/decisions/project-config.md — agent composition references
     - agents/decisions/orchestration-execution.md — vet delegation patterns
+    - agents/decisions/workflow-planning.md — vet-fix-agent, vet-agent, design-vet-agent references
+    - agents/decisions/workflow-core.md — /vet skill reference, vetting terminology
+    - agents/decisions/deliverable-review.md — vet-fix-agent routing reference
+    - agents/decisions/prompt-structure-research.md — vet-requirement reference
   - **Docs** (2 files):
     - agent-core/docs/tdd-workflow.md
     - agent-core/docs/general-workflow.md
