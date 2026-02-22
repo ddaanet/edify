@@ -21,4 +21,6 @@
 - `uv run` unnecessary when .venv is active (sandbox environment). Redirect to bare command.
 - `ln` redirect specifically targets symlink management — `just sync-to-parent` encodes correct paths and ordering.
 
+**Post-implementation:** Remove the inline "Script invocation" rule from CLAUDE.md — the hook mechanically enforces it via redirect. The rule is a stopgap until the hook lands.
+
 **Model:** sonnet (small conditional routing, needs to be correct)
