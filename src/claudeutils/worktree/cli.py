@@ -121,7 +121,7 @@ def _create_parent_worktree(
 def _setup_worktree(
     worktree_path: Path, slug: str, base: str, session: str, task: str
 ) -> None:
-    """Create worktrees, register sandbox, init environment."""
+    """Create worktrees and init environment."""
     _create_parent_worktree(worktree_path, slug, base, session)
     main_repo = _git("rev-parse", "--show-toplevel").strip()
     _create_submodule_worktree(main_repo, worktree_path, slug)
