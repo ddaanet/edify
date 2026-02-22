@@ -2,7 +2,10 @@
 
 import importlib.util
 import re
+import subprocess
 from pathlib import Path
+
+import pytest
 
 SCRIPT = Path(__file__).parent.parent / "agent-core" / "bin" / "prepare-runbook.py"
 
@@ -16,6 +19,7 @@ parse_frontmatter = _mod.parse_frontmatter
 extract_sections = _mod.extract_sections
 extract_cycles = _mod.extract_cycles
 generate_default_orchestrator = _mod.generate_default_orchestrator
+validate_and_create = _mod.validate_and_create
 
 MIXED_RUNBOOK_5PHASE = """\
 ---
@@ -75,6 +79,29 @@ Impl for cycle 4.1.
 """
 
 
+def _setup_git_repo(tmp_path: Path) -> None:
+    """Initialize a git repo in tmp_path for git add in validate_and_create."""
+    subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True, check=False)
+    subprocess.run(
+        ["git", "commit", "--allow-empty", "-m", "init"],
+        cwd=tmp_path,
+        capture_output=True,
+        check=False,
+    )
+
+
+def _setup_baseline_agents(tmp_path: Path) -> None:
+    """Create minimal baseline agent files that prepare-runbook.py reads."""
+    agents_dir = tmp_path / "agent-core" / "agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+
+    quiet_task = agents_dir / "quiet-task.md"
+    quiet_task.write_text("---\nname: quiet-task\n---\n# Quiet Task\nBaseline agent.")
+
+    tdd_task = agents_dir / "tdd-task.md"
+    tdd_task.write_text("---\nname: tdd-task\n---\n# TDD Task\nBaseline TDD agent.")
+
+
 class TestModelPropagation:
     """extract_phase_models extracts per-phase model overrides from headers."""
 
@@ -93,6 +120,66 @@ class TestModelPropagation:
 
         assert result == {1: "sonnet", 3: "opus"}
         assert 2 not in result
+
+    def test_phase_model_overrides_frontmatter(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Phase model overrides frontmatter default in generated step files."""
+        _setup_git_repo(tmp_path)
+        _setup_baseline_agents(tmp_path)
+        monkeypatch.chdir(tmp_path)
+
+        runbook_content = """\
+---
+type: tdd
+model: haiku
+name: override-test
+---
+
+### Phase 1: Core (type: tdd, model: sonnet)
+
+## Cycle 1.1: Test override
+
+**RED Phase:**
+Write a test.
+**GREEN Phase:**
+Implement it.
+**Stop/Error Conditions:** STOP if unexpected.
+"""
+        runbook_file = tmp_path / "runbook.md"
+        runbook_file.write_text(runbook_content)
+
+        metadata, body = parse_frontmatter(runbook_content)
+        sections = extract_sections(body)
+        cycles = extract_cycles(body)
+        phase_models = extract_phase_models(body)
+        metadata["type"] = "tdd"
+
+        agent_path = tmp_path / ".claude" / "agents" / "override-test-task.md"
+        steps_dir = tmp_path / "plans" / "override-test" / "steps"
+        orchestrator_path = (
+            tmp_path / "plans" / "override-test" / "orchestrator-plan.md"
+        )
+
+        result = validate_and_create(
+            runbook_file,
+            sections,
+            "override-test",
+            agent_path,
+            steps_dir,
+            orchestrator_path,
+            metadata,
+            cycles,
+            phase_models,
+        )
+
+        assert result is True
+        step_file = steps_dir / "step-1-1.md"
+        assert step_file.exists()
+        content = step_file.read_text()
+        assert "**Execution Model**: sonnet" in content, (
+            f"Expected 'sonnet' but got haiku in step file. Content:\n{content[:500]}"
+        )
 
 
 class TestPhaseNumbering:
