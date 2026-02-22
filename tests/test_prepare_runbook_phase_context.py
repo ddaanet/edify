@@ -1,7 +1,11 @@
-"""Tests for extract_phase_preambles (RC-3 phase context extraction)."""
+"""Tests for extract_phase_preambles and phase context injection (RC-3)."""
 
 import importlib.util
 from pathlib import Path
+
+import pytest
+
+from tests.pytest_helpers import setup_baseline_agents, setup_git_repo
 
 SCRIPT = Path(__file__).parent.parent / "agent-core" / "bin" / "prepare-runbook.py"
 
@@ -10,6 +14,11 @@ _mod = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
 _spec.loader.exec_module(_mod)  # type: ignore[union-attr]
 
 extract_phase_preambles = _mod.extract_phase_preambles
+parse_frontmatter = _mod.parse_frontmatter
+extract_sections = _mod.extract_sections
+extract_cycles = _mod.extract_cycles
+extract_phase_models = _mod.extract_phase_models
+validate_and_create = _mod.validate_and_create
 
 
 class TestPhaseContext:
@@ -38,3 +47,96 @@ class TestPhaseContext:
         assert result[3] == ""
         assert "### Phase 1:" not in result[1]
         assert "## Cycle 1.1:" not in result[1]
+
+    def test_step_and_cycle_files_include_phase_context(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Phase preamble text appears in generated step and cycle files."""
+        setup_git_repo(tmp_path)
+        setup_baseline_agents(tmp_path)
+        monkeypatch.chdir(tmp_path)
+
+        runbook_content = """\
+---
+type: mixed
+model: sonnet
+name: context-test
+---
+
+### Phase 1: TDD phase (type: tdd, model: sonnet)
+
+Phase 1 prerequisites: module X exists.
+
+## Cycle 1.1: First cycle
+
+**RED Phase:**
+Write a test.
+**GREEN Phase:**
+Implement it.
+**Stop/Error Conditions:** STOP if unexpected.
+
+### Phase 2: General phase (type: general, model: sonnet)
+
+Phase 2 constraints: no breaking changes.
+
+## Step 2.1: First step
+
+Step 2.1 content.
+"""
+
+        rf = tmp_path / "runbook.md"
+        rf.write_text(runbook_content)
+        metadata, body = parse_frontmatter(runbook_content)
+        sections = extract_sections(body)
+        cycles = extract_cycles(body)
+        phase_models = extract_phase_models(body)
+        phase_preambles = extract_phase_preambles(body)
+        steps_dir = tmp_path / "plans" / "context-test" / "steps"
+        result = validate_and_create(
+            rf,
+            sections,
+            "context-test",
+            tmp_path / ".claude" / "agents" / "context-test-task.md",
+            steps_dir,
+            tmp_path / "plans" / "context-test" / "orchestrator-plan.md",
+            metadata,
+            cycles,
+            phase_models,
+            phase_preambles,
+        )
+
+        assert result is True
+
+        cycle_file = steps_dir / "step-1-1.md"
+        assert cycle_file.exists()
+        cycle_content = cycle_file.read_text()
+
+        step_file = steps_dir / "step-2-1.md"
+        assert step_file.exists()
+        step_content = step_file.read_text()
+
+        assert "## Phase Context" in cycle_content, (
+            f"Expected '## Phase Context' in cycle file. Got:\n{cycle_content}"
+        )
+        assert "Phase 1 prerequisites: module X exists." in cycle_content, (
+            f"Expected preamble text in cycle file. Got:\n{cycle_content}"
+        )
+        assert "## Phase Context" in step_content, (
+            f"Expected '## Phase Context' in step file. Got:\n{step_content}"
+        )
+        assert "Phase 2 constraints: no breaking changes." in step_content, (
+            f"Expected preamble text in step file. Got:\n{step_content}"
+        )
+
+        # Verify ordering: metadata header BEFORE phase context BEFORE body content
+        for filename, content in [("cycle", cycle_content), ("step", step_content)]:
+            metadata_pos = content.find("**Plan**:")
+            phase_ctx_pos = content.find("## Phase Context")
+            body_pos = content.find("---\n\n") + 5  # after the divider
+
+            assert metadata_pos < phase_ctx_pos, (
+                f"{filename}: metadata header must precede ## Phase Context"
+            )
+            assert phase_ctx_pos < body_pos or phase_ctx_pos > metadata_pos, (
+                f"{filename}: ## Phase Context must appear after metadata header"
+            )
