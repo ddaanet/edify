@@ -235,14 +235,6 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when too many rules in context | managing rule count budget length
 /when loading context for llm processing
 
-## agents/decisions/runbook-review.md
-
-/when detecting vacuous items
-/when ordering runbook dependencies
-/when evaluating item density
-/when spacing runbook checkpoints
-/when planning for file growth
-
 ## agents/decisions/testing.md
 
 /how split test modules

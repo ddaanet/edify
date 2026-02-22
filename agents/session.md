@@ -60,6 +60,14 @@
 - [ ] **Worktree rm confirm gate fix** — fix `rm --confirm` gate | sonnet
   - Separated from CLI default task as orthogonal
 
+- [ ] **Orchestrate runbook generation fixes** — `/orchestrate runbook-generation-fixes` | sonnet | restart
+  - 13 TDD cycles: Phases 1-4 sequential, Phase 5 inline (orchestrator-direct, opus for skill prose)
+  - Phase 1: numbering fix (3 cycles), Phase 2: model propagation (5 cycles), Phase 3: context extraction (3 cycles), Phase 4: orchestrator plan (2 cycles)
+  - Affected files: prepare-runbook.py, tests/test_prepare_runbook_mixed.py (new), SKILL.md, implementation-notes.md
+- [ ] **Precommit python3 redirect** — `/design plans/precommit-python3-redirect/brief.md` | sonnet
+  - PreToolUse hook: intercept python3/uv-run/ln patterns, redirect to correct invocations
+- [x] **Runbook generation fixes** — `/runbook plans/runbook-generation-fixes/outline.md` | sonnet
+
 ## Worktree Tasks
 
 - [ ] **Wt blocker merge fix** → `wt-blocker-merge-fix` — `/design` | sonnet
@@ -182,6 +190,8 @@
 **Runbook skill blocks Session CLI tool:**
 - `/runbook` skill needs updates before processing handoff-cli-tool outline
 
+- `extract_sections()`/`extract_cycles()` parse `## Step`/`## Cycle` headers inside fenced code blocks. Phase files with example fixture content in code blocks trigger duplicate step errors. Workaround: describe fixtures inline instead of using code blocks with H2 headers. [from: runbook-generation-fixes]
+- Agent frontmatter and step files generated with `model: haiku` despite phases declaring `model: sonnet`. Manual correction applied. This is the bug being fixed by Phase 2. [from: runbook-generation-fixes]
 ## Next Steps
 
 Quality infra reform `/runbook` next. Planstate delivered `/runbook`. No active worktrees.
