@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-22
 
-**Status:** Runbook outline reviewed (2nd pass), file inventory corrected, ready for promotion to runbook.
+**Status:** Runbook ready for orchestration. Promoted outline to runbook, prepare-runbook.py generated 7 step files + orchestrator plan.
 
 ## Completed This Session
 
@@ -11,28 +11,31 @@
 - Phase 0.85: Consolidation gate — no trivial phases to merge (domains unrelated)
 - Phase 0.86: Simplification pass — no identical patterns to consolidate (commit: 4088a859)
 - Phase 0.9: Complexity check — 14 items, no callback triggers
-- Phase 0.95: Sufficiency check — ALL criteria pass, outline can be promoted directly to runbook
+- Phase 0.95: Sufficiency check — ALL criteria pass, outline promoted directly to runbook
 
 **Outline review (2nd pass):**
-- Manual review using runbook-outline-review-agent criteria against on-disk grep verification
-- Major: 6 files with vet references missing from Step 1.6 inventory — 4 decision files (workflow-planning, workflow-core, deliverable-review, prompt-structure-research) + 2 skill files (remember/SKILL.md, memory-index/SKILL.md)
-- Minor: workflow-advanced.md false positive removed (zero vet references on disk), file counts updated (~37→~43, ~25→~30)
+- Major: 6 files with vet references missing from Step 1.6 inventory — 4 decision files + 2 skill files
+- Minor: workflow-advanced.md false positive removed, file counts updated (~37→~43)
 - Report: `plans/quality-infrastructure/reports/runbook-outline-review-2.md`
+
+**Runbook promotion (Phase 0.95→Phase 4):**
+- Rewrote runbook.md from corrected outline (prior version had 6 steps with wrong boundaries; outline has 7)
+- Tier 3 assessment: ~43 files, multiple models, sequential steps
+- prepare-runbook.py generated: 7 step files, orchestrator-plan.md, quality-infrastructure-task.md agent
+- `/orchestrate quality-infrastructure` on clipboard
 
 ## Pending Tasks
 
-- [ ] **Quality infra reform** — promote outline to runbook (Phase 0.95→Phase 4) | sonnet
-  - Plan: quality-infrastructure | Status: planned (outline sufficient, 2nd review complete)
-  - Sufficiency confirmed: all items specify files/locations, concrete actions, no unresolved decisions
-  - Next: promote outline headings to H2, add Common Context + frontmatter, write runbook.md, run prepare-runbook.py, handoff for orchestration
+- [ ] **Quality infra reform** — `/orchestrate quality-infrastructure` | sonnet | restart
+  - Plan: quality-infrastructure | Status: ready
   - Phase 1: 7 general steps (haiku×3, sonnet×2, opus×2). Phases 2-3: inline
-  - Restart required post-completion (agent definitions load at session start)
+  - Restart required before orchestration (agent definition created by prepare-runbook.py)
 
 ## Reference Files
 
-- `plans/quality-infrastructure/runbook-outline.md` — Corrected outline (~43 files, sufficient for promotion)
-- `plans/quality-infrastructure/outline.md` — Design (7 decisions, 3 phases, serves as design)
+- `plans/quality-infrastructure/runbook.md` — Promoted runbook (7 steps + 2 inline phases)
+- `plans/quality-infrastructure/orchestrator-plan.md` — Orchestrator execution plan
+- `plans/quality-infrastructure/steps/` — 7 step files (step-1-1.md through step-1-7.md)
+- `plans/quality-infrastructure/runbook-outline.md` — Corrected outline (source for promotion)
+- `plans/quality-infrastructure/outline.md` — Design (7 decisions, 3 phases)
 - `plans/quality-infrastructure/requirements.md` — 3 FRs: deslop, code density, agent rename
-- `plans/quality-infrastructure/reports/runbook-outline-review.md` — 1st review: 6 fixes, expansion guidance
-- `plans/quality-infrastructure/reports/runbook-outline-review-2.md` — 2nd review: 6 missing files + 1 false positive
-- `plans/quality-infrastructure/reports/simplification-report.md` — No consolidation candidates

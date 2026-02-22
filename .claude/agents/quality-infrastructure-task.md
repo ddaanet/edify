@@ -133,23 +133,24 @@ Do not provide summary, explanation, or commentary in return message. Do not pro
 ## Common Context
 
 **Requirements:**
-- FR-1: Split deslop.md — prose rules → communication.md (ambient), code rules stay in project-conventions skill (pipeline-only). Delete deslop.md.
-- FR-2: Add 5 grounded code density decisions to agents/decisions/cli.md + memory-index triggers.
-- FR-3: Rename 11 agents (6 review/correct + 5 execution), delete vet-agent (deprecated, D-1), embed vet-taxonomy in corrector (D-2), delete 8 plan-specific detritus, rename skill dir + fragment. Update all reference files.
+- FR-1: Deslop restructuring — prose rules to communication.md (ambient), code rules stay in project-conventions skill
+- FR-2: Code density decisions — 5 grounded principles to cli.md + memory-index triggers
+- FR-3: Agent rename — 11 renames + 1 embed + 1 deprecation deletion + 8 plan-specific deletions + cross-codebase propagation
 
 **Scope boundaries:**
-- IN: 10 agent renames, 1 deprecation (delete), 1 taxonomy embed, 8 plan-specific deletions, ~37 reference updates, deslop restructuring, 5 code density entries, symlink regeneration
-- OUT: Context optimization (review-requirement.md demotion), project-conventions restructuring beyond code deslop, new agent definitions, codebase sweep (FR-4), prepare-runbook.py crew- prefix changes
+- IN: All items above, symlink regeneration, cross-reference verification
+- OUT: Context optimization (demotion), project-conventions restructuring beyond code deslop, new agent definitions, codebase sweep (FR-4), prepare-runbook.py crew- prefix changes
 
-**Key Constraints:**
-- Git mv for renames (preserves blame history)
-- Atomic rename: all references updated before symlink sync
-- Session restart after Phase 1 (agent definitions load at session start)
-- vet-agent DELETED per D-1 (zero active call sites), not renamed
-- vet-taxonomy.md content embedded in corrector.md per D-2, then deleted
-- vet-requirement.md is NOT in CLAUDE.md @-references — loaded by agents, not main session
+**Key Decisions:**
+- D-1: vet-agent deprecated, delete (zero call sites)
+- D-2: vet-taxonomy embedded in corrector (63 lines)
+- D-3: Code deslop via project-conventions skill (add to artisan + test-driver)
+- D-4: Prose deslop merged into communication.md (5 rules, strip examples)
+- D-5: Phase ordering FR-3 then FR-1 then FR-2
+- D-6: vet-requirement.md renamed to review-requirement.md
+- D-7: /vet skill renamed to /review skill (directory rename)
 
-**Terminology Table:**
+**Substitution Table — Agent Names:**
 
 | Old | New |
 |-----|-----|
@@ -164,21 +165,36 @@ Do not provide summary, explanation, or commentary in return message. Do not pro
 | tdd-task | test-driver |
 | runbook-simplification-agent | runbook-simplifier |
 | test-hooks | hooks-tester |
+
+**Substitution Table — Terminology:**
+
+| Old | New |
+|-----|-----|
+| vet report | review report |
+| vet-fix report | correction |
+| vetting | review/correction |
 | vet-requirement | review-requirement |
-| /vet (skill) | /review (skill) |
-| "vet report" | "review report" |
-| "vet-fix report" | "correction" |
-| "vetting" | "review/correction" |
+| /vet | /review |
+| vet/ (skill directory) | review/ |
+
+**Deprecated — delete references:**
+
+| Old | Action |
+|-----|--------|
+| vet-agent | Delete file + references (zero call sites per D-1) |
+| vet-taxonomy | Delete file after embed in corrector (D-2) |
 
 **Project Paths:**
 - Agent definitions: agent-core/agents/
 - Skills: agent-core/skills/
 - Fragments: agent-core/fragments/
 - Decisions: agents/decisions/
-- Plan-specific detritus: .claude/agents/ (standalone files, not symlinks)
-- Symlink sync: `cd agent-core && just sync-to-parent`
+- Symlinks: .claude/agents/, .claude/skills/
 
 ---
+
+
+**Checkpoint:** full
 
 ---
 
