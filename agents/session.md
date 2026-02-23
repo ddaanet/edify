@@ -1,14 +1,19 @@
 # Session Handoff: 2026-02-23
 
-**Status:** Learnings consolidated (237→28 lines). 23 entries routed to 10 decision files.
+**Status:** Recall pass grounded (Moderate). Worktree-rm-error-ux merged. Ready for recall-pass requirements in worktree.
 
 ## Completed This Session
 
-- Merged `phase-scoped-agents` — clean merge, precommit passed. `rm` failed (exit 255, submodule), `--force` succeeded. Task completed
-- Merged `wt-new-errors` — one conflict in `agents/plan-archive.md` (both-sides-added: remember-skill-update + worktree-error-output). Resolved, precommit passed, rm clean
-- Phase-scoped agent context unblocks: Session CLI tool, Orchestrate evolution
-- Updated codify skill: H1 → "Codify Learnings into Permanent Docs", Step 1 uses `learning-ages.py` for automated age gating
-- Consolidated learnings: 55 entries → 5 kept. 24 already in decision files (dropped), 23 consolidated to cli.md, orchestration-execution.md, workflow-planning.md, workflow-advanced.md, testing.md, pipeline-contracts.md, operational-practices.md, implementation-notes.md, project-tooling.md. Fixed duplicate soft-limit line
+- Merged `worktree-rm-error-ux` — clean merge, precommit passed, rm succeeded
+- Recall pass discussion — 4-pass model with reference forwarding, convergence via forwarding not repetition
+  - Named "recall pass" — explicit step in pipeline where project memory is read, entries selected by name, results forwarded downstream
+  - 4 passes: design recall (deep, whole decision files) → runbook recall (+impl +testing) → task agent injection (filtered) → review recall (+failure modes)
+- Created `plans/recall-pass/brief.md` capturing discussion conclusions
+- Grounded recall pass methodology — Moderate grounding quality
+  - CE framework (Write/Select/Compress/Isolate) maps well; failure modes (distraction, clash, confusion, poisoning) independently confirmed
+  - Agentic RAG paradigm deliberately inverted: prescriptive retrieval at fixed points, not adaptive agent-decided retrieval (justified by 2.9% measured adaptive recall)
+  - Key project-specific insight: multiplicative token cost (artifact × agent count), mechanical filterability for haiku orchestrators, format-per-consumer-tier
+  - Reports: `plans/reports/recall-pass-grounding.md`, `plans/reports/recall-pass-internal-brainstorm.md`
 
 ## Pending Tasks
 
@@ -33,8 +38,9 @@
 
 - [ ] **Diagnose compression detail loss** — RCA against commit `0418cedb` | sonnet
 
-- [x] **Consolidate learnings** — `/codify` | sonnet
-  - Consolidated 55 entries → 28 lines. 24 already in decision files (dropped). 23 consolidated to 10 files. 5 kept for continuity
+- [ ] **Recall pass requirements** — `/requirements plans/recall-pass/brief.md` | sonnet
+  - Plan: recall-pass | Status: grounded (brief + grounding report complete)
+  - Next: define FRs from discussion conclusions + grounding, then `/design`
 
 - [ ] **Precommit python3 redirect** — `/design plans/precommit-python3-redirect/brief.md` | sonnet
   - PreToolUse hook: intercept python3/uv-run/ln patterns, redirect to correct invocations
@@ -83,6 +89,9 @@
 - [ ] **UserPromptSubmit topic detection hook** — Phase 7 analysis recommends this as highest-impact recall improvement | sonnet
   - Seed keyword table from 200+ memory-index triggers
   - Inject matching decision content via additionalContext on prompt submit
+  - Complementary to recall pass (cheap first layer vs deep pipeline integration)
+
+- [ ] **Update grounding skill** — Use scouts for divergent-convergent, produce exploration artifacts | opus
 
 ## Worktree Tasks
 
@@ -125,10 +134,13 @@
 
 ## Next Steps
 
-No active worktrees. Next task: Worktree rm error UX (sonnet).
+Recall pass requirements in worktree. Brief and grounding complete — define FRs next.
 
 ## Reference Files
 
+- `plans/recall-pass/brief.md` — 4-pass model, reference forwarding, discussion conclusions
+- `plans/reports/recall-pass-grounding.md` — Moderate grounding (CE + Agentic RAG synthesis)
+- `plans/reports/recall-pass-internal-brainstorm.md` — 27 dimensions, project-specific constraints
 - `plans/planstate-delivered/outline.md` — Plan lifecycle design (7 decisions, 3 phases)
 - `plans/orchestrate-evolution/design.md` — Orchestration evolution design (ready for runbook)
 - `plans/handoff-cli-tool/outline.md` — Session CLI combined outline (reviewed 6 rounds)
