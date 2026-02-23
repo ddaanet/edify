@@ -321,3 +321,21 @@ def test_new_cleans_up_on_git_failure(
     wt = container / "test-feature"
     assert not wt.exists(), "worktree directory should be cleaned up"
     assert not container.exists(), "empty container should be cleaned up"
+
+
+def test_new_invalid_task_name_clean_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Invalid task name produces clean error with exit code 2."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+    init_repo(repo_path)
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["new", "task_with_underscore"])
+
+    assert result.exit_code == 2
+    assert "forbidden character '_'" in result.output
+    assert "Traceback" not in result.output
+    assert "ValueError" not in result.output
