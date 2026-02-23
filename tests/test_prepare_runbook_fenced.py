@@ -12,6 +12,7 @@ _spec.loader.exec_module(_mod)  # type: ignore[union-attr]
 
 extract_sections = _mod.extract_sections
 extract_cycles = _mod.extract_cycles
+extract_phase_preambles = _mod.extract_phase_preambles
 
 
 class TestFencedStepHeaders:
@@ -152,6 +153,34 @@ class TestFencedMultiBacktickFences:
         assert "2.1" not in sections["steps"]
         assert len(sections["steps"]) == 2
 
+    def test_extract_sections_four_backtick_unpaired_inner_fence(self) -> None:
+        """Unpaired inner 3-backtick must not leak from 4-backtick fence.
+
+        This is the actual toggle failure mode: a single inner ``` leaves toggle
+        state in_fence=False, exposing the step header. Count-based semantics
+        correctly keeps in_fence=True (3 < 4 opening count).
+        """
+        content = dedent("""\
+            ### Phase 1: Core (type: general)
+
+            ## Step 1.1: Real step
+
+            ````
+            ```python
+            ## Step 2.1: Inside outer fence, no closing inner fence
+            ````
+
+            ## Step 1.2: Another real step
+
+            More work.
+        """)
+        sections = extract_sections(content)
+        assert sections is not None
+        assert "1.1" in sections["steps"]
+        assert "1.2" in sections["steps"]
+        assert "2.1" not in sections["steps"]
+        assert len(sections["steps"]) == 2
+
 
 class TestFencedTildeFences:
     """Fence detection should handle tilde fences.
@@ -201,3 +230,29 @@ class TestFencedTildeFences:
         assert sections is not None
         assert "2.1" not in sections["steps"]
         assert len(sections["steps"]) == 2
+
+
+class TestFencedPhasePreambles:
+    """Phase preamble extraction should ignore headers inside fenced blocks."""
+
+    def test_extract_phase_preambles_ignores_fenced_headers(self) -> None:
+        """Preamble extraction should not terminate at fenced step headers."""
+        content = dedent("""\
+            ### Phase 1: Core
+
+            This is the preamble for phase 1.
+
+            Example structure:
+
+            ```
+            ## Step 1.1: Example
+            Some content.
+            ```
+
+            More preamble content after the fence.
+
+            ## Step 1.1: Real step
+        """)
+        preambles = extract_phase_preambles(content)
+        assert 1 in preambles
+        assert "More preamble content after the fence." in preambles[1]
