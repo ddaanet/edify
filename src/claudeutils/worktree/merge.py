@@ -11,6 +11,7 @@ from claudeutils.worktree.merge_state import (
     _recover_untracked_file_collision,
 )
 from claudeutils.worktree.resolve import (
+    remerge_learnings_md,
     resolve_learnings_md,
     resolve_session_md,
 )
@@ -275,6 +276,8 @@ def _phase4_merge_commit_and_precommit(slug: str) -> None:
     If MERGE_HEAD exists (merge in progress), always commit even if no staged
     changes (use --allow-empty). Otherwise, only commit if staged changes exist.
     """
+    remerge_learnings_md()
+
     merge_in_progress = (
         subprocess.run(
             ["git", "rev-parse", "--verify", "MERGE_HEAD"],

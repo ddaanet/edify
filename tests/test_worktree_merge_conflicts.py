@@ -288,6 +288,86 @@ def test_merge_conflict_learnings_md(
     assert "Learning B" in merged
 
 
+def test_merge_learnings_segment_diff3_prevents_orphans(
+    repo_with_submodule: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mock_precommit: None,
+    commit_file: Callable[[Path, str, str, str], None],
+) -> None:
+    """Segment diff3 merge prevents orphaned lines on clean-merge path."""
+    monkeypatch.chdir(repo_with_submodule)
+    commit_file(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
+    wt_path = _setup_merge_worktree(repo_with_submodule)
+
+    preamble = "# Learnings\n\nSoft limit: 80 lines.\n\n---\n"
+    base = (
+        preamble
+        + "## When analyzing X\n- bullet A1\n- bullet A2\n"
+        + "## When selecting Y\n- bullet B1\n- bullet B2\n"
+    )
+
+    (repo_with_submodule / "agents").mkdir(exist_ok=True)
+    (wt_path / "agents").mkdir(exist_ok=True)
+
+    _write_commit(repo_with_submodule, "agents/learnings.md", base, "Base learnings")
+    _write_commit(wt_path, "agents/learnings.md", base, "Base learnings")
+
+    # Branch: modify first entry body + add new entry at tail
+    branch_content = (
+        preamble
+        + "## When analyzing X\n- bullet A1 MODIFIED\n- bullet A2\n"
+        + "## When selecting Y\n- bullet B1\n- bullet B2\n"
+        + "## When comparing Z\n- bullet Z1\n- bullet Z2\n"
+    )
+    _write_commit(wt_path, "agents/learnings.md", branch_content, "Branch changes")
+
+    # Main: add different new entry at tail
+    _git("checkout", "main", cwd=repo_with_submodule)
+    main_content = (
+        preamble
+        + "## When analyzing X\n- bullet A1\n- bullet A2\n"
+        + "## When selecting Y\n- bullet B1\n- bullet B2\n"
+        + "## When compressing W\n- bullet W1\n- bullet W2\n"
+    )
+    _write_commit(
+        repo_with_submodule, "agents/learnings.md", main_content, "Main adds entry W"
+    )
+
+    result = CliRunner().invoke(worktree, ["merge", "test-merge"])
+    assert result.exit_code == 0, f"merge should succeed: {result.output}"
+
+    merged_text = (repo_with_submodule / "agents" / "learnings.md").read_text()
+    from claudeutils.validation.learnings import parse_segments  # noqa: PLC0415
+
+    segments = parse_segments(merged_text)
+
+    # All 4 entries present
+    assert "When analyzing X" in segments, f"Missing 'When analyzing X': {merged_text}"
+    assert "When selecting Y" in segments, f"Missing 'When selecting Y': {merged_text}"
+    assert "When comparing Z" in segments, f"Missing 'When comparing Z': {merged_text}"
+    assert "When compressing W" in segments, (
+        f"Missing 'When compressing W': {merged_text}"
+    )
+
+    # Branch's modified body is kept (not base's)
+    analyzing_body = segments["When analyzing X"]
+    assert "bullet A1 MODIFIED" in "\n".join(analyzing_body), (
+        f"Expected modified body for 'When analyzing X': {analyzing_body}"
+    )
+
+    # No orphaned content in preamble key
+    preamble_content = segments.get("", [])
+    orphan_lines = [
+        ln
+        for ln in preamble_content
+        if ln.strip()
+        and not ln.strip().startswith("#")
+        and not ln.strip().startswith("Soft limit")
+        and not ln.strip().startswith("---")
+    ]
+    assert not orphan_lines, f"Orphaned lines in preamble: {orphan_lines}"
+
+
 def test_conflict_output_contains_all_fields(
     repo_with_submodule: Path,
     monkeypatch: pytest.MonkeyPatch,
