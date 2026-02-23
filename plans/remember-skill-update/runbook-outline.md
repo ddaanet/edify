@@ -7,14 +7,14 @@
 | FR-1: When/How prefix | 1 | Cycle 1.1 |
 | FR-2: Min 2 content words | 1 | Cycle 1.2 |
 | FR-3: Precommit enforcement | 1 | Cycles 1.1-1.3 (validate() changes propagate via cli.py) |
-| FR-4: Mechanical consolidation | 2 | Step 2.1 (trigger derivation), Step 2.4 (consolidation-patterns) |
-| FR-5: Semantic guidance | 2 | Steps 2.1, 2.5 |
-| FR-8: Inline execution, remove delegation | 2 | Steps 2.1, 2.2, 2.3 |
-| FR-9: Inline splitting, remove delegation | 2 | Steps 2.1, 2.2 |
+| FR-4: Mechanical consolidation | 2 | Step 2.1 (trigger derivation), Step 2.3 (consolidation-patterns) |
+| FR-5: Semantic guidance | 2 | Steps 2.1, 2.4 |
+| FR-8: Inline execution, remove delegation | 2 | Steps 2.1, 2.2, 2.5 |
+| FR-9: Inline splitting, remove delegation | 2 | Steps 2.1, 2.5 |
 | FR-10: Rename to /codify | 6 | Steps 6.1-6.2 |
-| FR-11: Agent routing | 3 | Steps 3.1-3.2 |
+| FR-11: Agent routing | 3 | Step 3.1 |
 | FR-12: Recall CLI simplification | 4, 5 | Cycles 4.1-4.3 (code), Phase 5 (docs) |
-| FR-13: Remove memory-index from CLAUDE.md | 2 | Step 2.6 |
+| FR-13: Remove memory-index from CLAUDE.md | 2 | Step 2.5 |
 
 ## Key Decisions Reference
 
@@ -82,32 +82,29 @@ Prose edits to skills, agents, and CLAUDE.md. All decisions pre-resolved.
     - **Inline splitting (FR-9):** Add to Step 4: after Write/Edit to decision file, check line count; if >400, split by H2/H3 boundaries into 100-300 line sections; run `validate-memory-index.py --fix` after split
     - **Fix "no hyphens" (KD-1):** Remove "no hyphens or special characters" from line 65 — contradicts practice (30+ triggers use hyphens)
 
-- Step 2.2: Delete delegation agents
-  - Delete `agent-core/agents/remember-task.md` (FR-8)
-  - Delete `agent-core/agents/memory-refactor.md` (FR-9)
-  - Verify no other files import/reference these agents (grep `remember-task` and `memory-refactor`)
-
-- Step 2.3: Update consolidation-flow.md
+- Step 2.2: Update consolidation-flow.md
   - Target: `agent-core/skills/handoff/references/consolidation-flow.md`
   - Replace delegation flow (lines 7-10: filter → batch check → delegate to remember-task → read report) with inline flow: invoke `/remember` skill in clean session
   - Replace refactor flow (lines 16-19: delegate to memory-refactor) with inline instructions matching FR-9
   - Preserve error handling section (lines 24-27)
 
-- Step 2.4: Update consolidation-patterns.md derivation protocol
+- Step 2.3: Update consolidation-patterns.md derivation protocol
   - Target: `agent-core/skills/remember/references/consolidation-patterns.md`
   - Update Memory Index Maintenance section (line 64): trigger derived mechanically from title — `## When X Y` → `/when x y` (lowercase, no rephrasing)
   - Remove "Trigger naming" optimization guidance that implies agent judgment
 
-- Step 2.5: Update handoff skill Step 4 with trigger framing
+- Step 2.4: Update handoff skill Step 4 with trigger framing
   - Target: `agent-core/skills/handoff/SKILL.md` (lines 101-107)
   - Strengthen line 105: titles must start with "When" or "How to", min 2 content words after prefix
   - Add: reject jargon/root-cause titles, suggest rephrasing to situation description
   - Add examples: ❌ "transformation table" → ✅ "choosing review gate"; ❌ "prose gates" → ✅ "prevent skill steps from being skipped"
 
-- Step 2.6: Remove @agents/memory-index.md from CLAUDE.md
-  - Target: `CLAUDE.md` line 49
-  - Remove `@agents/memory-index.md` reference (~5000 tokens, 2.9% recall — FR-13)
+- Step 2.5: Remove deprecated artifacts (FR-8, FR-9, FR-13)
+  - Delete `agent-core/agents/remember-task.md` (FR-8)
+  - Delete `agent-core/agents/memory-refactor.md` (FR-9)
+  - Remove `@agents/memory-index.md` reference from `CLAUDE.md` line 49 (~5000 tokens, 2.9% recall — FR-13)
   - File `agents/memory-index.md` remains (used by when-resolve.py)
+  - Verify no other files reference deleted agents (grep `remember-task` and `memory-refactor`)
 
 **Checkpoint:** `just precommit` passes. Verify deleted agents not referenced elsewhere.
 
@@ -121,17 +118,15 @@ Add agent templates as consolidation targets.
 
 **Excluded:** plan-specific agents (generated per-runbook by prepare-runbook.py), remember-task (deleted), memory-refactor (deleted)
 
-- Step 3.1: Update SKILL.md Step 2 with agent routing
-  - Target: `agent-core/skills/remember/SKILL.md` Step 2 "File Selection" (line 26)
-  - Add agent templates as consolidation target category: `**Agent templates** → agent-core/agents/*.md: Execution patterns, tool usage, error handling, domain-specific guidance`
-  - Add selection criteria: learning is actionable for a specific agent role (execution pattern, stop condition, tool preference, error handling heuristic)
-  - List eligible agents (13) and exclusion rule (plan-specific)
-
-- Step 3.2: Update consolidation-patterns.md with agent routing
-  - Target: `agent-core/skills/remember/references/consolidation-patterns.md`
-  - Add "Agent-Specific" subsection under "Target Selection by Domain" (after line 30)
-  - Pattern: learnings about agent execution behavior → append to matching agent definition
-  - Example routing: "haiku rationalizes test failures" → test-driver.md; "step agents leave uncommitted files" → artisan.md
+- Step 3.1: Add agent routing to remember skill (SKILL.md + consolidation-patterns.md)
+  - Target 1: `agent-core/skills/remember/SKILL.md` Step 2 "File Selection" (line 26)
+    - Add agent templates as consolidation target category: `**Agent templates** → agent-core/agents/*.md: Execution patterns, tool usage, error handling, domain-specific guidance`
+    - Add selection criteria: learning is actionable for a specific agent role (execution pattern, stop condition, tool preference, error handling heuristic)
+    - List eligible agents (13) and exclusion rule (plan-specific)
+  - Target 2: `agent-core/skills/remember/references/consolidation-patterns.md`
+    - Add "Agent-Specific" subsection under "Target Selection by Domain" (after line 30)
+    - Pattern: learnings about agent execution behavior → append to matching agent definition
+    - Example routing: "haiku rationalizes test failures" → test-driver.md; "step agents leave uncommitted files" → artisan.md
 
 **Checkpoint:** `just precommit` passes.
 
@@ -213,9 +208,9 @@ Independent of all other phases. Can run at any time.
 
 **Phase 1:** Test plan already prepared in `plans/remember-skill-update/tdd-test-plan.md`. Cycle descriptions reference it. Key: Cycle 1.1 GREEN must update 5 existing test fixtures simultaneously.
 
-**Phase 2:** Steps 2.1-2.6 are all prose edits. Step 2.1 is largest (5 changes to SKILL.md). Steps 2.2 (delete agents) and 2.6 (remove CLAUDE.md line) are trivial — merge candidates for consolidation gate.
+**Phase 2:** Steps 2.1-2.5 are all prose edits. Step 2.1 is largest (5 changes to SKILL.md). Step 2.5 batches three trivial removals (2 agent deletions + CLAUDE.md reference removal).
 
-**Phase 3:** Two steps updating the same two files. Small phase, could merge with Phase 2 but kept separate due to dependency (Phase 3 needs Phase 2's pipeline simplification complete before defining routing targets).
+**Phase 3:** Single step updating two files in the same skill module. Small phase, kept separate from Phase 2 due to dependency (Phase 3 needs Phase 2's pipeline simplification complete before defining routing targets).
 
 **Phase 4:** Test plan prepared. Key risk: Cycle 4.1 GREEN rewrites Click command AND migrates all 5 existing tests.
 
