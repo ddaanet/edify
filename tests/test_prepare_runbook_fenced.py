@@ -80,3 +80,31 @@ class TestFencedCycleHeaders:
         assert "1.3" in numbers
         assert "1.2" not in numbers
         assert len(cycles) == 2
+
+
+class TestFencedPhaseHeaders:
+    """Phase header detection should ignore headers inside fenced blocks."""
+
+    def test_extract_sections_ignores_inline_phase_inside_fence(self) -> None:
+        """Parser should ignore ### Phase headers inside fenced code blocks."""
+        content = dedent("""\
+            ### Phase 1: Core (type: general)
+
+            ## Step 1.1: Real step
+
+            Example runbook structure:
+
+            ```
+            ### Phase 2: Infrastructure (type: inline)
+
+            Edit some files.
+            ```
+
+            ## Step 1.2: Second step
+
+            More work.
+        """)
+        sections = extract_sections(content)
+        assert sections is not None
+        assert len(sections["inline_phases"]) == 0
+        assert len(sections["steps"]) == 2
