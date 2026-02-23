@@ -1,0 +1,12 @@
+### Cycle 2.2: validate_and_create creates per-phase agents (with inline-skip) 2026-02-23
+- Status: GREEN_VERIFIED
+- Test command: `just test tests/test_prepare_runbook_agents.py -v -k "validate"`
+- RED result: FAIL as expected (TypeError: validate_and_create() got an unexpected keyword argument 'agents_dir')
+- GREEN result: PASS (both sub-cases pass: 2-phase mixed and 3-phase with inline)
+- Regression check: 11/11 passed (test_prepare_runbook_agents.py); 1195/1196 passed full suite (1 pre-existing xfail)
+- Refactoring: Fixed docstring wrap-summaries=80 violations; pre-existing RUF100 in fixtures_worktree.py not introduced by this cycle
+- Files modified:
+  - `tests/test_prepare_runbook_agents.py` — added TestValidateCreatesPerPhaseAgents class with 2 tests; added imports for validate_and_create, parse_frontmatter, extract_sections, extract_cycles, extract_phase_models, extract_phase_preambles, setup_git_repo
+  - `agent-core/bin/prepare-runbook.py` — changed validate_and_create() param agent_path → agents_dir; replaced single-agent creation with per-phase loop using detect_phase_types(); updated derive_paths() to return agents_dir; updated main() to pass agents_dir; passed phase_agents to generate_default_orchestrator()
+- Stop condition: none
+- Decision made: detect_phase_types() called on reconstructed content (phase headers + cycle/step content) inside validate_and_create() since original body not available at that call site

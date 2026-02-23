@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.pytest_helpers import setup_baseline_agents, setup_git_repo
+
 SCRIPT = Path(__file__).parent.parent / "agent-core" / "bin" / "prepare-runbook.py"
 
 _spec = importlib.util.spec_from_file_location("prepare_runbook", SCRIPT)
@@ -16,22 +18,12 @@ get_phase_baseline_type = _mod.get_phase_baseline_type
 generate_phase_agent = _mod.generate_phase_agent
 detect_phase_types = _mod.detect_phase_types
 generate_default_orchestrator = _mod.generate_default_orchestrator
-
-
-def setup_baseline_agents(tmp_path: Path) -> None:
-    """Create minimal baseline agent files for read_baseline_agent()."""
-    agents_dir = tmp_path / "agent-core" / "agents"
-    agents_dir.mkdir(parents=True)
-    tdd_baseline = agents_dir / "test-driver.md"
-    tdd_baseline.write_text(
-        "---\nname: test-driver\ndescription: Test Driver agent\n---\n\n"
-        "# Test Driver Baseline\n\nRED/GREEN/REFACTOR protocol.\n"
-    )
-    general_baseline = agents_dir / "artisan.md"
-    general_baseline.write_text(
-        "---\nname: artisan\ndescription: Artisan agent\n---\n\n"
-        "# Artisan Baseline\n\nGeneral execution protocol.\n"
-    )
+validate_and_create = _mod.validate_and_create
+parse_frontmatter = _mod.parse_frontmatter
+extract_sections = _mod.extract_sections
+extract_cycles = _mod.extract_cycles
+extract_phase_models = _mod.extract_phase_models
+extract_phase_preambles = _mod.extract_phase_preambles
 
 
 class TestDetectPhaseTypes:
@@ -185,3 +177,177 @@ class TestOrchestratorAgentField:
         mapping_idx = result.index("## Phase-Agent Mapping")
         step_idx = result.index("## Step Execution Order")
         assert mapping_idx < step_idx
+
+
+_RUNBOOK_2PHASE = """\
+---
+type: mixed
+model: sonnet
+name: testmixed
+---
+
+## Common Context
+
+Shared info about the project.
+
+### Phase 1: Core (type: tdd)
+
+## Cycle 1.1: First cycle
+
+**Execution Model**: sonnet
+
+**RED Phase:**
+Write a test.
+
+**GREEN Phase:**
+Implement it.
+
+**Stop Conditions:**
+Stop on error.
+
+### Phase 2: Cleanup (type: general)
+
+## Step 2.1: Do cleanup
+
+**Execution Model**: sonnet
+
+Do some cleanup work.
+"""
+
+_RUNBOOK_3PHASE_INLINE = """\
+---
+type: mixed
+model: sonnet
+name: testinline
+---
+
+## Common Context
+
+Shared info about the project.
+
+### Phase 1: Core (type: tdd)
+
+## Cycle 1.1: First cycle
+
+**Execution Model**: sonnet
+
+**RED Phase:**
+Write a test.
+
+**GREEN Phase:**
+Implement it.
+
+**Stop Conditions:**
+Stop on error.
+
+### Phase 2: Infrastructure (type: inline)
+
+Inline orchestration work done by orchestrator directly.
+
+### Phase 3: Cleanup (type: general)
+
+## Step 3.1: Do cleanup
+
+**Execution Model**: sonnet
+
+Do some cleanup work.
+"""
+
+
+class TestValidateCreatesPerPhaseAgents:
+    """validate_and_create() creates per-phase agent files in agents_dir."""
+
+    def test_validate_creates_per_phase_agents(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """2-phase mixed runbook creates crew-<name>-p1 and -p2 agents."""
+        setup_git_repo(tmp_path)
+        setup_baseline_agents(tmp_path)
+        monkeypatch.chdir(tmp_path)
+
+        agents_dir = tmp_path / ".claude" / "agents"
+        steps_dir = tmp_path / "plans" / "testmixed" / "steps"
+        orchestrator_path = tmp_path / "plans" / "testmixed" / "orchestrator-plan.md"
+        runbook_path = tmp_path / "plans" / "testmixed" / "runbook.md"
+
+        metadata, body = parse_frontmatter(_RUNBOOK_2PHASE)
+        sections = extract_sections(body)
+        cycles = extract_cycles(body)
+        phase_models = extract_phase_models(body)
+        phase_preambles = extract_phase_preambles(body)
+
+        result = validate_and_create(
+            runbook_path,
+            sections,
+            "testmixed",
+            agents_dir=agents_dir,
+            steps_dir=steps_dir,
+            orchestrator_path=orchestrator_path,
+            metadata=metadata,
+            cycles=cycles,
+            phase_models=phase_models,
+            phase_preambles=phase_preambles,
+        )
+
+        assert result is True
+        # Phase agent files created with correct naming
+        assert (agents_dir / "crew-testmixed-p1.md").exists()
+        assert (agents_dir / "crew-testmixed-p2.md").exists()
+        # Old single-agent naming gone
+        assert not (agents_dir / "testmixed-task.md").exists()
+        # Phase 1 agent uses test-driver baseline
+        p1_content = (agents_dir / "crew-testmixed-p1.md").read_text()
+        assert "Test Driver" in p1_content
+        # Phase 2 agent uses artisan baseline
+        p2_content = (agents_dir / "crew-testmixed-p2.md").read_text()
+        assert "Artisan" in p2_content
+        # Both agents contain plan context
+        assert "Shared info" in p1_content
+        assert "Shared info" in p2_content
+        # Preambles may be empty for these test runbooks (no preamble text)
+        # Orchestrator uses per-phase agent names
+        orch_content = orchestrator_path.read_text()
+        assert "crew-testmixed-p1" in orch_content
+        assert "crew-testmixed-p2" in orch_content
+
+    def test_validate_inline_phase_no_agent(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """3-phase runbook: inline phase gets no agent file."""
+        setup_git_repo(tmp_path)
+        setup_baseline_agents(tmp_path)
+        monkeypatch.chdir(tmp_path)
+
+        agents_dir = tmp_path / ".claude" / "agents"
+        steps_dir = tmp_path / "plans" / "testinline" / "steps"
+        orchestrator_path = tmp_path / "plans" / "testinline" / "orchestrator-plan.md"
+        runbook_path = tmp_path / "plans" / "testinline" / "runbook.md"
+
+        metadata, body = parse_frontmatter(_RUNBOOK_3PHASE_INLINE)
+        sections = extract_sections(body)
+        cycles = extract_cycles(body)
+        phase_models = extract_phase_models(body)
+        phase_preambles = extract_phase_preambles(body)
+
+        result = validate_and_create(
+            runbook_path,
+            sections,
+            "testinline",
+            agents_dir=agents_dir,
+            steps_dir=steps_dir,
+            orchestrator_path=orchestrator_path,
+            metadata=metadata,
+            cycles=cycles,
+            phase_models=phase_models,
+            phase_preambles=phase_preambles,
+        )
+
+        assert result is True
+        # Phase 1 (TDD) and Phase 3 (general) get agent files
+        assert (agents_dir / "crew-testinline-p1.md").exists()
+        assert (agents_dir / "crew-testinline-p3.md").exists()
+        # Phase 2 (inline) has NO agent file
+        assert not (agents_dir / "crew-testinline-p2.md").exists()
+        # Orchestrator plan contains "(orchestrator-direct)" for phase 2
+        orch_content = orchestrator_path.read_text()
+        assert "(orchestrator-direct)" in orch_content
