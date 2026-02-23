@@ -1,20 +1,16 @@
-# Session Handoff: 2026-02-22
+# Session Handoff: 2026-02-23
 
-**Status:** 4 worktrees merged (3 removed, 1 preserved). Two active worktrees: quality-infra-reform, runbook-generation-fixes. Handoff skill updated.
+**Status:** Both remaining worktrees merged and removed. No active worktrees.
 
 ## Completed This Session
 
-**Worktree merges (4):**
-- `wt-blocker-merge-fix` — merged + removed (section-aware blocker merge)
-- `wt-rm-amend-safety` — merged + removed (commit: be25582e, fix amend-wrong-commit bug)
-- `worktree-cli-default` — merged + removed. Positional task name, `--branch` for bare slug, sandbox removal
-- `runbook-generation-fixes` — merged, tree preserved. Design + runbook complete, execution pending
-
-**New tasks surfaced from merges:**
-- Consolidate learnings, Worktree rm confirm gate fix, Orchestrate runbook generation fixes, Precommit python3 redirect
-
-**Handoff skill update:**
-- Removed Step 4c (consolidation trigger check) and `learning-ages.py` from allowed-tools — obsoleted by SessionStart hook
+**Worktree merges:**
+- `runbook-generation-fixes` — merged (commit: 8bc9377a) + removed. Clean merge, no conflicts
+- `quality-infra-reform` — merged (commit: 6086650e) + removed. Resolved conflicts in 3 files:
+  - `agents/plan-archive.md` — kept both entries (worktree-cli-default + quality-infrastructure)
+  - `tests/test_prepare_runbook_inline.py` — kept shared helpers import, removed dead local helpers
+  - `agent-core/bin/prepare-runbook.py` — 15 conflict regions: kept HEAD features (model propagation, phase context) + branch agent renames (quiet-task→artisan, tdd-task→test-driver)
+  - `tests/pytest_helpers.py` — updated `setup_baseline_agents` to use renamed agent files
 
 ## Pending Tasks
 
@@ -62,18 +58,6 @@
 - [ ] **Runbook fenced code blocks** — update prepare-runbook.py to honor fenced code blocks | sonnet
   - `extract_sections()`/`extract_cycles()` parse headers inside fenced code blocks, causing duplicate step errors
 
-- [x] **Deliverable review: runbook-generation-fixes** — `/deliverable-review plans/runbook-generation-fixes` | opus | restart
-- [x] **Runbook generation fixes** — `/runbook plans/runbook-generation-fixes/outline.md` | sonnet
-
-- [x] **Deliverable review: quality-infra reform** — `/deliverable-review` | sonnet
-- [x] **Fix quality-infra findings** — `/design plans/quality-infrastructure/reports/deliverable-review.md` | opus
-
-## Worktree Tasks
-
-
-- [ ] **Runbook generation fixes** → `runbook-generation-fixes` — `/design` | sonnet
-  - Merged to main, tree preserved. Execution pending via Orchestrate runbook generation fixes task
-
 ## Backlog
 
 ### Worktree
@@ -108,7 +92,7 @@
 - [ ] **Migrate test suite to diamond** — Needs scoping | depends on runbook evolution
 - [ ] **Test diagnostic helper** — Replace subprocess.run check=True with stderr surfacing | sonnet
 - [ ] **Session.md validator** — Scripted precommit check | sonnet
-  - Plan: session-validator | FR-2/FR-4 depend on worktree-cli-default; FR-1/FR-3/FR-5 can proceed now
+  - Plan: session-validator | worktree-cli-default merged; all FRs can proceed
 
 ### Agents & Rules
 - [ ] **Agent rule injection** — Distill sub-agent rules into agent templates | sonnet
@@ -177,20 +161,17 @@
 **`_worktree rm --force` doesn't restore task to Pending:**
 - `rm --force` removes worktree but leaves task in Worktree Tasks section. Manual session.md edit needed to move back to Pending.
 
-- `extract_sections()`/`extract_cycles()` parse `## Step`/`## Cycle` headers inside fenced code blocks. Workaround: describe fixtures inline instead of using code blocks with H2 headers. [from: runbook-generation-fixes]
 ## Next Steps
 
-Quality infra reform in worktree. Orchestrate runbook generation fixes next on main.
+Orchestrate runbook generation fixes next on main.
 
 ## Reference Files
 
-- `plans/quality-infrastructure/outline.md` — Design outline (7 decisions, 3 phases, serves as design)
 - `plans/planstate-delivered/outline.md` — Plan lifecycle design (7 decisions, 3 phases)
 - `plans/orchestrate-evolution/design.md` — Orchestration evolution design (ready for runbook)
 - `plans/handoff-cli-tool/outline.md` — Session CLI combined outline (reviewed 5 rounds)
 - `plans/handoff-cli-tool/reports/outline-review-round5.md` — Latest review report
 - `plans/hook-batch/reports/deliverable-review.md` — Hook batch final review (0C/0M/6m)
 - `plans/worktree-merge-resilience/diagnostic.md` — Merge artifact reproduction conditions
-- `plans/quality-infrastructure/requirements.md` — 3 FRs: deslop, code density decisions, agent rename
 - `plans/codebase-sweep/requirements.md` — mechanical refactoring (_git_ok, _fail, exceptions)
 - `agents/decisions/cli.md` — LLM-native output decision (from session-cli-tool)
