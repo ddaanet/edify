@@ -121,6 +121,11 @@
 - [ ] **Upstream skills field** — PR/issue for missing skills frontmatter | sonnet
 - [ ] **Infrastructure scripts** — History tooling + agent-core script rewrites | sonnet
 
+- [ ] **Runbook fenced code blocks** — execute test plan `plans/runbook-fenced-blocks/test-plan.md` | sonnet
+  - 9 TDD cycles: 5 core (bug fix + CommonMark compliance), 4 completeness (remaining functions)
+  - Tier 2 lightweight delegation — test-driver agents per cycle
+  - All discovery done — test plan has references, affected function table, design decisions
+
 ## Worktree Tasks
 
 - [ ] **Remember skill update** → `remember-skill-update` — Resume `/design` Phase B | opus
