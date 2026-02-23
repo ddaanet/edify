@@ -311,7 +311,7 @@ def test_delete_branch_exits_1_on_failure(
         _delete_branch("unmerged-br", None)
 
     assert exc_info.value.code == 1
-    assert "deletion failed" in capsys.readouterr().err
+    assert "deletion failed" in capsys.readouterr().out
 
 
 def test_rm_force_bypasses_guard(

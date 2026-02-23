@@ -196,14 +196,12 @@ def new(
         else:
             slug = branch
         if (path := wt_path(slug, create_container=True)).exists():
-            click.echo(f"Error: existing directory {path}", err=True)
-            raise SystemExit(1)
+            _fail(f"Error: existing directory {path}")
         _setup_worktree_safe(path, slug, base, session, task_name or "")
         if task_name:
             session_md_path = Path(session_md)
             if not session_md_path.exists():
-                click.echo(f"Error: session.md not found at {session_md}", err=True)
-                raise SystemExit(1)
+                _fail(f"Error: session.md not found at {session_md}")
             move_task_to_worktree(session_md_path, task_name, slug)
     finally:
         if temp_session_file:
@@ -256,8 +254,7 @@ def _guard_branch_removal(slug: str) -> tuple[bool, str | None]:
         if count == 0
         else f"Branch {slug} has {count} unmerged commit(s). Merge first."
     )
-    click.echo(msg, err=True)
-    raise SystemExit(2)
+    _fail(msg, 2)
 
 
 def _delete_branch(slug: str, removal_type: str | None) -> None:
@@ -266,18 +263,16 @@ def _delete_branch(slug: str, removal_type: str | None) -> None:
         ["git", "branch", flag, slug], capture_output=True, text=True, check=False
     )
     if r.returncode != 0 and "not found" not in r.stderr.lower():
-        click.echo(f"Branch {slug} deletion failed: {r.stderr.strip()}", err=True)
-        raise SystemExit(1)
+        _fail(f"Branch {slug} deletion failed: {r.stderr.strip()}")
 
 
 def _check_confirm(slug: str, confirm: bool) -> None:  # noqa: FBT001
     if not confirm:
-        click.echo(
+        msg = (
             f"Use the worktree skill (wt merge {slug}) to remove worktrees safely. "
-            "Pass --confirm to invoke directly.",
-            err=True,
+            "Pass --confirm to invoke directly."
         )
-        raise SystemExit(2)
+        _fail(msg, 2)
 
 
 def _check_not_dirty(slug: str, worktree_path: Path) -> None:  # noqa: ARG001
@@ -286,19 +281,17 @@ def _check_not_dirty(slug: str, worktree_path: Path) -> None:  # noqa: ARG001
         status = _git("-C", str(worktree_path), "status", "--porcelain", check=False)
         if status.strip():
             n = len(status.strip().split("\n"))
-            click.echo(
+            msg = (
                 f"Worktree has {n} uncommitted file(s). "
-                "Commit or stash before removing worktree.",
-                err=True,
+                "Commit or stash before removing worktree."
             )
-            raise SystemExit(2)
+            _fail(msg, 2)
     if _is_submodule_dirty():
-        click.echo(
+        msg = (
             "Submodule (agent-core) has uncommitted changes. "
-            "Commit or stash before removing worktree.",
-            err=True,
+            "Commit or stash before removing worktree."
         )
-        raise SystemExit(2)
+        _fail(msg, 2)
 
 
 def _update_session_and_amend(slug: str) -> bool:
