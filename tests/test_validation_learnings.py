@@ -12,7 +12,7 @@ def test_valid_learnings_file_returns_no_errors(tmp_path: Path) -> None:
 
 Institutional knowledge accumulated across sessions.
 
-**Soft limit: 80 lines.** When approaching this limit, use `/remember` to consolidate.
+**Soft limit: 80 lines.** When approaching this limit, use `/codify` to consolidate.
 
 ---
 ## When learning one
