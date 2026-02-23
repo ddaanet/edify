@@ -110,3 +110,44 @@ def test_merge_learnings_segment_diff3_prevents_orphans(
         and not ln.strip().startswith("---")
     ]
     assert not orphan_lines, f"Orphaned lines in preamble: {orphan_lines}"
+
+
+def test_merge_learnings_divergent_edit_produces_conflict(
+    repo_with_submodule: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mock_precommit: None,
+    commit_file: Callable[[Path, str, str, str], None],
+) -> None:
+    """Same-entry divergent edits produce conflict markers, exit 3."""
+    monkeypatch.chdir(repo_with_submodule)
+    commit_file(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
+    wt_path = _setup_merge_worktree(repo_with_submodule)
+
+    preamble = "# Learnings\n\nSoft limit: 80 lines.\n\n---\n"
+    base = preamble + "## When analyzing X\n- original bullet\n"
+
+    (repo_with_submodule / "agents").mkdir(exist_ok=True)
+    (wt_path / "agents").mkdir(exist_ok=True)
+
+    _write_commit(repo_with_submodule, "agents/learnings.md", base, "Base learnings")
+    _write_commit(wt_path, "agents/learnings.md", base, "Base learnings")
+
+    # Branch: modify the entry body
+    branch_content = preamble + "## When analyzing X\n- branch modified bullet\n"
+    _write_commit(wt_path, "agents/learnings.md", branch_content, "Branch edit")
+
+    # Main: modify the SAME entry body differently
+    _git("checkout", "main", cwd=repo_with_submodule)
+    main_content = preamble + "## When analyzing X\n- main modified bullet\n"
+    _write_commit(repo_with_submodule, "agents/learnings.md", main_content, "Main edit")
+
+    result = CliRunner().invoke(worktree, ["merge", "test-merge"])
+    assert result.exit_code == 3, f"merge should exit 3 on conflict: {result.output}"
+
+    content = (repo_with_submodule / "agents" / "learnings.md").read_text()
+    assert "<<<<<<<" in content, f"Missing conflict marker '<<<<<<<': {content}"
+    assert "=======" in content, f"Missing conflict marker '=======': {content}"
+    assert ">>>>>>>" in content, f"Missing conflict marker '>>>>>>>': {content}"
+    assert "## When analyzing X" in content, f"Heading missing from file: {content}"
+    assert "branch modified bullet" in content, f"Branch body missing: {content}"
+    assert "main modified bullet" in content, f"Main body missing: {content}"

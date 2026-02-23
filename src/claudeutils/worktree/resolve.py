@@ -143,28 +143,74 @@ def resolve_session_md(conflicts: list[str], slug: str | None = None) -> list[st
     return [c for c in conflicts if c != "agents/session.md"]
 
 
-def resolve_learnings_md(conflicts: list[str]) -> list[str]:
-    """Resolve agents/learnings.md conflict.
+def _format_conflict_segment(
+    heading: str, ours_body: list[str], theirs_body: list[str]
+) -> list[str]:
+    """Format a conflicting segment with diff3 markers."""
+    lines = [f"## {heading}"]
+    lines.append("<<<<<<< ours")
+    lines.extend(ours_body)
+    lines.append("=======")
+    lines.extend(theirs_body)
+    lines.append(">>>>>>> theirs")
+    return lines
 
-    Keep ours and append theirs-only content.
+
+def _segments_to_content_with_conflicts(
+    merged: dict[str, list[str]],
+    conflict_headings: list[str],
+    ours: dict[str, list[str]],
+    theirs: dict[str, list[str]],
+) -> str:
+    """Assemble content with diff3 conflict markers for conflicting segments."""
+    parts: list[str] = []
+    conflict_set = set(conflict_headings)
+    for heading, body in merged.items():
+        if heading == "":
+            parts.extend(body)
+        elif heading in conflict_set:
+            parts.extend(
+                _format_conflict_segment(
+                    heading, ours.get(heading, []), theirs.get(heading, [])
+                )
+            )
+        else:
+            parts.append(f"## {heading}")
+            parts.extend(body)
+    return "\n".join(parts)
+
+
+def resolve_learnings_md(conflicts: list[str]) -> list[str]:
+    """Resolve agents/learnings.md conflict using segment-level diff3.
+
+    If segment conflicts detected, writes conflict markers and leaves the file
+    unresolved (not staged, not removed from conflicts list).
     """
     if "agents/learnings.md" not in conflicts:
         return conflicts
 
+    base_content = _git("show", ":1:agents/learnings.md", check=False)
     ours_content = _git("show", ":2:agents/learnings.md", check=False)
     theirs_content = _git("show", ":3:agents/learnings.md", check=False)
 
-    ours_lines = set(ours_content.split("\n"))
-    theirs_lines = theirs_content.split("\n")
-    theirs_only = [line for line in theirs_lines if line not in ours_lines]
+    base_segs = parse_segments(base_content)
+    ours_segs = parse_segments(ours_content)
+    theirs_segs = parse_segments(theirs_content)
 
-    merged = ours_content
-    if theirs_only:
-        merged += "\n" + "\n".join(theirs_only)
+    merged_segs, conflict_headings = diff3_merge_segments(
+        base_segs, ours_segs, theirs_segs
+    )
 
-    Path("agents/learnings.md").write_text(merged)
+    if conflict_headings:
+        content = _segments_to_content_with_conflicts(
+            merged_segs, conflict_headings, ours_segs, theirs_segs
+        )
+        Path("agents/learnings.md").write_text(content)
+        # Leave in conflicts list — caller will report and exit 3
+        return conflicts
+
+    Path("agents/learnings.md").write_text(_segments_to_content(merged_segs))
     _git("add", "agents/learnings.md")
-
     return [c for c in conflicts if c != "agents/learnings.md"]
 
 
@@ -294,7 +340,13 @@ def remerge_learnings_md() -> None:
             f"learnings.md: {len(conflicts)} segment conflict(s): {conflicts}",
             err=True,
         )
-        Path("agents/learnings.md").write_text(merged_content)
+        conflict_content = _segments_to_content_with_conflicts(
+            merged_segments,
+            conflicts,
+            parse_segments(ours_content),
+            parse_segments(theirs_content),
+        )
+        Path("agents/learnings.md").write_text(conflict_content)
         raise SystemExit(3)
 
     Path("agents/learnings.md").write_text(merged_content)

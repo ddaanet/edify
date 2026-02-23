@@ -58,7 +58,7 @@ def _git_setup(*args: str) -> str:
     return result.stdout
 
 
-def make_repo_with_branch(
+def make_repo_with_branch(  # noqa: PLR0913
     repo_dir: Path,
     init_fn: Callable[[Path], None],
     branch: str = "test-branch",
