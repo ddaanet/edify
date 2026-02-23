@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-23
 
-**Status:** Quality infra reform complete. Code density entries remediated — haiku prose replaced with sonnet rewrite from grounding doc.
+**Status:** Deliverable review complete. 1 critical (test regression), 5 major (terminology propagation gaps), 5 minor. Fix task pending.
 
 ## Completed This Session
 
@@ -26,14 +26,24 @@
 - Sonnet agent rewrote 5 cli.md entry bodies from `plans/reports/code-density-grounding.md`: restored grounding context, source citations, qualifiers haiku dropped
 - Opus (interactive) renamed H3 headings from outcome-named to activity-at-decision-point per naming rules, rewrote 5 memory-index.md triggers to match
 
+**Deliverable review:**
+- Reviewed all changes since merge-base `22434a5b` (main)
+- Report: `plans/quality-infrastructure/reports/deliverable-review.md`
+- Structural deliverables (renames, deletions, deslop split, code density entries, symlinks) all correct
+- C1: `tests/test_prepare_runbook_inline.py` fixtures create old-name agents (`quiet-task.md`, `tdd-task.md`) but `prepare-runbook.py` now expects `artisan.md`, `test-driver.md` — 2 tests fail
+- M1-M2: corrector.md description/H1/template and design-corrector.md H1 retain "Vet" terminology
+- M3: skill-embedded memory-index/SKILL.md has 5 stale "vet" triggers not synced with parent
+- M4: 13+ "vet" references in doc-writing, design, runbook, orchestrate, plugin-dev-validation skills
+- M5: parent memory-index.md has 4 partially-propagated "vet" triggers
+
 ## Pending Tasks
 
-- [ ] **Deliverable review: quality-infra reform** — `/deliverable-review` | sonnet
-  - Phase 3 code density entries already remediated (haiku contamination → sonnet body rewrite + opus heading/trigger rename). Review should focus on the rest: 11 agent renames + propagation (Steps 1.1-1.6), deslop restructuring (Phase 2), symlink state, project-conventions skill injection. Plan: `plans/quality-infrastructure/`
+- [x] **Deliverable review: quality-infra reform** — `/deliverable-review` | sonnet
+- [ ] **Fix quality-infra findings** — `/design plans/quality-infrastructure/reports/deliverable-review.md` | opus
 
 ## Next Steps
 
-Session restart recommended — agent definitions changed (11 renames, skill directory rename, fragment rename). New names load on restart.
+Fix task routes through `/design` for proportionality triage — likely resolves to simple execution (mechanical substitutions + test fixture update).
 
 ## Reference Files
 
