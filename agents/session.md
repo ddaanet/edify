@@ -1,55 +1,28 @@
 # Session Handoff: 2026-02-23
 
-**Status:** Housekeeping + worktree management. Backlog merged, fenced-blocks merged+removed, new worktrees for merge-artifact-validation and session-cli-tool.
+**Status:** Worktree management session — merged 4 worktrees, created 4 new ones, merged backlog into pending.
 
 ## Completed This Session
 
 **Worktree merges:**
-- `runbook-generation-fixes` — merged (commit: 8bc9377a) + removed. Clean merge, no conflicts
-- `quality-infra-reform` — merged (commit: 6086650e) + removed. Resolved conflicts in 3 files:
-  - `agents/plan-archive.md` — kept both entries (worktree-cli-default + quality-infrastructure)
-  - `tests/test_prepare_runbook_inline.py` — kept shared helpers import, removed dead local helpers
-  - `agent-core/bin/prepare-runbook.py` — 15 conflict regions: kept HEAD features (model propagation, phase context) + branch agent renames (quiet-task→artisan, tdd-task→test-driver)
-  - `tests/pytest_helpers.py` — updated `setup_baseline_agents` to use renamed agent files
-
-**Inline phase separation fix:**
-- Bug: `extract_sections()` second pass skipped phase headers via `continue` but didn't save current section — inline phase content bled into preceding step. Step 1.7 in quality-infra got Phases 2-3 appended
-- Fix: phase headers now save current section before clearing accumulator. Extracted duplicated save logic into `save_current()` closure (3x → 1x)
-- Test: `TestGeneralThenInlineBleed::test_last_step_excludes_inline_content` — integration test with general-steps-then-inline fixture. Cycle 2 unit test confirmed redundant and removed
-- Files: `agent-core/bin/prepare-runbook.py`, `tests/test_prepare_runbook_inline.py`
-
-**tdd-auditor scope violation detection:**
-- Added Step 4b "Assess Scope Compliance" to `agent-core/agents/tdd-auditor.md`
-- Checks: agent executed only assigned work, inline phases didn't cause scope creep, commit diffs match step scope
-- Scope violations classified CRITICAL in compliance table
-
-**Learnings correction:**
-- Corrected "When inline phases are appended to last step file" — removed false "actually beneficial" rationalization, documented as defect with detection gap
-
-**Task triage:**
-- Absorbed "Task agent guardrails" into Orchestrate evolution — tool-call limits, regression detection, model escalation all additive to existing design
-- Absorbed "RED pass protocol" into Orchestrate evolution — classification taxonomy, blast radius, defect impact evaluation additive
-- Removed "Runbook evolution" — all FRs already delivered (prose atomicity, testing diamond, self-modification discipline all present in SKILL.md). Deleted `plans/runbook-evolution/`
-- Updated "Migrate test suite to diamond" dependency note (runbook evolution delivered)
-
-**Merge audit (last 3 merges):**
-- No task loss across merges. Only drop: "Runbook generation fixes" correctly superseded by completed orchestration task
-- Found 6 orphaned bullets in learnings.md from merge `6086650e` — headingless duplicates of existing entries (lines 211-216). Removed
-- Brief written: `plans/worktree-merge-resilience/brief.md` documenting the instance, commit IDs, root cause, detection gap
-
-**Worktrees created:**
-- `remember-skill-update` — Remember skill update (opus design Phase B)
-- `runbook-fenced-blocks` — Runbook fenced code blocks (sonnet)
-- `merge-artifact-validation` — Merge artifact validation (sonnet)
+- `runbook-fenced-blocks` — merged (commit: 073f4ad7) + removed. Clean merge, task complete
+- `remember-skill-update` — merged (commit: 38fa0d80). `rm` failed at amend step (merge-commit issue) then `--force` failed at submodule removal. Directory needs manual `rm -rf /Users/david/code/claudeutils-wt/remember-skill-update`. Task completed on branch; successor task (UserPromptSubmit topic detection hook) came through
+- `merge-artifact-validation` — merged (commit: 7071b523). Conflict in `tests/test_validation_learnings.py` (orphan detection vs preamble line count). Resolved: dropped filler line to keep `---` within 10-line preamble zone, split test file (438 → 284 + 159 lines). Workaround — see pending task for real fix
+- `session-cli-tool` — merged (commit: d51c6459) + removed. Task still live (blocked)
 
 **Session housekeeping:**
-- Merged Backlog section into Pending Tasks — eliminated separate section, 30 items now in flat list to prevent bitrot
+- Merged Backlog section into Pending Tasks — eliminated separate section, 30 items in flat list to prevent bitrot
 - Removed "Simplify when-resolve CLI" — absorbed into remember-skill-update worktree
-- Merged `runbook-fenced-blocks` (commit: 073f4ad7) + removed worktree. Fenced code blocks task complete
-- Created worktrees: `merge-artifact-validation`, `session-cli-tool`
 - Removed fenced code block parsing blocker (fix shipped)
 - Added "Phase-scoped agent context" task — per-phase agent generation in prepare-runbook.py
-- Annotated orchestrate-evolution with per-phase agent dispatch gap
+- Added "Worktree new error formatting" task — error output cleanup
+- Added "Learnings validator structural boundaries" task — orphan detector uses line count not structure
+
+**Worktrees created:**
+- `merge-artifact-validation` — merged this session
+- `session-cli-tool` — merged this session
+- `phase-scoped-agents` — Phase-scoped agent context (sonnet)
+- `wt-new-errors` — Worktree new error formatting (sonnet)
 
 ## Pending Tasks
 
@@ -70,9 +43,7 @@
   - Absorbs: RED pass protocol — classification taxonomy, blast radius procedure, defect impact evaluation. Design has remediation + escalation patterns but not formal classification or blast radius assessment
   - Depends on: Phase-scoped agent context (prepare-runbook.py generates per-phase agents, orchestrate dispatches)
 
-
 - [ ] **Deslop remaining skills** — Prose quality pass on skills not yet optimized | sonnet
-
 
 - [ ] **Diagnose compression detail loss** — RCA against commit `0418cedb` | sonnet
 
@@ -122,25 +93,19 @@
 - [ ] **Fix task-context.sh task list bloat** — Filter/trim output | sonnet
 - [ ] **Upstream skills field** — PR/issue for missing skills frontmatter | sonnet
 - [ ] **Infrastructure scripts** — History tooling + agent-core script rewrites | sonnet
-
 - [!] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet
   - Plan: handoff-cli-tool | Status: designed (outline reviewed 6 rounds, ready for runbook)
   - `_session` group (handoff, status, commit)
   - Discussion conclusions baked into outline: amend, git passthrough, deviation-only output, submodule labeling
   - Blocked on: Phase-scoped agent context (mixed-type runbook needs per-phase agent generation)
-
-- [x] **Deliverable review: remember-skill-update** — `/deliverable-review plans/remember-skill-update` | opus | restart
 - [ ] **UserPromptSubmit topic detection hook** — Phase 7 analysis recommends this as highest-impact recall improvement | sonnet
   - Seed keyword table from 200+ memory-index triggers
   - Inject matching decision content via additionalContext on prompt submit
+- [ ] **Learnings validator structural boundaries** — orphan detector should use `---`/first `## ` as preamble boundary, not hardcoded 10-line count | sonnet
+  - Current: `_detect_orphaned_content()` skips first 10 lines, flags non-heading content after. `---` on line 11+ flagged as orphaned
+  - Fix: detect preamble end structurally. Test fixtures updated as workaround (test_validation_learnings.py)
 
 ## Worktree Tasks
-
-
-
-- [ ] **Merge artifact validation** → `merge-artifact-validation` — post-merge orphan detection in `_worktree merge` | sonnet
-  - Plan: worktree-merge-resilience | Diagnostic: `plans/worktree-merge-resilience/diagnostic.md`
-  - New instance found: `6086650e` merge produced 6 orphaned bullets in learnings.md (headingless, under wrong entry). Brief: `plans/worktree-merge-resilience/brief.md`
 
 - [ ] **Phase-scoped agent context** → `phase-scoped-agents` — `/design` | sonnet
   - prepare-runbook.py emits per-phase agents with phase-scoped shared context instead of one agent per runbook
@@ -179,20 +144,21 @@
 **`_worktree rm --force` doesn't restore task to Pending:**
 - `rm --force` removes worktree but leaves task in Worktree Tasks section. Manual session.md edit needed to move back to Pending.
 
-- Blocker "Manual post-merge check required" is now resolved by the diff3 implementation [from: merge-artifact-validation]
-- `agents/learnings.md` at 227 lines (soft limit 80) — `/remember` consolidation overdue [from: merge-artifact-validation]
+**`_worktree rm` fails on merge commits:**
+- `_update_session_and_amend` calls `git commit --amend` which fails on merge commits (exit 128). Then `--force` can fail on submodule removal. Manual `rm -rf` of directory needed after.
+
+**Orphaned remember-skill-update directory:**
+- `/Users/david/code/claudeutils-wt/remember-skill-update` — git deregistered but directory remains. Needs manual removal.
+
 ## Next Steps
 
-Four worktrees active: `remember-skill-update` (opus), `merge-artifact-validation` (sonnet), `session-cli-tool` (sonnet), `phase-scoped-agent-context` (sonnet).
+Two worktrees active: `phase-scoped-agents` (sonnet), `wt-new-errors` (sonnet). Manual cleanup needed for remember-skill-update directory.
 
 ## Reference Files
 
 - `plans/planstate-delivered/outline.md` — Plan lifecycle design (7 decisions, 3 phases)
 - `plans/orchestrate-evolution/design.md` — Orchestration evolution design (ready for runbook)
-- `plans/handoff-cli-tool/outline.md` — Session CLI combined outline (reviewed 5 rounds)
-- `plans/handoff-cli-tool/reports/outline-review-round5.md` — Latest review report
-- `plans/hook-batch/reports/deliverable-review.md` — Hook batch final review (0C/0M/6m)
+- `plans/handoff-cli-tool/outline.md` — Session CLI combined outline (reviewed 6 rounds)
 - `plans/worktree-merge-resilience/diagnostic.md` — Merge artifact reproduction conditions
-- `plans/worktree-merge-resilience/brief.md` — Orphaned bullets instance from merge `6086650e`
 - `plans/codebase-sweep/requirements.md` — mechanical refactoring (_git_ok, _fail, exceptions)
 - `agents/decisions/cli.md` — LLM-native output decision (from session-cli-tool)
