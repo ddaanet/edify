@@ -17,10 +17,10 @@
 
 ## Pending Tasks
 
-
 - [ ] **Codebase sweep** — `/design plans/codebase-sweep/requirements.md` | sonnet
   - Plan: codebase-sweep | Status: requirements
   - _git_ok, _fail, exception cleanup — mechanical refactoring
+
 
 - [ ] **Planstate delivered status** — `/runbook plans/planstate-delivered/outline.md` | sonnet
   - Plan: planstate-delivered | Status: designed
@@ -38,9 +38,6 @@
 
 - [ ] **Diagnose compression detail loss** — RCA against commit `0418cedb` | sonnet
 
-- [ ] **Recall pass requirements** — `/requirements plans/recall-pass/brief.md` | sonnet
-  - Plan: recall-pass | Status: grounded (brief + grounding report complete)
-  - Next: define FRs from discussion conclusions + grounding, then `/design`
 
 - [ ] **Precommit python3 redirect** — `/design plans/precommit-python3-redirect/brief.md` | sonnet
   - PreToolUse hook: intercept python3/uv-run/ln patterns, redirect to correct invocations
@@ -91,10 +88,15 @@
   - Inject matching decision content via additionalContext on prompt submit
   - Complementary to recall pass (cheap first layer vs deep pipeline integration)
 
-- [ ] **Update grounding skill** — Use scouts for divergent-convergent, produce exploration artifacts | opus
 
 ## Worktree Tasks
 
+
+- [ ] **Recall pass requirements** → `recall-pass-requirements` — `/requirements plans/recall-pass/brief.md` | sonnet
+  - Plan: recall-pass | Status: grounded (brief + grounding report complete)
+  - Next: define FRs from discussion conclusions + grounding, then `/design`
+
+- [ ] **Update grounding skill** → `update-grounding-skill` — Use scouts for divergent-convergent, produce exploration artifacts | opus
 
 ## Blockers / Gotchas
 
