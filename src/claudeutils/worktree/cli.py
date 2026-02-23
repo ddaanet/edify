@@ -80,7 +80,7 @@ def _initialize_environment(worktree_path: Path) -> None:
         check=False,
     )
     if r.returncode != 0:
-        click.echo(f"Warning: just setup failed: {r.stderr}", err=True)
+        click.echo(f"Warning: just setup failed: {r.stderr}")
 
 
 @click.group(name="_worktree")
@@ -113,7 +113,7 @@ def _create_parent_worktree(
         == 0
     )
     if branch_exists and session:
-        click.echo(f"Warning: branch {slug} exists, ignoring --session", err=True)
+        click.echo(f"Warning: branch {slug} exists, ignoring --session")
         session = ""
     if session:
         _git("branch", slug, _create_session_commit(slug, base, session))
@@ -308,7 +308,7 @@ def _update_session_and_amend(slug: str) -> bool:
         if line and not line.endswith("agents/session.md")
     ]
     if other_dirty:
-        click.echo("Warning: skipping session amend (parent repo dirty)", err=True)
+        click.echo("Warning: skipping session amend (parent repo dirty)")
         return False
     status_output = _git("status", "--porcelain", "agents/session.md", check=False)
     if not status_output.strip():
@@ -362,7 +362,7 @@ def rm(slug: str, confirm: bool, force: bool) -> None:  # noqa: FBT001
     if branch_exists:
         _delete_branch(slug, removal_type)
         if warning := _delete_submodule_branch(slug):
-            click.echo(warning, err=True)
+            click.echo(warning)
     amend_note = " Merge commit amended." if amended else ""
     detail = " (focused session only)" if removal_type == "focused" else ""
     prefix = "Removed worktree" if removal_type is None else "Removed"
