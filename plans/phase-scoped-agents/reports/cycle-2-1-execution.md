@@ -1,0 +1,12 @@
+### Cycle 2.1: Orchestrator plan format — Agent field and Phase-Agent Mapping table 2026-02-23
+- Status: GREEN_VERIFIED
+- Test command: `just test tests/test_prepare_runbook_agents.py -v -k "orchestrator"`
+- RED result: FAIL as expected (TypeError: unexpected keyword argument 'phase_agents')
+- GREEN result: PASS
+- Regression check: 43/43 passed (tests/test_prepare_runbook_*.py)
+- Refactoring: Fixed docstring lengths to satisfy wrap-summaries=80 constraint; pre-existing lint failures (RUF100, XFAIL) confirmed not introduced by this cycle
+- Files modified:
+  - `tests/test_prepare_runbook_agents.py` — added TestOrchestratorAgentField class with 2 tests
+  - `agent-core/bin/prepare-runbook.py` — extended generate_default_orchestrator() with phase_agents and phase_types params, Phase-Agent Mapping table, Agent: field per step
+- Stop condition: none
+- Decision made: none
