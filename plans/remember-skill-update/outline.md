@@ -30,7 +30,7 @@ Separately, consolidated knowledge is indexed but rarely recalled. Agents don't 
      - ❌ "transformation table" → ✅ "choosing review gate"
      - ❌ "prose gates" → ✅ "prevent skill steps from being skipped"
    - Updated in: remember skill SKILL.md, handoff skill
-   - Handoff skill implementation: Add guidance in "Learnings Quality" section after line 47, enforce trigger framing when creating learning titles during session handoff, reject jargon/root-cause titles with suggested rephrase
+   - Handoff skill implementation: Strengthen Step 4 "Write Learnings" (line 101) with trigger framing rules — titles must start with When/How to, describe the situation not the root cause. Add anti-pattern/correct-pattern examples. Enforce rejection of jargon/root-cause titles with suggested rephrase
 
 3. **Pipeline alignment (consolidation protocol)** — Trigger derivation from title:
    - Remember skill Step 4a: trigger = operator prefix + learning title (no rephrase)
@@ -52,7 +52,7 @@ Separately, consolidated knowledge is indexed but rarely recalled. Agents don't 
 
 **Evaluation criteria:** Agent-independence (works without cooperation), token cost, false positive rate, maintenance burden.
 
-**Output:** Analysis table with recommendation in dedicated design.md section "Frozen-Domain Recall Analysis". If hook-based, implementation as separate task.
+**Output:** Analysis report at `plans/remember-skill-update/reports/frozen-domain-analysis.md` with recommendation. If hook-based, implementation as separate task.
 
 ## Key Decisions
 
@@ -104,7 +104,7 @@ Separately, consolidated knowledge is indexed but rarely recalled. Agents don't 
 
 **Phase 6: Frozen-Domain Analysis (type: general)**
 - Evaluate four options against criteria (agent-independence, token cost, false positive rate, maintenance)
-- Write analysis section in design.md with recommendation
+- Write analysis report at `plans/remember-skill-update/reports/frozen-domain-analysis.md` with recommendation
 - If hook recommended: create separate task for implementation
 
 **Dependencies:**
@@ -113,6 +113,24 @@ Separately, consolidated knowledge is indexed but rarely recalled. Agents don't 
 - Phase 4 is independent (CLI fix, no dependency on other phases)
 - Phase 5 depends on Phase 2-3 (rename after content changes, not before)
 - Phase 6 is independent, can run in parallel with Phase 1-5
+
+## Requirements Mapping
+
+| Requirement | Phase | Items | Notes |
+|-------------|-------|-------|-------|
+| FR-1 | 1, 2 | P1: prefix check; P2: SKILL.md title guidance | Structural + semantic enforcement |
+| FR-2 | 1 | Min 2 content words, prefix check, regression | All validation rules in learnings.py |
+| FR-3 | 1 | Precommit integration via cli.py | Existing import path, new checks propagate |
+| FR-4 | 2 | SKILL.md Step 4a, consolidation-patterns.md | Trigger = title, no rephrase |
+| FR-5 | 2 | SKILL.md guidance, handoff Step 4 | Anti-pattern examples, rejection rules |
+| FR-6 | 6 | Analysis report with recommendation | Output: reports/frozen-domain-analysis.md |
+| ~~FR-7~~ | — | — | Struck: migration already done |
+| FR-8 | 2 | Delete remember-task.md, SKILL.md inline exec | Consolidation executes inline |
+| FR-9 | 2 | Delete memory-refactor.md, SKILL.md inline split | 400-line threshold, H2/H3 boundaries |
+| FR-10 | 5 | Directory rename + ~30 file references | Grep verification, sync-to-parent, restart |
+| FR-11 | 3 | SKILL.md Step 2, 13 agent templates | Agent-relevant learnings propagated |
+| FR-12 | 4 | cli.py rewrite, when-resolve.py, tests | One-arg syntax + batched recall |
+| FR-13 | 2 | Remove @agents/memory-index.md from CLAUDE.md | ~5000 tokens freed |
 
 ## Scope
 
@@ -132,7 +150,7 @@ Separately, consolidated knowledge is indexed but rarely recalled. Agents don't 
 - `agent-core/skills/when/SKILL.md` + `agent-core/skills/how/SKILL.md` + `agent-core/skills/memory-index/SKILL.md` — updated invocation docs
 - `agents/decisions/project-config.md` — update when-resolve.py reference
 - Skill directory rename to `codify` + all references (~30 files) (FR-10)
-- Frozen-domain analysis section in design.md
+- `plans/remember-skill-update/reports/frozen-domain-analysis.md` — analysis report (FR-6)
 
 **OUT:**
 - Memory index validation pipeline changes
@@ -165,3 +183,41 @@ Separately, consolidated knowledge is indexed but rarely recalled. Agents don't 
 **Platform guides (editing constraints):**
 - `/plugin-dev:skill-development` — skill description format ("This skill should be used when..."), structure rules
 - `/plugin-dev:agent-development` — agent frontmatter, triggering conditions
+
+## Expansion Guidance
+
+The following recommendations should be incorporated during full runbook expansion:
+
+**Phase 2 item ordering:**
+- SKILL.md edits first (establishes the updated protocol), then deletions (remember-task.md, memory-refactor.md), then downstream references (consolidation-flow, handoff, consolidation-patterns), then CLAUDE.md cleanup last
+- SKILL.md is the largest single edit in the outline (6 changes); consider splitting into 2 steps: (a) title guidance + trigger derivation + fix no-hyphens, (b) inline execution + inline splitting + validate-memory-index
+
+**Phase 2 handoff skill edit:**
+- Target is Step 4 "Write Learnings" at line 101 of `agent-core/skills/handoff/SKILL.md`
+- No "Learnings Quality" section exists; guidance integrates into the existing Step 4 block
+- Line 105 already says "Titles become `/when` triggers" — strengthen with format rules and examples, do not duplicate
+
+**Phase 4 structure:**
+- TDD cycles (4.1-4.3 per tdd-test-plan.md) precede doc updates
+- Doc updates (when/how SKILL.md, memory-index SKILL.md, project-config.md) are post-TDD general steps within the same phase
+- Phase type remains tdd; doc updates are non-code followup after all cycles green
+
+**Phase 3 SKILL.md edit:**
+- This is the known exception to single-artifact-per-item: SKILL.md is edited in both Phase 2 (protocol changes) and Phase 3 (routing targets)
+- Phase 3 edit is additive (adding agent list to Step 2), not conflicting with Phase 2 edits (Steps 4a, inline exec, splitting)
+
+**Phase 5 rename scope:**
+- The ~30 file estimate needs verification at expansion time via `grep -r "/remember\b" agent-core/ agents/ .claude/ --include="*.md"`
+- Include `agent-core/skills/remember/examples/remember-patterns.md` (internal reference file)
+- Include `agent-core/skills/handoff/references/learnings.md` if it references `/remember`
+
+**Checkpoint guidance:**
+- Checkpoint after Phase 1 (TDD complete, precommit passes)
+- Checkpoint after Phase 2 (all deletions + edits verified, no broken references)
+- Phase 4 is independent; can checkpoint independently
+- Phase 5 requires post-rename grep verification as final checkpoint
+
+**TDD test plan:**
+- Phases 1 and 4 have detailed cycle definitions in `plans/remember-skill-update/tdd-test-plan.md`
+- Phase 1: 3 cycles (1.1 prefix, 1.2 min words, 1.3 edge cases), 5 new tests, 5 fixture updates
+- Phase 4: 3 cycles (4.1 one-arg, 4.2 batch, 4.3 invalid prefix), 3 new tests, 5 rewrites

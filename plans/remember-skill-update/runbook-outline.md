@@ -204,7 +204,7 @@ Independent of all other phases. Can run at any time.
   - PreToolUse hook (file path → entry mapping, inject via additionalContext)
   - Inline code comments (`# See: /when X`)
   - UserPromptSubmit topic detection (keyword scan → inject)
-- Write analysis section in `plans/remember-skill-update/design.md` under "Frozen-Domain Recall Analysis"
+- Write analysis report to `plans/remember-skill-update/reports/frozen-domain-analysis.md`
 - If hook recommended: note as separate task in session.md
 
 ---
