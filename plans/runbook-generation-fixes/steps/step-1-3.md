@@ -36,9 +36,7 @@ Parse with `parse_frontmatter()`, `extract_sections()`, `extract_cycles()`.
 - Items appear in phase order: all phase-1 items before phase-2, phase-2 before phase-3, etc.
 - No interleaving: consecutive items within same phase have monotonically increasing minor numbers
 
-**Expected failure:** With current code (no phase header injection in assembly), phases 3-5 will have incorrect `step_phases` mappings (C2 reproduction). Orchestrator plan will show misnumbered PHASE_BOUNDARY entries (M1) and potentially interleaved items (M2).
-
-Note: This test uses the `MIXED_RUNBOOK_5PHASE` fixture directly (not phase files), so it tests `extract_sections()` phase detection on content that already has phase headers. The fixture must include `### Phase N:` headers to be realistic. The verification validates that the parsing pipeline produces correct downstream results.
+**Expected outcome (verification):** This test uses the `MIXED_RUNBOOK_5PHASE` fixture directly (not phase files) with correct `### Phase N:` headers already present. The test should PASS in RED — it verifies that `extract_sections()` parsing produces correct downstream results when headers are present. Passing confirms header injection from Cycle 1.1 is the complete fix for C2/M1/M2. If this test fails, investigate `extract_sections()` parsing independent of header injection.
 
 **Verify RED:** `pytest tests/test_prepare_runbook_mixed.py::TestPhaseNumbering::test_mixed_runbook_phase_metadata_and_orchestrator_correct -v`
 
@@ -58,22 +56,3 @@ Note: This test uses the `MIXED_RUNBOOK_5PHASE` fixture directly (not phase file
 
 **Verify GREEN:** `pytest tests/test_prepare_runbook_mixed.py::TestPhaseNumbering -v`
 **Verify no regression:** `pytest tests/test_prepare_runbook_inline.py -v`
-
-### Phase 2: Model propagation (type: tdd, model: sonnet)
-
-RC-1 fix. D-1 model priority chain: step body > phase-level > frontmatter > ERROR (no haiku default).
-
-**Post-Phase-1 state:** Assembled content contains `### Phase N:` headers (injected by `assemble_phase_files()` when absent). All cycles in this phase can rely on phase headers being present in assembled content.
-
-**Prerequisites:**
-- Phase 1 complete (phase headers present in assembled content)
-- `agent-core/bin/prepare-runbook.py` — target file
-- `tests/test_prepare_runbook_mixed.py` — test module (created in Phase 1)
-
-**Completion validation:**
-- All 5 cycles pass (RED fails then GREEN passes)
-- `just test tests/test_prepare_runbook_mixed.py` — all tests pass (Phase 1 + Phase 2)
-- No regressions: `just test tests/test_prepare_runbook_inline.py`
-- Model priority chain verified end-to-end: frontmatter → phase → step override → missing model error
-
----

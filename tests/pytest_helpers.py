@@ -1,6 +1,7 @@
 """Pytest helper functions for test setup and assertions."""
 
 import json
+import subprocess
 from collections.abc import Callable
 from pathlib import Path
 
@@ -46,6 +47,29 @@ def setup_cli_mocks(
             "claudeutils.cli.get_project_history_dir",
             make_mock_history_dir(history_dir),
         )
+
+
+def setup_git_repo(tmp_path: Path) -> None:
+    """Initialize a git repo in tmp_path for git add in validate_and_create."""
+    subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True, check=False)
+    subprocess.run(
+        ["git", "commit", "--allow-empty", "-m", "init"],
+        cwd=tmp_path,
+        capture_output=True,
+        check=False,
+    )
+
+
+def setup_baseline_agents(tmp_path: Path) -> None:
+    """Create minimal baseline agent files that prepare-runbook.py reads."""
+    agents_dir = tmp_path / "agent-core" / "agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+
+    quiet_task = agents_dir / "quiet-task.md"
+    quiet_task.write_text("---\nname: quiet-task\n---\n# Quiet Task\nBaseline agent.")
+
+    tdd_task = agents_dir / "tdd-task.md"
+    tdd_task.write_text("---\nname: tdd-task\n---\n# TDD Task\nBaseline TDD agent.")
 
 
 def assert_json_output(

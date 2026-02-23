@@ -131,9 +131,7 @@ Parse with `parse_frontmatter()`, `extract_sections()`, `extract_cycles()`.
 - Items appear in phase order: all phase-1 items before phase-2, phase-2 before phase-3, etc.
 - No interleaving: consecutive items within same phase have monotonically increasing minor numbers
 
-**Expected failure:** With current code (no phase header injection in assembly), phases 3-5 will have incorrect `step_phases` mappings (C2 reproduction). Orchestrator plan will show misnumbered PHASE_BOUNDARY entries (M1) and potentially interleaved items (M2).
-
-Note: This test uses the `MIXED_RUNBOOK_5PHASE` fixture directly (not phase files), so it tests `extract_sections()` phase detection on content that already has phase headers. The fixture must include `### Phase N:` headers to be realistic. The verification validates that the parsing pipeline produces correct downstream results.
+**Expected outcome (verification):** This test uses the `MIXED_RUNBOOK_5PHASE` fixture directly (not phase files) with correct `### Phase N:` headers already present. The test should PASS in RED — it verifies that `extract_sections()` parsing produces correct downstream results when headers are present. Passing confirms header injection from Cycle 1.1 is the complete fix for C2/M1/M2. If this test fails, investigate `extract_sections()` parsing independent of header injection.
 
 **Verify RED:** `pytest tests/test_prepare_runbook_mixed.py::TestPhaseNumbering::test_mixed_runbook_phase_metadata_and_orchestrator_correct -v`
 

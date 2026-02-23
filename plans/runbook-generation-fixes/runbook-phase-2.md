@@ -132,7 +132,7 @@ Run full pipeline.
 - Generated cycle file `steps/step-1-1.md` contains `**Execution Model**: opus` (not sonnet, not haiku)
 - Step-level model (opus) overrides phase model (sonnet) which overrides frontmatter (haiku)
 
-**Execution note:** Write this test before implementing Cycle 2.2. This is a regression guard: `extract_step_metadata()` already returns the body-level model correctly, but Cycle 2.2's phase-model threading could inadvertently overwrite it. This test catches that regression. It passes against pre-2.2 code; verify it still passes after 2.2 GREEN.
+**Execution note:** This is a regression guard — Cycle 2.2 is already implemented at this point. Verify that step-level model override still works after phase-model threading. This test should PASS; if it fails, Cycle 2.2 introduced a regression in `extract_step_metadata()`.
 
 **Expected failure (if 2.2 introduces regression):** `AssertionError: 'sonnet' != 'opus'` — step file contains phase model instead of step body model.
 

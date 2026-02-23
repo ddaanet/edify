@@ -14,8 +14,8 @@
 
 **Test:** `test_orchestrator_plan_includes_phase_file_paths`
 **Setup:** Create phase files in `tmp_path` directory:
-- `plans/test-job/runbook-phase-1.md`: Phase 1 with general steps
-- `plans/test-job/runbook-phase-2.md`: Phase 2 with TDD cycles
+- `plans/test-job/runbook-phase-1.md`: Phase 1 with general steps (model: sonnet)
+- `plans/test-job/runbook-phase-2.md`: Phase 2 with TDD cycles (model: sonnet)
 
 Assemble via `assemble_phase_files()`, run full pipeline through `validate_and_create()`.
 

@@ -1,10 +1,11 @@
 """Integration tests for prepare-runbook.py inline phase support."""
 
 import importlib.util
-import subprocess
 from pathlib import Path
 
 import pytest
+
+from tests.pytest_helpers import setup_baseline_agents, setup_git_repo
 
 SCRIPT = Path(__file__).parent.parent / "agent-core" / "bin" / "prepare-runbook.py"
 
@@ -18,8 +19,6 @@ extract_cycles = _mod.extract_cycles
 validate_and_create = _mod.validate_and_create
 derive_paths = _mod.derive_paths
 
-
-# --- Fixtures ---
 
 MIXED_RUNBOOK = """\
 ---
@@ -119,8 +118,8 @@ class TestMixedRunbookWithInline:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Inline phases must NOT produce step files; TDD phases must."""
-        _setup_git_repo(tmp_path)
-        _setup_baseline_agents(tmp_path)
+        setup_git_repo(tmp_path)
+        setup_baseline_agents(tmp_path)
         monkeypatch.chdir(tmp_path)
 
         plan_dir = tmp_path / "plans" / "mixed-test"
@@ -165,8 +164,8 @@ class TestMixedRunbookWithInline:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Orchestrator plan must have 'Execution: inline' for inline phases."""
-        _setup_git_repo(tmp_path)
-        _setup_baseline_agents(tmp_path)
+        setup_git_repo(tmp_path)
+        setup_baseline_agents(tmp_path)
         monkeypatch.chdir(tmp_path)
 
         plan_dir = tmp_path / "plans" / "mixed-test"
@@ -209,8 +208,8 @@ class TestInlineOnlyRunbook:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """All-inline runbook produces zero step files."""
-        _setup_git_repo(tmp_path)
-        _setup_baseline_agents(tmp_path)
+        setup_git_repo(tmp_path)
+        setup_baseline_agents(tmp_path)
         monkeypatch.chdir(tmp_path)
 
         plan_dir = tmp_path / "plans" / "inline-only-test"
@@ -248,8 +247,8 @@ class TestInlineOnlyRunbook:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """All-inline orchestrator plan has no step file references."""
-        _setup_git_repo(tmp_path)
-        _setup_baseline_agents(tmp_path)
+        setup_git_repo(tmp_path)
+        setup_baseline_agents(tmp_path)
         monkeypatch.chdir(tmp_path)
 
         plan_dir = tmp_path / "plans" / "inline-only-test"
@@ -280,29 +279,3 @@ class TestInlineOnlyRunbook:
         orch_content = (tmp_path / orch_path).read_text()
         assert "Execution: inline" in orch_content
         assert "steps/step-" not in orch_content
-
-
-# --- Helpers ---
-
-
-def _setup_git_repo(tmp_path: Path) -> None:
-    """Initialize a git repo in tmp_path for git add in validate_and_create."""
-    subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True, check=False)
-    subprocess.run(
-        ["git", "commit", "--allow-empty", "-m", "init"],
-        cwd=tmp_path,
-        capture_output=True,
-        check=False,
-    )
-
-
-def _setup_baseline_agents(tmp_path: Path) -> None:
-    """Create minimal baseline agent files that prepare-runbook.py reads."""
-    agents_dir = tmp_path / "agent-core" / "agents"
-    agents_dir.mkdir(parents=True, exist_ok=True)
-
-    quiet_task = agents_dir / "quiet-task.md"
-    quiet_task.write_text("---\nname: quiet-task\n---\n# Quiet Task\nBaseline agent.")
-
-    tdd_task = agents_dir / "tdd-task.md"
-    tdd_task.write_text("---\nname: tdd-task\n---\n# TDD Task\nBaseline TDD agent.")

@@ -1,0 +1,12 @@
+### Cycle 2.2: Phase model overrides frontmatter default 2026-02-22
+- Status: GREEN_VERIFIED
+- Test command: `pytest tests/test_prepare_runbook_mixed.py::TestModelPropagation::test_phase_model_overrides_frontmatter -v`
+- RED result: FAIL as expected — step file had `**Execution Model**: haiku` instead of `sonnet`
+- GREEN result: PASS
+- Regression check: 12/12 passed (test_prepare_runbook_mixed.py + test_prepare_runbook_inline.py)
+- Refactoring: none
+- Files modified:
+  - `agent-core/bin/prepare-runbook.py` — added `phase_models` parameter to `validate_and_create()`, thread phase models into cycle/step generation loops, extract phase models in `main()` and pass to `validate_and_create()`
+  - `tests/test_prepare_runbook_mixed.py` — added `test_phase_model_overrides_frontmatter` test, helper functions `_setup_git_repo` / `_setup_baseline_agents`, imports for `subprocess`, `pytest`, `validate_and_create`
+- Stop condition: none
+- Decision made: Test must call `extract_phase_models(body)` and pass result to `validate_and_create()` — mirrors what `main()` does; `validate_and_create` uses `phase_models` parameter when provided, falls back to frontmatter `model` when not

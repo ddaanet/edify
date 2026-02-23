@@ -76,6 +76,8 @@ When user says "pending: task description":
 
 @agent-core/fragments/project-tooling.md
 
+**Script invocation:** All `agent-core/bin/*.py` scripts have shebangs and are executable. Invoke directly (`agent-core/bin/script.py`), never with `python3` prefix. Adding `python3` breaks `permissions.allow` pattern matching and hits the denylist.
+
 ### Available Recipes
 
 - `just precommit` — Run all checks

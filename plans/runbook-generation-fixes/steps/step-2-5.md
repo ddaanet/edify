@@ -60,22 +60,3 @@ Run the pipeline through `validate_and_create()`.
 **Verify no regression:** `pytest tests/test_prepare_runbook_mixed.py tests/test_prepare_runbook_inline.py -v`
 
 Note: Existing `test_prepare_runbook_inline.py` tests use fixtures with `model: haiku` in frontmatter — they should continue to pass since haiku is explicitly specified. Only the *default* fallback to haiku is removed.
-
-### Phase 3: Phase context extraction (type: tdd, model: sonnet)
-
-RC-2 fix. D-2: phase preamble → `## Phase Context` section in step/cycle files.
-
-**Post-Phase-1 state:** Assembled content contains `### Phase N:` headers, enabling reliable phase boundary detection for preamble extraction.
-
-**Prerequisites:**
-- Phase 1 complete (phase headers present in assembled content)
-- `agent-core/bin/prepare-runbook.py` — target file
-- `tests/test_prepare_runbook_mixed.py` — test module (with Phase 1 and 2 tests)
-
-**Completion validation:**
-- All 3 cycles pass (RED fails then GREEN passes)
-- `just test tests/test_prepare_runbook_mixed.py` — all tests pass (Phases 1-3)
-- No regressions: `just test tests/test_prepare_runbook_inline.py`
-- Step/cycle files contain phase preamble content; phases without preamble produce no `## Phase Context` section
-
----

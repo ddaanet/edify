@@ -223,7 +223,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Rationale:** prepare-runbook.py regex matches `^## Step` — steps must be H2 for extraction.
 
-**Implementation:** assemble-runbook.py outputs correct format; manual runbooks need header level awareness.
+**Implementation:** prepare-runbook.py outputs correct format; manual runbooks need header level awareness.
 
 **Impact:** Runbook processing tools work correctly with phase-grouped structure.
 
@@ -347,7 +347,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Anti-pattern:** Editing `.claude/agents/<plan>-task.md` directly — it's a generated file assembled by prepare-runbook.py from tdd-task.md baseline + Common Context from phase-1 + phase content.
 
-**Correct pattern:** Edit the source (phase files in `plans/<job>/`), then re-run `prepare-runbook.py` to regenerate the agent file and step files. Common Context lives in `runbook-phase-1.md` only — phases 2–5 don't have their own copy.
+**Correct pattern:** Edit the source (phase files in `plans/<job>/`), then re-run `prepare-runbook.py` to regenerate the agent file and step files. Common Context is extracted from phase preambles (text between `### Phase N:` header and first `## Step`/`## Cycle`) and injected into all step/cycle files via `## Phase Context` section.
 
 **Evidence:** Edit rejected 3 times because target was the generated output, not the source.
 

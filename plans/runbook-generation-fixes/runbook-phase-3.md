@@ -71,9 +71,9 @@ RC-2 fix. D-2: phase preamble → `## Phase Context` section in step/cycle files
 **RED Phase:**
 
 **Test:** `test_step_and_cycle_files_include_phase_context`
-**Setup:** Create mixed runbook in `tmp_path` with:
-- Phase 1 (TDD): header + preamble "Phase 1 prerequisites: module X exists." + Cycle 1.1
-- Phase 2 (general): header + preamble "Phase 2 constraints: no breaking changes." + Step 2.1
+**Setup:** Create mixed runbook in `tmp_path` with frontmatter `model: sonnet`:
+- Phase 1 (TDD, model: sonnet): header + preamble "Phase 1 prerequisites: module X exists." + Cycle 1.1
+- Phase 2 (general, model: sonnet): header + preamble "Phase 2 constraints: no breaking changes." + Step 2.1
 
 Run full pipeline through `validate_and_create()`.
 
@@ -137,7 +137,7 @@ Note: `validate_and_create()` needs `body` (assembled content without frontmatte
   ```
 - Phase 2 header with substantive preamble (control case):
   ```
-  ### Phase 2: Extra (type: general)
+  ### Phase 2: Extra (type: general, model: sonnet)
 
   Some preamble here.
 

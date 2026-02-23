@@ -62,6 +62,9 @@
 - [ ] **Runbook fenced code blocks** — update prepare-runbook.py to honor fenced code blocks | sonnet
   - `extract_sections()`/`extract_cycles()` parse headers inside fenced code blocks, causing duplicate step errors
 
+- [x] **Deliverable review: runbook-generation-fixes** — `/deliverable-review plans/runbook-generation-fixes` | opus | restart
+- [x] **Runbook generation fixes** — `/runbook plans/runbook-generation-fixes/outline.md` | sonnet
+
 ## Worktree Tasks
 
 - [ ] **Quality infra reform** → `quality-infra-reform` — `/runbook plans/quality-infrastructure/outline.md` | sonnet
@@ -177,6 +180,7 @@
 **`_worktree rm --force` doesn't restore task to Pending:**
 - `rm --force` removes worktree but leaves task in Worktree Tasks section. Manual session.md edit needed to move back to Pending.
 
+- `extract_sections()`/`extract_cycles()` parse `## Step`/`## Cycle` headers inside fenced code blocks. Workaround: describe fixtures inline instead of using code blocks with H2 headers. [from: runbook-generation-fixes]
 ## Next Steps
 
 Quality infra reform in worktree. Orchestrate runbook generation fixes next on main.

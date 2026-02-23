@@ -21,7 +21,7 @@
   ```
 - Phase 2 header with substantive preamble (control case):
   ```
-  ### Phase 2: Extra (type: general)
+  ### Phase 2: Extra (type: general, model: sonnet)
 
   Some preamble here.
 
@@ -57,24 +57,3 @@ Run full pipeline.
 
 **Verify GREEN:** `pytest tests/test_prepare_runbook_mixed.py::TestPhaseContext -v`
 **Verify no regression:** `pytest tests/test_prepare_runbook_mixed.py tests/test_prepare_runbook_inline.py -v`
-
-### Phase 4: Orchestrator plan improvements (type: tdd, model: sonnet)
-
-D-5: Phase file references in PHASE_BOUNDARY markers. Phase-agent model mapping.
-
-**Post-Phase-2 state:** `extract_phase_models()` exists and `validate_and_create()` threads per-phase models to step/cycle generation. Phase models dict is available for orchestrator plan generation.
-
-**Cumulative signature note (if Phases 3 and 4 run sequentially):** When implementing Phase 4, `validate_and_create()` already has `phase_models` (Phase 2) and `phase_preambles` (Phase 3) parameters. Add `phase_dir` as an additional parameter — do not replace the prior additions.
-
-**Prerequisites:**
-- Phase 2 complete (model propagation working)
-- `agent-core/bin/prepare-runbook.py` — target file
-- `tests/test_prepare_runbook_mixed.py` — test module (with Phases 1-3 tests)
-
-**Completion validation:**
-- All 2 cycles pass (RED fails then GREEN passes)
-- `just test tests/test_prepare_runbook_mixed.py` — all tests pass (Phases 1-4)
-- No regressions: `just test tests/test_prepare_runbook_inline.py`
-- Orchestrator plan includes phase file paths and phase-model mapping table
-
----
