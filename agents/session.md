@@ -1,8 +1,11 @@
 # Session Handoff: 2026-02-23
 
-**Status:** Fixed learnings validator structural boundaries + prior worktree management.
+**Status:** Fixed learnings validator + worktree cleanup.
 
 ## Completed This Session
+
+**Worktree cleanup:**
+- Removed `merge-artifact-validation` worktree (already merged, leftover directory)
 
 **Learnings validator fix:**
 - Structural preamble boundary detection in `src/claudeutils/validation/learnings.py` — `_find_preamble_end()` uses `---`/first `## ` instead of hardcoded 10-line count
