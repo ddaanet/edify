@@ -1,12 +1,13 @@
 # Session Handoff: 2026-02-23
 
-**Status:** Merged two worktrees (phase-scoped-agents, wt-new-errors).
+**Status:** Codify skill updated with learning-ages script integration.
 
 ## Completed This Session
 
 - Merged `phase-scoped-agents` — clean merge, precommit passed. `rm` failed (exit 255, submodule), `--force` succeeded. Task completed
 - Merged `wt-new-errors` — one conflict in `agents/plan-archive.md` (both-sides-added: remember-skill-update + worktree-error-output). Resolved, precommit passed, rm clean
 - Phase-scoped agent context unblocks: Session CLI tool, Orchestrate evolution
+- Updated codify skill: H1 → "Codify Learnings into Permanent Docs", Step 1 uses `learning-ages.py` for automated age gating
 
 ## Pending Tasks
 
