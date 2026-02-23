@@ -151,3 +151,53 @@ class TestFencedMultiBacktickFences:
         assert "1.2" in sections["steps"]
         assert "2.1" not in sections["steps"]
         assert len(sections["steps"]) == 2
+
+
+class TestFencedTildeFences:
+    """Fence detection should handle tilde fences.
+
+    CommonMark semantics: tilde fences ≥3 tildes, closing requires ≥ opening count.
+    Tilde and backtick fences do NOT cross-close.
+    """
+
+    def test_extract_sections_handles_tilde_fences(self) -> None:
+        """Tilde fences should be recognized and tracked separately."""
+        content = dedent("""\
+            ### Phase 1: Core (type: general)
+
+            ## Step 1.1: Real step
+
+            ~~~
+            ## Step 2.1: Inside tilde fence
+            ~~~
+
+            ## Step 1.2: Another real step
+
+            Work.
+        """)
+        sections = extract_sections(content)
+        assert sections is not None
+        assert "2.1" not in sections["steps"]
+        assert len(sections["steps"]) == 2
+
+    def test_extract_sections_backtick_does_not_close_tilde(self) -> None:
+        """Backtick fence should not close a tilde fence."""
+        content = dedent("""\
+            ### Phase 1: Core (type: general)
+
+            ## Step 1.1: Real step
+
+            ~~~
+            ```
+            ## Step 2.1: Still inside tilde fence
+            ```
+            ~~~
+
+            ## Step 1.2: Real step two
+
+            Work.
+        """)
+        sections = extract_sections(content)
+        assert sections is not None
+        assert "2.1" not in sections["steps"]
+        assert len(sections["steps"]) == 2
