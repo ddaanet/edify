@@ -203,6 +203,10 @@ Safety gates for `_worktree rm`: dirty tree check (parent + submodule), exit cod
 
 CLI interface redesign: task name as positional argument (was `--task` flag), `--branch` for bare slug override, sandbox removal from `_worktree new` (no more `additionalDirectories` in settings.local.json). Absorbed: pre-merge untracked file fix, worktree skill adhoc mode, `--slug` override, `rm --confirm` gate fix (separated as orthogonal). Affected: src/claudeutils/worktree/cli.py, agent-core/skills/worktree/SKILL.md.
 
+## worktree-error-output
+
+Migrated all `_worktree` CLI error output from stderr to stdout per LLM-native CLI convention. Added `_fail(msg, code) -> Never` helper consolidating `click.echo + raise SystemExit` pairs, caught `derive_slug` ValueError in `new()` with clean exit 2, removed `err=True` from 12 sites (8 error+exit converted to `_fail()`, 4 warning-only stripped). 5 steps across 3 phases (TDD × 2, general × 1), 13 commits. TDD audit: 50% compliance — Cycle 1.1 broken GREEN (lint not run before commit). Affected: `src/claudeutils/worktree/cli.py`, `tests/test_worktree_utils.py`, `tests/test_worktree_new_creation.py`.
+
 ## quality-infrastructure
 
 3 FRs delivered: FR-3 renamed 11 agents (vet-fix-agent→corrector, quiet-task→artisan, tdd-task→test-driver, etc.) + deleted vet-agent + embedded vet-taxonomy in corrector + deleted 8 plan-specific detritus + propagated across ~45 files including prepare-runbook.py code paths. FR-1 split deslop.md into communication.md (prose rules, ambient) and project-conventions skill (code rules, injected). FR-2 added 5 grounded code density entries to cli.md + memory-index triggers. Affected: agent-core/agents/ (11 renames, 3 deletions), agent-core/skills/ (vet→review dir rename, 11 skill files updated), agent-core/fragments/ (vet-requirement→review-requirement, deslop deleted), agents/decisions/ (9 files), ~15 other files.

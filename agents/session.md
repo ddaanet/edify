@@ -1,28 +1,31 @@
 # Session Handoff: 2026-02-23
 
-**Status:** Runbook generated and artifacts prepared. Ready for `/orchestrate worktree-error-output`.
+**Status:** worktree-error-output execution complete. All `err=True` removed, `_fail()` in place, TDD audit done.
 
 ## Completed This Session
 
-**Design triage (prior session):**
-- Discovered root cause of "duplicated traceback": Bash tool error envelope repeats stderr on non-zero exit — confirmed with isolated test
-- Scope expanded from `derive_slug` fix to full `_worktree` stderr→stdout migration per cli.md "When CLI Commands Are LLM-Native" convention
-- Found `merge.py`/`merge_state.py`/`resolve.py` already use stdout; only `cli.py` has `err=True` (8 error sites, 4 warning sites)
-- Outline validated: `plans/worktree-error-output/outline.md`
+**worktree-error-output orchestration (5 steps, 13 commits):**
+- Cycle 1.1: Added `_fail(msg, code=1) -> Never` helper to `cli.py` + 3 tests. Lint fix required post-GREEN: `from typing import Never` missing, local imports in tests (commit: 1100569d)
+- Cycle 2.1: Caught `derive_slug` ValueError in `new()`, calls `_fail(str(e), 2)` — clean exit, no traceback (commit: d15bf631)
+- Step 3.1: Converted 7 `err=True + raise SystemExit` pairs to `_fail()` (commit: 763b670d). Phase 3 checkpoint found 2 missed `click.echo + raise SystemExit` sites in `clean_tree()` and `merge()` — not `err=True` sites, missed by grep scope (commit: 74d4b037)
+- Step 3.2: Dropped `err=True` from 4 warning-only sites, kept plain `click.echo()` (commit: 3b9e68ff)
+- Final corrector: fixed `_fail(str(e), code=2)` → positional style (commit: b7fcb340)
+- TDD audit: 50% compliance — Cycle 2.1 clean, Cycle 1.1 broken GREEN (lint not run before commit). Key recommendation: add `just lint` to GREEN verification in runbook template (commit: 022adb72)
 
-**Runbook generation:**
-- Tier 2 assessed (3 files, 3 sequential phases, ~5 cycles/steps, all decisions pre-resolved)
-- Generated `plans/worktree-error-output/runbook.md` — 3 phases: TDD `_fail()`, TDD ValueError catch, general `err=True` removal
-- Ran `prepare-runbook.py` → 5 step files, orchestrator plan, task agent
-- `/orchestrate worktree-error-output` copied to clipboard
+**Design invariants satisfied:**
+- Zero `err=True` in `cli.py` (grep confirms)
+- All error+exit pairs use `_fail()` (10 call sites)
+- `test_fail_writes_to_stdout` asserts `captured.err == ""` — direct invariant test
 
 ## Pending Tasks
 
-- [ ] **Worktree new error formatting** — `/orchestrate worktree-error-output` | haiku | restart
-  - Scope: drop `err=True` from 12 sites in cli.py, add `_fail()` helper, catch `derive_slug` ValueError in `new()`
-  - Phases: Cycle 1.1 `_fail()` (TDD), Cycle 2.1 ValueError catch (TDD), Steps 3.1-3.3 `err=True` removal (general)
-  - Step files: `plans/worktree-error-output/steps/`
+- [ ] **Runbook template lint gate** — Add `just lint` to GREEN verification sequence in `agent-core/skills/runbook/SKILL.md`; TDD audit critical finding: broken GREEN commits bypass lint, corrupt cycle invariant | sonnet
 
 ## Next Steps
 
-Restart session (agent was created by prepare-runbook.py), paste `/orchestrate worktree-error-output` from clipboard.
+Merge `wt-new-errors` to main, then address the runbook template lint gate task (single prose edit to SKILL.md TDD cycle GREEN verification section).
+
+## Reference Files
+
+- `plans/worktree-error-output/reports/tdd-process-review.md` — TDD audit: plan vs execution, compliance assessment, recommendations
+- `plans/worktree-error-output/reports/review.md` — Final corrector review: all requirements satisfied, Ready

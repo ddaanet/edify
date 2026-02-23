@@ -226,3 +226,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Fix: Phase headers now `save_current()` before clearing accumulator. Refactored 3x duplicated save logic into closure. Integration test: `TestGeneralThenInlineBleed::test_last_step_excludes_inline_content`.
 - Detection gap: tdd-auditor agent lacked scope violation checks. Fixed: Step 4b added to tdd-auditor.md.
 - Evidence: Step 1.7 haiku agent executed Phases 2-3 (quality-infrastructure). Cycle 2 unit test confirmed redundant with integration test — removed.
+## When haiku GREEN phase uses pytest without lint
+- Anti-pattern: Step file specifies `just test` or `pytest` for GREEN verification. Haiku runs tests (pass), commits, writes report — but lint errors exist. Separate fix commit required before REFACTOR can run. Report is written against broken state.
+- Correct pattern: GREEN verification command must be `just check && just test` (or `just lint && just test`). The runbook template's TDD cycle GREEN section should list lint as a required gate before the commit, not just test pass. Report written only after lint clean.
+- Evidence: Cycle 1.1 GREEN commit `a097b114` had F821 (undefined `Never`) and PLC0415 (local imports). Fix commit `1100569d` required. TDD audit flagged as the primary compliance violation; corrector caught both issues in Phase 1 checkpoint.
+## When step 3.1 grep scope is err=True only
+- Anti-pattern: Scoping "find all error+exit pairs to convert" grep to `err=True` sites. Misses pre-existing `click.echo() + raise SystemExit()` pairs that never used `err=True` — they output to stdout already, but don't use the `_fail()` helper.
+- Correct pattern: When the goal is "all echo+exit pairs use `_fail()`", inventory with `grep -n "raise SystemExit"` not `grep "err=True"`. The full inventory catches both classes. Phase 3 checkpoint review is the safety net but adds an unplanned commit.
+- Evidence: `clean_tree()` and `merge()` in cli.py had `click.echo + raise SystemExit(1)` without `err=True`. Step 3.1 missed them. Caught by Phase 3 checkpoint corrector (commit: 74d4b037).
