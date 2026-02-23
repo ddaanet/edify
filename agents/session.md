@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-23
 
-**Status:** Both remaining worktrees merged and removed. No active worktrees.
+**Status:** Inline phase bleed bug fixed in prepare-runbook.py. tdd-auditor scope violation detection added.
 
 ## Completed This Session
 
@@ -11,6 +11,20 @@
   - `tests/test_prepare_runbook_inline.py` — kept shared helpers import, removed dead local helpers
   - `agent-core/bin/prepare-runbook.py` — 15 conflict regions: kept HEAD features (model propagation, phase context) + branch agent renames (quiet-task→artisan, tdd-task→test-driver)
   - `tests/pytest_helpers.py` — updated `setup_baseline_agents` to use renamed agent files
+
+**Inline phase separation fix:**
+- Bug: `extract_sections()` second pass skipped phase headers via `continue` but didn't save current section — inline phase content bled into preceding step. Step 1.7 in quality-infra got Phases 2-3 appended
+- Fix: phase headers now save current section before clearing accumulator. Extracted duplicated save logic into `save_current()` closure (3x → 1x)
+- Test: `TestGeneralThenInlineBleed::test_last_step_excludes_inline_content` — integration test with general-steps-then-inline fixture. Cycle 2 unit test confirmed redundant and removed
+- Files: `agent-core/bin/prepare-runbook.py`, `tests/test_prepare_runbook_inline.py`
+
+**tdd-auditor scope violation detection:**
+- Added Step 4b "Assess Scope Compliance" to `agent-core/agents/tdd-auditor.md`
+- Checks: agent executed only assigned work, inline phases didn't cause scope creep, commit diffs match step scope
+- Scope violations classified CRITICAL in compliance table
+
+**Learnings correction:**
+- Corrected "When inline phases are appended to last step file" — removed false "actually beneficial" rationalization, documented as defect with detection gap
 
 ## Pending Tasks
 
@@ -32,7 +46,6 @@
   - Plan: handoff-cli-tool | Status: designed (outline reviewed 5 rounds, ready for runbook)
   - `_session` group (handoff, status, commit)
   - New requirement: commit subcommand must output shortened commit IDs
-  - Blocked: runbook skill fixes needed before proceeding
 
 - [ ] **Deslop remaining skills** — Prose quality pass on skills not yet optimized | sonnet
 
@@ -47,7 +60,7 @@
 - [ ] **Worktree rm confirm gate fix** — fix `rm --confirm` gate | sonnet
   - Separated from CLI default task as orthogonal
 
-- [ ] **Orchestrate runbook generation fixes** — `/orchestrate runbook-generation-fixes` | sonnet | restart
+- [x] **Orchestrate runbook generation fixes** — `/orchestrate runbook-generation-fixes` | sonnet | restart
   - 13 TDD cycles: Phases 1-4 sequential, Phase 5 inline (orchestrator-direct, opus for skill prose)
   - Phase 1: numbering fix (3 cycles), Phase 2: model propagation (5 cycles), Phase 3: context extraction (3 cycles), Phase 4: orchestrator plan (2 cycles)
   - Affected files: prepare-runbook.py, tests/test_prepare_runbook_mixed.py (new), SKILL.md, implementation-notes.md
@@ -149,21 +162,15 @@
 **Custom agents not discoverable as subagent_types:**
 - `.claude/agents/*.md` files with proper frontmatter weren't available via Task tool. Built-in types work. May need platform investigation.
 
-**Runbook skill blocks Session CLI tool:**
-- `/runbook` skill needs updates before processing handoff-cli-tool outline
-
 **prepare-runbook.py fenced code block parsing:**
 - `extract_sections()`/`extract_cycles()` parse headers inside fenced code blocks. Workaround: describe fixtures inline instead of code blocks with H2 headers.
-
-**Model propagation in prepare-runbook.py:**
-- Agent frontmatter and step files generated with `model: haiku` despite phases declaring `model: sonnet`. Manual correction required until Orchestrate runbook generation fixes completes.
 
 **`_worktree rm --force` doesn't restore task to Pending:**
 - `rm --force` removes worktree but leaves task in Worktree Tasks section. Manual session.md edit needed to move back to Pending.
 
 ## Next Steps
 
-Orchestrate runbook generation fixes next on main.
+Session CLI tool unblocked — ready for `/runbook` expansion.
 
 ## Reference Files
 

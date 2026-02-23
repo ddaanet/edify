@@ -227,6 +227,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Step 1.7's "grep entire codebase for ALL old names" is the safety net. But the propagation step agent hit context ceiling at 210 tool uses before reaching verification. Discovery inventory should use `grep -r` across the full tree, not manual file listing.
 - Evidence: Step 1.6 opus agent modified 30 listed files, hit ceiling. Second opus agent fixed 17 additional files. Orchestrator fixed 3 more path references.
 ## When inline phases are appended to last step file
-- Anti-pattern: Assuming haiku will respect step boundaries when the step file contains additional content below the step's closing `---`. prepare-runbook.py appends inline phase content to the last step file.
-- Correct pattern: Haiku executed Step 1.7 AND Phase 2 AND Phase 3 because all content was in one file. This was actually beneficial in this case (all work completed), but violates the assumption that each agent executes only its assigned step. For orchestration control, inline phases should be dispatched separately — not appended to step files.
-- Evidence: Step 1.7 haiku agent reported completing deslop restructuring and code density entries — work belonging to Phases 2-3.
+- Anti-pattern: `extract_sections()` second pass skipped phase headers via `continue` without saving current section. Inline phase content bled into preceding step's accumulator. Haiku then executed everything in the file — substandard prose, lost orchestration control.
+- Root cause: Phase headers are section boundaries but weren't treated as such. The `continue` statement skipped the header without triggering the save-and-clear logic that H2 boundaries use.
+- Fix: Phase headers now `save_current()` before clearing accumulator. Refactored 3x duplicated save logic into closure. Integration test: `TestGeneralThenInlineBleed::test_last_step_excludes_inline_content`.
+- Detection gap: tdd-auditor agent lacked scope violation checks. Fixed: Step 4b added to tdd-auditor.md.
+- Evidence: Step 1.7 haiku agent executed Phases 2-3 (quality-infrastructure). Cycle 2 unit test confirmed redundant with integration test — removed.

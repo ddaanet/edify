@@ -82,6 +82,44 @@ model: haiku
 - Update plan-reviewer.md: add inline detection
 """
 
+GENERAL_THEN_INLINE_RUNBOOK = """\
+---
+name: general-inline-test
+model: haiku
+---
+
+## Common Context
+
+**Project:** bleed test
+
+---
+
+### Phase 1: Setup (type: general)
+
+## Step 1.1: Create config
+
+**Objective**: Create configuration file.
+**Script Evaluation**: Direct
+**Implementation**: Write config.yaml with defaults.
+**Expected Outcome**: config.yaml exists.
+
+## Step 1.2: Validate config
+
+**Objective**: Validate configuration.
+**Script Evaluation**: Direct
+**Implementation**: Check config.yaml has required keys.
+**Expected Outcome**: Validation passes.
+
+### Phase 2: Prose updates (type: inline)
+
+- Edit file A with new prose
+- Edit file B with updated descriptions
+
+### Phase 3: Index updates (type: inline)
+
+- Add entries to memory index
+"""
+
 
 class TestFrontmatterInlineType:
     """Verify parse_frontmatter accepts 'inline' as a valid type."""
@@ -279,3 +317,51 @@ class TestInlineOnlyRunbook:
         orch_content = (tmp_path / orch_path).read_text()
         assert "Execution: inline" in orch_content
         assert "steps/step-" not in orch_content
+
+
+class TestGeneralThenInlineBleed:
+    """General steps followed by inline phases must not bleed content."""
+
+    def test_last_step_excludes_inline_content(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Step 1.2 file must not contain Phase 2-3 inline content."""
+        setup_git_repo(tmp_path)
+        setup_baseline_agents(tmp_path)
+        monkeypatch.chdir(tmp_path)
+
+        plan_dir = tmp_path / "plans" / "general-inline-test"
+        plan_dir.mkdir(parents=True)
+        runbook_path = plan_dir / "runbook.md"
+        runbook_path.write_text(GENERAL_THEN_INLINE_RUNBOOK)
+
+        name, agent_path, steps_dir, orch_path = derive_paths(runbook_path)
+        meta, body = parse_frontmatter(GENERAL_THEN_INLINE_RUNBOOK)
+        sections = extract_sections(body)
+        cycles = extract_cycles(body)
+
+        # Steps + inline (no cycles) → general type (default)
+        # "mixed" requires cycles; this case uses general with inline phases
+
+        result = validate_and_create(
+            runbook_path,
+            sections,
+            name,
+            tmp_path / agent_path,
+            tmp_path / steps_dir,
+            tmp_path / orch_path,
+            meta,
+            cycles,
+        )
+        assert result is True
+
+        step_file = tmp_path / steps_dir / "step-1-2.md"
+        assert step_file.exists()
+        content = step_file.read_text()
+
+        # Inline phase content must NOT appear in step file
+        assert "Edit file A" not in content
+        assert "Edit file B" not in content
+        assert "Add entries to memory index" not in content
