@@ -15,6 +15,7 @@ extract_cycles = _mod.extract_cycles
 extract_phase_preambles = _mod.extract_phase_preambles
 extract_phase_models = _mod.extract_phase_models
 strip_fenced_blocks = _mod.strip_fenced_blocks
+extract_file_references = _mod.extract_file_references
 
 
 class TestFencedStepHeaders:
@@ -279,3 +280,31 @@ class TestExtractPhaseModelsIgnoresFences:
         models = extract_phase_models(content)
         assert models == {1: "haiku"}
         assert 2 not in models
+
+
+class TestExtractFileReferencesIgnoresFences:
+    """File reference extraction ignores references inside fenced blocks."""
+
+    def test_extract_file_references_handles_four_backtick_fences(self) -> None:
+        """4-backtick fence should not expose content to reference extraction.
+
+        Current naive regex re.sub(r"```.*?```", ...) closes on the inner ```
+        fence, leaving content after it exposed.
+        """
+        content = dedent("""\
+            Real reference: `src/main.py`
+
+            ````markdown
+            Example reference: `src/example.py`
+
+            ```python
+            import src.other
+            ```
+
+            Another: `src/fake.py`
+            ````
+        """)
+        refs = extract_file_references(content)
+        assert "src/main.py" in refs
+        assert "src/example.py" not in refs
+        assert "src/fake.py" not in refs
