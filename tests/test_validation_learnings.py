@@ -280,6 +280,5 @@ Final content.
 """)
     errors = validate(Path("learnings.md"), tmp_path)
     assert len(errors) == 3
-    assert any("title has 8 words" in e for e in errors)
-    assert any("title has 8 words" in e for e in errors)
+    assert sum(1 for e in errors if "title has 8 words" in e) == 2
     assert any("duplicate title" in e for e in errors)
