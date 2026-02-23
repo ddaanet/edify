@@ -1,7 +1,6 @@
 """Tests for segment-level diff3 merge of learnings.md."""
 
 import subprocess
-from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -37,11 +36,10 @@ def test_merge_learnings_segment_diff3_prevents_orphans(
     repo_with_submodule: Path,
     monkeypatch: pytest.MonkeyPatch,
     mock_precommit: None,
-    commit_file: Callable[[Path, str, str, str], None],
 ) -> None:
     """Segment diff3 merge prevents orphaned lines on clean-merge path."""
     monkeypatch.chdir(repo_with_submodule)
-    commit_file(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
+    _write_commit(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
     wt_path = _setup_merge_worktree(repo_with_submodule)
 
     preamble = "# Learnings\n\nSoft limit: 80 lines.\n\n---\n"
@@ -116,11 +114,10 @@ def test_merge_learnings_divergent_edit_produces_conflict(
     repo_with_submodule: Path,
     monkeypatch: pytest.MonkeyPatch,
     mock_precommit: None,
-    commit_file: Callable[[Path, str, str, str], None],
 ) -> None:
     """Same-entry divergent edits produce conflict markers, exit 3."""
     monkeypatch.chdir(repo_with_submodule)
-    commit_file(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
+    _write_commit(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
     wt_path = _setup_merge_worktree(repo_with_submodule)
 
     preamble = "# Learnings\n\nSoft limit: 80 lines.\n\n---\n"
