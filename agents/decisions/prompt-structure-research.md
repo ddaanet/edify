@@ -105,7 +105,7 @@ CLAUDE.md sections ordered by position bias research (primacy strongest, recency
 |------|---------|-----------|-----------|
 | PRIMACY | Core Behavioral Rules | communication, execute-rule, delegation | Session-defining: interaction model, modes, shortcuts, core principle |
 | EARLY-MID | Documentation Structure | session.md, learnings.md, jobs.md, memory-index | Informational scaffolding, progressive discovery |
-| MIDDLE | Operational Rules | error-handling, vet-requirement, token-economy, commit-skill-usage, no-estimates, code-removal, tmp-directory | Important policies, not session-defining |
+| MIDDLE | Operational Rules | error-handling, review-requirement, token-economy, commit-skill-usage, no-estimates, code-removal, tmp-directory | Important policies, not session-defining |
 | RECENCY | Reference & Tooling | bash-strict-mode, sandbox-exemptions, claude-config-layout, design-decisions, project-tooling, tool-batching | Reference material, "how to work" (fresh before action) |
 
 `workflows-terminology` stays at absolute primacy (line 1) as entry point.

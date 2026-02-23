@@ -194,10 +194,10 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /how review delegation scope template | scope IN OUT changed files requirements
 /when UNFIXABLE escalation | fix-all pattern grep UNFIXABLE stop escalate
 /when declaring phase type | tdd general inline per-phase typing model expansion review orchestration
-/when vet escalation calibration | over-escalation pattern-matching not design
-/when vet flags out-of-scope items | DEFERRED vs UNFIXABLE distinction
-/when vet receives execution context | filesystem vs execution-time state
-/when vet-fix-agent rejects planning artifacts | plan-reviewer routing
+/when review escalation calibration | over-escalation pattern-matching not design
+/when review flags out-of-scope items | DEFERRED vs UNFIXABLE distinction
+/when review receives execution context | filesystem vs execution-time state
+/when corrector rejects planning artifacts | runbook-corrector routing
 /when reviewing expanded phases | expansion reintroduces defects regression LLM failure modes
 /when outline review produces ungrounded corrections | confabulated operation sequence fabricated fix-all sonnet opus
 /when simplifying runbook outlines | pattern consolidation identical-pattern batching
@@ -323,14 +323,14 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when handoff includes commit flag
 /when context already loaded for delegation
 /when complexity assessed twice | assessing routing layer efficiency double assessment
-/when reusing vet agent context
+/when reusing review agent context
 /how design with outline first approach
 /when selecting model for design guidance
 /when choosing model for design review
 /when brainstorming | always opus generative divergence
 /when research required before outline | external prior art ground
 /when design references need verification | glob disk verify names
-/when vet catches structural issues
+/when review catches structural issues
 /when reviewing agent definitions
 /when agent ignores injected directive | template context contradicts rules
 /when step agent uses wrong model | orchestrator model differs

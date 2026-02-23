@@ -7,7 +7,7 @@
 **Runbook planning (Phases 0.5–0.95):**
 - Phase 0.5: Codebase discovery — verified all ~37 files on disk (commit: 49254ac3)
 - Phase 0.75: Generated runbook outline with 7 general steps + 2 inline phases (commit: 49254ac3)
-- Outline review (1st): 6 fixes applied by runbook-outline-review-agent — dependency declarations, model downgrades (1.2/1.4 opus→sonnet), line count fix, post-phase state notes, scope boundary annotations (commit: b220f4d8)
+- Outline review (1st): 6 fixes applied by runbook-outline-corrector — dependency declarations, model downgrades (1.2/1.4 opus→sonnet), line count fix, post-phase state notes, scope boundary annotations (commit: b220f4d8)
 - Phase 0.85: Consolidation gate — no trivial phases to merge (domains unrelated)
 - Phase 0.86: Simplification pass — no identical patterns to consolidate (commit: 4088a859)
 - Phase 0.9: Complexity check — 14 items, no callback triggers

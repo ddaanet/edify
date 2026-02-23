@@ -12,7 +12,7 @@ Patterns for delegation, orchestration protocol, model selection, and execution-
 
 **Correct pattern:** Include explicit "commit your output before returning" in every delegation prompt.
 
-**Root cause:** Agents optimize for the stated task; cleanup is not implied. Vet-fix-agent especially frequent offender.
+**Root cause:** Agents optimize for the stated task; cleanup is not implied. Corrector especially frequent offender.
 
 ### When Limiting Agent Scope
 
@@ -22,7 +22,7 @@ Patterns for delegation, orchestration protocol, model selection, and execution-
 
 **Correct pattern:** Give executing agent step + design + outline only. Scope enforced structurally by context absence.
 
-**Rationale:** Executing agents don't get other step files — can't scope-creep. Phase context injected only at feedback points (vet-fix-agent) for alignment checking.
+**Rationale:** Executing agents don't get other step files — can't scope-creep. Phase context injected only at feedback points (corrector) for alignment checking.
 
 ### When Deduplicating Delegation Prompts
 
@@ -66,7 +66,7 @@ Patterns for delegation, orchestration protocol, model selection, and execution-
 
 **Decision Date:** 2026-02-15
 
-**Decision:** Commit artifacts before delegating to review agents (outline-review, plan-reviewer, vet-fix-agent).
+**Decision:** Commit artifacts before delegating to review agents (outline-corrector, runbook-corrector, corrector).
 
 **Anti-pattern:** Delegating to review agent while work is uncommitted.
 
@@ -128,11 +128,11 @@ Three escalation tiers for handling failures during runbook execution, ordered b
 
 **Decision Date:** 2026-02-15
 
-**Trigger:** Single item classified UNFIXABLE by vet-fix-agent — execution blocked by missing design decision, ambiguous requirement, or external dependency.
+**Trigger:** Single item classified UNFIXABLE by corrector — execution blocked by missing design decision, ambiguous requirement, or external dependency.
 
 **Response:** Orchestrator stops, surfaces UNFIXABLE item to user with investigation summary and subcategory (U-REQ, U-ARCH, U-DESIGN). User provides decision, execution resumes.
 
-**Existing protocol:** `vet-requirement.md` UNFIXABLE Detection Protocol (grep-based, mechanical).
+**Existing protocol:** `review-requirement.md` UNFIXABLE Detection Protocol (grep-based, mechanical).
 
 ### When Local Recovery Suffices
 
@@ -269,7 +269,7 @@ FR-17 documents the three-tier escalation requirement. Concrete detection mechan
 
 **Decision Date:** 2026-02-18
 
-**Anti-pattern:** Flagging code as "dead" based on production callers only. Vet recommended deleting `_task_summary` which had 4 test callers and was designed infrastructure for future wiring.
+**Anti-pattern:** Flagging code as "dead" based on production callers only. Reviewer recommended deleting `_task_summary` which had 4 test callers and was designed infrastructure for future wiring.
 
 **Correct pattern:** Check both production AND test callers before recommending removal. If tested, it's likely infrastructure awaiting integration. Verify design intent (was it planned for future wiring?) before classifying as dead code.
 
@@ -279,7 +279,7 @@ FR-17 documents the three-tier escalation requirement. Concrete detection mechan
 
 **Decision Date:** 2026-02-18
 
-**Anti-pattern:** Including "don't do X" alongside "do Y and Z" in delegation prompts. Agent read the vet report (which recommended X), saw it in changed files, and followed the report's recommendation despite the prompt saying otherwise.
+**Anti-pattern:** Including "don't do X" alongside "do Y and Z" in delegation prompts. Agent read the review report (which recommended X), saw it in changed files, and followed the report's recommendation despite the prompt saying otherwise.
 
 **Correct pattern:** Exclude the wrong item entirely from delegation scope. Don't delegate "3 fixes but actually only do 2" — delegate 2 fixes. Remove conflicting signals by not mentioning the excluded item.
 

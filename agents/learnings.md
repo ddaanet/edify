@@ -36,7 +36,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 ## When design ceremony continues after uncertainty resolves
 - Anti-pattern: One-shot complexity triage at `/design` entry, no re-assessment when outline resolves architectural uncertainty. Process continues at "complex" even when outline reveals 2-file prose edits.
 - Correct pattern: Two gates. Entry gate reads plan directory artifacts (existing outline can skip ceremony). Mid-stream gate re-checks complexity after outline production. Both internal to `/design` — preserves single entry point.
-- Evidence: Outline-review-agent + design.md + design-vet-agent cost ~112K tokens for work that could have been done inline. Findings would have surfaced during editing.
+- Evidence: outline-corrector + design.md + design-corrector cost ~112K tokens for work that could have been done inline. Findings would have surfaced during editing.
 ## When deleting agent artifacts
 - Anti-pattern: Treating all ceremony artifacts as equally disposable. Outline review found real issues (FR-2a gap, FR-3c contradiction); design.md restated the reviewed outline.
 - Correct pattern: Distinguish audit trails with real findings from redundant restates. Review reports that improved artifacts have value; documents that reformat existing artifacts don't.
@@ -48,10 +48,10 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Always routing from `/design` to `/runbook` after sufficiency gate, regardless of execution complexity. Complex design classification persists through the pipeline even when design resolves the uncertainty.
 - Correct pattern: Execution readiness gate inline at sufficiency gate. When design output is ≤3 files, prose/additive, insertion points identified, no cross-file coordination → direct execution with vet, skip `/runbook`.
 - Rationale: Design can resolve complexity. A job correctly classified as Complex for design may produce Simple execution. The gate is subtractive (creates exit ramp), not additive (more ceremony).
-## When selecting reviewer for artifact vet
-- Anti-pattern: Defaulting to vet-fix-agent for all artifacts because the vet-requirement fragment names it as the universal reviewer. Fragments are LLM-consumed behavioral instructions, not human documentation — doc-writing skill is wrong reviewer for them.
-- Correct pattern: Check artifact-type routing table before selecting reviewer. Skills → skill-reviewer, agents → agent-creator, design → design-vet-agent, fragments → vet-fix-agent (default, not doc-writing). Full routing table and vet protocol in `agent-core/fragments/vet-requirement.md`. Commit skill Step 1 is the enforcement gate.
-- Evidence: Selected vet-fix-agent for skill edits. User corrected to skill-reviewer. Root cause: generic rule without routing lookup.
+## When selecting reviewer for artifact review
+- Anti-pattern: Defaulting to corrector for all artifacts because the review-requirement fragment names it as the universal reviewer. Fragments are LLM-consumed behavioral instructions, not human documentation — doc-writing skill is wrong reviewer for them.
+- Correct pattern: Check artifact-type routing table before selecting reviewer. Skills → skill-reviewer, agents → agent-creator, design → design-corrector, fragments → corrector (default, not doc-writing). Full routing table and review protocol in `agent-core/fragments/review-requirement.md`. Commit skill Step 1 is the enforcement gate.
+- Evidence: Selected corrector for skill edits. User corrected to skill-reviewer. Root cause: generic rule without routing lookup.
 ## When constraining task names for slug validity
 - Anti-pattern: Propagating the 25-char git branch slug limit to task naming time. Forces suboptimal prose keys for tasks that may never become worktrees.
 - Correct pattern: Task names are prose keys (session management layer). Slug derivation is a worktree concern. When a derived slug is too long, provide a `--branch` override at invocation time — not a constraint at naming time.
@@ -118,7 +118,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Time and tool count address independent failure modes. Spinning (high activity, no convergence) → `max_turns`. Hanging (no activity, high wall-clock) → duration timeout. Independent guards, not a combined signal.
 - Evidence: OR(600s, 90 turns) would false-positive on the 855s/75-tool legitimate agent AND the 495s/129-tool agent. AND logic misses fast spinners.
 ## When all work is prose edits with pre-resolved decisions
-- Anti-pattern: Routing through full runbook pipeline (outline → runbook expansion → plan-reviewer → prepare-runbook.py → step files → orchestrate → per-step agents) when all phases are additive prose with no feedback loop.
+- Anti-pattern: Routing through full runbook pipeline (outline → runbook expansion → runbook-corrector → prepare-runbook.py → step files → orchestrate → per-step agents) when all phases are additive prose with no feedback loop.
 - Correct pattern: Recognize prose edits have no implementation loop — outcome determined by instruction + target file state. Execute inline from design outline. The delegation ceremony (agent startup, file re-reads, report write/read) costs more tokens than the edits.
 - Evidence: Error-handling runbook used 11 opus agents for ~250 lines of prose. Plan-reviewer caught a regression *introduced* by the runbook generation process (Step 4.2 dropped 2 of 4 skills the outline correctly listed).
 ## When proposing thresholds without data
@@ -146,7 +146,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Facts only — state what IS, not what MIGHT BE. For unrecoverable errors (data loss risk), include STOP directive. For recoverable errors, CLI handles recovery itself and surfaces a warning. Error taxonomy: Stop (clean-files, missing input) vs Warning+proceed (orphaned optional section).
 - Evidence: Clean-files error without STOP → agent removes file from list and confabulates "already committed." With STOP directive, agent reports to user instead.
 ## When review gates feel redundant after user-validated changes
-- Anti-pattern: Skipping procedural review (outline-review-agent) after redrafting because individual changes were user-validated in discussion. Implicit reasoning: "user approved each change → combined redraft doesn't need review."
+- Anti-pattern: Skipping procedural review (outline-corrector) after redrafting because individual changes were user-validated in discussion. Implicit reasoning: "user approved each change → combined redraft doesn't need review."
 - Correct pattern: Review gates are non-negotiable checkpoints, not confidence-gated decisions. User validates *approach*; review agent validates *completeness, internal consistency, requirement coverage*. Combining multiple changes can introduce inconsistencies the individual discussions didn't surface.
 - Root cause: Inserting a confidence assessment step that doesn't exist in the procedure. The procedure says "after redraft → review," not "after redraft → assess whether review is needed."
 ## When execution routing preempts skill scanning
@@ -164,7 +164,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 ## When batch changes span multiple artifact types
 - Anti-pattern: Collapsing a multi-file batch into a single reviewer. Batch framing ("10 files changed, -97 lines") creates a cognitive unit that overrides per-artifact routing. Agent fabricates capability limitations on the correct reviewer ("skill-reviewer is for individual skills, not batch changes") to justify the simpler single-reviewer path.
 - Correct pattern: Apply proportionality per-file first (trivial changes → self-review). Route remaining files by artifact type per routing table. The routing table is per-artifact-type, not per-batch. Same root cause as "batch momentum skip prevention" — batch framing overrides per-artifact decisions.
-- Evidence: 8 of 10 files had ≤1-line changes (self-review sufficient). Remaining 2 were skill files → skill-reviewer. Agent routed all 10 to vet-fix-agent.
+- Evidence: 8 of 10 files had ≤1-line changes (self-review sufficient). Remaining 2 were skill files → skill-reviewer. Agent routed all 10 to corrector.
 ## When discovery decomposes by data point instead of operation pattern
 - Anti-pattern: Brief presents a table of N items sharing identical structure (remove @-ref, verify skill coverage, optionally shrink to stub). Agent mirrors the table — one verification chain per row — producing N sequential reads instead of recognizing a single parametrized operation.
 - Correct pattern: During discovery, identify the operation pattern first ("all N items follow remove + verify + shrink"). Verify the pattern holds (1-2 spot checks). Then produce a single inline step with a variation table, not N separate steps. Phase 0.86 consolidation catches this post-outline, but recognizing it during discovery avoids wasted exploration.
@@ -189,7 +189,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Evidence: `git status` failed with `fatal: cannot chdir to '../../../../../../claudeutils-wt/hook-batch/agent-core'`. 4 worktrees had wrong agent-core HEAD (c4b8d11 instead of branch-specific commits).
 ## When custom agents aren't available as Task subagent_types
 - Anti-pattern: Assuming `.claude/agents/*.md` files with proper frontmatter are automatically available as `subagent_type` values in the Task tool. Attempting to use them produces "Agent type not found" errors.
-- Correct pattern: Use built-in agent types (`tdd-task`, `quiet-task`, `general-purpose`, etc.) with phase context injected in the prompt. Include the agent's instructions (TDD protocol, stop conditions, output format) directly in the Task prompt. Read the phase context file path so the agent can load it.
+- Correct pattern: Use built-in agent types (`test-driver`, `artisan`, `general-purpose`, etc.) with phase context injected in the prompt. Include the agent's instructions (TDD protocol, stop conditions, output format) directly in the Task prompt. Read the phase context file path so the agent can load it.
 - Evidence: 5 custom agents (`hb-p1` through `hb-p5`) created with valid YAML frontmatter, not discoverable. Session restart was noted as required but didn't resolve. All 16 steps executed successfully via built-in types.
 ## When submodule commits diverge during orchestration
 - Anti-pattern: Sequential haiku agents committing to a submodule create branching history. Each agent's `git -C agent-core commit` may create a new branch point if the parent repo's submodule pointer isn't updated between steps. A merge at any point can silently drop earlier commits.

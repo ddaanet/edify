@@ -25,7 +25,7 @@ Tier 1 direct implementation from pushback worktree. Incremental improvements to
 
 ## workflow-fixes
 
-Unified /runbook skill, plan-reviewer agent, review-plan skill, pipeline-contracts. Consolidated fragmented workflow tooling into coherent pipeline. Affected: agent-core/skills/runbook/, agent-core/agents/.
+Unified /runbook skill, runbook-corrector agent, review-plan skill, pipeline-contracts. Consolidated fragmented workflow tooling into coherent pipeline. Affected: agent-core/skills/runbook/, agent-core/agents/.
 
 ## process-review
 
@@ -165,11 +165,11 @@ Cross-tree worktree awareness with planstate inference, aggregation, rich ls dis
 
 ## inline-phase-type
 
-Inline phase type across pipeline. 7 pipeline artifacts updated, 7 integration tests. Added inline as third phase type (alongside TDD and general) for prose edits without feedback loops. Key decisions: coordination complexity discriminator (D-5), vet proportionality (D-7). Affected: pipeline-contracts.md, workflow-optimization.md, runbook/SKILL.md, plan-reviewer.md, review-plan/SKILL.md, orchestrate/SKILL.md, prepare-runbook.py.
+Inline phase type across pipeline. 7 pipeline artifacts updated, 7 integration tests. Added inline as third phase type (alongside TDD and general) for prose edits without feedback loops. Key decisions: coordination complexity discriminator (D-5), vet proportionality (D-7). Affected: pipeline-contracts.md, workflow-optimization.md, runbook/SKILL.md, runbook-corrector.md, review-plan/SKILL.md, orchestrate/SKILL.md, prepare-runbook.py.
 
 ## pipeline-skill-updates
 
-9 design decisions (D-1 through D-9) addressing pipeline closure gaps and vet scoping deficits. Additive prose edits to 7 files. Requirements-clarity gate (D-1), coordination complexity execution readiness (D-5), deliverable-review task creation (D-2/D-3), lifecycle audit (D-7), verification scope (D-4/D-9), resume completeness (D-8), TDD integration-first (D-6). Absorbed vet-invariant-scope and inline-phase-type designs. Affected: agent-core/skills/ (design, orchestrate, deliverable-review), agent-core/fragments/vet-requirement.md, agent-core/agents/ (outline-review-agent, tdd-task), agents/decisions/pipeline-contracts.md.
+9 design decisions (D-1 through D-9) addressing pipeline closure gaps and vet scoping deficits. Additive prose edits to 7 files. Requirements-clarity gate (D-1), coordination complexity execution readiness (D-5), deliverable-review task creation (D-2/D-3), lifecycle audit (D-7), verification scope (D-4/D-9), resume completeness (D-8), TDD integration-first (D-6). Absorbed vet-invariant-scope and inline-phase-type designs. Affected: agent-core/skills/ (design, orchestrate, deliverable-review), agent-core/fragments/vet-requirement.md, agent-core/agents/ (outline-corrector, test-driver), agents/decisions/pipeline-contracts.md.
 
 ## brief-skill
 
@@ -193,7 +193,7 @@ Cross-tree async context transfer skill. `/brief <slug>` writes timestamped entr
 
 ## vet-invariant-scope
 
-3 prose changes to address vet pipeline gaps found during worktree-merge-resilience deliverable review. Added Verification scope field to vet execution context template (vet-requirement.md, pipeline-contracts.md), lifecycle audit criterion for final checkpoint (orchestrate/SKILL.md), resume completeness criterion (outline-review-agent.md). No code changes.
+3 prose changes to address vet pipeline gaps found during worktree-merge-resilience deliverable review. Added Verification scope field to vet execution context template (vet-requirement.md, pipeline-contracts.md), lifecycle audit criterion for final checkpoint (orchestrate/SKILL.md), resume completeness criterion (outline-corrector.md). No code changes.
 
 ## worktree-rm-safety
 

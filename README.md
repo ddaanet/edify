@@ -32,7 +32,7 @@ reviews, scope creep, no handoff between sessions. The framework imposes a
 pipeline:
 
 ```
-/design → /runbook → [plan-reviewer] → /orchestrate → [vet-fix-agent] → /handoff
+/design → /runbook → [runbook-corrector] → /orchestrate → [corrector] → /handoff
 ```
 
 `/design` triages complexity — simple tasks execute directly, moderate tasks

@@ -11,9 +11,9 @@ Workflow-related architectural decisions and patterns.
 **Status:** Complete - All phases delivered, pattern validated
 
 **Key Components:**
-- Baseline task agent (`agent-core/agents/quiet-task.md`)
+- Baseline task agent (`agent-core/agents/artisan.md`)
 - Runbook preparation script (`agent-core/bin/prepare-runbook.py`)
-- 5 skills: `/design`, `/plan-adhoc`, `/orchestrate`, `/vet`, `/remember`
+- 5 skills: `/design`, `/plan-adhoc`, `/orchestrate`, `/review`, `/remember`
 - Complete documentation (documented in CLAUDE.md and agent-core)
 
 **Weak orchestrator pattern:**
@@ -47,11 +47,11 @@ Workflow-related architectural decisions and patterns.
 
 **Key Components:**
 - TDD workflow documentation (`agent-core/agents/tdd-workflow.md`)
-- TDD baseline agent (`agent-core/agents/tdd-task.md`)
+- TDD baseline agent (`agent-core/agents/test-driver.md`)
 - `/plan-tdd` skill with 5-phase execution (includes automated review)
 - Cycle-based runbooks supporting RED/GREEN/REFACTOR progression
 - TDD task agent pattern with cycle-aware instruction sets
-- TDD runbook reviewer (`agent-core/agents/tdd-plan-reviewer.md`) for prescriptive code detection
+- TDD runbook reviewer (`agent-core/agents/runbook-corrector.md`) for prescriptive code detection
 - Review skill (`agent-core/skills/review-tdd-plan/`) for anti-pattern detection
 
 **TDD workflow:**
@@ -61,7 +61,7 @@ Workflow-related architectural decisions and patterns.
 - RED phase: Write failing tests, document intent
 - GREEN phase: Describe behavior and provide hints (NOT prescriptive code)
 - REFACTOR phase: Improve code quality while maintaining tests
-- **Automated review**: tdd-plan-reviewer detects prescriptive code violations
+- **Automated review**: runbook-corrector detects prescriptive code violations
 - **Mandatory prepare-runbook.py**: Generates step files before /orchestrate
 - Cycle-aware task delegation with scoped runbooks per cycle
 - Quiet execution pattern preserves orchestrator context
@@ -235,7 +235,7 @@ plans/<stream-name>/
 - Work benefits from agent isolation but not full orchestration
 - Components are sequential (no parallelization benefit)
 - No model switching needed
-- **Sequence:** Delegate via Task tool (quiet-task/tdd-task) with context in prompts → vet agent → `/handoff --commit`
+- **Sequence:** Delegate via Task tool (artisan/test-driver) with context in prompts → vet agent → `/handoff --commit`
 - **Repetitive pattern variant:** ~15-20 cycles with same pattern qualifies as Tier 2 — plan cycle descriptions, delegate individually, checkpoint every 3-5 cycles. Full runbook overhead not justified for simple repetitive work
 
 **Tier 3 (Full Runbook):**
@@ -262,7 +262,7 @@ plans/<stream-name>/
 1. **Fix checkpoint:** `just dev` (lint, tests, build verification)
 2. **Vet checkpoint:** Quality review (code review, architecture validation)
 
-**Rationale:** Balances early issue detection with cost efficiency. Avoids both extremes: all-at-once vetting (late detection) and per-step vetting (excessive overhead).
+**Rationale:** Balances early issue detection with cost efficiency. Avoids both extremes: all-at-once review/correction (late detection) and per-step review/correction (excessive overhead).
 
 **Impact:** Optimal cost-benefit for runbook quality assurance.
 
@@ -313,7 +313,7 @@ plans/<stream-name>/
 **Decision:** Multiple layers of commit verification at different execution levels.
 
 **Layers:**
-- **tdd-task agent:** Post-commit sanity check (verify commit contains expected files)
+- **test-driver agent:** Post-commit sanity check (verify commit contains expected files)
 - **orchestrate skill:** Post-step tree check (escalate if working tree dirty)
 
 **Rationale:** Catches different failure modes at different levels (commit content vs working tree state).
