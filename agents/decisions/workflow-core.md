@@ -13,7 +13,7 @@ Workflow-related architectural decisions and patterns.
 **Key Components:**
 - Baseline task agent (`agent-core/agents/artisan.md`)
 - Runbook preparation script (`agent-core/bin/prepare-runbook.py`)
-- 5 skills: `/design`, `/plan-adhoc`, `/orchestrate`, `/review`, `/remember`
+- 5 skills: `/design`, `/plan-adhoc`, `/orchestrate`, `/review`, `/codify`
 - Complete documentation (documented in CLAUDE.md and agent-core)
 
 **Weak orchestrator pattern:**

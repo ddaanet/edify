@@ -20,7 +20,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Decision Date:** 2026-02-04
 
-**Decision:** Learnings → learnings.md → /remember → permanent doc → index entry.
+**Decision:** Learnings → learnings.md → /codify → permanent doc → index entry.
 
 **Anti-pattern:** Adding memory-index entries for concepts without permanent docs.
 

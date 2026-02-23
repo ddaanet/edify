@@ -105,7 +105,7 @@ All 14 cycles, 5 phases executed and validated. Parity testing for statusline ou
 
 ## learnings-consolidation
 
-Learnings consolidation infrastructure. 7 steps, 4 phases. Automated consolidation of learnings.md into permanent documentation. Affected: agent-core/skills/remember/, agent-core/bin/.
+Learnings consolidation infrastructure. 7 steps, 4 phases. Automated consolidation of learnings.md into permanent documentation. Affected: agent-core/skills/codify/, agent-core/bin/.
 
 ## workflow-feedback-loops
 

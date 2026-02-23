@@ -95,7 +95,7 @@ From `plans/prompt-composer/sysprompt-integration/design.md`:
 | execute  | ✓         | ✓    | ✓    | -        | -         | -       |
 | refactor | ✓         | ✓    | ✓    | -        | ✓         | ✓       |
 | review   | ✓         | ✓    | ✓    | -        | ✓         | -       |
-| remember | ✓         | ✓    | -    | -        | ✓         | ✓       |
+| codify   | ✓         | ✓    | -    | -        | ✓         | ✓       |
 
 ---
 
@@ -156,7 +156,7 @@ Include tool rules based on enabled tools for the role.
 
 **Content from `drafts.md` section 4.**
 
-### TodoWrite (planning, lint, refactor, review, remember)
+### TodoWrite (planning, lint, refactor, review, codify)
 
 **Tier 1:**
 
@@ -170,7 +170,7 @@ Include tool rules based on enabled tools for the role.
 
 **Content from `drafts.md` section 5.**
 
-### AskUserQuestion (planning, refactor, remember)
+### AskUserQuestion (planning, refactor, codify)
 
 **Tier 2:**
 

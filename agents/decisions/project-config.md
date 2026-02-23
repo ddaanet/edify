@@ -27,7 +27,7 @@ Project-level configuration decisions for Claude Code, models, skills, and devel
 - Token cost is modest: 200 entries × ~25 tokens ≈ 5000 tokens (acceptable for always-loaded context)
 - Growth is naturally bounded by consolidation rate (~5-10 entries/session)
 
-**Impact:** memory-index.md header updated (append-only), consolidation-patterns.md updated, no changes to /remember skill logic.
+**Impact:** memory-index.md header updated (append-only), consolidation-patterns.md updated, no changes to /codify skill logic.
 
 ## .Claude Code Rule Files
 

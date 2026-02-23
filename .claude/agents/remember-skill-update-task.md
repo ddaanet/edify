@@ -166,8 +166,8 @@ Do not provide summary, explanation, or commentary in return message. Do not pro
 - Validation: `src/claudeutils/validation/learnings.py`, `tests/test_validation_learnings.py`
 - CLI: `src/claudeutils/when/cli.py`, `tests/test_when_cli.py`, `agent-core/bin/when-resolve.py`
 - Resolver: `src/claudeutils/when/resolver.py` (signature unchanged)
-- Remember skill: `agent-core/skills/remember/SKILL.md`
-- Consolidation patterns: `agent-core/skills/remember/references/consolidation-patterns.md`
+- Remember skill: `agent-core/skills/codify/SKILL.md`
+- Consolidation patterns: `agent-core/skills/codify/references/consolidation-patterns.md`
 - Consolidation flow: `agent-core/skills/handoff/references/consolidation-flow.md`
 - Handoff skill: `agent-core/skills/handoff/SKILL.md`
 - When/How skills: `agent-core/skills/when/SKILL.md`, `agent-core/skills/how/SKILL.md`
