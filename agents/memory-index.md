@@ -111,7 +111,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 ## agents/decisions/operational-practices.md
 
 /when placing deliverable artifacts | plans vs tmp referenced later
-/when requiring per-artifact vet coverage | batch momentum skip prevention
+/when requiring per-artifact review coverage | batch momentum skip prevention
 /when launching task agents in parallel | single message batch
 /when background agents crash | check output files recovery
 /when refactoring agents need quality directives | deslop factorization
@@ -181,7 +181,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when agent context has conflicting signals | common context competes phase-neutral
 /when capturing requirements from conversation | capture over interview
 /when resuming interrupted orchestration | checkpoint recovery recipe enforcement
-/when vet flags unused code | check test callers design intent before deleting
+/when review flags unused code | check test callers design intent before deleting
 /when delegating with corrections | exclude wrong item dont mention
 /when ordering post-orchestration tasks | diagnostic fixes improvements sequence
 /when step agents leave uncommitted files | clean tree report commit invariant
@@ -195,7 +195,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 ## agents/decisions/pipeline-contracts.md
 
 /when choosing review gate | transformation table artifact type T1-T6 pipeline stages
-/when routing artifact review | reviewer per artifact type skill-reviewer agent-creator vet-fix orchestrator delegation
+/when routing artifact review | reviewer per artifact type skill-reviewer agent-creator corrector orchestrator delegation
 /how review delegation scope template | scope IN OUT changed files requirements
 /when UNFIXABLE escalation | fix-all pattern grep UNFIXABLE stop escalate
 /when declaring phase type | tdd general inline per-phase typing model expansion review orchestration
@@ -214,7 +214,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when routing implementation findings | unconditional design triage proportionality
 /when selecting review model | match model to correctness property
 /when holistic review applies fixes | grep all references fix-all occurrences
-/when scoping vet for cross-cutting invariants | verification scope full call graph
+/when scoping review for cross-cutting invariants | verification scope full call graph
 /when reviewing final orchestration checkpoint | lifecycle audit stateful objects
 
 ## agents/decisions/project-config.md

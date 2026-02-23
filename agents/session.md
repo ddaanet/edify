@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-23
 
-**Status:** Deliverable review complete. 1 critical (test regression), 5 major (terminology propagation gaps), 5 minor. Fix task pending.
+**Status:** Quality infra reform complete. All findings fixed, 1157 tests pass, ready to merge.
 
 ## Completed This Session
 
@@ -11,41 +11,32 @@
 - Step 1.4: Updated YAML frontmatter + cross-references in all 11 renamed agents (commit: 6b968b14)
 - Step 1.5: Renamed vet/ → review/ skill dir, vet-requirement.md → review-requirement.md (commit: 2c9546cc)
 - Step 1.6: Propagated substitution table across ~45 files — skills, decisions, fragments, docs, scripts (commit: f9e58f69, f495c57e)
-  - Step 1.6 opus agent hit context ceiling at 210 tool uses; second opus agent fixed remaining stragglers; orchestrator fixed final 3 vet-requirement path refs
-  - Critical fix: prepare-runbook.py hardcoded paths (quiet-task→artisan, tdd-task→test-driver)
-- Step 1.7 + Phase 2 + Phase 3: Haiku agent executed all three (step file had inline phases appended). Symlink cleanup, deslop restructuring, code density entries (commit: ce658d1e, cf42c1fe)
-
-**Verification:**
-- Zero grep hits for all old names across production files (plans/ excluded as historical)
-- `just precommit` passes
-- artisan.md + test-driver.md have project-conventions skill injection
-- deslop.md deleted, prose rules in communication.md "Prose Quality" section
+- Step 1.7 + Phase 2 + Phase 3: Symlink cleanup, deslop restructuring, code density entries (commit: ce658d1e, cf42c1fe)
 
 **Code density remediation:**
-- Phase 3 entries were haiku-authored prose (editorial synthesis from grounding doc — model tier mismatch)
-- Sonnet agent rewrote 5 cli.md entry bodies from `plans/reports/code-density-grounding.md`: restored grounding context, source citations, qualifiers haiku dropped
-- Opus (interactive) renamed H3 headings from outcome-named to activity-at-decision-point per naming rules, rewrote 5 memory-index.md triggers to match
+- Sonnet rewrote 5 cli.md entries from grounding doc; opus renamed headings + triggers
 
-**Deliverable review:**
-- Reviewed all changes since merge-base `22434a5b` (main)
+**Deliverable review + fix:**
 - Report: `plans/quality-infrastructure/reports/deliverable-review.md`
-- Structural deliverables (renames, deletions, deslop split, code density entries, symlinks) all correct
-- C1: `tests/test_prepare_runbook_inline.py` fixtures create old-name agents (`quiet-task.md`, `tdd-task.md`) but `prepare-runbook.py` now expects `artisan.md`, `test-driver.md` — 2 tests fail
-- M1-M2: corrector.md description/H1/template and design-corrector.md H1 retain "Vet" terminology
-- M3: skill-embedded memory-index/SKILL.md has 5 stale "vet" triggers not synced with parent
-- M4: 13+ "vet" references in doc-writing, design, runbook, orchestrate, plugin-dev-validation skills
-- M5: parent memory-index.md has 4 partially-propagated "vet" triggers
+- C1 fixed: test fixture `quiet-task`→`artisan`, `tdd-task`→`test-driver` (2 previously-failing tests now pass)
+- M1-M2 fixed: corrector.md description/H1/template, design-corrector.md H1 — removed "Vet" terminology
+- M3 fixed: 5 stale "vet" triggers in skill-embedded memory-index/SKILL.md
+- M4 fixed: 13 "vet" refs across doc-writing, design, runbook, orchestrate, plugin-dev-validation skills
+- M5 fixed: 4 partially-propagated "vet" triggers in parent memory-index.md
+- Minor fixed: 3 cosmetic refs in execution-routing.md, reflect/patterns.md, prioritize/scoring-tables.md
+- 15 files changed total, `just precommit` passes (1157/1158 pass, 1 xfail)
 
 ## Pending Tasks
 
 - [x] **Deliverable review: quality-infra reform** — `/deliverable-review` | sonnet
-- [ ] **Fix quality-infra findings** — `/design plans/quality-infrastructure/reports/deliverable-review.md` | opus
+- [x] **Fix quality-infra findings** — `/design plans/quality-infrastructure/reports/deliverable-review.md` | opus
 
 ## Next Steps
 
-Fix task routes through `/design` for proportionality triage — likely resolves to simple execution (mechanical substitutions + test fixture update).
+Commit fixes, then branch is ready for merge to main.
 
 ## Reference Files
 
 - `plans/quality-infrastructure/runbook.md` — Executed runbook
 - `plans/quality-infrastructure/requirements.md` — 3 FRs delivered
+- `plans/quality-infrastructure/reports/deliverable-review.md` — Review findings (all resolved)
