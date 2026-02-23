@@ -10,6 +10,27 @@ _mod = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
 _spec.loader.exec_module(_mod)  # type: ignore[union-attr]
 
 generate_agent_frontmatter = _mod.generate_agent_frontmatter
+get_phase_baseline_type = _mod.get_phase_baseline_type
+
+
+class TestPhaseBaselineType:
+    """Per-phase baseline selection based on content structure."""
+
+    def test_get_phase_baseline_type_tdd(self) -> None:
+        """Content with Cycle headers is TDD type."""
+        content = "## Cycle 1.1: First\n**RED Phase:**\ntest\n**GREEN Phase:**\nimpl"
+        assert get_phase_baseline_type(content) == "tdd"
+
+    def test_get_phase_baseline_type_general(self) -> None:
+        """Content with Step headers is general type."""
+        assert (
+            get_phase_baseline_type("## Step 1.1: First\nStep content here")
+            == "general"
+        )
+
+    def test_get_phase_baseline_type_default(self) -> None:
+        """Content with no headers defaults to general type."""
+        assert get_phase_baseline_type("No headers, just prose") == "general"
 
 
 class TestAgentNamingConvention:
