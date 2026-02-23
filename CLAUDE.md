@@ -46,10 +46,6 @@ When user says "pending: task description":
 
 ---
 
-@agents/memory-index.md
-
----
-
 ## Operational Rules
 
 @agent-core/fragments/error-handling.md
