@@ -198,3 +198,7 @@ Cross-tree async context transfer skill. `/brief <slug>` writes timestamped entr
 ## worktree-rm-safety
 
 Safety gates for `_worktree rm`: dirty tree check (parent + submodule), exit code 2 for guard refusal, `--force` bypass flag, no destructive suggestions in CLI output. Affected: src/claudeutils/worktree/cli.py, tests/test_worktree_rm_dirty.py, tests/test_worktree_rm.py.
+
+## quality-infrastructure
+
+3 FRs delivered: FR-3 renamed 11 agents (vet-fix-agent→corrector, quiet-task→artisan, tdd-task→test-driver, etc.) + deleted vet-agent + embedded vet-taxonomy in corrector + deleted 8 plan-specific detritus + propagated across ~45 files including prepare-runbook.py code paths. FR-1 split deslop.md into communication.md (prose rules, ambient) and project-conventions skill (code rules, injected). FR-2 added 5 grounded code density entries to cli.md + memory-index triggers. Affected: agent-core/agents/ (11 renames, 3 deletions), agent-core/skills/ (vet→review dir rename, 11 skill files updated), agent-core/fragments/ (vet-requirement→review-requirement, deslop deleted), agents/decisions/ (9 files), ~15 other files.

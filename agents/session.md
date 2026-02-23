@@ -1,41 +1,36 @@
-# Session Handoff: 2026-02-22
+# Session Handoff: 2026-02-23
 
-**Status:** Runbook ready for orchestration. Promoted outline to runbook, prepare-runbook.py generated 7 step files + orchestrator plan.
+**Status:** Quality infrastructure reform complete. All 3 FRs delivered: 11 agent renames + propagation, deslop restructuring, 5 code density decisions.
 
 ## Completed This Session
 
-**Runbook planning (Phases 0.5–0.95):**
-- Phase 0.5: Codebase discovery — verified all ~37 files on disk (commit: 49254ac3)
-- Phase 0.75: Generated runbook outline with 7 general steps + 2 inline phases (commit: 49254ac3)
-- Outline review (1st): 6 fixes applied by runbook-outline-corrector — dependency declarations, model downgrades (1.2/1.4 opus→sonnet), line count fix, post-phase state notes, scope boundary annotations (commit: b220f4d8)
-- Phase 0.85: Consolidation gate — no trivial phases to merge (domains unrelated)
-- Phase 0.86: Simplification pass — no identical patterns to consolidate (commit: 4088a859)
-- Phase 0.9: Complexity check — 14 items, no callback triggers
-- Phase 0.95: Sufficiency check — ALL criteria pass, outline promoted directly to runbook
+**Quality infra reform orchestration (7 steps + 2 inline phases):**
+- Step 1.1: Batch renamed 11 agent files via git mv (commit: 499c21b3)
+- Step 1.2: Embedded vet-taxonomy in corrector.md, deleted vet-taxonomy.md + vet-agent.md (commit: c221af90)
+- Step 1.3: Deleted 8 plan-specific agent detritus from .claude/agents/ (commit: a58b2233)
+- Step 1.4: Updated YAML frontmatter + cross-references in all 11 renamed agents (commit: 6b968b14)
+- Step 1.5: Renamed vet/ → review/ skill dir, vet-requirement.md → review-requirement.md (commit: 2c9546cc)
+- Step 1.6: Propagated substitution table across ~45 files — skills, decisions, fragments, docs, scripts (commit: f9e58f69, f495c57e)
+  - Step 1.6 opus agent hit context ceiling at 210 tool uses; second opus agent fixed remaining stragglers; orchestrator fixed final 3 vet-requirement path refs
+  - Critical fix: prepare-runbook.py hardcoded paths (quiet-task→artisan, tdd-task→test-driver)
+- Step 1.7 + Phase 2 + Phase 3: Haiku agent executed all three (step file had inline phases appended). Symlink cleanup, deslop restructuring, code density entries (commit: ce658d1e, cf42c1fe)
 
-**Outline review (2nd pass):**
-- Major: 6 files with vet references missing from Step 1.6 inventory — 4 decision files + 2 skill files
-- Minor: workflow-advanced.md false positive removed, file counts updated (~37→~43)
-- Report: `plans/quality-infrastructure/reports/runbook-outline-review-2.md`
-
-**Runbook promotion (Phase 0.95→Phase 4):**
-- Rewrote runbook.md from corrected outline (prior version had 6 steps with wrong boundaries; outline has 7)
-- Tier 3 assessment: ~43 files, multiple models, sequential steps
-- prepare-runbook.py generated: 7 step files, orchestrator-plan.md, quality-infrastructure-task.md agent
-- `/orchestrate quality-infrastructure` on clipboard
+**Verification:**
+- Zero grep hits for all old names across production files (plans/ excluded as historical)
+- `just precommit` passes
+- 5 code density entries in cli.md, 5 /when triggers in memory-index.md
+- artisan.md + test-driver.md have project-conventions skill injection
+- deslop.md deleted, prose rules in communication.md "Prose Quality" section
 
 ## Pending Tasks
 
-- [ ] **Quality infra reform** — `/orchestrate quality-infrastructure` | sonnet | restart
-  - Plan: quality-infrastructure | Status: ready
-  - Phase 1: 7 general steps (haiku×3, sonnet×2, opus×2). Phases 2-3: inline
-  - Restart required before orchestration (agent definition created by prepare-runbook.py)
+*(none)*
+
+## Next Steps
+
+Plan complete. Session restart recommended — agent definitions changed (11 renames, skill directory rename, fragment rename). New names load on restart.
 
 ## Reference Files
 
-- `plans/quality-infrastructure/runbook.md` — Promoted runbook (7 steps + 2 inline phases)
-- `plans/quality-infrastructure/orchestrator-plan.md` — Orchestrator execution plan
-- `plans/quality-infrastructure/steps/` — 7 step files (step-1-1.md through step-1-7.md)
-- `plans/quality-infrastructure/runbook-outline.md` — Corrected outline (source for promotion)
-- `plans/quality-infrastructure/outline.md` — Design (7 decisions, 3 phases)
-- `plans/quality-infrastructure/requirements.md` — 3 FRs: prose/code quality consolidation, code density, agent rename
+- `plans/quality-infrastructure/runbook.md` — Executed runbook
+- `plans/quality-infrastructure/requirements.md` — 3 FRs delivered
