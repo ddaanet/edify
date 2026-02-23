@@ -195,6 +195,51 @@ def test_cli_invokes_resolver(tmp_path: Path) -> None:
     assert len(result.output) > 0
 
 
+def test_batched_recall_multiple_queries() -> None:
+    """Test that multiple query args produce batched output separated by `---`.
+
+    Verifies:
+    1. Two query args invoke resolve() twice (once per query)
+    2. Output contains both results separated by newline-dashes-newline
+    3. Single query produces no separator (backward compatible)
+    """
+    runner = CliRunner()
+
+    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+        mock_resolve.side_effect = [
+            "# Result 1\n\nFirst content",
+            "# Result 2\n\nSecond content",
+        ]
+
+        result = runner.invoke(
+            cli, ["when", "when writing mock tests", "how encode paths"]
+        )
+        assert result.exit_code == 0
+        assert mock_resolve.call_count == 2
+
+        # First call: operator=when, query=writing mock tests
+        first_call = mock_resolve.call_args_list[0][0]
+        assert first_call[0] == "when"
+        assert first_call[1] == "writing mock tests"
+
+        # Second call: operator=how, query=encode paths
+        second_call = mock_resolve.call_args_list[1][0]
+        assert second_call[0] == "how"
+        assert second_call[1] == "encode paths"
+
+        # Output contains both results joined by separator
+        assert "---" in result.output
+        assert "# Result 1" in result.output
+        assert "# Result 2" in result.output
+
+    # Single query: no separator in output
+    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+        mock_resolve.return_value = "# Single Result\n\nContent"
+        result = runner.invoke(cli, ["when", "when writing mock tests"])
+        assert result.exit_code == 0
+        assert "---" not in result.output
+
+
 def test_cli_error_handling() -> None:
     """Test that CLI properly handles errors with stderr output and exit code 1.
 

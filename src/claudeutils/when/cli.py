@@ -38,6 +38,7 @@ def when_cmd(queries: tuple[str, ...]) -> None:
     index_path = project_root / "agents" / "memory-index.md"
     decisions_dir = project_root / "agents" / "decisions"
 
+    results = []
     for arg in queries:
         parsed = _parse_operator_query(arg)
         if parsed is None:
@@ -48,8 +49,11 @@ def when_cmd(queries: tuple[str, ...]) -> None:
         operator, query_str = parsed
 
         try:
-            result = resolve(operator, query_str, str(index_path), str(decisions_dir))
-            click.echo(result)
+            results.append(
+                resolve(operator, query_str, str(index_path), str(decisions_dir))
+            )
         except ResolveError as e:
             click.echo(str(e), err=True)
             sys.exit(1)
+
+    click.echo("\n---\n".join(results))
