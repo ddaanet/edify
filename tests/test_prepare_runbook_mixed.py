@@ -96,7 +96,7 @@ def _run_validate(tmp_path: Path, runbook_content: str, name: str) -> tuple[bool
         rf,
         sections,
         name,
-        tmp_path / ".claude" / "agents" / f"{name}-task.md",
+        tmp_path / ".claude" / "agents",
         steps_dir,
         tmp_path / "plans" / name / "orchestrator-plan.md",
         metadata,

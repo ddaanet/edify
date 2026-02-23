@@ -165,7 +165,7 @@ class TestMixedRunbookWithInline:
         runbook_path = plan_dir / "runbook.md"
         runbook_path.write_text(MIXED_RUNBOOK)
 
-        name, agent_path, steps_dir, orch_path = derive_paths(runbook_path)
+        name, agents_dir, steps_dir, orch_path = derive_paths(runbook_path)
         meta, body = parse_frontmatter(MIXED_RUNBOOK)
         sections = extract_sections(body)
         cycles = extract_cycles(body)
@@ -183,7 +183,7 @@ class TestMixedRunbookWithInline:
             runbook_path,
             sections,
             name,
-            tmp_path / agent_path,
+            tmp_path / agents_dir,
             tmp_path / steps_dir,
             tmp_path / orch_path,
             meta,
@@ -211,7 +211,7 @@ class TestMixedRunbookWithInline:
         runbook_path = plan_dir / "runbook.md"
         runbook_path.write_text(MIXED_RUNBOOK)
 
-        name, agent_path, steps_dir, orch_path = derive_paths(runbook_path)
+        name, agents_dir, steps_dir, orch_path = derive_paths(runbook_path)
         meta, body = parse_frontmatter(MIXED_RUNBOOK)
         sections = extract_sections(body)
         cycles = extract_cycles(body)
@@ -226,7 +226,7 @@ class TestMixedRunbookWithInline:
             runbook_path,
             sections,
             name,
-            tmp_path / agent_path,
+            tmp_path / agents_dir,
             tmp_path / steps_dir,
             tmp_path / orch_path,
             meta,
@@ -255,7 +255,7 @@ class TestInlineOnlyRunbook:
         runbook_path = plan_dir / "runbook.md"
         runbook_path.write_text(INLINE_ONLY_RUNBOOK)
 
-        name, agent_path, steps_dir, orch_path = derive_paths(runbook_path)
+        name, agents_dir, steps_dir, orch_path = derive_paths(runbook_path)
         meta, body = parse_frontmatter(INLINE_ONLY_RUNBOOK)
         sections = extract_sections(body)
         cycles = extract_cycles(body)
@@ -268,7 +268,7 @@ class TestInlineOnlyRunbook:
             runbook_path,
             sections,
             name,
-            tmp_path / agent_path,
+            tmp_path / agents_dir,
             tmp_path / steps_dir,
             tmp_path / orch_path,
             meta,
@@ -294,7 +294,7 @@ class TestInlineOnlyRunbook:
         runbook_path = plan_dir / "runbook.md"
         runbook_path.write_text(INLINE_ONLY_RUNBOOK)
 
-        name, agent_path, steps_dir, orch_path = derive_paths(runbook_path)
+        name, agents_dir, steps_dir, orch_path = derive_paths(runbook_path)
         meta, body = parse_frontmatter(INLINE_ONLY_RUNBOOK)
         sections = extract_sections(body)
         cycles = extract_cycles(body)
@@ -307,7 +307,7 @@ class TestInlineOnlyRunbook:
             runbook_path,
             sections,
             name,
-            tmp_path / agent_path,
+            tmp_path / agents_dir,
             tmp_path / steps_dir,
             tmp_path / orch_path,
             meta,
@@ -337,7 +337,7 @@ class TestGeneralThenInlineBleed:
         runbook_path = plan_dir / "runbook.md"
         runbook_path.write_text(GENERAL_THEN_INLINE_RUNBOOK)
 
-        name, agent_path, steps_dir, orch_path = derive_paths(runbook_path)
+        name, agents_dir, steps_dir, orch_path = derive_paths(runbook_path)
         meta, body = parse_frontmatter(GENERAL_THEN_INLINE_RUNBOOK)
         sections = extract_sections(body)
         cycles = extract_cycles(body)
@@ -349,7 +349,7 @@ class TestGeneralThenInlineBleed:
             runbook_path,
             sections,
             name,
-            tmp_path / agent_path,
+            tmp_path / agents_dir,
             tmp_path / steps_dir,
             tmp_path / orch_path,
             meta,

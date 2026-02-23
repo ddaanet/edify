@@ -35,7 +35,7 @@ def _run_validate(tmp_path: Path, runbook_content: str, name: str) -> tuple[bool
         rf,
         sections,
         name,
-        tmp_path / ".claude" / "agents" / f"{name}-task.md",
+        tmp_path / ".claude" / "agents",
         steps_dir,
         tmp_path / "plans" / name / "orchestrator-plan.md",
         metadata,
@@ -85,13 +85,13 @@ class TestOrchestratorPlan:
 
         orch_path = tmp_path / "plans" / "test-job" / "orchestrator-plan.md"
         steps_dir = tmp_path / "plans" / "test-job" / "steps"
-        agent_path = tmp_path / ".claude" / "agents" / "test-job-task.md"
+        agents_dir = tmp_path / ".claude" / "agents"
 
         result = validate_and_create(
             plan_dir / "runbook.md",
             sections,
             "test-job",
-            agent_path,
+            agents_dir,
             steps_dir,
             orch_path,
             metadata,

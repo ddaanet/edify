@@ -1,0 +1,14 @@
+### Cycle 2.3: Existing test regression updates 2026-02-23
+- Status: GREEN_VERIFIED
+- Test command: `just test tests/test_prepare_runbook_mixed.py tests/test_prepare_runbook_orchestrator.py tests/test_prepare_runbook_inline.py tests/test_prepare_runbook_phase_context.py`
+- RED result: N/A (REGRESSION cycle — existing tests passed with stale agent path)
+- GREEN result: PASS (22/22 passed after signature updates)
+- Regression check: 1195/1196 passed full suite (1 pre-existing xfail)
+- Refactoring: none (precommit clean, no warnings)
+- Files modified:
+  - `tests/test_prepare_runbook_mixed.py` — _run_validate() helper: changed agent arg from `tmp_path / ".claude" / "agents" / f"{name}-task.md"` to `tmp_path / ".claude" / "agents"` (directory)
+  - `tests/test_prepare_runbook_orchestrator.py` — _run_validate() helper: same change; test_orchestrator_plan_includes_phase_file_paths: renamed agent_path to agents_dir, removed filename suffix
+  - `tests/test_prepare_runbook_phase_context.py` — two validate_and_create() calls: removed -task.md filename suffix from agents arg (lines 99, 197)
+  - `tests/test_prepare_runbook_inline.py` — no change needed (uses derive_paths() which already returns a directory)
+- Stop condition: none
+- Decision made: none

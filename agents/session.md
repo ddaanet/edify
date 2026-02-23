@@ -113,10 +113,6 @@
 
 ## Worktree Tasks
 
-- [ ] **Phase-scoped agent context** → `phase-scoped-agents` — `/design` | sonnet
-  - prepare-runbook.py emits per-phase agents with phase-scoped shared context instead of one agent per runbook
-  - Same base type can serve multiple phases — differentiator is injected context, not protocol
-  - Orchestrate-evolution depends on this for dispatch side
 
 - [ ] **Worktree new error formatting** → `wt-new-errors` — clean up `derive_slug` error output (duplicated traceback, no agent-friendly guidance) | sonnet
 
