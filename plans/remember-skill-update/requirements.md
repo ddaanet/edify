@@ -23,20 +23,19 @@ Titles must pass existing learnings.py validation and be compatible with planned
 - Max 5 words (enforced, includes "When"/"How to")
 - Unique (enforced)
 - Min 2 words (planned — Workstream 1 Phase 1)
-- No special characters beyond alphanumeric + spaces (planned): no hyphens, colons, slashes, dots, camelCase exceptions only for actual setting/API names
+- ~~No special characters beyond alphanumeric + spaces~~ **Resolved:** hyphens allowed (memory-index already uses hyphens in 30+ triggers; SKILL.md "no hyphens" was unenforced and contradicted by practice). Special character restriction dropped from scope.
 
 **FR-3: Structural validation enforced at precommit**
 learnings.py updated with:
 - Min 2 words check
-- Special character detection
 - When/How prefix check
 - Existing checks preserved (max 5 words, uniqueness, H2 format)
 
 **FR-4: Consolidation pipeline is mechanical**
-Consolidation pipeline: `## When X` → `### When X` (decision heading, title case) → `/when x` (index trigger, lowercased). No agent rephrasing step. Remember skill Step 4a and remember-task agent updated to derive triggers directly from title.
+Consolidation pipeline: `## When X` → `### When X` (decision heading, title case) → `/when x` (index trigger, lowercased). No agent rephrasing step. Remember skill Step 4a updated to derive triggers directly from title.
 
 **FR-5: Semantic guidance in skill and handoff docs**
-Update remember SKILL.md, remember-task agent, and handoff skill with:
+Update remember SKILL.md and handoff skill with:
 - Title must start with "When" or "How to"
 - Anti-pattern/correct-pattern examples
 - Reject jargon/root-cause titles with suggested rephrase
@@ -47,8 +46,8 @@ Evaluate alternatives to rule files for proactive knowledge recall:
 - Criteria: agent-independence, token cost, false positive rate, maintenance burden
 - Output: analysis with recommendation (not implementation)
 
-**FR-7: Migrate existing learning titles**
-Apply When/How prefix format to 64 entries introduced after last consolidation (commit `8a62c85`). The 6 retained entries from consolidation are out of scope. Fix formatting defect at line 378 (heading concatenated to previous bullet).
+~~**FR-7: Migrate existing learning titles**~~
+**Resolved — already done.** All 54 current titles already use `When` prefix format. No migration needed.
 
 ### Constraints
 
@@ -58,8 +57,8 @@ The learning title must be directly usable as a memory-index trigger without age
 **C-2: Word count includes prefix**
 "When" and "How to" count toward the 5-word max. Effective content words: 4 (for When) or 3 (for How to).
 
-**C-3: Migration preserves body content**
-Title migration changes only `## ` lines. Body text (anti-pattern, correct pattern, rationale, evidence) remains unchanged.
+~~**C-3: Migration preserves body content**~~
+**Resolved — FR-7 already done.** No migration needed.
 
 **FR-8: Inline execution in clean session — remove remember-task delegation**
 The `/remember` skill executes consolidation inline in the calling session rather than delegating to `remember-task` agent. Requires a clean session (fresh start) to keep context manageable — CLAUDE.md + files being edited, not accumulated conversation history. Delegation throws away loaded context and adds agent startup overhead; inline execution in a bloated session is equally wrong.
@@ -79,37 +78,53 @@ Acceptance criteria:
 - Run `validate-memory-index.py --fix` after split
 - `memory-refactor` agent is deleted
 
-**FR-10: Rename skill**
-Select new name for `/remember` skill (test brainstorm-name agent or manual selection). Update all references: skill directory, SKILL.md, agent definitions, handoff skill, session.md mentions, memory-index triggers. Requires restart after rename.
+**FR-10: Rename skill to `/codify`**
+Rename `/remember` skill to `/codify`. Update all references (~30 files): skill directory, SKILL.md, agent definitions, handoff skill + references, session.md, memory-index triggers, agent-core docs, plan files. Requires restart after rename.
 
 Acceptance criteria:
-- New name selected and documented
-- All references updated (skill dir, agents, skills, fragments, session.md)
+- Skill directory renamed `remember` → `codify`
+- All references updated across codebase
 - `just sync-to-parent` run, symlinks verified
 - Restart required flag noted
 
 **FR-11: Agent routing for learnings**
-When consolidating learnings actionable for sub-agents, route to agent templates (quiet-task.md, tdd-task.md) as additional consolidation target. Deferred until memory redesign (FR-1 through FR-9) completes — redesign may change the routing surface.
+When consolidating learnings actionable for sub-agents, route to agent templates as additional consolidation targets. All agents are eligible except plan-specific agents (generated per-runbook).
 
 Acceptance criteria:
 - Consolidation pipeline identifies agent-relevant learnings
-- Relevant entries propagated to agent template files
-- Does not execute until FR-1–FR-9 redesign is complete
+- Relevant entries propagated to matching agent files
+
+**FR-12: Recall CLI simplification**
+Replace two-argument call convention (`when-resolve.py when <query>`) with one-argument-by-recall syntax (`when-resolve.py "when <query>"`). Add batched recall support.
+
+Acceptance criteria:
+- Operator parsed from query string prefix (when/how)
+- Batched recall: `when-resolve.py "when X" "how Y" "when Z"`
+- `/when` and `/how` skill docs updated with new invocation syntax
+- Backward compatibility not required (agents are sole callers)
+
+**FR-13: Remove memory-index from always-loaded context**
+Remove `@agents/memory-index.md` reference from CLAUDE.md. ~5000 tokens for 2.9% recall rate.
+
+Acceptance criteria:
+- `@agents/memory-index.md` removed from CLAUDE.md
+- `agents/memory-index.md` file remains (used by when-resolve.py)
+- `/when` and `/how` skills continue to work via CLI resolution
 
 ### Out of Scope
 
-- `/when` runtime resolution changes
 - Memory index validation pipeline changes
 - Hook implementation for frozen-domain (separate task if recommended by FR-6)
 - `agent-core/bin/compress-key.py` changes
-- Body content rewrites during migration
 
 ### Dependencies
 
 - Phase 1 (validation) should precede Phase 2 (documentation) — docs reference validation constraints
-- Phase 3 (frozen-domain analysis) is independent
-- FR-7 (migration) can execute before or after validation enforcement
+- Phase 3 depends on Phase 2 (routing targets defined after pipeline simplification)
+- Phase 4 is independent (CLI fix)
+- Phase 5 depends on Phase 2-3 (rename after content changes settle)
+- Phase 6 is independent (frozen-domain analysis)
 
 ### Open Questions
 
-- Q-1: Hyphen handling — allow in learning titles or enforce no-hyphens? Recommend: no hyphens (aligns with memory-index trigger format)
+~~Q-1: Hyphen handling~~ **Resolved:** allow hyphens. Memory-index already uses hyphens in 30+ triggers.
