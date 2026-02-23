@@ -169,7 +169,7 @@ Inline phase type across pipeline. 7 pipeline artifacts updated, 7 integration t
 
 ## pipeline-skill-updates
 
-9 design decisions (D-1 through D-9) addressing pipeline closure gaps and vet scoping deficits. Additive prose edits to 7 files. Requirements-clarity gate (D-1), coordination complexity execution readiness (D-5), deliverable-review task creation (D-2/D-3), lifecycle audit (D-7), verification scope (D-4/D-9), resume completeness (D-8), TDD integration-first (D-6). Absorbed vet-invariant-scope and inline-phase-type designs. Affected: agent-core/skills/ (design, orchestrate, deliverable-review), agent-core/fragments/vet-requirement.md, agent-core/agents/ (outline-corrector, test-driver), agents/decisions/pipeline-contracts.md.
+9 design decisions (D-1 through D-9) addressing pipeline closure gaps and vet scoping deficits. Additive prose edits to 7 files. Requirements-clarity gate (D-1), coordination complexity execution readiness (D-5), deliverable-review task creation (D-2/D-3), lifecycle audit (D-7), verification scope (D-4/D-9), resume completeness (D-8), TDD integration-first (D-6). Absorbed vet-invariant-scope and inline-phase-type designs. Affected: agent-core/skills/ (design, orchestrate, deliverable-review), agent-core/fragments/review-requirement.md, agent-core/agents/ (outline-corrector, test-driver), agents/decisions/pipeline-contracts.md.
 
 ## brief-skill
 
@@ -185,7 +185,7 @@ Error handling framework across 5 layers. 9 files (7 modified, 2 new), ~163 net 
 
 ## runbook-evolution
 
-5 FRs: prose atomicity (FR-1), self-modification discipline (FR-2a/2b), testing diamond (FR-3a-d). Additive prose edits to runbook SKILL.md (Testing Strategy section, Phase 0.75 verification, TDD Cycle Planning) and anti-patterns.md (4 new entries, 1 rewritten). Side fix: vet-requirement.md reviewer routing table. Affected: agent-core/skills/runbook/, agent-core/fragments/vet-requirement.md.
+5 FRs: prose atomicity (FR-1), self-modification discipline (FR-2a/2b), testing diamond (FR-3a-d). Additive prose edits to runbook SKILL.md (Testing Strategy section, Phase 0.75 verification, TDD Cycle Planning) and anti-patterns.md (4 new entries, 1 rewritten). Side fix: review-requirement.md reviewer routing table. Affected: agent-core/skills/runbook/, agent-core/fragments/review-requirement.md.
 
 ## brief-skill
 
@@ -193,7 +193,7 @@ Cross-tree async context transfer skill. `/brief <slug>` writes timestamped entr
 
 ## vet-invariant-scope
 
-3 prose changes to address vet pipeline gaps found during worktree-merge-resilience deliverable review. Added Verification scope field to vet execution context template (vet-requirement.md, pipeline-contracts.md), lifecycle audit criterion for final checkpoint (orchestrate/SKILL.md), resume completeness criterion (outline-corrector.md). No code changes.
+3 prose changes to address vet pipeline gaps found during worktree-merge-resilience deliverable review. Added Verification scope field to review execution context template (review-requirement.md, pipeline-contracts.md), lifecycle audit criterion for final checkpoint (orchestrate/SKILL.md), resume completeness criterion (outline-corrector.md). No code changes.
 
 ## worktree-rm-safety
 
