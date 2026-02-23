@@ -214,6 +214,52 @@ def resolve_learnings_md(conflicts: list[str]) -> list[str]:
     return [c for c in conflicts if c != "agents/learnings.md"]
 
 
+def _resolve_one_sided_deletion(
+    present: list[str],
+    present_body: str,
+    base_body: str,
+) -> tuple[list[str] | None, bool]:
+    """Resolve when one side deleted the entry.
+
+    Returns (body_or_none, is_conflict) per deletion matrix rows 10-13.
+    """
+    if present_body == base_body:
+        # Present side unchanged → respect deletion (Rows 10, 11)
+        return None, False
+    # Present side modified → conflict (Rows 12, 13)
+    return present, True
+
+
+def _resolve_both_present(
+    heading: str,
+    base: dict[str, list[str]],
+    ours: dict[str, list[str]],
+    theirs: dict[str, list[str]],
+) -> tuple[list[str] | None, bool]:
+    """Resolve heading when present in both ours and theirs."""
+    if heading not in base:
+        # Rows 3-4: both new, no base — conflict if bodies differ
+        return ours[heading], ours[heading] != theirs[heading]
+
+    if heading == "":
+        # Preamble: additive merge
+        ours_set = set(ours[heading])
+        extra = [ln for ln in theirs[heading] if ln not in ours_set]
+        return ours[heading] + extra, False
+
+    # Rows 5-9: all three present, named entry
+    base_body = "\n".join(base[heading])
+    ours_body = "\n".join(ours[heading])
+    theirs_body = "\n".join(theirs[heading])
+    ours_changed = ours_body != base_body
+    theirs_changed = theirs_body != base_body
+
+    if ours_changed and theirs_changed:
+        # Row 8: convergent; Row 9: divergent
+        return ours[heading], ours_body != theirs_body
+    return theirs[heading] if theirs_changed else ours[heading], False
+
+
 def _resolve_heading(
     heading: str,
     base: dict[str, list[str]],
@@ -227,34 +273,26 @@ def _resolve_heading(
     in_ours = heading in ours
     in_theirs = heading in theirs
 
-    # Absent from ours — omit (deleted or never existed on our side)
+    if not in_ours and not in_theirs:
+        return None, False  # Row 14
+
+    if in_ours and in_theirs:
+        return _resolve_both_present(heading, base, ours, theirs)
+
+    # One side absent
     if not in_ours:
-        return None, False
+        if heading not in base:
+            return None, False  # Row 1: theirs-only new — catch-all handles it
+        return _resolve_one_sided_deletion(
+            theirs[heading], "\n".join(theirs[heading]), "\n".join(base[heading])
+        )
 
-    # Absent from theirs — keep ours
-    if not in_theirs:
-        return ours[heading], False
-
-    # Not in base — new on one or both sides; keep ours
+    # not in_theirs
     if heading not in base:
-        return ours[heading], False
-
-    # Preamble: additive merge
-    if heading == "":
-        ours_set = set(ours[heading])
-        extra = [ln for ln in theirs[heading] if ln not in ours_set]
-        return ours[heading] + extra, False
-
-    # In all three — compare bodies for modification
-    base_body = "\n".join(base[heading])
-    ours_body = "\n".join(ours[heading])
-    theirs_body = "\n".join(theirs[heading])
-    ours_changed = ours_body != base_body
-    theirs_changed = theirs_body != base_body
-
-    if ours_changed and theirs_changed:
-        return ours[heading], True
-    return theirs[heading] if theirs_changed else ours[heading], False
+        return ours[heading], False  # Row 2: ours-only new
+    return _resolve_one_sided_deletion(
+        ours[heading], "\n".join(ours[heading]), "\n".join(base[heading])
+    )
 
 
 def diff3_merge_segments(
