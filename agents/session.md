@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-23
 
-**Status:** Task triage and merge audit. 3 tasks absorbed, 1 delivered plan removed, merge orphan found and fixed.
+**Status:** Session housekeeping — backlog merged into pending, worktree created for merge-artifact-validation, preparing to merge runbook-fenced-blocks.
 
 ## Completed This Session
 
@@ -40,6 +40,11 @@
 **Worktrees created:**
 - `remember-skill-update` — Remember skill update (opus design Phase B)
 - `runbook-fenced-blocks` — Runbook fenced code blocks (sonnet)
+- `merge-artifact-validation` — Merge artifact validation (sonnet)
+
+**Session housekeeping:**
+- Merged Backlog section into Pending Tasks — eliminated separate section, 30 items now in flat list to prevent bitrot
+- Removed "Simplify when-resolve CLI" — absorbed into remember-skill-update worktree
 
 ## Pending Tasks
 
@@ -66,9 +71,6 @@
 
 - [ ] **Deslop remaining skills** — Prose quality pass on skills not yet optimized | sonnet
 
-- [ ] **Merge artifact validation** — post-merge orphan detection in `_worktree merge` | sonnet
-  - Plan: worktree-merge-resilience | Diagnostic: `plans/worktree-merge-resilience/diagnostic.md`
-  - New instance found: `6086650e` merge produced 6 orphaned bullets in learnings.md (headingless, under wrong entry). Brief: `plans/worktree-merge-resilience/brief.md`
 
 - [ ] **Diagnose compression detail loss** — RCA against commit `0418cedb` | sonnet
 
@@ -81,6 +83,44 @@
 - [ ] **Precommit python3 redirect** — `/design plans/precommit-python3-redirect/brief.md` | sonnet
   - PreToolUse hook: intercept python3/uv-run/ln patterns, redirect to correct invocations
 
+- [ ] **Worktree merge from main** — `/design plans/worktree-merge-from-main/` | sonnet
+- [ ] **Cross-tree requirements transport** — `/requirements` skill writes to main from worktree | sonnet
+  - Transport solved: `git show <branch>:<path>` from main (no sandbox needed)
+  - Remaining: requirements skill path flag/auto-detection, optional CLI subcommand (`_worktree import`)
+  - Absorbs: Revert cross-tree sandbox access (remove `additionalDirectories` from `_worktree new`)
+- [ ] **Handoff wt awareness** — Only consolidate memory in main repo | sonnet
+- [ ] **Parallel orchestration** — Parallel dispatch via worktree isolation | sonnet
+  - Plan: parallel-orchestration | Blocked on: orchestrate-evolution
+- [ ] **Model directive pipeline** — Model guidance design → runbook → execution | opus
+- [ ] **Merge learnings delta** — Reconcile learnings.md after diverged merge | sonnet
+  - Plan: merge-learnings-delta | Strategy: main base + branch delta
+- [ ] **Continuation prepend** — `/design plans/continuation-prepend/problem.md` | sonnet
+- [ ] **Execute plugin migration** — Refresh outline then orchestrate | opus
+  - Plan: plugin-migration | Status: ready (stale — Feb 9)
+  - Recovery: design.md architecture valid, outline Phases 0-3/5-6 recoverable, Phase 4 needs rewrite
+- [ ] **Migrate test suite to diamond** — Needs scoping | depends on runbook evolution (delivered)
+- [ ] **Test diagnostic helper** — Replace subprocess.run check=True with stderr surfacing | sonnet
+- [ ] **Session.md validator** — Scripted precommit check | sonnet
+  - Plan: session-validator | worktree-cli-default merged; all FRs can proceed
+- [ ] **Agent rule injection** — Distill sub-agent rules into agent templates | sonnet
+- [ ] **Handoff insertion policy** — Insert at priority position instead of append | sonnet
+- [ ] **Behavioral design** — Nuanced conversational pattern intervention | opus
+- [ ] **Diagnostic opus review** — Post-vet RCA methodology | opus
+- [ ] **Safety review expansion** — Pipeline changes from grounding research | opus
+  - Depends on: Explore Anthropic plugins
+- [ ] **Ground state-machine review criteria** — State coverage validation research | opus
+- [ ] **Workflow formal analysis** — Formal verification of agent workflow | opus
+- [ ] **Design-to-deliverable** — tmux-like session automation | opus | restart
+- [ ] **Feature prototypes** — Markdown preprocessor, session extraction, last-output | sonnet
+- [ ] **Cache expiration prototype** — Debug log token metrics, measure TTL | sonnet
+- [ ] **Explore Anthropic plugins** — Install all 28 official plugins | sonnet | restart
+- [ ] **Tweakcc** — Remove redundant builtin prompts, inject custom | sonnet
+  - Plan: tweakcc
+- [ ] **TDD cycle test optimization** — Selective test rerun via dependency analysis | sonnet
+- [ ] **Fix task-context.sh task list bloat** — Filter/trim output | sonnet
+- [ ] **Upstream skills field** — PR/issue for missing skills frontmatter | sonnet
+- [ ] **Infrastructure scripts** — History tooling + agent-core script rewrites | sonnet
+
 ## Worktree Tasks
 
 - [ ] **Remember skill update** → `remember-skill-update` — Resume `/design` Phase B | opus
@@ -91,61 +131,9 @@
 - [ ] **Runbook fenced code blocks** → `runbook-fenced-blocks` — update prepare-runbook.py to honor fenced code blocks | sonnet
   - `extract_sections()`/`extract_cycles()` parse headers inside fenced code blocks, causing duplicate step errors
 
-## Backlog
-
-### Worktree
-- [ ] **Worktree merge from main** — `/design plans/worktree-merge-from-main/` | sonnet
-- [ ] **Cross-tree requirements transport** — `/requirements` skill writes to main from worktree | sonnet
-  - Transport solved: `git show <branch>:<path>` from main (no sandbox needed)
-  - Remaining: requirements skill path flag/auto-detection, optional CLI subcommand (`_worktree import`)
-  - Absorbs: Revert cross-tree sandbox access (remove `additionalDirectories` from `_worktree new`)
-- [ ] **Handoff wt awareness** — Only consolidate memory in main repo | sonnet
-- [ ] **Parallel orchestration** — Parallel dispatch via worktree isolation | sonnet
-  - Plan: parallel-orchestration | Blocked on: orchestrate-evolution
-
-### Pipeline & Orchestration
-- [ ] **Model directive pipeline** — Model guidance design → runbook → execution | opus
-
-### Memory & Learning
-- [ ] **Merge learnings delta** — Reconcile learnings.md after diverged merge | sonnet
-  - Plan: merge-learnings-delta | Strategy: main base + branch delta
-- [ ] **Continuation prepend** — `/design plans/continuation-prepend/problem.md` | sonnet
-
-### Quality & Testing
-- [ ] **Execute plugin migration** — Refresh outline then orchestrate | opus
-  - Plan: plugin-migration | Status: ready (stale — Feb 9)
-  - Recovery: design.md architecture valid, outline Phases 0-3/5-6 recoverable, Phase 4 needs rewrite
-- [ ] **Migrate test suite to diamond** — Needs scoping | depends on runbook evolution (delivered)
-- [ ] **Test diagnostic helper** — Replace subprocess.run check=True with stderr surfacing | sonnet
-- [ ] **Session.md validator** — Scripted precommit check | sonnet
-  - Plan: session-validator | worktree-cli-default merged; all FRs can proceed
-
-### Agents & Rules
-- [ ] **Agent rule injection** — Distill sub-agent rules into agent templates | sonnet
-- [ ] **Handoff insertion policy** — Insert at priority position instead of append | sonnet
-
-### Design (opus)
-- [ ] **Behavioral design** — Nuanced conversational pattern intervention | opus
-- [ ] **Diagnostic opus review** — Post-vet RCA methodology | opus
-- [ ] **Safety review expansion** — Pipeline changes from grounding research | opus
-  - Depends on: Explore Anthropic plugins
-- [ ] **Ground state-machine review criteria** — State coverage validation research | opus
-- [ ] **Workflow formal analysis** — Formal verification of agent workflow | opus
-- [ ] **Design-to-deliverable** — tmux-like session automation | opus | restart
-
-### Prototypes & Exploration
-- [ ] **Feature prototypes** — Markdown preprocessor, session extraction, last-output | sonnet
-- [ ] **Cache expiration prototype** — Debug log token metrics, measure TTL | sonnet
-- [ ] **Explore Anthropic plugins** — Install all 28 official plugins | sonnet | restart
-- [ ] **Tweakcc** — Remove redundant builtin prompts, inject custom | sonnet
-  - Plan: tweakcc
-- [ ] **TDD cycle test optimization** — Selective test rerun via dependency analysis | sonnet
-
-### Small Fixes
-- [ ] **Simplify when-resolve CLI** — Single argument with when/how prefix | sonnet
-- [ ] **Fix task-context.sh task list bloat** — Filter/trim output | sonnet
-- [ ] **Upstream skills field** — PR/issue for missing skills frontmatter | sonnet
-- [ ] **Infrastructure scripts** — History tooling + agent-core script rewrites | sonnet
+- [ ] **Merge artifact validation** → `merge-artifact-validation` — post-merge orphan detection in `_worktree merge` | sonnet
+  - Plan: worktree-merge-resilience | Diagnostic: `plans/worktree-merge-resilience/diagnostic.md`
+  - New instance found: `6086650e` merge produced 6 orphaned bullets in learnings.md (headingless, under wrong entry). Brief: `plans/worktree-merge-resilience/brief.md`
 
 ## Blockers / Gotchas
 
@@ -182,7 +170,7 @@
 
 ## Next Steps
 
-Two worktrees active: `remember-skill-update` (opus), `runbook-fenced-blocks` (sonnet). On main: session CLI tool ready for `/runbook` expansion.
+Three worktrees active: `remember-skill-update` (opus), `runbook-fenced-blocks` (sonnet), `merge-artifact-validation` (sonnet). Merging runbook-fenced-blocks next.
 
 ## Reference Files
 
