@@ -1,1 +1,0 @@
-../../agent-core/agents/outline-review-agent.md

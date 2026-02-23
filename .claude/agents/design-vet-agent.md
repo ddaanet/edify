@@ -1,1 +1,0 @@
-../../agent-core/agents/design-vet-agent.md

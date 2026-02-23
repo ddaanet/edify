@@ -38,4 +38,4 @@
 - `plans/quality-infrastructure/steps/` — 7 step files (step-1-1.md through step-1-7.md)
 - `plans/quality-infrastructure/runbook-outline.md` — Corrected outline (source for promotion)
 - `plans/quality-infrastructure/outline.md` — Design (7 decisions, 3 phases)
-- `plans/quality-infrastructure/requirements.md` — 3 FRs: deslop, code density, agent rename
+- `plans/quality-infrastructure/requirements.md` — 3 FRs: prose/code quality consolidation, code density, agent rename

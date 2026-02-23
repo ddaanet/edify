@@ -92,3 +92,35 @@ Total: 350 tokens
 - Matches existing CLI patterns (analyze, rules); text for humans, JSON for scripting
 - Show resolved model ID so users know which exact model version was used
 - Critical for debugging and reproducibility (especially when using aliases that auto-update)
+
+## .Code Density
+
+### When Expected State Checks Should Return Booleans
+
+**Principle:** Normal program states checked with boolean returns, not exceptions. EAFP is idiomatic for IO where failure is uncommon, but expected states (existence checks, availability queries) are not exceptional.
+
+**Project instance:** `_git_ok(*args) -> bool` checks branch existence without raising `CalledProcessError`. Returns `returncode == 0`. Replaces try/except blocks that treated expected conditions as exceptions.
+
+### When Error Termination Should Be a Single Call
+
+**Principle:** Consolidate display and exit into a single call. When display and exit are separate statements, they drift apart — different messages, forgotten exits, inconsistent stderr routing.
+
+**Project instance:** `_fail(msg, code=1) -> Never` in utils.py combines `print(msg, file=sys.stderr)` and `raise SystemExit(code)`. The `Never` return type informs type checkers that control flow terminates.
+
+### When Formatter Expansion Signals Abstraction Need
+
+**Principle:** When a call site takes 5+ lines after opinionated formatting (Black), the call has too many parameters for inline use. Extract a helper whose defaults encode common kwargs.
+
+**Project instance:** `subprocess.run()` with keyword args expands to 5-6 lines under Black. The `_git()` helper collapses stdout calls to 1 line; `_git_ok()` covers returncode cases without formatter expansion.
+
+### When Exceptions Should Be for Exceptional Events Only
+
+**Principle:** Custom exception classes for expected conditions (e.g., `SessionNotFoundError`, `MultipleSessionsError`), not broad types like `ValueError`. Broad types mask legitimate bugs under the same `except` clause.
+
+**Project instance:** `ValueError` raised for expected conditions (no session found, multiple matches) → replaced with custom exception classes. Custom classes satisfy lint rules about hardcoded exception messages without workarounds.
+
+### When Error Handling Layers Should Not Overlap
+
+**Principle:** Each error handling layer has one responsibility — failure site collects context and raises typed exception, top level displays and exits. When both layers print, you get duplicate output or conflicting messages.
+
+**Project instance:** Rule in cli.py — context collection at failure site, display at top level, never both. Use `raise from` chains to preserve causal chains without duplicating display logic.

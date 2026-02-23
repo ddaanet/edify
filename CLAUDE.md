@@ -8,8 +8,6 @@
 
 @agent-core/fragments/communication.md
 
-@agent-core/fragments/deslop.md
-
 @agent-core/fragments/execute-rule.md
 
 @agent-core/fragments/pushback.md

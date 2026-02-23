@@ -1,1 +1,0 @@
-../../agent-core/agents/vet-fix-agent.md

@@ -44,7 +44,7 @@ Agent reliability patterns, artifact management, and implementation practices.
 
 **Decision Date:** 2026-02-12
 
-**Correct pattern:** Include explicit deslop and factorization directives in refactor prompts.
+**Correct pattern:** Include explicit code quality and factorization directives in refactor prompts.
 
 **Rationale:** Refactor agent focuses on warnings (line limits, complexity), doesn't proactively optimize for token efficiency.
 

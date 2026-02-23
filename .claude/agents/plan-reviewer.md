@@ -1,1 +1,0 @@
-../../agent-core/agents/plan-reviewer.md
