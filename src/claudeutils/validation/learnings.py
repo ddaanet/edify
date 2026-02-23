@@ -36,6 +36,37 @@ def extract_titles(lines: list[str]) -> list[tuple[int, str]]:
     return titles
 
 
+def parse_segments(content: str) -> dict[str, list[str]]:
+    """Parse learnings.md into segments keyed by heading text.
+
+    Args:
+        content: Raw file content as string.
+
+    Returns:
+        Ordered dict mapping heading text (or empty string for preamble) to list of
+        body lines. The heading line itself is not included in body lines.
+    """
+    lines = content.splitlines()
+    segments: dict[str, list[str]] = {}
+    current_heading = ""
+    current_body: list[str] = []
+
+    for line in lines:
+        m = TITLE_PATTERN.match(line)
+        if m:
+            if current_heading or current_body:
+                segments[current_heading] = current_body
+            current_heading = m.group(1)
+            current_body = []
+        else:
+            current_body.append(line)
+
+    if current_heading or current_body:
+        segments[current_heading] = current_body
+
+    return segments
+
+
 def validate(path: Path, root: Path, max_words: int = MAX_WORDS) -> list[str]:
     """Validate learnings file. Returns list of error strings.
 
