@@ -69,11 +69,11 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 ### When Needing Mcp Tools In Subagents
 
-**Anti-pattern:** Assuming quiet-task or other sub-agents can call MCP tools (Context7, etc.).
+**Anti-pattern:** Assuming artisan or other sub-agents can call MCP tools (Context7, etc.).
 
 **Correct pattern:** MCP tools only available in main session. Call directly from designer/planner, write results to report file for reuse.
 
-**Confirmed:** Empirical test — quiet-task haiku has no access to `mcp__plugin_context7_context7__*` tools.
+**Confirmed:** Empirical test — artisan haiku has no access to `mcp__plugin_context7_context7__*` tools.
 
 **Impact:** Context7 queries cost opus tokens when designer calls them, but results persist for planner reuse.
 
@@ -345,7 +345,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Decision Date:** 2026-02-18
 
-**Anti-pattern:** Editing `.claude/agents/<plan>-task.md` directly — it's a generated file assembled by prepare-runbook.py from tdd-task.md baseline + Common Context from phase-1 + phase content.
+**Anti-pattern:** Editing `.claude/agents/<plan>-task.md` directly — it's a generated file assembled by prepare-runbook.py from test-driver.md baseline + Common Context from phase-1 + phase content.
 
 **Correct pattern:** Edit the source (phase files in `plans/<job>/`), then re-run `prepare-runbook.py` to regenerate the agent file and step files. Common Context is extracted from phase preambles (text between `### Phase N:` header and first `## Step`/`## Cycle`) and injected into all step/cycle files via `## Phase Context` section.
 

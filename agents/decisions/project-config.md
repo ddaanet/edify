@@ -239,7 +239,7 @@ description: |
 
 **Pattern:** Wrap fragments as lightweight skills, reference via `skills:` — no build step, stays current automatically.
 
-**Usage:** vet-fix-agent, design-vet-agent, outline-review-agent, plan-reviewer, refactor, runbook-outline-review-agent.
+**Usage:** corrector, design-corrector, outline-corrector, runbook-corrector, refactor, runbook-outline-corrector.
 
 ### How To Recall Sub-Agent Memory
 

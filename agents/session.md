@@ -65,14 +65,11 @@
 - [x] **Deliverable review: runbook-generation-fixes** — `/deliverable-review plans/runbook-generation-fixes` | opus | restart
 - [x] **Runbook generation fixes** — `/runbook plans/runbook-generation-fixes/outline.md` | sonnet
 
+- [x] **Deliverable review: quality-infra reform** — `/deliverable-review` | sonnet
+- [x] **Fix quality-infra findings** — `/design plans/quality-infrastructure/reports/deliverable-review.md` | opus
+
 ## Worktree Tasks
 
-- [ ] **Quality infra reform** → `quality-infra-reform` — `/runbook plans/quality-infrastructure/outline.md` | sonnet
-  - Plan: quality-infrastructure | Status: designed
-  - 3 FRs: deslop restructuring (FR-1), code density decisions (FR-2), agent rename (FR-3)
-  - Phase 1: agent rename (general), Phase 2: deslop restructure (inline), Phase 3: code density (inline)
-  - Subsumes: Rename vet agents (FR-3a). Absorbs: integration-first-tests
-  - vet-agent deprecated (D-1), vet-taxonomy embedded (D-2), stale symlink cleanup in Phase 1f
 
 - [ ] **Runbook generation fixes** → `runbook-generation-fixes` — `/design` | sonnet
   - Merged to main, tree preserved. Execution pending via Orchestrate runbook generation fixes task

@@ -65,11 +65,13 @@ def setup_baseline_agents(tmp_path: Path) -> None:
     agents_dir = tmp_path / "agent-core" / "agents"
     agents_dir.mkdir(parents=True, exist_ok=True)
 
-    quiet_task = agents_dir / "quiet-task.md"
-    quiet_task.write_text("---\nname: quiet-task\n---\n# Quiet Task\nBaseline agent.")
+    artisan = agents_dir / "artisan.md"
+    artisan.write_text("---\nname: artisan\n---\n# Artisan\nBaseline agent.")
 
-    tdd_task = agents_dir / "tdd-task.md"
-    tdd_task.write_text("---\nname: tdd-task\n---\n# TDD Task\nBaseline TDD agent.")
+    test_driver = agents_dir / "test-driver.md"
+    test_driver.write_text(
+        "---\nname: test-driver\n---\n# Test Driver\nBaseline TDD agent."
+    )
 
 
 def assert_json_output(

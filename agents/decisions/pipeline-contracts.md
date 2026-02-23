@@ -6,25 +6,25 @@ Centralized I/O contracts for the design-to-deliverable pipeline. Authoritative 
 
 | # | Transformation | Input | Output | Defect Types | Review Gate | Review Criteria |
 |---|---------------|-------|--------|-------------|-------------|----------------|
-| T1 | Requirements → Design | requirements.md or inline | design.md | Incomplete, infeasible | design-vet-agent (opus) | Architecture, feasibility, completeness |
-| T2 | Design → Outline | design.md | runbook-outline.md | Missing reqs, wrong decomposition, ungrounded corrections | runbook-outline-review-agent (opus) | Requirements coverage, phase structure, LLM failure modes |
-| T2.5 | Outline → Simplified outline | runbook-outline.md (post-0.85) | runbook-outline.md (consolidated) | Missed patterns, broken numbering | runbook-simplification-agent (opus) | Pattern detection, requirements preservation |
-| T3 | Outline → Phase files | runbook-outline.md | runbook-phase-N.md | Vacuity, prescriptive code, density | plan-reviewer | Type-aware: TDD discipline + general quality + LLM failure modes |
-| T4 | Phase files → Runbook | runbook-phase-*.md | runbook.md | Cross-phase inconsistency | plan-reviewer (holistic) | Cross-phase consistency, numbering, metadata |
+| T1 | Requirements → Design | requirements.md or inline | design.md | Incomplete, infeasible | design-corrector (opus) | Architecture, feasibility, completeness |
+| T2 | Design → Outline | design.md | runbook-outline.md | Missing reqs, wrong decomposition, ungrounded corrections | runbook-outline-corrector (opus) | Requirements coverage, phase structure, LLM failure modes |
+| T2.5 | Outline → Simplified outline | runbook-outline.md (post-0.85) | runbook-outline.md (consolidated) | Missed patterns, broken numbering | runbook-simplifier (opus) | Pattern detection, requirements preservation |
+| T3 | Outline → Phase files | runbook-outline.md | runbook-phase-N.md | Vacuity, prescriptive code, density | runbook-corrector | Type-aware: TDD discipline + general quality + LLM failure modes |
+| T4 | Phase files → Runbook | runbook-phase-*.md | runbook.md | Cross-phase inconsistency | runbook-corrector (holistic) | Cross-phase consistency, numbering, metadata |
 | T4.5 | Runbook → Validated runbook | runbook-phase-*.md or runbook.md | Validation reports | Model mismatches, lifecycle violations, count errors, implausible REDs | validate-runbook.py (script) | Deterministic structural checks |
 | T5 | Runbook → Step artifacts | runbook.md | steps/step-*.md, agent | Generation errors | prepare-runbook.py | Automated validation |
-| T6 | Steps → Implementation | step-*.md | Code/artifacts | Wrong behavior, stubs, drift | vet-fix-agent (checkpoints) | Scope IN/OUT, design alignment |
+| T6 | Steps → Implementation | step-*.md | Code/artifacts | Wrong behavior, stubs, drift | corrector (checkpoints) | Scope IN/OUT, design alignment |
 
 ## When Routing Artifact Review
 
-**Core routing table:** `agent-core/fragments/vet-requirement.md` "Reviewer routing by artifact type" (always-loaded, canonical).
+**Core routing table:** `agent-core/fragments/review-requirement.md` "Reviewer routing by artifact type" (always-loaded, canonical).
 
 **Orchestration-specific extensions:**
 
 | Artifact Type | Reviewer |
 |--------------|----------|
-| Planning artifacts (runbooks, phases) | plan-reviewer |
-| Human documentation (README, guides) | vet-fix-agent + doc-writing skill (writing style guidance) |
+| Planning artifacts (runbooks, phases) | runbook-corrector |
+| Human documentation (README, guides) | corrector + doc-writing skill (writing style guidance) |
 
 **Orchestrator handles all review delegation.** Sub-agents lack Task and Skill tools — they cannot delegate to any reviewer. All reviews must be delegated to prevent implementer bias (implementer never reviews own work). The execution agent commits; the orchestrator reads the validation section and delegates the review.
 
@@ -34,7 +34,7 @@ Centralized I/O contracts for the design-to-deliverable pipeline. Authoritative 
 
 ## How To Review Delegation Scope Template
 
-Every review delegation must include execution context (per `agent-core/fragments/vet-requirement.md`):
+Every review delegation must include execution context (per `agent-core/fragments/review-requirement.md`):
 
 **Required:**
 - **Scope IN:** What was produced (files, sections, features)
@@ -107,21 +107,21 @@ Inline phases in orchestrator-plan.md use `Execution: inline` (vs `Execution: st
 
 **Decision:** Vet validates against current filesystem, not execution-time state — context must be provided explicitly.
 
-**Anti-pattern:** Trusting vet-fix-agent output without providing execution context.
+**Anti-pattern:** Trusting corrector output without providing execution context.
 
-**Evidence:** Phase 6 error: vet "fixed" edify-plugin → agent-core based on stale filesystem state.
+**Evidence:** Phase 6 error: reviewer "fixed" edify-plugin → agent-core based on stale filesystem state.
 
 **Correct pattern:** Provide execution context (IN/OUT scope, changed files, requirements). Grep UNFIXABLE after return.
 
-### When Vet-Fix-Agent Rejects Planning Artifacts
+### When Corrector Rejects Planning Artifacts
 
 **Decision Date:** 2026-02-12
 
-**Decision:** vet-fix-agent reviews implementation changes only. Planning artifacts need plan-reviewer agent.
+**Decision:** corrector reviews implementation changes only. Planning artifacts need runbook-corrector agent.
 
-**Evidence:** vet-fix-agent line 27: "Error: Wrong agent type... This agent reviews implementation changes, not planning artifacts."
+**Evidence:** corrector line 27: "Error: Wrong agent type... This agent reviews implementation changes, not planning artifacts."
 
-**Routing:** plan-reviewer for both TDD and general planning artifacts.
+**Routing:** runbook-corrector for both TDD and general planning artifacts.
 
 ## When Reviewing Expanded Phases
 
@@ -133,7 +133,7 @@ Inline phases in orchestrator-plan.md use `Execution: inline` (vs `Execution: st
 
 **Evidence:** Outline was fixed. But expanded phases contained 3 vacuous cycles and 1 missing requirement.
 
-**Root cause:** plan-reviewer checks TDD discipline but not LLM failure modes after expansion.
+**Root cause:** runbook-corrector checks TDD discipline but not LLM failure modes after expansion.
 
 **Gap:** Outline checks → expansion → phase review (TDD only) → no LLM failure mode re-validation.
 
@@ -287,7 +287,7 @@ Inline phases in orchestrator-plan.md use `Execution: inline` (vs `Execution: st
 **Identification method:** Grep for the invariant pattern (e.g., `err=True` for output routing, `MERGE_HEAD` for state lifecycle) across the codebase.
 
 **Where documented:**
-- Operational (always-loaded): `agent-core/fragments/vet-requirement.md` — optional field in execution context
+- Operational (always-loaded): `agent-core/fragments/review-requirement.md` — optional field in execution context
 - Rationale (decision record): this section
 
 **Evidence:** Phase 5 checkpoint audited exit codes cross-cuttingly but missed MERGE_HEAD lifecycle — vet scope was limited to changed files. resolve.py had relevant calls but wasn't in the changed-files list.

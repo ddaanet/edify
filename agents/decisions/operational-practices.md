@@ -20,7 +20,7 @@ Agent reliability patterns, artifact management, and implementation practices.
 
 **Decision Date:** 2026-02-12
 
-**Decision:** Each production artifact requires vet-fix-agent review before proceeding.
+**Decision:** Each production artifact requires corrector review before proceeding.
 
 **Root cause:** Batch momentum — once first artifact skips review, switching cost increases for each subsequent one.
 
@@ -44,7 +44,7 @@ Agent reliability patterns, artifact management, and implementation practices.
 
 **Decision Date:** 2026-02-12
 
-**Correct pattern:** Include explicit deslop and factorization directives in refactor prompts.
+**Correct pattern:** Include explicit code quality and factorization directives in refactor prompts.
 
 **Rationale:** Refactor agent focuses on warnings (line limits, complexity), doesn't proactively optimize for token efficiency.
 
@@ -76,7 +76,7 @@ Agent reliability patterns, artifact management, and implementation practices.
 
 **Decision Date:** 2026-02-12
 
-**Correct pattern:** Verify file existence claims from quiet-explore agents (ls, git ls-tree).
+**Correct pattern:** Verify file existence claims from scout agents (ls, git ls-tree).
 
 ### When Scrubbing Learnings Before Design Input
 

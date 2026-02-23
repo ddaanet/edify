@@ -27,6 +27,11 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when choosing feedback output format
 /how format token count output
 /when writing CLI output | no destructive suggestions agents follow instructions
+/when checking expected program state | boolean return not exception EAFP state-query
+/when writing error exit code | consolidate display exit single call Click
+/when call site expands under formatter | 5+ lines Black kwargs extract helper
+/when raising exceptions for expected conditions | custom types not ValueError broad masking
+/when adding error handling to call chain | layer separation context site display top
 
 ## agents/decisions/data-processing.md
 
@@ -106,7 +111,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 ## agents/decisions/operational-practices.md
 
 /when placing deliverable artifacts | plans vs tmp referenced later
-/when requiring per-artifact vet coverage | batch momentum skip prevention
+/when requiring per-artifact review coverage | batch momentum skip prevention
 /when launching task agents in parallel | single message batch
 /when background agents crash | check output files recovery
 /when refactoring agents need quality directives | deslop factorization
@@ -176,7 +181,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when agent context has conflicting signals | common context competes phase-neutral
 /when capturing requirements from conversation | capture over interview
 /when resuming interrupted orchestration | checkpoint recovery recipe enforcement
-/when vet flags unused code | check test callers design intent before deleting
+/when review flags unused code | check test callers design intent before deleting
 /when delegating with corrections | exclude wrong item dont mention
 /when ordering post-orchestration tasks | diagnostic fixes improvements sequence
 /when step agents leave uncommitted files | clean tree report commit invariant
@@ -190,14 +195,14 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 ## agents/decisions/pipeline-contracts.md
 
 /when choosing review gate | transformation table artifact type T1-T6 pipeline stages
-/when routing artifact review | reviewer per artifact type skill-reviewer agent-creator vet-fix orchestrator delegation
+/when routing artifact review | reviewer per artifact type skill-reviewer agent-creator corrector orchestrator delegation
 /how review delegation scope template | scope IN OUT changed files requirements
 /when UNFIXABLE escalation | fix-all pattern grep UNFIXABLE stop escalate
 /when declaring phase type | tdd general inline per-phase typing model expansion review orchestration
-/when vet escalation calibration | over-escalation pattern-matching not design
-/when vet flags out-of-scope items | DEFERRED vs UNFIXABLE distinction
-/when vet receives execution context | filesystem vs execution-time state
-/when vet-fix-agent rejects planning artifacts | plan-reviewer routing
+/when review escalation calibration | over-escalation pattern-matching not design
+/when review flags out-of-scope items | DEFERRED vs UNFIXABLE distinction
+/when review receives execution context | filesystem vs execution-time state
+/when corrector rejects planning artifacts | runbook-corrector routing
 /when reviewing expanded phases | expansion reintroduces defects regression LLM failure modes
 /when outline review produces ungrounded corrections | confabulated operation sequence fabricated fix-all sonnet opus
 /when simplifying runbook outlines | pattern consolidation identical-pattern batching
@@ -209,7 +214,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when routing implementation findings | unconditional design triage proportionality
 /when selecting review model | match model to correctness property
 /when holistic review applies fixes | grep all references fix-all occurrences
-/when scoping vet for cross-cutting invariants | verification scope full call graph
+/when scoping review for cross-cutting invariants | verification scope full call graph
 /when reviewing final orchestration checkpoint | lifecycle audit stateful objects
 
 ## agents/decisions/project-config.md
@@ -323,14 +328,14 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when handoff includes commit flag
 /when context already loaded for delegation
 /when complexity assessed twice | assessing routing layer efficiency double assessment
-/when reusing vet agent context
+/when reusing review agent context
 /how design with outline first approach
 /when selecting model for design guidance
 /when choosing model for design review
 /when brainstorming | always opus generative divergence
 /when research required before outline | external prior art ground
 /when design references need verification | glob disk verify names
-/when vet catches structural issues
+/when review catches structural issues
 /when reviewing agent definitions
 /when agent ignores injected directive | template context contradicts rules
 /when step agent uses wrong model | orchestrator model differs

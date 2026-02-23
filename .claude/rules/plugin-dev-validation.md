@@ -16,9 +16,9 @@ When planning work that creates or modifies plugin components (skills, agents, h
 - Commands (`.claude/commands/**/*`)
 - Plugin structure (`plugin.json`, directory layout)
 
-**Include in vet-fix-agent delegation:**
+**Include in corrector delegation:**
 
-When writing runbook vet checkpoint steps for plugin development work:
+When writing runbook review checkpoint steps for plugin development work:
 
 1. Read and apply criteria from `agent-core/skills/plugin-dev-validation/SKILL.md`
 2. Specify artifact type being reviewed (skills, agents, hooks, commands, plugin-structure)
@@ -27,9 +27,9 @@ When writing runbook vet checkpoint steps for plugin development work:
 **Example vet step:**
 
 ```markdown
-### Step N: Checkpoint — Vet [artifact description]
+### Step N: Checkpoint — Review [artifact description]
 
-Delegate to vet-fix-agent:
+Delegate to corrector:
 - Review all changes for quality, security, and alignment
 - **Domain validation:** Read and apply criteria from
   `agent-core/skills/plugin-dev-validation/SKILL.md`

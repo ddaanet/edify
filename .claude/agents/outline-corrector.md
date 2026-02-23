@@ -1,0 +1,1 @@
+../../agent-core/agents/outline-corrector.md

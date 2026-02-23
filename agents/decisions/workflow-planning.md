@@ -55,9 +55,9 @@ Planning expansion, TDD, model selection, and validation patterns.
 
 **Escalation format:** Return filepath + "ESCALATION: N unfixable issues require attention"
 
-**Applies to:** tdd-plan-reviewer, outline-review-agent, runbook-outline-review-agent, design-vet-agent
+**Applies to:** runbook-corrector, outline-corrector, runbook-outline-corrector, design-corrector
 
-**Rationale:** Document fixes are low-risk; implementation fixes (vet-agent) remain review-only due to higher risk.
+**Rationale:** Document fixes are low-risk; implementation fixes remain review-only due to higher risk.
 
 **Impact:** Caller handles escalation only, not routine fixes. Audit trail preserved for process improvement.
 
@@ -71,7 +71,7 @@ Planning expansion, TDD, model selection, and validation patterns.
 
 **Rationale:** Phase expansion reads outline; guidance co-located ensures consumption.
 
-**Example:** runbook-outline-review-agent appends guidance to outline.md directly.
+**Example:** runbook-outline-corrector appends guidance to outline.md directly.
 
 **Impact:** Guidance reaches executor, not lost in separate report file.
 
@@ -107,7 +107,7 @@ Planning expansion, TDD, model selection, and validation patterns.
 
 **Token math:** Prose saves ~80% planning output tokens; haiku generates test code during execution anyway.
 
-**Quality gate:** Prose must be behaviorally specific — "contains 🥈 emoji" not "returns correct value". tdd-plan-reviewer validates prose quality.
+**Quality gate:** Prose must be behaviorally specific — "contains 🥈 emoji" not "returns correct value". runbook-corrector validates prose quality.
 
 **Impact:** Significant token savings in planning phase without quality loss.
 
@@ -205,7 +205,7 @@ This is not full test code — it is precise prose that preserves the specificat
 
 **Decision:** Phase boundary = hard stop requiring explicit checkpoint delegation per orchestrate skill 3.3.
 
-**Anti-pattern:** Treat checkpoint as part of step execution, skip vet-fix-agent delegation, proceed to next phase.
+**Anti-pattern:** Treat checkpoint as part of step execution, skip corrector delegation, proceed to next phase.
 
 **Rationale:** Checkpoints catch bugs (e.g., logic error in format_context() found at Phase 2→3 boundary). D+B hybrid merged phase boundary into 3.3 with Read anchor for phase detection.
 
@@ -279,15 +279,15 @@ This is not full test code — it is precise prose that preserves the specificat
 
 **Decision Date:** 2026-02-08
 
-**Decision:** Domain-specific validation via skill files read by vet-fix-agent, with planning-time detection encoded in runbook vet steps.
+**Decision:** Domain-specific validation via skill files read by corrector, with planning-time detection encoded in runbook review steps.
 
-**Pattern:** Planner detects domain (via rules files, design mentions, path patterns) → writes vet step referencing domain validation skill + artifact type → orchestrator copies instruction verbatim → vet-fix-agent reads skill file and applies criteria.
+**Pattern:** Planner detects domain (via rules files, design mentions, path patterns) → writes review step referencing domain validation skill + artifact type → orchestrator copies instruction verbatim → corrector reads skill file and applies criteria.
 
 **Architecture:**
 - **Domain validation skill:** `agent-core/skills/<domain>-validation/SKILL.md` — structured review criteria (Critical/Major/Minor + examples)
 - **Rules file:** `.claude/rules/<domain>-validation.md` — path-matched context injection for planner
 - **Planner awareness:** plan-adhoc and plan-tdd include "Domain Validation" subsection in vet checkpoint guidance
-- **No agent proliferation:** One vet-fix-agent, enriched via skill files (not separate domain-specific review agents)
+- **No agent proliferation:** One corrector, enriched via skill files (not separate domain-specific review agents)
 
 **First use case:** Plugin development validation (skills, agents, hooks, commands, plugin-structure)
 

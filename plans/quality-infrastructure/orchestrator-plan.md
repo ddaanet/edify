@@ -21,8 +21,11 @@ Execution: steps/step-1-4.md
 ## step-1-5 (Step 1.5)
 Execution: steps/step-1-5.md
 
-## step-1-6 (Step 1.6) — PHASE_BOUNDARY
+## step-1-6 (Step 1.6)
 Execution: steps/step-1-6.md
+
+## step-1-7 (Step 1.7) — PHASE_BOUNDARY
+Execution: steps/step-1-7.md
 [Last item of phase 1. Insert functional review checkpoint before Phase 2.]
 
 ## phase-2 (Phase 2 (inline))

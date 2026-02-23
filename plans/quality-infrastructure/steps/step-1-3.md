@@ -6,15 +6,14 @@
 
 ---
 
-## Step 1.3: Delete plan-specific detritus
+## Step 1.3: Delete plan-specific agent detritus
 
-**Objective**: Remove 8 standalone plan-specific agent files from .claude/agents/.
-
+**Objective**: Delete 8 standalone agent files from .claude/agents/ left over from past plan executions.
+**Script Evaluation**: Direct
 **Execution Model**: Haiku
 
 **Implementation**:
-
-Git rm these 8 files from .claude/agents/:
+Delete 8 files in .claude/agents/:
 - error-handling-task.md
 - pushback-task.md
 - runbook-quality-gates-task.md
@@ -24,14 +23,10 @@ Git rm these 8 files from .claude/agents/:
 - worktree-merge-resilience-task.md
 - workwoods-task.md
 
-**CRITICAL**: Verify each file is a standalone file (not a symlink) before deleting. Symlinks point to agent-core/ and must NOT be deleted — they're managed by `just sync-to-parent`. Check with `ls -la .claude/agents/` first.
+Do NOT delete: hb-p*.md, quality-infrastructure-task.md, runbook-generation-fixes-task.md (active plans).
 
-**Expected Outcome**: 8 standalone files removed. All symlinks remain intact.
-
-**Error Conditions**:
-- File not found → Warn, continue (may already be deleted)
-- File is a symlink → STOP, do NOT delete — symlinks managed separately
-
-**Validation**: `ls -la .claude/agents/` shows only symlinks (→ agent-core/) plus hook-batch-task.md. No other standalone *-task.md files.
+**Expected Outcome**: 8 files deleted. Active plan agents untouched.
+**Error Conditions**: File not found -> warn and continue (may already be deleted)
+**Validation**: `ls .claude/agents/*-task.md` shows only active plan agents
 
 ---

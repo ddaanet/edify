@@ -92,3 +92,35 @@ Total: 350 tokens
 - Matches existing CLI patterns (analyze, rules); text for humans, JSON for scripting
 - Show resolved model ID so users know which exact model version was used
 - Critical for debugging and reproducibility (especially when using aliases that auto-update)
+
+## .Code Density
+
+### When Checking Expected Program State
+
+**Principle:** EAFP is idiomatic Python for IO operations where failure is uncommon (file access, network calls), but expected program states — existence checks, availability queries — are not exceptional events. When a condition is a normal branch in program logic, check it with a boolean return, not a try/except. Source pattern: Real Python EAFP/LBYL guide distinguishes IO-bound EAFP from state-query abuse; charlax/antipatterns: "Exception handling is for unexpected or exceptional events."
+
+**Project instance:** Two inconsistent idioms for "does branch exist?" coexisted — raw subprocess LBYL (5-6 lines under Black) and EAFP try/except that treated an expected condition as exceptional. Consolidated as `_git_ok(*args) -> bool` returning `returncode == 0`. Covers 13 of 15 raw subprocess sites. Two outliers needing stderr remain as raw calls.
+
+### When Writing Error Exit Code
+
+**Principle:** Error termination should be a single call, not a display+exit sequence. CLI frameworks recognize this pattern — Click's `ClickException` and `UsageError` consolidate display and exit into one raise. When display and exit are separate statements, they drift apart: different messages, forgotten exits, inconsistent stderr routing. Source: Click exception hierarchy docs.
+
+**Project instance:** 18 instances of `click.echo(msg, err=True)` followed by `raise SystemExit(N)` across the worktree module. Consolidated as `_fail(msg, code=1) -> Never` in utils.py. `Never` return type informs type checkers that control flow terminates. Click's own `ClickException` was considered and rejected — its hardcoded exit codes (UsageError->2, Abort->1) don't map to this project's exit code semantics.
+
+### When Call Site Expands Under Formatter
+
+**Principle:** When a call site consistently takes 5+ lines after opinionated formatting, the call has too many parameters for inline use. Black's algorithm tries to fit calls on one line, falling back to one-arg-per-line with keyword arguments expanding aggressively. A function that "looks fine" hand-formatted but explodes under Black has an API surface problem, not a formatting problem. Extract a helper whose defaults encode common kwargs as policy — this reduces Black expansion by collapsing keyword arguments into the helper's signature.
+
+**Project instance:** Raw `subprocess.run()` with keyword args expands to 5-6 lines under Black. `_git()` collapses stdout calls to 1 line, but callers bypassed it when they needed returncode. `_git_ok()` covers the returncode case, eliminating the bypass pattern.
+
+### When Raising Exceptions for Expected Conditions
+
+**Principle:** Exception handling is for unexpected or exceptional events, not normal program states. Using broad exception types (`ValueError`) for expected conditions masks legitimate bugs under the same `except` clause — the handler cannot distinguish a real ValueError from the expected-condition signal. Custom exception classes make the distinction explicit. Source: charlax/antipatterns error-handling guide, Real Python EAFP/LBYL.
+
+**Project instance:** `try: _git("rev-parse"...) except CalledProcessError:` used to check branch existence — replaced with `_git_ok()` boolean. `ValueError` raised for expected conditions (no session found, multiple matches) — replaced with custom exception classes (`SessionNotFoundError`). Custom classes also properly satisfy lint rules about hardcoded exception messages, eliminating the `msg` variable circumvention pattern.
+
+### When Adding Error Handling to Call Chain
+
+**Principle:** Each layer in the error handling chain has one responsibility. Failure site: collect context, raise typed exception. Top level: display and exit. When both layers print, you get duplicate output or conflicting messages. The `raise from` chain preserves the causal chain without duplicating display logic.
+
+**Project instance:** Double error handling in cli.py — exceptions caught and messages printed at both the failure site and a top-level handler. Rule: context collection at the failure site, display at the top level, never both.

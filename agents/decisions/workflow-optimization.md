@@ -74,15 +74,15 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Impact:** Eliminates redundant analysis overhead.
 
-### When Reusing Vet Agent Context
+### When Reusing Review Agent Context
 
 **Decision Date:** 2026-02-01
 
-**Decision:** Leverage vet agent context for fixes instead of launching new agents.
+**Decision:** Leverage review agent context for fixes instead of launching new agents.
 
-**Anti-pattern:** When removal agent makes mistakes and vet catches them, launching a new fix agent (which re-reads everything)
+**Anti-pattern:** When removal agent makes mistakes and review catches them, launching a new fix agent (which re-reads everything)
 
-**Correct pattern:** If vet agent has context of what's wrong, leverage it. If caller also has context (from reading vet report), apply fixes directly.
+**Correct pattern:** If review agent has context of what's wrong, leverage it. If caller also has context (from reading review report), apply fixes directly.
 
 **Rationale:** Tier 1/2 pattern — caller reads report, applies fixes with full context. No need for another agent round-trip.
 
@@ -98,7 +98,7 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Correct pattern:** Two gates. Entry gate reads plan directory artifacts (existing outline can skip ceremony). Mid-stream gate re-checks complexity after outline production. Both internal to `/design` — preserves single entry point.
 
-**Evidence:** Outline-review-agent + design.md + design-vet-agent cost ~112K tokens for work that could have been done inline. Findings would have surfaced during editing.
+**Evidence:** outline-corrector + design.md + design-corrector cost ~112K tokens for work that could have been done inline. Findings would have surfaced during editing.
 
 ### When Design Resolves To Simple Execution
 
@@ -112,7 +112,7 @@ File count is a proxy — 7 files with independent additive changes can be simpl
 
 **Rationale:** Design can resolve complexity. A job correctly classified as Complex for design may produce Simple execution. The gate is subtractive (creates exit ramp), not additive (more ceremony).
 
-**Strongest signal:** All-prose phases with no feedback loop — execute inline from design outline. Delegation ceremony (agent startup, file re-reads, report write/read) exceeds edit cost. Evidence: error-handling runbook used 11 opus agents for ~250 lines of prose; plan-reviewer caught a regression *introduced* by the generation process.
+**Strongest signal:** All-prose phases with no feedback loop — execute inline from design outline. Delegation ceremony (agent startup, file re-reads, report write/read) exceeds edit cost. Evidence: error-handling runbook used 11 opus agents for ~250 lines of prose; runbook-corrector caught a regression *introduced* by the generation process.
 
 ## .Research and Methodology
 
@@ -164,19 +164,19 @@ File count is a proxy — 7 files with independent additive changes can be simpl
 
 ### When Choosing Model For Design Review
 
-**Decision Date:** 2026-02-04 (superseded by design-vet-agent)
+**Decision Date:** 2026-02-04 (superseded by design-corrector)
 
 **Original Decision:** Use `Task(subagent_type="general-purpose", model="opus")` for design review.
 
-**Current Decision:** Use `Task(subagent_type="design-vet-agent")` — dedicated agent with opus model.
+**Current Decision:** Use `Task(subagent_type="design-corrector")` — dedicated agent with opus model.
 
-**Anti-pattern:** Using vet-agent for design review (vet is implementation-focused — code quality, patterns, correctness).
+**Anti-pattern:** Using review-only agent for design review (review-only is implementation-focused — code quality, patterns, correctness).
 
 **Rationale:** General-purpose agent strengths (architecture analysis, multi-file exploration, complex investigation) align with design review needs.
 
-**Benefits:** Artifact-return pattern (detailed report to file), specialized review protocol, consistent with vet-agent/vet-fix-agent structure.
+**Benefits:** Artifact-return pattern (detailed report to file), specialized review protocol, consistent with review/correction agent structure.
 
-**Impact:** Three-agent vet system: vet-agent (code, sonnet), vet-fix-agent (code + fixes, sonnet), design-vet-agent (architecture, opus).
+**Impact:** Review/correction agents: corrector (code + fixes, sonnet), design-corrector (architecture, opus).
 
 ### When Brainstorming
 
@@ -208,23 +208,23 @@ File count is a proxy — 7 files with independent additive changes can be simpl
 
 **Anti-pattern:** Reviewing design content without checking referenced names exist on disk.
 
-**Evidence:** Opus review missed outline-review-agent vs runbook-outline-review-agent — two distinct agents.
+**Evidence:** Opus review missed outline-corrector vs runbook-outline-corrector — two distinct agents.
 
-### When Vet Catches Structural Issues
+### When Review Catches Structural Issues
 
-**Vet catches structure misalignments:**
+**Review catches structure misalignments:**
 
 **Decision Date:** 2026-02-04
 
-**Decision:** Vet agent validates file paths AND structural assumptions via Glob/Read during review.
+**Decision:** Review agent validates file paths AND structural assumptions via Glob/Read during review.
 
 **Anti-pattern:** Writing runbook steps based on assumed structure ("lines ~47-78") without reading actual files.
 
 **Example:** plan-adhoc Point 0.5 actually at line 95, plan-tdd uses "Actions:" not "Steps:".
 
-**Impact:** Prevented execution failures from incorrect section identification. Vet review with path validation is a blocker-prevention mechanism, not just quality check.
+**Impact:** Prevented execution failures from incorrect section identification. Review with path validation is a blocker-prevention mechanism, not just quality check.
 
-**Critical:** Always validate structural assumptions during vet reviews.
+**Critical:** Always validate structural assumptions during reviews.
 
 ## .Orchestration Patterns
 
@@ -250,11 +250,11 @@ File count is a proxy — 7 files with independent additive changes can be simpl
 
 **Decision Date:** 2026-02-04
 
-**Problem:** quiet-task.md says "NEVER commit unless task explicitly requires" while prepare-runbook.py appends "Commit all changes before reporting success".
+**Problem:** artisan.md says "NEVER commit unless task explicitly requires" while prepare-runbook.py appends "Commit all changes before reporting success".
 
 **Root cause:** Baseline template designed for ad-hoc delegation (no auto-commit), but orchestrated execution requires clean tree after every step.
 
-**Fix:** Qualified quiet-task.md line 112 to add "or a clean-tree requirement is specified".
+**Fix:** Qualified artisan.md line 112 to add "or a clean-tree requirement is specified".
 
 **Broader lesson:** Appended context at bottom of agent file has weak positional authority vs bolded NEVER in core constraints section — contradictions resolve in favor of the structurally prominent directive.
 
