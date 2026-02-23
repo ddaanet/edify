@@ -123,10 +123,11 @@
 - [ ] **Upstream skills field** — PR/issue for missing skills frontmatter | sonnet
 - [ ] **Infrastructure scripts** — History tooling + agent-core script rewrites | sonnet
 
-- [ ] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet
+- [!] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet
   - Plan: handoff-cli-tool | Status: designed (outline reviewed 6 rounds, ready for runbook)
   - `_session` group (handoff, status, commit)
   - Discussion conclusions baked into outline: amend, git passthrough, deviation-only output, submodule labeling
+  - Blocked on: Phase-scoped agent context (mixed-type runbook needs per-phase agent generation)
 
 - [x] **Deliverable review: remember-skill-update** — `/deliverable-review plans/remember-skill-update` | opus | restart
 - [ ] **UserPromptSubmit topic detection hook** — Phase 7 analysis recommends this as highest-impact recall improvement | sonnet
@@ -140,11 +141,6 @@
 - [ ] **Merge artifact validation** → `merge-artifact-validation` — post-merge orphan detection in `_worktree merge` | sonnet
   - Plan: worktree-merge-resilience | Diagnostic: `plans/worktree-merge-resilience/diagnostic.md`
   - New instance found: `6086650e` merge produced 6 orphaned bullets in learnings.md (headingless, under wrong entry). Brief: `plans/worktree-merge-resilience/brief.md`
-
-- [ ] **Session CLI tool** → `session-cli-tool` — `/runbook plans/handoff-cli-tool/outline.md` | sonnet
-  - Plan: handoff-cli-tool | Status: designed (outline reviewed 5 rounds, ready for runbook)
-  - `_session` group (handoff, status, commit)
-  - New requirement: commit subcommand must output shortened commit IDs
 
 - [ ] **Phase-scoped agent context** → `phase-scoped-agents` — `/design` | sonnet
   - prepare-runbook.py emits per-phase agents with phase-scoped shared context instead of one agent per runbook
