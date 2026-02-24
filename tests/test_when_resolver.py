@@ -115,6 +115,82 @@ def test_trigger_mode_resolves(tmp_path: Path) -> None:
     assert "# When Writing Mock Tests" in result
 
 
+def test_trigger_fuzzy_heading_match(tmp_path: Path) -> None:
+    """Fuzzy fallback resolves heading with missing articles."""
+    index_file = tmp_path / "test_index.md"
+    index_file.write_text(
+        "## workflow-planning\n"
+        "\n"
+        "/when adding a new variant to enumerated system | grep downstream\n"
+    )
+
+    decisions_dir = tmp_path / "decisions"
+    decisions_dir.mkdir()
+
+    decision_file = decisions_dir / "workflow-planning.md"
+    decision_file.write_text(
+        "# Workflow Planning\n"
+        "\n"
+        "## Some Other Section\n"
+        "\n"
+        "Other content.\n"
+        "\n"
+        "### When Adding A New Variant To An Enumerated System\n"
+        "\n"
+        "Grep downstream enumeration sites.\n"
+        "\n"
+        "Check all switch/match statements.\n"
+        "\n"
+        "### Another Section\n"
+        "\n"
+        "More content.\n"
+    )
+
+    # _build_heading produces "When Adding A New Variant To Enumerated System"
+    # Actual heading has "An" that trigger omits
+    # Fuzzy fallback should find the correct heading
+    result = resolve(
+        "when",
+        "adding a new variant to enumerated system",
+        str(index_file),
+        str(decisions_dir),
+    )
+    assert "Grep downstream enumeration sites" in result
+    assert "Check all switch/match statements" in result
+
+
+def test_trigger_fuzzy_heading_match_how_operator(tmp_path: Path) -> None:
+    """Fuzzy fallback works for /how operator with abbreviated trigger."""
+    index_file = tmp_path / "test_index.md"
+    index_file.write_text(
+        "## procedures\n\n/how configure script entry points | pyproject scripts\n"
+    )
+
+    decisions_dir = tmp_path / "decisions"
+    decisions_dir.mkdir()
+
+    decision_file = decisions_dir / "procedures.md"
+    decision_file.write_text(
+        "# Procedures\n"
+        "\n"
+        "## How to Configure the Script Entry Points\n"
+        "\n"
+        "Add project.scripts to pyproject.toml.\n"
+        "\n"
+        "## Other Section\n"
+        "\n"
+        "Other content.\n"
+    )
+
+    result = resolve(
+        "how",
+        "configure script entry points",
+        str(index_file),
+        str(decisions_dir),
+    )
+    assert "Add project.scripts to pyproject.toml" in result
+
+
 def test_resolve_output_format(tmp_path: Path) -> None:
     """Output formatting combines content and navigation links."""
     index_file = tmp_path / "test_index.md"

@@ -239,15 +239,7 @@ def _resolve_trigger(
     heading_text = _build_heading(matching_entry.operator, matching_entry.trigger)
     file_content = _read_file(file_path)
 
-    actual_heading = None
-    for line in file_content.split("\n"):
-        line_stripped = line.strip()
-        if line_stripped.startswith("#") and _heading_matches(
-            line_stripped, heading_text
-        ):
-            actual_heading = line_stripped
-            break
-
+    actual_heading = _find_heading(heading_text, file_content)
     if not actual_heading:
         msg = f"Section not found in {file_path}: {heading_text}"
         raise ResolveError(msg)
@@ -291,6 +283,44 @@ def _heading_matches(line: str, target_heading: str) -> bool:
     target_text = target_stripped.lstrip("#").strip()
 
     return line_text == target_text
+
+
+def _find_heading(heading_text: str, file_content: str) -> str | None:
+    """Find heading in file content, with fuzzy fallback.
+
+    Tries exact case-insensitive match first. Falls back to fuzzy scoring
+    when exact match fails (e.g., trigger text omits articles present in heading).
+
+    Args:
+        heading_text: Expected heading text (without # markers)
+        file_content: Full file content to search
+
+    Returns:
+        The matching heading line (with # markers) or None
+    """
+    heading_lines: list[str] = []
+    for line in file_content.split("\n"):
+        line_stripped = line.strip()
+        if line_stripped.startswith("#"):
+            if _heading_matches(line_stripped, heading_text):
+                return line_stripped
+            heading_lines.append(line_stripped)
+
+    if not heading_lines:
+        return None
+
+    # Fuzzy fallback: score all headings against expected text
+    target_text = heading_text.lstrip("#").strip()
+    candidates = [h.lstrip("#").strip() for h in heading_lines]
+    matches = fuzzy.rank_matches(target_text, candidates, limit=1)
+    if not matches:
+        return None
+
+    matched_text, _score = matches[0]
+    for h in heading_lines:
+        if h.lstrip("#").strip() == matched_text:
+            return h
+    return None
 
 
 def _build_heading(operator: str, trigger: str) -> str:

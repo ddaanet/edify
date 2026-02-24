@@ -133,10 +133,6 @@
   - Two manifestations: (1) WT Tasks entries dropped, (2) branch-only content appended to wrong section (Blockers)
   - Related: planstate-delivered (plan: planstate-delivered) would prevent "completed but no record" class
 
-- [ ] **Fix when-resolve.py heading lookup** → `when-resolve-fix` — fuzzy heading match in `_resolve_trigger()` instead of exact | sonnet
-  - Plan: when-resolve-fix | Status: requirements (problem.md exists)
-  - Scope: `src/claudeutils/when/resolver.py` `_resolve_trigger()` lines 241-253
-
 ## Blockers / Gotchas
 
 **Never run `git merge` without sandbox bypass:**
