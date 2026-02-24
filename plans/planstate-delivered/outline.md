@@ -40,44 +40,48 @@
 
 ### Phase Breakdown
 
-**Phase 1: Core inference (TDD)** — `inference.py` + tests (D-3, D-4, D-5)
-- Add `lifecycle.md` parsing to `_determine_status`: read file, parse last line, extract state keyword. Valid states: `review-pending`, `rework`, `reviewed`, `delivered`. Line format: `{ISO-date} {state} — {source}` (D-3)
-- `lifecycle.md` present → post-ready state from last entry; absent → existing pre-ready logic unchanged (D-4)
-- Add `lifecycle.md` to `_collect_artifacts`
-- Extend `_derive_next_action` with 4 new match arms (D-5): `review-pending` → `/deliverable-review`, `rework` → `""`, `reviewed` → `""`, `delivered` → `""`
-- Note: `PlanState.status` is `str` (not enum-constrained) — new status values require no model changes
-- Tests: each post-ready state detection, lifecycle.md with multiple entries (last wins), review loop cycle (rework → review-pending → reviewed — no file deletion needed), coexistence with pre-ready artifacts, missing/empty lifecycle.md fallback, malformed line handling
+**Phase 1: Core inference (TDD)** — COMPLETE (Cycles 1.1–1.5, commits `7d542b80`..`46c9e2e2`)
+- `_parse_lifecycle_status()` — parses lifecycle.md, extracts last valid state
+- `_determine_status()` — lifecycle-first priority (overrides pre-ready)
+- `_collect_artifacts()` — includes `lifecycle.md`
+- `_derive_next_action()` — template dict with `review-pending` → `/deliverable-review`; rework/reviewed/delivered → `""`
+- Tests: 8 cases covering status detection, priority override, review loop (last entry wins), edge cases (empty, malformed, invalid state, trailing newlines)
 
 **Phase 2: Merge integration (TDD)** — `merge.py` + tests (D-2 worktree path)
-- After successful merge commit, scan plan dirs for `lifecycle.md` where last entry is `reviewed`
+- **Insertion point:** In `merge()` after `_phase4_merge_commit_and_precommit` returns successfully. All 5 state paths (clean, merged, parent_resolved, parent_conflicts, submodule_conflicts) converge through `_phase4`, so a single call site after `_phase4` in each branch (or a helper called from `merge()` after the phase-4 call) covers all paths.
+- Scan plan dirs under `plans/` for `lifecycle.md` where last entry is `reviewed`
 - Append `{date} delivered — _worktree merge` entry using same line format as D-3
-- Must use lifecycle.md parsing from Phase 1 (or shared utility) to detect current state
+- Use `_parse_lifecycle_status()` from `inference.py` to detect current state (already exists from Phase 1)
 - Test: merge appends delivered, skips non-reviewed plans, handles plans without lifecycle.md, handles plans with lifecycle.md in non-reviewed state
 - Note: In-main delivery path handled by deliverable-review skill (Phase 3), not merge
 
-**Phase 3: Skill/prose updates (general)** — D-2 in-main path, D-6, D-7, lifecycle entry creation triggers
+**Phase 3: Skill/prose updates (inline from outline)** — D-2 in-main path, D-6, D-7, lifecycle entry creation triggers
+- All-prose edits, no feedback loop, all decisions pre-resolved — qualifies for inline execution per "design resolves to simple execution" decision. No runbook needed.
+- Model: **opus** (skills and fragments are LLM-consumed instructions — per "When Selecting Model For Prose Artifact Edits")
 - `orchestrate/SKILL.md`: append `review-pending` entry to `lifecycle.md` at orchestration completion (after final step commit)
 - `deliverable-review/SKILL.md`: append `reviewed` (pass) or `rework` (fail) entry; on re-review of plan in `rework` state, append `review-pending` entry first (re-entering review loop — no deletion needed); for in-main plans (no worktree, execution on main), also append `delivered` after `reviewed` (D-2 in-main path)
-- `execute-rule.md`: update Unscheduled Plans to exclude `delivered` (D-6); update terminology to grounded names (D-7); update status values list if present
+- `execute-rule.md`: update Unscheduled Plans to exclude `delivered` (D-6, agent-side filtering — instruction tells agent to omit `delivered` from display); update terminology to grounded names (D-7); update status values list from `requirements, designed, planned, ready` to include post-ready states
+- `agent-core/skills/prioritize/SKILL.md`: update plan status list (currently hardcodes `requirements/designed/planned/ready`)
 
 ### Scope
 
-**IN:** `_determine_status`, `_derive_next_action`, `_collect_artifacts`, `lifecycle.md` file format and parsing, `_worktree merge` delivered entry, skill updates (orchestrate + deliverable-review), `execute-rule.md` terminology, tests.
+**IN:** `_worktree merge` delivered entry, skill updates (orchestrate + deliverable-review + prioritize), `execute-rule.md` terminology + filtering, tests for merge integration.
 
-**OUT:** Deliverable review self-review shortcut logic (already exists in deliverable-review skill — this job adds lifecycle entry creation, not shortcut criteria). CLI-level filtering of delivered plans from display (agent-side in execute-rule.md, not planstate code). Review report format changes. Rework automation (manual fix cycle).
+**OUT:** Phase 1 (complete). Deliverable review self-review shortcut logic (already exists — this job adds lifecycle entry creation, not shortcut criteria). CLI-level filtering of delivered plans from display (agent-side in execute-rule.md, not planstate code). Review report format changes. Rework automation (manual fix cycle).
 
 **Resume edge case:** lifecycle.md is append-only — interrupted writes leave at most a partial last line. Recovery: truncate partial line, re-append. No deletion-based state transitions, so no stuck-state risk from the review loop.
 
 ### Affected Files
 
-- `src/claudeutils/planstate/inference.py` — lifecycle.md parsing, post-ready state detection, next-action extensions
+- `src/claudeutils/planstate/inference.py` — DONE (Phase 1 complete, provides `_parse_lifecycle_status` for Phase 2)
 - `src/claudeutils/planstate/models.py` — no changes needed (`PlanState.status` is `str`, not enum-constrained)
-- `tests/test_planstate_inference.py` — new test cases for all 4 post-ready states
-- `src/claudeutils/worktree/merge.py` — delivered entry creation post-merge
-- `tests/test_worktree_merge.py` or new test file — merge lifecycle tests
-- `agent-core/skills/orchestrate/SKILL.md` — review-pending entry creation
-- `agent-core/skills/deliverable-review/SKILL.md` — reviewed/rework entry creation, in-main delivered path
-- `agent-core/fragments/execute-rule.md` — terminology + delivered filtering
+- `tests/test_planstate_inference.py` — DONE (Phase 1 complete)
+- `src/claudeutils/worktree/merge.py` — delivered entry creation post-merge (Phase 2)
+- `tests/test_worktree_merge.py` or new test file — merge lifecycle tests (Phase 2)
+- `agent-core/skills/orchestrate/SKILL.md` — review-pending entry creation (Phase 3)
+- `agent-core/skills/deliverable-review/SKILL.md` — reviewed/rework entry creation, in-main delivered path (Phase 3)
+- `agent-core/fragments/execute-rule.md` — terminology + delivered filtering + status values list (Phase 3)
+- `agent-core/skills/prioritize/SKILL.md` — plan status list update (Phase 3)
 
 ### Open Questions
 
