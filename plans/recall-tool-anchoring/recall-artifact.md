@@ -92,3 +92,45 @@
 
 - Ambient context (100%) outperformed skill invocation (79%)
 - Skills not triggered 56% of cases — decision about "when to invoke" is failure point
+
+## When Declaring Phase Type
+
+**Source:** `agents/decisions/pipeline-contracts.md`
+**Relevance:** Phase typing for this runbook — inline for prose edits (D+B restructure), general for scripts/hook.
+
+- Inline eligibility: no runtime feedback loop, prose edits, all decisions pre-resolved
+- Inline phases → orchestrator-direct execution (no Task dispatch)
+- TDD/general → per-step agent delegation
+
+## When Selecting Model For Prose Artifact Edits
+
+**Source:** `agents/decisions/pipeline-contracts.md`
+**Relevance:** D+B restructure edits skills/agents — architectural artifacts requiring opus regardless of edit simplicity.
+
+- Skills, fragments, agent definitions, design documents → opus
+- Anti-pattern: assigning sonnet/haiku based on "edit complexity" rather than artifact type
+
+## When Bootstrapping Self-Referential Improvements
+
+**Source:** `agents/decisions/workflow-planning.md`
+**Relevance:** Scripts must exist before D+B references them. Bootstrap one D+B edit before rollout.
+
+- Apply each improvement before using that tool in subsequent steps
+- Phase ordering follows tool-usage dependency graph, not logical grouping
+
+## When Agent Context Has Conflicting Signals
+
+**Source:** `agents/decisions/orchestration-execution.md`
+**Relevance:** Common Context recall must be phase-neutral. D+B edit specifics belong in step/phase instructions only.
+
+- Common context is persistent ambient signal stronger than one-time step input
+- At haiku capability, persistent signal wins over per-step instructions
+
+## When Writing Rules For Different Models
+
+**Source:** `agents/decisions/prompt-structure-research.md`
+**Relevance:** D+B edits are consumed by haiku/sonnet/opus agents. Format instructions per consumer tier.
+
+- Haiku: explicit steps, DO NOT examples, ⚠️ markers
+- Sonnet: clear bullets with context
+- Opus: concise prose, trust inference
