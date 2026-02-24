@@ -305,7 +305,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /how write green phase descriptions
 /when verifying model analysis results
 /how implement domain validation
-/when adding a new variant to enumerated system | grep downstream enumeration sites
+/when adding a new variant to an enumerated system | grep downstream enumeration sites
 
 ## agents/decisions/workflow-core.md
 

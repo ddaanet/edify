@@ -6,6 +6,7 @@ from pathlib import Path
 
 import click
 
+from claudeutils.planstate.inference import _parse_lifecycle_status
 from claudeutils.worktree.git_ops import _git, _is_branch_merged, wt_path
 from claudeutils.worktree.merge_state import (
     _detect_merge_state,
@@ -23,6 +24,9 @@ def _append_lifecycle_delivered(plans_dir: Path) -> None:
     today = datetime.now(UTC).date().isoformat()
     for plan_dir in sorted(plans_dir.iterdir()):
         if not plan_dir.is_dir():
+            continue
+        status = _parse_lifecycle_status(plan_dir)
+        if status != "reviewed":
             continue
         lifecycle_file = plan_dir / "lifecycle.md"
         with lifecycle_file.open("a") as f:
