@@ -1,6 +1,7 @@
 """Tests for remerge_session_md (phase 4 structural merge)."""
 
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -9,31 +10,52 @@ from click.testing import CliRunner
 
 from claudeutils.worktree.cli import worktree
 from claudeutils.worktree.remerge import remerge_session_md
+from claudeutils.worktree.resolve import _merge_session_contents
 
 
-def _init_repo(path: Path) -> None:
-    """Initialize a git repo with user config."""
-    subprocess.run(["git", "init"], cwd=path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "config", "user.name", "Test"],
-        cwd=path,
-        check=True,
-        capture_output=True,
+def _git_helper(*args: str, cwd: Path | None = None) -> str:
+    """Run git command, return stdout."""
+    r = subprocess.run(
+        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True
     )
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.com"],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
+    return r.stdout.strip()
 
 
-def _commit(path: Path, msg: str) -> None:
-    """Stage all and commit."""
-    subprocess.run(["git", "add", "."], cwd=path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", msg], cwd=path, check=True, capture_output=True
+def _write_commit(path: Path, filepath: str, content: str, msg: str) -> None:
+    """Write file, stage, commit."""
+    (path / filepath).parent.mkdir(parents=True, exist_ok=True)
+    (path / filepath).write_text(content)
+    _git_helper("add", filepath, cwd=path)
+    _git_helper("commit", "-m", msg, cwd=path)
+
+
+# --- Pure function tests ---
+
+
+def test_merge_session_modified_blocker_keeps_ours() -> None:
+    """Blocker with same first line on both sides → ours version kept."""
+    ours = (
+        "# Session: Test\n"
+        "\n"
+        "## Blockers / Gotchas\n"
+        "\n"
+        "- Known issue X\n"
+        "  Original details from main\n"
     )
+    theirs = (
+        "# Session: Branch\n"
+        "\n"
+        "## Blockers / Gotchas\n"
+        "\n"
+        "- Known issue X\n"
+        "  Modified details from branch\n"
+    )
+    result = _merge_session_contents(ours, theirs)
+    assert "Original details from main" in result
+    assert "Modified details from branch" not in result
+
+
+# --- Remerge unit tests ---
 
 
 MAIN_SESSION = (
@@ -73,7 +95,7 @@ FOCUSED_SESSION = (
 
 
 def test_remerge_session_md_structural_merge(
-    tmp_path: Path, monkeypatch: MonkeyPatch
+    tmp_path: Path, monkeypatch: MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """remerge_session_md structurally merges session.md using HEAD/MERGE_HEAD.
 
@@ -83,12 +105,8 @@ def test_remerge_session_md_structural_merge(
     """
     repo = tmp_path / "repo"
     repo.mkdir()
-    _init_repo(repo)
-
-    # Base commit
-    (repo / "agents").mkdir()
-    (repo / "agents" / "session.md").write_text(MAIN_SESSION)
-    _commit(repo, "Base")
+    init_repo(repo)
+    _write_commit(repo, "agents/session.md", MAIN_SESSION, "Base")
 
     # Branch: focused session with new task
     subprocess.run(
@@ -97,15 +115,13 @@ def test_remerge_session_md_structural_merge(
         check=True,
         capture_output=True,
     )
-    (repo / "agents" / "session.md").write_text(FOCUSED_SESSION)
-    _commit(repo, "Branch: focused session")
+    _write_commit(repo, "agents/session.md", FOCUSED_SESSION, "Branch: focused session")
 
-    # Main: update session (diverge so merge isn't fast-forward)
+    # Main: diverge so merge isn't fast-forward
     subprocess.run(
         ["git", "checkout", "main"], cwd=repo, check=True, capture_output=True
     )
-    (repo / "dummy.txt").write_text("force divergence\n")
-    _commit(repo, "Main: diverge")
+    _write_commit(repo, "dummy.txt", "force divergence\n", "Main: diverge")
 
     # Start merge (--no-commit keeps MERGE_HEAD)
     subprocess.run(
@@ -135,16 +151,13 @@ def test_remerge_session_md_structural_merge(
 
 
 def test_remerge_session_md_skips_without_merge_head(
-    tmp_path: Path, monkeypatch: MonkeyPatch
+    tmp_path: Path, monkeypatch: MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """remerge_session_md is a no-op when MERGE_HEAD is absent."""
     repo = tmp_path / "repo"
     repo.mkdir()
-    _init_repo(repo)
-
-    (repo / "agents").mkdir()
-    (repo / "agents" / "session.md").write_text(MAIN_SESSION)
-    _commit(repo, "Base")
+    init_repo(repo)
+    _write_commit(repo, "agents/session.md", MAIN_SESSION, "Session commit")
 
     monkeypatch.chdir(repo)
     original = (repo / "agents" / "session.md").read_text()
@@ -153,15 +166,12 @@ def test_remerge_session_md_skips_without_merge_head(
 
 
 def test_remerge_session_md_skips_without_session_file(
-    tmp_path: Path, monkeypatch: MonkeyPatch
+    tmp_path: Path, monkeypatch: MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
     """remerge_session_md returns without error when no session.md on disk."""
     repo = tmp_path / "repo"
     repo.mkdir()
-    _init_repo(repo)
-
-    (repo / "dummy.txt").write_text("init\n")
-    _commit(repo, "Base")
+    init_repo(repo)
 
     # Create a branch and merge to get MERGE_HEAD
     subprocess.run(
@@ -170,13 +180,11 @@ def test_remerge_session_md_skips_without_session_file(
         check=True,
         capture_output=True,
     )
-    (repo / "branch.txt").write_text("branch\n")
-    _commit(repo, "Branch")
+    _write_commit(repo, "branch.txt", "branch\n", "Branch")
     subprocess.run(
         ["git", "checkout", "main"], cwd=repo, check=True, capture_output=True
     )
-    (repo / "main.txt").write_text("main\n")
-    _commit(repo, "Main diverge")
+    _write_commit(repo, "main.txt", "main\n", "Main diverge")
     subprocess.run(
         ["git", "merge", "--no-commit", "--no-ff", "test-br"],
         cwd=repo,
@@ -190,22 +198,6 @@ def test_remerge_session_md_skips_without_session_file(
 
 
 # --- Pipeline integration tests ---
-
-
-def _git_helper(*args: str, cwd: Path | None = None) -> str:
-    """Run git command, return stdout."""
-    r = subprocess.run(
-        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True
-    )
-    return r.stdout.strip()
-
-
-def _write_commit(path: Path, filepath: str, content: str, msg: str) -> None:
-    """Write file, stage, commit."""
-    (path / filepath).parent.mkdir(parents=True, exist_ok=True)
-    (path / filepath).write_text(content)
-    _git_helper("add", filepath, cwd=path)
-    _git_helper("commit", "-m", msg, cwd=path)
 
 
 def _setup_merge_worktree(repo: Path, slug: str = "test-merge") -> Path:

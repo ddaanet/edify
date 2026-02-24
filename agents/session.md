@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-24
 
-**Status:** Worktree session.md merge fix implemented and reviewed. Branch ready for merge to main.
+**Status:** Worktree session.md merge fix implemented, reviewed, deliverable-reviewed. Branch ready for merge to main.
 
 ## Completed This Session
 
@@ -17,6 +17,13 @@
 - Review by corrector: ready, one pre-existing docstring fix applied
 - All 13 session resolution tests pass, 2 learnings merge tests pass, lint clean
 
+**Deliverable review + fixes:**
+- Deliverable review: 0 critical, 0 major, 3 minor → `reviewed`
+- Fix 1: Added `test_merge_session_modified_blocker_keeps_ours` — explicit test for ours-wins blocker dedup (outline scenario 4)
+- Fix 2: Replaced local `_init_repo`/`_commit` helpers in remerge test with `init_repo` shared fixture + `_write_commit`
+- 12/12 tests pass after fixes
+- Lifecycle: `plans/worktree-session-merge/lifecycle.md` created with `reviewed` entry
+
 ## Pending Tasks
 
 _None._
@@ -25,3 +32,4 @@ _None._
 
 - `plans/worktree-session-merge/outline.md` — approach, decisions D-1 through D-5
 - `plans/worktree-session-merge/reports/review.md` — corrector review
+- `plans/worktree-session-merge/reports/deliverable-review.md` — deliverable review (0C/0M/3m)
