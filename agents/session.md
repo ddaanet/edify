@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-24
 
-**Status:** Recall tool anchoring designed (outline through 3 discussion rounds). Two new pending tasks spawned. wt-merge-dirty-tree active.
+**Status:** Task-classification designed (8 discussion rounds, `/prime` skill + two-section task list). wt-merge-dirty-tree merged and removed.
 
 ## Completed This Session
 
@@ -18,6 +18,13 @@
   - Outline through 3 discussion rounds: D+B hybrid application, reference manifest format, throwaway prototype
   - Key decisions: reference manifest forces tool-anchoring structurally (format requires resolution call); `_recall diff` anchors write-side gates; `_recall generate` deferred (entry selection is cognitive)
   - Recall artifact written with 11 entries from 6 decision files
+- Merged `wt-merge-dirty-tree` — dirty-tree guard fix on main, worktree removed
+- Designed task-classification (`plans/task-classification/`)
+  - Feature 1: `/prime` skill — loads plan artifacts + chain-calls `/recall` for ad-hoc plan work outside workflow skills
+  - Feature 2: Two-section task list — "In-tree Tasks" + "Worktree Tasks" (static planning signal, no move semantics)
+  - Design evolution: @ref preload → SessionStart hook → scripted gate → all dropped → explicit `/prime` skill invocation
+  - Key insight: @ref expansion and Read calls are cumulative (not deduplicated) — drove decision away from implicit injection
+  - Outline reviewed by corrector: 0 critical, 3 major fixed, 3 minor fixed
 
 ## Pending Tasks
 
@@ -77,6 +84,10 @@
   - Complementary to recall pass (cheap first layer vs deep pipeline integration)
 - [ ] **Prioritize script assistance** — Automate mechanical parts of prioritization scoring | sonnet
 
+- [ ] **Task classification** — `/runbook plans/task-classification/outline.md` | sonnet
+  - Plan: task-classification | Status: designed (outline reviewed, ready for runbook)
+  - `/prime` skill (ad-hoc plan context) + two-section task list (In-tree / Worktree Tasks)
+  - Scope: `session.py`, `resolve.py`, `aggregation.py`, `session_structure.py`, handoff skill, execute-rule.md
 - [ ] **Recall tool anchoring** — `/design plans/recall-tool-anchoring/outline.md` | sonnet
   - Plan: recall-tool-anchoring | Status: designed (outline reviewed, ready for prototype)
   - Throwaway prototype: 3 shell scripts (check, resolve, diff) + D+B restructure of 8 skills/agents + PreToolUse hook
@@ -114,9 +125,6 @@
   - Scope: `src/claudeutils/when/resolver.py` `_resolve_trigger()` lines 241-253
 ## Worktree Tasks
 
-- [ ] **Fix wt merge dirty-tree guard** → `wt-merge-dirty-tree` — Remove worktree-side clean-tree check from merge | sonnet
-  - Plan: wt-merge-dirty-tree | Bug: merge blocks on dirty worktree even though it merges branch ref not working tree
-  - Fix target: `src/claudeutils/worktree/merge.py`
 
 ## Blockers / Gotchas
 
@@ -162,15 +170,7 @@
 
 ## Next Steps
 
-Merge wt-merge-dirty-tree when done. Recall tool anchoring prototype is ready to execute (outline finalized). Next real work: recall-tool-anchoring prototype, execute orchestrate-evolution, or WT merge session loss dx.
-
-**Session.md cleanup needed (commit `d170244b`):**
-Handoff cleaned most artifacts but residual issues remain from 4 worktree merges in one session. The autostrategy appended branch content without deduplicating or placing in correct sections. Specific items for next-session validation:
-- Verify no duplicate task entries (autostrategy duplicated "Orchestrate evolution" across Pending + WT Tasks in earlier merge `a78ba867`, cleaned manually)
-- Verify Blockers section has no misplaced learnings (9 `[from: worktree]` entries were appended to Blockers by merge, removed in `d170244b`)
-- Verify completed tasks `[x]` are not lingering in Pending (3 were: WT new sentinel copy, Deliverable review planstate-delivered, Planstate delivered status — removed in `d170244b`)
-- Verify blank line cleanup (extra blanks from merge resolution cleaned)
-- Check `planstate-delivered` plan status shows `reviewed` not `designed` (CLI confirms `reviewed`)
+Task-classification designed and ready for runbook. Recall tool anchoring prototype also ready. Next: task-classification runbook, recall-tool-anchoring prototype, or execute orchestrate-evolution.
 
 ## Reference Files
 
@@ -187,3 +187,5 @@ Handoff cleaned most artifacts but residual issues remain from 4 worktree merges
 - `plans/recall-tool-anchoring/outline.md` — Recall gate tool-anchoring design (D+B + reference manifest)
 - `plans/recall-tool-anchoring/recall-artifact.md` — 11 entries, reference manifest format
 - `plans/recall-tool-anchoring/reports/recall-gate-inventory.md` — 31 gates inventoried across 13 files
+- `plans/task-classification/outline.md` — `/prime` skill + two-section task list design (8 rounds, reviewed)
+- `plans/task-classification/reports/outline-review.md` — Corrector review (0 critical, 3 major fixed)
