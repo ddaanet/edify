@@ -123,20 +123,11 @@
   - Continuation protocol preserved
   - Keep: deliverable review assessment, progress tracking, error escalation
 
-- Step 3.2: Refactor agent updates
-  - Add deslop directives before Step 3 (Refactoring Protocol)
-  - Add factorization-before-splitting rule to Evaluation section
-  - Add resume pattern to return protocol
-  - ~30 lines of additions to existing 244-line agent
+- Step 3.2: Refactor agent and delegation fragment updates
+  - **refactor.md:** Add deslop directives before Step 3 (Refactoring Protocol), factorization-before-splitting rule to Evaluation section, resume pattern to return protocol (~30 lines of additions to existing 244-line agent)
+  - **delegation.md:** Sonnet default (remove haiku default), remove "Never use opus for straightforward execution" (covered by skill), add file reference pattern and agent caching note, update quiet execution pattern references
 
-- Step 3.3: Delegation fragment updates
-  - Model selection: sonnet default (remove haiku default)
-  - Remove "Never use opus for straightforward execution" (covered by skill)
-  - Add: orchestrator provides file references, never inline content
-  - Add: plan-specific agents cache common context
-  - Update quiet execution pattern references
-
-**Complexity:** High (Step 3.1), Low (Steps 3.2, 3.3)
+**Complexity:** High (Step 3.1), Low (Step 3.2)
 
 ### Phase 4: TDD agent generation (type: tdd)
 
@@ -206,7 +197,7 @@ The following recommendations should be incorporated during full runbook expansi
 
 **Consolidation candidates:**
 - Phase 5 (1 step, Medium complexity) is a valid standalone phase — opus model differs from Phase 4's sonnet, and SKILL.md extension logically follows TDD infrastructure. Preserve as separate phase.
-- Steps 3.2 and 3.3 are Low complexity but grouped correctly with Step 3.1 (all prose/architectural artifacts requiring opus).
+- Step 3.2 (refactor agent + delegation fragment) is Low complexity but grouped correctly with Step 3.1 (all prose/architectural artifacts requiring opus).
 
 **Cycle expansion:**
 - Cycle 4.1 tests should target a new test file (`tests/test_prepare_runbook_tdd_agents.py`) to avoid pushing `test_prepare_runbook_agents.py` past 400 lines. Phase 1 cycles own the existing test file; Phase 4 creates a new one.
