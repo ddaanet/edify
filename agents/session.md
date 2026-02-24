@@ -107,6 +107,9 @@
 - [ ] **Fix validate-runbook.py false positives** — sonnet
   - model-tags: bash scripts under `agent-core/skills/` falsely flagged as prose artifacts
   - lifecycle: pre-existing files flagged as "modified before creation"
+- [ ] **Fix wt merge dirty-tree guard** — Remove worktree-side clean-tree check from merge | sonnet
+  - Plan: wt-merge-dirty-tree | Bug: merge blocks on dirty worktree even though it merges branch ref not working tree
+  - Fix target: `src/claudeutils/worktree/merge.py`
 
 ## Worktree Tasks
 
