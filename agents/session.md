@@ -1,31 +1,27 @@
 # Session Handoff: 2026-02-24
 
-**Status:** Prioritized backlog. Merged orchestrate-evolution (recall skill tweak only — runbook planning not started). planstate-delivered worktree active.
+**Status:** Prioritized backlog. 3 worktrees merged (orchestrate-evolution ×2, sentinel-copy, planstate-delivered). wt-merge-dirty-tree active.
 
 ## Completed This Session
 
 - Prioritization report — 37 tasks scored via WSJF, report at `plans/reports/prioritization-2026-02-24.md`
   - Top 5: orchestrate evolution (5.3), session CLI tool (4.0, blocked), planstate delivered (3.8), session.md validator (2.6), WT merge session loss dx (2.6)
-  - Parallel batch A identified: 4 independent sonnet tasks
-- Created worktrees: orchestrate-evolution, planstate-delivered
-- Discussion: test sentinel versioning (rejected — local cache, not versionable), sentinel copy on wt new (accepted as task)
-- Merged `orchestrate-evolution` — recall skill tweak only (runbook planning not started in that worktree)
-  - Merge artifact: autostrategy duplicated task into Pending + kept in Worktree Tasks. Manually cleaned
+- Discussion: test sentinel versioning (rejected — local cache, not versionable)
+- Merged `orchestrate-evolution` (×2) — 1st: recall skill tweak. 2nd: runbook planning (11 commits, design amendments + 4-phase runbook + execution artifacts)
+- Merged `sentinel-copy` — `_worktree new` copies `tmp/.test-sentinel` to new worktrees
+- Merged `planstate-delivered` — lifecycle implementation (TDD), deliverable review (0 Critical, 2 Major fixed), new bug tasks spawned
+  - New tasks: execute orchestrate-evolution, fix prepare-runbook.py bugs, fix validate-runbook.py false positives, deliverable review auto-commit, fix when-resolve.py heading lookup
+- Created `wt-merge-dirty-tree` worktree — bug: merge blocks on dirty worktree (should only check main)
+- Post-merge validation: 4 merges checked, artifacts cleaned each time. Autostrategy still unreliable for session.md
 
 ## Pending Tasks
 
 - [ ] **Codebase sweep** — `/design plans/codebase-sweep/requirements.md` | sonnet
   - Plan: codebase-sweep | Status: requirements
   - _git_ok, _fail, exception cleanup — mechanical refactoring
-
-
-
-
 - [ ] **Deslop remaining skills** — Prose quality pass on skills not yet optimized | sonnet
 
 - [ ] **Diagnose compression detail loss** — RCA against commit `0418cedb` | sonnet
-
-
 - [ ] **Precommit python3 redirect** — `/design plans/precommit-python3-redirect/brief.md` | sonnet
   - PreToolUse hook: intercept python3/uv-run/ln patterns, redirect to correct invocations
 
@@ -74,8 +70,6 @@
   - Seed keyword table from 200+ memory-index triggers
   - Inject matching decision content via additionalContext on prompt submit
   - Complementary to recall pass (cheap first layer vs deep pipeline integration)
-
-
 - [ ] **Prioritize script assistance** — Automate mechanical parts of prioritization scoring | sonnet
 
 - [ ] **Consolidate recall tooling** — rename `when-resolve.py` → `claudeutils _recall`, remove `..file` syntax; phase out `/when` and `/how` as separate skills, ensure `/recall` covers reactive single-entry lookups; memory-index entry format changes from `/when`+`/how` prefixes → new format; update `src/claudeutils/validation/memory_index_checks.py` and `when` module accordingly | sonnet
@@ -85,14 +79,7 @@
   - Observed: Merge 1 (`f525d705`) dropped WT entry, Merge 2 (`c91c7628`) left orphan + malformed blocker. Pre-merge: `0c91d969`
   - Fix target: `src/claudeutils/worktree/merge.py` session autostrategy
   - Related: planstate-delivered (plan: planstate-delivered) would prevent "completed but no record" class
-- [ ] **Orchestrate evolution** — `/runbook plans/orchestrate-evolution/design.md` | sonnet
-  - Design complete with Phase 1 (foundation) + Phase 2 (ping-pong TDD), ready for runbook planning
-  - Insights input: ping-pong TDD agent pattern — alternating tester/implementer agents with mechanical RED/GREEN gates between handoffs. Tester holds spec context (can't mirror code structure), implementer holds codebase context (can't over-implement beyond test demands). Resume-based context preservation avoids startup cost per cycle
-  - Absorbs: Task agent guardrails — tool-call limits, regression detection, model escalation (haiku→sonnet→opus on capability mismatch) all additive. Design covers agent→user escalation and context-size heuristic but not inter-tier promotion or tool-call budgets
-  - Absorbs: RED pass protocol — classification taxonomy, blast radius procedure, defect impact evaluation. Design has remediation + escalation patterns but not formal classification or blast radius assessment
-
-- [x] **WT new sentinel copy** — Copy `tmp/.test-sentinel` during `_worktree new` | sonnet
-
+- [x] **Orchestrate evolution** — runbook planned (4 phases, 14 steps). Superseded by Execute task below
 - [ ] **Execute orchestrate-evolution** — `/orchestrate orchestrate-evolution` | sonnet | restart
   - 14 steps: 12 TDD cycles (sonnet) + 2 general steps (opus)
   - Phase 1: agent caching model (4 cycles)
@@ -109,14 +96,9 @@
   - lifecycle: pre-existing files flagged as "modified before creation"
 
 - [ ] **Deliverable review auto-commit** — after fixing all issues in deliverable-review, auto handoff and commit | sonnet
-- [x] **Deliverable review: planstate-delivered** — 0 Critical, 2 Major fixed inline, 3 Minor noted
-  - Plan: planstate-delivered | Status: reviewed
-  - Report: `plans/planstate-delivered/reports/deliverable-review.md`
 - [ ] **Fix when-resolve.py heading lookup** — fuzzy heading match in `_resolve_trigger()` instead of exact | sonnet
   - Plan: when-resolve-fix | Status: requirements (problem.md exists)
   - Scope: `src/claudeutils/when/resolver.py` `_resolve_trigger()` lines 241-253
-- [x] **Planstate delivered status** — completed prior session
-
 ## Worktree Tasks
 
 - [ ] **Fix wt merge dirty-tree guard** → `wt-merge-dirty-tree` — Remove worktree-side clean-tree check from merge | sonnet
@@ -165,18 +147,17 @@
 **`just sync-to-parent` requires sandbox bypass:**
 - Recipe removes and recreates symlinks in `.claude/` — sandbox blocks `rm` on those paths
 
-- Code was written outside TDD discipline due to mis-triage. Implementation is correct (tests pass) but process was not followed. Design skill Simple criteria now strengthened to prevent recurrence. [from: sentinel-copy]
-- model-tags validator matches `agent-core/skills/` path prefix too broadly — catches bash scripts (verify-step.sh, verify-red.sh) meant for deterministic execution, not LLM-consumed prose [from: orchestrate-evolution]
-- lifecycle validator treats first mention of pre-existing file as "creation" — all prepare-runbook.py modifications flagged [from: orchestrate-evolution]
-- Non-blocking: violations are false positives, not actual runbook problems [from: orchestrate-evolution]
-- Rule says "Read recall-artifact.md if it exists" as terminal condition. After /clear, this loads summaries only — referenced decision files are not loaded. [from: planstate-delivered]
-- Correct: read artifact to identify entries, then batch-resolve via `agent-core/bin/when-resolve.py "when <trigger>" ...` to load full content. [from: planstate-delivered]
-- Not yet fixed in runbook/SKILL.md Tier 2 recall section (fixed corrector side; planner side still has the gap). [from: planstate-delivered]
-- Resolved for planstate-delivered: manual `review-pending` entry + deliverable review appended `reviewed`. [from: planstate-delivered]
-- Pattern: Tier 2 plans without `/orchestrate` need manual lifecycle bootstrapping before deliverable review. [from: planstate-delivered]
 ## Next Steps
 
-Create sentinel-copy worktree. WT new sentinel copy (quick). Then WT merge session loss dx or codebase sweep.
+Merge wt-merge-dirty-tree when done. Then session.md cleanup (merge artifacts need fresh-context pass — details below). Next real work: WT merge session loss dx or execute orchestrate-evolution.
+
+**Session.md cleanup needed (commit `d170244b`):**
+Handoff cleaned most artifacts but residual issues remain from 4 worktree merges in one session. The autostrategy appended branch content without deduplicating or placing in correct sections. Specific items for next-session validation:
+- Verify no duplicate task entries (autostrategy duplicated "Orchestrate evolution" across Pending + WT Tasks in earlier merge `a78ba867`, cleaned manually)
+- Verify Blockers section has no misplaced learnings (9 `[from: worktree]` entries were appended to Blockers by merge, removed in `d170244b`)
+- Verify completed tasks `[x]` are not lingering in Pending (3 were: WT new sentinel copy, Deliverable review planstate-delivered, Planstate delivered status — removed in `d170244b`)
+- Verify blank line cleanup (extra blanks from merge resolution cleaned)
+- Check `planstate-delivered` plan status shows `reviewed` not `designed` (CLI confirms `reviewed`)
 
 ## Reference Files
 
