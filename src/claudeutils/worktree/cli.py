@@ -67,6 +67,15 @@ def add_sandbox_dir(container: str, settings_path: str | Path) -> None:
     path.write_text(json.dumps(settings, indent=2, ensure_ascii=False))
 
 
+def _copy_test_sentinel(worktree_path: Path) -> None:
+    """Copy test sentinel to new worktree so cached test state carries over."""
+    sentinel = Path("tmp/.test-sentinel")
+    if sentinel.exists():
+        dest = worktree_path / "tmp"
+        dest.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(sentinel, dest / ".test-sentinel")
+
+
 def _initialize_environment(worktree_path: Path) -> None:
     try:
         subprocess.run(["just", "--version"], capture_output=True, check=True)
@@ -132,6 +141,7 @@ def _setup_worktree(
     main_repo = _git("rev-parse", "--show-toplevel").strip()
     _create_submodule_worktree(main_repo, worktree_path, slug)
     _initialize_environment(worktree_path)
+    _copy_test_sentinel(worktree_path)
     click.echo(f"{slug}\t{worktree_path}" if task else str(worktree_path))
 
 

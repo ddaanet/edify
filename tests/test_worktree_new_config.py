@@ -159,6 +159,45 @@ def test_new_environment_init_failure(
     assert "warning" in result.output.lower() or "failed" in result.output.lower()
 
 
+def test_new_copies_test_sentinel(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """Copies tmp/.test-sentinel to new worktree when it exists."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+    init_repo(repo_path)
+
+    # Create sentinel in source repo
+    (repo_path / "tmp").mkdir()
+    (repo_path / "tmp" / ".test-sentinel").write_text("12345 67")
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["new", "--branch", "test-sentinel"])
+    assert result.exit_code == 0
+
+    wt_sentinel = tmp_path / "repo-wt" / "test-sentinel" / "tmp" / ".test-sentinel"
+    assert wt_sentinel.exists()
+    assert wt_sentinel.read_text() == "12345 67"
+
+
+def test_new_no_sentinel_no_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
+) -> None:
+    """No error when tmp/.test-sentinel doesn't exist."""
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+    init_repo(repo_path)
+
+    runner = CliRunner()
+    result = runner.invoke(worktree, ["new", "--branch", "test-no-sentinel"])
+    assert result.exit_code == 0
+
+    wt_sentinel = tmp_path / "repo-wt" / "test-no-sentinel" / "tmp" / ".test-sentinel"
+    assert not wt_sentinel.exists()
+
+
 def test_new_container_idempotent(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
