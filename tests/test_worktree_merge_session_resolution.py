@@ -356,12 +356,7 @@ def test_resolve_session_md_fallback_outputs_to_stdout(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """resolve_session_md fallback diagnostic goes to stdout, not stderr.
-
-    Bug: resolve.py uses click.echo(..., err=True) in the fallback path when
-    git add fails. This sends the message to stderr, which merge.py never echoes.
-    Fix: remove err=True so the message goes to stdout.
-    """
+    """Fallback hash-object path emits diagnostic to stdout, not stderr."""
     agents_dir = tmp_path / "agents"
     agents_dir.mkdir()
     (agents_dir / "session.md").write_text("# Session\n")
@@ -384,9 +379,7 @@ def test_resolve_session_md_fallback_outputs_to_stdout(
     resolve_session_md(["agents/session.md"], slug="test")
 
     captured = capsys.readouterr()
-    # BUG: message goes to stderr due to err=True in click.echo
     assert "hash-object" in captured.out, (
-        f"Fallback message should go to stdout."
-        f" out={captured.out!r} err={captured.err!r}"
+        f"Fallback message must go to stdout. out={captured.out!r} err={captured.err!r}"
     )
     assert "hash-object" not in captured.err

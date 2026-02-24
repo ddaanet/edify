@@ -12,11 +12,8 @@ from claudeutils.worktree.merge_state import (
     _detect_merge_state,
     _recover_untracked_file_collision,
 )
-from claudeutils.worktree.resolve import (
-    remerge_learnings_md,
-    resolve_learnings_md,
-    resolve_session_md,
-)
+from claudeutils.worktree.remerge import remerge_learnings_md, remerge_session_md
+from claudeutils.worktree.resolve import resolve_learnings_md, resolve_session_md
 
 
 def _append_lifecycle_delivered(plans_dir: Path) -> None:
@@ -294,6 +291,7 @@ def _phase4_merge_commit_and_precommit(slug: str) -> None:
     changes (use --allow-empty). Otherwise, only commit if staged changes exist.
     """
     remerge_learnings_md()
+    remerge_session_md(slug)
 
     merge_in_progress = (
         subprocess.run(
