@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-24
 
-**Status:** Context optimization test completed — reads accumulate, no dedup. `/recall` skip-tracking confirmed necessary.
+**Status:** Recall pass requirements updated with FR-11 (cognitive boundaries), fast path coverage, on-demand memory-index, batch-resolve. Skill review applied.
 
 ## Completed This Session
 
@@ -9,33 +9,55 @@
 - `plans/recall-pass/outline.md` — 10 key decisions, all open questions resolved
 - 4 pipeline skill files edited with recall artifact generation, augmentation, injection, and review recall (47 insertions across design, runbook, orchestrate, deliverable-review skills)
 
-**`/recall` skill — interactive recall pass:**
+**`/recall` skill — interactive recall pass (prior sessions, carried forward):**
 - Created `agent-core/skills/recall/SKILL.md` — manual recall for interactive sessions
-- Naming: 5 brainstorm rounds with opus brainstorm-name agent → `/recall` selected (transparent, self-documenting, ecosystem identity)
-- 5-mode taxonomy designed through discussion:
-  - default (section-level, 1-2 passes), deep (aggressive saturation, 4 passes), broad (whole-file Read), all (deep+broad), everything (full corpus)
-- Broad mode uses direct Read tool (not when-resolve.py) — file-level loading doesn't benefit from section resolution overhead
-- Tail-recursive design: skill self-invokes until zero new entries found (mechanical exit condition). Defeats agent loop short-circuiting — skill continuation drives iteration, not prompt instructions.
-- Symlinked via `just sync-to-parent`
+- 5-mode taxonomy: default, deep, broad, all, everything
+- Tail-recursive design with mechanical exit condition
 
-**brainstorm-name agent fix:**
-- Fixed YAML frontmatter: added `description: |` block scalar (without it, `model`/`color`/`tools` fields were consumed as description text)
-- Added `# Artifact Naming Specialist` title heading
+**Read tool context optimization test (prior sessions, carried forward):**
+- No dedup — each Read appends. Skip-tracking confirmed necessary.
 
-**Read tool context optimization test (T1):**
-- Ran T1 (whole-file dedup) from `plans/reports/recall-context-optimization-test.md`
-- Result: no dedup — baseline 37k → +25k first read → +25k second read (identical files)
-- Confirms `implementation-notes.md` decision: "Each Read appends new content block. No application-level dedup."
-- Skipped T2–T5: T1 is decisive for the core question
-- Results written to `plans/reports/recall-context-optimization-results.md`
-- Updated `/recall` SKILL.md: removed false "redundant context is cheap" claim from broad mode (line 101)
+**Recall pass requirements expansion (this session):**
+- FR-11 added: recall at every cognitive boundary (not just 4 pipeline stages)
+  - Before requirements capture, exploration, design outline (A.5), full design (C.1), runbook outline (0.75), phase expansion (Phase 1), implementation, tests, review/correction
+  - Within-session recall as compaction insurance (low cost, high upside)
+- FR-1 enhanced: on-demand memory-index read (not preloaded), batch-resolve via `when-resolve.py`, no-requirements keyword derivation, memory-index amplification property documented
+- C-1: "pipeline stages" → "cognitive boundaries"
+- C-3: expanded integration points to `/requirements`, granular design/runbook phases, Tier 1/2
+- Q-4: resolved by FR-11 (yes, mid-design recall)
+
+**Fast path recall coverage (this session):**
+- Runbook Tier 1: recall context paragraph — read artifact + lightweight recall when no artifact
+- Runbook Tier 2: same + injection into delegation prompts with format-per-tier
+- Design direct execution (outline-sufficient + C.5): review recall in corrector prompt
+- Runbook Phase 0.5: on-demand memory-index read, batch-resolve, removed stale "do NOT grep" language
+
+**Pipeline contracts updated:**
+- T1 output: +recall-artifact.md
+- T2 input: +recall-artifact.md
+
+**On-demand memory-index pattern (this session):**
+- Removed memory-index from ambient CLAUDE.md preloading assumption
+- All recall points now: Read memory-index.md (skip if already in context)
+- First recall point in session reads it; subsequent points find it loaded
+- "Scan file" language replaced everywhere — prevents spurious file re-reads
+
+**Skill review (this session):**
+- Batch review of 5 modified skills (design, runbook, recall, when, how)
+- 2 major fixes: runbook description trigger phrases, Tier 1 format-per-tier guidance
+- 4 minor fixes: recall skip-phrasing standardized, "Bash transport" → "batch-resolve", cumulative behavior wording, cross-reference stability
+
+**/when and /how stale reference fix:**
+- Removed "already loaded via CLAUDE.md @-reference" from both skills
+- Replaced with "already in context from prior /recall, /when, or /how invocation"
 
 ## Pending Tasks
 
 - [x] **Recall pass requirements** — implemented via Tier 2 delegation
 - [ ] **Sync-to-parent sandbox documentation** — update references to document required sandbox bypass | haiku
 - [ ] **Rename when-resolve.py to claudeutils _recall** — consolidate into CLI, remove `..file` syntax | sonnet
-- [x] **Read tool context optimization test** — run `plans/reports/recall-context-optimization-test.md` protocol in fresh session, results inform `/recall` skip-tracking logic | sonnet
+- [x] **Read tool context optimization test** — run T1 protocol, no dedup confirmed | sonnet
+- [ ] **Consolidate /when and /how into /recall** — phase out as separate skills, ensure /recall covers reactive single-entry lookups | sonnet
 
 ## Blockers / Gotchas
 
@@ -47,11 +69,11 @@
 
 ## Next Steps
 
-Sync-to-parent sandbox documentation (haiku) or rename when-resolve.py (sonnet).
+Sync-to-parent sandbox documentation (haiku) or consolidate /when+/how into /recall (sonnet).
 
 ## Reference Files
 
-- `agent-core/skills/recall/SKILL.md` — interactive recall skill (5 modes)
-- `plans/reports/recall-context-optimization-results.md` — T1 test results (no dedup confirmed)
-- `plans/reports/recall-context-optimization-test.md` — Read deduplication test protocol
+- `plans/recall-pass/requirements.md` — 11 FRs including FR-11 cognitive boundaries
 - `plans/recall-pass/outline.md` — pipeline recall pass design (10 key decisions)
+- `agent-core/skills/recall/SKILL.md` — interactive recall skill (5 modes)
+- `agents/decisions/pipeline-contracts.md` — T1/T2 recall-artifact.md in I/O flow

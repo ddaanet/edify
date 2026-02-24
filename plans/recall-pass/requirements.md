@@ -8,11 +8,13 @@
 When a design session begins (Phase A.1), produce a recall artifact containing relevant decision file content selected from the memory corpus. The artifact is a persistent file in the plan directory with named references to each selected entry. Supplements the existing Documentation Checkpoint — the checkpoint's results die with the context window; the recall artifact persists and forwards.
 
 Acceptance criteria:
-- Reads `memory-index.md`, selects relevant entries by problem-domain matching
+- Reads `memory-index.md` on demand (skip if already in context from earlier recall in same session), selects relevant entries by problem-domain matching. Memory-index keyword-rich entries amplify thin user input — even sparse queries surface relevant decisions through index cross-references, superior to direct corpus search.
+- Batch-resolves multiple entries via `when-resolve.py "when <trigger>" "how <trigger>" ...` (single call for efficiency)
 - Reads whole decision files for selected entries
 - Writes artifact to `plans/<job>/recall-artifact.md` (or equivalent path)
 - Each entry identified by name (heading + source file)
 - Artifact readable by downstream passes without re-reading source files
+- When no requirements.md exists, derive domain keywords from user request and task description for memory-index matching — wider net compensates for weaker signal
 
 **FR-2: Planning-stage recall**
 When runbook planning begins, augment the design recall artifact with implementation and testing learnings relevant to the planned work. Adds the implementation lens: TDD cycle pitfalls, step file quality patterns, precommit gotchas, model selection failures.
@@ -91,6 +93,20 @@ Acceptance criteria:
 - Anti-pattern entries framed to prevent haiku from implementing the anti-pattern
 - Scope conditions evaluable by the consuming agent without external lookups
 
+**FR-11: Recall at cognitive boundaries**
+Recall relevant context before every cognitive work boundary in the pipeline. Within-session recall serves as compaction insurance (low token cost, high upside against context loss). Extends FR-1 through FR-4 (pipeline stage boundaries) to cover all cognitive transitions.
+
+Acceptance criteria — recall at each boundary:
+- Before requirements capture: domain context, prior art, settled decisions
+- Before exploration (A.2, Phase 0.5 step 4, Tier 1/2 ad-hoc): recall domain context to target exploration — especially critical when no formal requirements exist (derive keywords from user request)
+- Before design outline (A.5): re-surface artifact after exploration/research
+- Before full design (C.1): re-surface artifact after user discussion
+- Before runbook outline (Phase 0.75): re-surface artifact after codebase discovery
+- Before phase expansion (Phase 1): re-surface per-phase with phase-specific entries
+- Before implementation: recall implementation decisions (per-tier: direct read / delegation injection / Common Context)
+- Before tests: recall testing conventions (same per-tier mechanism)
+- Before review/correction: recall quality patterns, failure modes, artifact-type conventions
+
 ### Non-Functional Requirements
 
 **NFR-1: Token economy**
@@ -105,13 +121,13 @@ Composes with existing context injection mechanisms (prepare-runbook.py common c
 ### Constraints
 
 **C-1: Prescriptive retrieval at fixed points**
-Recall triggers at predetermined pipeline stages, not when agents decide to retrieve. Justified by 2.9% measured adaptive recall rate. The system inverts the Agentic RAG paradigm deliberately — agents lack the capability for self-directed retrieval (no Skill tool in task agents, fire-and-forget dispatch).
+Recall triggers at predetermined cognitive boundaries, not when agents decide to retrieve. Justified by 2.9% measured adaptive recall rate. The system inverts the Agentic RAG paradigm deliberately — agents lack the capability for self-directed retrieval (no Skill tool in task agents, fire-and-forget dispatch).
 
 **C-2: Existing corpus format**
 Works with the current decision file format (markdown, heading hierarchy, prose entries). No reformatting, annotation, or metadata additions to the corpus required.
 
 **C-3: Existing pipeline integration points**
-Integrates into `/design` (Phase A.1), `/runbook` (planning), `/orchestrate` (dispatch), and `/deliverable-review` (review). No new top-level skills or pipeline stages.
+Integrates into `/requirements` (capture), `/design` (A.1, A.5, C.1), `/runbook` (Phase 0.5, 0.75, 1, Tier 1/2), `/orchestrate` (dispatch), and `/deliverable-review` (review). No new top-level skills or pipeline stages.
 
 **C-4: Fire-and-forget dispatch**
 No mid-flight communication with task agents. Recall content must be complete and correct at injection time — no correction possible after dispatch.
@@ -133,7 +149,7 @@ The orchestrator filtering recall content may run on haiku. All filtering operat
 - Q-1: Artifact growth control — when accumulated artifact exceeds per-agent budget, what eviction or compression mechanism applies? (Compression, fixed budget with eviction, or later-pass replacement model)
 - Q-2: Conflict resolution — when entries from different passes contradict, which wins? Needs a mechanical tiebreaker (not agent judgment)
 - Q-3: Staleness across pipeline stages — artifact generated at design time may be stale by execution time (days later in multi-session work). Regenerate vs. accept staleness?
-- Q-4: Mid-design recall — whether a second recall pass after exploration but before synthesis (within the design skill) adds value over the single Pass 1
+- Q-4: Mid-design recall — RESOLVED by FR-11: yes, recall before A.5 and C.1 as compaction insurance within same session
 - Q-5: Positional effectiveness — where in the agent prompt does the recall artifact appear? Primacy/recency positions already claimed by system prompt and step instructions
 
 ### References

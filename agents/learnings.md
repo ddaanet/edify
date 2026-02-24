@@ -31,3 +31,10 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Applying "opus for prose artifacts" model rule to justify delegation when the cognitive work (designing what to add) was already done at opus during design. Launches N agents for N independent file edits, each re-reading files already in planner context.
 - Correct pattern: The "opus for prose artifacts" rule targets cases where design decisions happen during editing. When an outline pre-resolves all decisions and specifies exact insertion points, execution is mechanical — sonnet follows the outline. The "design resolves to simple execution" decision applies: delegation ceremony exceeds edit cost for all-prose work.
 - Evidence: 4 opus artisan agents launched for 47 lines of prose insertions across 4 skill files. User corrected: "why not inline?" The existing decision file explicitly warns against this pattern.
+## When writing instructions that reference memory-index
+- Anti-pattern: Using "scan memory-index" or "check loaded memory-index" language. "Scan file" triggers agents to Read the file even when it's already in context, wasting tokens on redundant reads.
+- Correct pattern: "Read memory-index.md (skip if already in context)" — on-demand read with explicit skip condition. First recall point in a session reads it; subsequent points find it loaded. Never assume ambient preloading via CLAUDE.md @-reference.
+- Rationale: Memory-index was removed from CLAUDE.md because it was useless without explicit action. The recall pass provides explicit action at cognitive boundaries, making on-demand reading the right pattern.
+## When memory-index amplifies thin user input
+- Memory-index keyword-rich entries surface relevant decisions even from sparse queries — cross-references between entries create an amplification effect superior to direct corpus search.
+- This makes pipeline recall effective even on the moderate path (no formal requirements): derive domain keywords from user request, match against memory-index, follow cross-references to discover relevant decisions the user didn't explicitly mention.

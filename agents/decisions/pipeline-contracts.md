@@ -6,8 +6,8 @@ Centralized I/O contracts for the design-to-deliverable pipeline. Authoritative 
 
 | # | Transformation | Input | Output | Defect Types | Review Gate | Review Criteria |
 |---|---------------|-------|--------|-------------|-------------|----------------|
-| T1 | Requirements → Design | requirements.md or inline | design.md | Incomplete, infeasible | design-corrector (opus) | Architecture, feasibility, completeness |
-| T2 | Design → Outline | design.md | runbook-outline.md | Missing reqs, wrong decomposition, ungrounded corrections | runbook-outline-corrector (opus) | Requirements coverage, phase structure, LLM failure modes |
+| T1 | Requirements → Design | requirements.md or inline | design.md, recall-artifact.md | Incomplete, infeasible | design-corrector (opus) | Architecture, feasibility, completeness |
+| T2 | Design → Outline | design.md, recall-artifact.md | runbook-outline.md | Missing reqs, wrong decomposition, ungrounded corrections | runbook-outline-corrector (opus) | Requirements coverage, phase structure, LLM failure modes |
 | T2.5 | Outline → Simplified outline | runbook-outline.md (post-0.85) | runbook-outline.md (consolidated) | Missed patterns, broken numbering | runbook-simplifier (opus) | Pattern detection, requirements preservation |
 | T3 | Outline → Phase files | runbook-outline.md | runbook-phase-N.md | Vacuity, prescriptive code, density | runbook-corrector | Type-aware: TDD discipline + general quality + LLM failure modes |
 | T4 | Phase files → Runbook | runbook-phase-*.md | runbook.md | Cross-phase inconsistency | runbook-corrector (holistic) | Cross-phase consistency, numbering, metadata |
