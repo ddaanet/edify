@@ -14,7 +14,7 @@ from claudeutils.worktree.merge import (
     _phase4_merge_commit_and_precommit,
     _validate_merge_result,
 )
-from tests.fixtures_worktree import last_commit_subject, make_repo_with_branch
+from tests.fixtures_worktree import _run_git, last_commit_subject, make_repo_with_branch
 
 
 def test_phase4_refuses_single_parent_when_unmerged(
@@ -237,6 +237,46 @@ def test_validate_merge_single_parent_warning(
         _validate_merge_result("test-branch")
 
     assert "Warning: merge commit has 1 parent(s)" in capsys.readouterr().out
+
+
+def test_phase1_allows_dirty_worktree(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    init_repo: Callable[[Path], None],
+) -> None:
+    """Phase 1 passes when worktree has uncommitted changes.
+
+    Merge uses branch ref, not working tree.
+    """
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    init_repo(repo)
+
+    # Create worktree at the path wt_path("test-branch") resolves to
+    wt_container = tmp_path / "repo-wt"
+    wt_container.mkdir()
+    wt_dir = wt_container / "test-branch"
+    _run_git(repo, "worktree", "add", "-b", "test-branch", str(wt_dir))
+
+    # Commit something on the branch
+    (wt_dir / "committed.txt").write_text("committed content")
+    _run_git(wt_dir, "add", ".")
+    _run_git(wt_dir, "commit", "-m", "branch commit")
+
+    # Modify tracked file — untracked files are hidden by --untracked-files=no
+    (wt_dir / "committed.txt").write_text("modified content")
+
+    monkeypatch.chdir(repo)
+
+    exit_code = 0
+    try:
+        _phase1_validate_clean_trees("test-branch")
+    except SystemExit as e:
+        exit_code = e.code
+
+    assert exit_code == 0, (
+        f"Dirty worktree should not block merge, got exit code {exit_code}"
+    )
 
 
 def test_merge_preserves_parent_repo_files(

@@ -144,7 +144,6 @@ def _phase1_validate_clean_trees(slug: str) -> None:
             "agent-core",
         }
     )
-    _check_clean_for_merge(path=wt_path(slug), label="worktree")
 
 
 def _phase2_resolve_submodule(slug: str) -> None:
