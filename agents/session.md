@@ -1,25 +1,22 @@
 # Session Handoff: 2026-02-25
 
-**Status:** Skills quality pass design updated with v2 scout (content segmentation framework), 3 new FRs, 7 NFRs. Ready for `/runbook`.
+**Status:** Skills quality pass runbook outline complete (5 phases, 16 steps, 4 parallel opus agents). Corrector reviewed (0 critical, 3 major fixed). Ready for orchestration next session.
 
 ## Completed This Session
 
-- Designed skills-quality-pass: triage (Moderate), `/recall all`, 2 sonnet scouts, design.md + recall-artifact.md
-  - Inventory: 30 skills graded A+ to C. 18/30 description anti-pattern, 15/30 "When to Use" preamble, 3 C-grade (review, orchestrate, token-efficient-bash)
-  - Gate audit: 12 genuine prose-only gates across 7 files. 3 high (design skill routing gates), 4 medium, 5 low
-  - Discussion: doc update for regression prevention (yes) vs optimize-skill skill (no — low recurrence)
-  - Haiku scouts re-run at sonnet after user correction — haiku produced 3 false positives in gate audit, uncritical grading in inventory
-- Updated skills-quality-pass design with v2 scout report
-  - Re-ran scout with Segment→Attribute→Compress framework from `plans/reports/skill-optimization-grounding.md`
-  - Grade shifts: design B+→C+, runbook B→C, commit A+→A-. C/C+ list expanded to 5 skills
-  - 3 new FRs: FR-8 redundant always-loaded (6 skills), FR-9 tail sections (12 skills), FR-10 conditional path bloat (5 skills)
-  - 3 new NFRs: extraction completeness, description format preservation, D+B gate safety
-  - Corrected D-3: description must stay in platform-required format (was incorrectly "replace with noun phrase")
-  - Total corpus: 7,182 lines, ~1,770 removable (25%)
-  - Discussion: no optimize-skill skill (D-1 holds), no plan-scanning recall pass (index gap not architecture gap), persistent constraints → learnings not direct decision-file edit
-- Added learning: grounding report discoverability (`plans/reports/skill-optimization-grounding.md`)
-- Added learning: skill editing constraints (platform format, extraction safety, control flow verification, D+B gate safety)
-- New pending: Design skill stale recall artifact format (sonnet)
+- Designed skills-quality-pass (prior session): triage, scouts, design.md, recall-artifact.md
+- Skills quality pass runbook outline (`plans/skills-quality-pass/runbook-outline.md`)
+  - Tier 3 assessment: 24+ files, 3 parallelizable workstreams, opus throughout
+  - Phase 0.5: loaded full documentation perimeter (6 files), resolved 10 recall keys via when-resolve.py, verified all 26 skill/agent file locations via Glob
+  - Phase 0.75: 5 phases, 16 general steps, all opus. Prose atomicity enforced (no file in 2 steps)
+  - Phase 1: agent D+B gates (bootstrap, restart). Phases 2-5: 4 parallel background opus agents (disjoint file sets)
+  - FR-7 (doc update) removed from scope — content already in learnings.md line 87, deferred to `/codify`
+  - Discussion: Phase 6 inline violated codify workflow; batching by modified file confirmed; parallel agent structure (4 background opus, resume until quality degrades); recall injection gap identified and fixed
+- Corrected recall artifact format: replaced inline summaries with 10 pure resolution keys
+- Outline corrector review (commit: 644ce558): 0 critical, 3 major (mapping traceability, checkpoint mechanism, NFR-5 consistency), 2 minor — all fixed
+- Added recall injection + baked learnings sections to outline (execution + review agents both get recall)
+- New requirements: `plans/runbook-recall-expansion/requirements.md` — 7 FRs for step agent + corrector recall during full orchestration
+- New pending: Runbook outline review loop, Recall learnings integration, Runbook recall expansion
 
 ## Pending Tasks
 
@@ -27,12 +24,11 @@
 - [ ] **Codebase sweep** — `/design plans/codebase-sweep/requirements.md` | sonnet
   - Plan: codebase-sweep | Status: requirements
   - _git_ok, _fail, exception cleanup — mechanical refactoring
-- [ ] **Skills quality pass** — `/runbook plans/skills-quality-pass/design.md` | sonnet
-  - Plan: skills-quality-pass | Status: designed
-  - 3 workstreams: deslop (30 skills, ~1,770 lines removable), D+B gate anchoring (12 gates/7 files), doc update (regression prevention)
-  - 10 FRs, 7 NFRs. Opus required for all prose edits (pipeline-contracts.md). Bootstrapping order: corrector agents first
-  - Top compression: runbook (−350), token-efficient-bash (−200), design (−150), review (−140), orchestrate (−130)
-  - Reports: `plans/skills-quality-pass/reports/skill-inventory.md` (v2 with content segmentation), `plans/skills-quality-pass/reports/full-gate-audit.md`
+- [ ] **Skills quality pass** — orchestrate with 4 parallel opus agents | sonnet
+  - Plan: skills-quality-pass | Status: planned (outline reviewed, ready for orchestration)
+  - 5 phases, 16 steps. Phase 1 (bootstrap agents) → restart → 4 parallel agents (Phases 2-5)
+  - Recall injection: agents resolve artifact keys + baked learnings in dispatch prompt
+  - Reports: `plans/skills-quality-pass/reports/runbook-outline-review.md` (0 critical, 3 major fixed)
 
 - [ ] **Diagnose compression detail loss** — RCA against commit `0418cedb` | sonnet
 - [ ] **Precommit python3 redirect** — `/design plans/precommit-python3-redirect/brief.md` | sonnet
@@ -115,6 +111,13 @@
 
 - [ ] **Skill progressive disclosure** — `d:` discuss optimizing /runbook and /design for progressive disclosure: fast paths don't need whole skill loaded | opus
 
+- [ ] **Runbook outline review loop** — update runbook skill: user review gate after outline correction, iterative fix cycle until approved | sonnet
+- [ ] **Runbook recall expansion** — `/design plans/runbook-recall-expansion/requirements.md` | sonnet
+  - Plan: runbook-recall-expansion | Status: requirements
+  - prepare-runbook.py recall injection, corrector.md self-loading, two-pattern docs (7 FRs)
+- [ ] **Recall learnings integration** — `d:` whether learnings.md entries should be resolvable via when-resolve.py | opus
+  - Implies memory-index format changes (new source type), resolver changes — genuine design uncertainty
+
 ## Worktree Tasks
 
 ## Blockers / Gotchas
@@ -165,7 +168,7 @@
 
 ## Next Steps
 
-Skills quality pass: `/runbook plans/skills-quality-pass/design.md`. Codify learnings critical (88/80).
+Skills quality pass: orchestrate with parallel agents per outline. Codify learnings critical (88/80).
 
 ## Reference Files
 
@@ -188,7 +191,10 @@ Skills quality pass: `/runbook plans/skills-quality-pass/design.md`. Codify lear
 - `plans/when-resolve-fix/diagnostic-double-to.md` — Double-to + cross-operator bugs, TDD plan, code paths
 - `plans/when-resolve-fix/reports/corrector-review.md` — Corrector review of 4-bug fix (0 critical, 0 major)
 - `plans/skills-quality-pass/design.md` — Skills quality pass design (3 workstreams, 10 FRs, 7 NFRs)
-- `plans/skills-quality-pass/recall-artifact.md` — 12 recall entries for downstream consumers
+- `plans/skills-quality-pass/recall-artifact.md` — 10 resolution keys (corrected from inline summaries)
+- `plans/skills-quality-pass/runbook-outline.md` — 5 phases, 16 steps, parallel 4-agent execution model
+- `plans/skills-quality-pass/reports/runbook-outline-review.md` — Corrector review (0 critical, 3 major fixed)
+- `plans/runbook-recall-expansion/requirements.md` — Step agent + corrector recall during full orchestration (7 FRs)
 - `plans/skills-quality-pass/reports/skill-inventory.md` — Sonnet scout v2: 30 skills, content segmentation, compression opportunities
 - `plans/skills-quality-pass/reports/full-gate-audit.md` — Sonnet scout: 12 prose-only gates, fix directions
 - `plans/reports/skill-optimization-grounding.md` — Segment→Attribute→Compress framework (LLMLingua/ProCut)

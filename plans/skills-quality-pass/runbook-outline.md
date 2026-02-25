@@ -8,28 +8,28 @@
 
 ## Requirements Mapping
 
-| FR | Description | Phase |
-|---|---|---|
-| FR-1 | Description tightening (18 skills) | 2, 3, 4, 5 |
-| FR-2 | Preamble removal (13 skills) | 2, 3, 4, 5 |
-| FR-3 | C/C+ extraction to references/ (5 skills) | 3 |
-| FR-4 | B-/B trim/extract (5 skills) | 4 |
-| FR-5 | D+B gate anchoring (12 gates, 7 files) | 1, 2, 4 |
-| FR-6 | Correctness fixes (3 targeted) | 3, 4, 5 |
-| FR-7 | Doc update (implementation-notes + memory-index) | Out of scope — content in learnings.md line 87, deferred to `/codify` |
-| FR-8 | Redundant always-loaded removal (6 skills) | 2, 3, 4, 5 |
-| FR-9 | Tail section removal (12 skills) | 2, 3, 4, 5 |
-| FR-10 | Conditional path extraction (absorbed into FR-3) | 3 |
+| FR | Description | Phase | Steps | Notes |
+|---|---|---|---|---|
+| FR-1 | Description tightening (18 skills) | 2, 3, 4, 5 | 2.2, 2.3, 3.1, 3.2, 3.3, 4.2, 5.1, 5.2 | 18 skills across 8 steps |
+| FR-2 | Preamble removal (13 skills) | 2, 3, 4, 5 | 2.3, 3.1, 3.2, 3.4, 3.5, 4.2, 4.4, 5.1, 5.2 | 13 skills across 9 steps |
+| FR-3 | C/C+ extraction to references/ (5 skills) | 3 | 3.1, 3.2, 3.3, 3.4, 3.5 | ~14 new reference files |
+| FR-4 | B-/B trim/extract (5 skills) | 4 | 4.1, 4.2, 4.3, 4.4, 4.5 | ~7 new reference files |
+| FR-5 | D+B gate anchoring (12 gates, 7 files) | 1, 2, 4 | 1.1, 2.1, 2.2, 2.3, 3.1, 4.5 | Gates 1-12 per full-gate-audit.md |
+| FR-6 | Correctness fixes (3 targeted) | 3, 4, 5 | 3.4, 4.5, 5.2 | orchestrate paths, requirements stale section, worktree CLI |
+| FR-7 | Doc update (implementation-notes + memory-index) | — | — | Out of scope — deferred to `/codify` (content in learnings.md line 87, per task constraint) |
+| FR-8 | Redundant always-loaded removal (6 skills) | 2, 3, 4, 5 | 2.1, 3.3, 3.4, 4.2, 5.1, 5.2 | 6 skills with fragment duplication |
+| FR-9 | Tail section removal (12 skills) | 2, 3, 4, 5 | 2.2, 2.3, 3.3, 3.4, 3.5, 4.2, 4.5, 5.1, 5.2 | 12 skills with redundant tail sections |
+| FR-10 | Conditional path extraction (absorbed into FR-3) | 3 | 3.1, 3.2, 3.3, 3.4, 3.5 | Executed jointly with FR-3 per design |
 
-| NFR | Enforcement |
-|---|---|
-| NFR-1 (control flow correctness) | Steps with conditional-branch skills include path enumeration |
-| NFR-2 (user reporting correctness) | Same steps verify user-visible output per path |
-| NFR-3 (opus for prose) | All steps: opus execution model |
-| NFR-4 (bootstrapping order) | Phase 1 → all others |
-| NFR-5 (extraction completeness) | Phase 3, 4 steps verify trigger + Read for each moved block |
-| NFR-6 (description format) | All description edits: "This skill should be used when..." |
-| NFR-7 (D+B gate safety) | Phase 1, 2, 4 gate steps verify no outcome change |
+| NFR | Enforcement | Phases | Steps |
+|---|---|---|---|
+| NFR-1 (control flow correctness) | Steps with conditional-branch skills include path enumeration | 2, 3, 4 | 2.1, 2.2, 2.3, 3.1, 3.4, 4.5 |
+| NFR-2 (user reporting correctness) | Same steps verify user-visible output per path | 2, 3, 4 | 2.1, 2.2, 3.1, 3.4, 4.5 |
+| NFR-3 (opus for prose) | All steps: opus execution model | 1-5 | All |
+| NFR-4 (bootstrapping order) | Phase 1 → restart → Phases 2-5 | 1 | 1.1 (enables all subsequent) |
+| NFR-5 (extraction completeness) | Verify trigger + Read for each moved block | 3, 4 | 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3 |
+| NFR-6 (description format) | All description edits: "This skill should be used when..." | 2-5 | All FR-1 steps |
+| NFR-7 (D+B gate safety) | Gate steps verify no outcome change on existing paths | 1, 2, 3, 4 | 1.1, 2.1, 2.2, 2.3, 3.1, 4.5 |
 
 ---
 
@@ -65,6 +65,7 @@
 
 ### Phase 2: Skill D+B gates + light fixes (type: general, model: opus)
 
+**Depends on:** Phase 1 + session restart
 **Complexity:** Medium — 5 D+B gates across 3 skills, plus FR-1/2/8/9 per file (prose atomicity)
 **Rationale:** These skills need D+B gates and light-touch edits but not body surgery.
 
@@ -98,6 +99,7 @@
 
 ### Phase 3: C/C+ body surgery (type: general, model: opus)
 
+**Depends on:** Phase 1 + session restart
 **Complexity:** High — 5 major extractions creating ~14 new reference files, 4 D+B gates, description/preamble/tail work
 **Rationale:** Largest compression opportunity (~970 lines removable). Prose atomicity: all FRs per skill in one step.
 
@@ -171,13 +173,15 @@
     - Remove security section that duplicates system-level guidance
   - FR-9: Remove redundant tail sections
   - Leave trigger + Read for each extracted section
+  - **NFR-5:** Verify each references/ file has a load point
 
-**Checkpoint:** Full — `just dev`, opus review of accumulated changes (5 skills restructured), functional check
+**Checkpoint:** Full — `just dev`, then opus `/deliverable-review` of each restructured SKILL.md against design compression targets and NFR-5 extraction completeness (5 skills)
 
 ---
 
 ### Phase 4: B-/B trim/extract (type: general, model: opus)
 
+**Depends on:** Phase 1 + session restart
 **Complexity:** Medium — 5 skills with moderate extraction/trimming, 1 D+B gate
 **Rationale:** Smaller compression than Phase 3 but still significant restructuring.
 
@@ -188,6 +192,7 @@
   - Extract output format template → `references/report-template.md`
   - Remove Key Principles tail section
   - Leave trigger + Read for each extracted section
+  - **NFR-5:** Verify each references/ file has a load point
 
 - Step 4.2: reflect skill (FR-1, FR-2, FR-4, FR-8, FR-9)
   - `agent-core/skills/reflect/SKILL.md` (304 lines → ~234)
@@ -208,6 +213,7 @@
   - Remove Alignment Criteria section (duplicates review criteria)
   - Remove Usage Notes tail section
   - Leave trigger + Read for extracted section
+  - **NFR-5:** Verify references/ file has a load point
 
 - Step 4.4: shelve skill (FR-2, FR-4)
   - `agent-core/skills/shelve/SKILL.md` (136 lines → ~81)
@@ -232,6 +238,7 @@
 
 ### Phase 5: Light-touch batch (type: general, model: opus)
 
+**Depends on:** Phase 1 + session restart
 **Complexity:** Low per file — mechanical description/preamble/tail edits across 15 skills
 **Rationale:** Identical operation pattern (read → apply applicable FRs → verify). Batched with variation table.
 
@@ -270,7 +277,7 @@
 
   Same per-skill operation as Step 5.1.
 
-**Checkpoint:** Full — `just dev`, opus review (all 15 skills modified), functional check
+**Checkpoint:** Full — `just dev`, then opus spot-check review of 3-4 representative skills from each batch (verify NFR-6 description format, no content loss from FR-9 tail removal)
 
 ---
 
@@ -293,9 +300,33 @@
 
 **Within each agent:** Steps execute sequentially — context accumulates (file reads persist, recall loaded once). No re-reading between steps.
 
+### Recall Injection
+
+**All dispatched agents** (execution AND review) receive recall context in their prompt:
+
+**Execution agents (A-D):** First action before any step work:
+1. Read `plans/skills-quality-pass/recall-artifact.md` to get entry keys
+2. Run `agent-core/bin/when-resolve.py` with all 10 keys in a single batch call
+3. Carry resolved content as context for all subsequent steps
+
+**Review agents** (corrector at checkpoints, `/deliverable-review`): Same recall resolution instruction in dispatch prompt. Recall enables project-specific review criteria (D+B safety patterns, format preservation, control flow regression).
+
+### Baked Learnings
+
+Two learnings from `agents/learnings.md` are not yet in decision files and cannot be resolved via `when-resolve.py`. Include verbatim in every agent dispatch prompt:
+
+**Skill editing constraints** (learnings.md lines 83-88):
+- Platform constraint: skill `description` frontmatter MUST use "This skill should be used when..." format
+- Extraction safety: every content block moved to references/ must leave a trigger condition + Read instruction in the main SKILL.md body. Verify each references/ file has a corresponding load point.
+- Control flow verification: after restructuring skills with conditional branches, enumerate all execution paths and verify user-visible output on each path. Prior deslop on design skill combined two fast paths and regressed user-facing classification message.
+- D+B gate additions: adding tool calls to anchor prose-only gates must not change the gate's decision outcome on existing paths.
+
+**Model selection for discovery/audit** (learnings.md lines 79-82):
+- Sonnet minimum for any discovery/audit touching skills, agents, or fragments. These are architectural prose artifacts — assessing their quality requires the same judgment tier as editing them.
+
 **Agent lifecycle:** Resume agents until observable quality degradation (wrong file references, stale content, tool call failures). Do NOT use a fixed token threshold — context size is a proxy, quality is the signal.
 
-**Checkpoints after convergence:** When all 4 agents complete, run aggregate checkpoint: `just dev` + opus review of accumulated changes across all agents.
+**Checkpoints after convergence:** When all 4 agents complete, run aggregate checkpoint: `just dev` + opus `/deliverable-review` sampling skills from each agent's file set (verify NFR-1 control flow, NFR-5 extraction completeness, NFR-6 description format).
 
 ### Content Guidance
 
@@ -319,7 +350,7 @@
 **Error Escalation:** Opus → User (single model tier, no lower-model fallback)
 **Report Locations:** `plans/skills-quality-pass/reports/`
 **Success Criteria:** All 30 skills pass `just precommit`; FR-1 through FR-10 (except FR-7, deferred to `/codify`) addressed per requirements mapping; no control flow regressions in conditional-branch skills.
-**Checkpoints:** Light after Phase 1 (pre-restart). Aggregate full checkpoint after all 4 agents converge.
+**Checkpoints:** Light after Phase 1 (pre-restart). Per-phase checkpoints per outline. Aggregate full checkpoint after all 4 agents converge: `just dev` + opus `/deliverable-review` sampling across all phases.
 
 **Prerequisites:**
 - Design document complete (✓ `plans/skills-quality-pass/design.md`)
