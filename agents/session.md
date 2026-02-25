@@ -1,18 +1,14 @@
 # Session Handoff: 2026-02-25
 
-**Status:** Fixed 4 when-resolve bugs via TDD, simplified to operator-optional single matching path. Corrector reviewed, precommit green.
+**Status:** Skills quality pass designed. Sonnet scouts produced skill inventory (30 skills graded) and gate audit (12 prose-only gates). Design document and recall artifact written, ready for `/runbook`.
 
 ## Completed This Session
 
-- Fixed when-resolve.py: 4 bugs, 4 TDD cycles + simplification
-  - Bug 1: Double-to prefix — `removeprefix("to ")` in `_resolve_trigger` (resolver.py:196)
-  - Bug 2: Cross-operator matching — bare-trigger matching replaces operator-prefixed matching (resolver.py:197-203)
-  - Bug 3: Fail-fast batch — accumulate errors, print successes first, errors to stdout (cli.py:38-59)
-  - Bug 4: Operator made optional — `_strip_operator` in CLI, `operator` parameter removed from `resolve()`, single matching path
-  - Collision safety: `check_duplicate_entries` in `memory_index_checks.py` already validates trigger uniqueness across operators
-  - "Did you mean" suggestions now show entry's actual operator via `trigger_to_op` dict
-  - Corrector review: 0 critical, 0 major, 3 minor (all fixed) — `plans/when-resolve-fix/reports/corrector-review.md`
-  - Tests: 28/28 pass (4 new tests added, disambiguation test updated, CLI tests rewritten)
+- Designed skills-quality-pass: triage (Moderate), `/recall all`, 2 sonnet scouts, design.md + recall-artifact.md
+  - Inventory: 30 skills graded A+ to C. 18/30 description anti-pattern, 15/30 "When to Use" preamble, 3 C-grade (review, orchestrate, token-efficient-bash)
+  - Gate audit: 12 genuine prose-only gates across 7 files. 3 high (design skill routing gates), 4 medium, 5 low
+  - Discussion: doc update for regression prevention (yes) vs optimize-skill skill (no — low recurrence)
+  - Haiku scouts re-run at sonnet after user correction — haiku produced 3 false positives in gate audit, uncritical grading in inventory
 
 ## Pending Tasks
 
@@ -20,10 +16,11 @@
 - [ ] **Codebase sweep** — `/design plans/codebase-sweep/requirements.md` | sonnet
   - Plan: codebase-sweep | Status: requirements
   - _git_ok, _fail, exception cleanup — mechanical refactoring
-- [ ] **Skills quality pass** — Prose quality pass on skills not yet optimized + complete skill audit for prose-only recall gates | sonnet
-  - Deslop reference: `agent-core/skills/project-conventions/SKILL.md` (bundles deslop rules)
-  - Prose-only gate antipattern: `plans/recall-tool-anchoring/recall-artifact.md` entry "How to Prevent Skill Steps From Being Skipped" — D+B fix anchors each gate with tool call
-  - Recall gate inventory: `plans/recall-tool-anchoring/reports/recall-gate-inventory.md` — 19/31 recall gates (61%) prose-only; skill audit extends this to all skill gates
+- [ ] **Skills quality pass** — `/runbook plans/skills-quality-pass/design.md` | sonnet
+  - Plan: skills-quality-pass | Status: designed
+  - 3 workstreams: deslop (30 skills), D+B gate anchoring (12 gates/7 files), doc update (regression prevention)
+  - Opus required for all prose edits (pipeline-contracts.md). Bootstrapping order: corrector agents first
+  - Reports: `plans/skills-quality-pass/reports/skill-inventory.md`, `plans/skills-quality-pass/reports/full-gate-audit.md`
 
 - [ ] **Diagnose compression detail loss** — RCA against commit `0418cedb` | sonnet
 - [ ] **Precommit python3 redirect** — `/design plans/precommit-python3-redirect/brief.md` | sonnet
@@ -101,7 +98,9 @@
 - [ ] **Worktree new fuzzy matching** — `_worktree new` accepts approximate task names instead of exact match | sonnet
 
 - [ ] **Codify learnings** — `/codify` | opus
-  - Learnings at 76 lines (soft limit 80) — consolidation urgent
+  - Learnings at 80 lines (AT soft limit) — consolidation urgent
+
+- [ ] **Skill progressive disclosure** — `d:` discuss optimizing /runbook and /design for progressive disclosure: fast paths don't need whole skill loaded | opus
 
 ## Worktree Tasks
 
@@ -153,7 +152,7 @@
 
 ## Next Steps
 
-Codify learnings (urgent, 76/80 lines). When-resolve fix unblocks recall CLI integration and consolidate recall tooling tasks.
+Skills quality pass: `/runbook plans/skills-quality-pass/design.md`. Codify learnings urgent (78/80).
 
 ## Reference Files
 
@@ -175,3 +174,7 @@ Codify learnings (urgent, 76/80 lines). When-resolve fix unblocks recall CLI int
 - `plans/task-lifecycle/outline.md` — Planstate-derived commands + STATUS continuation design
 - `plans/when-resolve-fix/diagnostic-double-to.md` — Double-to + cross-operator bugs, TDD plan, code paths
 - `plans/when-resolve-fix/reports/corrector-review.md` — Corrector review of 4-bug fix (0 critical, 0 major)
+- `plans/skills-quality-pass/design.md` — Skills quality pass design (3 workstreams, 7 FRs, 4 NFRs)
+- `plans/skills-quality-pass/recall-artifact.md` — 12 recall entries for downstream consumers
+- `plans/skills-quality-pass/reports/skill-inventory.md` — Sonnet scout: 30 skills graded, 5 anti-patterns identified
+- `plans/skills-quality-pass/reports/full-gate-audit.md` — Sonnet scout: 12 prose-only gates, fix directions
