@@ -48,3 +48,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: ground against external frameworks first. The grounding step externalizes the design reasoning — principles come from outside the system, not from the skill's own reasoning. Then the redesign is execution of grounded conclusions (moderate complexity), not design from scratch (complex).
 - Corollary: by the grounded skill's own classification criteria, the redesign has clear requirements (grounding gaps with proposed fixes), no architectural uncertainty (grounding resolved it), and bounded scope → Moderate, routes to direct execution or /runbook, not full /design.
 - Evidence: /design grounding produced 8 principles and 7 gaps from 6 external frameworks. All 7 gap fixes were prose-only edits to existing sections — direct execution, no runbook needed.
+## When using permission deny for Bash commands
+- Anti-pattern: `"Bash(rm:*/index.lock)"` in permissions deny list to block lock removal. Looks correct but never fires — rm runs within the sandbox without needing explicit permission, so the permission check (and its deny list) is bypassed entirely.
+- Correct pattern: PreToolUse hook on Bash matcher with script that inspects `tool_input.command`. Hook fires unconditionally before execution, independent of sandbox/permission state.
+- Evidence: deny entry `"Bash(rm:*/.git/index.lock)"` existed in settings.json and was bypassed. User confirmed: "denylist is ineffective, operation does not require sandbox bypass." Hook replaced it.

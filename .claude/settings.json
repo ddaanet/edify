@@ -21,6 +21,9 @@
       "Skill",
       "WebSearch",
       "WebFetch",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+
       "WebFetch(domain:docs.claude.com)",
       "WebFetch(domain:arxiv.org)",
       "WebFetch(domain:registry.npmjs.org)",
@@ -83,6 +86,10 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/agent-core/hooks/pretooluse-recipe-redirect.py"
+          },
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/agent-core/hooks/pretooluse-block-rm-lock.sh"
           }
         ]
       },
