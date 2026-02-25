@@ -562,6 +562,7 @@ run-checks() {
     report "ruff check" ruff check -q
     report "docformatter -c" docformatter -c src tests
     report "mypy" mypy
+    report "validate memory-index" claudeutils validate memory-index
 }
 
 run-pytest() {

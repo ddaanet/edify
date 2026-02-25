@@ -199,14 +199,6 @@ Only then does the fix address the cause, not the symptoms.
 
 **Rationale:** Optimization must not degrade decision quality. The agent cannot know what it hasn't seen.
 
-### When Comparing File Versions Across Branches
-
-**Decision Date:** 2026-02-19
-
-**Anti-pattern:** Using `wc -l` equality to conclude files are identical. Same line count ≠ same content.
-
-**Correct pattern:** Diff content, not counts. `git diff <base>..<branch> -- <file>` or compare actual text.
-
 ### When Merging Worktree With Consolidated Learnings
 
 **Decision Date:** 2026-02-20
@@ -256,14 +248,6 @@ Only then does the fix address the cause, not the symptoms.
 **Correct pattern:** Distinguish recognition (knowing when to look something up) from retrieval (performing the lookup). Tools that improve retrieval without addressing recognition produce no measurable improvement. Forced injection (hooks detect topic mechanically, inject content) bypasses recognition entirely.
 
 **Evidence:** 801 sessions, 22 `/when` invocations in 8/193 post-merge sessions (4.1%). Baseline skill activation ~20%; `/when` at 4.1% suggests metacognitive triggers have additional activation penalty vs procedural triggers.
-
-### When Step File Inventory Misses Codebase References
-
-**Decision Date:** 2026-02-23
-
-**Anti-pattern:** Runbook step lists ~30 files for propagation based on Phase 0.5 discovery. Actual codebase has ~45 files with old names.
-
-**Correct pattern:** Discovery inventory should use `grep -r` across the full tree, not manual file listing. The verification step is the safety net, but discovery should cast a wider net initially.
 
 ### When Loading Context Before Skill Edits
 

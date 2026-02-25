@@ -161,14 +161,6 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Impact:** Clear separation between validation (precommit) and transformation (dev) workflows.
 
-### When Constraining Task Names For Slug Validity
-
-**Decision Date:** 2026-02-20
-
-**Anti-pattern:** Propagating the 25-char git branch slug limit to task naming time. Forces suboptimal prose keys for tasks that may never become worktrees.
-
-**Correct pattern:** Task names are prose keys (session management layer). Slug derivation is a worktree concern. When a derived slug is too long, provide a `--branch` override at invocation time — not a constraint at naming time.
-
 ### When Tracking Worktree Tasks In Session
 
 **Decision Date:** 2026-02-20

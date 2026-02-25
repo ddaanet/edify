@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-25
 
-**Status:** Parsing-fixes-batch delivered and reviewed. Review findings fixed (CLI test coverage, helper consistency, import cleanup).
+**Status:** Batch fix of 3 pending tasks: precommit validation wired, autofix removed from hook, orphan headers indexed.
 
 ## Completed This Session
 
@@ -34,6 +34,13 @@
   - Report: `plans/parsing-fixes-batch/reports/deliverable-review.md`
   - Findings fixed: added `test_lifecycle_known_file_cli` (CLI `--known-file` arg path), refactored `test_model_tags_non_markdown_artifact_not_flagged` to use `_run_validate` helper, moved `datetime` import to module-level alongside `UTC`
   - Extended `_run_validate` helper with keyword-only `extra_args` parameter
+- **Batch fix: 3 pending tasks**
+  - Removed `ruff check --fix-only` from `posttooluse-autoformat.sh` — hook now formats only, no autofix
+  - Fixed 3 duplicate decision headers: comparing-file-versions, constraining-task-names, step-file-inventory (kept more complete version, relocated memory-index entries)
+  - Added 37 memory-index entries for orphan headers, renamed `Inline Eligibility Criteria` → `When Phase Qualifies As Inline`
+  - Wired `claudeutils validate memory-index` into `run-checks()` in justfile
+  - Scoped to memory-index only — learnings/tasks/planstate/session-structure validators have pre-existing errors
+  - when-recall section lookup bug already fixed in prior commit (orphan entry removed in `09e1b700`)
 
 ## Pending Tasks
 
@@ -41,15 +48,18 @@
   - Plan: parsing-fixes-batch | Status: delivered
   - Report: `plans/parsing-fixes-batch/reports/deliverable-review.md`
 
-- [ ] **Wire validation into precommit** — add `claudeutils validate` to `run-checks()`, fix orphan entries/headers | sonnet
-  - 12 orphan index entries, 33 orphan headers, 3 cross-file duplicates
-  - Precommit gap: `just precommit` never runs `claudeutils validate`
+- [x] **Wire validation into precommit** — memory-index validator wired into `run-checks()`
+  - Scoped to memory-index only; other validators deferred (pre-existing errors)
 
-- [ ] **Remove autofix from PostToolUse hook** — just autoformat, no autofix | sonnet
+- [x] **Remove autofix from PostToolUse hook** — `ruff check --fix-only` removed, format-only now
 
-- [ ] **Fix when-recall section lookup bug** — `agent-core/bin/when-resolve.py` "Section not found" for entries that exist | sonnet
-  - Root cause traced: commit `bbcafd3c` added index entry without corresponding section heading
-  - "When Validating Runbook Pre-execution" content only in T4.5 table row, never a section
+- [x] **Fix when-recall section lookup bug** — orphan entry already removed in prior commit
+
+- [ ] **Wire remaining precommit validators** — fix pre-existing errors in learnings/tasks/planstate/session-structure validators, wire each into `run-checks()` | sonnet
+  - Learnings: title length limit (7 entries exceed 5-word max), orphaned content block
+  - Tasks: 25-char slug limit (30+ tasks exceed), forbidden characters (:, /, ()
+  - Planstate: 12 plans with no artifacts or missing phase files, 10 archived plans with remaining directories
+  - Session-structure: 2 glob-pattern reference files not found
 
 - [ ] **Tool deviation detection hook** — PostToolUse hook on Bash to detect when-resolve.py failures | sonnet
   - Check exit code + stderr patterns from specific scripts
@@ -172,8 +182,9 @@
 - When branch modifies existing entry in-place AND both sides add at tail, git appends modified line as duplicate.
 - Manual post-merge check required until worktree-merge-resilience automated
 
-**Validator orphan entries not autofixable:**
-- Marking headings structural (`.` prefix) causes non-autofixable error in `check_orphan_entries`
+**Validator autofix handles placement:**
+- `claudeutils validate memory-index` autofixes placement (file section) and ordering issues
+- All 37 orphan headers now indexed; 3 duplicates resolved
 
 **Memory index `/how` operator mapping (resolved):**
 - Operator prefix no longer used in matching — bare trigger matching handles both `/when` and `/how` entries
@@ -209,12 +220,12 @@
 **Possible Claude Code skill caching:**
 - On-disk skills current, but `/design` and `/reflect` invocations received older content. No structural fix — awareness only.
 
-**when-resolve.py "Section not found" for valid entries:**
-- Observed this session: "When Validating Runbook Pre-execution" entry in memory-index but section lookup fails in target file. Heading mismatch or file relocation. Tracked as pending task.
+**when-resolve.py "Section not found" (resolved):**
+- Orphan entry "When Validating Runbook Pre-execution" removed in commit `09e1b700`. No code bug — data issue only.
 
 ## Next Steps
 
-Continue with pending tasks.
+Wire remaining precommit validators (learnings, tasks, planstate, session-structure) — fix pre-existing errors then add each to `run-checks()`.
 
 ## Reference Files
 

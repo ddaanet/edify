@@ -20,10 +20,13 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 
 
 
+
+
 ## agents/decisions/cli.md
 
 /when getting current working directory
 /how output errors to stderr
+/when cli commands are llm-native | internal stdout markdown exit-code no-stderr
 /how configure script entry points
 /when writing CLI output | no destructive suggestions agents follow instructions
 /when choosing feedback output format
@@ -33,6 +36,8 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when call site expands under formatter | 5+ lines Black kwargs extract helper
 /when raising exceptions for expected conditions | custom types not ValueError broad masking
 /when adding error handling to call chain | layer separation context site display top
+/when designing cli tools for llm callers | stdin stdout markdown no quoting structured
+/when cli error messages are llm-consumed | facts only no suggestions STOP directive recovery
 
 ## agents/decisions/data-processing.md
 
@@ -92,6 +97,9 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when precommit fails | fix before committing broken gate worse than none
 /when editing runbook step or agent files | edit source phase files not generated
 /when removing stale learnings on commit
+/when edit tool reports stale success | Write after Bash dropped sandbox git-mv
+/when custom agents not discoverable as subagent types | built-in Task frontmatter restart
+/when phase files contain h2 headers in code blocks | extract_sections code fence boundary
 
 ## agents/decisions/markdown-tooling.md
 
@@ -113,6 +121,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 ## agents/decisions/operational-practices.md
 
 /when placing deliverable artifacts | plans vs tmp referenced later
+/when requiring per-artifact vet coverage | corrector review batch momentum
 /when launching task agents in parallel | single message batch
 /when background agents crash | check output files recovery
 /when refactoring agents need quality directives | deslop factorization
@@ -125,9 +134,19 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when performing root cause analysis | multi-layer stop between layers
 /when searching adjacent domains | correction not exclusion adjacent research
 /when temporal validation required for analysis | git history correlation
-/when comparing file versions across branches | diff content not line count
+/when inlining reference file subsets for optimization | knowledge ceiling partial subset full-Read
 /when merging worktree with consolidated learnings | delta only post-consolidation
-/when step file inventory misses codebase references | discovery grep propagation rename
+/when batch review routing overrides per-artifact judgment | single reviewer fabricates proportionality
+/when discovery decomposes by data point | parametrized operation spot-check variation-table
+/when verifying delivered plan artifacts | content line-counts signatures not file-existence
+/when assessing fragment demotion | behavioral procedural workflow-specific dead-weight
+/when evaluating recall system effectiveness | recognition retrieval metacognitive forced injection
+/when loading context before skill edits | plugin-dev skill-development description frontmatter
+/when reusable components reference project paths | hardcoding config pyproject
+/when validate-runbook flags pre-existing files | lifecycle false-positive modify-before-create
+/when execution routing preempts skill scanning | skill matching gate hook injection
+/when skill sections cross-reference context | back-reference inline criteria framing
+/when recovering broken submodule worktree refs | git worktree repair core.worktree
 
 ## agents/decisions/operational-tooling.md
 
@@ -138,9 +157,12 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when failed merge leaves debris | abort untracked files clean
 /when git lock error occurs | never delete lock report wait
 /when tracking worktree tasks in session.md | inline marker filesystem query
+/when comparing file versions across branches | diff content not line count
 /when validating worktree merges | session.md merge autostrategy remerge
+/when cli command fails and raw commands are denied | routing signal wrapper force retry
 /when classifyHandoffIfNeeded bug occurs | foreground Task calls fail background works
 /when sub-agents cannot spawn sub-agents | Task MCP hooks unavailable
+/when resolving session.md conflicts during merge | checkout discard branch tasks verify
 /when removing worktrees with submodules | core.worktree restore submodule merge check
 /when importing artifacts from worktrees | git show branch transport scope ownership
 /when workaround requires creating dependencies | two-step limit stop report
@@ -183,6 +205,8 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when script should generate metadata | validates not just validate
 /when bootstrapping around broken tools | design as execution plan
 /when resuming interrupted orchestration | checkpoint recovery recipe enforcement
+/when vet flags unused code | test callers infrastructure design-intent not dead
+/when delegating with corrections to prior analysis | exclude wrong item conflicting signals recency
 /when ordering post-orchestration tasks | diagnostic fixes improvements sequence
 /when assessing RED pass blast radius | over-implementation test-flaw correct
 /when shared code is bifurcated | unifying over patching root cause
@@ -190,6 +214,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when capturing requirements from conversation | capture over interview
 /when measuring agent durations | sleep inflation tool use rate
 /when analyzing sub-agent token costs | total_tokens cache decomposition
+/when submodule commits diverge during orchestration | linear history pointer verify phase-boundary
 /when selecting agent type for orchestrated steps | plan-specific mandatory restart
 
 ## agents/decisions/pipeline-contracts.md
@@ -199,6 +224,10 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /how review delegation scope template | scope IN OUT changed files requirements
 /when UNFIXABLE escalation | fix-all pattern grep UNFIXABLE stop escalate
 /when declaring phase type | tdd general inline per-phase typing model expansion review orchestration
+/when phase qualifies as inline | outcome determined instruction prose config pre-resolved
+/when vet escalation calibration | over-escalate UNFIXABLE pattern-matching uncertainty
+/when vet flags out-of-scope items | DEFERRED vs UNFIXABLE blocking scope
+/when vet receives execution context | filesystem state explicit IN OUT changed-files
 /when corrector rejects planning artifacts | runbook-corrector routing
 /when reviewing expanded phases | expansion reintroduces defects regression LLM failure modes
 /when outline review produces ungrounded corrections | confabulated operation sequence fabricated fix-all sonnet opus
@@ -210,10 +239,14 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when routing implementation findings | unconditional design triage proportionality
 /when selecting review model | match model to correctness property
 /when holistic review applies fixes | grep all references fix-all occurrences
+/when scoping vet for cross-cutting invariants | verification scope call-graph grep
 /when reviewing final orchestration checkpoint | lifecycle audit stateful objects
+/when adding verification scope to vet context | cross-cutting invariant indicators grep
+/when review gates feel redundant | non-negotiable checkpoint completeness consistency
 /when recall-artifact is absent during review | lightweight recall fallback
 /when corrector agents lack recall mechanism | design-corrector outline-corrector recall loading
 /when treating recall-artifact summary as recall pass | batch-resolve full content when-resolve
+/when batch changes span multiple artifact types | proportionality per-file routing artifact-type
 
 ## agents/decisions/project-config.md
 
@@ -256,6 +289,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when testing CLI tools | click CliRunner in-process isolated filesystem
 /when tests simulate merge workflows | branch as merged parent amend preserves
 /when safety checks fail in tests | understand why fix scenario not suppress
+/when green phase verification includes lint | just check test lint commit gate
 
 ## agents/decisions/validation-quality.md
 
@@ -287,6 +321,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when compressing session tasks | classify sub-items contextual vs artifact
 /when committing rca fixes
 /when running precommit validation
+/when tracking worktree tasks in session | inline marker pending slug filesystem-state
 
 ## agents/decisions/workflow-core.md
 
@@ -329,6 +364,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when reusing review agent context
 /when delegating well-specified prose edits | opus delegation ceremony cost pre-resolved
 /when designing context preloading mechanisms | @ref duplication skill invocation prime
+/when design ceremony continues after uncertainty resolves | two gates entry mid-stream re-check
 /when design resolves to simple execution | execution readiness gate exit ramp prose inline
 /when writing methodology | ground skill diverge converge external research general-first framing parallel agents
 
@@ -351,3 +387,6 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when verifying model analysis results
 /how implement domain validation
 /when adding a new variant to an enumerated system | grep downstream enumeration sites
+/when tdd cycles grow shared test file | line-limit split conditional 400 refactor
+/when step file inventory misses codebase references | discovery grep propagation rename
+/when triaging behavioral code changes as simple | structural criteria functions logic-paths moderate

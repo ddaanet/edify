@@ -66,7 +66,7 @@ Type determines:
 
 Type does NOT affect: tier assessment, outline generation, consolidation gates, assembly, checkpoints.
 
-### Inline Eligibility Criteria
+### When Phase Qualifies As Inline
 
 A phase qualifies as `inline` when outcome is fully determined by instruction + target file state:
 - No runtime feedback loop (tests, scripts, external state)
