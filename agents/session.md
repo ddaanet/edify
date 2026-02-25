@@ -96,13 +96,10 @@
 - [ ] **Deliverable review auto-commit** — after fixing all issues in deliverable-review, auto handoff and commit | sonnet
 - [ ] **Worktree new fuzzy matching** — `_worktree new` accepts approximate task names instead of exact match | sonnet
 
+- [ ] **Codify learnings** — `/codify` | opus
+  - Learnings at 76 lines (soft limit 80) — consolidation urgent
+
 ## Worktree Tasks
-
-
-- [ ] **Recall tool anchoring** → `recall-tool-anchoring` — `/design plans/recall-tool-anchoring/outline.md` | sonnet
-  - Plan: recall-tool-anchoring | Status: designed (outline reviewed, ready for prototype)
-  - Throwaway prototype: 3 shell scripts (check, resolve, diff) + D+B restructure of 8 skills/agents + PreToolUse hook
-  - Reference manifest format: thin trigger list replaces content dump in recall-artifact.md
 
 ## Blockers / Gotchas
 
@@ -146,6 +143,8 @@
 **`just sync-to-parent` requires sandbox bypass:**
 - Recipe removes and recreates symlinks in `.claude/` — sandbox blocks `rm` on those paths
 
+**Possible Claude Code skill caching:**
+- On-disk skills current, but `/design` and `/reflect` invocations received older content. No structural fix — awareness only.
 ## Next Steps
 
 1 worktree active (recall-tool-anchoring). Next: merge recall-tool-anchoring, or task-classification runbook, or execute orchestrate-evolution on main.

@@ -17,6 +17,7 @@
       "Bash(echo:*)",
       "Bash(printf:*)",
       "Bash(agent-core/bin/prepare-runbook.py:*)",
+      "Bash(agent-core/bin/recall-*:*)",
       "Skill",
       "WebSearch",
       "WebFetch",
@@ -82,6 +83,15 @@
           {
             "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/agent-core/hooks/pretooluse-recipe-redirect.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/agent-core/hooks/pretooluse-recall-check.py"
           }
         ]
       }
