@@ -1,21 +1,22 @@
 # Session Handoff: 2026-02-25
 
-**Status:** Merged 4 worktrees (prepare-runbook-fixes, when-resolve-fix, wt-merge-session-loss, recall-tool-anchoring), all validated, 0 worktrees remain.
+**Status:** Diagnosed when-resolve.py double-to + cross-operator bugs, confirmed skill caching blocker, wrote diagnostic for next session.
 
 ## Completed This Session
 
-- Merged `prepare-runbook-fixes` (commit: `885b06b8`) — extract_cycles() H3 termination + provenance path fixes
-- Merged `when-resolve-fix` (commit: `919b892e`) — fuzzy heading match in `_resolve_trigger()`
-- Merged `wt-merge-session-loss` (commit: `6003c424`) — session autostrategy RCA + fixes
-- All 3 merges required same autostrategy fix: completed `[x]` appended to Pending instead of replacing WT entry
-- Removed 3 worktrees (prepare-runbook-fixes, when-resolve-fix, wt-merge-session-loss)
-- Renamed "Deslop remaining skills" → "Skills quality pass", enriched with deslop/gate references
-- Merged `recall-tool-anchoring` (commit: `ae268de1`) — D+B prototype, 3 shell scripts, 8 skill restructures, PreToolUse hook, prepare-runbook-inline-regex fix
-  - Learnings: 1 entry invalidated, 3 new entries from worktree (behavioral deviation RCA, companion task bundling, recall gate anchoring)
-  - New task surfaced: Codify learnings (76/80 lines urgent)
+- Diagnosed when-resolve.py bugs: double-to prefix (`"how to X"` → `"how to to X"`) and cross-operator mismatch (`"when X"` for `/how` entries fails fuzzy matching)
+  - Diagnostic: `plans/when-resolve-fix/diagnostic-double-to.md` — reproduction, code paths, TDD cycles, fix locations
+  - Both bugs in `resolver.py:194-265` (`_resolve_trigger`), cli.py contributing
+- Confirmed skill caching blocker: reflect skill updated on disk (recall-tool-anchoring merge has Phase 4.5 STOP gate + D+B anchoring) but Claude Code served stale cached version without those fixes
+  - Blocker already noted in session.md; no new structural fix available
+- `/recall all` + `/recall deep` loaded 14 entries from 7 decision files for when-resolve and reflect topics
+- `/reflect` diagnosed itself applying fixes without recall or user validation — root cause was stale skill cache serving old version without Phase 4.5 checkpoint
 
 ## Pending Tasks
 
+- [ ] **Fix when-resolve double-to and cross-operator** — TDD fix per `plans/when-resolve-fix/diagnostic-double-to.md` | sonnet
+  - 2 TDD cycles: (1) strip "to " prefix for /how, (2) match on bare triggers not operator-prefixed
+  - Files: `src/claudeutils/when/resolver.py`, `tests/test_when_resolver.py`
 - [ ] **Codebase sweep** — `/design plans/codebase-sweep/requirements.md` | sonnet
   - Plan: codebase-sweep | Status: requirements
   - _git_ok, _fail, exception cleanup — mechanical refactoring
@@ -151,7 +152,7 @@
 
 ## Next Steps
 
-Codify learnings (urgent, 76/80 lines), then task-classification runbook or execute orchestrate-evolution.
+Fix when-resolve bugs (unblocks all recall tooling), then codify learnings (urgent, 76/80 lines).
 
 ## Reference Files
 
@@ -171,3 +172,4 @@ Codify learnings (urgent, 76/80 lines), then task-classification runbook or exec
 - `plans/task-classification/outline.md` — `/prime` skill + two-section task list design (8 rounds, reviewed)
 - `plans/task-classification/reports/outline-review.md` — Corrector review (0 critical, 3 major fixed)
 - `plans/task-lifecycle/outline.md` — Planstate-derived commands + STATUS continuation design
+- `plans/when-resolve-fix/diagnostic-double-to.md` — Double-to + cross-operator bugs, TDD plan, code paths
