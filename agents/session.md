@@ -113,6 +113,10 @@
   - Each decision/learning declares keywords for index. Index generated from declarations. Diff displayed after update for agent review. Supersedes manual append workflow in `/codify` step 4a.
 - [ ] **Skill prompt-composer** — migrate skill authoring to use prompt-composer pattern | sonnet
 
+- [ ] **Session scraping** — `/design plans/session-scraping/requirements.md` | sonnet
+  - Requirements captured, ready for design
+  - Key decisions: all ~/.claude/projects/ (not just claudeutils), agent files are first-class sources, many-to-many session↔commit, tool I/O noise by default
+
 ## Worktree Tasks
 
 
