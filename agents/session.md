@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-25
 
-**Status:** Inline regex bug fixed. Learnings at 76 lines — `/codify` needed urgently.
+**Status:** Deliverable review for prepare-runbook-inline-regex complete (0C/0Ma/0Mi). Learnings at 76 lines — `/codify` needed urgently.
 
 ## Completed This Session
 
@@ -21,6 +21,12 @@
 - Both: `\(type:\s*inline\)` → `\(type:\s*inline[^)]*\)` — handles compound tags like `(type: inline, model: sonnet)`
 - 2 new tests in `TestCompoundInlineTypeTags` class, 10/10 inline tests pass, full suite 1258/1259 (1 pre-existing xfail)
 
+**Deliverable review: prepare-runbook-inline-regex:**
+- 0C/0Ma/0Mi — clean delivery
+- 3 files reviewed: 2 regex changes in prepare-runbook.py, 70-line compound tag test file, 1-line import cleanup
+- Report: `plans/prepare-runbook-inline-regex/reports/deliverable-review.md`
+- Created lifecycle.md (requirements → reviewed)
+
 ## Pending Tasks
 
 - [x] **Orchestrate recall tool anchoring** — `/orchestrate recall-tool-anchoring` | sonnet | restart
@@ -28,7 +34,7 @@
 - [x] **Deliverable review: recall-tool-anchoring** — `/deliverable-review plans/recall-tool-anchoring` | opus | restart
   - Plan: recall-tool-anchoring | Status: reviewed
 - [x] **Fix prepare-runbook inline regex** — `/design plans/prepare-runbook-inline-regex/problem.md` | sonnet
-  - Plan: prepare-runbook-inline-regex | Status: delivered
+  - Plan: prepare-runbook-inline-regex | Status: reviewed
 - [ ] **Codify learnings** — `/codify` | opus
   - Learnings at 76 lines (soft limit 80) — consolidation urgent
 
@@ -50,6 +56,8 @@
 - `plans/recall-tool-anchoring/reports/deliverable-review.md` — Deliverable review (0C/0Ma/2Mi)
 - `plans/recall-tool-anchoring/lifecycle.md` — reviewed
 - `plans/prepare-runbook-inline-regex/problem.md` — Inline phase detection regex bug diagnostic
+- `plans/prepare-runbook-inline-regex/reports/deliverable-review.md` — Deliverable review (0C/0Ma/0Mi)
+- `plans/prepare-runbook-inline-regex/lifecycle.md` — reviewed
 - `agent-core/skills/design/SKILL.md` — Updated triage with D+B anchor, reorder, separation, gate
 - `agent-core/skills/reflect/SKILL.md` — Phase 4.5 restructured with recall gate
 - `agent-core/skills/runbook/SKILL.md` — Tier 1/2/Phase 0.5 recall anchored with when-resolve.py
