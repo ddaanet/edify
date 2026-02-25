@@ -43,3 +43,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: name after the situation at the decision point — the activity you're doing when the rule applies ("When recall gate has skip condition" → you're at the gate, evaluating it).
 - Routes to both: **handoff** (writing new ## headings for learnings mid-session) and **codify** (consolidating learnings into permanent docs). Both contexts produce ## headings that become memory-index triggers.
 - Same principle applies to memory-index trigger naming: trigger = situation, not antipattern label.
+## When redesigning a process skill
+- The skill's own failure modes govern its redesign if you use it on itself (circular dependency).
+- Correct pattern: ground against external frameworks first. The grounding step externalizes the design reasoning — principles come from outside the system, not from the skill's own reasoning. Then the redesign is execution of grounded conclusions (moderate complexity), not design from scratch (complex).
+- Corollary: by the grounded skill's own classification criteria, the redesign has clear requirements (grounding gaps with proposed fixes), no architectural uncertainty (grounding resolved it), and bounded scope → Moderate, routes to direct execution or /runbook, not full /design.
+- Evidence: /design grounding produced 8 principles and 7 gaps from 6 external frameworks. All 7 gap fixes were prose-only edits to existing sections — direct execution, no runbook needed.

@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-25
 
-**Status:** All 4 precommit validators wired; task names, learnings, and plans cleaned up.
+**Status:** Design skill grounded and redesigned; 8 principles applied across 7 gaps.
 
 ## Completed This Session
 
@@ -34,6 +34,17 @@
   - Deleted 11 archived plan directories + 5 stale no-artifact directories
   - Wired all 4 validators into `run-checks()` in justfile
 
+- **Ground design skill** — opus convergence from prior sonnet branch artifacts + direct execution
+  - Grounding report: `plans/reports/design-skill-grounding.md` (Strong — 6 frameworks, 8 principles, 7 gaps)
+  - 8 edits applied to SKILL.md (gaps 1-2, 4-6) and design-content-rules.md (gap 3)
+  - Gap 1: requirements-clarity gate upgraded from prose-only to D+B anchor with structured output block
+  - Gap 2: classification criteria reframed around Stacey axes (implementation certainty × requirement stability)
+  - Gap 3: decision tradeoff documentation rule added (ADR consequences pattern)
+  - Gap 4: outline-corrector prompt → PDR criteria; design-corrector prompt → CDR criteria (NASA staged review)
+  - Gap 5: companion task enforcement upgraded from prose to enumeration-before-processing
+  - Gap 6: defect/structured-bugfix fourth triage path added (Cynefin Complicated domain)
+  - Gap 7: triage feedback loop — out of scope (monitoring, not /design)
+
 ## Pending Tasks
 
 - [x] **Parsing-fixes review** — reviewed, 0 critical, 2 major
@@ -57,16 +68,13 @@
   - Activated after unexpected stop. Records compensation strategy. Applies trivial workarounds inline (e.g., rename heading to route around parser bug). Creates pending task for proper fix. Resumes interrupted work via continuation-prepend.
   - Needs grounding on failure recovery patterns, compensation strategies
 
-- [ ] **Ground design skill** — `/ground` then redesign | opus
-  - Highest-leverage grounding target — every task flows through /design
-  - Ground against established design methodology (requirements engineering, architectural decision processes, complexity assessment)
-  - Absorbs structured-bugfix process as routing outcome (fix-category assessment in triage)
-  - Compare grounded structure against current /design to identify structural gaps vs cosmetic differences
+- [x] **Ground design skill** — grounded + redesigned, 8 principles applied
+  - Report: `plans/reports/design-skill-grounding.md`
 
 - [ ] **Ground workflow skills** — `/ground` each per audit | opus
   - Audit: `plans/reports/workflow-grounding-audit.md`
   - Priority: /runbook → review agents (corrector + design-corrector batch) → /orchestrate → /handoff
-  - /design done separately (above) as highest priority
+  - /design completed — grounded and redesigned
   - Skip low-benefit: /commit, artisan, test-driver, /shelve
 
 - [ ] **Codebase sweep** — `/design plans/codebase-sweep/requirements.md` | sonnet
@@ -216,6 +224,8 @@
 
 Proceed with next pending task: **Tool deviation hook** — PostToolUse hook to detect when-resolve.py failures.
 
+Design skill grounding artifacts are complete — branch reports + final synthesis retained in `plans/reports/` for audit trail.
+
 ## Reference Files
 
 - `plans/parsing-fixes-batch/plan.md` — Tier 2 cycle plan (6 cycles, validate-runbook + prepare-runbook + dead code)
@@ -246,3 +256,6 @@ Proceed with next pending task: **Tool deviation hook** — PostToolUse hook to 
 - `plans/skills-quality-pass/reports/behavior-invariance-review.md` — 50-path independent verification (0 issues)
 - `plans/skills-quality-pass/reports/resolved-recall.md` — Pre-resolved recall dump for shared agent consumption
 - `plans/parsing-fixes-batch/reports/deliverable-review.md` — Deliverable review (0 critical, 2 major fixed)
+- `plans/reports/design-skill-grounding.md` — Design skill grounding (Strong — Cynefin, Stacey, IEEE 29148, Double Diamond, ADR, NASA PDR/CDR)
+- `plans/reports/design-skill-internal-codebase.md` — Branch A: 10 failure patterns, 8 gaps, 5 structural patterns
+- `plans/reports/design-skill-external-research.md` — Branch B: 6 frameworks with authority assessments
