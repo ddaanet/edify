@@ -69,3 +69,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Including gaps that solve problems from a different execution context. Time-boxing (from XP spikes) solves human-attention wandering. Prototype-to-production gate (from Lean Startup) solves organizational transition decisions. Neither applies to agentic execution where context windows bound exploration and users decide productization.
 - Correct pattern: Evaluate each external framework concept for applicability to the actual execution environment before importing as a gap. The concept may be valid in its source domain but irrelevant here.
 - Evidence: Time-boxing removed (context window is the natural bound), prototype-to-production gate removed (user invokes `/design` when ready — existing pipeline handles it).
+## When selecting gate anchor tools
+- Anti-pattern: Using a tool because it's "related" to the gate's domain without checking its preconditions match the gate's execution context. `recall-diff.sh` uses `git log --since=mtime` — requires intervening commits between artifact creation and gate point. At A.2.5, exploration reports are uncommitted; the script finds nothing.
+- Correct pattern: Verify the tool's mechanism matches the gate's runtime state. The right anchor is the tool that will be called on the positive path (`when-resolve.py`) — add a no-op mode (`null`) so the negative path has equal cost.
+- Evidence: A.2.5 post-explore recall gate initially used recall-diff.sh. Discussion revealed it can't detect uncommitted exploration reports.
+## When design gates bypass downstream pipeline
+- Anti-pattern: Direct execution gate in `/design` checks coordination complexity but not capacity. Gate bypasses `/runbook` entirely — if capacity isn't assessed, large-scope work routes to inline execution because it has "no coordination complexity."
+- Correct pattern: Gates that bypass downstream stages must union the criteria of all bypassed stages. Design's direct execution gate bypasses runbook tier assessment, so it must assess both coordination complexity (is this structurally simple?) and capacity (does it fit inline?).
+- Evidence: Phase B/C.5 direct execution criteria lacked session span and model constraints. Runbook Tier 1 has them because it's the inline-capacity gate.
