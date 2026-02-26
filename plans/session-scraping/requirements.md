@@ -17,26 +17,28 @@ Acceptance criteria:
 Extract a chronological timeline per session with these entry types:
 
 - **Timestamps** — on every extracted entry
-- **User prompts** — human-authored messages (distinguished from tool_result messages and system injections)
+- **User prompts** — human-authored messages (distinguished from tool_result messages, system injections, and command entries)
+- **Skill/command invocations** — `/design`, `/commit`, `/requirements` etc. Detected via `<command-name>` XML tags in user string content. The skill body (injected as a subsequent `type=user` list entry) is suppressible content, same principle as C-1
 - **Interactive tool outputs** — ExitPlanMode, AskUserQuestion, and similar tools where the output is a decision/choice, not just data
 - **Interrupts** — `[Request interrupted by user]` signals
-- **Tool calls with exit status** — tool name and success/failure by default. Tool input and output are noise unless specifically requested — available on demand for correlation with git changes, failed precommit, etc.
-- **Git commit IDs** — extracted from Bash tool_result content containing `git commit` output
+- **Tool calls with exit status** — tool name and success/failure by default. Tool input and output available via targeted per-call expansion by reference (not binary all-or-nothing toggle). Bash tool_calls that produce git commits carry the commit hash as metadata in the detail dict (`detail["commit_hash"]`) — not a separate entry type
 - **Agent answers** — assistant text blocks
 
 Acceptance criteria:
-- Distinguishes human prompts from tool_result user entries and system-reminder injections
-- Tool calls show name + status in summary view; input/output expandable on demand
-- Commit hashes extracted from Bash output via pattern matching
+- Distinguishes human prompts from tool_result user entries, system-reminder injections, and command/skill entries
+- Skill invocations show command name + args; skill body suppressed by default
+- Tool calls show name + status in summary view; input/output expandable per-call by reference
+- Commit hashes extracted from Bash output via pattern matching, attached as metadata on the tool_call entry
 - Timeline is chronologically ordered by timestamp
 
-**FR-3: Sub-agent tree aggregation**
-Walk the full session tree — main session plus all sub-agents spawned via Task tool. Aggregate timeline entries and commit hashes across the entire tree. Tag each entry with its source (main session vs. agent slug/type).
+**FR-3: Sub-agent aggregation**
+Walk the session tree — main session plus direct sub-agents spawned via Task tool. Aggregate timeline entries and commit hashes across the tree. Tag each entry with its source (main session vs. agent slug/type).
 
 Acceptance criteria:
-- Follows agent file references recursively (agent spawns agent)
+- Discovers direct sub-agent files (agent-*.jsonl) for a session
 - Each timeline entry identifies which agent produced it
 - Commit hashes collected from all agents in the tree
+- Single-level depth only (no recursive sub-sub-agents — claude does not nest agent spawning)
 
 **FR-4: Git history correlation (post-processing)**
 Correlate sessions with git history. The relationship is many-to-many: a commit may result from work spanning multiple sessions, a session tree may produce multiple commits, merge commits aggregate worktree branches with their own session histories.
@@ -49,8 +51,8 @@ Acceptance criteria:
 
 ### Constraints
 
-**C-1: Tool output is noise by default**
-Session JSONL `progress` entries are ~85% of file size. Tool input/output is voluminous. The default view must suppress this noise — show tool name and status only. Detailed input/output available as an expansion mode for specific investigation (e.g., correlating with failed precommit, examining what a Bash command did).
+**C-1: Noise suppression with targeted expansion**
+Session JSONL `progress` entries are ~85% of file size. Tool input/output and skill bodies are voluminous. The default view must suppress this noise — show tool name and status only, skill name and args only. Detailed content available via targeted per-call expansion by reference (given a tool call reference, show input, output, or both). Skill bodies expandable similarly. Not a binary all-or-nothing toggle — expanding all tool I/O reproduces the noise problem.
 
 **C-2: Many-to-many session↔commit mapping**
 No assumption of 1:1. Commits span sessions, sessions span commits. Orchestration sessions have sub-agents committing independently. The data model must represent this as a graph, not a bijection.
@@ -64,6 +66,7 @@ Start as scripts in `plans/prototypes/` or `agent-core/bin/`. Integration into `
 - Modify session files — read-only access to `~/.claude/projects/`
 - Full-text search / indexing — stateless per invocation, no persistent database. Operates on raw JSONL each time
 - Compaction handling — autocompact is disabled, handoff pattern keeps sessions short and complete
+- Recursive sub-agent trees — claude does not spawn sub-sub-agents; single-level agent discovery is sufficient
 
 ### Dependencies
 
