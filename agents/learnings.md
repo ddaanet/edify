@@ -48,6 +48,10 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: ground against external frameworks first. The grounding step externalizes the design reasoning — principles come from outside the system, not from the skill's own reasoning. Then the redesign is execution of grounded conclusions (moderate complexity), not design from scratch (complex).
 - Corollary: by the grounded skill's own classification criteria, the redesign has clear requirements (grounding gaps with proposed fixes), no architectural uncertainty (grounding resolved it), and bounded scope → Moderate, routes to direct execution or /runbook, not full /design.
 - Evidence: /design grounding produced 8 principles and 7 gaps from 6 external frameworks. All 7 gap fixes were prose-only edits to existing sections — direct execution, no runbook needed.
+## When writing hook redirect messages
+- Anti-pattern: "Use X instead of Y" without explaining why. Agent sees the redirect but lacks rationale to internalize the preference — may override in future invocations.
+- Correct pattern: Include brief rationale in every hook message. "Use X directly — python3 prefix breaks permissions.allow matching." Rationale improves agent adherence because it provides a reason to comply, not just an instruction.
+- Platform noise: Claude Code prepends `[hook-command-path]:` to stderr on exit 2 blocks. Shorten hook commands in settings.json (drop interpreter prefix, drop `$CLAUDE_PROJECT_DIR`) to reduce this noise. Scripts have shebangs; hooks execute from project root.
 ## When using permission deny for Bash commands
 - Anti-pattern: `"Bash(rm:*/index.lock)"` in permissions deny list to block lock removal. Looks correct but never fires — rm runs within the sandbox without needing explicit permission, so the permission check (and its deny list) is bypassed entirely.
 - Correct pattern: PreToolUse hook on Bash matcher with script that inspects `tool_input.command`. Hook fires unconditionally before execution, independent of sandbox/permission state.

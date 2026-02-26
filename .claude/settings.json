@@ -69,11 +69,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/pretooluse-block-tmp.sh"
+            "command": ".claude/hooks/pretooluse-block-tmp.sh"
           },
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/pretooluse-symlink-redirect.sh"
+            "command": ".claude/hooks/pretooluse-symlink-redirect.sh"
           }
         ]
       },
@@ -82,15 +82,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/submodule-safety.py"
+            "command": ".claude/hooks/submodule-safety.py"
           },
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/agent-core/hooks/pretooluse-recipe-redirect.py"
-          },
-          {
-            "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/agent-core/hooks/pretooluse-block-rm-lock.sh"
+            "command": "agent-core/hooks/pretooluse-recipe-redirect.py"
           }
         ]
       },
@@ -99,7 +95,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/agent-core/hooks/pretooluse-recall-check.py"
+            "command": "agent-core/hooks/pretooluse-recall-check.py"
           }
         ]
       }
@@ -110,7 +106,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/submodule-safety.py"
+            "command": ".claude/hooks/submodule-safety.py"
           }
         ]
       },
@@ -119,7 +115,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/agent-core/hooks/posttooluse-autoformat.sh"
+            "command": "agent-core/hooks/posttooluse-autoformat.sh"
           }
         ]
       }
@@ -129,7 +125,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/agent-core/hooks/userpromptsubmit-shortcuts.py",
+            "command": "agent-core/hooks/userpromptsubmit-shortcuts.py",
             "timeout": 5
           }
         ]
@@ -141,7 +137,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/agent-core/hooks/sessionstart-health.sh"
+            "command": "agent-core/hooks/sessionstart-health.sh"
           }
         ]
       }
@@ -152,7 +148,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/agent-core/hooks/stop-health-fallback.sh"
+            "command": "agent-core/hooks/stop-health-fallback.sh"
           }
         ]
       }
