@@ -56,3 +56,15 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: `"Bash(rm:*/index.lock)"` in permissions deny list to block lock removal. Looks correct but never fires — rm runs within the sandbox without needing explicit permission, so the permission check (and its deny list) is bypassed entirely.
 - Correct pattern: PreToolUse hook on Bash matcher with script that inspects `tool_input.command`. Hook fires unconditionally before execution, independent of sandbox/permission state.
 - Evidence: deny entry `"Bash(rm:*/.git/index.lock)"` existed in settings.json and was bypassed. User confirmed: "denylist is ineffective, operation does not require sandbox bypass." Hook replaced it.
+## When mapping hook output channel audiences
+- Empirical finding (TEST=1–7): `additionalContext` → agent-only (system-reminder, no user output); `systemMessage` → user-only ("PreToolUse:Bash says: ..."); `permissionDecisionReason` → both audiences, repeats twice in CLI; stderr+exit 2 → both, 1 line, `[hook-path]:` prefix noise.
+- Correct pattern for PreToolUse blocks: `permissionDecision:deny` JSON on exit 0. Short non-empty `permissionDecisionReason` (goes to both, repeated — keep brief); `additionalContext` for extended agent instructions (agent-only); `systemMessage` for user summary (user-only, ~60 chars).
+- Supersedes: "Platform noise: shorten hook commands" workaround in "When writing hook redirect messages" — permissionDecision:deny eliminates path noise without command shortening.
+## When implementing pre-delegation gates as PreToolUse hooks
+- Anti-pattern: PreToolUse hook on Task tool with exit 0 + additionalContext advisory ("consider doing recall first"). No model re-run between PreToolUse hook and tool execution for exit 0. Task dispatches, runs, completes before agent reads the advisory — the gate is post-delegation.
+- Correct pattern: Block with `permissionDecision:deny`. Gate by `subagent_type` discriminator (execution agents: artisan, test-driver, corrector, runbook-corrector, design-corrector, outline-corrector, runbook-outline-corrector, tdd-auditor, refactor) — more precise than plan-path in prompt. Fragments don't load in sub-agents; recall-artifact is the only project context transport.
+## When writing hook user-visible messages
+- Terminal constraint: "UserPromptSubmit says: " prefix = ~29 chars; ~90 char terminal = ~60 chars for content. Authored independently from additionalContext (agent text is written for agents, not for display).
+- Tier 2 injections (discuss, pending, brainstorm, quick, learn): behavioral outline + non-blank line count. Format: `discuss: assess, stress-test, state verdict. (N lines)`. Non-blank lines: `sum(1 for l in expansion.split('\n') if l.strip())`.
+- Tier 2.5 guards (1-line injections): authored human summary, not verbatim content. Example: "Agent instructed to use claude-code-guide" not the raw 130-char injection text.
+- Terse commands (c, y): same brief text for both audiences — instruction IS the summary.
