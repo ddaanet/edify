@@ -1,26 +1,20 @@
-# Session Handoff: 2026-02-27
+# Session Handoff: 2026-02-28
 
-**Status:** when-resolve-fix delivered and reviewed. Deliverable review: 0C/0M/4m, 3 fixed inline. Learning: all review findings must resolve to fix-now or pending-task.
+**Status:** recall-null planned (Tier 2). Outline with Execution Model ready for `/inline`. Per-consumer recall artifacts prepared (test-driver, corrector, skill-reviewer).
 
 ## Completed This Session
 
-- **Fix when-resolve.py** — dedup + stdin + navigation simplification (via /inline)
-  - Deleted `navigation.py` — sibling/related links redundant with memory-index scanning
-  - Replaced broader links with `Source: agents/decisions/<file>.md` — emergent Read calls
-  - Added stdin support: queries piped one-per-line, combined with CLI args
-  - Added dedup: identical resolved results emitted once (exact content match)
-  - Extracted `_collect_queries()` and `_resolve_queries()` helpers (C901 fix)
-  - `click.UsageError` with `# noqa: TRY003` — framework exception, not custom class target
-  - Corrector review: 0C/0M/1m (stale docstring fixed); triage: no-classification
-  - Plan: when-resolve-fix | Report: `plans/when-resolve-fix/reports/review.md`
-- **Discussion: navigation removal** — siblings redundant (memory-index already surfaces), broader replaced by bare path (agents process Read calls emergently), manual cross-file references rejected (recall does dynamic discovery)
-- **Discussion: recall artifact models** — two distinct models identified: pipeline (grouped entries with relevance notes, selective resolution) vs sub-agent injection (flat list, resolve-all, no selection judgment)
-- **Discussion: lint-gated recall** — context rotation problem: decisions loaded via `/recall broad` early in session aren't functionally present when lint error fires later. Fix: PostToolUse hook injects memory-index on first lint/precommit red after green (state-transition gated). Separate recall gate (PreToolUse) forces index scanning before fix attempt. Defense-in-depth: injection (layer 1) + mandatory recall gate (layer 2)
-- **Discussion: `resync` shorthand** — summarize conversation state for user validation before resuming execution; interpreted as "stop and report," NOT "continue"
-- **Deliverable review: when-resolve-fix** — 0C/0M/4m (3 fixed, 1 kept as-is)
-  - Fixed: `arg` → `query` loop variable rename, `_collect_queries` docstring ordering note, added `test_dedup_with_error`
-  - Kept: `tuple[str, ...]` type annotation — documents Click call site
-  - Plan: when-resolve-fix | Status: delivered | Report: `plans/when-resolve-fix/reports/deliverable-review.md`
+- **Recall-null planning** — `/design` triage → Moderate → `/runbook` Tier 2 assessment → outline with Execution Model
+  - Scope discussion: null mode + D+B gate language + post-explore gates. Artifact generation for sub-agents excluded (that's runbook-recall-expansion scope).
+  - Inventoried recall gate state across 4 pipeline skills: /requirements, /design, /runbook, /inline
+  - Classification: Moderate (behavioral code forces minimum), mixed artifact destination (production + agentic-prose)
+  - Tier 2: 6 files, benefits from agent isolation (TDD sonnet + prose opus), no full orchestration
+  - Plan: recall-null | Outline: `plans/recall-null/outline.md` (has Execution Model — ready for /inline)
+- **Per-consumer recall artifacts** — curated subsets of recall-artifact for each agent type
+  - `tdd-recall-artifact.md` (5 entries: CLI testing, assertions, lint gate)
+  - `review-recall-artifact.md` (7 entries: D+B pattern, model selection, holistic fixes)
+  - `skill-review-recall-artifact.md` (6 entries: skill editing, D+B propagation)
+- **Recall broad** — loaded 16/21 decision files. Remaining 5 (data-processing, deliverable-review, markdown-tooling, operational-tooling, validation-quality) irrelevant to recall gates
 
 ## Pending Tasks
 
@@ -28,10 +22,10 @@
 
 - [x] **Fix when-resolve.py** — dedup, stdin, navigation simplification delivered
 - [x] **Review when-resolve** — delivered, 0C/0M/4m (3 fixed inline)
-- [ ] **when-resolve null mode** — add no-op `null` argument to `when-resolve.py` for gate anchoring | sonnet
-  - Equalizes tool call cost between positive/negative recall paths
-  - Prevents fast-pathing past recall gates
-  - Referenced by `/design` A.2.5 post-explore recall gate
+- [ ] **Recall-null delivery** — `/inline plans/recall-null` | opus
+  - Plan: recall-null | Status: planned (outline with Execution Model)
+  - Phase 1: null mode TDD (2 cycles, test-driver at sonnet). Phase 2: skill gate language (5 inline edits, opus direct)
+  - Absorbs: when-resolve null mode + runbook post-explore gate
 - [ ] **Recall CLI integration** — Production `claudeutils _recall` CLI (check/resolve/diff), Click, TDD | sonnet
   - Prototype delivered via recall-tool-anchoring worktree
 - [ ] **UserPromptSubmit topic** — Phase 7 analysis recommends this as highest-impact recall improvement | sonnet
@@ -50,9 +44,7 @@
   - Two drift vectors: stale recall-artifact (entries loaded not persisted) and stale skill artifacts (decisions loaded after artifact written)
 - [ ] **Generate memory index** — `/design` | opus
   - Each decision/learning declares keywords for index. Index generated from declarations. Diff displayed after update for agent review. Supersedes manual append workflow in `/codify` step 4a.
-- [ ] **Runbook post-explore gate** — opus
-  - /runbook Tier 3 Phase 0.5 has recall (resolve + augment) and Phase 0.75 has recall-diff, but no post-exploration re-scan of memory-index for domains discovered during Glob/Grep verification (step 3). /design has A.2.5 for this. Same pattern needed after Phase 0.5 step 3 discovers file areas not anticipated during step 1 recall.
-  - Separate from inline-execute delivery — standalone skill edit
+- [x] **Runbook post-explore gate** — absorbed into recall-null delivery (outline item 2.4)
 - [ ] **Stale recall artifact** — diagnose /design producing old-style recall artifact instead of memory key list | sonnet
 - [ ] **Recall deduplication** — integrate session context scraping into `when-resolve.py` to filter already-loaded entries | sonnet
   - Session scraper prototype: `plans/prototypes/session-scraper.py`
@@ -239,7 +231,7 @@
 
 ## Next Steps
 
-when-resolve-fix fully delivered. Next: **when-resolve null mode** (sonnet).
+Recall-null planned. Next: **Recall-null delivery** — `/inline plans/recall-null` (opus).
 
 ## Reference Files
 
@@ -256,3 +248,4 @@ when-resolve-fix fully delivered. Next: **when-resolve null mode** (sonnet).
 - `plans/inline-execute/outline.md` — /inline skill design outline
 - `plans/inline-execute/reports/cross-skill-review.md` — Cross-skill review (continuation frontmatter gaps)
 - `agents/decisions/pipeline-contracts.md` — Pipeline contract decision file (new)
+- `plans/recall-null/outline.md` — Recall-null execution outline with Execution Model (Tier 2, ready for /inline)

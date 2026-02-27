@@ -1,0 +1,7 @@
+- **Classification:** Moderate
+- **Implementation certainty:** High — approach known (null argument + replicate A.2.5 pattern)
+- **Requirement stability:** High — FRs established from discussion + codified decisions
+- **Behavioral code check:** Yes — `null` handling in cli.py adds conditional branch → Moderate minimum
+- **Work type:** Production (delivers capability to agents)
+- **Artifact destination:** Mixed — production (`src/claudeutils/when/cli.py`) + agentic-prose (4 skills)
+- **Evidence:** `defense-in-depth.md §When Selecting Gate Anchor Tools` defines null mode. A.2.5 in /design is the canonical gate pattern. All skill edits replicate this existing pattern.
