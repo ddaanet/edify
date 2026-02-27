@@ -65,6 +65,11 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when splitting validation into mechanical and semantic | script deterministic agent judgment advisory
 /when reviewing quality gate coverage | defense layer checklist
 /when fixing behavioral deviations identified by RCA | structural fix environment prose
+/when anchoring gates with tool calls | recall gate skip condition escape hatch D+B proves work
+/when selecting gate anchor tools | preconditions runtime state verify mechanism
+/when gates bypass downstream pipeline stages | union criteria capacity coordination
+/when choosing hook enforcement over permission deny | sandbox denylist ineffective PreToolUse
+/when implementing pre-delegation gates | permissionDecision deny block subagent_type Task hook
 
 ## agents/decisions/deliverable-review.md
 
@@ -78,11 +83,11 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when tier boundary is capacity vs orchestration complexity | Tier 1 Tier 2 Tier 3 prompt generation ad-hoc runbook
 /when tier thresholds are ungrounded | file count cycle count calibration empirical measurement
 /when relating execution tiers to complexity routing | design ceremony work type quality obligations execution mechanics
+/when routing prototype work through pipeline | artifact destination ceremony level plans/prototypes
+/when requirements-clarity gate fires | empirical validation phase 0 reroute
 
-## agents/decisions/implementation-notes.md
+## agents/decisions/hook-patterns.md
 
-/when using at-sign references
-/when placing DO NOT rules in skills | skill constraint rules negative constraints
 /when using session start hooks
 /how filter user prompt submit hooks
 /when using hooks in subagents
@@ -91,6 +96,14 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when hook fragment alignment needed | recency primacy contradict reinforce
 /when prompt caching differs from file caching | read appends API prefix
 /when sub-agent rules not injected | rules fire main only domain context
+/when writing hook redirect messages | rationale why not just what agent adherence
+/when mapping hook output channel audiences | additionalContext systemMessage permissionDecisionReason stderr
+/when writing hook user-visible messages | terminal constraint 60 chars tier injection
+
+## agents/decisions/implementation-notes.md
+
+/when using at-sign references
+/when placing DO NOT rules in skills | skill constraint rules negative constraints
 /when treating commits as sync points
 /when deciding to commit interactively
 /when git branch rename writes config | sandbox config write failure
@@ -183,6 +196,11 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when avoiding CLI skill name collision | check built-ins before naming
 /when choosing name | public handles discovery recall over cleverness
 /when constraining task names for slug validity | layers dont share constraints
+/when choosing script vs agent judgment | scripting non-cognitive deterministic
+/when script should generate metadata | validates not just validate
+/when bootstrapping around broken tools | design as execution plan
+/when measuring agent durations | sleep inflation tool use rate
+/when analyzing sub-agent token costs | total_tokens cache decomposition
 
 ## agents/decisions/orchestration-execution.md
 
@@ -208,9 +226,6 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when haiku rationalizes test failures | regression green phase bugs
 /when haiku GREEN phase skips lint | tdd green verification lint check
 /when classifying errors by tier | tier-aware self-classify report
-/when choosing script vs agent judgment | scripting non-cognitive deterministic
-/when script should generate metadata | validates not just validate
-/when bootstrapping around broken tools | design as execution plan
 /when resuming interrupted orchestration | checkpoint recovery recipe enforcement
 /when vet flags unused code | test callers infrastructure design-intent not dead
 /when delegating with corrections to prior analysis | exclude wrong item conflicting signals recency
@@ -219,10 +234,13 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when shared code is bifurcated | unifying over patching root cause
 /when agent context has conflicting signals | common context competes phase-neutral
 /when capturing requirements from conversation | capture over interview
-/when measuring agent durations | sleep inflation tool use rate
-/when analyzing sub-agent token costs | total_tokens cache decomposition
 /when submodule commits diverge during orchestration | linear history pointer verify phase-boundary
 /when selecting agent type for orchestrated steps | plan-specific mandatory restart
+/when selecting model for discovery and audit | haiku sonnet minimum prose artifacts
+/when reviewing batch skill edits | parallel reviewers split relatedness invariance
+/when scoping corrector on TDD deliverables | full branch diff main HEAD not last cycle
+/when delegating TDD cycles to test-driver | piecemeal one per invocation resume context
+/when implementation modifies pipeline skills | self-modification inline task sequence fresh loads
 
 ## agents/decisions/pipeline-contracts.md
 
@@ -257,6 +275,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when using inline execution lifecycle | Tier 1 Tier 2 entry gate corrector triage feedback
 /how dispatch corrector from inline skill | standardized template baseline diff recall report
 /when triage feedback shows divergence | classification comparison heuristics calibration log
+/when proximal requirements reveal lifecycle gaps | structural gap inline execution pipeline stage
 
 ## agents/decisions/project-config.md
 
@@ -332,6 +351,9 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when committing rca fixes
 /when running precommit validation
 /when tracking worktree tasks in session | inline marker pending slug filesystem-state
+/when writing recall artifacts | keys only no excerpts downstream resolve
+/when requirements capture needs recall | requirements skill recall step infrastructure
+/when recall loads new entries mid-artifact | re-evaluate each pass invalidate extend requirements outline design
 
 ## agents/decisions/workflow-core.md
 
@@ -377,6 +399,10 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when design ceremony continues after uncertainty resolves | two gates entry mid-stream re-check
 /when design resolves to simple execution | execution readiness gate exit ramp prose inline
 /when writing methodology | ground skill diverge converge external research general-first framing parallel agents
+/when companion tasks bundled into design invocation | phase 0 gates triage recall routing
+/when redesigning a process skill | circular dependency ground external first
+/when grounding identifies gaps in existing structure | operational environment constraints methodology
+/when assessing grounding gaps for relevance | applicability execution context import
 
 ## agents/decisions/workflow-planning.md
 

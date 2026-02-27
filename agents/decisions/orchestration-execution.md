@@ -233,34 +233,6 @@ FR-17 documents the three-tier escalation requirement. Concrete detection mechan
 
 **Rationale:** Execution agent has full error context (stack trace, file state). Transmitting to orchestrator for classification loses fidelity or costs tokens.
 
-## .Scripting Principles
-
-### When Choosing Script Vs Agent Judgment
-
-**Decision Date:** 2026-02-12
-
-**Decision:** If solution is non-cognitive (deterministic, pattern-based), script it. Always auto-fix when possible.
-
-**Anti-pattern:** Using agent judgment for deterministic operations.
-
-**Corollary:** Reserve agent invocations for cognitive work (design, review, ambiguous decisions).
-
-### When Script Should Generate Metadata
-
-**Decision Date:** 2026-02-12
-
-**Anti-pattern:** Script validates metadata presence but expects cognitive agent to generate it.
-
-**Correct pattern:** If metadata is deterministic and standard, script injects it during assembly.
-
-### When Bootstrapping Around Broken Tools
-
-**Decision Date:** 2026-02-12
-
-**Decision:** When replacing a workflow tool, assess tier from design and execute directly if feasible.
-
-**Key insight:** The design document IS the execution plan when work is well-specified.
-
 ## .Orchestration Recovery Patterns
 
 ### When Resuming Interrupted Orchestration
@@ -343,28 +315,6 @@ FR-17 documents the three-tier escalation requirement. Concrete detection mechan
 
 **Rationale:** User's actual need was "formalize what we just discussed" not "guide me through questions".
 
-## .Measurement Patterns
-
-### When Measuring Agent Durations
-
-**Decision Date:** 2026-02-19
-
-**Anti-pattern:** Computing duration as timestamp delta between tool_use and tool_result — includes laptop sleep time, producing artifact "outliers."
-
-**Correct pattern:** Use `duration_ms` from Task result metadata when available. Cross-reference with tool_uses to validate: normal p50=6.6s/tool. Flag entries >30s/tool as sleep-inflated.
-
-**Evidence:** 13/951 entries flagged, all confirmed artifacts.
-
-### When Analyzing Sub-Agent Token Costs
-
-**Decision Date:** 2026-02-19
-
-**Anti-pattern:** Treating `total_tokens` from CLI `<usage>` as fresh input cost. The field sums all token types (cache reads + writes + fresh) without decomposition.
-
-**Correct pattern:** Use main session first-turn `cache_creation_input_tokens` to measure system prompt size (~43K tokens p50). Use minimal-work agents (≤3 tool uses) for fixed overhead proxy.
-
-**Evidence:** 709 Task calls analyzed. Minimal-work agents: 35.7K total_tokens p50. Main session cache hit rate: 94-100% after warmup.
-
 ### When Submodule Commits Diverge During Orchestration
 
 **Decision Date:** 2026-02-21
@@ -384,3 +334,49 @@ FR-17 documents the three-tier escalation requirement. Concrete detection mechan
 **Correct pattern:** Plan-specific agent is mandatory for `/orchestrate`. If `<plan>-task` isn't available as a subagent_type, STOP and report. Session restart makes custom agents in `.claude/agents/` discoverable. `tdd-task` is only for ad-hoc TDD cycles outside prepared runbooks.
 
 **Evidence:** Dispatched Cycle 1.1 via `tdd-task` instead of `runbook-generation-fixes-task`. Remaining 12 cycles used correct agent after restart.
+
+### When Selecting Model For Discovery And Audit
+
+**Decision Date:** 2026-02-25
+
+**Anti-pattern:** Using haiku scouts to audit prose quality or detect structural anti-patterns in skills, agents, or fragments. Haiku grades generously, misses dominant failure patterns, produces false positives requiring opus validation — double work.
+
+**Correct pattern:** Sonnet minimum for any discovery/audit touching skills, agents, or fragments. These are architectural prose artifacts — assessing their quality requires the same judgment tier as editing them.
+
+**Evidence:** Haiku graded 0 skills at C (sonnet found 3), missed description anti-pattern as dominant issue (18/30), produced 15 gate findings vs sonnet's 12 (3 false positives).
+
+### When Reviewing Batch Skill Edits
+
+**Decision Date:** 2026-02-25
+
+**Anti-pattern:** Single reviewer agent for all modified skills. Context fills with 28 skill reads before review begins. Quality degrades as context grows.
+
+**Correct pattern:** Parallel reviewers split by relatedness. Separate behavior invariance agent for conditional-branch skills. All read-only, no file conflicts.
+
+### When Scoping Corrector On TDD Deliverables
+
+**Decision Date:** 2026-02-27
+
+**Anti-pattern:** Scoping corrector to only the files modified in the most recent TDD cycle.
+
+**Correct pattern:** Scope corrector to ALL files changed on the branch vs main (`git diff --name-only main...HEAD`). The deliverable is the full branch, not the last cycle. Test-driven specification doesn't replace review — it narrows what the review needs to check.
+
+### When Delegating TDD Cycles To Test-Driver
+
+**Decision Date:** 2026-02-27
+
+**Anti-pattern:** Sending all N cycles in a single prompt. Agent loses focus on later cycles, context overloaded.
+
+**Correct pattern:** Piecemeal — one cycle per invocation. Resume the same agent for subsequent cycles (preserves accumulated context). Fresh agent if context nears 150k.
+
+**Context priming:** Sub-agents don't share parent context. Each NEW agent must self-prime by running `when-resolve.py` on relevant recall-artifact entries. Resumed agents already have this context.
+
+### When Implementation Modifies Pipeline Skills
+
+**Decision Date:** 2026-02-27
+
+**Anti-pattern:** Using the full runbook pipeline when the planned work modifies pipeline skills (/design, /runbook) or pipeline contracts. Self-modification coupling: a runbook step that edits the runbook skill creates stale-instruction risk for subsequent steps.
+
+**Correct pattern:** Structure as inline task sequence orchestrated through session pending tasks. Each task executes with fresh CLAUDE.md loads, sidestepping stale instructions. TDD discipline preserved — executing session dispatches test-driver via Task tool per cycle.
+
+**Also applies when:** No parallelization benefit (strict dependency chain), overhead/value mismatch (pipeline coordination cost > error-recovery value for ~10 sequential work units).

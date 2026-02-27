@@ -168,3 +168,29 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 **Anti-pattern:** Separate Worktree Tasks section with move semantics (Pending → Worktree on create, Worktree → Completed on rm). Creates merge-commit amend ceremony (`_update_session_and_amend`), drifts from filesystem state.
 
 **Correct pattern:** Tasks stay in Pending with inline `→ \`slug\`` marker. `#status` renders worktree section from `_worktree ls`, not from session.md section. Single source of truth is git worktree state.
+
+## .Recall Workflow Patterns
+
+### When Writing Recall Artifacts
+
+**Decision Date:** 2026-02-25
+
+**Anti-pattern:** Full excerpts per entry (heading + source + relevance + content excerpt). Creates stale snapshots — if decision files change between artifact creation and consumption, excerpts are outdated.
+
+**Correct pattern:** Entry keys only. Artifact lists trigger phrases with 1-line relevance notes. Downstream consumers batch-resolve via `when-resolve.py` to get current content. No staleness, no excerpt duplication.
+
+### When Requirements Capture Needs Recall
+
+**Decision Date:** 2026-02-25
+
+/requirements skill originally went straight from conversation extraction to codebase discovery without recall. This produces naive requirements that miss existing infrastructure.
+
+**Correct pattern:** /requirements includes a recall step between mode detection and conversation scanning, producing a recall artifact. The recall grounds the extraction — agent knows what infrastructure exists before interpreting what the user asked for.
+
+### When Recall Loads New Entries Mid-Artifact
+
+**Decision Date:** 2026-02-27
+
+**Anti-pattern:** Loading recall entries across multiple passes, then only applying entries that matched the original artifact structure. New entries from later passes can invalidate or extend decisions made before those entries were loaded.
+
+**Correct pattern:** After each recall pass, re-evaluate current artifact decisions against newly loaded entries. Applies to any artifact in progress — requirements, outline, design, runbook. Later passes may reveal structural gaps, not minor refinements.

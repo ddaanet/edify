@@ -124,3 +124,45 @@ When designing a new quality gate or quality process:
 
 **Evidence:** /reflect prescribed "no exceptions" language for design skill Simple gate after agent rationalized past existing clear behavioral-code rule. Same anti-pattern class as ambient rules without enforcement.
 
+## .When Implementing Enforcement Gates
+
+### When Anchoring Gates With Tool Calls
+
+**Decision Date:** 2026-02-25
+
+**Anti-pattern:** "Read X (skip if already in context)" as a gate. Agent rationalizes the skip condition without verifying — substitutes related activity for the required Read. The escape hatch IS the failure mode.
+
+**Correct pattern:** Anchor with a tool call that proves work happened. `when-resolve.py` is the canonical gate anchor: it's a Bash call (unskippable), requires trigger knowledge (forces prior Read of memory-index), and produces output (proves resolution). One tool-call anchor is sufficient — passphrase/proof-of-Read mechanisms are redundant when the resolution tool proves both.
+
+### When Selecting Gate Anchor Tools
+
+**Decision Date:** 2026-02-26
+
+**Anti-pattern:** Using a tool because it's "related" to the gate's domain without checking its preconditions match the gate's execution context. `recall-diff.sh` uses `git log --since=mtime` — requires intervening commits. At a post-explore gate, exploration reports are uncommitted; the script finds nothing.
+
+**Correct pattern:** Verify the tool's mechanism matches the gate's runtime state. The right anchor is the tool called on the positive path (`when-resolve.py`) — add a no-op mode (`null`) so the negative path has equal cost.
+
+### When Gates Bypass Downstream Pipeline Stages
+
+**Decision Date:** 2026-02-26
+
+**Anti-pattern:** Direct execution gate checks coordination complexity but not capacity. Gate bypasses `/runbook` entirely — large-scope work routes to inline execution because it has "no coordination complexity."
+
+**Correct pattern:** Gates that bypass downstream stages must union the criteria of all bypassed stages. Design's direct execution gate bypasses runbook tier assessment, so it must assess both coordination complexity (structurally simple?) and capacity (fits inline?).
+
+### When Choosing Hook Enforcement Over Permission Deny
+
+**Decision Date:** 2026-02-25
+
+**Anti-pattern:** `"Bash(rm:*/index.lock)"` in permissions deny list. Never fires — rm runs within the sandbox without needing explicit permission, so the deny list is bypassed entirely.
+
+**Correct pattern:** PreToolUse hook on Bash matcher with script that inspects `tool_input.command`. Hook fires unconditionally before execution, independent of sandbox/permission state.
+
+### When Implementing Pre-Delegation Gates
+
+**Decision Date:** 2026-02-26
+
+**Anti-pattern:** PreToolUse hook on Task tool with exit 0 + additionalContext advisory. No model re-run between PreToolUse hook and tool execution for exit 0. Task dispatches, runs, completes before agent reads the advisory — the gate is post-delegation.
+
+**Correct pattern:** Block with `permissionDecision:deny`. Gate by `subagent_type` discriminator (execution agents: artisan, test-driver, corrector, runbook-corrector, design-corrector, outline-corrector, runbook-outline-corrector, tdd-auditor, refactor). Fragments don't load in sub-agents; recall-artifact is the only project context transport.
+

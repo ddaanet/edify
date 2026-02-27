@@ -48,3 +48,17 @@ These are three independent decisions made at different pipeline stages:
 - Complexity routing grounding report: `plans/reports/complexity-routing-grounding.md`
 - Problem statement: `plans/complexity-routing/problem.md`
 - User explanation during grounding discussion (2026-02-26 session)
+
+## When Routing Prototype Work Through Pipeline
+
+**Decision Date:** 2026-02-26
+
+**Anti-pattern:** Design skill's behavioral-code gate routes ALL non-prose work to /runbook. /runbook tier assessment counts files against production conventions. A C-3 prototype script in plans/prototypes/ gets assessed as Tier 3. Procedural momentum from practiced pipeline overrides explicit prototype constraint.
+
+**Correct pattern:** Artifact destination determines ceremony level. Prototype scripts (plans/prototypes/, one-off analysis, spikes) don't need runbooks, TDD, or test files. Design resolves complexity; post-design a prototype is direct implementation regardless of behavioral code.
+
+## When Requirements-Clarity Gate Fires
+
+**Decision Date:** 2026-02-27
+
+**Data point:** /design Phase 0 correctly detected 5 mechanism-free open questions in `plans/triage-feedback/problem.md` and rerouted to /requirements. First empirical validation of the requirements-clarity gate — previously 0 events in n=38 sessions. Structured output block format was sufficient to trigger the correct routing decision without a full D+B tool-call anchor.

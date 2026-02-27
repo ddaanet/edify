@@ -150,4 +150,34 @@ File count is a proxy — 7 files with independent additive changes can be simpl
 
 **Evidence:** First prioritization attempt produced subjective weights ("Highest/High/Medium") and 0-3 scores without defined criteria. After grounding in WSJF research, methodology used Fibonacci scoring with observable evidence sources. Code-density grounding produced project-specific entries ("Git state queries return booleans — `_git_ok()`") that should have been general principles with project instances.
 
+### When Companion Tasks Bundled Into Design Invocation
 
+**Decision Date:** 2026-02-25
+
+**Anti-pattern:** Session note says "address X during /design." Agent treats companion work as exempt from design process — no recall, no skill loading, no classification gate. Rationalizes "well-specified from prior RCA" to skip all process steps.
+
+**Correct pattern:** Companion tasks get their own triage pass through the same Phase 0 gates. "Address during /design" means the /design session is the venue, not that process is optional. Each workstream needs: recall, classification, routing.
+
+### When Redesigning A Process Skill
+
+**Decision Date:** 2026-02-25
+
+The skill's own failure modes govern its redesign if you use it on itself (circular dependency).
+
+**Correct pattern:** Ground against external frameworks first. The grounding step externalizes the design reasoning — principles come from outside the system, not from the skill's own reasoning. Then the redesign is execution of grounded conclusions (moderate complexity), not design from scratch (complex).
+
+### When Grounding Identifies Gaps In Existing Structure
+
+**Decision Date:** 2026-02-26
+
+**Anti-pattern:** Treating existing operational structure (e.g., three execution tiers) as ungrounded because external methodology frameworks don't prescribe it.
+
+**Correct pattern:** Operational structure can be grounded in execution environment constraints (context window capacity, delegation overhead, prompt generation cost) rather than external methodology. External frameworks validate the principle (match process weight to need); environment constraints validate the specific structure.
+
+### When Assessing Grounding Gaps For Relevance
+
+**Decision Date:** 2026-02-26
+
+**Anti-pattern:** Including gaps that solve problems from a different execution context. Time-boxing (from XP spikes) solves human-attention wandering. Prototype-to-production gate (from Lean Startup) solves organizational transition decisions. Neither applies to agentic execution where context windows bound exploration and users decide productization.
+
+**Correct pattern:** Evaluate each external framework concept for applicability to the actual execution environment before importing as a gap.

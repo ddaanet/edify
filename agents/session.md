@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-27
 
-**Status:** 4 worktree merges consolidated; /inline skill and triage-feedback delivered from design-grounding-update; recall skill path fix; 2 new pending tasks from discussion.
+**Status:** Codify consolidation: 27 learnings → 10 decision/fragment files, 2 file splits, new hook-patterns.md. 3 entries returned to staging pending skill-dev skill.
 
 ## Completed This Session
 
@@ -15,6 +15,19 @@
 - **Recall skill path fix** — `memory-index.md` → `agents/memory-index.md` across all references
 - **Process-critical triage** — handoff wt awareness superseded; tool deviation hook scope broadened
 - **Discussion: handoff --commit removal** — motivation: decouple handoff from commit-ready state; chain `["/handoff", "/commit"]` replaces `--commit` flag; ~60 occurrences across skills, fragments, tests, continuation infrastructure
+- **Codify learnings** — 27 entries consolidated into permanent docs, 3 returned to staging (skill editing patterns pending skill-dev skill)
+  - defense-in-depth.md: 5 gate implementation patterns (recall gates, anchor tools, bypass criteria, permission deny, pre-delegation)
+  - hook-patterns.md: new file (split from implementation-notes + 3 hook implementation entries)
+  - workflow-optimization.md: 5 entries (companion tasks, grounding methodology ×3, prototype routing moved to execution-strategy)
+  - orchestration-execution.md: 5 entries (model audit, batch review, corrector scope, TDD delegation, self-modifying pipelines)
+  - execution-strategy.md: 2 entries (prototype routing, requirements-clarity gate data point)
+  - workflow-advanced.md: 3 recall patterns (artifacts format, requirements recall, mid-artifact re-evaluation)
+  - pipeline-contracts.md: 1 lifecycle gaps entry
+  - project-tooling.md: 1 precommit cost entry
+  - codify references/learnings.md: 2 entries (naming headings, decision file splits)
+  - operational-tooling.md: scripting + measurement patterns (split from orchestration-execution)
+  - File splits: implementation-notes 427→319, orchestration-execution 432→382
+  - User corrections: removed shared-recall entry (planner writes keys, sub-agent resolves), generalized outline-affecting → mid-artifact, skill-development rule → pending skill
 
 ## Pending Tasks
 
@@ -70,8 +83,8 @@
 - [ ] **Fix task-context bloat** — Filter/trim output | sonnet
 - [ ] **Upstream skills field** — PR/issue for missing skills frontmatter | sonnet
 - [ ] **Infrastructure scripts** — History tooling + agent-core script rewrites | sonnet
-- [!] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet
-  - Plan: handoff-cli-tool | Status: designed (outline reviewed 6 rounds, ready for runbook)
+- [!] **Session CLI tool** — `/design plans/handoff-cli-tool/requirements.md` | sonnet
+  - Plan: handoff-cli-tool | Status: requirements
   - `_session` group (handoff, status, commit)
   - Discussion conclusions baked into outline: amend, git passthrough, deviation-only output, submodule labeling
 - [ ] **UserPromptSubmit topic** — Phase 7 analysis recommends this as highest-impact recall improvement | sonnet
@@ -145,8 +158,8 @@
   - `when-resolve.py` touches sentinel; skill compares sentinel mtime to recall-artifact.md AND primary skill artifact (requirements.md, outline.md, design.md, runbook.md)
   - If recall newer than either artifact, trigger update step
   - Two drift vectors: stale recall-artifact (entries loaded not persisted) and stale skill artifacts (decisions loaded after artifact written)
-- [ ] **Codify learnings** — `/codify` | sonnet
-  - learnings.md at ~125 lines, soft limit 80
+- [x] **Codify learnings** — `/codify` | sonnet
+  - 27 entries consolidated, 3 returned to staging, learnings.md 31 lines
 - [x] **Create inline skill** — `x` | opus
   - Plan: inline-execute
   - Deliverables: `agent-core/skills/inline/SKILL.md`, `agent-core/skills/inline/references/corrector-template.md`
@@ -186,6 +199,10 @@
   - Audit skills for cold-start gaps; retrofit where beneficial
   - Follow-on after /inline delivery
 - [ ] **When-resolve bloat** — group entries by section, list broader/related once per section header | sonnet
+- [ ] **Skill-dev skill** — `/design` | sonnet
+  - Front-load plugin-dev:skill-development with project-specific skill editing patterns via ad-hoc continuation passing
+  - Content: description field rules, extraction safety, control flow verification, entry point naming, prose quality ref
+  - Replace ambient `.claude/rules/skill-development.md` path trigger with explicit skill invocation
 - [ ] **Handoff --commit removal** — remove --commit from /handoff, expand standalone to chain, deduplicate [handoff, commit] | sonnet
   - ~60 occurrences: skills, fragments, tests, continuation infrastructure, decision files
   - Motivation: decouple handoff from commit-ready state (handoff should work on dirty tree)
@@ -220,9 +237,6 @@
 - Operator prefix no longer used in matching — bare trigger matching handles both `/when` and `/how` entries
 - `removeprefix("to ")` in resolver strips leftover "to" from "how to X" invocations
 
-**Learnings at 134 lines, 31 entries:**
-- Well over 80-line soft limit. `/codify` urgently needed.
-
 **SessionStart hook #10373 still open:**
 - Output discarded for new interactive sessions. Stop hook fallback deployed (Phase 4).
 
@@ -255,7 +269,7 @@
 
 ## Next Steps
 
-Session.md validator worktree active. Next in-tree: **Tool deviation hook** or **Fix when-resolve output bloat** (high priority).
+Session.md validator worktree active. Next in-tree: **Tool deviation hook** or **Fix when-resolve output bloat** (high priority). Codify complete — learnings.md at 31 lines.
 
 ## Reference Files
 

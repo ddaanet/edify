@@ -356,3 +356,13 @@ Corrector dispatch follows standardized template in `agent-core/skills/inline/re
 ### When Triage Feedback Shows Divergence
 
 `triage-feedback.sh` compares post-execution evidence against pre-execution classification.md. Divergence surfaced inline — no automatic action. Divergence data accumulates in `plans/reports/triage-feedback-log.md` for future threshold calibration. Current heuristics are initial estimates (C-3 constraint).
+
+### When Proximal Requirements Reveal Lifecycle Gaps
+
+**Decision Date:** 2026-02-27
+
+**Pattern:** A specific requirement (e.g., "post-execution comparison point") that can't map to any existing pipeline stage reveals a structural gap. The pipeline state machine (/requirements → /design → /runbook → /orchestrate → /deliverable-review → /commit) has no stage for execution-ready work between /design and /handoff.
+
+**Correct pattern:** The proximal requirement points at the structural gap. Fix the gap (inline execution skill covering pre-work + execute + post-work), and the proximal requirement becomes one FR among many.
+
+**Corollary:** Conditional gates ("skip Read if no /design ran") reintroduce prose-gate failure modes. The D+B principle applies: unconditional Read, file absence is the negative path.

@@ -16,6 +16,8 @@ This provides hook event types, prompt-based hooks API, validation patterns, and
 
 **Configuration reference:** Read `agent-core/fragments/claude-config-layout.md` for hook configuration locations, output formats, activation requirements, and security patterns.
 
+**Implementation patterns:** Read `agents/decisions/hook-patterns.md` for output channel audiences, redirect message authoring, user-visible message constraints, and pre-delegation gate design.
+
 ### Hook Error Protocol (D-6)
 
 Hook failures are visible but non-fatal for the session:

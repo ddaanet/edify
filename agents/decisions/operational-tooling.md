@@ -266,3 +266,53 @@ Git workflow, platform constraints, code patterns, and naming conventions.
 **Correct pattern:** Task names are prose keys (session management layer). Slug derivation is a worktree concern. When a derived slug is too long, provide a `--slug` override at invocation time. **Gap:** No `--slug` override exists yet — current workaround is bare `_worktree new <slug>` which loses session integration.
 
 **Rationale:** Layers should not share constraints. The enforcement point (worktree creation) is the right place to surface slug limits, not the point of task authoring.
+
+## .Scripting Principles
+
+### When Choosing Script Vs Agent Judgment
+
+**Decision Date:** 2026-02-12
+
+**Decision:** If solution is non-cognitive (deterministic, pattern-based), script it. Always auto-fix when possible.
+
+**Anti-pattern:** Using agent judgment for deterministic operations.
+
+**Corollary:** Reserve agent invocations for cognitive work (design, review, ambiguous decisions).
+
+### When Script Should Generate Metadata
+
+**Decision Date:** 2026-02-12
+
+**Anti-pattern:** Script validates metadata presence but expects cognitive agent to generate it.
+
+**Correct pattern:** If metadata is deterministic and standard, script injects it during assembly.
+
+### When Bootstrapping Around Broken Tools
+
+**Decision Date:** 2026-02-12
+
+**Decision:** When replacing a workflow tool, assess tier from design and execute directly if feasible.
+
+**Key insight:** The design document IS the execution plan when work is well-specified.
+
+## .Measurement Patterns
+
+### When Measuring Agent Durations
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Computing duration as timestamp delta between tool_use and tool_result — includes laptop sleep time, producing artifact "outliers."
+
+**Correct pattern:** Use `duration_ms` from Task result metadata when available. Cross-reference with tool_uses to validate: normal p50=6.6s/tool. Flag entries >30s/tool as sleep-inflated.
+
+**Evidence:** 13/951 entries flagged, all confirmed artifacts.
+
+### When Analyzing Sub-Agent Token Costs
+
+**Decision Date:** 2026-02-19
+
+**Anti-pattern:** Treating `total_tokens` from CLI `<usage>` as fresh input cost. The field sums all token types (cache reads + writes + fresh) without decomposition.
+
+**Correct pattern:** Use main session first-turn `cache_creation_input_tokens` to measure system prompt size (~43K tokens p50). Use minimal-work agents (≤3 tool uses) for fixed overhead proxy.
+
+**Evidence:** 709 Task calls analyzed. Minimal-work agents: 35.7K total_tokens p50. Main session cache hit rate: 94-100% after warmup.
