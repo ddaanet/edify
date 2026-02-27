@@ -1,0 +1,7 @@
+- **Classification:** Defect
+- **Implementation certainty:** High — fixes specified in deliverable review
+- **Requirement stability:** High — concrete rework items
+- **Behavioral code check:** Yes — grep pattern change (Task 1)
+- **Work type:** Production
+- **Artifact destination:** production + agentic-prose
+- **Evidence:** Deliverable review Critical #1 (format mismatch), Major #4 (pivot table gap)

@@ -206,12 +206,6 @@
 
 ## Worktree Tasks
 
-- [ ] **Fix inline-exec findings** → `inline-exec-fixes` — `/design plans/inline-execute/reports/deliverable-review.md` | opus
-  - Plan: inline-execute | Status: rework
-  - Classification format mismatch (grep pattern vs /design list-marker format)
-  - Pivot Transactions table missing /inline entry
-  - Unspecified A.3-5 restructure in /design (Minor/excess)
-
 ## Blockers / Gotchas
 
 **Never run `git merge` without sandbox bypass:**

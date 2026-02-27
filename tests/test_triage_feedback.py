@@ -243,6 +243,27 @@ def test_underclassified_simple_with_reports(tmp_path: Path) -> None:
     )
 
 
+def test_list_marker_classification_format(tmp_path: Path) -> None:
+    """Script parses classification from list-marker format."""
+    repo_path, baseline_sha = _init_repo(tmp_path)
+
+    classification_dir = repo_path / "plans" / "testjob"
+    classification_dir.mkdir(parents=True)
+    (classification_dir / "classification.md").write_text(
+        "- **Classification:** Simple\n- **Implementation certainty:** High\n"
+    )
+
+    _git_add_commit(repo_path, "code.py", "def foo():\n    pass\n", "add code")
+
+    result = _run_script(repo_path, "testjob", baseline_sha)
+    assert result.returncode == 0, (
+        f"Expected exit 0, got {result.returncode}: {result.stderr}"
+    )
+    assert "underclassified" in result.stdout, (
+        f"Expected 'underclassified' for list-marker Simple: {result.stdout}"
+    )
+
+
 def test_match_moderate(tmp_path: Path) -> None:
     """Script reports match for Moderate classification with behavioral code."""
     repo_path, baseline_sha = _init_repo(tmp_path)
