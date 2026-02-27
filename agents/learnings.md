@@ -29,3 +29,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Prose quality: `plans/reports/skill-optimization-grounding.md` — Segment → Attribute → Compress framework.
 - Triggers: editing skills, skill surgery, deslop, extraction, progressive disclosure, restructuring conditional branches
 - Pending: consolidate into `/skill-dev` skill (front-loads plugin-dev:skill-development via continuation passing)
+## When writing recall artifacts for sub-agents
+- Two distinct artifact models: pipeline recall (grouped entries with relevance notes, selective resolution by consuming skill) vs sub-agent injection (flat trigger list, resolve-all, no selection judgment). Sub-agents have no parent context — they can't judge which entries are relevant, making selective resolution circular.
+- Anti-pattern: Using pipeline-model artifacts (grouped, relevance notes) when the consumer is a delegated agent. The grouping invites selective resolution which the agent can't perform.
+- Correct pattern: Flat list for sub-agent injection. Delegation prompt says "resolve ALL entries." Pipeline model for skills/orchestrators that have topic context for selection.
+## When loaded decisions miss error context
+- Decisions loaded via `/recall broad` early in session aren't functionally present when errors fire later (context rotation). The agent processes lint error against immediate context (error message, rule description), not against decisions loaded 50k+ tokens earlier.
+- Anti-pattern: Adding another recall pass as prose instruction ("recall after lint failure") — this is a prose gate, same failure mode as the original recall.
+- Correct pattern: Structural injection — PostToolUse hook injects memory-index content on first lint/precommit red after green (state-transition gated). Separate PreToolUse recall gate forces index scanning before fix attempt. Two layers: injection (availability) + gate (application).

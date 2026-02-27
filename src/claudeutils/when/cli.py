@@ -19,20 +19,27 @@ def _strip_operator(arg: str) -> str:
     return arg
 
 
-@click.command(name="when")
-@click.argument("queries", nargs=-1, required=True)
-def when_cmd(queries: tuple[str, ...]) -> None:
-    """Query memory index with fuzzy matching.
+def _collect_queries(args: tuple[str, ...]) -> list[str]:
+    """Collect queries from CLI args and stdin."""
+    queries = list(args or [])
 
-    QUERIES: One or more trigger queries. Operator prefix (when/how) is optional.
-    Examples: "writing mock tests", "when writing mock tests", "how encode paths"
-    """
-    project_root = Path(os.getenv("CLAUDE_PROJECT_DIR", "."))
-    index_path = project_root / "agents" / "memory-index.md"
-    decisions_dir = project_root / "agents" / "decisions"
+    if not sys.stdin.isatty():
+        for line in sys.stdin:
+            stripped = line.strip()
+            if stripped:
+                queries.append(stripped)
 
+    return queries
+
+
+def _resolve_queries(
+    queries: list[str], index_path: str, decisions_dir: str
+) -> tuple[list[str], list[str]]:
+    """Resolve queries, deduplicating results."""
     results: list[str] = []
+    seen: set[str] = set()
     errors: list[str] = []
+
     for arg in queries:
         query_str = _strip_operator(arg)
         if not query_str.strip():
@@ -40,15 +47,39 @@ def when_cmd(queries: tuple[str, ...]) -> None:
             continue
 
         try:
-            results.append(resolve(query_str, str(index_path), str(decisions_dir)))
+            result = resolve(query_str, index_path, decisions_dir)
+            if result not in seen:
+                seen.add(result)
+                results.append(result)
         except ResolveError as e:
             errors.append(str(e))
 
-    # Print successes first
+    return results, errors
+
+
+@click.command(name="when")
+@click.argument("queries", nargs=-1, required=False)
+def when_cmd(queries: tuple[str, ...]) -> None:
+    """Query memory index with fuzzy matching.
+
+    QUERIES: One or more trigger queries (args and/or stdin, one per line).
+    Operator prefix (when/how) is optional.
+    Examples: "writing mock tests", "when writing mock tests", "how encode paths"
+    """
+    all_queries = _collect_queries(queries)
+
+    if not all_queries:
+        raise click.UsageError("No queries provided")  # noqa: TRY003 — Click API
+
+    project_root = Path(os.getenv("CLAUDE_PROJECT_DIR", "."))
+    index_path = str(project_root / "agents" / "memory-index.md")
+    decisions_dir = str(project_root / "agents" / "decisions")
+
+    results, errors = _resolve_queries(all_queries, index_path, decisions_dir)
+
     if results:
         click.echo("\n---\n".join(results))
 
-    # Then errors to stdout
     if errors:
         for err in errors:
             click.echo(err)

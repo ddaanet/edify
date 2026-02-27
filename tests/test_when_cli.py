@@ -86,7 +86,7 @@ def test_dot_prefix_preserved() -> None:
     # No query args should error
     result = runner.invoke(cli, ["when"])
     assert result.exit_code != 0
-    assert "Missing argument" in result.output
+    assert "No queries provided" in result.output
 
 
 def test_cli_invokes_resolver(tmp_path: Path) -> None:
@@ -214,3 +214,117 @@ def test_batch_all_succeed_exit_zero() -> None:
         assert result.exit_code == 0
         assert "Result 1" in result.output
         assert "Result 2" in result.output
+
+
+def test_dedup_identical_results() -> None:
+    """Duplicate resolved results are emitted once."""
+    runner = CliRunner()
+
+    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+        # Two different queries resolve to the same content
+        mock_resolve.side_effect = [
+            "# Same Entry\n\nContent here",
+            "# Same Entry\n\nContent here",
+        ]
+
+        result = runner.invoke(cli, ["when", "query one", "query two"])
+        assert result.exit_code == 0
+        assert result.output.count("# Same Entry") == 1
+        assert "---" not in result.output
+
+
+def test_dedup_preserves_distinct() -> None:
+    """Distinct resolved results are all emitted."""
+    runner = CliRunner()
+
+    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+        mock_resolve.side_effect = [
+            "# Entry A\n\nFirst",
+            "# Entry A\n\nFirst",
+            "# Entry B\n\nSecond",
+        ]
+
+        result = runner.invoke(cli, ["when", "q1", "q2", "q3"])
+        assert result.exit_code == 0
+        assert result.output.count("# Entry A") == 1
+        assert result.output.count("# Entry B") == 1
+        assert "---" in result.output
+
+
+def test_stdin_queries() -> None:
+    """Queries read from stdin (one per line)."""
+    runner = CliRunner()
+
+    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+        mock_resolve.return_value = "# Result\n\nContent"
+
+        result = runner.invoke(cli, ["when"], input="writing mock tests\n")
+        assert result.exit_code == 0
+        assert "# Result" in result.output
+        mock_resolve.assert_called_once()
+        assert mock_resolve.call_args[0][0] == "writing mock tests"
+
+
+def test_stdin_multiple_lines() -> None:
+    """Multiple stdin lines produce multiple queries."""
+    runner = CliRunner()
+
+    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+        mock_resolve.side_effect = [
+            "# Result 1\n\nFirst",
+            "# Result 2\n\nSecond",
+        ]
+
+        result = runner.invoke(cli, ["when"], input="query one\nquery two\n")
+        assert result.exit_code == 0
+        assert mock_resolve.call_count == 2
+        assert "---" in result.output
+
+
+def test_stdin_skips_blank_lines() -> None:
+    """Blank lines in stdin are ignored."""
+    runner = CliRunner()
+
+    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+        mock_resolve.return_value = "# Result\n\nContent"
+
+        result = runner.invoke(cli, ["when"], input="\n  \nactual query\n\n")
+        assert result.exit_code == 0
+        mock_resolve.assert_called_once()
+
+
+def test_stdin_combined_with_args() -> None:
+    """Stdin queries combined with CLI arg queries."""
+    runner = CliRunner()
+
+    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+        mock_resolve.side_effect = [
+            "# From Args\n\nArg content",
+            "# From Stdin\n\nStdin content",
+        ]
+
+        result = runner.invoke(cli, ["when", "arg query"], input="stdin query\n")
+        assert result.exit_code == 0
+        assert mock_resolve.call_count == 2
+        assert "# From Args" in result.output
+        assert "# From Stdin" in result.output
+
+
+def test_stdin_strips_operator_prefix() -> None:
+    """Operator prefix stripped from stdin queries too."""
+    runner = CliRunner()
+
+    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+        mock_resolve.return_value = "# Result\n\nContent"
+
+        result = runner.invoke(cli, ["when"], input="when writing tests\n")
+        assert result.exit_code == 0
+        assert mock_resolve.call_args[0][0] == "writing tests"
+
+
+def test_no_queries_error() -> None:
+    """Error when no queries from args or stdin."""
+    runner = CliRunner()
+    result = runner.invoke(cli, ["when"])
+    assert result.exit_code != 0
+    assert "No queries provided" in result.output

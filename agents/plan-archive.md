@@ -243,9 +243,6 @@ Fix inline phase detection in prepare-runbook.py for compound type tags (e.g., `
 
 2 bug fixes in prepare-runbook.py: extract_cycles() H3 phase header termination (last cycle captured next phase's preamble), generate_cycle_file/generate_step_file provenance metadata pointing to non-existent runbook.md. TDD with edge-case tests and deliverable review. Affected: agent-core/bin/prepare-runbook.py.
 
-## when-resolve-fix
-
-Fuzzy heading match in _resolve_trigger() replacing exact match. Resolves memory-index trigger failures when trigger phrasing differs from section heading by articles or minor wording. TDD with deliverable review. Affected: src/claudeutils/when/resolver.py.
 
 ## worktree-session-merge
 

@@ -186,7 +186,7 @@ def test_trigger_fuzzy_heading_match_how_operator(tmp_path: Path) -> None:
 
 
 def test_resolve_output_format(tmp_path: Path) -> None:
-    """Output formatting combines content and navigation links."""
+    """Output formatting combines content with source reference."""
     index_file = tmp_path / "test_index.md"
     index_file.write_text(
         "## testing\n"
@@ -222,9 +222,9 @@ def test_resolve_output_format(tmp_path: Path) -> None:
     assert "# When Writing Mock Tests" in result
     assert "Mock tests prevent side effects" in result
     assert "Use test doubles for external dependencies" in result
-    assert "Broader:" in result
-    assert "/when ..testing.md" in result
-    assert "Related:" in result or "/when mock patching" in result
+    assert "Source: agents/decisions/testing.md" in result
+    assert "Broader:" not in result
+    assert "Related:" not in result
 
 
 def test_how_to_prefix_not_doubled(tmp_path: Path) -> None:

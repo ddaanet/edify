@@ -1,57 +1,29 @@
 # Session Handoff: 2026-02-27
 
-**Status:** Prioritization + housekeeping + sync-to-parent fixes. 61 tasks scored, 25 plan-archive entries recovered, pending tasks reordered by priority tiers.
+**Status:** Fix when-resolve.py delivered (dedup, stdin, navigation simplification). Corrector review clean. Discussion: recall artifact models, lint-gated recall, `resync` shorthand.
 
 ## Completed This Session
 
-- **Merged python3-redirect-hook** — hook command shortening, permissionDecision:deny migration, hook output audit learnings (3 entries)
-- **Merged session-scraping-prototype** — complexity routing grounding (6 frameworks → 7 fix points), execution-strategy.md, session scraper prototype, 6 learnings
-- **Merged merge-learnings-delta** — 7 TDD cycles, remerge.py improvements, test fixtures refactored, justfile recipes added
-- **Merged design-grounding-update** — /inline skill (create + design integration + pipeline integration), triage-feedback.sh TDD (7 cycles, 13 tests), design grounding update with session scraper empirical data, execution feedback processed (6 issues classified)
-- **Post-merge validation** — all 4 merges verified: no session.md task loss, no learnings.md entry loss
-- **Diff baseline rule** — ambient directive in worktree skill: three-dot diff for merge analysis
-- **Permanent post-merge gotcha** — validate session.md AND learnings.md after every merge
-- **Stale hook cleanup** — removed `tmp/test-hook-channels.py` from settings.json
-- **Recall skill path fix** — `memory-index.md` → `agents/memory-index.md` across all references
-- **Process-critical triage** — handoff wt awareness superseded; tool deviation hook scope broadened
-- **Discussion: handoff --commit removal** — motivation: decouple handoff from commit-ready state; chain `["/handoff", "/commit"]` replaces `--commit` flag; ~60 occurrences across skills, fragments, tests, continuation infrastructure
-- **Codify learnings** — 27 entries consolidated into permanent docs, 3 returned to staging (skill editing patterns pending skill-dev skill)
-  - defense-in-depth.md: 5 gate implementation patterns (recall gates, anchor tools, bypass criteria, permission deny, pre-delegation)
-  - hook-patterns.md: new file (split from implementation-notes + 3 hook implementation entries)
-  - workflow-optimization.md: 5 entries (companion tasks, grounding methodology ×3, prototype routing moved to execution-strategy)
-  - orchestration-execution.md: 5 entries (model audit, batch review, corrector scope, TDD delegation, self-modifying pipelines)
-  - execution-strategy.md: 2 entries (prototype routing, requirements-clarity gate data point)
-  - workflow-advanced.md: 3 recall patterns (artifacts format, requirements recall, mid-artifact re-evaluation)
-  - pipeline-contracts.md: 1 lifecycle gaps entry
-  - project-tooling.md: 1 precommit cost entry
-  - codify references/learnings.md: 2 entries (naming headings, decision file splits)
-  - operational-tooling.md: scripting + measurement patterns (split from orchestration-execution)
-  - File splits: implementation-notes 427→319, orchestration-execution 432→382
-  - User corrections: removed shared-recall entry (planner writes keys, sub-agent resolves), generalized outline-affecting → mid-artifact, skill-development rule → pending skill
-- **Prioritization** — 61 tasks scored via WSJF, report: `plans/reports/prioritization-2026-02-27.md`
-  - User directive: recall/when-resolve first (foundational) → workflow prose → workflow non-prose → rest
-  - Top 5: Orchestrate evolution (6.0), Fix when-resolve.py (4.8), when-resolve null mode (4.3), Task classification (2.8), Recall CLI integration (2.6)
-  - Pragmatic ordering: Fix when-resolve.py → when-resolve null mode → Orchestrate evolution → Recall CLI integration
-- **Plan archive recovery** — 25 entries added to plan-archive.md from git archaeology
-  - 9 delivered with full summaries, 3 absorbed, 7 killed, 6 early-stage
-  - Covered both bulk-delete commits (Feb 4: 12 plans, Feb 21: 10 plans)
-- **Plan cleanup** — deleted 4 delivered plan directories (merge-learnings-delta, parsing-fixes-batch, planstate-delivered, skills-quality-pass)
-- **Pending task reorder** — session.md reordered by prioritization tiers (recall → prose → workflow → rest)
-- **FR-6 added to session-validator** — plan-archive coverage check (deleted plans must have archive entry)
-- **Merged inline-exec-fixes** — classification format fix (list-marker parsing), test added, worktree merge validator caught duplicate task
-- **Worktree cleanup** — removed when-resolve-fixes, skill-retrofit, session-md-validator worktrees (no changes on any)
-- **Discussion: plan archival** — precommit validator (option A) selected over workflow integration (B) or lifecycle coupling (C); proven failure mode (2 bulk deletes without archival)
-- **Fix sync-hooks-config.py** — `normalize_command()` strips interpreter prefix + `$CLAUDE_PROJECT_DIR/`, `_merge_hook_entries()` replaces old-form commands instead of duplicating
-- **Fix sync-to-parent** — auto-stage new skill/agent symlinks via `git add` (hooks excluded — gitignored)
+- **Fix when-resolve.py** — dedup + stdin + navigation simplification (via /inline)
+  - Deleted `navigation.py` — sibling/related links redundant with memory-index scanning
+  - Replaced broader links with `Source: agents/decisions/<file>.md` — emergent Read calls
+  - Added stdin support: queries piped one-per-line, combined with CLI args
+  - Added dedup: identical resolved results emitted once (exact content match)
+  - Extracted `_collect_queries()` and `_resolve_queries()` helpers (C901 fix)
+  - `click.UsageError` with `# noqa: TRY003` — framework exception, not custom class target
+  - Corrector review: 0C/0M/1m (stale docstring fixed); triage: no-classification
+  - Plan: when-resolve-fix | Report: `plans/when-resolve-fix/reports/review.md`
+- **Discussion: navigation removal** — siblings redundant (memory-index already surfaces), broader replaced by bare path (agents process Read calls emergently), manual cross-file references rejected (recall does dynamic discovery)
+- **Discussion: recall artifact models** — two distinct models identified: pipeline (grouped entries with relevance notes, selective resolution) vs sub-agent injection (flat list, resolve-all, no selection judgment)
+- **Discussion: lint-gated recall** — context rotation problem: decisions loaded via `/recall broad` early in session aren't functionally present when lint error fires later. Fix: PostToolUse hook injects memory-index on first lint/precommit red after green (state-transition gated). Separate recall gate (PreToolUse) forces index scanning before fix attempt. Defense-in-depth: injection (layer 1) + mandatory recall gate (layer 2)
+- **Discussion: `resync` shorthand** — summarize conversation state for user validation before resuming execution; interpreted as "stop and report," NOT "continue"
 
 ## Pending Tasks
 
 ### Tier 1: Recall/when-resolve (foundational)
 
-- [ ] **Fix when-resolve.py** — `x` | sonnet
-  - Deduplicate fuzzy matches in output (same entry resolved multiple times)
-  - Accept recall-artifact on stdin (line-per-trigger format)
-  - Current workaround: zsh array expansion `triggers=("${(@f)$(< file)}") && when-resolve.py "${triggers[@]}"`
+- [x] **Fix when-resolve.py** — dedup, stdin, navigation simplification delivered
+- [ ] **Review when-resolve** — `/deliverable-review plans/when-resolve-fix` | opus | restart
 - [ ] **when-resolve null mode** — add no-op `null` argument to `when-resolve.py` for gate anchoring | sonnet
   - Equalizes tool call cost between positive/negative recall paths
   - Prevents fast-pathing past recall gates
@@ -65,7 +37,7 @@
 - [ ] **Runbook recall expansion** — `/design plans/runbook-recall-expansion/requirements.md` | sonnet
   - Plan: runbook-recall-expansion | Status: requirements
   - prepare-runbook.py recall injection, corrector.md self-loading, two-pattern docs (7 FRs)
-- [ ] **When-resolve bloat** — group entries by section, list broader/related once per section header | sonnet
+- [ ] **When-resolve bloat** — group resolved entries by source file when batch-resolving multiple queries | sonnet
 - [ ] **Recall tool consolidation** — rename `when-resolve.py` → `claudeutils _recall`, remove `..file` syntax; phase out `/when` and `/how` as separate skills, ensure `/recall` covers reactive single-entry lookups; memory-index entry format changes from `/when`+`/how` prefixes → new format; update `src/claudeutils/validation/memory_index_checks.py` and `when` module accordingly | sonnet
 - [ ] **Artifact staleness gate** — sonnet
   - Mechanical checkpoint at /requirements, /design, /runbook exit points
@@ -81,11 +53,13 @@
 - [ ] **Recall deduplication** — integrate session context scraping into `when-resolve.py` to filter already-loaded entries | sonnet
   - Session scraper prototype: `plans/prototypes/session-scraper.py`
   - Dedup should be opt-in (`--new-only` flag or `null` mode), not default — explicit queries may resolve for sub-agent prompts
-- [ ] **Recall pipeline** — `d:` when-resolve.py stdin/recall-artifact support, session log dedup | opus
-  - Accept recall keys on stdin (ignore post-"|" memory-index format), change recall-artifact format (dash separator unsafe)
+- [ ] **Recall pipeline** — `d:` recall-artifact stdin format parsing, session log dedup | opus
+  - Stdin support delivered (basic). Remaining: parse recall-artifact format on stdin (strip post-"|" keywords, post-"—" relevance notes)
   - Session log scraping to auto-eliminate already-recalled entries
 - [ ] **Recall learnings design** — `d:` whether learnings.md entries should be resolvable via when-resolve.py | opus
   - Implies memory-index format changes (new source type), resolver changes — genuine design uncertainty
+- [ ] **Lint-gated recall** — PostToolUse hook: inject memory-index on first lint/precommit red after green (state-transition gated) | sonnet
+- [ ] **Lint recall gate** — PreToolUse recall pass before lint fix attempt; depends on when-resolve null mode | sonnet
 
 ### Tier 2: Workflow prose (load bearing)
 
@@ -261,7 +235,7 @@
 
 ## Next Steps
 
-No worktrees active. Next per prioritization: **Fix when-resolve.py** (4.8) then **when-resolve null mode** (4.3) — both Tier 1 recall fixes.
+Fix when-resolve.py delivered. Next: **Deliverable review: when-resolve-fix** (opus, restart) then **when-resolve null mode** (4.3).
 
 ## Reference Files
 

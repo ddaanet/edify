@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.when import fuzzy, navigation
+from claudeutils.when import fuzzy
 from claudeutils.when.index_parser import WhenEntry, parse_index
 
 
@@ -175,7 +175,7 @@ def _load_matched_entry(matched_trigger: str, entries: list[WhenEntry]) -> WhenE
 
 
 def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
-    """Resolve trigger via fuzzy matching with navigation.
+    """Resolve trigger via fuzzy matching.
 
     Args:
         query: The search query (bare trigger text)
@@ -183,7 +183,7 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
         decisions_dir: Path to decisions directory
 
     Returns:
-        Resolved content with navigation
+        Resolved content with source reference
     """
     index_file = Path(index_path)
     dec_dir = Path(decisions_dir)
@@ -225,20 +225,13 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
     content = _extract_section(file_path, actual_heading)
     heading_text_only = actual_heading.lstrip("#").strip()
 
-    ancestors = navigation.compute_ancestors(
-        heading_text_only, section_filename, file_content
-    )
-    siblings = navigation.compute_siblings(heading_text_only, file_content, entries)
-    nav_text = navigation.format_navigation(ancestors, siblings)
-
     formatted_heading = f"# {heading_text_only}"
     content_lines = content.split("\n")
     section_content = "\n".join(content_lines[1:]).lstrip()
 
-    output_parts = [formatted_heading, section_content]
-    if nav_text:
-        output_parts.append("")
-        output_parts.append(nav_text)
+    # Section path relative to decisions_dir parent (agents/decisions/<file>)
+    source_path = f"agents/decisions/{section_filename}"
+    output_parts = [formatted_heading, section_content, f"\nSource: {source_path}"]
 
     return "\n".join(output_parts).rstrip()
 
