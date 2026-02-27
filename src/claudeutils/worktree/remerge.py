@@ -63,6 +63,20 @@ def remerge_learnings_md() -> None:
     Path("agents/learnings.md").write_text(_segments_to_content(merged_segments))
     _git("add", "agents/learnings.md")
 
+    base_segs = parse_segments(base_content)
+    kept = sum(1 for h in merged_segments if h != "" and h in ours_segs)
+    appended = sum(1 for h in merged_segments if h != "" and h not in ours_segs)
+    dropped = sum(
+        1
+        for h in theirs_segs
+        if h != "" and h in base_segs and h not in merged_segments
+    )
+    if appended > 0 or dropped > 0:
+        click.echo(
+            f"learnings.md: kept {kept} + appended {appended} new"
+            f" (dropped {dropped} consolidated)"
+        )
+
 
 def remerge_session_md(slug: str | None = None) -> None:
     """Structural session.md merge for all paths; skips when no MERGE_HEAD."""

@@ -4,6 +4,7 @@ import subprocess
 from collections.abc import Callable
 from pathlib import Path
 
+import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
 from claudeutils.validation.learnings import parse_segments
@@ -266,3 +267,101 @@ class TestConsolidationIntegration:
         assert "When E" in segments
         assert "When A" not in segments
         assert "When B" not in segments
+
+
+class TestMergeReporting:
+    """remerge_learnings_md() emits a summary line after a successful merge."""
+
+    def test_reports_counts_when_segments_change(
+        self,
+        tmp_path: Path,
+        monkeypatch: MonkeyPatch,
+        init_repo: Callable[[Path], None],
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        """Output includes kept/appended/dropped counts for consolidation merge.
+
+        Scenario: base=A+B+C, ours=C (consolidated), theirs=A+B+C+E.
+        kept=1 (C), appended=1 (E), dropped=2 (A, B).
+        """
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        init_repo(repo)
+
+        _write_commit(
+            repo,
+            "agents/learnings.md",
+            PREAMBLE_STR + ENTRY_A + ENTRY_B + ENTRY_C,
+            "Base: A B C",
+        )
+
+        _git(repo, "checkout", "-b", "test-consolidation")
+        _write_commit(
+            repo,
+            "agents/learnings.md",
+            PREAMBLE_STR + ENTRY_A + ENTRY_B + ENTRY_C + ENTRY_E,
+            "Branch: A B C E",
+        )
+
+        _git(repo, "checkout", "main")
+        _write_commit(
+            repo,
+            "agents/learnings.md",
+            PREAMBLE_STR + ENTRY_C,
+            "Main: consolidated to C",
+        )
+
+        subprocess.run(
+            ["git", "merge", "--no-commit", "--no-ff", "test-consolidation"],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        monkeypatch.chdir(repo)
+        remerge_learnings_md()
+
+        out = capsys.readouterr().out
+        assert "learnings.md: kept 1 + appended 1 new (dropped 2 consolidated)" in out
+
+    def test_silent_on_noop(
+        self,
+        tmp_path: Path,
+        monkeypatch: MonkeyPatch,
+        init_repo: Callable[[Path], None],
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        """No output when learnings.md is unchanged on both sides."""
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        init_repo(repo)
+
+        _write_commit(
+            repo,
+            "agents/learnings.md",
+            PREAMBLE_STR + ENTRY_A + ENTRY_B,
+            "Base: A B",
+        )
+
+        # Branch: non-conflicting change on a different file (learnings unchanged)
+        _git(repo, "checkout", "-b", "test-noop")
+        _write_commit(repo, "other.txt", "branch change\n", "Branch: other file")
+
+        # Main: non-conflicting change on yet another file
+        _git(repo, "checkout", "main")
+        _write_commit(repo, "main.txt", "main change\n", "Main: other file")
+
+        subprocess.run(
+            ["git", "merge", "--no-commit", "--no-ff", "test-noop"],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        monkeypatch.chdir(repo)
+        remerge_learnings_md()
+
+        out = capsys.readouterr().out
+        assert "learnings.md:" not in out
