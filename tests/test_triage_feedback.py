@@ -151,3 +151,29 @@ def test_files_changed_count(tmp_path: Path) -> None:
     assert "Files changed: 1" in result.stdout, (
         f"Expected 'Files changed: 1', got: {result.stdout}"
     )
+
+
+def test_report_count_excludes_preexecution(tmp_path: Path) -> None:
+    """Script counts report files, excluding pre-execution artifacts."""
+    repo_path, baseline_sha = _init_repo(tmp_path)
+
+    reports_dir = repo_path / "plans" / "testjob" / "reports"
+    reports_dir.mkdir(parents=True)
+
+    (reports_dir / "review.md").write_text("review content")
+    (reports_dir / "check.md").write_text("check content")
+    (reports_dir / "outline-review.md").write_text("outline review")
+    (reports_dir / "design-review.md").write_text("design review")
+    (reports_dir / "recall-artifact.md").write_text("recall artifact")
+
+    result = subprocess.run(
+        [str(SCRIPT), "testjob", baseline_sha],
+        cwd=repo_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, (
+        f"Expected exit 0, got {result.returncode}: {result.stderr}"
+    )
+    assert "Reports: 2" in result.stdout, f"Expected 'Reports: 2', got: {result.stdout}"
