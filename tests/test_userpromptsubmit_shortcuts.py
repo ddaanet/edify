@@ -111,7 +111,7 @@ class TestPatternGuards:
             "plugin-dev:skill-development"
             in result["hookSpecificOutput"]["additionalContext"]
         )
-        assert "systemMessage" not in result
+        assert "systemMessage" in result
 
     def test_skill_editing_guard_slash_pattern(self) -> None:
         """Slash-prefixed skill name with editing verb triggers reminder."""
@@ -131,7 +131,7 @@ class TestPatternGuards:
         result = call_hook("how do hooks work")
         assert result != {}
         assert "claude-code-guide" in result["hookSpecificOutput"]["additionalContext"]
-        assert "systemMessage" not in result
+        assert "systemMessage" in result
 
     def test_ccg_guard_platform_keywords(self) -> None:
         """Various platform capability keywords trigger CCG reminder."""
@@ -213,7 +213,7 @@ code block
 discuss: after fence should match"""
         output_after_fence = call_hook(prompt_after_fence)
         assert "hookSpecificOutput" in output_after_fence
-        assert "[DISCUSS]" in output_after_fence["systemMessage"]
+        assert "discuss" in output_after_fence["systemMessage"].lower()
         # Verify enhanced content includes counterfactual structure
         additional_context = output_after_fence["hookSpecificOutput"][
             "additionalContext"

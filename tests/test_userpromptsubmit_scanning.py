@@ -114,8 +114,8 @@ class TestEnhancedDDirective:
         assert "do not execute" in additional_context.lower()
 
         # systemMessage stays concise (no full evaluation framework)
-        assert "[DISCUSS]" in system_message
-        assert "do not execute" in system_message.lower()
+        assert "discuss" in system_message.lower()
+        assert "do not execute" not in system_message.lower()
         # systemMessage should NOT have full evaluation framework
         assert len(system_message) < 200
 
@@ -198,12 +198,12 @@ class TestAnyLineMatching:
         # Directive on line 2 (not line 1)
         output_line2 = call_hook("some text before\nd: directive on line 2")
         assert "hookSpecificOutput" in output_line2
-        assert "[DISCUSS]" in output_line2["systemMessage"]
+        assert "discuss" in output_line2["systemMessage"].lower()
 
         # Directive on line 3
         output_line3 = call_hook("line 1\nline 2\np: directive on line 3")
         assert "hookSpecificOutput" in output_line3
-        assert "[PENDING]" in output_line3["systemMessage"]
+        assert "pending" in output_line3["systemMessage"].lower()
 
         # Directive inside fenced block returns None (excluded by fence detection)
         fenced_prompt = """some text
@@ -214,15 +214,15 @@ p: outside fence"""
         output_fenced = call_hook(fenced_prompt)
         # Should match the p: directive outside fence, not the d: inside
         assert "hookSpecificOutput" in output_fenced
-        assert "[PENDING]" in output_fenced["systemMessage"]
+        assert "pending" in output_fenced["systemMessage"].lower()
 
         # All non-fenced directives fire (additive, D-7)
         multi_prompt = """d: first directive
 p: second directive"""
         output_multi = call_hook(multi_prompt)
         assert "hookSpecificOutput" in output_multi
-        assert "[DISCUSS]" in output_multi["systemMessage"]
-        assert "[PENDING]" in output_multi["systemMessage"]
+        assert "discuss" in output_multi["systemMessage"].lower()
+        assert "pending" in output_multi["systemMessage"].lower()
 
 
 class TestAdditiveDirectives:
@@ -261,4 +261,4 @@ class TestAdditiveDirectives:
         assert (
             "Evaluate critically" in result["hookSpecificOutput"]["additionalContext"]
         )
-        assert "[DISCUSS]" in result["systemMessage"]
+        assert "discuss" in result["systemMessage"].lower()

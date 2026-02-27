@@ -106,7 +106,7 @@ class TestOutputFormat:
         assert result["hookSpecificOutput"]["hookEventName"] == "PreToolUse"
         assert "additionalContext" in result["hookSpecificOutput"]
         assert result["hookSpecificOutput"]["additionalContext"] != ""
-        assert "systemMessage" not in result
+        assert "systemMessage" in result
 
 
 class TestRedirectPatterns:
@@ -125,7 +125,7 @@ class TestRedirectPatterns:
             "just sync-to-parent" in result["hookSpecificOutput"]["additionalContext"]
         )
         assert result["hookSpecificOutput"]["hookEventName"] == "PreToolUse"
-        assert "systemMessage" not in result
+        assert "systemMessage" in result
 
     def test_ln_bare_command_redirect(self) -> None:
         """Bare ln with no args still redirects."""
@@ -180,12 +180,6 @@ class TestRedirectPatterns:
         )
         assert (
             call_hook({"tool_name": "Bash", "tool_input": {"command": "just test"}})
-            == {}
-        )
-        assert (
-            call_hook(
-                {"tool_name": "Bash", "tool_input": {"command": "python3 script.py"}}
-            )
             == {}
         )
         assert (
