@@ -108,3 +108,10 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 ## When requirements-clarity gate fires
 - /design Phase 0 correctly detected 5 mechanism-free open questions in `plans/triage-feedback/problem.md` and rerouted to /requirements. This is the first empirical validation of the requirements-clarity gate — previously 0 events in n=38 sessions (Gap 4 coverage note in grounding report).
 - Data point: Gap 1 remains Mitigated (not Closed). The structured output block format was sufficient to trigger the correct routing decision without a full D+B tool-call anchor.
+## When naming skill entry points
+- Anti-pattern: Using `--flag` CLI conventions for skill workflow control (e.g., `--chain` to skip pre-work). Skills parse prose arguments, not CLI flags. The flag convention is unnatural and incompatible with the continuation passing system (`[CONTINUATION: /skill args]`).
+- Correct pattern: Named entry points matching workflow phase names. `execute` instead of `--chain`. The entry point is just another token in prose args — natural, self-documenting, continuation-compatible. Each skill defines its own entry points from its workflow phases.
+- Per "when parsing cli flags as tokens": flags are exact tokens for CLI tools; skill args are prose. Named entry points respect this boundary.
+## When recall surfaces outline-affecting entries
+- Anti-pattern: Running /recall all, loading 25+ entries across 4 passes, then only applying the entries that matched the original outline structure. New entries from later passes can invalidate or extend decisions made before those entries were loaded.
+- Correct pattern: After each recall pass, re-evaluate existing outline decisions against newly loaded entries. In this session: pass 3 loaded "how chain multiple skills together" which required adding continuation protocol to D-6, and "when recall-artifact is absent during review" which required adding fallback to D-4. Both were structural gaps, not minor refinements.

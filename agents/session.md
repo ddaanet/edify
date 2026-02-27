@@ -1,41 +1,49 @@
 # Session Handoff: 2026-02-27
 
-**Status:** Inline execution skill requirements captured. /design requirements-clarity gate validated (first empirical event). Ready for design phase.
+**Status:** /inline skill design complete (outline sufficient, all 17 requirements traced). Plan renamed from triage-feedback to inline-execute. Ready for /runbook.
 
 ## Completed This Session
 
-- /design Phase 0 requirements-clarity gate fired correctly on `plans/triage-feedback/problem.md` — detected 5 mechanism-free open questions, rerouted to /requirements. First empirical validation (previously 0 events in n=38).
-- /requirements captured initial triage feedback requirements, then discussion expanded scope:
-  - Q1 (output): three-layer — append-only log + inline divergence message + learning-when-actionable
-  - Q2 (evidence): files changed + agent count + behavioral code detection (skip correction count)
-  - Q3 (threshold): surface only on divergence, silent on match
-  - Q4 (persistence): classification block persisted to `plans/<job>/classification.md` during /design Phase 0
-  - Q5 (timing): per-session inline comparison at commit/handoff
-- Scope expansion: triage feedback → inline execution lifecycle skill. Proximal requirement revealed structural gap — inline execution path (Tier 1, /design direct execution) has no lifecycle skill in the pipeline state machine.
-- Requirements rewritten: 10 FRs covering pre-work (context + recall), execute, post-work (corrector, evidence, triage comparison, deliverable-review chain), lifecycle integration (/design + /runbook exit paths)
-- Recall artifact written: `plans/triage-feedback/recall-artifact.md` (24 entry keys from 7 decision files)
+**Design: /inline skill (plans/inline-execute/):**
+- /design Phase 0: Complex classification (moderate implementation certainty, high requirement stability, behavioral code in script + skill modifications)
+- /design Phase A: Full recall (4 passes, 25 entries from 9 decision files + 3 full files), plugin-dev:skill-development loaded, brainstorm-name agent for Q-2
+- Naming decision: `/inline` — discoverability-first (pairs with `/orchestrate` for tier relationship), no dedicated shortcut (`x` suffices). Rejected `/fulfill` (metaphorical indirection), `/execute` (collides with `x`)
+- D-1 revised: named entry points (`execute`) instead of `--chain` flag — natural in prose-parsed args, continuation-compatible, self-documenting
+- Outline review: 3 major + 4 minor issues, all fixed by outline-corrector
+- Post-review fixes: continuation protocol added to D-6, recall-artifact fallback added to D-4
+- Plan directory renamed: `triage-feedback/` → `inline-execute/`
+- Recall artifact updated: pruned 6 JSONL-processing entries (irrelevant after scope shift), added 10 implementation-relevant entries, organized by domain
+- Sufficiency gate: outline IS the design (all decisions resolved, scope explicit, no architectural uncertainty). Execution routing: Production + behavioral code → /runbook
 
 ## Pending Tasks
 
-- [ ] **Design inline execution** — `/design plans/triage-feedback/` | opus
-  - Requirements complete in `plans/triage-feedback/requirements.md` (10 FRs, 3 NFRs, 4 constraints)
-  - Plan directory name `triage-feedback` is legacy — skill scope is broader (inline execution lifecycle)
-  - Rename plan directory during design if needed
-  - 3 open questions: git diff baseline, skill name, batch retrospective timing
+- [ ] **Plan inline skill** — `/runbook plans/inline-execute/outline.md` | sonnet
+  - Outline is the design (sufficiency gate passed, no design.md needed)
+  - Planstate shows `requirements` because no design.md exists — /runbook should accept outline.md as design reference
+  - Script (triage-feedback.sh) needs TDD; skill + integration edits are agentic-prose
+- [ ] **Retrofit skill pre-work** — `/design` | opus
+  - Many skills lack initial task context loading (task-context.sh, brief.md, recall-artifact) and skill-adapted recall
+  - Audit skills for cold-start gaps; retrofit where beneficial
+  - Follow-on after /inline delivery
+- [ ] **Artifact staleness gate** — sonnet
+  - Mechanical checkpoint at /requirements, /design, /runbook exit points
+  - `when-resolve.py` touches sentinel; skill compares sentinel mtime to recall-artifact.md AND primary skill artifact (requirements.md, outline.md, design.md, runbook.md)
+  - If recall newer than either artifact, trigger update step
+  - Two drift vectors: stale recall-artifact (entries loaded not persisted) and stale skill artifacts (decisions loaded after artifact written)
 - [ ] **Codify learnings** — `/codify` | sonnet
-  - learnings.md at ~112 lines, soft limit 80. Consolidate older learnings before they accumulate further.
+  - learnings.md at ~112 lines (109 measured), soft limit 80
 
 ## Blockers / Gotchas
 
-**Plan directory naming:** `plans/triage-feedback/` contains requirements for an inline execution skill, not just triage feedback. The name reflects the proximal requirement that led to the discovery. Rename decision deferred to design phase.
+**Planstate mismatch:** `inline-execute` plan has outline.md (design-sufficient) but no design.md, so planstate reads `requirements`. /runbook invocation should reference outline.md directly.
 
-**Learnings.md over soft limit:** 112 lines vs 80-line soft limit. /codify should run before next substantive work session to prevent further growth.
+**Learnings.md over soft limit:** 109 lines vs 80-line soft limit. /codify should run before next substantive work session.
 
 ## Reference Files
 
-- `plans/triage-feedback/requirements.md` — Inline execution skill requirements (10 FRs)
-- `plans/triage-feedback/problem.md` — Original Gap 7 problem statement
-- `plans/triage-feedback/recall-artifact.md` — 24 entry keys from 7 decision files
-- `plans/reports/design-skill-grounding.md` — Grounding report (Gap 7 = Deferred, now has requirements)
-- `agent-core/skills/design/SKILL.md` — Phase B/C.5 direct execution (FR-9 replacement target)
-- `agent-core/skills/runbook/SKILL.md` — Tier 1 direct implementation (FR-10 replacement target)
+- `plans/inline-execute/outline.md` — Design outline (sufficient, all 17 requirements traced)
+- `plans/inline-execute/requirements.md` — 10 FRs, 3 NFRs, 4 constraints
+- `plans/inline-execute/recall-artifact.md` — 28 entry keys organized by domain
+- `plans/inline-execute/reports/outline-review.md` — PDR review (Ready)
+- `plans/reports/design-skill-grounding.md` — Grounding report (Gap 7 = this skill)
+- `agent-core/fragments/continuation-passing.md` — Continuation protocol for cooperative skills
