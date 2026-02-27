@@ -76,10 +76,10 @@ New pattern:
 
 Acceptance: /design sufficiency and execution-readiness gates route to this skill instead of inline steps.
 
-**FR-10: Lifecycle integration — /runbook Tier 1 exit path**
-Replace the current Tier 1 direct implementation sequence in /runbook with invocation of this skill.
+**FR-10: Lifecycle integration — /runbook Tier 1 and Tier 2 exit paths**
+Replace the current Tier 1 direct implementation sequence and Tier 2 execution sequence in /runbook with invocation of this skill. /runbook retains tier assessment criteria and Tier 2 lightweight cycle planning, but routes execution to `/inline`.
 
-Current pattern (replace):
+Current Tier 1 pattern (replace):
 ```
 1. Implement changes directly
 2. Delegate to review agent
@@ -87,13 +87,22 @@ Current pattern (replace):
 4. /handoff --commit
 ```
 
-New pattern:
+Current Tier 2 execution pattern (replace):
 ```
-1. /inline-execute (with plan context already loaded from /runbook)
-   — handles: execute, corrector, evidence, triage feedback, deliverable-review chain, handoff
+1. For each cycle: delegate via Task (test-driver/artisan)
+2. Intermediate checkpoints every 3-5 cycles
+3. After delegation complete: delegate to review agent
+4. Apply all fixes from review
+5. Tail-call /handoff --commit
 ```
 
-Acceptance: /runbook Tier 1 assessment routes to this skill instead of inline steps.
+New pattern (both tiers):
+```
+1. /inline (with plan context already loaded from /runbook)
+   — handles: execute (direct or delegated), corrector, evidence, triage feedback, deliverable-review chain, handoff
+```
+
+Acceptance: /runbook Tier 1 and Tier 2 assessments route to this skill instead of inline execution steps. /runbook retains Tier 2 criteria, planning, and design-constraint rules. Tier 3 unchanged.
 
 ### Non-Functional Requirements
 

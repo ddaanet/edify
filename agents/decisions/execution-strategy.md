@@ -25,7 +25,11 @@ The Tier 1/2 boundary is about execution capacity. The Tier 2/3 boundary is abou
 
 ## When Tier Thresholds Are Ungrounded
 
-The specific thresholds currently used (Tier 1: <6 files, Tier 2: 6-15 files, Tier 3: >15 files; Tier 3: >10 TDD cycles) are **ungrounded operational parameters**. They have no empirical calibration data. The tier structure is justified; the thresholds within it need measurement. Separate task: calibrate against execution history.
+The specific thresholds currently used (Tier 1: <6 files, Tier 2: 6-15 files, Tier 3: >15 files; Tier 3: >10 TDD cycles) are **ungrounded operational parameters**. They have no empirical calibration data. The tier structure is justified; the thresholds within it need measurement.
+
+Also ungrounded: mid-execution checkpoint frequency for delegated work ("every 3-5 cycles" in /runbook Tier 2). `/inline` deliberately omits mid-execution checkpoints to collect clean execution data — corrector serves as sole semantic review, post-step lint catches mechanical drift.
+
+**Calibration data source:** `plans/reports/triage-feedback-log.md` — collects per-execution evidence (files changed, agent count, behavioral code, classification verdict). After sufficient executions, analyze: at what file/cycle counts did executions struggle? Did Tier 2 executions without checkpoints show compounding drift? The log + git history provide both signals.
 
 ## When Relating Execution Tiers to Complexity Routing
 

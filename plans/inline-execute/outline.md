@@ -22,6 +22,7 @@ The skill does NOT prescribe how to implement (that's the caller's responsibilit
 
 ### Phase 1: Entry
 
+- **Entry gate:** Verify `git status --porcelain` clean and `just precommit` green. Dirty tree or failing precommit → stop, surface to user. Ensures execution starts from a known-good baseline.
 - Capture baseline: `BASELINE=$(git rev-parse HEAD)` — before any edits (FR-5 baseline)
 - Detect entry point: `execute` in args → chained invocation (skip Phase 2); absent → cold start (full workflow)
 
@@ -38,6 +39,20 @@ Skipped when entry point is `execute` — caller (/design or /runbook) has alrea
 
 - Perform implementation (edits, TDD cycles for behavioral code, prose changes)
 - Skill provides lifecycle wrapper only — execution approach comes from caller's design/plan
+- Covers both Tier 1 (direct) and Tier 2 (delegated) execution — same lifecycle, different scale
+
+**Delegation protocol** (when execution dispatches sub-agents):
+- **Direct execution:** No delegation — edits performed in current session
+- **Delegated execution** (artisan, test-driver):
+  - Prepare sub-agent recall artifact: curated subset of plan recall-artifact entries relevant to delegation target. Separate artifact per delegation, not section-aware resolution.
+  - Piecemeal dispatch for TDD: one cycle per invocation, resume same agent between cycles, fresh agent when context nears 150k
+  - Context isolation: parent does cognitive work (selecting entries, curating context), child does mechanical work (resolving entries, executing). Sub-agents have no parent context.
+  - test-driver commit contract: test-driver commits each cycle for audit trail. Caller does not add commit instructions. Expect clean tree on resume.
+  - Post-step verification: `git status --porcelain` clean + `just lint` after each delegated step
+  - Design constraints non-negotiable: when design specifies explicit classifications, include LITERALLY in delegation prompt. Agents apply design rules, not invent alternatives.
+  - Artifact-type model override: opus for edits to skills/fragments/agents/design documents regardless of task complexity.
+
+**No mid-execution checkpoints.** Deliberate omission — corrector (Phase 4a) is the sole semantic review point. Post-step lint catches mechanical issues. Triage feedback (Phase 4b) collects uninterrupted execution data for future threshold calibration. Revisit after 10+ Tier 2 executions show whether compounding drift is a real problem at this scale.
 
 ### Phase 4: Post-work
 
@@ -90,7 +105,7 @@ One corrector dispatch pattern used everywhere (NFR-3). Template:
 ```
 Corrector dispatch:
 - Scope: uncommitted changes (git diff against baseline) — implementation changes only
-- Requirements: from plans/<job>/requirements.md or design.md
+- Design context: from plans/<job>/outline.md (design spec, not requirements.md — requirements are upstream abstractions)
 - Recall context: review-relevant entries from plans/<job>/recall-artifact.md (if absent: lightweight recall fallback per "when recall-artifact is absent during review")
 - Report: plans/<job>/reports/review.md
 - Scope IN/OUT: from design or outline
@@ -153,6 +168,7 @@ SKILL.md is lean: workflow phases (pre-work, execute, post-work) with decision r
 - /orchestrate Section 3.0 inline phases (separate concern)
 - Automatic triage criteria modification
 - Learning entry generation from divergence patterns
+- Entry gate propagation to /orchestrate, /deliverable-review, corrector (cross-cutting — separate /design job)
 
 ## Integration Points
 
