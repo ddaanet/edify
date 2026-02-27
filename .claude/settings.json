@@ -23,7 +23,6 @@
       "WebFetch",
       "mcp__plugin_context7_context7__resolve-library-id",
       "mcp__plugin_context7_context7__query-docs",
-
       "WebFetch(domain:docs.claude.com)",
       "WebFetch(domain:arxiv.org)",
       "WebFetch(domain:registry.npmjs.org)",
@@ -85,7 +84,7 @@
           },
           {
             "type": "command",
-            "command": "agent-core/hooks/pretooluse-recipe-redirect.py"
+            "command": "python3 $CLAUDE_PROJECT_DIR/agent-core/hooks/pretooluse-recipe-redirect.py"
           }
         ]
       },
@@ -114,7 +113,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "agent-core/hooks/posttooluse-autoformat.sh"
+            "command": "bash $CLAUDE_PROJECT_DIR/agent-core/hooks/posttooluse-autoformat.sh"
           }
         ]
       }
@@ -124,7 +123,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "agent-core/hooks/userpromptsubmit-shortcuts.py",
+            "command": "python3 $CLAUDE_PROJECT_DIR/agent-core/hooks/userpromptsubmit-shortcuts.py",
             "timeout": 5
           }
         ]
@@ -136,7 +135,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "agent-core/hooks/sessionstart-health.sh"
+            "command": "bash $CLAUDE_PROJECT_DIR/agent-core/hooks/sessionstart-health.sh"
           }
         ]
       }
@@ -147,7 +146,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "agent-core/hooks/stop-health-fallback.sh"
+            "command": "bash $CLAUDE_PROJECT_DIR/agent-core/hooks/stop-health-fallback.sh"
           }
         ]
       }

@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-27
 
-**Status:** Prioritization + housekeeping. 61 tasks scored, 25 plan-archive entries recovered, pending tasks reordered by priority tiers.
+**Status:** Prioritization + housekeeping + sync-to-parent fixes. 61 tasks scored, 25 plan-archive entries recovered, pending tasks reordered by priority tiers.
 
 ## Completed This Session
 
@@ -41,6 +41,8 @@
 - **Merged inline-exec-fixes** — classification format fix (list-marker parsing), test added, worktree merge validator caught duplicate task
 - **Worktree cleanup** — removed when-resolve-fixes, skill-retrofit, session-md-validator worktrees (no changes on any)
 - **Discussion: plan archival** — precommit validator (option A) selected over workflow integration (B) or lifecycle coupling (C); proven failure mode (2 bulk deletes without archival)
+- **Fix sync-hooks-config.py** — `normalize_command()` strips interpreter prefix + `$CLAUDE_PROJECT_DIR/`, `_merge_hook_entries()` replaces old-form commands instead of duplicating
+- **Fix sync-to-parent** — auto-stage new skill/agent symlinks via `git add` (hooks excluded — gitignored)
 
 ## Pending Tasks
 
