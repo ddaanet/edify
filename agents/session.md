@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-27
 
-**Status:** merge-learnings-delta delivered — 7 TDD cycles, FR-1 tests + FR-2 reporting, corrector clean.
+**Status:** merge-learnings-delta reviewed — deliverable review clean (0 critical, 0 major), 1 minor fix applied.
 
 ## Completed This Session
 
@@ -22,6 +22,11 @@
 - Corrector pass (full branch): no critical/major issues; 1 minor fix applied (hoisted `base_segs` to eliminate double parse in reporting block)
 - All 9 tests pass, `just precommit` clean
 
+**Deliverable review (this session):**
+- `/deliverable-review`: 0 critical, 0 major, 1 minor (private pytest import inconsistency)
+- Fixed `_pytest.monkeypatch.MonkeyPatch` → `pytest.MonkeyPatch` in `test_learnings_consolidation.py`
+- Report: `plans/merge-learnings-delta/reports/deliverable-review.md`
+
 ## Pending Tasks
 
 - [x] **Merge learnings delta** — `x` | sonnet
@@ -34,5 +39,6 @@ Merge `merge-learnings-delta` branch to main. Plan status will auto-update to `d
 
 - `tests/test_learnings_consolidation.py` — 9-test coverage: consolidation scenarios + reporting
 - `src/claudeutils/worktree/remerge.py` — FR-2 reporting implementation (`remerge_learnings_md`)
-- `plans/merge-learnings-delta/reports/corrector-review-full.md` — full deliverable review
+- `plans/merge-learnings-delta/reports/corrector-review-full.md` — full corrector review
+- `plans/merge-learnings-delta/reports/deliverable-review.md` — deliverable review report
 - `plans/merge-learnings-delta/requirements.md` — FR-1 + FR-2 requirements

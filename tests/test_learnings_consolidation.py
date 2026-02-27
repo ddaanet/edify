@@ -5,7 +5,6 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
-from _pytest.monkeypatch import MonkeyPatch
 
 from claudeutils.validation.learnings import parse_segments
 from claudeutils.worktree.remerge import remerge_learnings_md
@@ -154,7 +153,7 @@ class TestConsolidationIntegration:
     def test_branch_to_main_consolidation(
         self,
         tmp_path: Path,
-        monkeypatch: MonkeyPatch,
+        monkeypatch: pytest.MonkeyPatch,
         init_repo: Callable[[Path], None],
     ) -> None:
         """Main consolidated A+B away; branch has pre-consolidation + new E.
@@ -212,7 +211,7 @@ class TestConsolidationIntegration:
     def test_main_to_branch_consolidation(
         self,
         tmp_path: Path,
-        monkeypatch: MonkeyPatch,
+        monkeypatch: pytest.MonkeyPatch,
         init_repo: Callable[[Path], None],
     ) -> None:
         """Branch merges consolidated main; branch has pre-consolidation + E.
@@ -275,7 +274,7 @@ class TestMergeReporting:
     def test_reports_counts_when_segments_change(
         self,
         tmp_path: Path,
-        monkeypatch: MonkeyPatch,
+        monkeypatch: pytest.MonkeyPatch,
         init_repo: Callable[[Path], None],
         capsys: pytest.CaptureFixture[str],
     ) -> None:
@@ -328,7 +327,7 @@ class TestMergeReporting:
     def test_silent_on_noop(
         self,
         tmp_path: Path,
-        monkeypatch: MonkeyPatch,
+        monkeypatch: pytest.MonkeyPatch,
         init_repo: Callable[[Path], None],
         capsys: pytest.CaptureFixture[str],
     ) -> None:
