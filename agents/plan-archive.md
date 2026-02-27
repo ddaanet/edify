@@ -215,6 +215,22 @@ Migrated all `_worktree` CLI error output from stderr to stdout per LLM-native C
 
 4-pass pipeline memory model integrated into design, runbook, orchestrate, and deliverable-review skills. Recall passes at cognitive boundaries: design recall (deep, whole decision files), runbook recall (+implementation +testing), task agent injection (orchestrator filters per phase), review recall (+failure modes). Reference forwarding eliminates convergence problem — each pass augments rather than re-discovers. Grounded against CE framework (Write/Select/Compress/Isolate) and Agentic RAG; deliberately inverts adaptive retrieval to prescriptive (fixed pipeline points, justified by 2.9% baseline). Added `/recall` skill, updated grounding skill to use scouts for diverge-converge. Delivered: 4 skill integrations, recall skill, grounding report, internal brainstorm (27 dimensions).
 
+## merge-learnings-delta
+
+Segment-level diff3 merge for learnings.md during worktree merges. Prevents consolidation reversion when branch diverges before a `/codify` on main. 7 TDD cycles, test fixtures refactored, justfile recipes added. Affected: src/claudeutils/worktree/merge.py, tests/.
+
+## parsing-fixes-batch
+
+7 bug fixes across prepare-runbook.py and validate-runbook.py: model-tags false positive, lifecycle false positive, model propagation, phase numbering, phase context extraction, 2 dead code removals. Tier 2 plan. Affected: agent-core/bin/prepare-runbook.py, agent-core/bin/validate-runbook.py, src/claudeutils/validation/memory_index_checks.py.
+
+## planstate-delivered
+
+Extended plan state machine with 4 post-execution states (review-pending, rework, reviewed, delivered). Single lifecycle.md file per plan, append-only. Two delivery paths: worktree (via merge) and in-main (via deliverable-review). Pre-ready states use functional artifact detection; post-ready use lifecycle.md. Affected: src/claudeutils/planstate/, agent-core/skills/orchestrate/, agent-core/skills/deliverable-review/.
+
+## skills-quality-pass
+
+30 skills (7,182 lines) compressed ~25% via Segment→Attribute→Compress framework. 10 FRs: description tightening, preamble removal, narrative extraction to references/, D+B gate anchoring (12 gates), redundant always-loaded content removal, tail section overhead removal, conditional path extraction. Bootstrapping order: corrector agents first. Affected: agent-core/skills/ (18+ files), agent-core/agents/.
+
 ## recall-tool-anchoring
 
 D+B hybrid prototype for recall gate tool-anchoring. 3 shell scripts (_recall check/resolve/diff), reference manifest format replacing content dump in recall-artifact.md, D+B restructure of 8 skills/agents anchoring prose gates with tool calls, PreToolUse hook for recipe-redirect. Side fix: prepare-runbook-inline-regex. 3 new learnings codified. Affected: agent-core/skills/ (8 files), agent-core/hooks/, agent-core/bin/, plans/recall-tool-anchoring/.
@@ -238,3 +254,107 @@ RCA and fix for _worktree merge autostrategy dropping session.md content. Two ma
 ## quality-infrastructure
 
 3 FRs delivered: FR-3 renamed 11 agents (vet-fix-agent→corrector, quiet-task→artisan, tdd-task→test-driver, etc.) + deleted vet-agent + embedded vet-taxonomy in corrector + deleted 8 plan-specific detritus + propagated across ~45 files including prepare-runbook.py code paths. FR-1 split deslop.md into communication.md (prose rules, ambient) and project-conventions skill (code rules, injected). FR-2 added 5 grounded code density entries to cli.md + memory-index triggers. Affected: agent-core/agents/ (11 renames, 3 deletions), agent-core/skills/ (vet→review dir rename, 11 skill files updated), agent-core/fragments/ (vet-requirement→review-requirement, deslop deleted), agents/decisions/ (9 files), ~15 other files.
+
+## unification
+
+Original claudeutils consolidation project. Unified justfile recipes, pyproject.toml settings, and bash helpers across multiple projects (box-api, emojipack, pytest-md, home) into the claudeutils package. 7 phases, 3 sub-plans (consolidation, phase3-steps), 10+ step files per phase. Foundation of the current CLI and module structure. Affected: src/claudeutils/, justfile, pyproject.toml.
+
+## runbook-quality-gates
+
+5 FRs: outline-level simplification pass (parametrized consolidation of identical-pattern items), runbook-corrector agent, runbook-simplifier agent, outline-corrector agent, runbook validation pipeline. Full pipeline execution: requirements, design, 5 phases, 42 step files, deliverable review. Affected: agent-core/agents/ (3 new agents), agent-core/bin/prepare-runbook.py, agent-core/bin/validate-runbook.py.
+
+## worktree-rm-fixes
+
+Worktree rm edge case fixes discovered during field usage. Deliverable review completed Feb 20. Bug fixes for rm failure modes including submodule removal and merge commit interactions. Affected: src/claudeutils/worktree/cli.py, tests/test_worktree_rm.py.
+
+## pretool-hook-cd-pattern
+
+Allow `cd <project_root> && <command>` compound pattern in submodule-safety.py PreToolUse hook. Previously only bare `cd <dir>` was allowed, blocking sub-agents needing compound commands. TDD with vet review. Affected: agent-core/hooks/submodule-safety.py.
+
+## skill-improvements
+
+TDD workflow skill improvements addressing broken feedback loop across plan-tdd, review-tdd-plan, and tdd-task skills. Root cause: 37 GREEN cycles in claude-tools-rewrite all passed but features didn't work — weak RED tests enabled stub implementations. Fixes to RED test quality checks and escalation boundaries. Affected: agent-core/skills/ (plan-tdd, review-tdd-plan, tdd-task).
+
+## handoff-lite-fixes
+
+Fix handoff-lite skill misuse where Sonnet agent invoked Haiku-only skill, interpreted template as "replace" rather than "augment", deleting learnings section. Fix 1: decouple handoff from commit skill. Design review approved with changes. Affected: agent-core/skills/handoff/, agent-core/skills/commit/.
+
+## handoff-haiku-import
+
+Import handoff-haiku fix design documents and learnings from home repo into claudeutils. 3 commits imported, agent-core submodule synced. Provided context for commit-unification vet review (skill composition decisions). Affected: plans/, agents/session.md.
+
+## feedback-fixes
+
+Design and fixes for execution feedback processing patterns. Affected: agent-core/skills/.
+
+## context-optimization
+
+Brief for fragment demotion to reduce always-loaded context. Analysis: 25.5k tokens in memory files (50% of budget), ~6.6k demotable. Scoped but absorbed into skills-quality-pass FR-8 (redundant always-loaded content removal). Affected: CLAUDE.md @-references.
+
+## integration-first-tests
+
+Outline for migrating subprocess-mocking tests to integration-first pattern. 939 tests, 117 files. 3 violation areas identified where git operations were mocked instead of using real git via init_repo fixture. Scoped but not executed — absorbed into test diamond migration task.
+
+## runbook-fenced-blocks
+
+Fix fenced code block handling in runbook processing. Test plan with 9 execution cycles, deliverable review. Affected: agent-core/bin/prepare-runbook.py.
+
+## commit-cli-tool
+
+Outline for commit CLI tool. 3 review rounds. Absorbed into handoff-cli-tool plan when commit, handoff, and status were unified into `_session` CLI group.
+
+## ambient-awareness
+
+Killed: scope absorbed into other work.
+
+## commit-rca-fixes
+
+Killed: fixes landed via other plans.
+
+## hook-output-fix
+
+Killed: fixes landed via hook-batch plan.
+
+## memory-index-update
+
+Killed: superseded by memory-index-recall and subsequent recall work.
+
+## plan-skill-fast-paths
+
+Killed: fast paths absorbed into runbook evolution.
+
+## reflect-skill
+
+Empty plan directory — never populated. Reflect skill exists independently (agent-core/skills/reflect/).
+
+## remember-update
+
+Killed: absorbed into remember-skill-update plan.
+
+## workflow-controls
+
+Killed: scope absorbed into workflow-fixes and error-handling plans.
+
+## docs-to-skills
+
+Early doc-to-skill refactoring. Structural change absorbed into domain-based doc reorganization.
+
+## handoff-skill
+
+Early handoff skill design. Predates current handoff infrastructure; superseded by handoff-lite-fixes and commit-unification.
+
+## commit-context
+
+Early commit-context skill. Absorbed into commit-unification plan.
+
+## wt-merge-dirty-tree
+
+Brief for dirty-tree handling during worktree merge. Absorbed into worktree-rm-safety.
+
+## wt-merge-skill
+
+Outline for worktree merge ceremony. Absorbed into worktree-skill plan.
+
+## runbook (validation)
+
+Runbook validation reports (lifecycle, model-tags, red-plausibility, test-counts). Intermediate work absorbed into runbook-quality-gates.

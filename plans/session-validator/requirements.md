@@ -67,6 +67,16 @@ Acceptance criteria:
 - H1 matches `# Session Handoff: YYYY-MM-DD`
 - Status line (bold text on line 3) exists and is non-empty
 
+**FR-6: Plan archive coverage**
+
+Validate that deleted plan directories have corresponding entries in `agents/plan-archive.md`.
+
+Acceptance criteria:
+- Compare plan directories staged for deletion (or absent from `plans/` but referenced in git history) against H2 headings in `plan-archive.md`
+- Error when a plan directory is deleted without a matching archive entry
+- Only applies to plans that had substantive content (at least one `.md` file beyond `.gitkeep`)
+- Scoped to precommit: checks staged deletions in `plans/*/` against archive headings
+
 ## Non-Functional Requirements
 
 **NFR-1: Precommit integration**
