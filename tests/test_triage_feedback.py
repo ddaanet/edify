@@ -533,3 +533,48 @@ def test_log_appends_multiple_entries(tmp_path: Path) -> None:
     assert len(data_rows) == 2, (
         f"Expected 2 data rows, got {len(data_rows)}: {log_content}"
     )
+
+
+def test_no_classification_skips_log(tmp_path: Path) -> None:
+    """Script silently skips log when no classification.md exists."""
+    repo_path, baseline_sha = _init_repo(tmp_path)
+
+    (repo_path / "file.txt").write_text("some content")
+
+    result = subprocess.run(
+        ["git", "add", "file.txt"],
+        cwd=repo_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, f"git add failed: {result.stderr}"
+
+    result = subprocess.run(
+        ["git", "commit", "-m", "add file"],
+        cwd=repo_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, f"git commit failed: {result.stderr}"
+
+    result = subprocess.run(
+        [str(SCRIPT), "testjob", baseline_sha],
+        cwd=repo_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, (
+        f"Expected exit 0, got {result.returncode}: {result.stderr}"
+    )
+
+    assert "no-classification" in result.stdout, (
+        f"Expected 'no-classification' in: {result.stdout}"
+    )
+
+    log_file = repo_path / "plans" / "reports" / "triage-feedback-log.md"
+    assert not log_file.exists(), (
+        f"Log file should not exist when no classification, but found: {log_file}"
+    )
