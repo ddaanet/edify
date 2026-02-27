@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-27
 
-**Status:** Execution feedback processed (task 2 of 4). Design refinements applied: entry gate, delegation protocol, Tier 2 absorption, no mid-execution checkpoints. Three remaining inline-execute tasks pending. Recall artifact expanded (54 entries, design/runbook split). Sub-agent recall artifacts prepared (corrector, TDD).
+**Status:** Inline skill created (task 3 of 5). Two remaining inline-execute integration tasks pending. Next: Design skill integration (FR-1, FR-9).
 
 ## Completed This Session
 
@@ -40,6 +40,15 @@
 - execution-strategy.md updated: checkpoint frequency added as ungrounded parameter, triage-feedback-log.md named as calibration data source
 - New pending task: entry gate propagation (/design, cross-cutting)
 
+**Create inline skill (this session):**
+- Pre-work recall: 28 design-related entries batch-resolved via when-resolve.py, plugin-dev:skill-development loaded
+- Reference reads: continuation-passing.md, design/SKILL.md (Phase structure), orchestrate/SKILL.md (lifecycle wrapper), handoff/SKILL.md (frontmatter)
+- Wrote `agent-core/skills/inline/SKILL.md` (~1200 words): entry gate, pre-work, execute (Tier 1/2 delegation protocol), post-work (corrector, triage feedback, deliverable-review chain), continuation
+- Wrote `agent-core/skills/inline/references/corrector-template.md` (~500 words): dispatch template, field rules, lightweight recall fallback, worked example
+- Corrector (opus): 2 major FIXED (UNFIXABLE handling, Phase 4c continuation connection), 1 minor FIXED (error propagation), 1 minor OUT-OF-SCOPE (continuation-passing.md cooperative skills table → pipeline integration task)
+- Skill-reviewer (opus): 2 major, 3 minor found. Applied 4 fixes: description triggers + Tier 1/2, passive voice, Phase 2.3 D+B anchor, Phase 4c standard task format
+- Deferred: continuation-passing.md cooperative skills table entry for /inline (pipeline integration task scope)
+
 ## Pending Tasks
 
 - [x] **Triage feedback script** — sonnet
@@ -52,17 +61,11 @@
   - Design refinements: entry gate, delegation protocol, D-4 fix, Tier 2 absorption, no mid-execution checkpoints
   - FR-10 expanded: Tier 1 + Tier 2 → /inline. /runbook becomes planning-only for Tiers 1-2.
   - New pending: entry gate propagation
-- [ ] **Create inline skill** — `x` | opus
+- [x] **Create inline skill** — `x` | opus
   - Plan: inline-execute
-  - **Pre-work recall:** Resolve design-related section of `plans/inline-execute/recall-artifact.md` (27 entries). Load `plugin-dev:skill-development`.
-  - **Scope:** New `agent-core/skills/inline/SKILL.md` (~1500 words), new `agent-core/skills/inline/references/corrector-template.md`
-  - **FRs:** FR-2 (pre-work context loading), FR-3 (execute wrapper + delegation protocol), FR-4 (corrector dispatch), FR-8 (deliverable-review chain via handoff continuation), D-1 (named entry points: default, execute), D-4 (corrector template — outline.md not requirements.md), D-5 (chain via handoff), D-6 (skill structure + continuation protocol)
-  - **Key patterns:** D+B anchors for gates, continuation frontmatter (`cooperative: true`, `default-exit`), peel-first-pass-remainder protocol
-  - **Delegation protocol in skill body:** Entry gate (git clean + precommit), piecemeal TDD dispatch with resume, context isolation (parent selects, child resolves), test-driver commit contract, post-step lint verification, sub-agent recall artifact preparation, design constraints non-negotiable, artifact-type model override
-  - **Tier coverage:** Skill handles both Tier 1 (direct) and Tier 2 (delegated). No mid-execution checkpoints — deliberate omission for data collection, revisit after 10+ Tier 2 executions.
-  - **Read before writing:** `agent-core/fragments/continuation-passing.md`, existing skill structure examples (design/SKILL.md for Phase structure, orchestrate/SKILL.md for lifecycle wrapper pattern)
-  - **Sub-agent recall:** For corrector delegation, prepare filtered recall entries from plan artifact design-related section. For TDD delegation, use `plans/inline-execute/tdd-recall-artifact.md` pattern.
-  - **Post-work:** Corrector dispatch with recall entries. Report → `plans/inline-execute/reports/review-skill.md`
+  - Deliverables: `agent-core/skills/inline/SKILL.md`, `agent-core/skills/inline/references/corrector-template.md`
+  - Corrector + skill-reviewer both dispatched; all in-scope issues fixed
+  - Review: `plans/inline-execute/reports/review-skill.md`
 - [ ] **Design skill integration** — `x` | opus
   - Plan: inline-execute
   - **Pre-work recall:** Resolve design-related section of `plans/inline-execute/recall-artifact.md` — focus on design gates/classification and execution routing subsections.
@@ -78,6 +81,7 @@
   - **FR-10:** Runbook Tier 1 (lines ~122-126) AND Tier 2 execution (lines ~144-157) — replace both with `/inline` routing. /runbook retains Tier 2 criteria + planning + design-constraint rules; execution routes out.
   - **Pipeline contracts:** Add T6.5 row (inline lifecycle transformation) to transformation table. Grep enumeration sites for existing variants per "when adding a new variant to an enumerated system"
   - **Memory-index:** Add entries for /inline skill decisions (when using inline execution lifecycle, how dispatch corrector from inline skill, when triage feedback shows divergence)
+  - **Continuation-passing.md:** Add /inline row to cooperative skills table (deferred from skill creation — both corrector and skill-reviewer flagged)
   - **Post-work:** Corrector dispatch. Report → `plans/inline-execute/reports/review-integration.md`
 - [ ] **Entry gate propagation** — `/design` | opus
   - Add git-clean + precommit entry gates to /orchestrate, /deliverable-review, corrector agent
@@ -104,7 +108,7 @@
 
 ## Blockers / Gotchas
 
-**Task dependency chain:** ~~Triage feedback script~~ → ~~Execution feedback~~ → Create inline skill → Design skill integration → Pipeline integration. Strict sequence — each task depends on prior.
+**Task dependency chain:** ~~Triage feedback script~~ → ~~Execution feedback~~ → ~~Create inline skill~~ → Design skill integration → Pipeline integration. Strict sequence — each task depends on prior.
 
 **Planstate mismatch:** `inline-execute` plan has outline.md (design-sufficient) but no design.md, so planstate reads `requirements`. Task commands reference outline.md directly.
 
@@ -125,4 +129,5 @@
 - `plans/inline-execute/tdd-recall-artifact.md` — 10 entry keys for TDD sub-agent context priming
 - `plans/inline-execute/corrector-recall-artifact.md` — 11 entry keys for corrector sub-agent context priming
 - `plans/inline-execute/reports/execution-feedback.md` — Execution friction report (6 issues, 4 recommendations)
-- `plans/inline-execute/reports/review-script.md` — Corrector review output
+- `plans/inline-execute/reports/review-script.md` — Corrector review output (triage-feedback.sh)
+- `plans/inline-execute/reports/review-skill.md` — Corrector + skill-reviewer output (inline skill)
