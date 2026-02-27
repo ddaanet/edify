@@ -2,6 +2,7 @@
 
 import subprocess
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -58,34 +59,54 @@ def _git_setup(*args: str) -> str:
     return result.stdout
 
 
-def make_repo_with_branch(  # noqa: PLR0913
+@dataclass
+class BranchSpec:
+    """Configuration for branch content and post-creation behavior."""
+
+    files: dict[str, str] | None = None
+    empty_msg: str | None = None
+    n_commits: int = 0
+    diverge: bool = False
+    merge: bool = False
+
+
+def make_repo_with_branch(
     repo_dir: Path,
     init_fn: Callable[[Path], None],
     branch: str = "test-branch",
-    *,
-    files: dict[str, str] | None = None,
-    empty_msg: str | None = None,
-    n_commits: int = 0,
-    diverge: bool = False,
-    merge: bool = False,
+    spec: BranchSpec | None = None,
 ) -> None:
     """Init repo, create branch with commits, optionally diverge/merge.
 
     Default: one file commit ("file.txt") on branch.
     """
+    if spec is None:
+        spec = BranchSpec()
     repo_dir.mkdir(exist_ok=True)
     if not (repo_dir / ".git").exists():
         init_fn(repo_dir)
     _run_git(repo_dir, "checkout", "-b", branch)
-    if empty_msg:
-        _run_git(repo_dir, "commit", "--allow-empty", "-m", empty_msg)
-    elif files:
-        for fname, content in files.items():
+    _populate_branch(repo_dir, spec)
+    _run_git(repo_dir, "checkout", "main")
+    if spec.diverge:
+        (repo_dir / "other.txt").write_text("main content")
+        _run_git(repo_dir, "add", ".")
+        _run_git(repo_dir, "commit", "-m", "main commit")
+    if spec.merge:
+        _run_git(repo_dir, "merge", "--no-edit", branch)
+
+
+def _populate_branch(repo_dir: Path, spec: BranchSpec) -> None:
+    """Create commits on the current branch per the spec."""
+    if spec.empty_msg:
+        _run_git(repo_dir, "commit", "--allow-empty", "-m", spec.empty_msg)
+    elif spec.files:
+        for fname, content in spec.files.items():
             (repo_dir / fname).write_text(content)
             _run_git(repo_dir, "add", fname)
             _run_git(repo_dir, "commit", "-m", f"Add {fname}")
-    elif n_commits > 0:
-        for i in range(n_commits):
+    elif spec.n_commits > 0:
+        for i in range(spec.n_commits):
             (repo_dir / f"file-{i}.txt").write_text(f"content {i}")
             _run_git(repo_dir, "add", f"file-{i}.txt")
             _run_git(repo_dir, "commit", "-m", f"Commit {i}")
@@ -93,13 +114,6 @@ def make_repo_with_branch(  # noqa: PLR0913
         (repo_dir / "file.txt").write_text("branch content")
         _run_git(repo_dir, "add", ".")
         _run_git(repo_dir, "commit", "-m", "branch commit")
-    _run_git(repo_dir, "checkout", "main")
-    if diverge:
-        (repo_dir / "other.txt").write_text("main content")
-        _run_git(repo_dir, "add", ".")
-        _run_git(repo_dir, "commit", "-m", "main commit")
-    if merge:
-        _run_git(repo_dir, "merge", "--no-edit", branch)
 
 
 def add_worktree(repo_dir: Path, slug: str) -> Path:

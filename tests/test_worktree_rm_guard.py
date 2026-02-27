@@ -9,7 +9,12 @@ from click.testing import CliRunner
 
 from claudeutils.worktree.cli import _delete_branch, worktree
 from claudeutils.worktree.git_ops import _classify_branch, _is_branch_merged
-from tests.fixtures_worktree import _run_git, add_worktree, make_repo_with_branch
+from tests.fixtures_worktree import (
+    BranchSpec,
+    _run_git,
+    add_worktree,
+    make_repo_with_branch,
+)
 
 
 def _branch_exists(repo: Path, branch: str) -> bool:
@@ -31,7 +36,9 @@ def test_is_branch_merged(
 ) -> None:
     """_is_branch_merged returns True for merged, False for unmerged."""
     repo = tmp_path / "repo"
-    make_repo_with_branch(repo, init_repo, branch="merged-branch", merge=True)
+    make_repo_with_branch(
+        repo, init_repo, branch="merged-branch", spec=BranchSpec(merge=True)
+    )
     monkeypatch.chdir(repo)
 
     assert _is_branch_merged("merged-branch") is True
@@ -126,7 +133,9 @@ def test_rm_refuses_unmerged_real_history(
 ) -> None:
     """Rm refuses unmerged branches with real history and orphan branches."""
     repo = tmp_path / "repo"
-    make_repo_with_branch(repo, init_repo, branch="real-unmerged", n_commits=2)
+    make_repo_with_branch(
+        repo, init_repo, branch="real-unmerged", spec=BranchSpec(n_commits=2)
+    )
     monkeypatch.chdir(repo)
     runner = CliRunner()
 
@@ -159,7 +168,9 @@ def test_rm_allows_merged_branch(
 ) -> None:
     """Rm allows merged branch removal with safe delete."""
     repo = tmp_path / "repo"
-    make_repo_with_branch(repo, init_repo, branch="merged-branch", merge=True)
+    make_repo_with_branch(
+        repo, init_repo, branch="merged-branch", spec=BranchSpec(merge=True)
+    )
     monkeypatch.chdir(repo)
 
     add_worktree(repo, "merged-branch")
@@ -181,7 +192,7 @@ def test_rm_allows_focused_session_only(
         repo,
         init_repo,
         branch="test-branch",
-        empty_msg="Focused session for test-branch",
+        spec=BranchSpec(empty_msg="Focused session for test-branch"),
     )
     monkeypatch.chdir(repo)
 
@@ -204,7 +215,9 @@ def test_rm_guard_prevents_destruction(
     _probe_registrations, branch deletion must not execute.
     """
     repo = tmp_path / "repo"
-    make_repo_with_branch(repo, init_repo, branch="guard-test", n_commits=2)
+    make_repo_with_branch(
+        repo, init_repo, branch="guard-test", spec=BranchSpec(n_commits=2)
+    )
     monkeypatch.chdir(repo)
 
     wt_path = add_worktree(repo, "guard-test")
@@ -246,8 +259,7 @@ def test_rm_no_destructive_suggestions(
         repo,
         init_repo,
         branch="merged-test",
-        files={"merged.txt": "merged content"},
-        merge=True,
+        spec=BranchSpec(files={"merged.txt": "merged content"}, merge=True),
     )
     add_worktree(repo, "merged-test")
     result = runner.invoke(worktree, ["rm", "merged-test"])
@@ -258,7 +270,7 @@ def test_rm_no_destructive_suggestions(
         repo,
         init_repo,
         branch="focused-test",
-        empty_msg="Focused session for focused-test",
+        spec=BranchSpec(empty_msg="Focused session for focused-test"),
     )
     add_worktree(repo, "focused-test")
     result = runner.invoke(worktree, ["rm", "focused-test"])
@@ -269,7 +281,7 @@ def test_rm_no_destructive_suggestions(
         repo,
         init_repo,
         branch="unmerged-test",
-        files={"unmerged.txt": "unmerged content"},
+        spec=BranchSpec(files={"unmerged.txt": "unmerged content"}),
     )
     add_worktree(repo, "unmerged-test")
     result = runner.invoke(worktree, ["rm", "unmerged-test"])
@@ -283,7 +295,9 @@ def test_rm_guard_exits_2(
 ) -> None:
     """Rm exits 2 when guard refuses removal (safety gate)."""
     repo = tmp_path / "repo"
-    make_repo_with_branch(repo, init_repo, branch="guard-test-br", n_commits=2)
+    make_repo_with_branch(
+        repo, init_repo, branch="guard-test-br", spec=BranchSpec(n_commits=2)
+    )
     monkeypatch.chdir(repo)
 
     add_worktree(repo, "guard-test-br")
@@ -302,7 +316,10 @@ def test_delete_branch_exits_1_on_failure(
     """_delete_branch raises SystemExit(1) when git branch -d fails."""
     repo = tmp_path / "repo"
     make_repo_with_branch(
-        repo, init_repo, branch="unmerged-br", files={"f.txt": "content"}
+        repo,
+        init_repo,
+        branch="unmerged-br",
+        spec=BranchSpec(files={"f.txt": "content"}),
     )
     monkeypatch.chdir(repo)
 
@@ -321,7 +338,9 @@ def test_rm_force_bypasses_guard(
 ) -> None:
     """Force flag bypasses guard check."""
     repo = tmp_path / "repo"
-    make_repo_with_branch(repo, init_repo, branch="unmerged-force", n_commits=2)
+    make_repo_with_branch(
+        repo, init_repo, branch="unmerged-force", spec=BranchSpec(n_commits=2)
+    )
     monkeypatch.chdir(repo)
 
     wt_path = add_worktree(repo, "unmerged-force")

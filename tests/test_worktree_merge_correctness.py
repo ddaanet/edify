@@ -14,7 +14,12 @@ from claudeutils.worktree.merge import (
     _phase4_merge_commit_and_precommit,
     _validate_merge_result,
 )
-from tests.fixtures_worktree import _run_git, last_commit_subject, make_repo_with_branch
+from tests.fixtures_worktree import (
+    BranchSpec,
+    _run_git,
+    last_commit_subject,
+    make_repo_with_branch,
+)
 
 
 def test_phase4_refuses_single_parent_when_unmerged(
@@ -25,7 +30,7 @@ def test_phase4_refuses_single_parent_when_unmerged(
 ) -> None:
     """Phase 4 refuses single-parent commit when branch unmerged."""
     repo = tmp_path / "repo"
-    make_repo_with_branch(repo, init_repo, diverge=True)
+    make_repo_with_branch(repo, init_repo, spec=BranchSpec(diverge=True))
     monkeypatch.chdir(repo)
 
     # Merge --no-commit then simulate MERGE_HEAD loss
@@ -66,7 +71,7 @@ def test_phase4_allows_already_merged(
 ) -> None:
     """Phase 4 allows commit when branch already merged (idempotent)."""
     repo = tmp_path / "repo"
-    make_repo_with_branch(repo, init_repo, merge=True)
+    make_repo_with_branch(repo, init_repo, spec=BranchSpec(merge=True))
     monkeypatch.chdir(repo)
 
     # Stage additional changes on top of already-merged state
@@ -138,7 +143,7 @@ def test_phase4_no_merge_head_merged_skips(
 ) -> None:
     """Phase 4 skips when no MERGE_HEAD, no staged, branch already merged."""
     repo = tmp_path / "repo"
-    make_repo_with_branch(repo, init_repo, merge=True)
+    make_repo_with_branch(repo, init_repo, spec=BranchSpec(merge=True))
     monkeypatch.chdir(repo)
 
     assert not (repo / ".git" / "MERGE_HEAD").exists()
@@ -171,7 +176,7 @@ def test_validate_merge_valid(
 ) -> None:
     """Validation passes when slug is ancestor of HEAD."""
     repo = tmp_path / "repo"
-    make_repo_with_branch(repo, init_repo, merge=True)
+    make_repo_with_branch(repo, init_repo, spec=BranchSpec(merge=True))
     monkeypatch.chdir(repo)
 
     exit_code = 0
