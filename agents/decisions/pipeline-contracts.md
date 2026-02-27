@@ -14,6 +14,7 @@ Centralized I/O contracts for the design-to-deliverable pipeline. Authoritative 
 | T4.5 | Runbook → Validated runbook | runbook-phase-*.md or runbook.md | Validation reports | Model mismatches, lifecycle violations, count errors, implausible REDs | validate-runbook.py (script) | Deterministic structural checks |
 | T5 | Runbook → Step artifacts | runbook.md | steps/step-*.md, agent | Generation errors | prepare-runbook.py | Automated validation |
 | T6 | Steps → Implementation | step-*.md | Code/artifacts | Wrong behavior, stubs, drift | corrector (checkpoints) | Scope IN/OUT, design alignment |
+| T6.5 | Design/Outline → Implementation (inline) | design.md or outline.md, classification.md | Code/artifacts, review report | Wrong behavior, drift from classification | corrector (/inline Phase 4a) + triage-feedback.sh | Scope IN/OUT, design alignment, triage feedback |
 
 ## When Routing Artifact Review
 
@@ -339,3 +340,19 @@ Inline phases in orchestrator-plan.md use `Execution: inline` (vs `Execution: st
 **Anti-pattern:** Collapsing a multi-file batch into a single reviewer. Batch framing overrides per-artifact routing — agent fabricates capability limitations to justify the simpler single-reviewer path.
 
 **Correct pattern:** Apply proportionality per-file first (trivial changes → self-review). Route remaining files by artifact type per routing table. Routing is per-artifact-type, not per-batch.
+
+## When Using Inline Execution Lifecycle
+
+`/inline` wraps Tier 1 (direct) and Tier 2 (delegated) execution with a standard lifecycle: entry gate → pre-work → execute → corrector → triage feedback → deliverable-review chain. Invoked by `/design` (Phase B/C.5 execution-ready paths) and `/runbook` (Tier 1/2 assessment).
+
+**When to use:** Work classified as execution-ready by /design sufficiency gate or /runbook tier assessment (Tier 1 or Tier 2).
+
+**When NOT to use:** Tier 3 (full runbook) — uses `/orchestrate` instead.
+
+### How To Dispatch Corrector From Inline Skill
+
+Corrector dispatch follows standardized template in `agent-core/skills/inline/references/corrector-template.md`. Key fields: scope (uncommitted changes via git diff against baseline), design context (from outline.md or design.md), recall context (review-relevant entries from recall-artifact.md or lightweight fallback), report path.
+
+### When Triage Feedback Shows Divergence
+
+`triage-feedback.sh` compares post-execution evidence against pre-execution classification.md. Divergence surfaced inline — no automatic action. Divergence data accumulates in `plans/reports/triage-feedback-log.md` for future threshold calibration. Current heuristics are initial estimates (C-3 constraint).

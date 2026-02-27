@@ -226,7 +226,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 
 ## agents/decisions/pipeline-contracts.md
 
-/when choosing review gate | transformation table artifact type T1-T6 pipeline stages
+/when choosing review gate | transformation table artifact type T1-T6.5 pipeline stages
 /when routing artifact review | reviewer per artifact type skill-reviewer agent-creator corrector orchestrator delegation
 /how review delegation scope template | scope IN OUT changed files requirements
 /when UNFIXABLE escalation | fix-all pattern grep UNFIXABLE stop escalate
@@ -254,6 +254,9 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when corrector agents lack recall mechanism | design-corrector outline-corrector recall loading
 /when treating recall-artifact summary as recall pass | batch-resolve full content when-resolve
 /when batch changes span multiple artifact types | proportionality per-file routing artifact-type
+/when using inline execution lifecycle | Tier 1 Tier 2 entry gate corrector triage feedback
+/how dispatch corrector from inline skill | standardized template baseline diff recall report
+/when triage feedback shows divergence | classification comparison heuristics calibration log
 
 ## agents/decisions/project-config.md
 

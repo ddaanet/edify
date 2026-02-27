@@ -137,6 +137,58 @@
 
 - [x] **Merge learnings delta** — `x` | sonnet
 
+- [ ] **Artifact staleness gate** — sonnet
+  - Mechanical checkpoint at /requirements, /design, /runbook exit points
+  - `when-resolve.py` touches sentinel; skill compares sentinel mtime to recall-artifact.md AND primary skill artifact (requirements.md, outline.md, design.md, runbook.md)
+  - If recall newer than either artifact, trigger update step
+  - Two drift vectors: stale recall-artifact (entries loaded not persisted) and stale skill artifacts (decisions loaded after artifact written)
+- [ ] **Codify learnings** — `/codify` | sonnet
+  - learnings.md at ~125 lines, soft limit 80
+- [x] **Create inline skill** — `x` | opus
+  - Plan: inline-execute
+  - Deliverables: `agent-core/skills/inline/SKILL.md`, `agent-core/skills/inline/references/corrector-template.md`
+  - Corrector + skill-reviewer both dispatched; all in-scope issues fixed
+  - Review: `plans/inline-execute/reports/review-skill.md`
+- [x] **Design skill integration** — `x` | opus
+  - Plan: inline-execute
+  - FR-1 + FR-9 applied, corrector clean (1 major fixed). Review: `plans/inline-execute/reports/review-design-integration.md`
+- [ ] **Entry gate propagation** — `/design` | opus
+  - Add git-clean + precommit entry gates to /orchestrate, /deliverable-review, corrector agent
+  - Cross-cutting pattern — needs /design to resolve: each skill body vs shared fragment vs hook, and per-consumer questions (corrector double-gating, orchestrate checkpoint overlap, deliverable-review session context)
+  - Follow-on after /inline delivery
+- [x] **Execution feedback** — sonnet
+  - Corrector fixes all applied (2 critical, 1 major, 2 minor — FIXED by corrector)
+  - All 6 issues classified: 4 inline skill design (delegation protocol), 1 tooling (when-resolve.py stdin — existing task), 1 resolved
+  - Reclassified hook false positive: prompt discipline (no template placeholders), not hook matching bug
+  - Design refinements: entry gate, delegation protocol, D-4 fix, Tier 2 absorption, no mid-execution checkpoints
+  - FR-10 expanded: Tier 1 + Tier 2 → /inline. /runbook becomes planning-only for Tiers 1-2.
+  - New pending: entry gate propagation
+- [ ] **Fix inline-exec findings** — `/design plans/inline-execute/reports/deliverable-review.md` | opus
+  - Plan: inline-execute | Status: rework
+  - Classification format mismatch (grep pattern vs /design list-marker format)
+  - Pivot Transactions table missing /inline entry
+  - Unspecified A.3-5 restructure in /design (Minor/excess)
+- [ ] **Fix when-resolve.py** — `x` | sonnet
+  - Deduplicate fuzzy matches in output (same entry resolved multiple times)
+  - Accept recall-artifact on stdin (line-per-trigger format)
+  - Current workaround: zsh array expansion `triggers=("${(@f)$(< file)}") && when-resolve.py "${triggers[@]}"`
+- [x] **Pipeline integration** — `x` | opus
+  - Plan: inline-execute
+  - FR-10 + T6.5 + memory-index + continuation-passing applied, corrector clean (1 critical, 1 major, 1 minor fixed). Review: `plans/inline-execute/reports/review-integration.md`
+  - Cross-skill review: `plans/inline-execute/reports/cross-skill-review.md` — 2 major pre-existing (continuation frontmatter) → Retrofit task
+- [ ] **Retrofit skill pre-work** — `/design` | opus
+  - Many skills lack initial task context loading (task-context.sh, brief.md, recall-artifact) and skill-adapted recall
+  - Continuation-passing retrofit: /design and /runbook lack `continuation:` frontmatter blocks and `## Continuation` body sections (cross-skill review: `plans/inline-execute/reports/cross-skill-review.md`, issues 1-4)
+  - /runbook lacks "Downstream Consumers" summary section (issue 5)
+  - Audit skills for cold-start gaps; retrofit where beneficial
+  - Follow-on after /inline delivery
+- [ ] **Runbook post-explore gate** — opus
+  - /runbook Tier 3 Phase 0.5 has recall (resolve + augment) and Phase 0.75 has recall-diff, but no post-exploration re-scan of memory-index for domains discovered during Glob/Grep verification (step 3). /design has A.2.5 for this. Same pattern needed after Phase 0.5 step 3 discovers file areas not anticipated during step 1 recall.
+  - Separate from inline-execute delivery — standalone skill edit
+- [x] **Triage feedback script** — sonnet
+  - Plan: inline-execute
+  - 7 TDD cycles, 13 tests, corrector review dispatched
+
 ## Worktree Tasks
 
 - [ ] **Design grounding update** → `design-grounding-update` — `/ground` with session scraper exploration input | opus
