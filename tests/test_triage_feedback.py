@@ -8,72 +8,39 @@ SCRIPT = (
 )
 
 
-def _init_repo(tmp_path: Path) -> tuple[Path, str]:
-    """Initialize git repo with initial commit.
+def _run_git(repo_path: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    """Run git command in repo, assert success, return result."""
+    result = subprocess.run(
+        ["git", *args],
+        cwd=repo_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    cmd = " ".join(args)
+    assert result.returncode == 0, f"git {cmd} failed: {result.stderr}"
+    return result
 
-    Returns (repo_path, commit_sha).
-    """
+
+def _init_repo(tmp_path: Path) -> tuple[Path, str]:
+    """Initialize git repo with initial commit."""
     repo_path = tmp_path / "test-repo"
     repo_path.mkdir()
-
-    result = subprocess.run(
-        ["git", "init"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git init failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "config", "user.email", "test@example.com"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git config email failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "config", "user.name", "Test User"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git config name failed: {result.stderr}"
-
+    _run_git(repo_path, "init")
+    _run_git(repo_path, "config", "user.email", "test@example.com")
+    _run_git(repo_path, "config", "user.name", "Test User")
     (repo_path / "dummy.txt").write_text("initial content")
+    _run_git(repo_path, "add", "dummy.txt")
+    _run_git(repo_path, "commit", "-m", "initial")
+    result = _run_git(repo_path, "rev-parse", "HEAD")
+    return repo_path, result.stdout.strip()
 
-    result = subprocess.run(
-        ["git", "add", "dummy.txt"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git add failed: {result.stderr}"
 
-    result = subprocess.run(
-        ["git", "commit", "-m", "initial"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git commit failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git rev-parse failed: {result.stderr}"
-    commit_sha = result.stdout.strip()
-
-    return repo_path, commit_sha
+def _git_add_commit(repo_path: Path, filename: str, content: str, message: str) -> None:
+    """Stage a file and create a commit in the given repo."""
+    (repo_path / filename).write_text(content)
+    _run_git(repo_path, "add", filename)
+    _run_git(repo_path, "commit", "-m", message)
 
 
 def test_script_exists_and_executable() -> None:
@@ -83,15 +50,15 @@ def test_script_exists_and_executable() -> None:
 
 
 def test_no_args_shows_usage() -> None:
-    """Running without args shows usage to stderr and exits 0."""
+    """Running without args shows usage to stderr and exits 1."""
     result = subprocess.run(
         [str(SCRIPT)],
         check=False,
         capture_output=True,
         text=True,
     )
-    assert result.returncode == 0, (
-        f"Expected exit 0, got {result.returncode}: {result.stderr}"
+    assert result.returncode == 1, (
+        f"Expected exit 1, got {result.returncode}: {result.stderr}"
     )
     assert "Usage" in result.stderr, f"Usage not in stderr: {result.stderr}"
 
@@ -118,25 +85,7 @@ def test_files_changed_count(tmp_path: Path) -> None:
     """Script counts files changed since baseline commit."""
     repo_path, baseline_sha = _init_repo(tmp_path)
 
-    (repo_path / "newfile.txt").write_text("new content")
-
-    result = subprocess.run(
-        ["git", "add", "newfile.txt"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git add failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "commit", "-m", "add new file"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git commit failed: {result.stderr}"
+    _git_add_commit(repo_path, "newfile.txt", "new content", "add new file")
 
     result = subprocess.run(
         [str(SCRIPT), "testjob", baseline_sha],
@@ -183,27 +132,12 @@ def test_behavioral_code_detected(tmp_path: Path) -> None:
     """Script detects behavioral code (functions and classes)."""
     repo_path, baseline_sha = _init_repo(tmp_path)
 
-    (repo_path / "newcode.py").write_text(
-        "def new_function():\n    pass\n\nclass NewClass:\n    pass\n"
+    _git_add_commit(
+        repo_path,
+        "newcode.py",
+        "def new_function():\n    pass\n\nclass NewClass:\n    pass\n",
+        "add code",
     )
-
-    result = subprocess.run(
-        ["git", "add", "newcode.py"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git add failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "commit", "-m", "add code"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git commit failed: {result.stderr}"
 
     result = subprocess.run(
         [str(SCRIPT), "testjob", baseline_sha],
@@ -224,27 +158,12 @@ def test_no_behavioral_code_for_prose(tmp_path: Path) -> None:
     """Script reports no behavioral code for prose-only files."""
     repo_path, baseline_sha = _init_repo(tmp_path)
 
-    (repo_path / "README.md").write_text(
-        "# My Project\n\nThis is a readme file with only prose.\n"
+    _git_add_commit(
+        repo_path,
+        "README.md",
+        "# My Project\n\nThis is a readme file with only prose.\n",
+        "add readme",
     )
-
-    result = subprocess.run(
-        ["git", "add", "README.md"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git add failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "commit", "-m", "add readme"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git commit failed: {result.stderr}"
 
     result = subprocess.run(
         [str(SCRIPT), "testjob", baseline_sha],
@@ -271,25 +190,7 @@ def test_underclassified_simple_with_behavioral_code(tmp_path: Path) -> None:
         "**Classification:** Simple\n"
     )
 
-    (repo_path / "code.py").write_text("def foo():\n    pass\n")
-
-    result = subprocess.run(
-        ["git", "add", "code.py"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git add failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "commit", "-m", "add code"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git commit failed: {result.stderr}"
+    _git_add_commit(repo_path, "code.py", "def foo():\n    pass\n", "add code")
 
     result = subprocess.run(
         [str(SCRIPT), "testjob", baseline_sha],
@@ -319,25 +220,9 @@ def test_overclassified_complex_minimal_changes(tmp_path: Path) -> None:
         "**Classification:** Complex\n"
     )
 
-    (repo_path / "README.md").write_text("# Documentation\n\nJust prose.\n")
-
-    result = subprocess.run(
-        ["git", "add", "README.md"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
+    _git_add_commit(
+        repo_path, "README.md", "# Documentation\n\nJust prose.\n", "add readme"
     )
-    assert result.returncode == 0, f"git add failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "commit", "-m", "add readme"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git commit failed: {result.stderr}"
 
     result = subprocess.run(
         [str(SCRIPT), "testjob", baseline_sha],
@@ -364,25 +249,7 @@ def test_match_moderate(tmp_path: Path) -> None:
         "**Classification:** Moderate\n"
     )
 
-    (repo_path / "code.py").write_text("def bar():\n    pass\n")
-
-    result = subprocess.run(
-        ["git", "add", "code.py"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git add failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "commit", "-m", "add code"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git commit failed: {result.stderr}"
+    _git_add_commit(repo_path, "code.py", "def bar():\n    pass\n", "add code")
 
     result = subprocess.run(
         [str(SCRIPT), "testjob", baseline_sha],
@@ -407,26 +274,7 @@ def test_log_created_with_entry(tmp_path: Path) -> None:
         "**Classification:** Simple\n"
     )
 
-    (repo_path / "code.py").write_text("def foo():\n    pass\n")
-
-    result = subprocess.run(
-        ["git", "add", "code.py"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git add failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "commit", "-m", "add code"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git commit failed: {result.stderr}"
-
+    _git_add_commit(repo_path, "code.py", "def foo():\n    pass\n", "add code")
     (repo_path / "plans" / "reports").mkdir(parents=True, exist_ok=True)
 
     result = subprocess.run(
@@ -461,26 +309,7 @@ def test_log_appends_multiple_entries(tmp_path: Path) -> None:
 
     (repo_path / "plans" / "reports").mkdir(parents=True, exist_ok=True)
 
-    (repo_path / "code.py").write_text("def foo():\n    pass\n")
-
-    result = subprocess.run(
-        ["git", "add", "code.py"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git add failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "commit", "-m", "add code"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git commit failed: {result.stderr}"
-
+    _git_add_commit(repo_path, "code.py", "def foo():\n    pass\n", "add code")
     first_baseline = baseline_sha
 
     result = subprocess.run(
@@ -492,26 +321,7 @@ def test_log_appends_multiple_entries(tmp_path: Path) -> None:
     )
     assert result.returncode == 0, f"First script run failed: {result.stderr}"
 
-    (repo_path / "code2.py").write_text("def bar():\n    pass\n")
-
-    result = subprocess.run(
-        ["git", "add", "code2.py"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git add code2 failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "commit", "-m", "add code2"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git commit code2 failed: {result.stderr}"
-
+    _git_add_commit(repo_path, "code2.py", "def bar():\n    pass\n", "add code2")
     second_baseline = baseline_sha
 
     result = subprocess.run(
@@ -539,25 +349,7 @@ def test_no_classification_skips_log(tmp_path: Path) -> None:
     """Script silently skips log when no classification.md exists."""
     repo_path, baseline_sha = _init_repo(tmp_path)
 
-    (repo_path / "file.txt").write_text("some content")
-
-    result = subprocess.run(
-        ["git", "add", "file.txt"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git add failed: {result.stderr}"
-
-    result = subprocess.run(
-        ["git", "commit", "-m", "add file"],
-        cwd=repo_path,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, f"git commit failed: {result.stderr}"
+    _git_add_commit(repo_path, "file.txt", "some content", "add file")
 
     result = subprocess.run(
         [str(SCRIPT), "testjob", baseline_sha],

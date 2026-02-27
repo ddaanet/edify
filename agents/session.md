@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-27
 
-**Status:** /inline skill implementation planned as inline task sequence (not full runbook pipeline — self-modification coupling, no parallelization benefit, overhead/value mismatch). Four sequential tasks with per-task recall + corrector pattern.
+**Status:** Triage feedback script (task 1 of 4) implemented via TDD. 13 tests, 7 cycles, corrector dispatched. Three remaining inline-execute tasks pending. Execution feedback report written for skill design iteration.
 
 ## Completed This Session
 
@@ -15,24 +15,29 @@
 - Recall artifact updated: pruned 6 JSONL-processing entries (irrelevant after scope shift), added 10 implementation-relevant entries, organized by domain
 - Sufficiency gate: outline IS the design (all decisions resolved, scope explicit, no architectural uncertainty)
 
-**Execution planning (this session):**
+**Execution planning (prior session):**
 - Tier 3 assessed initially; user redirected: pipeline not yet stable for self-modification, structure as inline task sequence
 - Full recall: 28 artifact entries resolved + 13 deep recall entries (skill creation, TDD patterns, integration, self-referential ordering)
 - Gap found: /runbook skill lacks post-exploration recall (no A.2.5 equivalent) — added as pending task
-- Rationale: self-modification coupling (tasks edit pipeline skills), no parallelization (strict dependency chain), overhead/value mismatch (pipeline coordination cost > error-recovery value for ~10 work units)
+
+**Triage feedback script (this session):**
+- Pre-work recall: 16 entries across 4 passes (evidence collection, testing, TDD discipline, quality gates)
+- TDD: 7 cycles via test-driver agent, piecemeal dispatch (1 cycle per invocation, resume between cycles)
+- Deliverables: `agent-core/bin/triage-feedback.sh` (84 lines), `tests/test_triage_feedback.py` (13 tests, 581 lines)
+- Corrector dispatched → `plans/inline-execute/reports/review-script.md`
+- Execution feedback report → `plans/inline-execute/reports/execution-feedback.md`
+- tdd-recall-artifact created: `plans/inline-execute/tdd-recall-artifact.md` (10 entry keys for TDD sub-agents)
+- Issues: hook false positives on template paths (4 blocked dispatches), recall artifact word-splitting, sub-agent context isolation iteration
 
 ## Pending Tasks
 
-- [ ] **Triage feedback script** — `x` | sonnet
+- [x] **Triage feedback script** — sonnet
   - Plan: inline-execute
-  - **Pre-work recall:** Resolve recall-artifact entries for evidence collection domain: `how detect noise in command output`, `how architect feedback pipeline`, `when choosing feedback output format`, `when choosing script vs agent judgment`, `when splitting validation into mechanical and semantic`
-  - **Scope:** New `agent-core/bin/triage-feedback.sh` + `tests/test_triage_feedback.py`
-  - **FRs:** FR-5 (evidence collection: git diff stat, report count, behavioral code grep), FR-6 (comparison against classification.md), FR-7 (append to triage-feedback-log.md)
-  - **TDD:** Real subprocess in tmp_path (per "when preferring e2e over mocked subprocess"). Fixture classification.md files for comparison paths. Per-cycle: RED → GREEN → verify, then next. Delegate cycles to test-driver via Task tool.
-  - **Script interface:** `triage-feedback.sh <job-dir> <baseline-commit>` → structured text (evidence + verdict) + log append
-  - **Cycles:** ~5-7: (1) script exists + takes args, (2) git diff stat collection, (3) report file counting, (4) behavioral code grep, (5) classification.md read + comparison, (6) log append, (7) missing classification.md → silent skip
-  - **Post-work:** Corrector dispatch with recall entries for quality patterns. Report → `plans/inline-execute/reports/review-script.md`
-  - **Verification:** `just check && just test`
+  - 7 TDD cycles, 13 tests, corrector review dispatched
+- [ ] **Execution feedback** — `x` | sonnet
+  - Read `plans/inline-execute/reports/execution-feedback.md` and corrector review `plans/inline-execute/reports/review-script.md`
+  - Apply corrector fixes if any
+  - Process feedback recommendations into actionable items: hook fix, when-resolve.py stdin support, skill design notes
 - [ ] **Create inline skill** — `x` | opus
   - Plan: inline-execute
   - **Pre-work recall:** Resolve entries for skill structure: `how chain multiple skills together`, `when placing DO NOT rules in skills`, `how compose agents via skills`, `how prevent skill steps from being skipped`, `when embedding knowledge in context`, `when skill sections cross-reference context`. Load `plugin-dev:skill-development`.
@@ -69,8 +74,12 @@
   - `when-resolve.py` touches sentinel; skill compares sentinel mtime to recall-artifact.md AND primary skill artifact (requirements.md, outline.md, design.md, runbook.md)
   - If recall newer than either artifact, trigger update step
   - Two drift vectors: stale recall-artifact (entries loaded not persisted) and stale skill artifacts (decisions loaded after artifact written)
+- [ ] **Fix when-resolve.py** — `x` | sonnet
+  - Deduplicate fuzzy matches in output (same entry resolved multiple times)
+  - Accept recall-artifact on stdin (line-per-trigger format)
+  - Current workaround: zsh array expansion `triggers=("${(@f)$(< file)}") && when-resolve.py "${triggers[@]}"`
 - [ ] **Codify learnings** — `/codify` | sonnet
-  - learnings.md at ~112 lines (109 measured), soft limit 80
+  - learnings.md at ~125 lines, soft limit 80
 
 ## Blockers / Gotchas
 
@@ -78,7 +87,9 @@
 
 **Planstate mismatch:** `inline-execute` plan has outline.md (design-sufficient) but no design.md, so planstate reads `requirements`. Task commands reference outline.md directly.
 
-**Learnings.md over soft limit:** 109 lines vs 80-line soft limit. /codify should run before next substantive work session.
+**Learnings.md over soft limit:** ~125 lines vs 80-line soft limit. /codify should run before next substantive work session.
+
+**Test file over soft limit:** `tests/test_triage_feedback.py` at 581 lines vs 400-line soft limit. Corrector will flag; split needed.
 
 **Self-modification:** Tasks 3-4 edit skills that define the pipeline being used. Execute with fresh session loads to pick up changes.
 
@@ -90,3 +101,6 @@
 - `plans/inline-execute/reports/outline-review.md` — PDR review (Ready)
 - `plans/reports/design-skill-grounding.md` — Grounding report (Gap 7 = this skill)
 - `agent-core/fragments/continuation-passing.md` — Continuation protocol for cooperative skills
+- `plans/inline-execute/tdd-recall-artifact.md` — 10 entry keys for TDD sub-agent context priming
+- `plans/inline-execute/reports/execution-feedback.md` — Execution friction report (6 issues, 4 recommendations)
+- `plans/inline-execute/reports/review-script.md` — Corrector review output
