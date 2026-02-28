@@ -51,6 +51,66 @@ def call_hook(prompt: str) -> dict[str, Any]:
     return result
 
 
+class TestDirectiveCharacterization:
+    """Characterization tests for each directive in isolation (FR-6)."""
+
+    def test_d_directive_standalone(self) -> None:
+        """d: directive produces discuss expansion."""
+        result = call_hook("d: analyze this approach")
+        assert result != {}
+        additional_context = result["hookSpecificOutput"]["additionalContext"]
+        assert (
+            "DISCUSS" in additional_context
+            or "Evaluate critically" in additional_context
+        )
+        assert "stress-test" in additional_context.lower()
+        assert "discuss" in result["systemMessage"].lower()
+
+    def test_p_directive_standalone(self) -> None:
+        """p: directive produces pending expansion."""
+        result = call_hook("p: implement feature X")
+        assert result != {}
+        additional_context = result["hookSpecificOutput"]["additionalContext"]
+        assert "PENDING" in additional_context or "Do NOT execute" in additional_context
+        assert (
+            "model tier" in additional_context.lower()
+            or "opus" in additional_context.lower()
+        )
+        assert "pending" in result["systemMessage"].lower()
+
+    def test_b_directive_standalone(self) -> None:
+        """b: directive produces brainstorm expansion."""
+        result = call_hook("b: approaches for caching")
+        assert result != {}
+        additional_context = result["hookSpecificOutput"]["additionalContext"]
+        assert (
+            "BRAINSTORM" in additional_context
+            or "diverge" in additional_context.lower()
+        )
+        assert "brainstorm" in result["systemMessage"].lower()
+
+    def test_q_directive_standalone(self) -> None:
+        """q: directive produces quick/terse expansion."""
+        result = call_hook("q: what does FR-1 mean")
+        assert result != {}
+        additional_context = result["hookSpecificOutput"]["additionalContext"]
+        assert "QUICK" in additional_context or "terse" in additional_context.lower()
+        assert "quick" in result["systemMessage"].lower()
+
+    def test_learn_directive_standalone(self) -> None:
+        """learn: directive produces learn expansion."""
+        result = call_hook("learn: always use project-local tmp")
+        assert result != {}
+        additional_context = result["hookSpecificOutput"]["additionalContext"]
+        assert "LEARN" in additional_context or "learnings.md" in additional_context
+        assert "learn" in result["systemMessage"].lower()
+
+    def test_no_match_pass_through(self) -> None:
+        """Prompt with no feature match produces silent exit (empty result)."""
+        assert call_hook("just a regular prompt with no shortcuts") == {}
+        assert call_hook("hello world") == {}
+
+
 class TestLongFormAliases:
     """Test long-form directive aliases."""
 
