@@ -118,6 +118,20 @@ Summary: counts by severity and axis, gap analysis results.
 
 **Evidence:** memory-index skill drifted during execution (3 entries missing); workflows-terminology.md referenced non-existent agent; runbook skill missing general-patterns.md reference. Each step's artifacts were internally consistent — gaps only visible holistically.
 
+### When Resolving Deliverable Review Findings
+
+**Decision Date:** 2026-02-28
+
+**Rule:** Every finding must resolve to one of: (1) fix inline now, or (2) pending task as issue tracker entry. There is no third option.
+
+**Anti-pattern:** "Minor findings deferred — no pending task created." Deferral without a tracking mechanism is abandonment. The finding disappears from all active surfaces. Severity classification exists for report readers to assess risk, not as skip permission for executors.
+
+**Second anti-pattern:** Severity-as-priority-filter. Agent treats Minor severity as implicit permission to drop findings during fix execution. Conflates "low impact if wrong" with "acceptable to skip."
+
+**Correct pattern:** The fix task created by `/deliverable-review` scopes ALL findings (Critical, Major, Minor). The executing agent fixes each one or creates a pending task. "Noted in report" is not a resolution — reports are not checked proactively.
+
+**Evidence:** Two occurrences of identical pattern. Learning created after first; learning present in context during second but agent rationalized past it via ambiguous "deferral" language in review skill (since fixed).
+
 ## .Sources
 
 - [ISO/IEC 25010:2023](https://iso25000.com/index.php/en/iso-25000-standards/iso-25010) — Product quality model (functional suitability, reliability, maintainability)

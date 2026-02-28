@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-28
 
-**Status:** Hook tier flattening complete. UPS topic injection unblocked.
+**Status:** Flatten-hook-tiers delivered (reviewed + all findings fixed). UPS topic injection unblocked.
 
 ## Completed This Session
 
@@ -19,10 +19,20 @@
 - Corrector review: `plans/flatten-hook-tiers/reports/review.md` — 2 major issues fixed (FR-6 gap for b:/q:/learn: characterization, dead code in `is_line_in_fence`)
 - Test suite: 1328/1329 (1 known xfail), precommit clean
 
+**Deliverable review + fix (flatten-hook-tiers):**
+- `/deliverable-review plans/flatten-hook-tiers` — 0 critical, 1 major, 3 minor. Report: `plans/flatten-hook-tiers/reports/deliverable-review.md`
+- Major: FR-7 systemMessage assertions missing in 2 combination tests → fixed
+- Minor: docstring missing Tier 3 → fixed, `call_hook` duplication → extracted to `tests/ups_hook_helpers.py`, test rename for FR-2 traceability → fixed
+- Lifecycle: `reviewed` → `delivered` pending merge
+
+**RCA: /design dropped minor findings:**
+- `/reflect` on severity-as-priority-filter rationalization during fix task execution
+- Root cause: directive conflict — "deferral" in review skill vs "no third option" in learning. Systemic (2nd occurrence).
+- Fix 1: `agent-core/skills/deliverable-review/SKILL.md` — replaced ambiguous "deferral" with "pending task," unified all severities into single pending task
+- Fix 2: codified to `agents/decisions/deliverable-review.md` — "When Resolving Deliverable Review Findings" + memory-index entry
+
 ## Pending Tasks
 
-- [x] **Flatten hook tiers** — complete
-- [ ] **Review hook flatten** — `/deliverable-review plans/flatten-hook-tiers` | opus | restart
 - [ ] **UPS topic injection** — `/runbook plans/userpromptsubmit-topic/outline.md` | sonnet
   - Plan: userpromptsubmit-topic | Status: outlined
 - [ ] **Calibrate topic params** — extend session-scraper.py | sonnet

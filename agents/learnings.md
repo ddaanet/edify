@@ -38,6 +38,5 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Adding another recall pass as prose instruction ("recall after lint failure") — this is a prose gate, same failure mode as the original recall.
 - Correct pattern: Structural injection — PostToolUse hook injects memory-index content on first lint/precommit red after green (state-transition gated). Separate PreToolUse recall gate forces index scanning before fix attempt. Two layers: injection (availability) + gate (application).
 ## When handling deliverable review findings
-- Anti-pattern: "Minor findings deferred — no pending task created." Deferral without a tracking mechanism is abandonment. The finding disappears from all active surfaces.
-- Correct pattern: Every finding must resolve to one of: (1) fix inline now, or (2) pending task as issue tracker entry. There is no third option. "Noted in report" is not a resolution — reports are not checked proactively.
-- Rationale: Session.md pending tasks are the issue tracker. If work isn't there, it doesn't exist.
+- Codified to `agents/decisions/deliverable-review.md` — "When Resolving Deliverable Review Findings"
+- Key addition from 2nd occurrence RCA: severity-as-priority-filter rationalization. Agent treated Minor severity as skip permission during fix task execution. Root cause was ambiguous "deferral" language in review skill (fixed: replaced with "pending task"). Learning alone didn't prevent recurrence — codified to decisions/ for `when-resolve.py` discoverability.

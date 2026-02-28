@@ -1,64 +1,18 @@
 """Tests for userpromptsubmit-shortcuts hook."""
 
-import importlib.util
-import json
-from io import StringIO
-from pathlib import Path
-from typing import Any
 from unittest.mock import patch
 
-# Import hook module using importlib (filename contains hyphen)
-HOOK_PATH = (
-    Path(__file__).parent.parent
-    / "agent-core"
-    / "hooks"
-    / "userpromptsubmit-shortcuts.py"
-)
-spec = importlib.util.spec_from_file_location("hook_module", HOOK_PATH)
-if spec is None or spec.loader is None:
-    raise RuntimeError(f"Failed to load hook module from {HOOK_PATH}")
-hook = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(hook)
-
-
-def call_hook(prompt: str) -> dict[str, Any]:
-    """Call hook with prompt, return parsed output or empty dict if exit 0."""
-    hook_input = {"prompt": prompt}
-    input_data = json.dumps(hook_input)
-
-    # Capture stdout and stderr
-    captured_stdout = StringIO()
-    captured_stderr = StringIO()
-
-    with (
-        patch("sys.stdin", StringIO(input_data)),
-        patch("sys.stdout", captured_stdout),
-        patch("sys.stderr", captured_stderr),
-    ):
-        try:
-            hook.main()
-        except SystemExit as e:
-            if e.code == 0:
-                # Silent pass-through
-                return {}
-            raise
-
-    # Parse output
-    output_str = captured_stdout.getvalue()
-    if not output_str:
-        return {}
-
-    result = json.loads(output_str)
-    if not isinstance(result, dict):
-        return {}
-    return result
+from tests.ups_hook_helpers import call_hook, hook
 
 
 class TestTier1Commands:
     """Test Tier 1 command matching on any prompt line."""
 
-    def test_tier1_shortcut_on_own_line_in_multiline_prompt(self) -> None:
-        """Shortcut on own line in multi-line prompt triggers expansion."""
+    def test_multiline_command_no_systemmessage(self) -> None:
+        """Command + plain text, no other feature (FR-2).
+
+        Multi-line command produces additionalContext only, no systemMessage.
+        """
         result = call_hook("s\nsome additional context")
         assert result != {}
         assert "[#status]" in result["hookSpecificOutput"]["additionalContext"]
@@ -365,6 +319,9 @@ class TestFeatureCombinations:
         additional_context = result["hookSpecificOutput"]["additionalContext"]
         assert "[#status]" in additional_context
         assert "claude-code-guide" in additional_context
+        # systemMessage: multi-line command adds nothing, CCG guard adds summary
+        assert "systemMessage" in result
+        assert "claude-code-guide" in result["systemMessage"].lower()
 
     def test_command_plus_continuation(self) -> None:
         """Command on one line + continuation chain → both fire."""
@@ -378,6 +335,8 @@ class TestFeatureCombinations:
         additional_context = result["hookSpecificOutput"]["additionalContext"]
         assert "[#status]" in additional_context
         assert "CONTINUATION" in additional_context
+        # systemMessage: multi-line command and continuation both add nothing
+        assert "systemMessage" not in result
 
     def test_command_plus_directive_plus_guard(self) -> None:
         """Command + directive + pattern guard triple → all three fire."""

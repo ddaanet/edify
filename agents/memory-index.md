@@ -77,6 +77,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when identifying deliverable artifacts | classify artifact types review axes agentic prose code test
 /when orchestrator handles review delegation | sub-agents lack Task all reviews post-commit
 /when deliverable review catches drift | inter-file consistency holistic not per-step
+/when resolving deliverable review findings | severity not skip permission fix or pending task no deferral
 
 ## agents/decisions/execution-strategy.md
 
