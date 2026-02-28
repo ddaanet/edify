@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-28
 
-**Status:** Hook cwd-drift bypass diagnosed and fixed. Supercession passes complete (recall-null + hook fix). Recall-null deliverable review still pending.
+**Status:** Three worktrees created for parallel recall work. Review-recall-null merge pending.
 
 ## Completed This Session
 
@@ -36,6 +36,10 @@
 - **Supercession passes** — recall-null + hook fix
   - Recall-null: updated "When Selecting Gate Anchor Tools" (null mode now delivered, not proposed). 6 other entries checked — describe patterns recall-null conforms to, no supersession
   - Hook fix: new decision entry, no existing entries superseded
+- **Worktree setup** — 3 worktrees for parallel recall work
+  - `review-recall-null` — deliverable review (opus)
+  - `recall-cli-integration` — production CLI (sonnet)
+  - `userpromptsubmit-topic` — prompt-submit recall injection (sonnet)
 
 ## Pending Tasks
 
@@ -47,13 +51,6 @@
   - Plan: recall-null | Status: delivered
   - Phase 1: null mode TDD (2 cycles, test-driver at sonnet). Phase 2: skill gate language (5 inline edits, opus direct)
   - Absorbs: when-resolve null mode + runbook post-explore gate
-- [ ] **Review recall-null** — `/deliverable-review plans/recall-null` | opus | restart
-- [ ] **Recall CLI integration** — Production `claudeutils _recall` CLI (check/resolve/diff), Click, TDD | sonnet
-  - Prototype delivered via recall-tool-anchoring worktree
-- [ ] **UserPromptSubmit topic** — Phase 7 analysis recommends this as highest-impact recall improvement | sonnet
-  - Seed keyword table from 200+ memory-index triggers
-  - Inject matching decision content via additionalContext on prompt submit
-  - Complementary to recall pass (cheap first layer vs deep pipeline integration)
 - [ ] **Runbook recall expansion** — `/design plans/runbook-recall-expansion/requirements.md` | sonnet
   - Plan: runbook-recall-expansion | Status: requirements
   - prepare-runbook.py recall injection, corrector.md self-loading, two-pattern docs (7 FRs)
@@ -214,6 +211,16 @@
 
 ## Worktree Tasks
 
+- [ ] **Review recall-null** → `review-recall-null` — `/deliverable-review plans/recall-null` | opus | restart
+
+- [ ] **Recall CLI integration** → `recall-cli-integration` — Production `claudeutils _recall` CLI (check/resolve/diff), Click, TDD | sonnet
+  - Prototype delivered via recall-tool-anchoring worktree
+
+- [ ] **UserPromptSubmit topic** → `userpromptsubmit-topic` — Phase 7 analysis recommends this as highest-impact recall improvement | sonnet
+  - Seed keyword table from 200+ memory-index triggers
+  - Inject matching decision content via additionalContext on prompt submit
+  - Complementary to recall pass (cheap first layer vs deep pipeline integration)
+
 ## Blockers / Gotchas
 
 **Never run `git merge` without sandbox bypass:**
@@ -264,7 +271,7 @@
 
 ## Next Steps
 
-Hook fix committed. Restart required (settings.json hook paths changed). Next: **Deliverable review: recall-null** — `/deliverable-review plans/recall-null` (opus, restart).
+Merge review-recall-null worktree, then rm. Two other worktrees active: recall-cli-integration, userpromptsubmit-topic.
 
 ## Reference Files
 
