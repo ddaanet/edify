@@ -49,3 +49,36 @@ when second entry — annotation for second
             assert "# Second Entry Resolved" in result.output
             assert "Content 2" in result.output
             assert "---" in result.output
+
+
+def test_resolve_argument_mode_happy_path() -> None:
+    """Resolve argument mode: each arg is trigger, resolve, output results."""
+    runner = CliRunner()
+    with (
+        runner.isolated_filesystem(),
+        patch("claudeutils.recall_cli.cli.resolve") as mock_resolve,
+    ):
+        mock_resolve.side_effect = [
+            "Content for mock tests",
+            "Content for encode paths",
+        ]
+
+        # Arguments: triggers passed directly (not artifact paths)
+        result = runner.invoke(
+            cli,
+            ["_recall", "resolve", "when writing mock tests", "how encode paths"],
+        )
+
+        # Verify exit code 0
+        assert result.exit_code == 0
+
+        # Verify resolver called with correct bare trigger strings
+        assert mock_resolve.call_count == 2
+        calls = [call.args for call in mock_resolve.call_args_list]
+        assert calls[0][0] == "writing mock tests"
+        assert calls[1][0] == "encode paths"
+
+        # Verify output contains both resolved contents
+        assert "Content for mock tests" in result.output
+        assert "Content for encode paths" in result.output
+        assert "---" in result.output
