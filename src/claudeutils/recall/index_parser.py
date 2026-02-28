@@ -69,7 +69,7 @@ class IndexEntry(BaseModel):
     keywords: set[str]  # Extracted from key + description
 
 
-def _extract_keywords(text: str) -> set[str]:
+def extract_keywords(text: str) -> set[str]:
     """Extract keywords from text.
 
     Tokenizes on whitespace and punctuation, lowercases, removes stopwords.
@@ -110,7 +110,7 @@ def _parse_new_format_line(
         description="",
         referenced_file=current_file,
         section=current_section,
-        keywords=_extract_keywords(trigger + " " + extras),
+        keywords=extract_keywords(trigger + " " + extras),
     )
 
 
@@ -135,7 +135,7 @@ def _parse_old_format_line(
         description=description,
         referenced_file=current_file,
         section=current_section,
-        keywords=_extract_keywords(key + " " + description),
+        keywords=extract_keywords(key + " " + description),
     )
 
 
