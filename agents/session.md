@@ -207,9 +207,6 @@
 
 ## Worktree Tasks
 
-- [ ] **Runbook recall expansion** → `runbook-recall-expansion` — `/design plans/runbook-recall-expansion/requirements.md` | sonnet
-  - Plan: runbook-recall-expansion | Status: requirements
-  - prepare-runbook.py recall injection, corrector.md self-loading, two-pattern docs (7 FRs)
 
 
 - [ ] **Fix planstate detector** → `fix-planstate-detector` — `/design plans/fix-planstate-detector/requirements.md` | sonnet
@@ -283,6 +280,7 @@
 - Fails during `_worktree merge` precommit, passes in isolation and standalone full suite
 - Non-reproducible after merge completes. On reoccurrence: capture `pytest -v` output to identify predecessor test
 - Root cause unknown — not CWD pollution (test uses monkeypatch.chdir), not UPS tests (verified), not worktree presence
+- Inline TDD after full codebase exploration produces test-after with ceremony. All 15 tests passed on first attempt — no behavioral RED. Must delegate to test-driver in fresh context when task is marked TDD and design session loaded implementation context. [from: runbook-recall-expansion]
 ## Next Steps
 
 5 worktrees active (runbook-recall-expansion, fix-planstate-detector, ups-topic-injection, task-classification, continuation-prepend). Userpromptsubmit-topic worktree still registered (merged, needs `wt-rm userpromptsubmit-topic`). Merge returning worktrees as they complete via `wt merge <slug>`.
