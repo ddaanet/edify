@@ -58,3 +58,28 @@ More content
 """
     result = parse_entry_keys_section(content)
     assert result is None
+
+
+def test_parse_entry_keys_section_missing() -> None:
+    """Empty section (only blanks) returns empty list, not None."""
+    content = """\
+## Entry Keys
+
+
+"""
+    result = parse_entry_keys_section(content)
+    assert result == []
+
+
+def test_parse_entry_keys_skips_comments() -> None:
+    """Lines starting with # within section are excluded."""
+    content = """\
+## Entry Keys
+
+when foo
+# this is a comment
+how bar
+# another comment
+"""
+    result = parse_entry_keys_section(content)
+    assert result == ["when foo", "how bar"]
