@@ -126,3 +126,79 @@ when third entry — annotation for third
             # Verify error message in output
             assert "second entry" in result.output
             assert "error" in result.output.lower()
+
+
+def test_resolve_argument_mode_partial_success_exits_0() -> None:
+    """Argument mode: ≥1 resolved content exits 0 (best-effort semantics)."""
+    runner = CliRunner()
+    with (
+        runner.isolated_filesystem(),
+        patch("claudeutils.recall_cli.cli.resolve") as mock_resolve,
+    ):
+        # First succeeds, second fails, third succeeds
+        mock_resolve.side_effect = [
+            "Content for first",
+            ResolveError("second not found"),
+            "Content for third",
+        ]
+
+        result = runner.invoke(
+            cli,
+            [
+                "_recall",
+                "resolve",
+                "when first trigger",
+                "when second trigger",
+                "when third trigger",
+            ],
+        )
+
+        # Verify exit code 0 (≥1 success)
+        assert result.exit_code == 0
+
+        # Verify resolver called for all three
+        assert mock_resolve.call_count == 3
+
+        # Verify successful content in output
+        assert "Content for first" in result.output
+        assert "Content for third" in result.output
+
+        # Verify error message in output
+        assert "second trigger" in result.output
+
+
+def test_resolve_argument_mode_total_failure_exits_1() -> None:
+    """Argument mode: zero resolved content exits 1 (best-effort semantics)."""
+    runner = CliRunner()
+    with (
+        runner.isolated_filesystem(),
+        patch("claudeutils.recall_cli.cli.resolve") as mock_resolve,
+    ):
+        # All three fail
+        mock_resolve.side_effect = [
+            ResolveError("first not found"),
+            ResolveError("second not found"),
+            ResolveError("third not found"),
+        ]
+
+        result = runner.invoke(
+            cli,
+            [
+                "_recall",
+                "resolve",
+                "when first trigger",
+                "when second trigger",
+                "when third trigger",
+            ],
+        )
+
+        # Verify exit code 1 (zero successes)
+        assert result.exit_code == 1
+
+        # Verify resolver called for all three
+        assert mock_resolve.call_count == 3
+
+        # Verify error messages in output
+        assert "first trigger" in result.output
+        assert "second trigger" in result.output
+        assert "third trigger" in result.output

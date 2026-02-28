@@ -76,14 +76,9 @@ def _load_triggers_from_artifact(artifact_path: str) -> list[str]:
     return [parse_trigger(entry) for entry in entries]
 
 
-def _handle_resolve_error(
-    error: Exception, trigger: str, *, artifact_mode: bool
-) -> str:
-    """Handle resolution error: collect message or fail per mode."""
-    error_msg = f"Error resolving '{trigger}': {error}"
-    if not artifact_mode:
-        _fail(error_msg, code=1)
-    return error_msg
+def _format_resolve_error(error: Exception, trigger: str) -> str:
+    """Format resolution error message."""
+    return f"Error resolving '{trigger}': {error}"
 
 
 @recall_cmd.command()
@@ -120,10 +115,7 @@ def resolve_cmd(args: tuple[str, ...]) -> None:
                 seen.add(result)
                 results.append(result)
         except (ResolveError, OSError, ValueError, RuntimeError) as e:
-            error_msg = _handle_resolve_error(
-                e, trigger, artifact_mode=is_artifact_mode
-            )
-            errors.append(error_msg)
+            errors.append(_format_resolve_error(e, trigger))
 
     output_parts = []
     if results:
@@ -134,7 +126,7 @@ def resolve_cmd(args: tuple[str, ...]) -> None:
     if output_parts:
         click.echo("\n".join(output_parts))
 
-    if errors and is_artifact_mode:
+    if is_artifact_mode and errors:
         raise SystemExit(1)
 
     if not results:
