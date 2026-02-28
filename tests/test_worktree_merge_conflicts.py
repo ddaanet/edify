@@ -153,7 +153,7 @@ def test_merge_conflict_session_md_multiline_blocks(
     wt_path = _setup_merge_worktree(repo_with_submodule)
 
     base = (
-        "# Session\n\n## Pending Tasks\n\n"
+        "# Session\n\n## In-tree Tasks\n\n"
         "- [ ] **Task A** — `/design` | sonnet\n\n## Blockers\n"
     )
     _setup_session_conflict(
@@ -163,7 +163,7 @@ def test_merge_conflict_session_md_multiline_blocks(
             "main": base,
             "wt_base": base,
             "wt_updated": (
-                "# Session\n\n## Pending Tasks\n\n"
+                "# Session\n\n## In-tree Tasks\n\n"
                 "- [ ] **Task A** — `/design` | sonnet\n"
                 "- [ ] **Task B** — `/runbook plans/foo/runbook.md` | haiku\n"
                 "  - Plan: foo | Status: planned\n"
@@ -171,7 +171,7 @@ def test_merge_conflict_session_md_multiline_blocks(
                 "## Blockers\n"
             ),
             "main_updated": (
-                "# Session\n\n## Pending Tasks\n\n"
+                "# Session\n\n## In-tree Tasks\n\n"
                 "- [ ] **Task A** — `/design` | opus\n\n## Blockers\n"
             ),
         },
@@ -205,7 +205,7 @@ def test_merge_conflict_session_md_insertion_position(
     wt_path = _setup_merge_worktree(repo_with_submodule)
 
     base = (
-        "# Session\n\n## Pending Tasks\n\n"
+        "# Session\n\n## In-tree Tasks\n\n"
         "- [ ] **Task A** — `/design` | sonnet\n\n"
         "## Blockers / Gotchas\n\n- Some blocker note\n"
     )
@@ -216,13 +216,13 @@ def test_merge_conflict_session_md_insertion_position(
             "main": base,
             "wt_base": base,
             "wt_updated": (
-                "# Session\n\n## Pending Tasks\n\n"
+                "# Session\n\n## In-tree Tasks\n\n"
                 "- [ ] **Task A** — `/design` | sonnet\n"
                 "- [ ] **Task B** — `/runbook` | haiku\n\n"
                 "## Blockers / Gotchas\n\n- Some blocker note\n"
             ),
             "main_updated": (
-                "# Session\n\n## Pending Tasks\n\n"
+                "# Session\n\n## In-tree Tasks\n\n"
                 "- [ ] **Task A** — `/design` | opus\n\n"
                 "## Blockers / Gotchas\n\n- Some blocker note\n"
             ),

@@ -70,29 +70,28 @@ def _merge_session_contents(ours: str, theirs: str, slug: str | None = None) -> 
     """Merge session.md contents with per-section strategies (D-5).
 
     Strategy table:
-    - Status line, Completed This Session, Worktree Tasks,
-      Reference Files, Next Steps: keep ours (implicit — ours is base)
-    - Pending Tasks: additive (union by task name)
+    - Status, Completed, Reference Files, Next Steps: keep ours (implicit)
+    - In-tree Tasks: additive (union by task name)
+    - Worktree Tasks: additive (union by task name)
     - Blockers / Gotchas: evaluate (tag theirs with [from: slug], append)
     """
-    ours_blocks = [
-        b for b in extract_task_blocks(ours) if b.section != "Worktree Tasks"
-    ]
-    theirs_blocks = [
-        b for b in extract_task_blocks(theirs) if b.section != "Worktree Tasks"
-    ]
-    ours_names = {b.name for b in ours_blocks}
-    new_blocks = [b for b in theirs_blocks if b.name not in ours_names]
-
     result_lines = ours.split("\n")
 
-    # Pending Tasks: additive strategy
-    if new_blocks:
+    for section in ("In-tree Tasks", "Worktree Tasks", ""):
+        ours_blocks = [b for b in extract_task_blocks(ours) if b.section == section]
+        theirs_blocks = [b for b in extract_task_blocks(theirs) if b.section == section]
+        ours_names = {b.name for b in ours_blocks}
+        new_blocks = [b for b in theirs_blocks if b.name not in ours_names]
+
+        if not new_blocks:
+            continue
+
         new_task_lines: list[str] = []
         for block in sorted(new_blocks, key=lambda b: b.name):
             new_task_lines.extend(block.lines)
 
-        bounds = find_section_bounds(ours, "Pending Tasks")
+        bounds = find_section_bounds(ours, section) if section else None
+
         if bounds is not None:
             insertion_point = bounds[1]
             if (
@@ -102,8 +101,13 @@ def _merge_session_contents(ours: str, theirs: str, slug: str | None = None) -> 
             ):
                 new_task_lines.append("")
             result_lines[insertion_point:insertion_point] = new_task_lines
+            ours = "\n".join(result_lines)
+        elif section:
+            result_lines.extend(["", f"## {section}", "", *new_task_lines])
+            ours = "\n".join(result_lines)
         else:
-            result_lines.extend(["", "## Pending Tasks", "", *new_task_lines])
+            result_lines.extend(new_task_lines)
+            ours = "\n".join(result_lines)
 
     _merge_blockers(result_lines, ours, theirs, slug)
 

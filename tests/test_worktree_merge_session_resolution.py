@@ -17,7 +17,7 @@ def test_merge_session_preserves_new_blockers() -> None:
     ours = (
         "# Session: Test\n"
         "\n"
-        "## Pending Tasks\n"
+        "## In-tree Tasks\n"
         "\n"
         "- [ ] **Task A** — existing task\n"
         "\n"
@@ -28,7 +28,7 @@ def test_merge_session_preserves_new_blockers() -> None:
     theirs = (
         "# Session: Branch\n"
         "\n"
-        "## Pending Tasks\n"
+        "## In-tree Tasks\n"
         "\n"
         "- [ ] **Task A** — existing task\n"
         "\n"
@@ -44,11 +44,11 @@ def test_merge_session_preserves_new_blockers() -> None:
 
 def test_merge_session_preserves_new_tasks() -> None:
     """Tasks from theirs not in ours are added to merged output."""
-    ours = "# Session: Test\n\n## Pending Tasks\n\n- [ ] **Task A** — existing task\n"
+    ours = "# Session: Test\n\n## In-tree Tasks\n\n- [ ] **Task A** — existing task\n"
     theirs = (
         "# Session: Branch\n"
         "\n"
-        "## Pending Tasks\n"
+        "## In-tree Tasks\n"
         "\n"
         "- [ ] **Task A** — existing task\n"
         "- [ ] **Task B** — new from branch\n"
@@ -63,7 +63,7 @@ def test_merge_session_preserves_tasks_and_blockers() -> None:
     ours = (
         "# Session: Test\n"
         "\n"
-        "## Pending Tasks\n"
+        "## In-tree Tasks\n"
         "\n"
         "- [ ] **Task A** — existing\n"
         "\n"
@@ -74,7 +74,7 @@ def test_merge_session_preserves_tasks_and_blockers() -> None:
     theirs = (
         "# Session: Branch\n"
         "\n"
-        "## Pending Tasks\n"
+        "## In-tree Tasks\n"
         "\n"
         "- [ ] **Task A** — existing\n"
         "- [ ] **Task C** — branch task\n"
@@ -93,11 +93,11 @@ def test_merge_session_preserves_tasks_and_blockers() -> None:
 
 def test_merge_session_no_blocker_section_in_ours() -> None:
     """When ours has no Blockers section, one is created from theirs."""
-    ours = "# Session: Test\n\n## Pending Tasks\n\n- [ ] **Task A** — existing\n"
+    ours = "# Session: Test\n\n## In-tree Tasks\n\n- [ ] **Task A** — existing\n"
     theirs = (
         "# Session: Branch\n"
         "\n"
-        "## Pending Tasks\n"
+        "## In-tree Tasks\n"
         "\n"
         "- [ ] **Task A** — existing\n"
         "\n"
@@ -136,7 +136,7 @@ def test_merge_conflict_preserves_branch_session_tasks(
     # Base: session.md with one task
     (repo / "agents").mkdir()
     base_session = (
-        "# Session: Test\n\n## Pending Tasks\n\n- [ ] **Task A** — shared task\n"
+        "# Session: Test\n\n## In-tree Tasks\n\n- [ ] **Task A** — shared task\n"
     )
     (repo / "agents" / "session.md").write_text(base_session)
     subprocess.run(["git", "add", "."], cwd=repo, check=True, capture_output=True)
@@ -154,7 +154,7 @@ def test_merge_conflict_preserves_branch_session_tasks(
     branch_session = (
         "# Session: Branch\n"
         "\n"
-        "## Pending Tasks\n"
+        "## In-tree Tasks\n"
         "\n"
         "- [ ] **Task A** — shared task\n"
         "- [ ] **Task B** — new from branch\n"
@@ -181,7 +181,7 @@ def test_merge_conflict_preserves_branch_session_tasks(
         "\n"
         "**Status:** Updated on main\n"
         "\n"
-        "## Pending Tasks\n"
+        "## In-tree Tasks\n"
         "\n"
         "- [ ] **Task A** — shared task\n"
     )
@@ -247,7 +247,7 @@ def test_resolve_session_md_with_slug_tags_blockers(
     base_session = (
         "# Session: Test\n"
         "\n"
-        "## Pending Tasks\n"
+        "## In-tree Tasks\n"
         "\n"
         "- [ ] **Task A** — shared task\n"
         "\n"
@@ -272,7 +272,7 @@ def test_resolve_session_md_with_slug_tags_blockers(
     branch_session = (
         "# Session: Branch\n"
         "\n"
-        "## Pending Tasks\n"
+        "## In-tree Tasks\n"
         "\n"
         "- [ ] **Task A** — shared task\n"
         "\n"
@@ -305,7 +305,7 @@ def test_resolve_session_md_with_slug_tags_blockers(
         "\n"
         "**Status:** Updated on main\n"
         "\n"
-        "## Pending Tasks\n"
+        "## In-tree Tasks\n"
         "\n"
         "- [ ] **Task A** — shared task\n"
         "\n"
@@ -349,6 +349,74 @@ def test_resolve_session_md_with_slug_tags_blockers(
     assert "- WT blocker 2 [from: test-wt]" in resolved
     assert "  WT detail 1" in resolved
     assert "  WT detail 2" in resolved
+
+
+def test_merge_session_worktree_tasks_additive() -> None:
+    """New task in Worktree Tasks from theirs is merged into ours' section."""
+    ours = (
+        "# Session: Test\n"
+        "\n"
+        "## In-tree Tasks\n"
+        "\n"
+        "- [ ] **Task A** — in-tree task\n"
+        "\n"
+        "## Worktree Tasks\n"
+        "\n"
+        "- [ ] **WT Task 1** → `wt1` — existing worktree task\n"
+    )
+    theirs = (
+        "# Session: Branch\n"
+        "\n"
+        "## In-tree Tasks\n"
+        "\n"
+        "- [ ] **Task A** — in-tree task\n"
+        "\n"
+        "## Worktree Tasks\n"
+        "\n"
+        "- [ ] **WT Task 1** → `wt1` — existing worktree task\n"
+        "- [ ] **WT Task 2** → `wt2` — new worktree task\n"
+    )
+    result = _merge_session_contents(ours, theirs)
+    assert "**WT Task 1**" in result
+    assert "**WT Task 2**" in result
+    # Verify both are in Worktree Tasks section
+    assert "## Worktree Tasks" in result
+    assert result.index("**WT Task 1**") < result.index("**WT Task 2**")
+
+
+def test_merge_session_both_sections_additive() -> None:
+    """New tasks in both sections are merged into their respective sections."""
+    ours = (
+        "# Session: Test\n"
+        "\n"
+        "## In-tree Tasks\n"
+        "\n"
+        "- [ ] **In-tree A** — existing in-tree\n"
+        "\n"
+        "## Worktree Tasks\n"
+        "\n"
+        "- [ ] **WT A** → `wt-a` — existing wt\n"
+    )
+    theirs = (
+        "# Session: Branch\n"
+        "\n"
+        "## In-tree Tasks\n"
+        "\n"
+        "- [ ] **In-tree A** — existing in-tree\n"
+        "- [ ] **In-tree B** — new in-tree\n"
+        "\n"
+        "## Worktree Tasks\n"
+        "\n"
+        "- [ ] **WT A** → `wt-a` — existing wt\n"
+        "- [ ] **WT B** → `wt-b` — new wt\n"
+    )
+    result = _merge_session_contents(ours, theirs)
+    # In-tree tasks
+    assert "**In-tree A**" in result
+    assert "**In-tree B**" in result
+    # Worktree tasks
+    assert "**WT A**" in result
+    assert "**WT B**" in result
 
 
 def test_resolve_session_md_fallback_outputs_to_stdout(

@@ -16,7 +16,7 @@ class TestStatusLineSquashStrategy:
             "\n"
             "**Status:** Main work in progress.\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — `/do-a` | sonnet\n"
         )
@@ -25,7 +25,7 @@ class TestStatusLineSquashStrategy:
             "\n"
             "**Status:** Worktree work happening.\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — `/do-a` | sonnet\n"
         )
@@ -49,7 +49,7 @@ class TestCompletedThisSessionSquashStrategy:
             "- Main item 1\n"
             "- Main item 2\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — cmd | sonnet\n"
         )
@@ -60,7 +60,7 @@ class TestCompletedThisSessionSquashStrategy:
             "\n"
             "- Worktree item 1\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — cmd | sonnet\n"
         )
@@ -71,14 +71,14 @@ class TestCompletedThisSessionSquashStrategy:
 
 
 class TestPendingTasksAdditiveStrategy:
-    """Cycle 5.4: Pending Tasks uses additive union by task name."""
+    """Cycle 5.4: In-tree Tasks uses additive union by task name."""
 
     def test_pending_tasks_additive_strategy(self) -> None:
         """Union by task name, no duplicates."""
         ours = (
             "# Session Handoff: 2026-02-16\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — `/do-a` | sonnet\n"
             "- [ ] **Task B** — `/do-b` | sonnet\n"
@@ -86,7 +86,7 @@ class TestPendingTasksAdditiveStrategy:
         theirs = (
             "# Session Handoff: 2026-02-15\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task B** — `/do-b` | sonnet\n"
             "- [ ] **Task C** — `/do-c` | haiku\n"
@@ -128,7 +128,7 @@ class TestKeepOursStrategies:
         ours = (
             "# Session Handoff: 2026-02-16\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — cmd | sonnet\n"
             "\n"
@@ -139,7 +139,7 @@ class TestKeepOursStrategies:
         theirs = (
             "# Session Handoff: 2026-02-15\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — cmd | sonnet\n"
             "\n"
@@ -180,7 +180,7 @@ class TestExtractBlockersFunction:
 
     def test_no_blockers_section(self) -> None:
         """Missing Blockers section returns empty list."""
-        content = "# Session\n\n## Pending Tasks\n\n- [ ] **Task** — cmd\n"
+        content = "# Session\n\n## In-tree Tasks\n\n- [ ] **Task** — cmd\n"
         result = extract_blockers(content)
         assert result == []
 
@@ -211,7 +211,7 @@ class TestBlockersEvaluateStrategy:
         ours = (
             "# Session Handoff: 2026-02-16\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — cmd | sonnet\n"
             "\n"
@@ -223,7 +223,7 @@ class TestBlockersEvaluateStrategy:
         theirs = (
             "# Session Handoff: 2026-02-15\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — cmd | sonnet\n"
             "\n"
@@ -247,14 +247,14 @@ class TestBlockersEvaluateStrategy:
         ours = (
             "# Session Handoff: 2026-02-16\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — cmd | sonnet\n"
         )
         theirs = (
             "# Session Handoff: 2026-02-15\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — cmd | sonnet\n"
             "\n"
@@ -282,7 +282,7 @@ class TestFullSessionMdMergeIntegration:
             "- Main completed item 1\n"
             "- Main completed item 2\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task A** — `/do-a` | sonnet\n"
             "- [ ] **Task B** — `/do-b` | haiku\n"
@@ -313,7 +313,7 @@ class TestFullSessionMdMergeIntegration:
             "\n"
             "- Worktree completed item\n"
             "\n"
-            "## Pending Tasks\n"
+            "## In-tree Tasks\n"
             "\n"
             "- [ ] **Task B** — `/do-b` | haiku\n"
             "- [ ] **Task C** — `/do-c` | opus\n"
@@ -351,15 +351,15 @@ class TestFullSessionMdMergeIntegration:
         assert "Main completed item 2" in result
         assert "Worktree completed item" not in result
 
-        # Pending Tasks: union (A, B, C — no duplicate B)
+        # In-tree Tasks: union (A, B, C — no duplicate B)
         assert "**Task A**" in result
         assert "**Task B**" in result
         assert "**Task C**" in result
         assert result.count("**Task B**") == 1
 
-        # Worktree Tasks: ours preserved, theirs discarded
+        # Worktree Tasks: additive (union by task name)
         assert "**WT Task**" in result
-        assert "**WT Other**" not in result
+        assert "**WT Other**" in result
 
         # Blockers: ours preserved, theirs appended with tag
         assert "- Main blocker" in result
