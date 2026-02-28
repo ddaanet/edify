@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-28
 
-**Status:** Requirements captured for recall CLI integration. Two-mode resolve (artifact/argument) designed from discussion.
+**Status:** Requirements refined for recall CLI integration. FR-1/FR-2 strengthened, C-2/C-4 updated, Q-1 resolved.
 
 ## Completed This Session
 
@@ -12,14 +12,19 @@
   - Rejected stdin piping (`git show | _recall resolve -`) — not a real use case, worktrees have artifact locally at creation
   - Updated dependencies: recall-null delivered, resolver handles null natively
   - Artifacts: `plans/recall-cli-integration/requirements.md`, `plans/recall-cli-integration/recall-artifact.md`
+- **Requirements refinement** — discussion-driven updates to FR-1, FR-2, C-2, C-4, Q-1
+  - FR-1: strengthened from existence check to structural validation (`## Entry Keys` section with parseable entries)
+  - FR-2: section-keyed parsing (terminal `## Entry Keys` to EOF), optional annotation (bare triggers for sub-agent flat-list format)
+  - C-2: changed from `Path.cwd()` to `CLAUDE_PROJECT_DIR` with `.` fallback (matches `when/cli.py:84`)
+  - C-4: new constraint — `## Entry Keys` must be terminal section (simplifies parser)
+  - Q-1: resolved — delete prototypes as part of deliverable, update referencing docs in same change
 
 ## Pending Tasks
 
 - [ ] **Recall CLI integration** — `/design plans/recall-cli-integration/requirements.md` | sonnet
   - Plan: recall-cli-integration | Status: requirements
-  - 5 FRs: check, resolve (two-mode), diff, Click group registration, LLM-native output
-  - Prototype scripts (`agent-core/bin/recall-{check,resolve,diff}.sh`) define behavioral spec
-  - Q-1 open: delete prototype scripts after CLI ships?
+  - 5 FRs, 4 constraints, 0 open questions
+  - Prototype scripts (`agent-core/bin/recall-{check,resolve,diff}.sh`) define behavioral spec — deletion part of deliverable
 
 ## Next Steps
 

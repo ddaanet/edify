@@ -7,13 +7,15 @@ Production `claudeutils _recall` CLI replacing the three prototype shell scripts
 ### Functional Requirements
 
 **FR-1: `_recall check <job-name>`**
-Validates that `plans/<job>/recall-artifact.md` exists and is non-empty. Exit 0 on success. Exit 1 with diagnostic on failure (missing file, empty file). Replaces `agent-core/bin/recall-check.sh`.
+Validates that `plans/<job>/recall-artifact.md` is a structurally valid recall artifact. Existence alone is insufficient — the artifact must contain a `## Entry Keys` section with at least one parseable entry. The null entry (`null — no relevant entries found`) satisfies minimum validity. Replaces `agent-core/bin/recall-check.sh`.
 
 Acceptance criteria:
-- Exit 0 when artifact exists and has content
+- Exit 0 when artifact has `## Entry Keys` section with at least one parseable line
 - Exit 1 + "recall-artifact.md missing for <job>" when file absent
-- Exit 1 + "recall-artifact.md empty for <job>" when file exists but empty
-- Operates relative to project root (cwd)
+- Exit 1 + "recall-artifact.md has no Entry Keys section for <job>" when section missing
+- Exit 1 + "recall-artifact.md has no entries for <job>" when section exists but empty
+- Null entry counts as valid (parseable, resolver handles silently)
+- Operates relative to project root
 
 **FR-2: `_recall resolve` — two modes**
 Resolves recall triggers via `claudeutils.when.resolver.resolve()`. Outputs resolved content to stdout with `---` separators. Two invocation modes with different error semantics.
@@ -22,10 +24,12 @@ Resolves recall triggers via `claudeutils.when.resolver.resolve()`. Outputs reso
 Reads recall artifact reference manifest file. Every entry was curated — resolution failure means broken artifact. Replaces `agent-core/bin/recall-resolve.sh`.
 
 Acceptance criteria:
-- Parses manifest lines: `<trigger> — <annotation>` format
-- Strips annotation, preserves trigger
+- Parses only the `## Entry Keys` section (terminal section — read from section header to EOF)
+- All content above `## Entry Keys` (title, preamble prose, metadata) is structurally excluded
+- Entry lines: `<trigger> — <annotation>` or bare `<trigger>` (annotation optional, supports sub-agent flat-list format)
+- When annotation present: strips on first `—` separator, left side is trigger
 - Detects operator prefix: lines starting with "when"/"how" used as-is, others get "when" prepended
-- Skips blank lines, comment lines (`#` prefix), and markdown headers (`##` prefix)
+- Skips blank lines and comment lines (`#` prefix) within the section
 - Null entries (`null — no relevant entries found`) pass through to resolver which handles them silently (delivered: recall-null). Not counted as resolution failures
 - Deduplicates resolved content (same entry referenced twice → output once)
 - Exit 0 on success (including empty manifest / all-null)
@@ -81,11 +85,14 @@ Acceptance criteria:
 **C-1: Reuse when/resolver**
 `_recall resolve` delegates to `claudeutils.when.resolver.resolve()`. No independent resolution implementation. Rationale: when/resolver is the canonical resolution engine; duplication creates divergence risk.
 
-**C-2: Path derivation from cwd**
-`check` and `diff` derive `plans/<job>/recall-artifact.md` from cwd + job name. `resolve` artifact mode takes an explicit file path; argument mode takes trigger strings. Matches existing CLI pattern (`Path.cwd()` for project directory).
+**C-2: Project root via `CLAUDE_PROJECT_DIR`**
+`check` and `diff` derive `plans/<job>/recall-artifact.md` from project root + job name. `resolve` artifact mode takes an explicit file path; argument mode takes trigger strings. Project root: `Path(os.getenv("CLAUDE_PROJECT_DIR", "."))` — matches `when/cli.py:84`, the resolver `_recall` delegates to.
 
 **C-3: No project-specific hardcoded paths**
 Module code must not hardcode `agents/memory-index.md` or `agents/decisions/` paths. These are resolved via the when/resolver's existing path resolution, or passed as arguments.
+
+**C-4: `## Entry Keys` is terminal section**
+Recall artifacts must have `## Entry Keys` as the final section. Parser reads from section header to EOF — no closing boundary detection needed. Preamble (title, description, future metadata sections) lives above. Simplifies both `check` (section exists + has content) and `resolve` (parse to EOF).
 
 ### Out of Scope
 
@@ -101,9 +108,9 @@ Module code must not hardcode `agents/memory-index.md` or `agents/decisions/` pa
 - `claudeutils.when.resolver.resolve()` — importable and stable, includes null mode (recall-null delivered). Tested in `test_when_resolver*.py`, `test_when_null.py`
 - Prototype scripts — `agent-core/bin/recall-{check,resolve,diff}.sh` define behavioral spec
 
-### Open Questions
+### Resolved Questions
 
-- Q-1: After production CLI ships, should the prototype shell scripts be deleted? (Likely yes — code removal principle — but confirm timing relative to skill D+B restructure references)
+- Q-1: Delete prototype scripts after CLI ships? **Yes.** Deliverable includes deleting `agent-core/bin/recall-{check,resolve,diff}.sh` and updating referencing skills/docs in same change. Code removal principle; git history preserves originals.
 
 ### References
 
