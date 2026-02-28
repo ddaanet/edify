@@ -22,6 +22,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 
 
 
+
 ## agents/decisions/cli.md
 
 /when getting current working directory
@@ -96,6 +97,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when hook fragment alignment needed | recency primacy contradict reinforce
 /when prompt caching differs from file caching | read appends API prefix
 /when sub-agent rules not injected | rules fire main only domain context
+/when hook commands use relative paths | cwd drift non-blocking error CLAUDE_PROJECT_DIR absolute
 /when writing hook redirect messages | rationale why not just what agent adherence
 /when mapping hook output channel audiences | additionalContext systemMessage permissionDecisionReason stderr
 /when writing hook user-visible messages | terminal constraint 60 chars tier injection

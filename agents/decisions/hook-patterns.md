@@ -78,6 +78,18 @@ Claude Code hook configuration, output channels, session mechanics, and sub-agen
 
 **Consequence:** Domain context must be carried explicitly — planner writes it into runbook, orchestrator passes through task prompt.
 
+### When Hook Commands Use Relative Paths
+
+**Decision Date:** 2026-02-28
+
+**Anti-pattern:** Hook command in settings.json uses relative path (`.claude/hooks/submodule-safety.py`). After agent cwd drifts (e.g., `cd subdir && ...`), the relative path resolves against the new cwd — hook script not found. Hook errors are non-blocking in Claude Code, so the guarded command proceeds without the hook.
+
+**Irony:** The submodule-safety hook (designed to block cwd drift) was itself disabled by cwd drift.
+
+**Correct pattern:** All hook commands must use `$CLAUDE_PROJECT_DIR/` prefix for absolute resolution. Claude Code sets this env var to the project root regardless of cwd.
+
+**Evidence:** Agent ran 4+ bash commands from `agent-core/` subdirectory without the submodule-safety hook blocking. Hook errors visible on `git submodule status` confirmed the hook script wasn't found.
+
 ## .Hook Implementation Patterns
 
 ### When Writing Hook Redirect Messages

@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-28
 
-**Status:** Recall-null delivered. Null mode in when-resolve.py (TDD), D+B gate anchoring propagated to 4 pipeline skills, null artifact format added. Corrector: 0C/0M/2m fixed. Deliverable review pending.
+**Status:** Hook cwd-drift bypass diagnosed and fixed. Supercession passes complete (recall-null + hook fix). Recall-null deliverable review still pending.
 
 ## Completed This Session
 
@@ -29,6 +29,13 @@
   - Null artifact format: explicit `null — no relevant entries found` entry in /requirements and /design artifact format blocks
   - Corrector: 0C/0M/2m — Tier 2 parenthetical consistency, fragile test assertion. Both fixed. Report: `plans/recall-null/reports/review.md`
   - Triage feedback: no-classification (no divergence)
+- **Hook cwd-drift bypass** — diagnosed and fixed
+  - Root cause: `.claude/hooks/submodule-safety.py` used relative path in settings.json. After cwd drift (`cd agent-core && ...`), hook file not found → hook errors are non-blocking → guard silently disabled
+  - Fix: prefixed 4 relative hook paths with `$CLAUDE_PROJECT_DIR/` (submodule-safety ×2, block-tmp, symlink-redirect, recall-check)
+  - New decision: "When Hook Commands Use Relative Paths" in hook-patterns.md + memory-index entry
+- **Supercession passes** — recall-null + hook fix
+  - Recall-null: updated "When Selecting Gate Anchor Tools" (null mode now delivered, not proposed). 6 other entries checked — describe patterns recall-null conforms to, no supersession
+  - Hook fix: new decision entry, no existing entries superseded
 
 ## Pending Tasks
 
@@ -67,6 +74,7 @@
 - [ ] **Generate memory index** — `/design` | opus
   - Each decision/learning declares keywords for index. Index generated from declarations. Diff displayed after update for agent review. Supersedes manual append workflow in `/codify` step 4a.
 - [x] **Runbook post-explore gate** — absorbed into recall-null delivery (outline item 2.4)
+- [ ] **Delivery supercession** — `d:` memory-index pass at plan delivery for supercession | opus
 - [ ] **Stale recall artifact** — diagnose /design producing old-style recall artifact instead of memory key list | sonnet
 - [ ] **Recall deduplication** — integrate session context scraping into `when-resolve.py` to filter already-loaded entries | sonnet
   - Session scraper prototype: `plans/prototypes/session-scraper.py`
@@ -105,6 +113,8 @@
   - Audit skills for cold-start gaps; retrofit where beneficial
   - Follow-on after /inline delivery
 - [ ] **Prose gate terminology** — Find proper name for D+B pattern, ground, update docs | opus
+- [ ] **Memory-index loading docs** — update references claiming memory-index is @-ref from CLAUDE.md | sonnet
+- [ ] **Decision drift audit** — audit decision files and learnings.md for stale operational assumptions (e.g., `uv run` references when sandbox-denied) | sonnet
 
 ### Tier 3: Workflow non-prose
 
@@ -135,6 +145,7 @@
 - [ ] **Continuation prepend** — `/design plans/continuation-prepend/problem.md` | sonnet
 - [ ] **Runbook outline review** — update runbook skill: user review gate after outline correction, iterative fix cycle until approved | sonnet
 - [ ] **Review auto-commit** — after fixing all issues in deliverable-review, auto handoff and commit | sonnet
+- [ ] **Block cd-chaining in bash** — PreToolUse hook to block `cd * && *` and `cd *; *`, recommend `git -C` or subshell | sonnet
 - [ ] **Model directive pipeline** — Model guidance design → runbook → execution | opus
 
 ### Tier 4: Rest
@@ -253,7 +264,7 @@
 
 ## Next Steps
 
-Recall-null delivered. Next: **Deliverable review: recall-null** — `/deliverable-review plans/recall-null` (opus, restart).
+Hook fix committed. Restart required (settings.json hook paths changed). Next: **Deliverable review: recall-null** — `/deliverable-review plans/recall-null` (opus, restart).
 
 ## Reference Files
 

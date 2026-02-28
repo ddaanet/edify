@@ -67,11 +67,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/pretooluse-block-tmp.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pretooluse-block-tmp.sh"
           },
           {
             "type": "command",
-            "command": ".claude/hooks/pretooluse-symlink-redirect.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/pretooluse-symlink-redirect.sh"
           }
         ]
       },
@@ -80,7 +80,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/submodule-safety.py"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/submodule-safety.py"
           },
           {
             "type": "command",
@@ -93,7 +93,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "agent-core/hooks/pretooluse-recall-check.py"
+            "command": "$CLAUDE_PROJECT_DIR/agent-core/hooks/pretooluse-recall-check.py"
           }
         ]
       }
@@ -104,7 +104,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/submodule-safety.py"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/submodule-safety.py"
           }
         ]
       },
