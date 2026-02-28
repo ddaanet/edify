@@ -119,6 +119,11 @@
   - Move continuation registry cache from TMPDIR to project-local tmp/
 - [ ] **Block cd-chaining in bash** — PreToolUse hook to block `cd * && *` and `cd *; *`, recommend `git -C` or subshell | sonnet
 - [ ] **Model directive pipeline** — Model guidance design → runbook → execution | opus
+- [ ] **Design context gate** — `/design plans/design-context-gate/brief.md` | sonnet
+  - Plan: design-context-gate | Status: brief
+  - /design tail-call /inline only when context budget allows, otherwise handoff+commit
+  - Mechanism: UPS hook injects context percentage from statusline infrastructure
+  - Threshold needs empirical calibration (no confabulated number)
 
 ### Tier 4: Rest
 
@@ -212,6 +217,8 @@
   - Scope: `session.py`, `resolve.py`, `aggregation.py`, `session_structure.py`, handoff skill, execute-rule.md
 
 - [ ] **Continuation prepend** → `continuation-prepend` — `/design plans/continuation-prepend/problem.md` | sonnet
+
+- [ ] **Deliverable review: runbook-recall-expansion** → `runbook-recall-expansion` — `/deliverable-review plans/runbook-recall-expansion` | opus | restart
 
 ## Blockers / Gotchas
 
