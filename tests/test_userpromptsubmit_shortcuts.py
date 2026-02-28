@@ -350,6 +350,21 @@ class TestExecuteCommandInjection:
         assert "failed-thing" not in ctx
         assert "canceled-thing" not in ctx
 
+    def test_x_prefers_in_progress_task(self, tmp_path: Any, monkeypatch: Any) -> None:
+        """X extracts in-progress [>] task command over pending [ ] task."""
+        session_dir = tmp_path / "agents"
+        session_dir.mkdir()
+        (session_dir / "session.md").write_text(
+            "## Pending Tasks\n\n"
+            "- [>] **Resumable task** — `/orchestrate my-job` | sonnet\n"
+            "- [ ] **Next pending** — `/design other-thing` | sonnet\n"
+        )
+        monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+        result = call_hook("x")
+        ctx = result["hookSpecificOutput"]["additionalContext"]
+        assert "Invoke: /orchestrate my-job" in ctx
+        assert "other-thing" not in ctx
+
 
 class TestFeatureCombinations:
     """Test pairwise and triple feature combinations (FR-7)."""
