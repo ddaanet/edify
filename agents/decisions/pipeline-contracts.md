@@ -329,7 +329,7 @@ Inline phases in orchestrator-plan.md use `Execution: inline` (vs `Execution: st
 
 **Anti-pattern:** Reading recall-artifact.md summaries (titles + 2-line descriptions) as terminal recall step. After `/clear`, summaries alone miss behavioral nuance that delegation prompts need verbatim.
 
-**Correct pattern:** Read artifact to identify WHICH decisions matter, then batch-resolve via `when-resolve.py "when <trigger>" ...` to load WHAT they say (full decision section content). Both steps required in new sessions.
+**Correct pattern:** Read artifact to identify WHICH decisions matter, then batch-resolve via `claudeutils _recall resolve "when <trigger>" ...` to load WHAT they say (full decision section content). Both steps required in new sessions.
 
 **Evidence:** /reflect RCA identified the root cause.
 

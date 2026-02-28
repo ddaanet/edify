@@ -164,7 +164,7 @@ Do not provide summary, explanation, or commentary in return message. Do not pro
 
 **Project Paths:**
 - Validation: `src/claudeutils/validation/learnings.py`, `tests/test_validation_learnings.py`
-- CLI: `src/claudeutils/when/cli.py`, `tests/test_when_cli.py`, `agent-core/bin/when-resolve.py`
+- CLI: `src/claudeutils/when/cli.py`, `tests/test_when_cli.py`, `claudeutils _recall resolve`
 - Resolver: `src/claudeutils/when/resolver.py` (signature unchanged)
 - Remember skill: `agent-core/skills/codify/SKILL.md`
 - Consolidation patterns: `agent-core/skills/codify/references/consolidation-patterns.md`

@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-28
 
-**Status:** Merged recall-cli-integration and userpromptsubmit-topic worktrees. Test ordering dep in `test_merge_learnings_segment_diff3_prevents_orphans` — non-reproducible, recorded for reoccurrence. Discussion: dev integration branch for async merge issue resolution.
+**Status:** Recall skill path fix applied (15 active files), post-merge reprioritization scored (71 tasks, 19 new/rescored). Recall CLI path now `claudeutils _recall resolve` across all skills/agents/decisions.
 
 ## Completed This Session
 
@@ -14,6 +14,16 @@
   - New pending tasks from branch (Calibrate topic params, Fix planstate detector, Registry cache to tmp, UPS topic injection)
   - Precommit failure: `test_merge_learnings_segment_diff3_prevents_orphans` — non-reproducible (passes in isolation and full suite post-merge), recorded as ordering dep bug for reoccurrence
 - **Post-merge validation** — both merges validated for session.md and learnings.md completeness
+- **Recall skill path fix** — updated `agent-core/bin/when-resolve.py` → `claudeutils _recall resolve` across 15 active files
+  - Skills: recall, when, how, design, runbook, inline, orchestrate, deliverable-review, review-plan, reflect, requirements, memory-index
+  - Agents: runbook-outline-corrector, outline-corrector, design-corrector
+  - References: corrector-template.md, tier3-planning-process.md
+  - Decision files: defense-in-depth.md, workflow-advanced.md, orchestration-execution.md, pipeline-contracts.md, project-config.md
+  - Remaining ~50 references in plans/, reports/, learnings — historical records, consolidation task scope
+- **Post-merge reprioritization** — scored 71 tasks (19 new/rescored), 6 removed (3 delivered, 3 absorbed)
+  - Report: `plans/reports/prioritization-2026-02-28.md`
+  - Key movements: UPS topic injection 2.4→3.2 (ME drop, infrastructure delivered), Fix planstate detector new at 2.6, Execute flag lint new at 3.0
+  - Scoring arithmetic via `tmp/score.py` (tool-assisted, not mental math)
 
 ## Pending Tasks
 
@@ -29,7 +39,7 @@
   - Absorbs: Stale recall artifact — diagnose /design producing old-style recall artifact instead of memory key list
 - [ ] **Artifact staleness gate** — sonnet
   - Mechanical checkpoint at /requirements, /design, /runbook exit points
-  - `when-resolve.py` touches sentinel; skill compares sentinel mtime to recall-artifact.md AND primary skill artifact (requirements.md, outline.md, design.md, runbook.md)
+  - `claudeutils _recall resolve` touches sentinel; skill compares sentinel mtime to recall-artifact.md AND primary skill artifact (requirements.md, outline.md, design.md, runbook.md)
   - If recall newer than either artifact, trigger update step
   - Two drift vectors: stale recall-artifact (entries loaded not persisted) and stale skill artifacts (decisions loaded after artifact written)
 - [ ] **Recall usage scoring** — Post-resolve relevance scoring at skill transitions (/design exit, /runbook exit, /inline exit) | sonnet
@@ -39,13 +49,13 @@
 - [ ] **Generate memory index** — `/design` | opus
   - Each decision/learning declares keywords for index. Index generated from declarations. Diff displayed after update for agent review. Supersedes manual append workflow in `/codify` step 4a.
 - [ ] **Delivery supercession** — `d:` memory-index pass at plan delivery for supercession | opus
-- [ ] **Recall deduplication** — integrate session context scraping into `when-resolve.py` to filter already-loaded entries | sonnet
+- [ ] **Recall deduplication** — integrate session context scraping into `claudeutils _recall resolve` to filter already-loaded entries | sonnet
   - Session scraper prototype: `plans/prototypes/session-scraper.py`
   - Dedup should be opt-in (`--new-only` flag or `null` mode), not default — explicit queries may resolve for sub-agent prompts
 - [ ] **Recall pipeline** — `d:` recall-artifact stdin format parsing, session log dedup | opus
   - Stdin support delivered (basic). Remaining: parse recall-artifact format on stdin (strip post-"|" keywords, post-"—" relevance notes)
   - Session log scraping to auto-eliminate already-recalled entries
-- [ ] **Recall learnings design** — `d:` whether learnings.md entries should be resolvable via when-resolve.py | opus
+- [ ] **Recall learnings design** — `d:` whether learnings.md entries should be resolvable via `claudeutils _recall resolve` | opus
   - Implies memory-index format changes (new source type), resolver changes — genuine design uncertainty
 - [ ] **Lint-gated recall** — PostToolUse hook: inject memory-index on first lint/precommit red after green (state-transition gated) | sonnet
 - [ ] **Lint recall gate** — PreToolUse recall pass before lint fix attempt; depends on when-resolve null mode | sonnet
@@ -268,7 +278,7 @@
 - Root cause unknown — not CWD pollution (test uses monkeypatch.chdir), not UPS tests (verified), not worktree presence
 ## Next Steps
 
-No worktrees active. Userpromptsubmit-topic worktree still registered (merged, needs `_worktree rm`). Next in-tree: Runbook recall expansion (`/design plans/runbook-recall-expansion/requirements.md`).
+No worktrees active. Userpromptsubmit-topic worktree still registered (merged, needs `_worktree rm`). Per reprioritization: UPS topic injection (`/runbook plans/userpromptsubmit-topic/outline.md`) or Fix planstate detector (`/design plans/fix-planstate-detector/requirements.md`).
 
 ## Reference Files
 
@@ -277,7 +287,7 @@ No worktrees active. Userpromptsubmit-topic worktree still registered (merged, n
 - `plans/handoff-cli-tool/outline.md` — Session CLI combined outline (reviewed 6 rounds)
 - `plans/codebase-sweep/requirements.md` — mechanical refactoring (_git_ok, _fail, exceptions)
 - `agents/decisions/cli.md` — LLM-native output decision (from session-cli-tool)
-- `plans/reports/prioritization-2026-02-27.md` — WSJF scoring, 61 tasks ranked (supersedes 2026-02-24)
+- `plans/reports/prioritization-2026-02-28.md` — WSJF scoring, 71 tasks ranked (supersedes 2026-02-27)
 - `plans/task-classification/outline.md` — `/prime` skill + two-section task list design
 - `plans/runbook-recall-expansion/requirements.md` — Step agent + corrector recall during full orchestration (7 FRs)
 - `plans/skill-progressive-disclosure/brief.md` — Segment loading at gate boundaries (/design and /runbook)

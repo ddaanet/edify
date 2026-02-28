@@ -369,7 +369,7 @@ FR-17 documents the three-tier escalation requirement. Concrete detection mechan
 
 **Correct pattern:** Piecemeal — one cycle per invocation. Resume the same agent for subsequent cycles (preserves accumulated context). Fresh agent if context nears 150k.
 
-**Context priming:** Sub-agents don't share parent context. Each NEW agent must self-prime by running `when-resolve.py` on relevant recall-artifact entries. Resumed agents already have this context.
+**Context priming:** Sub-agents don't share parent context. Each NEW agent must self-prime by running `claudeutils _recall resolve` on relevant recall-artifact entries. Resumed agents already have this context.
 
 ### When Implementation Modifies Pipeline Skills
 

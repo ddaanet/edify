@@ -132,7 +132,7 @@ When designing a new quality gate or quality process:
 
 **Anti-pattern:** "Read X (skip if already in context)" as a gate. Agent rationalizes the skip condition without verifying — substitutes related activity for the required Read. The escape hatch IS the failure mode.
 
-**Correct pattern:** Anchor with a tool call that proves work happened. `when-resolve.py` is the canonical gate anchor: it's a Bash call (unskippable), requires trigger knowledge (forces prior Read of memory-index), and produces output (proves resolution). One tool-call anchor is sufficient — passphrase/proof-of-Read mechanisms are redundant when the resolution tool proves both.
+**Correct pattern:** Anchor with a tool call that proves work happened. `claudeutils _recall resolve` is the canonical gate anchor: it's a Bash call (unskippable), requires trigger knowledge (forces prior Read of memory-index), and produces output (proves resolution). One tool-call anchor is sufficient — passphrase/proof-of-Read mechanisms are redundant when the resolution tool proves both.
 
 ### When Selecting Gate Anchor Tools
 
@@ -140,7 +140,7 @@ When designing a new quality gate or quality process:
 
 **Anti-pattern:** Using a tool because it's "related" to the gate's domain without checking its preconditions match the gate's execution context. `_recall diff` uses `git log --since=mtime` — requires intervening commits. At a post-explore gate, exploration reports are uncommitted; the script finds nothing.
 
-**Correct pattern:** Verify the tool's mechanism matches the gate's runtime state. The right anchor is the tool called on the positive path (`when-resolve.py`). Null mode (`when-resolve.py null`) provides the negative path at equal cost — silent exit 0, no output, proves gate was reached.
+**Correct pattern:** Verify the tool's mechanism matches the gate's runtime state. The right anchor is the tool called on the positive path (`claudeutils _recall resolve`). Null mode (`claudeutils _recall resolve null`) provides the negative path at equal cost — silent exit 0, no output, proves gate was reached.
 
 ### When Gates Bypass Downstream Pipeline Stages
 
