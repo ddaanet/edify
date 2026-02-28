@@ -22,7 +22,7 @@ def _fail(msg: str, code: int = 1) -> NoReturn:
     raise SystemExit(code)
 
 
-@click.group(name="_recall")
+@click.group(name="_recall", hidden=True)
 def recall_cmd() -> None:
     """Manage artifact operations (hidden)."""
 
@@ -96,7 +96,7 @@ def resolve_cmd(args: tuple[str, ...]) -> None:
     OUTPUT: Resolved content separated by ---, exit 0 on success.
     """
     project_root = Path(os.getenv("CLAUDE_PROJECT_DIR", "."))
-    index_path = str(project_root / ".claude" / "memory-index.json")
+    index_path = str(project_root / "agents" / "memory-index.md")
     decisions_dir = str(project_root / "agents" / "decisions")
 
     is_artifact_mode = bool(args and Path(args[0]).is_file())

@@ -138,7 +138,7 @@ When designing a new quality gate or quality process:
 
 **Decision Date:** 2026-02-26
 
-**Anti-pattern:** Using a tool because it's "related" to the gate's domain without checking its preconditions match the gate's execution context. `recall-diff.sh` uses `git log --since=mtime` — requires intervening commits. At a post-explore gate, exploration reports are uncommitted; the script finds nothing.
+**Anti-pattern:** Using a tool because it's "related" to the gate's domain without checking its preconditions match the gate's execution context. `_recall diff` uses `git log --since=mtime` — requires intervening commits. At a post-explore gate, exploration reports are uncommitted; the script finds nothing.
 
 **Correct pattern:** Verify the tool's mechanism matches the gate's runtime state. The right anchor is the tool called on the positive path (`when-resolve.py`). Null mode (`when-resolve.py null`) provides the negative path at equal cost — silent exit 0, no output, proves gate was reached.
 
