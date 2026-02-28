@@ -328,6 +328,28 @@ class TestExecuteCommandInjection:
         ctx = result["hookSpecificOutput"]["additionalContext"]
         assert "Invoke: /design my-requirements" in ctx
 
+    def test_x_skips_non_eligible_tasks(self, tmp_path: Any, monkeypatch: Any) -> None:
+        """X skips completed, blocked, failed, and canceled tasks."""
+        session_dir = tmp_path / "agents"
+        session_dir.mkdir()
+        (session_dir / "session.md").write_text(
+            "## Pending Tasks\n\n"
+            "- [x] **Done task** — `/commit` | sonnet\n"
+            "- [!] **Blocked task** — `/orchestrate blocked-job` | sonnet\n"
+            "- [✗] **Failed task** — `/design failed-thing` | opus\n"
+            "- [-] **Canceled task** — `/runbook canceled-thing` | sonnet\n"
+            "- [ ] **Actual pending** — `/runbook actual-work` | sonnet\n"
+        )
+        monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+        result = call_hook("x")
+        ctx = result["hookSpecificOutput"]["additionalContext"]
+        assert "Invoke: /runbook actual-work" in ctx
+        # Must NOT inject commands from non-eligible tasks
+        assert "/commit" not in ctx.split("Invoke:")[-1]
+        assert "blocked-job" not in ctx
+        assert "failed-thing" not in ctx
+        assert "canceled-thing" not in ctx
+
 
 class TestFeatureCombinations:
     """Test pairwise and triple feature combinations (FR-7)."""
