@@ -24,7 +24,7 @@ def test_new_task_mode_adds_slug_marker(
     session_file.parent.mkdir(parents=True, exist_ok=True)
     session_content = """# Session Handoff
 
-## Pending Tasks
+## In-tree Tasks
 
 - [ ] **Fix bug Y** — `/design` | haiku
 
@@ -42,7 +42,7 @@ def test_new_task_mode_adds_slug_marker(
     assert result.exit_code == 0
 
     updated_session = session_file.read_text()
-    assert "## Pending Tasks" in updated_session
+    assert "## In-tree Tasks" in updated_session
     assert "- [ ] **Fix bug Y** — `/design` | haiku" in updated_session
     assert "## Worktree Tasks" in updated_session
     assert "→ `implement-feature-x`" in updated_session
@@ -65,7 +65,7 @@ def test_rm_removes_slug_marker(
     session_file.parent.mkdir(parents=True, exist_ok=True)
     session_content = """# Session Handoff
 
-## Pending Tasks
+## In-tree Tasks
 
 - [ ] **Other task** — `/runbook` | sonnet
 
@@ -134,7 +134,7 @@ def test_rm_e2e_slug_marker_removal(
     session_file.parent.mkdir(parents=True, exist_ok=True)
     session_content = """# Session Handoff
 
-## Pending Tasks
+## In-tree Tasks
 
 - [ ] **Other task** — `/design` | sonnet
 

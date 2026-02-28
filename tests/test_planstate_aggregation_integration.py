@@ -41,11 +41,11 @@ def test_task_summary_extraction(tmp_path: Path) -> None:
 
     _init_git_repo(repo_str)
 
-    # Create session.md with Pending Tasks section
+    # Create session.md with In-tree Tasks section
     session_dir = repo_path / "agents"
     session_dir.mkdir(parents=True, exist_ok=True)
     session_file = session_dir / "session.md"
-    session_content = "# Session\n\n## Pending Tasks\n- [ ] **Fix bug** — description\n"
+    session_content = "# Session\n\n## In-tree Tasks\n- [ ] **Fix bug** — description\n"
     session_file.write_text(session_content)
     subprocess.run(
         ["git", "add", "agents/session.md"],
@@ -63,13 +63,13 @@ def test_task_summary_extraction(tmp_path: Path) -> None:
     result = _task_summary(repo_path)
     assert result == "Fix bug"
 
-    # No Pending Tasks section → None
+    # No In-tree Tasks section → None
     session_file.write_text("# Session\n\n## Other Section\n")
     result = _task_summary(repo_path)
     assert result is None
 
-    # Empty Pending Tasks → None
-    session_file.write_text("# Session\n\n## Pending Tasks\n")
+    # Empty In-tree Tasks → None
+    session_file.write_text("# Session\n\n## In-tree Tasks\n")
     result = _task_summary(repo_path)
     assert result is None
 

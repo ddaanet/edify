@@ -168,7 +168,7 @@ def _task_summary(tree_path: Path) -> str | None:
         return None
 
     content = session_path.read_text()
-    blocks = extract_task_blocks(content, section="Pending Tasks")
+    blocks = extract_task_blocks(content, section="In-tree Tasks")
 
     if not blocks:
         return None
