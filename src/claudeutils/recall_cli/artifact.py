@@ -2,11 +2,7 @@
 
 
 def parse_trigger(entry_line: str) -> str:
-    """Parse trigger string from entry line.
-
-    Strips annotation (text after em dash), then detects operator (when/how). If
-    entry lacks operator prefix, prepends "when".
-    """
+    """Strip annotation and normalize operator prefix for resolver lookup."""
     # Strip annotation: split on first ' — ' and take left side
     base = entry_line.split(" — ")[0].strip()
 
@@ -27,10 +23,8 @@ def parse_entry_keys_section(content: str) -> list[str] | None:
     """
     lines = content.split("\n")
 
-    heading_found = False
     for i, line in enumerate(lines):
         if line.strip() == "## Entry Keys":
-            heading_found = True
             # Start collecting from the next line
             entries = []
             for entry_line in lines[i + 1 :]:
@@ -39,4 +33,4 @@ def parse_entry_keys_section(content: str) -> list[str] | None:
                     entries.append(stripped)
             return entries if entries else []
 
-    return None if not heading_found else []
+    return None

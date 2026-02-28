@@ -1,1 +1,1 @@
-"""Recall artifact validation and resolution tool."""
+"""Recall artifact validation and resolution CLI."""

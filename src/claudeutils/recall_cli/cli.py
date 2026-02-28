@@ -4,7 +4,7 @@ import datetime
 import os
 import subprocess
 from pathlib import Path
-from typing import NoReturn
+from typing import Never
 
 import click
 
@@ -13,7 +13,7 @@ from claudeutils.when.resolver import ResolveError, resolve
 from .artifact import parse_entry_keys_section, parse_trigger
 
 
-def _fail(msg: str, code: int = 1) -> NoReturn:
+def _fail(msg: str, code: int = 1) -> Never:
     """Display message and exit with code.
 
     LLM-native: stdout, no framing.
