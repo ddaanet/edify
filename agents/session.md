@@ -53,6 +53,8 @@
   - Plan: recall-null | Status: delivered
   - Phase 1: null mode TDD (2 cycles, test-driver at sonnet). Phase 2: skill gate language (5 inline edits, opus direct)
   - Absorbs: when-resolve null mode + runbook post-explore gate
+- [ ] **Recall CLI integration** — `/design plans/recall-cli-integration/requirements.md` | sonnet
+  - Prototype delivered via recall-tool-anchoring worktree
 - [ ] **Runbook recall expansion** — `/design plans/runbook-recall-expansion/requirements.md` | sonnet
   - Plan: runbook-recall-expansion | Status: requirements
   - prepare-runbook.py recall injection, corrector.md self-loading, two-pattern docs (7 FRs)
@@ -212,9 +214,6 @@
   - Plan: parallel-orchestration | Blocked on: orchestrate-evolution
 
 ## Worktree Tasks
-
-- [ ] **Recall CLI integration** → `recall-cli-integration` — Production `claudeutils _recall` CLI (check/resolve/diff), Click, TDD | sonnet
-  - Prototype delivered via recall-tool-anchoring worktree
 
 - [ ] **UserPromptSubmit topic** → `userpromptsubmit-topic` — Phase 7 analysis recommends this as highest-impact recall improvement | sonnet
   - Seed keyword table from 200+ memory-index triggers
