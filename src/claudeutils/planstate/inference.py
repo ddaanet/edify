@@ -63,7 +63,10 @@ def _parse_lifecycle_status(plan_dir: Path) -> str | None:
 
 
 def _determine_status(plan_dir: Path) -> str:
-    """Status priority: lifecycle > ready > planned > designed > requirements."""
+    """Determine status from artifacts.
+
+    Priority: lifecycle > ready > planned > designed > outlined > requirements.
+    """
     # Check lifecycle.md first (post-ready states take priority)
     lifecycle_status = _parse_lifecycle_status(plan_dir)
     if lifecycle_status is not None:
@@ -76,11 +79,14 @@ def _determine_status(plan_dir: Path) -> str:
         return "planned"
     if (plan_dir / "design.md").exists():
         return "designed"
+    if (plan_dir / "outline.md").exists():
+        return "outlined"
     return "requirements"
 
 
 _NEXT_ACTION_TEMPLATES: dict[str, str | None] = {
     "requirements": "/design plans/{plan_name}/requirements.md",
+    "outlined": "/runbook plans/{plan_name}/outline.md",
     "designed": "/runbook plans/{plan_name}/design.md",
     "planned": "agent-core/bin/prepare-runbook.py plans/{plan_name}",
     "ready": "/orchestrate {plan_name}",
@@ -141,7 +147,7 @@ def infer_state(
     """Infer plan state from directory artifacts.
 
     Scans for recognized artifacts and returns PlanState or None if no artifacts
-    found. Status priority: ready > planned > designed > requirements
+    found. Status priority: ready > planned > designed > outlined > requirements
 
     Args:
         plan_dir: Path to the plan directory

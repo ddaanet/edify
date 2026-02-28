@@ -23,40 +23,44 @@ def test_empty_directory_not_a_plan(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    ("status", "create_artifacts", "expected_status", "expected_artifacts"),
+    ("create_artifacts", "expected_status", "expected_artifacts"),
     [
-        (
-            "requirements",
-            ["requirements.md"],
-            "requirements",
-            {"requirements.md"},
-        ),
-        (
-            "requirements_outline_only",
+        (["requirements.md"], "requirements", {"requirements.md"}),
+        pytest.param(
             ["outline.md"],
-            "requirements",
+            "outlined",
             {"outline.md"},
+            id="outlined-outline-only",
         ),
-        (
-            "requirements_problem_only",
+        pytest.param(
+            ["requirements.md", "outline.md"],
+            "outlined",
+            {"requirements.md", "outline.md"},
+            id="outlined-with-requirements",
+        ),
+        pytest.param(
             ["problem.md"],
             "requirements",
             {"problem.md"},
+            id="requirements-problem-only",
         ),
         (
-            "designed",
             ["requirements.md", "design.md"],
             "designed",
             {"requirements.md", "design.md"},
         ),
+        pytest.param(
+            ["requirements.md", "outline.md", "design.md"],
+            "designed",
+            {"requirements.md", "outline.md", "design.md"},
+            id="designed-with-outline",
+        ),
         (
-            "planned",
             ["design.md", "runbook-phase-1.md", "runbook-phase-2.md"],
             "planned",
             {"design.md", "runbook-phase-1.md", "runbook-phase-2.md"},
         ),
         (
-            "ready",
             ["design.md", "runbook-phase-1.md", "steps", "orchestrator-plan.md"],
             "ready",
             {"design.md", "runbook-phase-1.md", "steps", "orchestrator-plan.md"},
@@ -65,7 +69,6 @@ def test_empty_directory_not_a_plan(tmp_path: Path) -> None:
 )
 def test_status_priority_detection(
     tmp_path: Path,
-    status: str,
     create_artifacts: list[str],
     expected_status: str,
     expected_artifacts: set[str],
@@ -91,25 +94,16 @@ def test_status_priority_detection(
 
 
 @pytest.mark.parametrize(
-    ("status", "create_artifacts", "expected_next_action"),
+    ("create_artifacts", "expected_next_action"),
     [
+        (["requirements.md"], "/design plans/test-plan/requirements.md"),
+        (["requirements.md", "outline.md"], "/runbook plans/test-plan/outline.md"),
+        (["requirements.md", "design.md"], "/runbook plans/test-plan/design.md"),
         (
-            "requirements",
-            ["requirements.md"],
-            "/design plans/test-plan/requirements.md",
-        ),
-        (
-            "designed",
-            ["requirements.md", "design.md"],
-            "/runbook plans/test-plan/design.md",
-        ),
-        (
-            "planned",
             ["design.md", "runbook-phase-1.md", "runbook-phase-2.md"],
             "agent-core/bin/prepare-runbook.py plans/test-plan",
         ),
         (
-            "ready",
             ["design.md", "runbook-phase-1.md", "steps", "orchestrator-plan.md"],
             "/orchestrate test-plan",
         ),
@@ -117,7 +111,6 @@ def test_status_priority_detection(
 )
 def test_next_action_derivation(
     tmp_path: Path,
-    status: str,
     create_artifacts: list[str],
     expected_next_action: str,
 ) -> None:

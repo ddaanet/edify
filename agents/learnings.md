@@ -61,3 +61,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Treating test ordering dependence as "flaky" and retrying or ignoring. A test that fails only when run after other tests has shared mutable state — that's a bug, not noise.
 - Correct pattern: Diagnose the pollution. Run `pytest --lf` to confirm, then bisect with `pytest -x` subsets. Fix the shared state (fixture cleanup, monkeypatch teardown, global mutation). The test or its predecessor is wrong.
 - Rationale: "Passes in isolation" is a diagnostic signal, not a resolution. Merging with a known ordering-dependent failure means the suite is unreliable — future failures get dismissed as "that flaky test."
+## When execute mode bypasses skill invocation
+- Anti-pattern: `#execute` picks up task with command `/design plans/foo/requirements.md`, agent reads the requirements and starts implementing directly. Bypasses entire `/design` → triage → `/inline` lifecycle, losing recall, corrector, and triage feedback.
+- Correct pattern: Task's backtick command IS the instruction. `/design plans/foo/requirements.md` means invoke `/design` skill, not "assess and implement the work." The skill handles triage, recall, and lifecycle.
+- Root cause: execute-rule MODE 2 says "start first pending task" — ambiguous. Agent interprets "start" as "do the work" rather than "invoke the stated command." Same class as "When Execution Routing Preempts Skill Scanning." Structural fix needed: UPS hook injects the concrete command (plans/execute-skill-dispatch).
