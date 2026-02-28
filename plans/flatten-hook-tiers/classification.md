@@ -1,0 +1,7 @@
+- **Classification:** Moderate
+- **Implementation certainty:** High — approach known (remove early returns, accumulate into lists, single output assembly). Pattern already partially exists in Tier 2.5 + Tier 3 code.
+- **Requirement stability:** High — 7 FRs with concrete acceptance criteria including test inputs/outputs, scope bounded
+- **Behavioral code check:** Yes — changes logic paths in main() (remove early returns), adds command accumulation, adds multi-command warning. Moderate minimum.
+- **Work type:** Production — delivers capability change to hook system
+- **Artifact destination:** production (agent-core/hooks/, tests/)
+- **Evidence:** "when behavioral code" — behavioral code changes route to Moderate regardless of conceptual simplicity. Both axes high but behavioral code = Moderate floor. No architectural uncertainty — approach specified in UPS outline prerequisite section.

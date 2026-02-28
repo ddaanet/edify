@@ -99,6 +99,21 @@ class TestTier1Commands:
         assert call_hook("fix something") == {}
         assert call_hook("  s  trailing space") == {}
 
+    def test_command_cofires_with_directive(self) -> None:
+        """Command on one line + directive on another → both fire."""
+        result = call_hook("s\nd: discuss this topic")
+        assert result != {}
+        additional_context = result["hookSpecificOutput"]["additionalContext"]
+        # Command expansion must be present
+        assert "[#status]" in additional_context
+        # Directive expansion must also be present
+        assert (
+            "DISCUSS" in additional_context
+            or "Evaluate critically" in additional_context
+        )
+        # systemMessage should include directive summary (not command multiline)
+        assert "discuss" in result["systemMessage"].lower()
+
     def test_h_expansion(self) -> None:
         """H command expands to handoff instruction."""
         result = call_hook("h")
