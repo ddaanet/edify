@@ -1,0 +1,7 @@
+- **Classification:** Moderate
+- **Implementation certainty:** High — mechanism fully specified in problem.md (prepend step, append-only invariant)
+- **Requirement stability:** High — scope bounded (update skill sections, update fragment, add test)
+- **Behavioral code check:** Yes — integration test adds test functions → Moderate minimum
+- **Work type:** Production — delivers capability to agents (subroutine call pattern)
+- **Artifact destination:** agentic-prose (skill files, fragment) + production (test)
+- **Evidence:** "When triaging behavioral code" decision (integration test = Moderate minimum). Problem.md has fully specified mechanism, no architectural uncertainty. Both axes high → Moderate. No design needed — problem.md IS the design specification.
