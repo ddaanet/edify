@@ -60,13 +60,13 @@ Git workflow, platform constraints, code patterns, and naming conventions.
 
 ### When Tracking Worktree Tasks In Session.md
 
-**Decision Date:** 2026-02-19
+**Decision Date:** 2026-02-28 (supersedes 2026-02-19)
 
-**Anti-pattern:** Separate Worktree Tasks section with move semantics (Pending → Worktree on create, Worktree → Completed on rm). Creates merge-commit amend ceremony, requires manual editing for bare-slug worktrees, drifts from filesystem state.
+**Anti-pattern:** Single "Pending Tasks" section with move semantics (Pending → Worktree on create, Worktree → Completed on rm). Creates merge-commit amend ceremony (`_update_session_and_amend` exit 128 on merge commits), requires manual editing for bare-slug worktrees, drifts from filesystem state.
 
-**Correct pattern:** Tasks stay in Pending with inline `→ \`slug\`` marker. `#status` renders worktree section from `_worktree ls`, not from a session.md section. Single source of truth is git worktree state.
+**Correct pattern:** Two-section model — "In-tree Tasks" (quick, mechanical, no isolation) + "Worktree Tasks" (plan dir + behavioral changes, or restart, or explicitly parallel). Classification is static — set at task creation, no moves between sections. `→ \`slug\`` marker added/removed inline by `add_slug_marker()`/`remove_slug_marker()`. `#status` annotates from `_worktree ls` (filesystem state).
 
-**Rationale:** Worktree Tasks is a UI concern baked into the data model. The `_update_session_and_amend` code path is a failure source (exit 128 during merge).
+**Rationale:** Eliminates three failure modes: (a) no move semantics removes amend ceremony, (b) bare-slug worktrees orthogonal (no session integration expected), (c) `#status` renders from filesystem, not session.md section content. Design: `plans/task-classification/outline.md` D-4.
 
 ### When Merging Worktree With Consolidated Learnings On Main
 
