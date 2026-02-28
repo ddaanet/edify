@@ -106,7 +106,7 @@ def resolve_cmd(args: tuple[str, ...]) -> None:
 
     for trigger in triggers:
         query = _strip_operator(trigger)
-        if not query.strip():
+        if not query.strip() or query == "null":
             continue
 
         try:
