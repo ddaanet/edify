@@ -1,9 +1,21 @@
 """Topic matching pipeline: index construction, matching, and output formatting."""
 
 from collections import defaultdict
+from dataclasses import dataclass
+from pathlib import Path
 
 from claudeutils.recall.index_parser import IndexEntry, extract_keywords
 from claudeutils.recall.relevance import RelevanceScore, score_relevance
+from claudeutils.when.resolver import extract_section
+
+
+@dataclass
+class ResolvedEntry:
+    """Resolved decision file section."""
+
+    content: str
+    source_file: Path
+    entry: IndexEntry
 
 
 def build_inverted_index(entries: list[IndexEntry]) -> dict[str, list[IndexEntry]]:
@@ -71,3 +83,50 @@ def score_and_rank(
     relevant = [(entry, score) for entry, score in scored if score.is_relevant]
     ranked = sorted(relevant, key=lambda x: x[1].score, reverse=True)
     return ranked[:max_entries] if max_entries else ranked
+
+
+def _capitalize_heading(text: str) -> str:
+    """Capitalize heading text: normal words capitalized, all-caps preserved."""
+    words = text.split()
+    return " ".join(w if w.isupper() else w.capitalize() for w in words)
+
+
+def resolve_entries(
+    entries: list[tuple[IndexEntry, RelevanceScore]], project_dir: Path
+) -> list[ResolvedEntry]:
+    """Resolve matched entries to decision file content.
+
+    For each entry, constructs file path and tries both "When {key}" and
+    "How to {key}" heading patterns. Silently skips entries with no matching
+    section.
+
+    Args:
+        entries: List of (IndexEntry, RelevanceScore) tuples
+        project_dir: Project root directory for resolving relative paths
+
+    Returns:
+        List of ResolvedEntry objects with extracted content
+    """
+    resolved: list[ResolvedEntry] = []
+
+    for entry, _score in entries:
+        file_path = project_dir / entry.referenced_file
+
+        capitalized_key = _capitalize_heading(entry.key)
+        headings_to_try = [
+            f"## When {capitalized_key}",
+            f"## How to {capitalized_key}",
+        ]
+
+        content = ""
+        for heading in headings_to_try:
+            content = extract_section(file_path, heading)
+            if content:
+                break
+
+        if content:
+            resolved.append(
+                ResolvedEntry(content=content, source_file=file_path, entry=entry)
+            )
+
+    return resolved

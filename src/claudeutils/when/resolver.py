@@ -114,7 +114,7 @@ def _resolve_section(query: str, decisions_dir: str) -> str:
         raise ResolveError(msg)
 
     file_path, full_heading = matches[0]
-    content = _extract_section(file_path, full_heading)
+    content = extract_section(file_path, full_heading)
     if not content:
         msg = f"Failed to extract section '{full_heading}' from {file_path}"
         raise ResolveError(msg)
@@ -222,7 +222,7 @@ def _resolve_trigger(query: str, index_path: str, decisions_dir: str) -> str:
         msg = f"Section not found in {file_path}: {heading_text}"
         raise ResolveError(msg)
 
-    content = _extract_section(file_path, actual_heading)
+    content = extract_section(file_path, actual_heading)
     heading_text_only = actual_heading.lstrip("#").strip()
 
     formatted_heading = f"# {heading_text_only}"
@@ -330,7 +330,7 @@ def _extract_section_content(heading: str, file_content: str) -> str:
     return "\n".join(result_lines).rstrip("\n")
 
 
-def _extract_section(file_path: Path, heading: str) -> str:
+def extract_section(file_path: Path, heading: str) -> str:
     """Extract section from file."""
     try:
         content = file_path.read_text()

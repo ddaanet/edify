@@ -1,5 +1,7 @@
 """Tests for topic matching and inverted index construction."""
 
+from pathlib import Path
+
 import pytest
 
 from claudeutils.recall.index_parser import IndexEntry
@@ -7,6 +9,7 @@ from claudeutils.recall.relevance import RelevanceScore
 from claudeutils.recall.topic_matcher import (
     build_inverted_index,
     get_candidates,
+    resolve_entries,
     score_and_rank,
 )
 
@@ -173,3 +176,92 @@ def test_score_candidates_ranks_by_relevance_and_filters(
     if len(result) > 1:
         scores = [item[1].score for item in result]
         assert scores == sorted(scores, reverse=True)
+
+
+@pytest.mark.parametrize(
+    "setup_case",
+    ["happy_path", "missing_file", "missing_section"],
+)
+def test_resolve_entries(tmp_path: Path, setup_case: str) -> None:
+    """resolve_entries should extract sections and handle error cases.
+
+    Test cases: happy path (file + section exists), missing file, missing section.
+    """
+    if setup_case == "happy_path":
+        decision_file = tmp_path / "agents" / "decisions" / "test.md"
+        decision_file.parent.mkdir(parents=True, exist_ok=True)
+        decision_file.write_text(
+            "# Test Decisions\n\n"
+            "## When Evaluating Recall System Effectiveness\n\n"
+            "Anti-pattern: Measuring without proper baseline\n\n"
+            "## Other Section\n\n"
+            "Other content here\n"
+        )
+
+        entry = IndexEntry(
+            key="evaluating recall system effectiveness",
+            description="test entry",
+            referenced_file="agents/decisions/test.md",
+            section="Test",
+            keywords=frozenset({"recall", "effectiveness"}),
+        )
+        score = RelevanceScore(
+            session_id="hook",
+            entry_key=entry.key,
+            score=0.8,
+            is_relevant=True,
+            matched_keywords={"recall", "effectiveness"},
+        )
+
+        result = resolve_entries([(entry, score)], tmp_path)
+
+        assert len(result) == 1
+        assert "Evaluating Recall System Effectiveness" in result[0].content
+        assert "Anti-pattern" in result[0].content
+        assert str(decision_file) == str(result[0].source_file)
+
+    elif setup_case == "missing_file":
+        entry = IndexEntry(
+            key="nonexistent",
+            description="test entry",
+            referenced_file="agents/decisions/nonexistent.md",
+            section="Test",
+            keywords=frozenset({"test"}),
+        )
+        score = RelevanceScore(
+            session_id="hook",
+            entry_key=entry.key,
+            score=0.5,
+            is_relevant=True,
+            matched_keywords={"test"},
+        )
+
+        result = resolve_entries([(entry, score)], tmp_path)
+
+        assert len(result) == 0
+
+    elif setup_case == "missing_section":
+        decision_file = tmp_path / "agents" / "decisions" / "test.md"
+        decision_file.parent.mkdir(parents=True, exist_ok=True)
+        decision_file.write_text(
+            "# Test Decisions\n\n## Some Other Section\n\nContent here\n"
+        )
+
+        entry = IndexEntry(
+            key="nonexistent section",
+            description="test entry",
+            referenced_file="agents/decisions/test.md",
+            section="Test",
+            keywords=frozenset({"test"}),
+        )
+        score = RelevanceScore(
+            session_id="hook",
+            entry_key=entry.key,
+            score=0.5,
+            is_relevant=True,
+            matched_keywords={"test"},
+        )
+
+        result = resolve_entries([(entry, score)], tmp_path)
+
+        assert len(result) == 0
