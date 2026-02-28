@@ -1,0 +1,7 @@
+- **Classification:** Moderate
+- **Implementation certainty:** High — approach specified in requirements, hook exists and needs extension
+- **Requirement stability:** High — all FRs mechanism-specified with acceptance criteria
+- **Behavioral code check:** Yes (FR-2 adds parsing/extraction logic to hook) → Moderate minimum
+- **Work type:** Production — delivers capability to agents
+- **Artifact destination:** production (`agent-core/hooks/`) + agentic-prose (`agent-core/fragments/`)
+- **Evidence:** Both axes high but behavioral code changes (session.md parsing, command extraction, conditional dispatch). "When Triaging Behavioral Code Changes As Simple" confirms Moderate floor. "When Fixing Behavioral Deviations Identified By RCA" confirms structural approach (hook) over prose strengthening.

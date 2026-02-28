@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-01
 
-**Status:** Planstate `outlined` status implemented and passing. Process deviation identified → requirements captured for execute-skill-dispatch.
+**Status:** Branch complete. Planstate fix delivered, execute-skill-dispatch triaged as Moderate → `/runbook` on main.
 
 ## Completed This Session
 
@@ -23,15 +23,20 @@
 - `designed_with_outline` was never RED — characterization test added as if TDD
 - Learning captured: one acceptance criterion per RED→GREEN cycle
 
+**Execute-skill-dispatch triage:**
+- `/design` classified as Moderate (both axes high, behavioral code in FR-2 hook logic)
+- Wrote `plans/execute-skill-dispatch/classification.md`
+- Routed to `/runbook` — skip design, requirements are mechanism-specified
+
 ## Pending Tasks
 
 - [x] **Fix planstate detector** — `/design plans/fix-planstate-detector/requirements.md` | sonnet
   - Plan: fix-planstate-detector | Status: requirements
   - Missing `outlined` status: outline.md grouped under `requirements` fallback
-- [ ] **Execute skill dispatch** — `/design plans/execute-skill-dispatch/requirements.md` | sonnet
+- [ ] **Execute skill dispatch** — `/runbook plans/execute-skill-dispatch/requirements.md` | sonnet
   - Plan: execute-skill-dispatch | Status: requirements
   - UPS hook injects task command for `#execute` mode; execute-rule prose alignment
 
 ## Next Steps
 
-Branch work complete. Execute-skill-dispatch requirements captured here — carries to main on merge.
+Branch complete. Merge to main, then `/runbook plans/execute-skill-dispatch/requirements.md` on main (Moderate classification, skip design).
