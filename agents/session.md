@@ -40,6 +40,8 @@
   - `review-recall-null` — deliverable review (opus)
   - `recall-cli-integration` — production CLI (sonnet)
   - `userpromptsubmit-topic` — prompt-submit recall injection (sonnet)
+- **Review recall-null** — deliverable review completed in worktree, merged back
+  - Report: `plans/recall-null/reports/deliverable-review.md`
 
 ## Pending Tasks
 
@@ -210,8 +212,6 @@
   - Plan: parallel-orchestration | Blocked on: orchestrate-evolution
 
 ## Worktree Tasks
-
-- [ ] **Review recall-null** → `review-recall-null` — `/deliverable-review plans/recall-null` | opus | restart
 
 - [ ] **Recall CLI integration** → `recall-cli-integration` — Production `claudeutils _recall` CLI (check/resolve/diff), Click, TDD | sonnet
   - Prototype delivered via recall-tool-anchoring worktree

@@ -67,6 +67,7 @@ def when_cmd(queries: tuple[str, ...]) -> None:
 
     QUERIES: One or more trigger queries (args and/or stdin, one per line).
     Operator prefix (when/how) is optional.
+    "null" is reserved as a D+B gate anchor (silent exit 0, no output).
     Examples: "writing mock tests", "when writing mock tests", "how encode paths"
     """
     all_queries = _collect_queries(queries)
