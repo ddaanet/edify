@@ -74,3 +74,25 @@ def test_check_empty_section() -> None:
         result = runner.invoke(cli, ["_recall", "check", "test-job"])
         assert result.exit_code == 1
         assert "recall-artifact.md has no entries for test-job" in result.output
+
+
+def test_check_null_entry_valid() -> None:
+    """Check exits 0 when artifact has null entry.
+
+    Null entry (no relevant entries found) counts as a valid entry.
+    """
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        artifact_content = """# Recall Artifact: Test Job
+
+## Entry Keys
+
+null — no relevant entries found
+"""
+        artifact_dir = Path("plans/test-job")
+        artifact_dir.mkdir(parents=True)
+        artifact_path = artifact_dir / "recall-artifact.md"
+        artifact_path.write_text(artifact_content)
+
+        result = runner.invoke(cli, ["_recall", "check", "test-job"])
+        assert result.exit_code == 0
