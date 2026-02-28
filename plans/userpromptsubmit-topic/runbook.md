@@ -68,6 +68,13 @@ model: sonnet
 - systemMessage terminal constraint: ~60 chars after "UserPromptSubmit says: " prefix. Topic block is one entry in `system_parts` (hook joins with `" | "`).
 - additionalContext is agent-only (system-reminder), systemMessage is user-only
 
+**Stop/Error Conditions (all cycles):**
+STOP IMMEDIATELY if: RED phase test passes (expected failure) • RED phase failure message doesn't match expected • GREEN phase tests don't pass after implementation • Any existing tests break (regression)
+
+Actions when stopped: 1) Document in reports/cycle-{X}-{Y}-notes.md 2) Test passes unexpectedly → investigate if feature exists 3) Regression → STOP, report broken tests 4) Scope unclear → STOP, document ambiguity
+
+**Dependencies:** Cycles are sequential within phases. Phase 3 depends on Phases 1 and 2. Cross-phase dependency declared per-cycle where applicable.
+
 **Project Paths:**
 - `src/claudeutils/recall/topic_matcher.py` — NEW: matching pipeline module
 - `src/claudeutils/recall/index_parser.py` — READ: `parse_memory_index()`, `extract_keywords()` (promote from `_extract_keywords`)
