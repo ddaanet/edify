@@ -15,7 +15,7 @@ def test_score_relevance_exact_match() -> None:
         description="for testing",
         referenced_file="test.md",
         section="Test Section",
-        keywords={"test", "entry"},
+        keywords=frozenset({"test", "entry"}),
     )
 
     session_keywords = {"test", "entry", "other"}
@@ -32,7 +32,7 @@ def test_score_relevance_partial_match() -> None:
         description="for testing",
         referenced_file="test.md",
         section="Test Section",
-        keywords={"test", "entry", "data"},
+        keywords=frozenset({"test", "entry", "data"}),
     )
 
     # Only 2 of 3 keywords match
@@ -50,7 +50,7 @@ def test_score_relevance_no_match() -> None:
         description="for testing",
         referenced_file="test.md",
         section="Test Section",
-        keywords={"test", "entry"},
+        keywords=frozenset({"test", "entry"}),
     )
 
     session_keywords = {"other", "keywords"}
@@ -67,7 +67,7 @@ def test_score_relevance_threshold(tmp_path: Path) -> None:
         description="description",
         referenced_file="test.md",
         section="Test Section",
-        keywords={"test", "entry", "data"},
+        keywords=frozenset({"test", "entry", "data"}),
     )
 
     # 1 of 3 keywords match: 33%
@@ -89,7 +89,7 @@ def test_score_relevance_matched_keywords() -> None:
         description="description",
         referenced_file="test.md",
         section="Test Section",
-        keywords={"test", "entry", "data"},
+        keywords=frozenset({"test", "entry", "data"}),
     )
 
     session_keywords = {"test", "other", "entry"}
@@ -106,14 +106,14 @@ def test_find_relevant_entries_single_relevant() -> None:
             description="matches session",
             referenced_file="match.md",
             section="Section 1",
-            keywords={"relevant", "entry"},
+            keywords=frozenset({"relevant", "entry"}),
         ),
         IndexEntry(
             key="irrelevant entry",
             description="does not match",
             referenced_file="nomatch.md",
             section="Section 2",
-            keywords={"irrelevant", "unrelated"},
+            keywords=frozenset({"irrelevant", "unrelated"}),
         ),
     ]
 
@@ -134,14 +134,14 @@ def test_find_relevant_entries_multiple_relevant() -> None:
             description="test-related",
             referenced_file="test.md",
             section="Section 1",
-            keywords={"testing", "features"},
+            keywords=frozenset({"testing", "features"}),
         ),
         IndexEntry(
             key="refactor code",
             description="code refactoring",
             referenced_file="refactor.md",
             section="Section 2",
-            keywords={"refactor", "code"},
+            keywords=frozenset({"refactor", "code"}),
         ),
     ]
 
@@ -161,14 +161,14 @@ def test_find_relevant_entries_sorted_by_score() -> None:
             description="keywords",
             referenced_file="a.md",
             section="Section",
-            keywords={"alpha"},
+            keywords=frozenset({"alpha"}),
         ),
         IndexEntry(
             key="entry b",
             description="keywords",
             referenced_file="b.md",
             section="Section",
-            keywords={"beta", "gamma"},
+            keywords=frozenset({"beta", "gamma"}),
         ),
     ]
 
@@ -190,7 +190,7 @@ def test_find_relevant_entries_empty_session_keywords() -> None:
             description="description",
             referenced_file="test.md",
             section="Section",
-            keywords={"test"},
+            keywords=frozenset({"test"}),
         ),
     ]
 

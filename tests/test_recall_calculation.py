@@ -100,7 +100,7 @@ def test_calculate_recall_simple() -> None:
             description="for testing",
             referenced_file="test.md",
             section="Test",
-            keywords={"test"},
+            keywords=frozenset({"test"}),
         ),
     ]
 
@@ -144,7 +144,7 @@ def test_calculate_recall_multiple_sessions() -> None:
             description="for testing",
             referenced_file="test.md",
             section="Test",
-            keywords={"test"},
+            keywords=frozenset({"test"}),
         ),
     ]
 
@@ -198,14 +198,14 @@ def test_calculate_recall_per_entry_metrics() -> None:
             description="description a",
             referenced_file="a.md",
             section="Test",
-            keywords={"entry_a"},
+            keywords=frozenset({"entry_a"}),
         ),
         IndexEntry(
             key="entry b",
             description="description b",
             referenced_file="b.md",
             section="Test",
-            keywords={"entry_b"},
+            keywords=frozenset({"entry_b"}),
         ),
     ]
 

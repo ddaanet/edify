@@ -137,7 +137,7 @@ def test_parse_memory_index_entry_model() -> None:
         description="Test description",
         referenced_file="test/file.md",
         section="Test Section",
-        keywords={"test", "key"},
+        keywords=frozenset({"test", "key"}),
     )
 
     assert entry.key == "Test key"

@@ -66,7 +66,12 @@ class IndexEntry(BaseModel):
     description: str  # Text after em-dash
     referenced_file: str  # From parent H2 heading (file path)
     section: str  # Parent H2 heading text
-    keywords: set[str]  # Extracted from key + description
+    keywords: frozenset[str]  # Extracted from key + description
+
+    class Config:
+        """Pydantic configuration."""
+
+        frozen = True
 
 
 def extract_keywords(text: str) -> set[str]:
@@ -110,7 +115,7 @@ def _parse_new_format_line(
         description="",
         referenced_file=current_file,
         section=current_section,
-        keywords=extract_keywords(trigger + " " + extras),
+        keywords=frozenset(extract_keywords(trigger + " " + extras)),
     )
 
 
@@ -135,7 +140,7 @@ def _parse_old_format_line(
         description=description,
         referenced_file=current_file,
         section=current_section,
-        keywords=extract_keywords(key + " " + description),
+        keywords=frozenset(extract_keywords(key + " " + description)),
     )
 
 
