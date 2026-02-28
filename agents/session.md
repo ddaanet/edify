@@ -29,9 +29,6 @@
 
 ### Tier 1: Recall/when-resolve (foundational)
 
-- [ ] **Runbook recall expansion** — `/design plans/runbook-recall-expansion/requirements.md` | sonnet
-  - Plan: runbook-recall-expansion | Status: requirements
-  - prepare-runbook.py recall injection, corrector.md self-loading, two-pattern docs (7 FRs)
 - [ ] **Recall tool consolidation** — rename `when-resolve.py` → `claudeutils _recall`, remove `..file` syntax; phase out `/when` and `/how` as separate skills, ensure `/recall` covers reactive single-entry lookups; memory-index entry format changes from `/when`+`/how` prefixes → new format; update `src/claudeutils/validation/memory_index_checks.py` and `when` module accordingly | sonnet
   - Recall simplification: remove sibling expansion (redundant with index scanning). Resolver = pure lookup (key in, section out).
   - Mode reduction: default (per-key, 2 passes), all (per-file, iterated), everything (full corpus). Drop `broad` and `deep` from formal mode set.
@@ -88,9 +85,6 @@
 - [ ] **Prose gate terminology** — Find proper name for D+B pattern, ground, update docs | opus
 - [ ] **Memory-index loading docs** — update references claiming memory-index is @-ref from CLAUDE.md | sonnet
 - [ ] **Decision drift audit** — audit decision files and learnings.md for stale operational assumptions (e.g., `uv run` references when sandbox-denied) | sonnet
-- [ ] **Pushback grounding** — `/design plans/pushback-grounding/requirements.md` | sonnet
-  - Plan: pushback-grounding | Status: requirements
-  - Add claim verification + recall to `d:` discussion protocol (pushback.md + hook expansion)
 - [ ] **Remove wt rm --force** — remove `--force` flag from `_worktree rm` CLI | sonnet
   - Structural safety: `--force` bypasses the uncommitted-work check that exists to prevent data loss
   - Emergency cleanup via raw `git worktree remove --force` + `rm -rf`
@@ -104,10 +98,6 @@
   - Phase 3: TDD agent generation + verify-red.sh (4 cycles)
   - Phase 4: SKILL.md rewrite + refactor.md/delegation.md updates (2 steps, opus)
   - Checkpoints: light at phase boundaries, full at Phase 4 (final)
-- [ ] **Task classification** — `/runbook plans/task-classification/outline.md` | sonnet
-  - Plan: task-classification | Status: designed (outline reviewed, ready for runbook)
-  - `/prime` skill (ad-hoc plan context) + two-section task list (In-tree / Worktree Tasks)
-  - Scope: `session.py`, `resolve.py`, `aggregation.py`, `session_structure.py`, handoff skill, execute-rule.md
 - [ ] **Handoff --commit removal** — remove --commit from /handoff, expand standalone to chain, deduplicate [handoff, commit] | sonnet
   - ~60 occurrences: skills, fragments, tests, continuation infrastructure, decision files
   - Motivation: decouple handoff from commit-ready state (handoff should work on dirty tree)
@@ -121,7 +111,6 @@
   - Add git-clean + precommit entry gates to /orchestrate, /deliverable-review, corrector agent
   - Cross-cutting pattern — needs /design to resolve: each skill body vs shared fragment vs hook, and per-consumer questions (corrector double-gating, orchestrate checkpoint overlap, deliverable-review session context)
   - Follow-on after /inline delivery
-- [ ] **Continuation prepend** — `/design plans/continuation-prepend/problem.md` | sonnet
 - [ ] **Runbook outline review** — update runbook skill: user review gate after outline correction, iterative fix cycle until approved | sonnet
 - [ ] **Review auto-commit** — after fixing all issues in deliverable-review, auto handoff and commit | sonnet
 - [ ] **Execute flag lint** — precommit lint gate for `/inline ... execute` in session.md | haiku
@@ -131,11 +120,6 @@
   - When requirements lack structural decisions (module layout, function decomposition, wiring), generate lightweight outline before routing to /runbook
   - Single data point so far — trigger condition needs sharper criteria before implementing
   - Self-modification risk: editing /design during active use
-- [ ] **Fix planstate detector** — `/design plans/fix-planstate-detector/requirements.md` | sonnet
-  - Plan: fix-planstate-detector | Status: requirements
-  - Missing `outlined` status: outline.md grouped under `requirements` fallback
-- [ ] **UPS topic injection** — `/runbook plans/userpromptsubmit-topic/outline.md` | sonnet
-  - Plan: userpromptsubmit-topic | Status: outlined (planstate detector shows `requirements` — fix-planstate-detector bug)
 - [ ] **Registry cache to tmp** — inline | sonnet
   - Move continuation registry cache from TMPDIR to project-local tmp/
 - [ ] **Block cd-chaining in bash** — PreToolUse hook to block `cd * && *` and `cd *; *`, recommend `git -C` or subshell | sonnet
@@ -218,6 +202,28 @@
 ## Worktree Tasks
 
 (none — userpromptsubmit-topic and recall-cli-integration merged this session)
+
+- [ ] **Runbook recall expansion** → `runbook-recall-expansion` — `/design plans/runbook-recall-expansion/requirements.md` | sonnet
+  - Plan: runbook-recall-expansion | Status: requirements
+  - prepare-runbook.py recall injection, corrector.md self-loading, two-pattern docs (7 FRs)
+
+- [ ] **Pushback grounding** → `pushback-grounding` — `/design plans/pushback-grounding/requirements.md` | sonnet
+  - Plan: pushback-grounding | Status: requirements
+  - Add claim verification + recall to `d:` discussion protocol (pushback.md + hook expansion)
+
+- [ ] **Fix planstate detector** → `fix-planstate-detector` — `/design plans/fix-planstate-detector/requirements.md` | sonnet
+  - Plan: fix-planstate-detector | Status: requirements
+  - Missing `outlined` status: outline.md grouped under `requirements` fallback
+
+- [ ] **UPS topic injection** → `ups-topic-injection` — `/runbook plans/userpromptsubmit-topic/outline.md` | sonnet
+  - Plan: userpromptsubmit-topic | Status: outlined (planstate detector shows `requirements` — fix-planstate-detector bug)
+
+- [ ] **Task classification** → `task-classification` — `/runbook plans/task-classification/outline.md` | sonnet
+  - Plan: task-classification | Status: designed (outline reviewed, ready for runbook)
+  - `/prime` skill (ad-hoc plan context) + two-section task list (In-tree / Worktree Tasks)
+  - Scope: `session.py`, `resolve.py`, `aggregation.py`, `session_structure.py`, handoff skill, execute-rule.md
+
+- [ ] **Continuation prepend** → `continuation-prepend` — `/design plans/continuation-prepend/problem.md` | sonnet
 
 ## Blockers / Gotchas
 
