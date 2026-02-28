@@ -395,6 +395,29 @@ class TestExecuteCommandInjection:
         assert "[#execute]" in ctx
         assert "Invoke:" not in ctx
 
+    def test_x_uses_planstate_command_over_session(
+        self, tmp_path: Any, monkeypatch: Any
+    ) -> None:
+        """Planstate-derived command takes priority over session.md command."""
+        session_dir = tmp_path / "agents"
+        session_dir.mkdir()
+        (session_dir / "session.md").write_text(
+            "## Pending Tasks\n\n"
+            "- [ ] **My task** — `/design my-plan` | sonnet\n"
+            "  - Plan: my-plan | Status: requirements\n"
+        )
+        # Create plan directory with design.md so planstate infers "designed"
+        plan_dir = tmp_path / "plans" / "my-plan"
+        plan_dir.mkdir(parents=True)
+        (plan_dir / "design.md").write_text("# Design\n")
+        (plan_dir / "requirements.md").write_text("# Requirements\n")
+
+        monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+        result = call_hook("x")
+        ctx = result["hookSpecificOutput"]["additionalContext"]
+        # Planstate "designed" -> runbook command, not session.md /design
+        assert "/runbook" in ctx.split("Invoke:")[-1]
+
 
 class TestFeatureCombinations:
     """Test pairwise and triple feature combinations (FR-7)."""
