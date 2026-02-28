@@ -1,6 +1,6 @@
 # Session Handoff: 2026-02-28
 
-**Status:** recall-null planned (Tier 2). Outline with Execution Model ready for `/inline`. Per-consumer recall artifacts prepared (test-driver, corrector, skill-reviewer).
+**Status:** Recall lifecycle grounded. Three-mode recall system designed (default/all/everything). Recall-null outline unchanged — grounding informs broader recall simplification, not the null mode delivery.
 
 ## Completed This Session
 
@@ -15,6 +15,14 @@
   - `review-recall-artifact.md` (7 entries: D+B pattern, model selection, holistic fixes)
   - `skill-review-recall-artifact.md` (6 entries: skill editing, D+B propagation)
 - **Recall broad** — loaded 16/21 decision files. Remaining 5 (data-processing, deliverable-review, markdown-tooling, operational-tooling, validation-quality) irrelevant to recall gates
+- **Recall lifecycle grounding** — `/ground` research on artifact lifecycle across pipeline stages
+  - Three grounded patterns: accumulator with stage provenance (LangGraph+OpenLineage), forward-only refinement (HL7 CRMI), lifecycle role contract (RUP+TOGAF)
+  - Per-point retrieval mode assignment across 10 pipeline recall points: 8 per-key (default), 2 per-file iterated (all)
+  - Recall system simplification: no sibling expansion (redundant with index scanning), per-key and per-file only
+  - Revised mode set: default (per-key, two passes, scored selection), all (per-file, iterated), everything (full corpus). `broad` and `deep` drop from pipeline usage.
+  - Post-resolve relevance scoring at skill transitions (not per-point) — design input for recall calibration
+  - Reports: grounding (`plans/reports/recall-lifecycle-grounding.md`), internal inventory (`plans/reports/recall-lifecycle-internal-codebase.md`), external research (`plans/reports/recall-lifecycle-external-research.md`)
+- **Recall everything** — loaded all 21 decision files (full corpus for grounding context)
 
 ## Pending Tasks
 
@@ -37,11 +45,18 @@
   - prepare-runbook.py recall injection, corrector.md self-loading, two-pattern docs (7 FRs)
 - [ ] **When-resolve bloat** — group resolved entries by source file when batch-resolving multiple queries | sonnet
 - [ ] **Recall tool consolidation** — rename `when-resolve.py` → `claudeutils _recall`, remove `..file` syntax; phase out `/when` and `/how` as separate skills, ensure `/recall` covers reactive single-entry lookups; memory-index entry format changes from `/when`+`/how` prefixes → new format; update `src/claudeutils/validation/memory_index_checks.py` and `when` module accordingly | sonnet
+  - Recall simplification: remove sibling expansion (redundant with index scanning). Resolver = pure lookup (key in, section out).
+  - Mode reduction: default (per-key, 2 passes), all (per-file, iterated), everything (full corpus). Drop `broad` and `deep` from formal mode set.
+  - Grounding: `plans/reports/recall-lifecycle-grounding.md` (per-point mode assignments, lifecycle role contract)
 - [ ] **Artifact staleness gate** — sonnet
   - Mechanical checkpoint at /requirements, /design, /runbook exit points
   - `when-resolve.py` touches sentinel; skill compares sentinel mtime to recall-artifact.md AND primary skill artifact (requirements.md, outline.md, design.md, runbook.md)
   - If recall newer than either artifact, trigger update step
   - Two drift vectors: stale recall-artifact (entries loaded not persisted) and stale skill artifacts (decisions loaded after artifact written)
+- [ ] **Recall usage scoring** — Post-resolve relevance scoring at skill transitions (/design exit, /runbook exit, /inline exit) | sonnet
+  - Per-entry assessment: referenced / informed / unused. Accumulates in `plans/<job>/recall-usage.md`
+  - Parallel to triage-feedback.sh: compares pre-execution selection against post-execution usage
+  - Grounding: `plans/reports/recall-lifecycle-grounding.md` §Revised Mode Assignment
 - [ ] **Generate memory index** — `/design` | opus
   - Each decision/learning declares keywords for index. Index generated from declarations. Diff displayed after update for agent review. Supersedes manual append workflow in `/codify` step 4a.
 - [x] **Runbook post-explore gate** — absorbed into recall-null delivery (outline item 2.4)
@@ -231,7 +246,7 @@
 
 ## Next Steps
 
-Recall-null planned. Next: **Recall-null delivery** — `/inline plans/recall-null` (opus).
+Recall lifecycle grounded. Next: **Recall-null delivery** — `/inline plans/recall-null` (opus). Outline unchanged — grounding results inform recall tool consolidation, not null mode delivery.
 
 ## Reference Files
 
@@ -249,3 +264,6 @@ Recall-null planned. Next: **Recall-null delivery** — `/inline plans/recall-nu
 - `plans/inline-execute/reports/cross-skill-review.md` — Cross-skill review (continuation frontmatter gaps)
 - `agents/decisions/pipeline-contracts.md` — Pipeline contract decision file (new)
 - `plans/recall-null/outline.md` — Recall-null execution outline with Execution Model (Tier 2, ready for /inline)
+- `plans/reports/recall-lifecycle-grounding.md` — Grounded recall artifact lifecycle (3 patterns, per-point mode assignments, mode reduction)
+- `plans/reports/recall-lifecycle-internal-codebase.md` — Internal inventory: recall-artifact handling across all pipeline skills
+- `plans/reports/recall-lifecycle-external-research.md` — External research: 10 frameworks (HL7 CRMI, PROV-DM, OpenLineage, ADK, LangGraph, etc.)
