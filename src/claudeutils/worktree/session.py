@@ -27,7 +27,7 @@ def extract_task_blocks(content: str, section: str | None = None) -> list[TaskBl
     lines = content.split("\n")
     blocks = []
     current_section = None
-    task_pattern = re.compile(r"^- \[[ x>]\] \*\*(.+?)\*\*")
+    task_pattern = re.compile(r"^- \[[ x>!✗–]\] \*\*(.+?)\*\*")  # noqa: RUF001
 
     i = 0
     while i < len(lines):

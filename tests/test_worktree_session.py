@@ -68,6 +68,25 @@ def test_find_section_bounds_not_found() -> None:
     assert bounds is None
 
 
+def test_extract_blocked_failed_canceled_tasks() -> None:
+    """Extract tasks with [!], [✗], [–] statuses."""  # noqa: RUF002
+    content = """# Session
+
+## In-tree Tasks
+
+- [!] **Blocked Task** — waiting on signal
+- [✗] **Failed Task** — terminal failure
+- [\u2013] **Canceled Task** \u2014 user canceled
+
+## Blockers
+"""
+    blocks = extract_task_blocks(content)
+    assert len(blocks) == 3
+    assert blocks[0].name == "Blocked Task"
+    assert blocks[1].name == "Failed Task"
+    assert blocks[2].name == "Canceled Task"
+
+
 def test_extract_multi_line_task() -> None:
     """Extract multi-line task with continuation lines."""
     content = """# Session

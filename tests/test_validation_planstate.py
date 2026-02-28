@@ -30,6 +30,17 @@ def test_missing_artifacts_excludes_reports(tmp_path: Path) -> None:
     assert errors == []
 
 
+def test_classification_only_recognized(tmp_path: Path) -> None:
+    """Plan with only classification.md is recognized."""
+    plans = tmp_path / "plans"
+    plan = plans / "classified-plan"
+    plan.mkdir(parents=True)
+    (plan / "classification.md").write_text("# Classification\n")
+
+    errors = validate_planstate(tmp_path)
+    assert errors == []
+
+
 def test_empty_plans_dir(tmp_path: Path) -> None:
     """Empty plans/ directory produces no errors."""
     plans = tmp_path / "plans"

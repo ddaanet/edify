@@ -54,6 +54,19 @@ class TestExtractTaskNames:
         """File with no tasks returns empty list."""
         assert extract_task_names(["# Session", "", "Some content"]) == []
 
+    def test_blocked_failed_canceled_statuses(self) -> None:
+        """Tasks with [!], [✗], [–] statuses extracted."""  # noqa: RUF002
+        lines = [
+            "- [!] **Blocked Task** — waiting on signal",
+            "- [✗] **Failed Task** — terminal failure",
+            "- [–] **Canceled Task** — user canceled",  # noqa: RUF001
+        ]
+        tasks = extract_task_names(lines)
+        assert len(tasks) == 3
+        assert tasks[0] == (1, "Blocked Task")
+        assert tasks[1] == (2, "Failed Task")
+        assert tasks[2] == (3, "Canceled Task")
+
     def test_malformed_task_line_ignored(self) -> None:
         """Malformed task lines are ignored."""
         lines = [

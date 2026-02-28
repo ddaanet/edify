@@ -13,6 +13,7 @@ def _collect_artifacts(plan_dir: Path) -> set[str]:
     # Baseline artifacts
     for filename in [
         "brief.md",
+        "classification.md",
         "requirements.md",
         "design.md",
         "outline.md",

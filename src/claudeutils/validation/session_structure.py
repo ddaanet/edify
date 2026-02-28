@@ -9,7 +9,8 @@ Checks:
 import re
 from pathlib import Path
 
-TASK_PATTERN = re.compile(r"^- \[[ x>]\] \*\*(.+?)\*\*")
+TASK_PATTERN = re.compile(r"^- \[[ x>!✗–]\] \*\*(.+?)\*\*")  # noqa: RUF001
+TERMINAL_STATUS_PATTERN = re.compile(r"^- \[[!✗–]\] ")  # noqa: RUF001
 SECTION_PATTERN = re.compile(r"^## (.+)$")
 REF_FILE_PATTERN = re.compile(r"^- `([^`]+)`")
 
@@ -70,7 +71,7 @@ def check_worktree_format(
     errors = []
     for lineno, line in section_lines:
         task_m = TASK_PATTERN.match(line)
-        if task_m and "\u2192" not in line:
+        if task_m and "\u2192" not in line and not TERMINAL_STATUS_PATTERN.match(line):
             errors.append(
                 f"  line {lineno}: worktree task missing \u2192 slug: "
                 f"**{task_m.group(1)}**"

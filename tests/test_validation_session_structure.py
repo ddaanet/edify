@@ -69,6 +69,19 @@ class TestExtractSectionTasks:
         assert tasks[0] == (5, "Task One")
         assert tasks[1] == (7, "Task Two")
 
+    def test_blocked_failed_canceled_statuses(self) -> None:
+        """Tasks with [!], [\u2717], [\u2013] statuses extracted."""
+        section = [
+            (5, "- [!] **Blocked Task** \u2014 waiting"),
+            (6, "- [\u2717] **Failed Task** \u2014 terminal"),
+            (7, "- [\u2013] **Canceled Task** \u2014 canceled"),
+        ]
+        tasks = extract_section_tasks(section)
+        assert len(tasks) == 3
+        assert tasks[0] == (5, "Blocked Task")
+        assert tasks[1] == (6, "Failed Task")
+        assert tasks[2] == (7, "Canceled Task")
+
     def test_no_tasks(self) -> None:
         """Non-task lines produce empty result."""
         section = [(1, "Just text"), (2, "More text")]
@@ -94,6 +107,15 @@ class TestCheckWorktreeFormat:
     def test_non_task_lines_ignored(self) -> None:
         """Non-task lines in section not checked."""
         section = [(5, "Some regular text"), (6, "- Not a task format")]
+        assert check_worktree_format(section) == []
+
+    def test_terminal_status_exempt_from_slug(self) -> None:
+        """Blocked, failed, canceled tasks not required to have \u2192 slug."""
+        section = [
+            (5, "- [!] **Blocked Task** \u2014 waiting on signal"),
+            (6, "- [\u2717] **Failed Task** \u2014 terminal"),
+            (7, "- [\u2013] **Canceled Task** \u2014 canceled"),
+        ]
         assert check_worktree_format(section) == []
 
     def test_multiple_tasks_mixed(self) -> None:

@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-01
 
-**Status:** Task classification fixes applied. 2 Major + 6 Minor fixed, 1 Minor deferred (pre-existing TASK_PATTERN gap).
+**Status:** TASK_PATTERN statuses fixed. All task statuses (`[!]`, `[✗]`, `[–]`) now recognized across validation and worktree modules.
 
 ## Completed This Session
 
@@ -30,15 +30,21 @@
 - Minor 6: TASK_PATTERN regex deferred as pending task (pre-existing)
 - Corrector: `plans/task-classification/reports/review.md` — 0 critical, 0 major
 
+**Task pattern statuses (Tier 1 inline):**
+- TASK_PATTERN extended `[ x>]` → `[ x>!✗–]` in 3 locations: `session_structure.py`, `tasks.py`, `session.py`
+- `classification.md` added to planstate recognized artifacts (consumed by `triage-feedback.sh`)
+- Corrector found+fixed: `check_worktree_format` terminal status exemption (blocked/failed/canceled tasks don't need `→ slug`)
+- Review: `plans/task-pattern-statuses/reports/review.md` — 0 critical, 0 major, 2 minor fixed
+- Triage feedback: match
+
 ## In-tree Tasks
 
 - [x] **Task classification** — `/runbook plans/task-classification/outline.md` | sonnet
 - [x] **Review task-class** — `/deliverable-review plans/task-classification` | opus | restart
 - [x] **Fix task-class findings** — `/design plans/task-classification/reports/deliverable-review.md` | opus
+- [x] **Task pattern statuses** — `/design` | sonnet
 
-- [ ] **Task pattern statuses** — `/design` | sonnet
-  - `TASK_PATTERN` in session_structure.py + session.py misses `[!]`, `[✗]`, `[–]`
-  - Pre-existing gap; task-classification increased surface area
+- [ ] **Review task-patterns** — `/deliverable-review plans/task-pattern-statuses` | opus | restart
 
 ## Worktree Tasks
 
@@ -53,3 +59,4 @@ Branch work complete.
 - `plans/task-classification/reports/review.md` — corrector review (0 critical, 2 major fixed)
 - `plans/task-classification/reports/deliverable-review.md` — deliverable review (0 critical, 2 major, 7 minor)
 - `plans/task-classification/reports/review.md` — corrector review of fix pass
+- `plans/task-pattern-statuses/reports/review.md` — corrector review (0 critical, 0 major)
