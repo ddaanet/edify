@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-01
 
-**Status:** Branch deliverable-reviewed. Execute-skill-dispatch: 0 critical, 1 major (private API import), 3 minor. Fix task pending.
+**Status:** All deliverable-review findings fixed. Branch work complete.
 
 ## Completed This Session
 
@@ -46,11 +46,20 @@
 - Report: `plans/execute-skill-dispatch/reports/deliverable-review.md`
 - Lifecycle: `reviewed` (no critical findings)
 
+**Fix dispatch findings:**
+- Major: Replaced `_determine_status`/`_derive_next_action` private imports with `infer_state()` public API in `_try_planstate_command`
+- Minor: Added `lifecycle` to `infer_state` docstring priority chain
+- Minor: Added `r` mode backward-compat test (`test_r_does_not_inject`)
+- Minor: Replaced fragile `ctx.split("Invoke:")[-1]` with direct `assert "Invoke: /commit" not in ctx`
+- Corrector: 0 critical, 0 major, 1 minor deferred (empty-artifact edge case — new behavior safer)
+- Precommit green: 1375 passed, 1 xfail
+
 ## Pending Tasks
 
 - [x] **Review skill dispatch** — `/deliverable-review plans/execute-skill-dispatch` | opus | restart
-- [ ] **Fix dispatch findings** — `/design plans/execute-skill-dispatch/reports/deliverable-review.md` | opus
+- [x] **Fix dispatch findings** — `/design plans/execute-skill-dispatch/reports/deliverable-review.md` | opus
+- [ ] **Re-review dispatch fixes** — `/deliverable-review plans/execute-skill-dispatch` | opus | restart
 
 ## Next Steps
 
-Fix task routes through `/design` for proportional triage. Branch work otherwise complete.
+Re-review fixes (4 changes: API swap, docstring, test, assertion). Branch work otherwise complete.

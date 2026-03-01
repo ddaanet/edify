@@ -147,7 +147,7 @@ def infer_state(
     """Infer plan state from directory artifacts.
 
     Scans for recognized artifacts and returns PlanState or None if no artifacts
-    found. Status priority: ready > planned > designed > outlined > requirements
+    found. Priority: lifecycle > ready > planned > designed > outlined > requirements
 
     Args:
         plan_dir: Path to the plan directory

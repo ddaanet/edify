@@ -48,7 +48,7 @@ class TestExecuteCommandInjection:
         ctx = result["hookSpecificOutput"]["additionalContext"]
         assert "Invoke: /runbook actual-work" in ctx
         # Must NOT inject commands from non-eligible tasks
-        assert "/commit" not in ctx.split("Invoke:")[-1]
+        assert "Invoke: /commit" not in ctx
         assert "blocked-job" not in ctx
         assert "failed-thing" not in ctx
         assert "canceled-thing" not in ctx
@@ -142,4 +142,20 @@ class TestExecuteBackwardCompat:
         result = call_hook("xc")
         ctx = result["hookSpecificOutput"]["additionalContext"]
         assert "[execute, commit]" in ctx
+        assert "Invoke:" not in ctx
+
+    def test_r_does_not_inject(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Resume mode does not inject Invoke directive (C-3)."""
+        session_dir = tmp_path / "agents"
+        session_dir.mkdir()
+        (session_dir / "session.md").write_text(
+            "## Pending Tasks\n\n"
+            "- [ ] **Do something** — `/design my-requirements` | sonnet\n"
+        )
+        monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+        result = call_hook("r")
+        ctx = result["hookSpecificOutput"]["additionalContext"]
+        assert "[#resume]" in ctx
         assert "Invoke:" not in ctx
