@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-01
 
-**Status:** UPS Phase 3 hook integration delivered (3 TDD cycles, corrector-reviewed). All 10 runbook cycles complete. Deliverable review next.
+**Status:** UPS topic deliverable review complete (0 Critical, 0 Major, 3 Minor). Fix task and TDD dispatch review pending.
 
 ## Completed This Session
 
@@ -40,6 +40,12 @@
 - Triage: no-classification
 - Report: `plans/userpromptsubmit-topic/reports/phase3-review.md`
 
+**UPS deliverable review:**
+- 0 Critical, 0 Major, 3 Minor (get_or_build_index precondition, capitalize_heading duplication, loose integration test assertion)
+- All 7 FRs covered, all design decisions conformant, full suite green (1378 pass, 1 xfail)
+- Lifecycle: reviewed (worktree — delivered deferred to merge)
+- Report: `plans/userpromptsubmit-topic/reports/deliverable-review.md`
+
 ## Pending Tasks
 
 - [x] **UPS matching pipeline** — `/inline plans/userpromptsubmit-topic` | sonnet
@@ -48,7 +54,8 @@
   - Plan: userpromptsubmit-topic | Phase 2: Cycles 2.1-2.2 + light checkpoint
 - [x] **UPS hook integration** — `/inline plans/userpromptsubmit-topic` | sonnet
   - Plan: userpromptsubmit-topic | Phase 3: Cycles 3.1-3.3 + full checkpoint
-- [ ] **Review UPS topic** — `/deliverable-review plans/userpromptsubmit-topic` | opus | restart
+- [x] **Review UPS topic** — `/deliverable-review plans/userpromptsubmit-topic` | opus | restart
+- [ ] **Fix UPS topic findings** — `/design plans/userpromptsubmit-topic/reports/deliverable-review.md` | opus
 - [ ] **Review TDD dispatch** — `/deliverable-review plans/inline-tdd-dispatch` | opus | restart
 
 ## Blockers / Gotchas
@@ -58,15 +65,12 @@
 
 ## Next Steps
 
-Deliverable review for userpromptsubmit-topic (all 10 TDD cycles across 3 phases complete).
+Fix UPS topic findings (3 Minor) and review TDD dispatch deliverables. Both tasks are independent — parallelizable.
 
 ## Reference Files
 
+- `plans/userpromptsubmit-topic/reports/deliverable-review.md` — deliverable review (3 Minor findings)
+- `plans/userpromptsubmit-topic/lifecycle.md` — plan lifecycle (reviewed)
 - `plans/userpromptsubmit-topic/runbook.md` — full runbook with 10 TDD cycles
 - `plans/userpromptsubmit-topic/recall-artifact.md` — recall context for sub-agent priming
-- `plans/userpromptsubmit-topic/tdd-recall-artifact.md` — flat recall for sub-agent injection
-- `plans/userpromptsubmit-topic/reports/review.md` — Phase 1 corrector review
-- `plans/userpromptsubmit-topic/reports/phase2-review.md` — Phase 2 corrector review
-- `plans/userpromptsubmit-topic/reports/phase3-review.md` — Phase 3 corrector review
 - `plans/inline-tdd-dispatch/requirements.md` — cycle-scoping requirements
-- `plans/inline-tdd-dispatch/reports/review.md` — inline TDD dispatch corrector review
