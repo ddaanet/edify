@@ -2,6 +2,7 @@
 
 import importlib.util
 import subprocess
+import sys
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import patch
@@ -132,6 +133,13 @@ class TestResolveRecallEntries:
         with patch.object(_mod.subprocess, "run", return_value=_mock_result(rc=1)):
             assert resolve_recall_entries(["when nonexistent"]) == ""
 
+    def test_returns_empty_on_binary_not_found(self) -> None:
+        """FileNotFoundError (missing binary) returns empty string."""
+        with patch.object(
+            _mod.subprocess, "run", side_effect=FileNotFoundError("claudeutils")
+        ):
+            assert resolve_recall_entries(["when something"]) == ""
+
 
 class TestResolveRecallForRunbook:
     """End-to-end recall resolution for a runbook."""
@@ -205,8 +213,19 @@ class TestResolveRecallForRunbook:
         assert result is None
 
 
+def _run_main(monkeypatch: pytest.MonkeyPatch, runbook_path: Path) -> int:
+    """Invoke main() via sys.argv, return exit code."""
+    monkeypatch.setattr(sys, "argv", ["prepare-runbook", str(runbook_path)])
+    try:
+        _mod.main()
+    except SystemExit as exc:
+        return exc.code if isinstance(exc.code, int) else 1
+    else:
+        return 0
+
+
 class TestRecallInjectionE2E:
-    """End-to-end: recall content in generated artifacts."""
+    """End-to-end: recall content in generated artifacts via main()."""
 
     SIMPLE_RUNBOOK = dedent("""\
         ---
@@ -222,6 +241,47 @@ class TestRecallInjectionE2E:
         Step content.
     """)
 
+    MULTI_PHASE_RUNBOOK = dedent("""\
+        ---
+        model: sonnet
+        ---
+        ## Common Context
+
+        Shared constraints.
+
+        **Stop/Error Conditions:** Escalate on unexpected failures.
+
+        **Dependencies:** None.
+
+        ### Phase 1: Core logic (type: tdd)
+
+        Phase 1 preamble.
+
+        ## Cycle 1.1: Basic behavior
+
+        ### RED
+
+        Test that basic behavior works.
+
+        ```python
+        def test_basic():
+            assert True
+        ```
+
+        ### GREEN
+
+        Implement basic behavior.
+
+        ### Phase 2: Integration (type: general)
+
+        Phase 2 preamble.
+
+        ## Step 2.1: Wire components
+
+        **Objective**: Connect parts.
+        Integration content.
+    """)
+
     def test_shared_recall_in_agent(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
@@ -229,40 +289,15 @@ class TestRecallInjectionE2E:
         artifact = ARTIFACT_TEMPLATE.format(
             entries="when writing recall artifacts — keys"
         )
-        plan_dir = _setup_e2e(
-            tmp_path, monkeypatch, "rt", self.SIMPLE_RUNBOOK, artifact
-        )
-        runbook = plan_dir / "runbook.md"
+        _setup_e2e(tmp_path, monkeypatch, "rt", self.SIMPLE_RUNBOOK, artifact)
+        runbook_path = tmp_path / "plans" / "rt" / "runbook.md"
         with patch.object(
             _mod.subprocess,
             "run",
             return_value=_mock_result("Resolved content."),
         ):
-            content = runbook.read_text()
-            metadata, body = _mod.parse_frontmatter(content)
-            sections = _mod.extract_sections(body)
-            pt = _mod.detect_phase_types(body)
-            recall_result = resolve_recall_for_runbook(runbook, pt)
-            assert recall_result is not None
-            shared_recall, _ = recall_result
-            if shared_recall:
-                cc = sections.get("common_context") or ""
-                sections["common_context"] = (
-                    cc + "\n\n## Resolved Recall\n\n" + shared_recall
-                )
-            result = _mod.validate_and_create(
-                runbook,
-                sections,
-                "rt",
-                tmp_path / ".claude" / "agents",
-                plan_dir / "steps",
-                plan_dir / "orchestrator-plan.md",
-                metadata,
-                _mod.extract_cycles(body),
-                _mod.extract_phase_models(body),
-                _mod.extract_phase_preambles(body),
-            )
-        assert result is True
+            exit_code = _run_main(monkeypatch, runbook_path)
+        assert exit_code == 0
         agent = tmp_path / ".claude" / "agents" / "crew-rt.md"
         agent_content = agent.read_text()
         assert "Resolved Recall" in agent_content
@@ -272,27 +307,65 @@ class TestRecallInjectionE2E:
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Without artifact, agent has no Resolved Recall (NFR-3)."""
-        plan_dir = _setup_e2e(tmp_path, monkeypatch, "nr", self.SIMPLE_RUNBOOK)
-        runbook = plan_dir / "runbook.md"
-        content = runbook.read_text()
-        metadata, body = _mod.parse_frontmatter(content)
-        sections = _mod.extract_sections(body)
-        pt = _mod.detect_phase_types(body)
-        shared, phased = resolve_recall_for_runbook(runbook, pt)
-        assert shared == ""
-        assert phased == {}
-        result = _mod.validate_and_create(
-            runbook,
-            sections,
-            "nr",
-            tmp_path / ".claude" / "agents",
-            plan_dir / "steps",
-            plan_dir / "orchestrator-plan.md",
-            metadata,
-            _mod.extract_cycles(body),
-            _mod.extract_phase_models(body),
-            _mod.extract_phase_preambles(body),
-        )
-        assert result is True
+        _setup_e2e(tmp_path, monkeypatch, "nr", self.SIMPLE_RUNBOOK)
+        runbook_path = tmp_path / "plans" / "nr" / "runbook.md"
+        exit_code = _run_main(monkeypatch, runbook_path)
+        assert exit_code == 0
         agent = tmp_path / ".claude" / "agents" / "crew-nr.md"
         assert "Resolved Recall" not in agent.read_text()
+
+    def test_phase_recall_in_step_files(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        capsys: pytest.CaptureFixture[str],
+    ) -> None:
+        """Phase-tagged recall appears in step files for that phase."""
+        entries = (
+            "when writing recall artifacts — all phases\n"
+            "when editing skill files — phase 2 context (phase 2)"
+        )
+        artifact = ARTIFACT_TEMPLATE.format(entries=entries)
+        _setup_e2e(tmp_path, monkeypatch, "pr", self.MULTI_PHASE_RUNBOOK, artifact)
+        runbook_path = tmp_path / "plans" / "pr" / "runbook.md"
+        call_count = 0
+
+        def mock_run(cmd: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+            nonlocal call_count
+            call_count += 1
+            # First call resolves shared entries, second resolves phase 2
+            return _mock_result(
+                "Shared recall content."
+                if call_count == 1
+                else "Phase 2 recall content."
+            )
+
+        with patch.object(_mod.subprocess, "run", side_effect=mock_run):
+            exit_code = _run_main(monkeypatch, runbook_path)
+        captured = capsys.readouterr()
+        assert exit_code == 0, (
+            f"main() failed.\nstdout:\n{captured.out}\nstderr:\n{captured.err}"
+        )
+
+        # Phase 2 step file should contain phase recall
+        steps_dir = tmp_path / "plans" / "pr" / "steps"
+        step_files = sorted(steps_dir.glob("step-2-*.md"))
+        assert len(step_files) >= 1, (
+            f"No phase 2 step files in {list(steps_dir.iterdir())}"
+        )
+        step_content = step_files[0].read_text()
+        assert "Phase Recall" in step_content
+        assert "Phase 2 recall content" in step_content
+
+        # Phase 1 step file should NOT contain phase 2 recall
+        p1_files = sorted(steps_dir.glob("step-1-*.md"))
+        assert len(p1_files) >= 1
+        p1_content = p1_files[0].read_text()
+        assert "Phase 2 recall content" not in p1_content
+
+        # Shared recall in agent (not phase-specific)
+        # Multi-phase → check both phase agents
+        agent_p1 = tmp_path / ".claude" / "agents" / "crew-pr-p1.md"
+        agent_p2 = tmp_path / ".claude" / "agents" / "crew-pr-p2.md"
+        assert "Shared recall content" in agent_p1.read_text()
+        assert "Shared recall content" in agent_p2.read_text()
