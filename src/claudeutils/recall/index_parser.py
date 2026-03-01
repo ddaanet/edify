@@ -112,7 +112,7 @@ def _parse_new_format_line(
 
     return IndexEntry(
         key=trigger,
-        description="",
+        description=extras,
         referenced_file=current_file,
         section=current_section,
         keywords=frozenset(extract_keywords(trigger + " " + extras)),

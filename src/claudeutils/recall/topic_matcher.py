@@ -19,14 +19,7 @@ class ResolvedEntry:
 
 
 def build_inverted_index(entries: list[IndexEntry]) -> dict[str, list[IndexEntry]]:
-    """Build inverted index mapping keywords to entries containing them.
-
-    Args:
-        entries: List of IndexEntry objects
-
-    Returns:
-        Dictionary mapping keyword strings to lists of IndexEntry objects
-    """
+    """Build inverted index mapping keywords to entries containing them."""
     index: dict[str, list[IndexEntry]] = defaultdict(list)
     for entry in entries:
         for keyword in entry.keywords:
@@ -39,15 +32,8 @@ def get_candidates(
 ) -> set[IndexEntry]:
     """Get candidate entries matching prompt keywords.
 
-    Tokenizes prompt using the same rules as index entries, then returns
-    the union of all entries matching any prompt keyword.
-
-    Args:
-        prompt_text: Text to tokenize and match against index
-        inverted_index: Inverted index from build_inverted_index()
-
-    Returns:
-        Set of IndexEntry objects with keyword overlap
+    Tokenizes prompt using the same rules as index entries, then returns the
+    union of all entries matching any prompt keyword.
     """
     prompt_keywords = extract_keywords(prompt_text)
     candidates: set[IndexEntry] = set()
@@ -65,16 +51,7 @@ def score_and_rank(
 ) -> list[tuple[IndexEntry, RelevanceScore]]:
     """Score and rank candidates by relevance to prompt keywords.
 
-    Filters entries by relevance threshold and caps results to max_entries.
-
-    Args:
-        prompt_keywords: Set of keywords extracted from prompt
-        candidates: Set of candidate entries to score
-        threshold: Minimum score to include entry (default 0.3)
-        max_entries: Maximum entries to return (default None = all)
-
-    Returns:
-        List of (IndexEntry, RelevanceScore) tuples sorted by score descending
+    Filters by threshold, sorts by score descending, caps to max_entries.
     """
     scored = [
         (entry, score_relevance("hook", prompt_keywords, entry, threshold=threshold))
@@ -144,13 +121,7 @@ def format_output(resolved: list[ResolvedEntry]) -> TopicMatchResult:
     """Format resolved entries as dual-channel output.
 
     Produces agent context (full decision sections) and user-visible system
-    message (trigger list with line count).
-
-    Args:
-        resolved: List of ResolvedEntry objects
-
-    Returns:
-        TopicMatchResult with context and system_message fields
+    message (trigger list with injected line count).
     """
     if not resolved:
         return TopicMatchResult(context="", system_message="")
@@ -162,7 +133,11 @@ def format_output(resolved: list[ResolvedEntry]) -> TopicMatchResult:
         context_parts.append(
             f"{resolved_entry.content}\n\nSource: {resolved_entry.source_file}"
         )
-        trigger_list.append(resolved_entry.entry.key)
+        entry = resolved_entry.entry
+        trigger_line = (
+            f"{entry.key} | {entry.description}" if entry.description else entry.key
+        )
+        trigger_list.append(trigger_line)
 
     context = "\n\n".join(context_parts)
     context_lines = len(context.split("\n"))

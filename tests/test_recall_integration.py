@@ -157,11 +157,7 @@ def test_recall_report_formatting(tmp_path: Path) -> None:
 
 
 def test_recall_analysis_with_new_format(tmp_path: Path) -> None:
-    """Verify recall analysis works with new /when format and empty description.
-
-    The new format has no description field.
-    """
-    # Create index file in new format (empty description)
+    """Verify recall analysis works with /when format entries."""
     index_file = tmp_path / "index.md"
     index_file.write_text(
         "## agents/decisions/testing.md\n\n"
@@ -185,9 +181,9 @@ def test_recall_analysis_with_new_format(tmp_path: Path) -> None:
     # Parse index with new format
     entries = parse_memory_index(index_file)
     assert len(entries) == 3
-    # Verify entries have empty description
-    for entry in entries:
-        assert entry.description == ""
+    # Extras stored in description field
+    red_phase = next(e for e in entries if e.key == "TDD RED Phase")
+    assert red_phase.description == "verify behavior"
     # Verify keywords are extracted from trigger text
     assert all(entry.keywords for entry in entries)
 

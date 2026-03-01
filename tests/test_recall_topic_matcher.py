@@ -181,93 +181,89 @@ def test_score_candidates_ranks_by_relevance_and_filters(
         assert scores == sorted(scores, reverse=True)
 
 
-@pytest.mark.parametrize(
-    "setup_case",
-    ["happy_path", "missing_file", "missing_section"],
-)
-def test_resolve_entries(tmp_path: Path, setup_case: str) -> None:
-    """resolve_entries should extract sections and handle error cases.
+def test_resolve_entries_extracts_section_content(tmp_path: Path) -> None:
+    """resolve_entries returns content when file and section exist."""
+    decision_file = tmp_path / "agents" / "decisions" / "test.md"
+    decision_file.parent.mkdir(parents=True, exist_ok=True)
+    decision_file.write_text(
+        "# Test Decisions\n\n"
+        "## When Evaluating Recall System Effectiveness\n\n"
+        "Anti-pattern: Measuring without proper baseline\n\n"
+        "## Other Section\n\n"
+        "Other content here\n"
+    )
 
-    Test cases: happy path (file + section exists), missing file, missing section.
-    """
-    if setup_case == "happy_path":
-        decision_file = tmp_path / "agents" / "decisions" / "test.md"
-        decision_file.parent.mkdir(parents=True, exist_ok=True)
-        decision_file.write_text(
-            "# Test Decisions\n\n"
-            "## When Evaluating Recall System Effectiveness\n\n"
-            "Anti-pattern: Measuring without proper baseline\n\n"
-            "## Other Section\n\n"
-            "Other content here\n"
-        )
+    entry = IndexEntry(
+        key="evaluating recall system effectiveness",
+        description="test entry",
+        referenced_file="agents/decisions/test.md",
+        section="Test",
+        keywords=frozenset({"recall", "effectiveness"}),
+    )
+    score = RelevanceScore(
+        session_id="hook",
+        entry_key=entry.key,
+        score=0.8,
+        is_relevant=True,
+        matched_keywords={"recall", "effectiveness"},
+    )
 
-        entry = IndexEntry(
-            key="evaluating recall system effectiveness",
-            description="test entry",
-            referenced_file="agents/decisions/test.md",
-            section="Test",
-            keywords=frozenset({"recall", "effectiveness"}),
-        )
-        score = RelevanceScore(
-            session_id="hook",
-            entry_key=entry.key,
-            score=0.8,
-            is_relevant=True,
-            matched_keywords={"recall", "effectiveness"},
-        )
+    result = resolve_entries([(entry, score)], tmp_path)
 
-        result = resolve_entries([(entry, score)], tmp_path)
+    assert len(result) == 1
+    assert "Evaluating Recall System Effectiveness" in result[0].content
+    assert "Anti-pattern" in result[0].content
+    assert str(decision_file) == str(result[0].source_file)
 
-        assert len(result) == 1
-        assert "Evaluating Recall System Effectiveness" in result[0].content
-        assert "Anti-pattern" in result[0].content
-        assert str(decision_file) == str(result[0].source_file)
 
-    elif setup_case == "missing_file":
-        entry = IndexEntry(
-            key="nonexistent",
-            description="test entry",
-            referenced_file="agents/decisions/nonexistent.md",
-            section="Test",
-            keywords=frozenset({"test"}),
-        )
-        score = RelevanceScore(
-            session_id="hook",
-            entry_key=entry.key,
-            score=0.5,
-            is_relevant=True,
-            matched_keywords={"test"},
-        )
+def test_resolve_entries_skips_missing_file(tmp_path: Path) -> None:
+    """resolve_entries silently skips entries whose file does not exist."""
+    entry = IndexEntry(
+        key="nonexistent",
+        description="test entry",
+        referenced_file="agents/decisions/nonexistent.md",
+        section="Test",
+        keywords=frozenset({"test"}),
+    )
+    score = RelevanceScore(
+        session_id="hook",
+        entry_key=entry.key,
+        score=0.5,
+        is_relevant=True,
+        matched_keywords={"test"},
+    )
 
-        result = resolve_entries([(entry, score)], tmp_path)
+    result = resolve_entries([(entry, score)], tmp_path)
 
-        assert len(result) == 0
+    assert len(result) == 0
 
-    elif setup_case == "missing_section":
-        decision_file = tmp_path / "agents" / "decisions" / "test.md"
-        decision_file.parent.mkdir(parents=True, exist_ok=True)
-        decision_file.write_text(
-            "# Test Decisions\n\n## Some Other Section\n\nContent here\n"
-        )
 
-        entry = IndexEntry(
-            key="nonexistent section",
-            description="test entry",
-            referenced_file="agents/decisions/test.md",
-            section="Test",
-            keywords=frozenset({"test"}),
-        )
-        score = RelevanceScore(
-            session_id="hook",
-            entry_key=entry.key,
-            score=0.5,
-            is_relevant=True,
-            matched_keywords={"test"},
-        )
+def test_resolve_entries_skips_missing_section(tmp_path: Path) -> None:
+    """resolve_entries skips entries with no matching section heading."""
+    decision_file = tmp_path / "agents" / "decisions" / "test.md"
+    decision_file.parent.mkdir(parents=True, exist_ok=True)
+    decision_file.write_text(
+        "# Test Decisions\n\n## Some Other Section\n\nContent here\n"
+    )
 
-        result = resolve_entries([(entry, score)], tmp_path)
+    entry = IndexEntry(
+        key="nonexistent section",
+        description="test entry",
+        referenced_file="agents/decisions/test.md",
+        section="Test",
+        keywords=frozenset({"test"}),
+    )
+    score = RelevanceScore(
+        session_id="hook",
+        entry_key=entry.key,
+        score=0.5,
+        is_relevant=True,
+        matched_keywords={"test"},
+    )
 
-        assert len(result) == 0
+    result = resolve_entries([(entry, score)], tmp_path)
+
+    assert len(result) == 0
 
 
 def test_format_output_produces_context_and_system_parts() -> None:
