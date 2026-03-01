@@ -16,10 +16,14 @@ from claudeutils.worktree.remerge import remerge_learnings_md, remerge_session_m
 from claudeutils.worktree.resolve import resolve_learnings_md, resolve_session_md
 
 
-def _append_lifecycle_delivered(plans_dir: Path) -> None:
-    """Append delivered entry to lifecycle.md for reviewed plans."""
+def _append_lifecycle_delivered(plans_dir: Path) -> list[Path]:
+    """Append delivered entry to lifecycle.md for reviewed plans.
+
+    Returns modified lifecycle.md paths.
+    """
     if not plans_dir.exists():
-        return
+        return []
+    modified: list[Path] = []
     today = datetime.now(UTC).date().isoformat()
     for plan_dir in sorted(plans_dir.iterdir()):
         if not plan_dir.is_dir():
@@ -30,6 +34,8 @@ def _append_lifecycle_delivered(plans_dir: Path) -> None:
         lifecycle_file = plan_dir / "lifecycle.md"
         with lifecycle_file.open("a") as f:
             f.write(f"{today} delivered — _worktree merge\n")
+        modified.append(lifecycle_file)
+    return modified
 
 
 def _format_git_error(e: subprocess.CalledProcessError) -> str:
@@ -285,13 +291,16 @@ def _validate_merge_result(slug: str) -> None:
 
 
 def _phase4_merge_commit_and_precommit(slug: str) -> None:
-    """Phase 4: Commit merge and run precommit validation.
+    """Phase 4: Stage lifecycle.md, commit merge, run precommit validation.
 
-    If MERGE_HEAD exists (merge in progress), always commit even if no staged
-    changes (use --allow-empty). Otherwise, only commit if staged changes exist.
+    Stages lifecycle 'delivered' entries before committing so they are included
+    in the merge commit. If MERGE_HEAD exists, always commits (--allow-empty).
+    Otherwise commits only if staged changes exist.
     """
     remerge_learnings_md()
     remerge_session_md(slug)
+    for lf in _append_lifecycle_delivered(Path("plans")):
+        _git("add", str(lf))
 
     merge_in_progress = (
         subprocess.run(
@@ -376,5 +385,3 @@ def merge(slug: str) -> None:
         _phase2_resolve_submodule(slug)
         _phase3_merge_parent(slug)
         _phase4_merge_commit_and_precommit(slug)
-
-    _append_lifecycle_delivered(Path("plans"))

@@ -20,6 +20,7 @@ from claudeutils.worktree.git_ops import (
     _get_worktree_path_for_branch,
     _git,
     _is_branch_merged,
+    _is_merge_of,
     _is_submodule_dirty,
     _parse_worktree_list,
     _probe_registrations,
@@ -291,11 +292,28 @@ def _check_not_dirty(slug: str, worktree_path: Path) -> None:  # noqa: ARG001
         _fail(msg, 2)
 
 
-def _update_session(slug: str) -> None:
+def _update_session_and_amend(slug: str) -> bool:
     session_md_path = Path("agents/session.md")
     if not session_md_path.exists():
-        return
+        return False
     remove_slug_marker(session_md_path, slug)
+    if not _is_merge_of(slug):
+        return False
+    parent_status = _git("status", "--porcelain", check=False)
+    other_dirty = [
+        line
+        for line in parent_status.strip().split("\n")
+        if line and not line.endswith("agents/session.md")
+    ]
+    if other_dirty:
+        click.echo("Warning: skipping session amend (parent repo dirty)")
+        return False
+    status_output = _git("status", "--porcelain", "agents/session.md", check=False)
+    if not status_output.strip():
+        return False
+    _git("add", "agents/session.md")
+    _git("commit", "--amend", "--no-edit")
+    return True
 
 
 @worktree.command()
@@ -317,7 +335,7 @@ def rm(slug: str, force: bool) -> None:  # noqa: FBT001
             branch_exists = True
             removal_type = "focused"
         parent_reg, submodule_reg = _probe_registrations(worktree_path)
-        _update_session(slug)
+        amended = _update_session_and_amend(slug)
 
         if parent_reg or submodule_reg:
             _remove_worktrees(worktree_path, parent_reg, submodule_reg)
@@ -335,9 +353,10 @@ def rm(slug: str, force: bool) -> None:  # noqa: FBT001
             _delete_branch(slug, removal_type)
             if warning := _delete_submodule_branch(slug):
                 click.echo(warning)
+        amend_note = " Merge commit amended." if amended else ""
         detail = " (focused session only)" if removal_type == "focused" else ""
         prefix = "Removed worktree" if removal_type is None else "Removed"
-        click.echo(f"{prefix} {slug}{detail}")
+        click.echo(f"{prefix} {slug}{detail}{amend_note}")
     except subprocess.CalledProcessError as e:
         stderr = e.stderr.strip() if isinstance(e.stderr, str) else ""
         _fail(f"git error: {stderr or e}")
