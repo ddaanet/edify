@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-01
 
-**Status:** UPS Phase 2 index caching delivered (2 TDD cycles, corrector-reviewed). Phase 3 hook integration next.
+**Status:** UPS Phase 3 hook integration delivered (3 TDD cycles, corrector-reviewed). All 10 runbook cycles complete. Deliverable review next.
 
 ## Completed This Session
 
@@ -32,14 +32,23 @@
 - Triage: no-classification
 - Report: `plans/userpromptsubmit-topic/reports/phase2-review.md`
 
+**UPS Phase 3 — hook integration (3 TDD cycles):**
+- 3.1: `match_topics()` entry point + Tier 2.75 detector block in hook + integration tests
+- 3.2: Additive with commands — test passed in RED (parallel accumulation confirmed)
+- 3.3: No-match passthrough — test passed in RED (empty result guards confirmed)
+- Corrector: 3 minor fixes (deduplicated prompt tokenization in get_candidates, removed redundant test, strengthened no-match assertions)
+- Triage: no-classification
+- Report: `plans/userpromptsubmit-topic/reports/phase3-review.md`
+
 ## Pending Tasks
 
 - [x] **UPS matching pipeline** — `/inline plans/userpromptsubmit-topic` | sonnet
   - Plan: userpromptsubmit-topic | Phase 1: Cycles 1.1-1.5 + light checkpoint
 - [x] **UPS index caching** — `/inline plans/userpromptsubmit-topic` | sonnet
   - Plan: userpromptsubmit-topic | Phase 2: Cycles 2.1-2.2 + light checkpoint
-- [ ] **UPS hook integration** — `/inline plans/userpromptsubmit-topic` | sonnet
+- [x] **UPS hook integration** — `/inline plans/userpromptsubmit-topic` | sonnet
   - Plan: userpromptsubmit-topic | Phase 3: Cycles 3.1-3.3 + full checkpoint
+- [ ] **Review UPS topic** — `/deliverable-review plans/userpromptsubmit-topic` | opus | restart
 - [ ] **Review TDD dispatch** — `/deliverable-review plans/inline-tdd-dispatch` | opus | restart
 
 ## Blockers / Gotchas
@@ -49,7 +58,7 @@
 
 ## Next Steps
 
-Execute Phase 3 (hook integration, Cycles 3.1-3.3).
+Deliverable review for userpromptsubmit-topic (all 10 TDD cycles across 3 phases complete).
 
 ## Reference Files
 
@@ -58,5 +67,6 @@ Execute Phase 3 (hook integration, Cycles 3.1-3.3).
 - `plans/userpromptsubmit-topic/tdd-recall-artifact.md` — flat recall for sub-agent injection
 - `plans/userpromptsubmit-topic/reports/review.md` — Phase 1 corrector review
 - `plans/userpromptsubmit-topic/reports/phase2-review.md` — Phase 2 corrector review
+- `plans/userpromptsubmit-topic/reports/phase3-review.md` — Phase 3 corrector review
 - `plans/inline-tdd-dispatch/requirements.md` — cycle-scoping requirements
 - `plans/inline-tdd-dispatch/reports/review.md` — inline TDD dispatch corrector review
