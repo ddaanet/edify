@@ -1,0 +1,7 @@
+- **Classification:** Defect
+- **Implementation certainty:** High — root cause identified, fix known (move function call + add staging)
+- **Requirement stability:** High — 3 FRs mechanism-specified, scope bounded
+- **Behavioral code check:** Yes — changes operation ordering in merge.py (moves lifecycle write before commit, adds staging). Moderate minimum per "when behavioral code" decision.
+- **Work type:** Production — delivers bug fix to worktree tooling
+- **Artifact destination:** production (`src/claudeutils/worktree/`)
+- **Evidence:** Brief identified observed ≠ expected behavior (dirty-state warning after clean merge). Root cause confirmed in /requirements codebase discovery: `_append_lifecycle_delivered` at merge.py:380 runs after phase 4 commit. "When behavioral code" decision confirms Moderate minimum for changed logic paths. Defect classification per Cynefin Complicated domain — cause analyzed, fix knowable.
