@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-01
 
-**Status:** Branch complete. Planstate fix delivered, execute-skill-dispatch triaged as Moderate → `/runbook` on main.
+**Status:** Execute-skill-dispatch implemented. UPS hook injects task commands for `x`, execute-rule prose aligned. Pending deliverable review.
 
 ## Completed This Session
 
@@ -28,15 +28,26 @@
 - Wrote `plans/execute-skill-dispatch/classification.md`
 - Routed to `/runbook` — skip design, requirements are mechanism-specified
 
+**Execute-skill-dispatch implementation:**
+- Tier 2 assessment: 5 TDD cycles + 1 general step, lightweight delegation
+- FR-2: Added `_extract_execute_command()`, `_try_planstate_command()`, `_extract_plan_name()` to UPS hook
+- Hook parses `agents/session.md` when `x` fires, extracts first eligible task command, injects `Invoke: <command>` into additionalContext
+- Priority: in-progress `[>]` over pending `[ ]`; planstate-derived commands override session.md static commands (lazy import, C-1 performance safe)
+- FR-1/FR-3: execute-rule.md MODE 2 updated — "Invoke the task's backtick command" with "Do not reinterpret" clause
+- Tests extracted to `tests/test_userpromptsubmit_execute.py` (7 tests: injection, filtering, priority, fallback, planstate, backward-compat)
+- Corrector review: 4 minor fixes (docstring accuracy, fixture character, assertion strength, C-3 backward-compat test)
+- Precommit green: 1373 passed, 1 xfail
+
 ## Pending Tasks
 
 - [x] **Fix planstate detector** — `/design plans/fix-planstate-detector/requirements.md` | sonnet
   - Plan: fix-planstate-detector | Status: requirements
   - Missing `outlined` status: outline.md grouped under `requirements` fallback
-- [ ] **Execute skill dispatch** — `/runbook plans/execute-skill-dispatch/requirements.md` | sonnet
+- [x] **Execute skill dispatch** — `/runbook plans/execute-skill-dispatch/requirements.md` | sonnet
   - Plan: execute-skill-dispatch | Status: requirements
   - UPS hook injects task command for `#execute` mode; execute-rule prose alignment
+- [ ] **Review skill dispatch** — `/deliverable-review plans/execute-skill-dispatch` | opus | restart
 
 ## Next Steps
 
-Branch complete. Merge to main, then `/runbook plans/execute-skill-dispatch/requirements.md` on main (Moderate classification, skip design).
+Branch work complete.
