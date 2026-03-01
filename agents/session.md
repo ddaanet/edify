@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-01
 
-**Status:** Bug fix complete — lifecycle.md ordering in merge phase 4. Awaiting deliverable review.
+**Status:** Branch complete — deliverable review passed, ready to merge.
 
 ## Completed This Session
 
@@ -10,11 +10,19 @@
 - 2 integration tests: merge→rm amend sequence, lifecycle in merge commit tree
 - Corrector review clean (plans/wt-rm-dirty/reports/review.md)
 - 1390 tests pass, precommit OK
+- [x] **Review wt-rm-dirty** — 0 Critical, 0 Major, 0 Minor (new). Report: plans/wt-rm-dirty/reports/deliverable-review.md
 
 ## Pending Tasks
 
-- [ ] **Review wt-rm-dirty** — `/deliverable-review plans/wt-rm-dirty` | opus | restart
+- [ ] **Worktree exit ceremony** — `/requirements plans/wt-exit-ceremony/brief.md` | sonnet
+  - Plan: wt-exit-ceremony | Brief: plans/wt-exit-ceremony/brief.md
+- [ ] **Discuss-to-pending chain** — `/requirements plans/discuss-to-pending/brief.md` | sonnet
+  - Plan: discuss-to-pending | Brief: plans/discuss-to-pending/brief.md
+
+## Learnings
+
+- When `d:` mode validates a proposed change (affirmative verdict), chain to `p:` evaluation — the agreement IS a pending task trigger. Three consecutive misses in same session confirm this is a behavioral gap, not a one-off.
 
 ## Next Steps
 
-Branch work complete after deliverable review.
+Merge to main: `wt merge wt-rm-dirty` then `wt-rm wt-rm-dirty`.
