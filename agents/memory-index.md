@@ -178,10 +178,12 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when naming tasks for worktrees | branch-suitable alphanumeric constraint
 /when requiring clean git tree | no stash fragile merge rebase
 /when failed merge leaves debris | abort untracked files clean
-/when git lock error occurs | never delete lock report wait
+/when git lock error occurs | never delete lock retry concurrent worktree contention
 /when tracking worktree tasks in session.md | inline marker filesystem query
 /when comparing file versions across branches | diff content not line count
 /when validating worktree merges | session.md merge autostrategy remerge
+/when merging completed tasks from branch | filter completed canceled additive union
+/when choosing task status markers | notation checkbox dagger failed blocked canceled
 /when cli command fails and raw commands are denied | routing signal wrapper force retry
 /when classifyHandoffIfNeeded bug occurs | foreground Task calls fail background works
 /when sub-agents cannot spawn sub-agents | Task MCP hooks unavailable

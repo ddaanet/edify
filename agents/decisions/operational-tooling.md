@@ -98,6 +98,33 @@ Git workflow, platform constraints, code patterns, and naming conventions.
 
 **Evidence:** Merge 1 dropped "Update grounding skill" from Worktree Tasks. Merge 2 left orphaned entry + malformed blocker line. Fix: `remerge_session_md` in resolve.py.
 
+### When Merging Completed Tasks From Branch
+
+**Decision Date:** 2026-03-01
+
+**Anti-pattern:** Autostrategy's additive union (`new_blocks` in `_merge_session_contents`) carries branch-completed `[x]` and branch-canceled `[–]` tasks into main's Pending Tasks. These are ephemeral — created and resolved within the worktree session. On main, they cause duplicate-section validator failures.
+
+**Correct pattern:** Filter completed and canceled tasks from the additive merge. In `resolve.py` line 85, exclude blocks whose first line contains `- [x]` or `- [–]`. The branch's deliverables are in the merge commit; the task entries have no value on main. Only uncompleted `[ ]`, blocked `[!]`, and failed `[†]` tasks should carry over.
+
+**Evidence:** continuation-prepend merge brought 4 `[x]` tasks into Blocked/Terminal section. Precommit validator caught "task in both Pending and Worktree." Manual fix required.
+
+### When Choosing Task Status Markers
+
+**Decision Date:** 2026-03-01
+
+**Decision:** Task status notation uses single-width characters that are visually self-documenting:
+
+| Marker | Status | Mnemonic |
+|--------|--------|----------|
+| `[ ]` | Pending | Empty — work not started |
+| `[x]` | Completed | GFM standard checkbox |
+| `[>]` | In-progress | Arrow — forward motion |
+| `[!]` | Blocked | Exclamation — attention |
+| `[†]` | Failed | Dagger — dead |
+| `[–]` | Canceled | En dash — struck through |
+
+**Rationale:** Symbols that carry meaning through visual form (`!`, `–`, `>`, `†`) beat letters requiring convention lookup (`B`, `C`, `W`, `F`). Only `[ ]` and `[x]` are valid GFM checkboxes (per spec §5.3); all others are text conventions parsed by project tooling. Changed `[✗]` → `[†]` because `✗` (U+2717) is visually confusable with `x` (U+0078) — different codepoints but near-identical in many fonts. `†` (U+2020 dagger) is unmistakable and transparently means "dead."
+
 ## .Known Issues
 
 ### When CLI Command Fails And Raw Commands Are Denied

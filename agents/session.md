@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-01
 
-**Status:** 4 worktrees active. Pushback grounding and runbook recall expansion merged. Worktree-ad-hoc-task requirements captured.
+**Status:** 4 worktrees active (3 original + 1 deliverable review). Continuation-prepend merged. RCA: lock contention hook fix. Decisions: autostrategy filter, task notation [✗]→[†].
 
 ## Completed This Session
 
@@ -19,6 +19,22 @@
 - **Requirements: worktree-ad-hoc-task** — captured requirements for adding task to session.md before `_worktree new` when task absent from Pending Tasks
   - Plan: worktree-ad-hoc-task | Status: requirements
   - Skill-layer fix only (SKILL.md Mode A), no CLI changes
+- **Continuation-prepend merge** — worktree merged to main and removed
+  - Branch delivered: continuation-prepend plan, cooperative-protocol-gaps classification, integration tests
+  - Validator failure during merge: 4 `[x]` tasks from branch leaked into Pending (autostrategy bug)
+  - Manual fix: removed completed tasks, amended merge commit
+- **RCA: lock contention** — 3-layer root cause analysis
+  - Hook message fixed: "retry the git command" → "Retry your git command — do not delete lock files"
+  - Decision updated: `operational-tooling.md` "When git lock error occurs" — concurrent worktree contention
+  - Learning added: "When hook messages conflict with behavioral rules"
+- **Design-context-gate brief** — `/design` tail-call decision based on context budget
+  - Mechanism: UPS hook injects context % from statusline infrastructure (already exists)
+  - Threshold needs empirical calibration
+- **Deliverable review: runbook-recall-expansion worktree** — created with slug `runbook-recall-expansion`
+- **Decisions written** — `operational-tooling.md`:
+  - "When merging completed tasks from branch" — filter `[x]`/`[–]` from additive union
+  - "When choosing task status markers" — `[✗]` → `[†]` (dagger = dead, visually distinct from `[x]`)
+  - Memory index updated with both entries
 
 ## Pending Tasks
 
@@ -123,6 +139,13 @@
   - Catch index.lock errors, retry after model latency (no explicit sleep)
   - Bounded retries (3 attempts), report after exhaustion
   - Concurrent worktree sessions cause transient lock contention on shared .git
+- [ ] **Merge completed filter** — filter `[x]` and `[–]` tasks from merge additive union in `resolve.py` | sonnet
+  - Single-line fix: exclude blocks whose first line matches completed/canceled markers
+  - Prevents branch-completed tasks from leaking into main's Pending Tasks
+- [ ] **Task notation migration** — replace `[✗]` → `[†]` across codebase | sonnet
+  - 23 files reference ✗; active files: execute-rule.md, task-failure-lifecycle.md, error-classification.md, handoff skill, session.md, validators, justfiles
+  - Update `extract_task_blocks` regex, session-structure validator
+  - Plans/reports are historical — update only active behavioral files
 - [ ] **Design context gate** — `/design plans/design-context-gate/brief.md` | sonnet
   - Plan: design-context-gate | Status: brief
   - /design tail-call /inline only when context budget allows, otherwise handoff+commit
@@ -283,7 +306,7 @@
 - Inline TDD after full codebase exploration produces test-after with ceremony. All 15 tests passed on first attempt — no behavioral RED. Must delegate to test-driver in fresh context when task is marked TDD and design session loaded implementation context. [from: runbook-recall-expansion]
 ## Next Steps
 
-4 worktrees active (fix-planstate-detector, ups-topic-injection, task-classification, continuation-prepend). Userpromptsubmit-topic worktree still registered (merged, needs `wt-rm userpromptsubmit-topic`). Merge returning worktrees as they complete via `wt merge <slug>`. Worktree-ad-hoc-task ready for `/design`.
+4 worktrees active (fix-planstate-detector, ups-topic-injection, task-classification, runbook-recall-expansion). Userpromptsubmit-topic worktree still registered (merged, needs `wt-rm userpromptsubmit-topic`). Mechanical tasks ready: autostrategy completed filter (single-line fix), task notation migration (23 files). Learnings at 70 lines — approaching `/codify` threshold.
 
 ## Reference Files
 

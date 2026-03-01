@@ -355,3 +355,7 @@ Outline for worktree merge ceremony. Absorbed into worktree-skill plan.
 ## runbook (validation)
 
 Runbook validation reports (lifecycle, model-tags, red-plausibility, test-counts). Intermediate work absorbed into runbook-quality-gates.
+
+## continuation-prepend
+
+Continuation passing protocol gaps: cooperative protocol compliance for skills receiving continuation chains. Deliverables: `plans/continuation-prepend/plan.md` (continuation prepend design), `plans/cooperative-protocol-gaps/` (protocol gap classification), integration tests for continuation passing. Reviewed via deliverable-review with fix cycle.
