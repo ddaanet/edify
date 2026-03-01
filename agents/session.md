@@ -4,4 +4,4 @@
 
 ## Pending Tasks
 
-- [ ] **Diagnose wt rm dirty-state** — `plans/wt-rm-dirty/brief.md` | sonnet
+- [>] **Fix wt rm dirty-state** — `/inline plans/wt-rm-dirty execute` | sonnet
