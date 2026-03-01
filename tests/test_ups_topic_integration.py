@@ -170,3 +170,45 @@ def test_topic_injection_additive_with_commands(
     assert "topic" in system_message.lower() or "recall" in system_message.lower(), (
         "systemMessage missing topic indicator"
     )
+
+
+def test_topic_injection_silent_on_no_match(
+    tmp_path: Path, monkeypatch: MonkeyPatch, tmp_memory_index: Path
+) -> None:
+    """Hook passes through silently when no keywords match memory-index.
+
+    Verifies no-match case: prompt with unrelated keywords produces no topic output.
+    """
+    # Setup
+    tmp_dir = tmp_memory_index.parent.parent
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_dir))
+
+    # Create tmp directory for cache
+    tmp_cache_dir = tmp_dir / "tmp"
+    tmp_cache_dir.mkdir(exist_ok=True)
+
+    # Call hook with prompt containing no matching keywords
+    prompt = "hello world"
+    result = call_hook(prompt)
+
+    # Assertions: Either empty dict (complete pass-through) or no topic content
+    if result == {}:
+        # Complete pass-through — expected behavior
+        return
+
+    # If output exists, verify no topic-related content injected
+    assert "hookSpecificOutput" in result or "systemMessage" in result
+
+    # Check additionalContext (if present) has no topic content
+    if "hookSpecificOutput" in result:
+        additional_context = result["hookSpecificOutput"].get("additionalContext", "")
+        assert "topic" not in additional_context.lower(), (
+            "additionalContext should not contain topic content on no-match"
+        )
+
+    # Check systemMessage (if present) has no topic marker
+    if "systemMessage" in result:
+        system_message = result["systemMessage"]
+        assert "topic" not in system_message.lower(), (
+            "systemMessage should not mention topic on no-match"
+        )
