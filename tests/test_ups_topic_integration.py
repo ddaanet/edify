@@ -112,3 +112,61 @@ def test_hook_topic_injection_end_to_end(
     assert "systemMessage" in result
     system_message = result["systemMessage"]
     assert "topic" in system_message.lower()
+
+
+def test_topic_injection_additive_with_commands(
+    tmp_path: Path, monkeypatch: MonkeyPatch, tmp_memory_index: Path
+) -> None:
+    """Topic injection works additively with command expansion.
+
+    Both features fire independently and contribute to output:
+    - Command "s" expands to status instructions in additionalContext
+    - Topic keywords match memory-index entries, resolve to decision content
+    - Both features visible in systemMessage (joined by " | ")
+    """
+    # Setup
+    tmp_dir = tmp_memory_index.parent.parent
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_dir))
+
+    # Create tmp directory for cache
+    tmp_cache_dir = tmp_dir / "tmp"
+    tmp_cache_dir.mkdir(exist_ok=True)
+
+    # Call hook with prompt: command "s" + topic keywords on separate lines
+    # Command "s" triggers status expansion
+    # Keywords "recall" matches memory-index entry "recall system works"
+    prompt = "s\nhow does recall work"
+    result = call_hook(prompt)
+
+    # Verify output structure
+    assert result != {}, "Hook should produce output with command + topic"
+    assert "hookSpecificOutput" in result
+    assert "additionalContext" in result["hookSpecificOutput"]
+
+    additional_context = result["hookSpecificOutput"]["additionalContext"]
+
+    # additionalContext should contain BOTH features:
+    # 1. Command expansion: "s" command text (contains "status" or "#status")
+    # 2. Topic decision: resolved section body (contains "recall system")
+    assert "[#status]" in additional_context or "#status" in additional_context, (
+        "additionalContext missing command expansion"
+    )
+    assert (
+        "recall system" in additional_context.lower()
+        or "implementation" in additional_context.lower()
+    ), "additionalContext missing topic decision content"
+
+    # systemMessage should show both features are active
+    # Both should be joined by "|" separator
+    assert "systemMessage" in result
+    system_message = result["systemMessage"]
+    assert " | " in system_message, (
+        "systemMessage missing separator — features not both present"
+    )
+    # Verify both features visible
+    assert "status" in system_message.lower() or "s" in system_message.lower(), (
+        "systemMessage missing command indicator"
+    )
+    assert "topic" in system_message.lower() or "recall" in system_message.lower(), (
+        "systemMessage missing topic indicator"
+    )
