@@ -278,3 +278,67 @@ Implement cleanup.
         assert "**Corrector Agent:** none" in content, (
             f"Expected corrector agent as none for single-phase.\n{content}"
         )
+
+    def test_orchestrator_plan_boundaries_and_summaries(self) -> None:
+        """Orchestrator plan marks phase boundaries and phase summaries."""
+        content = generate_default_orchestrator(
+            "test-job",
+            cycles=[
+                {
+                    "major": 1,
+                    "minor": 1,
+                    "number": "1.1",
+                    "title": "First",
+                    "content": "test 1",
+                },
+                {
+                    "major": 1,
+                    "minor": 2,
+                    "number": "1.2",
+                    "title": "Second",
+                    "content": "test 2",
+                },
+                {
+                    "major": 2,
+                    "minor": 1,
+                    "number": "2.1",
+                    "title": "Third",
+                    "content": "test 3",
+                },
+            ],
+            inline_phases={3: "inline phase 3 content"},
+            phase_models={1: "sonnet", 2: "opus", 3: "haiku"},
+        )
+
+        # Check PHASE_BOUNDARY markers on last step of each phase
+        assert "- step-1-2.md | Phase 1 | sonnet | 30 | PHASE_BOUNDARY" in content, (
+            f"Expected PHASE_BOUNDARY marker for last phase 1 step.\n{content}"
+        )
+        assert "- step-2-1.md | Phase 2 | opus | 30 | PHASE_BOUNDARY" in content, (
+            f"Expected PHASE_BOUNDARY marker for last phase 2 step.\n{content}"
+        )
+
+        # Check inline phase format: - INLINE | Phase N | —
+        assert "- INLINE | Phase 3 | —" in content, (
+            f"Expected inline phase format.\n{content}"
+        )
+
+        # Check Phase Summaries section exists
+        assert "## Phase Summaries" in content, (
+            f"Expected Phase Summaries section.\n{content}"
+        )
+
+        # Check phase summary structure: ### Phase N: title
+        assert "### Phase 1:" in content, (
+            f"Expected Phase 1 summary subsection.\n{content}"
+        )
+        assert "### Phase 2:" in content, (
+            f"Expected Phase 2 summary subsection.\n{content}"
+        )
+        assert "### Phase 3:" in content, (
+            f"Expected Phase 3 summary subsection.\n{content}"
+        )
+
+        # Check IN:/OUT: bullet items in summaries
+        assert "- IN:" in content, f"Expected IN: bullets in summaries.\n{content}"
+        assert "- OUT:" in content, f"Expected OUT: bullets in summaries.\n{content}"

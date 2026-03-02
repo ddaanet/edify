@@ -234,7 +234,7 @@ class TestMixedRunbookWithInline:
         )
 
         orch_content = (tmp_path / orch_path).read_text()
-        assert "Execution: inline" in orch_content
+        assert "- INLINE | Phase" in orch_content
 
 
 class TestInlineOnlyRunbook:
@@ -315,7 +315,7 @@ class TestInlineOnlyRunbook:
         )
 
         orch_content = (tmp_path / orch_path).read_text()
-        assert "Execution: inline" in orch_content
+        assert "- INLINE | Phase" in orch_content
         assert "steps/step-" not in orch_content
 
 
