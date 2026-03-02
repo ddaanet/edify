@@ -15,6 +15,7 @@ _spec.loader.exec_module(_mod)  # type: ignore[union-attr]
 
 assemble_phase_files = _mod.assemble_phase_files
 extract_phase_models = _mod.extract_phase_models
+extract_step_metadata = _mod.extract_step_metadata
 generate_default_orchestrator = _mod.generate_default_orchestrator
 parse_frontmatter = _mod.parse_frontmatter
 extract_sections = _mod.extract_sections
@@ -342,3 +343,54 @@ Implement cleanup.
         # Check IN:/OUT: bullet items in summaries
         assert "- IN:" in content, f"Expected IN: bullets in summaries.\n{content}"
         assert "- OUT:" in content, f"Expected OUT: bullets in summaries.\n{content}"
+
+    def test_max_turns_extraction_and_propagation(self) -> None:
+        """Max Turns extracted from metadata and propagated to orchestrator."""
+        cycle_with_max_turns = {
+            "major": 1,
+            "minor": 1,
+            "number": "1.1",
+            "title": "First",
+            "content": "**MAX TURNS**: 25\n\nTest content",
+        }
+        cycle_default_max_turns = {
+            "major": 1,
+            "minor": 2,
+            "number": "1.2",
+            "title": "Second",
+            "content": "Test content without max turns",
+        }
+
+        # Test extract_step_metadata
+        metadata_with_max = extract_step_metadata(cycle_with_max_turns["content"])
+        assert "max_turns" in metadata_with_max, (
+            f"Expected max_turns in metadata. Got {metadata_with_max}"
+        )
+        assert metadata_with_max["max_turns"] == 25, (
+            f"Expected max_turns=25, got {metadata_with_max.get('max_turns')}"
+        )
+
+        metadata_default = extract_step_metadata(cycle_default_max_turns["content"])
+        assert "max_turns" in metadata_default, (
+            f"Expected max_turns in metadata. Got {metadata_default}"
+        )
+        assert metadata_default["max_turns"] == 30, (
+            f"Expected max_turns=30 (default), got {metadata_default.get('max_turns')}"
+        )
+
+        # Test orchestrator plan uses extracted max_turns
+        content = generate_default_orchestrator(
+            "test-job",
+            cycles=[cycle_with_max_turns, cycle_default_max_turns],
+            phase_models={1: "sonnet"},
+        )
+
+        # Step with explicit max turns should show 25
+        assert "- step-1-1.md | Phase 1 | sonnet | 25" in content, (
+            f"Expected max_turns=25 in step entry.\n{content}"
+        )
+
+        # Step with default max turns should show 30
+        assert "- step-1-2.md | Phase 1 | sonnet | 30 | PHASE_BOUNDARY" in content, (
+            f"Expected max_turns=30 in step entry.\n{content}"
+        )
