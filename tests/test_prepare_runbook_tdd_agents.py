@@ -24,6 +24,7 @@ extract_sections = _mod.extract_sections
 extract_cycles = _mod.extract_cycles
 extract_phase_models = _mod.extract_phase_models
 extract_phase_preambles = _mod.extract_phase_preambles
+generate_default_orchestrator = _mod.generate_default_orchestrator
 
 
 _RUNBOOK_PURE_TDD = """\
@@ -346,3 +347,57 @@ class TestStepFileSplitting:
         assert "step-1-1.md" in step_files
         assert "step-1-1-test.md" not in step_files
         assert "step-1-1-impl.md" not in step_files
+
+
+_TDD_CYCLES = [
+    {
+        "number": "1.1",
+        "major": 1,
+        "minor": 1,
+        "content": "**Execution Model**: sonnet\n**Max Turns**: 25\n",
+    },
+    {
+        "number": "1.2",
+        "major": 1,
+        "minor": 2,
+        "content": "**Execution Model**: sonnet\n**Max Turns**: 25\n",
+    },
+]
+
+_GENERAL_STEPS = {"1.1": "**Execution Model**: sonnet\n**Max Turns**: 25\nWork here.\n"}
+
+
+def test_orchestrator_plan_tdd_role_markers() -> None:
+    """TDD step entries include TEST/IMPLEMENT role markers; general steps do
+    not."""
+    tdd_plan = generate_default_orchestrator(
+        "testplan",
+        cycles=_TDD_CYCLES,
+        default_model="sonnet",
+    )
+
+    # Test step entries have TEST marker, impl step entries have IMPLEMENT marker
+    assert "step-1-1-test.md | Phase 1 | sonnet | 25 | TEST" in tdd_plan
+    assert "step-1-1-impl.md | Phase 1 | sonnet | 25 | IMPLEMENT" in tdd_plan
+
+    # TEST appears before IMPLEMENT for each cycle
+    test_pos = tdd_plan.index("step-1-1-test.md")
+    impl_pos = tdd_plan.index("step-1-1-impl.md")
+    assert test_pos < impl_pos, "TEST entry must appear before IMPLEMENT entry"
+
+    # No single unsplit entry for TDD cycles
+    assert "step-1-1.md" not in tdd_plan
+
+    # Plan associates TEST steps with tester agent and IMPLEMENT steps with implementer
+    assert "tester" in tdd_plan
+    assert "implementer" in tdd_plan
+
+    # General runbook step entries have no role marker
+    general_plan = generate_default_orchestrator(
+        "testgeneral",
+        steps=_GENERAL_STEPS,
+        default_model="sonnet",
+    )
+    assert "| TEST" not in general_plan
+    assert "| IMPLEMENT" not in general_plan
+    assert "step-1-1.md | Phase 1 | sonnet | 25" in general_plan
