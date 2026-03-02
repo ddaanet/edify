@@ -17,6 +17,20 @@ MEMORY_INDEX_CONTENT = (
 )
 
 
+def test_missing_index_returns_empty(tmp_path: Path) -> None:
+    """get_or_build_index returns empty results for nonexistent index_path."""
+    nonexistent = tmp_path / "missing-memory-index.md"
+
+    entries, inverted_index = get_or_build_index(nonexistent, tmp_path)
+
+    assert entries == []
+    assert inverted_index == {}
+
+    # No cache file should be created
+    cache_files = list(tmp_path.glob("tmp/topic-index-*.json"))
+    assert len(cache_files) == 0
+
+
 def test_cache_stores_index_to_project_tmp(tmp_path: Path) -> None:
     """get_or_build_index should build and cache index to project tmp."""
     memory_index = tmp_path / "memory-index.md"

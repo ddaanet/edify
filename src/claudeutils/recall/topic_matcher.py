@@ -70,7 +70,12 @@ def score_and_rank(
 
 
 def _capitalize_heading(text: str) -> str:
-    """Capitalize heading text: normal words capitalized, all-caps preserved."""
+    """Capitalize heading text: normal words capitalized, all-caps preserved.
+
+    Note: Same pattern exists in when/resolver.py:_build_heading.
+    Not extracted — introducing when→recall dependency for a one-liner
+    is disproportionate to the duplication risk.
+    """
     words = text.split()
     return " ".join(w if w.isupper() else w.capitalize() for w in words)
 
@@ -257,8 +262,11 @@ def get_or_build_index(
     Returns:
         Tuple of (entries list, inverted index dict)
     """
+    if not index_path.exists():
+        return [], {}
+
     cache_path = _get_cache_path(index_path, project_dir)
-    source_mtime = index_path.stat().st_mtime if index_path.exists() else 0.0
+    source_mtime = index_path.stat().st_mtime
 
     if cache_path.exists():
         try:

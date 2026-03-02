@@ -66,10 +66,7 @@ def test_hook_topic_injection_end_to_end(
     additional_context = result["hookSpecificOutput"]["additionalContext"]
 
     # Should contain resolved decision content
-    assert (
-        "test decision content" in additional_context
-        or "hook" in additional_context.lower()
-    )
+    assert "test decision content" in additional_context
 
     # systemMessage should contain topic marker
     assert "systemMessage" in result
