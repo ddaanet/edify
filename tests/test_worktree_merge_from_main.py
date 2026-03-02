@@ -1,5 +1,6 @@
 """Tests for from_main direction support in the merge pipeline."""
 
+import contextlib
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
@@ -88,8 +89,7 @@ def test_phase1_rejects_main_branch_when_from_main(
     monkeypatch: pytest.MonkeyPatch,
     init_repo: Callable[[Path], None],
 ) -> None:
-    """_phase1_validate_clean_trees exits 2 with 'cannot merge main into itself'
-    on main branch."""
+    """_phase1_validate_clean_trees exits 2 on main branch."""
     repo = tmp_path / "repo"
     repo.mkdir()
     init_repo(repo)
@@ -116,8 +116,7 @@ def test_phase1_passes_on_non_main_branch_when_from_main(
     monkeypatch: pytest.MonkeyPatch,
     init_repo: Callable[[Path], None],
 ) -> None:
-    """_phase1_validate_clean_trees passes when from_main=True on a non-main
-    branch."""
+    """_phase1_validate_clean_trees passes on non-main branch with from_main."""
     repo = tmp_path / "repo"
     repo.mkdir()
     init_repo(repo)
@@ -134,8 +133,7 @@ def test_phase4_skips_lifecycle_when_from_main(
     init_repo: Callable[[Path], None],
     mock_precommit: None,
 ) -> None:
-    """_phase4_merge_commit_and_precommit does not append lifecycle 'delivered'
-    when from_main=True."""
+    """_phase4 skips lifecycle 'delivered' when from_main=True."""
     repo = tmp_path / "repo"
     repo.mkdir()
     init_repo(repo)
@@ -174,8 +172,7 @@ def test_format_conflict_report_hints_from_main(
     monkeypatch: pytest.MonkeyPatch,
     init_repo: Callable[[Path], None],
 ) -> None:
-    """_format_conflict_report output contains '--from-main' hint when
-    from_main=True."""
+    """_format_conflict_report includes '--from-main' hint."""
     repo = tmp_path / "repo"
     repo.mkdir()
     init_repo(repo)
@@ -206,8 +203,7 @@ def test_phase3_passes_from_main_to_auto_resolve(
     monkeypatch: pytest.MonkeyPatch,
     init_repo: Callable[[Path], None],
 ) -> None:
-    """_phase3_merge_parent passes from_main to
-    _auto_resolve_known_conflicts."""
+    """_phase3_merge_parent forwards from_main to _auto_resolve."""
     repo = tmp_path / "repo"
     repo.mkdir()
     init_repo(repo)
@@ -221,16 +217,14 @@ def test_phase3_passes_from_main_to_auto_resolve(
 
     monkeypatch.chdir(repo)
 
-    with patch(
-        "claudeutils.worktree.merge._auto_resolve_known_conflicts",
-        return_value=[],
-    ) as mock_resolve:
-        # merge will succeed (no conflicts) — MERGE_HEAD may not exist
-        # but we want to verify from_main is forwarded to _auto_resolve
-        try:
-            _phase3_merge_parent("feature", from_main=True)
-        except SystemExit:
-            pass
+    with (
+        patch(
+            "claudeutils.worktree.merge._auto_resolve_known_conflicts",
+            return_value=[],
+        ) as mock_resolve,
+        contextlib.suppress(SystemExit),
+    ):
+        _phase3_merge_parent("feature", from_main=True)
 
     # If _auto_resolve_known_conflicts was called, from_main must be in kwargs
     if mock_resolve.called:
