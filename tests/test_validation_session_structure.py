@@ -296,7 +296,7 @@ class TestValidate:
             "## Worktree Tasks\n\n"
             "- [ ] **Dup Task** \u2192 `slug` \u2014 in worktree\n"
         )
-        errors = validate("session.md", tmp_path)
+        errors = validate("session.md", tmp_path, worktree_slugs={"slug"})
         assert len(errors) == 1
         assert "both In-tree" in errors[0]
 
@@ -346,5 +346,7 @@ class TestValidate:
             "## Reference Files\n\n"
             "- `missing.md` \u2014 gone\n"
         )
-        errors = validate("session.md", tmp_path)
-        assert len(errors) == 2  # cross-section duplicate + missing ref
+        errors = validate("session.md", tmp_path, worktree_slugs=set())
+        assert (
+            len(errors) == 3
+        )  # cross-section duplicate + missing ref + missing worktree

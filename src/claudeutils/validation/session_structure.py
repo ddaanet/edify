@@ -4,12 +4,14 @@ Checks:
 - No task appears in both In-tree Tasks and Worktree Tasks
 - Reference Files entries point to existing versioned files
 - Command fields in task lines don't contain known anti-patterns
+- Worktree markers correspond to actual git worktrees
 """
 
 import re
 from pathlib import Path
 
 from claudeutils.validation.session_commands import check_command_semantics
+from claudeutils.validation.session_worktrees import check_worktree_markers
 
 TASK_PATTERN = re.compile(r"^- \[.\] \*\*(.+?)\*\*")
 SECTION_PATTERN = re.compile(r"^## (.+)$")
@@ -239,12 +241,18 @@ def check_section_schema(lines: list[str]) -> list[str]:
     return errors
 
 
-def validate(session_path: str, root: Path) -> list[str]:
+def validate(
+    session_path: str,
+    root: Path,
+    worktree_slugs: set[str] | None = None,
+) -> list[str]:
     """Validate session.md structure.
 
     Args:
         session_path: Path to session file (relative to root).
         root: Project root directory.
+        worktree_slugs: Optional set of worktree slugs (for testing).
+                       If None, queries git worktree list.
 
     Returns:
         List of error strings. Empty if no errors.
@@ -277,5 +285,11 @@ def validate(session_path: str, root: Path) -> list[str]:
     # Reference Files existence
     if "Reference Files" in sections:
         errors.extend(check_reference_files(sections["Reference Files"], root))
+
+    # Worktree marker validation
+    marker_errors, _ = check_worktree_markers(
+        [line.rstrip() for line in lines], worktree_slugs=worktree_slugs
+    )
+    errors.extend(marker_errors)
 
     return errors
