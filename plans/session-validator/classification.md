@@ -1,0 +1,7 @@
+- **Classification:** Moderate
+- **Implementation certainty:** High — 3 existing validators establish the pattern, prior art read, extension points known
+- **Requirement stability:** High — 7 FRs mechanism-specified with acceptance criteria, 4 NFRs measurable
+- **Behavioral code check:** Yes → Moderate minimum — new validation functions, conditional branches per FR, shared parsing extraction (NFR-4)
+- **Work type:** Production — delivers precommit validation capability
+- **Artifact destination:** production (`src/claudeutils/validation/`)
+- **Evidence:** "When triaging behavioral code changes as Simple" recall entry confirms Moderate floor. Existing validators (session_structure.py, tasks.py, session_refs.py) establish pattern. NFR-4 (shared parsing) adds cross-file coordination.

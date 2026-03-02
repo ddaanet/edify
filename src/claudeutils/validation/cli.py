@@ -9,6 +9,9 @@ from claudeutils.validation.common import find_project_root
 from claudeutils.validation.decision_files import validate as validate_decision_files
 from claudeutils.validation.learnings import validate as validate_learnings
 from claudeutils.validation.memory_index import validate as validate_memory_index
+from claudeutils.validation.plan_archive import (
+    check_plan_archive_coverage,
+)
 from claudeutils.validation.planstate import validate as validate_planstate
 from claudeutils.validation.session_refs import validate as validate_session_refs
 from claudeutils.validation.session_structure import (
@@ -69,13 +72,19 @@ def _run_all_validators(root: Path) -> dict[str, list[str]]:
     _run_validator("decisions", validate_decision_files, all_errors, root)
     _run_validator("planstate", validate_planstate, all_errors, root)
     _run_validator("session-refs", validate_session_refs, all_errors, root)
-    _run_validator(
-        "session-structure",
-        validate_session_structure,
-        all_errors,
-        "agents/session.md",
-        root,
-    )
+    # session-structure returns (errors, warnings) — handle separately
+    try:
+        struct_errors, struct_warnings = validate_session_structure(
+            "agents/session.md", root
+        )
+        if struct_errors:
+            all_errors["session-structure"] = struct_errors
+        if struct_warnings:
+            for warning in struct_warnings:
+                click.echo(f"Warning (session-structure): {warning}", err=True)
+    except (ValueError, FileNotFoundError, OSError) as e:
+        all_errors["session-structure"] = [f"Error: {e}"]
+    _run_validator("plan-archive", check_plan_archive_coverage, all_errors, root)
 
     return all_errors
 
@@ -171,7 +180,20 @@ def session_refs() -> None:
 def session_structure() -> None:
     """Validate session.md structure."""
     root = find_project_root(Path.cwd())
-    errors = validate_session_structure("agents/session.md", root)
+    errors, warnings = validate_session_structure("agents/session.md", root)
+    for warning in warnings:
+        click.echo(f"Warning: {warning}", err=True)
+    if errors:
+        for error in errors:
+            click.echo(error, err=True)
+        sys.exit(1)
+
+
+@validate.command()
+def plan_archive() -> None:
+    """Validate deleted plans have archive entries."""
+    root = find_project_root(Path.cwd())
+    errors = check_plan_archive_coverage(root)
     if errors:
         for error in errors:
             click.echo(error, err=True)

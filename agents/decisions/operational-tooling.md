@@ -121,9 +121,9 @@ Git workflow, platform constraints, code patterns, and naming conventions.
 | `[>]` | In-progress | Arrow — forward motion |
 | `[!]` | Blocked | Exclamation — attention |
 | `[†]` | Failed | Dagger — dead |
-| `[–]` | Canceled | En dash — struck through |
+| `[-]` | Canceled | Hyphen — struck through |
 
-**Rationale:** Symbols that carry meaning through visual form (`!`, `–`, `>`, `†`) beat letters requiring convention lookup (`B`, `C`, `W`, `F`). Only `[ ]` and `[x]` are valid GFM checkboxes (per spec §5.3); all others are text conventions parsed by project tooling. Changed `[✗]` → `[†]` because `✗` (U+2717) is visually confusable with `x` (U+0078) — different codepoints but near-identical in many fonts. `†` (U+2020 dagger) is unmistakable and transparently means "dead."
+**Rationale:** Symbols that carry meaning through visual form (`!`, `-`, `>`, `†`) beat letters requiring convention lookup (`B`, `C`, `W`, `F`). Only `[ ]` and `[x]` are valid GFM checkboxes (per spec §5.3); all others are text conventions parsed by project tooling. Changed `[✗]` → `[†]` because `✗` (U+2717) is visually confusable with `x` (U+0078) — different codepoints but near-identical in many fonts. `†` (U+2020 dagger) is unmistakable and transparently means "dead." Changed `[–]` → `[-]` because `–` (U+2013 en dash) is visually confusable with `-` (U+002D hyphen-minus) — and `-` is what humans type. Same confusability class as `✗`/`x`.
 
 ## .Known Issues
 

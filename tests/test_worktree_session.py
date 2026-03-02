@@ -69,14 +69,14 @@ def test_find_section_bounds_not_found() -> None:
 
 
 def test_extract_blocked_failed_canceled_tasks() -> None:
-    """Extract tasks with [!], [✗], [–] statuses."""  # noqa: RUF002
+    """Extract tasks with [!], [†], [-] statuses."""
     content = """# Session
 
 ## In-tree Tasks
 
 - [!] **Blocked Task** — waiting on signal
-- [✗] **Failed Task** — terminal failure
-- [\u2013] **Canceled Task** \u2014 user canceled
+- [†] **Failed Task** — terminal failure
+- [-] **Canceled Task** — user canceled
 
 ## Blockers
 """

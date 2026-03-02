@@ -13,7 +13,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-TASK_PATTERN = re.compile(r"^- \[[ x>!✗–]\] \*\*(.+?)\*\* —")  # noqa: RUF001
+from claudeutils.validation.task_parsing import TASK_PATTERN
+
 LEARNING_PATTERN = re.compile(r"^## (.+)$")
 H1_PATTERN = re.compile(r"^# ")
 
@@ -62,7 +63,7 @@ def extract_task_names(lines: list[str]) -> list[tuple[int, str]]:
     for i, line in enumerate(lines, 1):
         m = TASK_PATTERN.match(line.strip())
         if m:
-            tasks.append((i, m.group(1)))
+            tasks.append((i, m.group("name")))
     return tasks
 
 

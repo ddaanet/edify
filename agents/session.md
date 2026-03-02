@@ -112,14 +112,14 @@
   - Phase 3: TDD agent generation + verify-red.sh (4 cycles)
   - Phase 4: SKILL.md rewrite + refactor.md/delegation.md updates (2 steps, opus)
   - Checkpoints: light at phase boundaries, full at Phase 4 (final)
-- [ ] **Execute flag lint** → `execute-flag-lint` — precommit lint gate for `/inline ... execute` in session.md | haiku | 3.0
+- [ ] **Execute flag lint** — precommit lint gate for `/inline ... execute` in session.md | haiku | 3.0
   - Scan session.md pending tasks for `/inline plans/.* execute` pattern
   - Flag as error: execute entry point in session.md bypasses Phase 2 recall (D+B anchor)
 - [x] **Skill disclosure** — `/design plans/skill-progressive-disclosure/requirements.md` | opus | 2.6
   - Plan: skill-progressive-disclosure | Status: requirements
   - Segment loading at gate boundaries: initial load → write-outline → write-design (/design); tier assessment → tier3-planning → expansion (/runbook)
   - Complementary with skills-quality-pass FR-3 extractions
-- [ ] **Session.md validator** → `session-md-validator` — Scripted precommit check | sonnet | 2.4
+- [x] **Session.md validator** — Scripted precommit check | sonnet | 2.4
   - Plan: session-validator
   - Includes plan-archive coverage check (deleted plans must have archive entry)
 - [ ] **Worktree merge resilience** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.2
@@ -164,7 +164,7 @@
   - Token counting API + sqlite user cache, threshold migration (line counts → tokens)
   - `just setup` sandbox config for cache dir
   - Parsing fixes batch delivered — parser can now replace regex code
-- [ ] **Merge lifecycle audit** — `/design plans/merge-lifecycle-audit/requirements.md` | sonnet | 1.8
+- [ ] **Merge lifecycle audit** — `/design plans/merge-lifecycle-audit/brief.md` | sonnet | 1.8
   - Plan: merge-lifecycle-audit | Status: requirements
   - State machine audit + integration tests for merge→rm lifecycle. Absorbs merge-submodule-ordering.
 - [ ] **Codebase sweep** — `/design plans/codebase-sweep/requirements.md` | sonnet | 1.8
@@ -198,7 +198,7 @@
   - Dropped by autostrategy merge at d78d5fa5 (wt-rm-dirty), restored 2026-03-02
 - [ ] **Tweakcc** — Remove redundant builtin prompts, inject custom | sonnet | 1.6
   - Plan: tweakcc
-- [ ] **Wt rm task cleanup** — `/design plans/wt-rm-task-cleanup/requirements.md` | sonnet | 1.6
+- [ ] **Wt rm task cleanup** — `/design plans/wt-rm-task-cleanup/brief.md` | sonnet | 1.6
   - Plan: wt-rm-task-cleanup | Status: requirements
   - rm removes completed task entry (branch `[x]` check), strips marker only if not completed
 - [ ] **Worktree ad-hoc task** — `/design plans/worktree-ad-hoc-task/requirements.md` | sonnet | 1.6
@@ -210,7 +210,7 @@
 - [ ] **Remove wt rm --force** — remove `--force` flag from `_worktree rm` CLI | sonnet | 1.5
   - Structural safety: `--force` bypasses the uncommitted-work check that exists to prevent data loss
   - Emergency cleanup via raw `git worktree remove --force` + `rm -rf`
-- [ ] **Design context gate** — `/design plans/design-context-gate/requirements.md` | sonnet | 1.5
+- [ ] **Design context gate** — `/design plans/design-context-gate/brief.md` | sonnet | 1.5
   - Plan: design-context-gate | Status: requirements
   - /design tail-call /inline only when context budget allows, otherwise handoff+commit
   - Mechanism: UPS hook injects context percentage from statusline infrastructure
@@ -360,10 +360,6 @@
 **Main is worktree-tasks-only:**
 - Only trivial fixes belong in In-tree. Plan absence doesn't qualify for in-tree.
 
-## Next Steps
-
-2 worktrees active: orchestrate-evolution, session-md-validator. execute-flag-lint worktree missing from `_worktree ls` — investigate. Active recall system plan created — needs `/requirements` then `/design`. Learnings at 112 lines — well past `/codify` threshold. 6 brief-only tasks need `/requirements` before `/design`.
-
 ## Reference Files
 
 - `plans/reports/workflow-grounding-audit.md` — Grounding provenance for all workflow skills/agents
@@ -385,3 +381,7 @@
 - `plans/merge-lifecycle-audit/brief.md` — State machine audit for merge→rm lifecycle (absorbs merge-submodule-ordering)
 - `plans/active-recall/brief.md` — Active recall system: hierarchical index, documentation conversion, trigger classes, invalidation
 - `tmp/active-recall.md` — Discussion decisions: recall-explore-recall, tree navigation, benchmark landscape
+
+## Next Steps
+
+2 worktrees active: orchestrate-evolution, session-md-validator. execute-flag-lint worktree missing from `_worktree ls` — investigate. Active recall system plan created — needs `/requirements` then `/design`. Learnings at 112 lines — well past `/codify` threshold. 6 brief-only tasks need `/requirements` before `/design`.

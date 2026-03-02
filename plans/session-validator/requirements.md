@@ -77,6 +77,14 @@ Acceptance criteria:
 - Only applies to plans that had substantive content (at least one `.md` file beyond `.gitkeep`)
 - Scoped to precommit: checks staged deletions in `plans/*/` against archive headings
 
+**FR-7: Task command semantic validation**
+
+Validate that command fields in task lines don't contain known anti-patterns.
+
+Acceptance criteria:
+- `/inline plans/.* execute` pattern flagged as error (bypasses Phase 2 recall D+B anchor)
+- Pattern list extensible without extraction layer changes
+
 ## Non-Functional Requirements
 
 **NFR-1: Precommit integration**
@@ -88,10 +96,14 @@ Follow `validate-memory-index.py` pattern: `--fix` flag applies mechanical fixes
 **NFR-3: Dependency on format finalization**
 FR-2 and FR-4 depend on the Worktree Tasks elimination (inline `→ slug` markers). Implement after the `worktree-cli-default` task lands the new format. FR-1, FR-3, FR-5 can be implemented against the current format.
 
+**NFR-4: Shared parsing layer**
+Consolidate session.md task-line parsing into a single extraction module. Currently three independent `TASK_PATTERN` regexes exist (`validation/session_structure.py`, `validation/tasks.py`, `worktree/session.py`) with subtly different capture semantics. New validators must consume the shared layer, not add additional regex copies.
+
 ## Implementation Notes
 
 - Pattern: `validate-memory-index.py` — same structure (argparse, `--fix`, precommit integration, exit codes)
-- Location: `agent-core/bin/validate-session.py` (alongside other validators)
-- Task format regex: `^- \[([ x>])\] \*\*(.+?)\*\* —` captures checkbox state and task name
+- Location: extend existing `src/claudeutils/validation/` modules (not `agent-core/bin/`)
+- Existing validators already cover partial scope: `session_structure.py` (cross-section uniqueness, reference files), `tasks.py` (task name format/uniqueness/history), `session_refs.py` (tmp/ path rejection)
+- Shared parsing module: extract common task-line parsing from validators + `worktree/session.py` into single source
 - Worktree list parsing: reuse `_parse_worktree_list` from `worktree/utils.py` or shell out to `git worktree list --porcelain`
 - Section ordering: compare indices of found sections against the canonical order list

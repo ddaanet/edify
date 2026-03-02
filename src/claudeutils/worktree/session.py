@@ -4,6 +4,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from claudeutils.validation.task_parsing import TASK_PATTERN
+
 
 @dataclass
 class TaskBlock:
@@ -27,8 +29,6 @@ def extract_task_blocks(content: str, section: str | None = None) -> list[TaskBl
     lines = content.split("\n")
     blocks = []
     current_section = None
-    task_pattern = re.compile(r"^- \[[ x>!✗–]\] \*\*(.+?)\*\*")  # noqa: RUF001
-
     i = 0
     while i < len(lines):
         line = lines[i]
@@ -40,9 +40,9 @@ def extract_task_blocks(content: str, section: str | None = None) -> list[TaskBl
             continue
 
         # Match task lines
-        match = task_pattern.match(line)
+        match = TASK_PATTERN.match(line)
         if match:
-            task_name = match.group(1)
+            task_name = match.group("name")
             task_lines = [line]
 
             # Collect continuation lines (indented lines following the task)
@@ -51,7 +51,7 @@ def extract_task_blocks(content: str, section: str | None = None) -> list[TaskBl
                 next_line = lines[j]
                 # Stop at next task, next section, or blank line
                 if (
-                    task_pattern.match(next_line)
+                    TASK_PATTERN.match(next_line)
                     or next_line.startswith("## ")
                     or not next_line.strip()
                 ):

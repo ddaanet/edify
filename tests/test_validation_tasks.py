@@ -55,11 +55,11 @@ class TestExtractTaskNames:
         assert extract_task_names(["# Session", "", "Some content"]) == []
 
     def test_blocked_failed_canceled_statuses(self) -> None:
-        """Tasks with [!], [✗], [–] statuses extracted."""  # noqa: RUF002
+        """Tasks with [!], [†], [-] statuses extracted."""
         lines = [
             "- [!] **Blocked Task** — waiting on signal",
-            "- [✗] **Failed Task** — terminal failure",
-            "- [–] **Canceled Task** — user canceled",  # noqa: RUF001
+            "- [†] **Failed Task** — terminal failure",
+            "- [-] **Canceled Task** — user canceled",
         ]
         tasks = extract_task_names(lines)
         assert len(tasks) == 3

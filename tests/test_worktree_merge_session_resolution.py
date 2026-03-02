@@ -212,7 +212,7 @@ def test_resolve_session_md_fallback_outputs_to_stdout(
 
 
 def test_merge_session_filters_completed_tasks_from_theirs() -> None:
-    """Completed [x] and canceled [–] tasks from theirs are excluded."""  # noqa: RUF002
+    """Completed [x] and canceled [-] tasks from theirs are excluded."""
     ours = "# Session: Main\n\n## In-tree Tasks\n\n- [ ] **Task A** — existing task\n"
     theirs = (
         "# Session: Branch\n"
@@ -221,7 +221,7 @@ def test_merge_session_filters_completed_tasks_from_theirs() -> None:
         "\n"
         "- [ ] **Task A** — existing task\n"
         "- [x] **Done Task** — completed in branch\n"
-        "- [–] **Canceled Task** — canceled in branch\n"  # noqa: RUF001
+        "- [-] **Canceled Task** — canceled in branch\n"
         "- [ ] **New Task** — genuinely new from branch\n"
     )
     result = _merge_session_contents(ours, theirs)

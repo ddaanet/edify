@@ -76,7 +76,7 @@ def _merge_session_contents(ours: str, theirs: str, slug: str | None = None) -> 
     - Blockers / Gotchas: evaluate (tag theirs with [from: slug], append)
     """
     result_lines = ours.split("\n")
-    completed_re = re.compile(r"^- \[[x–]\] ")  # noqa: RUF001
+    completed_re = re.compile(r"^- \[[x-]\] ")
 
     for section in ("In-tree Tasks", "Worktree Tasks", ""):
         ours_blocks = [b for b in extract_task_blocks(ours) if b.section == section]
