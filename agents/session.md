@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-02
 
-**Status:** Session-md-validator merged, orchestrate-evolution merge in progress.
+**Status:** Discussion session — codify-in-branch proposal rejected, learning recorded.
 
 ## Completed This Session
 
@@ -86,6 +86,11 @@
   - Worktree recovery: force-removed without checking 2 uncommitted files (data loss), recreated at merge parent for other-session recovery, re-merged recovery commit
   - 5 new tests covering validator false positives
   - Worktree removed after second merge
+- **Discussion: codify-in-branch proposal rejected:**
+  - Proposal: run `/codify` in a dedicated worktree, batch small worktrees on the side
+  - Rejected: merge conflict risk on shared infrastructure files (decisions/, fragments/, memory-index.md) with no ordering guarantee
+  - Resolution: "worktree-tasks-only" rule scopes to task classification, not interactive skill execution — `/codify` runs on main directly
+  - Learning recorded: "When worktree-tasks-only appears to block maintenance skills"
 
 ## In-tree Tasks
 
@@ -115,7 +120,7 @@
   - Plan: active-recall
   - Hierarchical index, automated documentation conversion, memory format grounding
   - Relates to: recall tool consolidation, generate memory index, recall dedup, recall pipeline, recall learnings design
-- [ ] **Orchestrate evolution** — `/orchestrate orchestrate-evolution` | sonnet | restart | 6.0
+- [x] **Orchestrate evolution** — `/orchestrate orchestrate-evolution` | sonnet | restart | 6.0
   - 14 steps: 12 TDD cycles (sonnet) + 2 general steps (opus)
   - Phase 1: agent caching model (4 cycles)
   - Phase 2: orchestrator plan format + verify-step.sh (4 cycles)
@@ -397,4 +402,4 @@
 
 ## Next Steps
 
-Merging orchestrate-evolution. execute-flag-lint worktree missing from `_worktree ls` — investigate. Learnings at 122 lines — well past `/codify` threshold.
+Learnings at 156 lines — well past `/codify` threshold. Run `/codify` on main next.
