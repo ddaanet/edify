@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-02
 
-**Status:** Bulk reclassification (63 tasks → Worktree), validator slug requirement removed, 4 worktrees created.
+**Status:** Skill-disclosure merged, discussion insights on merge ceremony and requirements-first workflow.
 
 ## Completed This Session
 
@@ -57,6 +57,20 @@
 - **Worktree setup (4 parallel):**
   - orchestrate-evolution, execute-flag-lint, skill-disclosure, session-md-validator
   - Blast zone assessed: validator removal contained, merge asymmetry amplified (pre-existing bug, larger surface)
+- **Skill-disclosure worktree merged + removed**
+- **Discussion: merge ceremony redesign:**
+  - Insight: "merge conflict and precommit fixing belongs out of main" — branch self-updates, main rollbacks on failure
+  - Worktree-merge-from-main becomes prerequisite for merge resilience (branch updates itself before merge to main)
+  - Plan-completion ceremony is merge-point side-effect (like `remerge_session_md`), not branch-side or main-side — supercession needs merged state, concurrent merges invalidate branch-side checks
+  - Rejected: splitting ceremony into branch-context (supercession) + main-mechanical (deletion) — supercession must check against main's actual merged state including learnings/decisions from other merged worktrees
+- **Discussion: requirements-first workflow:**
+  - Always start from `/requirements` unless requirement-equivalent document exists (requirements.md, design.md with behavioral FRs, deliverable review report)
+  - Brief.md is NOT requirement-equivalent — context transfer without testable acceptance criteria
+  - 5 tasks have `/design` commands but only brief.md: plan-completion-ceremony, directive-skill-promotion, merge-lifecycle-audit, design-context-gate, wt-rm-task-cleanup
+  - Existing blocker documents this gap (line 316-317): planstate infers requirements.md template for brief-only plans
+- **`w` (wrap) command definition recovered via session scraper:**
+  - Tier 1 command (no colon), sequence: findings → takeaways → submit (handoff+commit)
+  - Absorbed into directive-skill-promotion task
 
 ## In-tree Tasks
 
@@ -88,7 +102,7 @@
 - [ ] **Execute flag lint** → `execute-flag-lint` — precommit lint gate for `/inline ... execute` in session.md | haiku | 3.0
   - Scan session.md pending tasks for `/inline plans/.* execute` pattern
   - Flag as error: execute entry point in session.md bypasses Phase 2 recall (D+B anchor)
-- [ ] **Skill disclosure** — `/design plans/skill-progressive-disclosure/requirements.md` | opus | 2.6
+- [x] **Skill disclosure** — `/design plans/skill-progressive-disclosure/requirements.md` | opus | 2.6
   - Plan: skill-progressive-disclosure | Status: requirements
   - Segment loading at gate boundaries: initial load → write-outline → write-design (/design); tier assessment → tier3-planning → expansion (/runbook)
   - Complementary with skills-quality-pass FR-3 extractions
@@ -101,7 +115,10 @@
 - [ ] **Session scraping** — `/runbook plans/session-scraping/outline.md` | sonnet | 2.2
   - Plan: session-scraping | Status: outlined
   - Key decisions: all ~/.claude/projects/ (not just claudeutils), agent files are first-class sources, many-to-many session↔commit, tool I/O noise by default
-- [ ] **Worktree merge from main** — `/design plans/worktree-merge-from-main/` | sonnet | 2.2
+- [ ] **Worktree merge from main** — `/design plans/worktree-merge-from-main/requirements.md` | sonnet | 2.2
+  - Plan: worktree-merge-from-main | Status: requirements
+  - Branch self-updates before merge to main; main rollbacks on failure instead of fixing on main
+  - Prerequisite for merge resilience — eliminates most merge failures at source
 - [ ] **Handoff --commit removal** — remove --commit from /handoff, expand standalone to chain, deduplicate [handoff, commit] | sonnet | 2.2
   - ~60 occurrences: skills, fragments, tests, continuation infrastructure, decision files
   - Motivation: decouple handoff from commit-ready state (handoff should work on dirty tree)
@@ -332,7 +349,7 @@
 
 ## Next Steps
 
-4 worktrees active: orchestrate-evolution, execute-flag-lint, skill-disclosure, session-md-validator. Launch sessions, `hc` when done, merge back from main. Learnings at 91 lines — past `/codify` threshold.
+3 worktrees active: orchestrate-evolution, execute-flag-lint, session-md-validator. Learnings at 108 lines — well past `/codify` threshold. 5 brief-only tasks need `/requirements` before `/design`.
 
 ## Reference Files
 

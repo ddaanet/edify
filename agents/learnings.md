@@ -90,3 +90,20 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Shipping a new classification model (two-section In-tree/Worktree Tasks) without reclassifying existing tasks. Handoff perpetuates defaults — all 60+ tasks stayed In-tree despite D-9 heuristic qualifying most for Worktree Tasks. On main (parent of worktrees), this left the Worktree Tasks section empty, making `wt` unable to dispatch.
 - Correct pattern: Structural changes to task organization require a bulk reclassification pass on existing data. Classification heuristics apply retroactively, not just to new tasks.
 - Compounding factor: Stale decision entry in `workflow-advanced.md` (2026-02-20, single-section model) contradicts the superseding entry in `operational-tooling.md` (2026-02-28, two-section model). Stale entry never cleaned up on delivery — the "Delivery supercession" task exists for exactly this gap.
+## When merge fails on main
+- Anti-pattern: Resolving conflicts and precommit failures on main after `_worktree merge`. The main session lacks branch context — it resolves conflicts by reading diff markers, not understanding intent. Precommit failures leave a broken merge commit on main requiring amend.
+- Correct pattern: Rollback main on failure (`git merge --abort`). The branch merges main into itself first (existing plan: `worktree-merge-from-main`), resolves conflicts in its own context where the developer/agent has full change knowledge, passes precommit, then main retries. Main-side merge becomes trivially clean.
+- Implication: `worktree-merge-from-main` becomes a prerequisite for merge resilience, not an independent task. The sequence: build `merge --from-main` (branch self-updates) → modify `_worktree merge` to rollback-and-report → skill workflow guides user to update branch then retry.
+- Session.md/learnings.md auto-resolve (`remerge_session_md`, `remerge_learnings_md`) may still run on main — these are mechanical, context-free. Rollback applies to source conflicts and precommit failures where main lacks resolution context.
+## When starting work on a task
+- Anti-pattern: Jumping to `/design` because the task description seems clear enough. Session.md task entries are scope (name + one-liner), not specification. The gap between task description and behavioral FRs is where design sessions waste time discovering what they're building.
+- Correct pattern: Always start from `/requirements` unless a requirement-equivalent document already exists. Requirement-equivalent: existing requirements.md, design.md with behavioral FRs, deliverable review report (findings = acceptance criteria for rework). Brief.md is NOT equivalent — transfers context but lacks testable acceptance criteria.
+- Rationale: `/requirements` includes a recall step that grounds extraction against existing infrastructure. Skipping to `/design` produces naive requirements (workflow-advanced.md). The `/design` Phase 0 requirements-clarity gate fires at 2.6% rate (1/38 sessions) — too late and too rare to compensate.
+- For well-discussed tasks (`d:` → `p:` chain): `/requirements` primary mode is conversation-to-artifact capture, not elicitation. Fast when requirements are pre-resolved — extract, write, done. The artifact persists across context boundaries; discussion conclusions don't survive `/clear`.
+## How to wrap a discussion session
+- `w` (wrap) is a Tier 1 command (standalone, no colon, no user content). Sequence: findings → takeaways → submit.
+- **Findings:** Summarize what the investigation/discussion discovered (factual, not narrative).
+- **Takeaways:** Extract learnings (append to learnings.md), create pending tasks (`p:` evaluation for each validated change), write briefs if discussion produced design context worth preserving.
+- **Submit:** `/handoff --commit` (or `hc`).
+- Trigger: user says `wrap` or `w` at any point during or after discussion. The command crystallizes conversation context into persistent artifacts before context rotates out.
+- Pending: absorbed into directive-skill-promotion task. This learning bridges the gap until the UPS expansion is implemented.
