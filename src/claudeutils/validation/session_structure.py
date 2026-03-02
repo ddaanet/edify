@@ -3,10 +3,13 @@
 Checks:
 - No task appears in both In-tree Tasks and Worktree Tasks
 - Reference Files entries point to existing versioned files
+- Command fields in task lines don't contain known anti-patterns
 """
 
 import re
 from pathlib import Path
+
+from claudeutils.validation.session_commands import check_command_semantics
 
 TASK_PATTERN = re.compile(r"^- \[.\] \*\*(.+?)\*\*")
 SECTION_PATTERN = re.compile(r"^## (.+)$")
@@ -260,6 +263,9 @@ def validate(session_path: str, root: Path) -> list[str]:
 
     # Section schema validation
     errors.extend(check_section_schema(lines))
+
+    # Command semantic validation
+    errors.extend(check_command_semantics([line.rstrip() for line in lines]))
 
     sections = parse_sections(lines)
 
