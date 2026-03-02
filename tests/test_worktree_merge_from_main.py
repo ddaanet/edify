@@ -197,6 +197,135 @@ def test_format_conflict_report_hints_from_main(
     assert "merge --from-main" in report
 
 
+# ── Cycle 2.1 tests ──────────────────────────────────────────────────────
+
+
+def _setup_session_md_conflict(
+    repo: Path,
+    init_repo: Callable[[Path], None],
+    *,
+    branch_session: str,
+    main_session: str,
+) -> list[str]:
+    """Set up a repo on a feature branch with a session.md merge conflict.
+
+    Creates divergent session.md on branch vs main, initiates a merge (no-
+    commit), and returns the conflict list. The repo's cwd must be set by
+    caller.
+    """
+    repo.mkdir(exist_ok=True)
+    init_repo(repo)
+
+    # Create agents/ dir with initial session.md on main
+    agents_dir = repo / "agents"
+    agents_dir.mkdir()
+    (agents_dir / "session.md").write_text("# Session\n\nInitial content\n")
+    _run_git(repo, "add", "agents/session.md")
+    _run_git(repo, "commit", "-m", "add session.md")
+
+    # Branch off, write branch session content
+    _run_git(repo, "checkout", "-b", "feature")
+    (agents_dir / "session.md").write_text(branch_session)
+    _run_git(repo, "add", "agents/session.md")
+    _run_git(repo, "commit", "-m", "branch session")
+
+    # Write main session content (diverging)
+    _run_git(repo, "checkout", "main")
+    (agents_dir / "session.md").write_text(main_session)
+    _run_git(repo, "add", "agents/session.md")
+    _run_git(repo, "commit", "-m", "main session")
+
+    # Return to feature, start merge (no-commit to leave conflict state)
+    _run_git(repo, "checkout", "feature")
+    subprocess.run(
+        ["git", "merge", "--no-commit", "--no-ff", "main"],
+        cwd=repo,
+        check=False,
+    )
+
+    return ["agents/session.md"]
+
+
+def test_resolve_session_md_from_main_keeps_ours_exactly(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    init_repo: Callable[[Path], None],
+) -> None:
+    """resolve_session_md with from_main=True keeps branch session exactly.
+
+    When merging main into the branch (from_main=True), main's tasks must NOT be
+    injected into session.md — the branch's focused session is authoritative.
+    """
+    branch_session = (
+        "# Session Handoff: 2026-03-02\n\n"
+        "## In-tree Tasks\n\n"
+        "- [ ] **Branch task only** — `just test` | sonnet\n"
+    )
+    main_session = (
+        "# Session Handoff: 2026-03-01\n\n"
+        "## In-tree Tasks\n\n"
+        "- [ ] **Main task A** — `just lint` | sonnet\n"
+        "- [ ] **Main task B** — `just precommit` | sonnet\n"
+    )
+
+    repo = tmp_path / "repo"
+    conflicts = _setup_session_md_conflict(
+        repo, init_repo, branch_session=branch_session, main_session=main_session
+    )
+    monkeypatch.chdir(repo)
+
+    from claudeutils.worktree.resolve import resolve_session_md
+
+    remaining = resolve_session_md(conflicts, slug="main", from_main=True)
+
+    # session.md must be resolved (removed from conflicts)
+    assert "agents/session.md" not in remaining
+
+    # Content must be exactly the branch's session — main's tasks must NOT appear
+    result_content = (repo / "agents" / "session.md").read_text()
+    assert "Main task A" not in result_content
+    assert "Main task B" not in result_content
+    assert "Branch task only" in result_content
+
+
+def test_resolve_session_md_default_direction_still_merges(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    init_repo: Callable[[Path], None],
+) -> None:
+    """resolve_session_md default (from_main=False) still does additive merge.
+
+    Regression: the existing behaviour must not regress when from_main omitted.
+    """
+    branch_session = (
+        "# Session Handoff: 2026-03-02\n\n"
+        "## In-tree Tasks\n\n"
+        "- [ ] **Branch task** — `just test` | sonnet\n"
+    )
+    main_session = (
+        "# Session Handoff: 2026-03-01\n\n"
+        "## In-tree Tasks\n\n"
+        "- [ ] **Main task** — `just lint` | sonnet\n"
+    )
+
+    repo = tmp_path / "repo"
+    conflicts = _setup_session_md_conflict(
+        repo, init_repo, branch_session=branch_session, main_session=main_session
+    )
+    monkeypatch.chdir(repo)
+
+    from claudeutils.worktree.resolve import resolve_session_md
+
+    remaining = resolve_session_md(conflicts, slug="main")
+
+    assert "agents/session.md" not in remaining
+
+    result_content = (repo / "agents" / "session.md").read_text()
+    # Additive merge: both tasks should appear
+    assert "Branch task" in result_content
+    assert "Main task" in result_content
+
+
 def test_phase3_passes_from_main_to_auto_resolve(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
