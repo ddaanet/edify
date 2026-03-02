@@ -70,7 +70,8 @@ def setup_baseline_agents(tmp_path: Path) -> None:
 
     test_driver = agents_dir / "test-driver.md"
     test_driver.write_text(
-        "---\nname: test-driver\n---\n# Test Driver\nBaseline TDD agent."
+        "---\nname: test-driver\n---\n"
+        "# TDD Task Agent - Baseline Template\nBaseline TDD agent."
     )
 
     corrector = agents_dir / "corrector.md"
