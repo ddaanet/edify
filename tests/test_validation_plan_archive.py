@@ -3,6 +3,8 @@
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from claudeutils.validation.plan_archive import (
     check_plan_archive_coverage,
     get_archive_headings,
@@ -10,156 +12,64 @@ from claudeutils.validation.plan_archive import (
 )
 
 
+def _git(repo: Path, *args: str) -> None:
+    subprocess.run(["git", *args], cwd=repo, check=True, capture_output=True)
+
+
+@pytest.fixture
+def git_repo(tmp_path: Path) -> Path:
+    """Create initialized git repo with config."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init")
+    _git(repo, "config", "user.name", "Test")
+    _git(repo, "config", "user.email", "test@test.com")
+    return repo
+
+
 class TestGetStagedPlanDeletions:
     """Tests for get_staged_plan_deletions."""
 
-    def test_no_deletions_returns_empty(self, tmp_path: Path) -> None:
+    def test_no_deletions_returns_empty(self, git_repo: Path) -> None:
         """Repository with no deletions returns empty list."""
-        repo = tmp_path / "repo"
-        repo.mkdir()
-        subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "config", "user.name", "Test"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-        subprocess.run(
-            ["git", "config", "user.email", "test@test.com"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
+        assert get_staged_plan_deletions(git_repo) == []
 
-        result = get_staged_plan_deletions(repo)
-        assert result == []
-
-    def test_deleted_plan_detected(self, tmp_path: Path) -> None:
+    def test_deleted_plan_detected(self, git_repo: Path) -> None:
         """Deleted plan directory detected from git staging."""
-        repo = tmp_path / "repo"
-        repo.mkdir()
-        subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "config", "user.name", "Test"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-        subprocess.run(
-            ["git", "config", "user.email", "test@test.com"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-
-        # Create and commit plan with file
-        plans_dir = repo / "plans" / "old-plan"
+        plans_dir = git_repo / "plans" / "old-plan"
         plans_dir.mkdir(parents=True)
         (plans_dir / "design.md").write_text("# Design")
-        subprocess.run(["git", "add", "."], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", "Add plan"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
+        _git(git_repo, "add", ".")
+        _git(git_repo, "commit", "-m", "Add plan")
+        _git(git_repo, "rm", "-r", "plans/old-plan")
 
-        # Delete the plan and stage deletion
-        subprocess.run(
-            ["git", "rm", "-r", "plans/old-plan"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
+        assert "old-plan" in get_staged_plan_deletions(git_repo)
 
-        result = get_staged_plan_deletions(repo)
-        assert "old-plan" in result
-
-    def test_multiple_deleted_plans(self, tmp_path: Path) -> None:
+    def test_multiple_deleted_plans(self, git_repo: Path) -> None:
         """Multiple deleted plans all detected."""
-        repo = tmp_path / "repo"
-        repo.mkdir()
-        subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "config", "user.name", "Test"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-        subprocess.run(
-            ["git", "config", "user.email", "test@test.com"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
+        for name in ["plan-one", "plan-two"]:
+            d = git_repo / "plans" / name
+            d.mkdir(parents=True)
+            (d / "design.md").write_text("# Design")
+        _git(git_repo, "add", ".")
+        _git(git_repo, "commit", "-m", "Add plans")
+        for name in ["plan-one", "plan-two"]:
+            _git(git_repo, "rm", "-r", f"plans/{name}")
 
-        # Create and commit plans
-        for plan_name in ["plan-one", "plan-two"]:
-            plans_dir = repo / "plans" / plan_name
-            plans_dir.mkdir(parents=True)
-            (plans_dir / "design.md").write_text("# Design")
-        subprocess.run(["git", "add", "."], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", "Add plans"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-
-        # Delete both plans
-        for plan_name in ["plan-one", "plan-two"]:
-            subprocess.run(
-                ["git", "rm", "-r", f"plans/{plan_name}"],
-                cwd=repo,
-                check=True,
-                capture_output=True,
-            )
-
-        result = get_staged_plan_deletions(repo)
+        result = get_staged_plan_deletions(git_repo)
         assert "plan-one" in result
         assert "plan-two" in result
 
-    def test_plan_with_only_gitkeep_not_deleted(self, tmp_path: Path) -> None:
+    def test_plan_with_only_gitkeep_not_deleted(self, git_repo: Path) -> None:
         """Plans containing only .gitkeep not considered substantive."""
-        repo = tmp_path / "repo"
-        repo.mkdir()
-        subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "config", "user.name", "Test"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-        subprocess.run(
-            ["git", "config", "user.email", "test@test.com"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
+        d = git_repo / "plans" / "empty-plan"
+        d.mkdir(parents=True)
+        (d / ".gitkeep").touch()
+        _git(git_repo, "add", ".")
+        _git(git_repo, "commit", "-m", "Add empty plan")
+        _git(git_repo, "rm", "-r", "plans/empty-plan")
 
-        # Create plan with only .gitkeep
-        plans_dir = repo / "plans" / "empty-plan"
-        plans_dir.mkdir(parents=True)
-        (plans_dir / ".gitkeep").touch()
-        subprocess.run(["git", "add", "."], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", "Add empty plan"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-
-        # Delete the plan
-        subprocess.run(
-            ["git", "rm", "-r", "plans/empty-plan"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-
-        result = get_staged_plan_deletions(repo)
-        # Non-substantive plans should not be in the list
-        assert "empty-plan" not in result
+        assert "empty-plan" not in get_staged_plan_deletions(git_repo)
 
 
 class TestGetArchiveHeadings:
@@ -246,169 +156,57 @@ class TestCheckPlanArchiveCoverage:
 
     def test_no_deleted_plans_no_errors(self, tmp_path: Path) -> None:
         """No errors when no plans deleted."""
-        root = tmp_path
-        result = root / "agents" / "plan-archive.md"
-        result.parent.mkdir(parents=True)
-        result.write_text("# Archive\n")
+        archive = tmp_path / "agents" / "plan-archive.md"
+        archive.parent.mkdir(parents=True)
+        archive.write_text("# Archive\n")
+        assert check_plan_archive_coverage(tmp_path) == []
 
-        errors = check_plan_archive_coverage(root)
-        assert errors == []
-
-    def test_deleted_plan_with_archive_entry_no_error(self, tmp_path: Path) -> None:
+    def test_deleted_plan_with_archive_entry_no_error(self, git_repo: Path) -> None:
         """Deleted plan with archive entry produces no error."""
-        repo = tmp_path / "repo"
-        repo.mkdir()
-        subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "config", "user.name", "Test"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-        subprocess.run(
-            ["git", "config", "user.email", "test@test.com"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
+        d = git_repo / "plans" / "old-plan"
+        d.mkdir(parents=True)
+        (d / "design.md").write_text("# Design")
+        agents = git_repo / "agents"
+        agents.mkdir(exist_ok=True)
+        (agents / "plan-archive.md").write_text("# Archive\n\n## old-plan\n\nDone.\n")
+        _git(git_repo, "add", ".")
+        _git(git_repo, "commit", "-m", "Add plan")
+        _git(git_repo, "rm", "-r", "plans/old-plan")
 
-        # Create plan and archive entry
-        plans_dir = repo / "plans" / "old-plan"
-        plans_dir.mkdir(parents=True)
-        (plans_dir / "design.md").write_text("# Design")
+        assert check_plan_archive_coverage(git_repo) == []
 
-        agents_dir = repo / "agents"
-        agents_dir.mkdir(exist_ok=True)
-        (agents_dir / "plan-archive.md").write_text(
-            """# Plan Archive
-
-## old-plan
-
-Description of old-plan.
-"""
-        )
-
-        subprocess.run(["git", "add", "."], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", "Add plan"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-
-        # Delete the plan
-        subprocess.run(
-            ["git", "rm", "-r", "plans/old-plan"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-
-        errors = check_plan_archive_coverage(repo)
-        assert errors == []
-
-    def test_deleted_plan_without_archive_entry_error(self, tmp_path: Path) -> None:
+    def test_deleted_plan_without_archive_entry_error(self, git_repo: Path) -> None:
         """Deleted plan without archive entry produces error."""
-        repo = tmp_path / "repo"
-        repo.mkdir()
-        subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "config", "user.name", "Test"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-        subprocess.run(
-            ["git", "config", "user.email", "test@test.com"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
+        d = git_repo / "plans" / "undocumented-plan"
+        d.mkdir(parents=True)
+        (d / "design.md").write_text("# Design")
+        agents = git_repo / "agents"
+        agents.mkdir(exist_ok=True)
+        (agents / "plan-archive.md").write_text("# Plan Archive\n")
+        _git(git_repo, "add", ".")
+        _git(git_repo, "commit", "-m", "Add plan")
+        _git(git_repo, "rm", "-r", "plans/undocumented-plan")
 
-        # Create plan without archive entry
-        plans_dir = repo / "plans" / "undocumented-plan"
-        plans_dir.mkdir(parents=True)
-        (plans_dir / "design.md").write_text("# Design")
-
-        agents_dir = repo / "agents"
-        agents_dir.mkdir(exist_ok=True)
-        (agents_dir / "plan-archive.md").write_text("# Plan Archive\n")
-
-        subprocess.run(["git", "add", "."], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", "Add plan"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-
-        # Delete the plan
-        subprocess.run(
-            ["git", "rm", "-r", "plans/undocumented-plan"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-
-        errors = check_plan_archive_coverage(repo)
+        errors = check_plan_archive_coverage(git_repo)
         assert len(errors) == 1
         assert "undocumented-plan" in errors[0]
 
-    def test_multiple_deleted_plans_mixed_coverage(self, tmp_path: Path) -> None:
-        """Multiple deleted plans with mixed coverage.
-
-        Reports only missing ones.
-        """
-        repo = tmp_path / "repo"
-        repo.mkdir()
-        subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "config", "user.name", "Test"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
+    def test_multiple_deleted_plans_mixed_coverage(self, git_repo: Path) -> None:
+        """Mixed coverage: reports only missing archive entries."""
+        for name in ["covered-plan", "uncovered-plan"]:
+            d = git_repo / "plans" / name
+            d.mkdir(parents=True)
+            (d / "design.md").write_text("# Design")
+        agents = git_repo / "agents"
+        agents.mkdir(exist_ok=True)
+        (agents / "plan-archive.md").write_text(
+            "# Archive\n\n## covered-plan\n\nArchived.\n"
         )
-        subprocess.run(
-            ["git", "config", "user.email", "test@test.com"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
+        _git(git_repo, "add", ".")
+        _git(git_repo, "commit", "-m", "Add plans")
+        for name in ["covered-plan", "uncovered-plan"]:
+            _git(git_repo, "rm", "-r", f"plans/{name}")
 
-        # Create plans
-        for plan_name in ["covered-plan", "uncovered-plan"]:
-            plans_dir = repo / "plans" / plan_name
-            plans_dir.mkdir(parents=True)
-            (plans_dir / "design.md").write_text("# Design")
-
-        agents_dir = repo / "agents"
-        agents_dir.mkdir(exist_ok=True)
-        (agents_dir / "plan-archive.md").write_text(
-            """# Plan Archive
-
-## covered-plan
-
-This plan is archived.
-"""
-        )
-
-        subprocess.run(["git", "add", "."], cwd=repo, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", "Add plans"],
-            cwd=repo,
-            check=True,
-            capture_output=True,
-        )
-
-        # Delete both plans
-        for plan_name in ["covered-plan", "uncovered-plan"]:
-            subprocess.run(
-                ["git", "rm", "-r", f"plans/{plan_name}"],
-                cwd=repo,
-                check=True,
-                capture_output=True,
-            )
-
-        errors = check_plan_archive_coverage(repo)
+        errors = check_plan_archive_coverage(git_repo)
         assert len(errors) == 1
         assert "uncovered-plan" in errors[0]
