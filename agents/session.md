@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-02
 
-**Status:** Phase 1 of orchestrate-evolution complete (agent caching model). 3 phases remaining.
+**Status:** Phase 2 of orchestrate-evolution complete (orchestrator plan format + verify-step.sh). 2 phases remaining.
 
 ## Completed This Session
 
@@ -23,14 +23,22 @@
 - When sunk-cost framing enters evaluation
 - When codify triggers on a feature branch
 
+**Orchestrate evolution — Phase 2 (orchestrator plan format):**
+- Cycle 2.1: Structured step list format — rewrote `generate_default_orchestrator` from prose H2-per-step to pipe-delimited `- filename | Phase N | model | max_turns` entries with `**Agent:**`, `**Corrector Agent:**`, `**Type:**` header
+- Cycle 2.2: PHASE_BOUNDARY markers on last step per phase, `INLINE | Phase N | —` format, `## Phase Summaries` section with IN/OUT placeholders
+- Cycle 2.3: `max_turns` extraction via `**Max Turns**:` field in `extract_step_metadata`, default 30, propagated to step entries
+- Cycle 2.4: Created `agent-core/skills/orchestrate/scripts/verify-step.sh` — git clean + submodule pointer + precommit check (exit 0/1)
+- Corrector review: 4 minor issues fixed (`_DEFAULT_MAX_TURNS` constant, phase summary double-header bug, test dedup, early-return alignment)
+- Review: `plans/orchestrate-evolution/reports/phase-2-implementation-review.md`
+
 ## In-tree Tasks
 
-- [ ] **Orch-evo plan format** — `/inline plans/orchestrate-evolution` | sonnet
+- [x] **Orch-evo plan format** — `/inline plans/orchestrate-evolution` | sonnet
   - Phase 2: orchestrator plan format + verify-step.sh (4 TDD cycles: steps 2-1 through 2-4)
   - Depends on Phase 1 (complete)
 - [ ] **Orch-evo TDD agents** — `/inline plans/orchestrate-evolution` | sonnet
   - Phase 3: TDD agent generation + verify-red.sh (4 TDD cycles: steps 3-1 through 3-4)
-  - Depends on Phase 2
+  - Depends on Phase 2 (complete)
 - [ ] **Orch-evo skill rewrite** — `/inline plans/orchestrate-evolution` | opus | restart
   - Phase 4: SKILL.md rewrite + refactor.md/delegation.md updates (2 general steps: 4-1, 4-2)
   - Depends on Phase 3. Opus for architectural prose artifacts.
@@ -40,4 +48,4 @@
 
 ## Next Steps
 
-Continue with Phase 2 (orchestrator plan format + verify-step.sh) via `/inline plans/orchestrate-evolution`.
+Continue with Phase 3 (TDD agent generation + verify-red.sh) via `/inline plans/orchestrate-evolution`.
