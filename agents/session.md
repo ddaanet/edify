@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-02
 
-**Status:** Phase 2 of orchestrate-evolution complete (orchestrator plan format + verify-step.sh). 2 phases remaining.
+**Status:** Phase 3 of orchestrate-evolution complete (TDD agent generation + verify-red.sh). 1 phase remaining.
 
 ## Completed This Session
 
@@ -31,21 +31,29 @@
 - Corrector review: 4 minor issues fixed (`_DEFAULT_MAX_TURNS` constant, phase summary double-header bug, test dedup, early-return alignment)
 - Review: `plans/orchestrate-evolution/reports/phase-2-implementation-review.md`
 
+**Orchestrate evolution — Phase 3 (TDD agent generation):**
+- Cycle 3.1: `generate_tdd_agents` function + `_TDD_ROLES` data-driven constant — 4 agents (tester, implementer, test-corrector, impl-corrector) with role-specific baselines and footers
+- Cycle 3.2: `split_cycle_content` helper — TDD cycles split on `**GREEN Phase:**` marker into `step-N-M-test.md` (RED) + `step-N-M-impl.md` (GREEN)
+- Cycle 3.3: Orchestrator plan TDD role markers — TEST/IMPLEMENT 5th field on pipe-delimited entries, tester/implementer agent mapping in plan header
+- Cycle 3.4: Created `agent-core/skills/orchestrate/scripts/verify-red.sh` — pytest exit code inversion (exit 0 = test fails = RED confirmed)
+- Corrector review: 1 major (orchestrator plan referenced nonexistent task agent for pure TDD runbooks), 4 minor fixes (model upgrade haiku→sonnet for tester/implementer, vacuous assertion, fixture name mismatch, assertion tightening)
+- Review: `plans/orchestrate-evolution/reports/phase-3-implementation-review.md`
+
 ## In-tree Tasks
 
 - [x] **Orch-evo plan format** — `/inline plans/orchestrate-evolution` | sonnet
   - Phase 2: orchestrator plan format + verify-step.sh (4 TDD cycles: steps 2-1 through 2-4)
   - Depends on Phase 1 (complete)
-- [ ] **Orch-evo TDD agents** — `/inline plans/orchestrate-evolution` | sonnet
+- [x] **Orch-evo TDD agents** — `/inline plans/orchestrate-evolution` | sonnet
   - Phase 3: TDD agent generation + verify-red.sh (4 TDD cycles: steps 3-1 through 3-4)
   - Depends on Phase 2 (complete)
 - [ ] **Orch-evo skill rewrite** — `/inline plans/orchestrate-evolution` | opus | restart
   - Phase 4: SKILL.md rewrite + refactor.md/delegation.md updates (2 general steps: 4-1, 4-2)
-  - Depends on Phase 3. Opus for architectural prose artifacts.
+  - Depends on Phase 3 (complete). Opus for architectural prose artifacts.
 - [ ] **Orch-evo review** — `/deliverable-review plans/orchestrate-evolution` | opus | restart
   - After Phase 4 completes
 - [ ] **Codify branch awareness** — Add feature-branch gate to `/codify` + soft-limit age calculation | sonnet
 
 ## Next Steps
 
-Continue with Phase 3 (TDD agent generation + verify-red.sh) via `/inline plans/orchestrate-evolution`.
+Continue with Phase 4 (SKILL.md rewrite + delegation.md updates) via `/inline plans/orchestrate-evolution`. Requires opus model and session restart.
