@@ -368,8 +368,7 @@ _GENERAL_STEPS = {"1.1": "**Execution Model**: sonnet\n**Max Turns**: 25\nWork h
 
 
 def test_orchestrator_plan_tdd_role_markers() -> None:
-    """TDD step entries include TEST/IMPLEMENT role markers; general steps do
-    not."""
+    """TDD step entries have TEST/IMPLEMENT markers; general steps do not."""
     tdd_plan = generate_default_orchestrator(
         "testplan",
         cycles=_TDD_CYCLES,

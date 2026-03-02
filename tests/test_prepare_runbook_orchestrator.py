@@ -242,15 +242,19 @@ Implement cleanup.
         # Check Steps section exists
         assert "## Steps" in content, f"Expected Steps section.\n{content}"
 
-        # Check pipe-delimited step format
-        assert "- step-1-1.md | Phase 1 | sonnet | 30" in content, (
-            f"Expected pipe-delimited step entry for cycle 1.1.\n{content}"
+        # Check pipe-delimited step format with TEST/IMPLEMENT role markers
+        assert "- step-1-1-test.md | Phase 1 | sonnet | 30 | TEST" in content, (
+            f"Expected TEST step entry for cycle 1.1.\n{content}"
         )
-        assert "- step-1-2.md | Phase 1 | sonnet | 30 | PHASE_BOUNDARY" in content, (
-            f"Expected phase boundary marker for last phase 1 item.\n{content}"
+        assert "- step-1-1-impl.md | Phase 1 | sonnet | 30 | IMPLEMENT" in content, (
+            f"Expected IMPLEMENT step entry for cycle 1.1.\n{content}"
         )
-        assert "- step-2-1.md | Phase 2 | opus | 30" in content, (
-            f"Expected pipe-delimited step entry for cycle 2.1.\n{content}"
+        assert (
+            "- step-1-2-impl.md | Phase 1 | sonnet | 30 | IMPLEMENT | PHASE_BOUNDARY"
+            in content
+        ), f"Expected phase boundary marker for last phase 1 item.\n{content}"
+        assert "- step-2-1-test.md | Phase 2 | opus | 30 | TEST" in content, (
+            f"Expected TEST step entry for cycle 2.1.\n{content}"
         )
 
         # Check no old-style H2 per step
@@ -311,13 +315,15 @@ Implement cleanup.
             phase_models={1: "sonnet", 2: "opus", 3: "haiku"},
         )
 
-        # Check PHASE_BOUNDARY markers on last step of each phase
-        assert "- step-1-2.md | Phase 1 | sonnet | 30 | PHASE_BOUNDARY" in content, (
-            f"Expected PHASE_BOUNDARY marker for last phase 1 step.\n{content}"
-        )
-        assert "- step-2-1.md | Phase 2 | opus | 30 | PHASE_BOUNDARY" in content, (
-            f"Expected PHASE_BOUNDARY marker for last phase 2 step.\n{content}"
-        )
+        # Check PHASE_BOUNDARY markers on last step of each phase (impl is last in TDD)
+        assert (
+            "- step-1-2-impl.md | Phase 1 | sonnet | 30 | IMPLEMENT | PHASE_BOUNDARY"
+            in content
+        ), f"Expected PHASE_BOUNDARY marker for last phase 1 step.\n{content}"
+        assert (
+            "- step-2-1-impl.md | Phase 2 | opus | 30 | IMPLEMENT | PHASE_BOUNDARY"
+            in content
+        ), f"Expected PHASE_BOUNDARY marker for last phase 2 step.\n{content}"
 
         # Check inline phase format: - INLINE | Phase N | —
         assert "- INLINE | Phase 3 | —" in content, (
@@ -385,12 +391,19 @@ Implement cleanup.
             phase_models={1: "sonnet"},
         )
 
-        # Step with explicit max turns should show 25
-        assert "- step-1-1.md | Phase 1 | sonnet | 25" in content, (
-            f"Expected max_turns=25 in step entry.\n{content}"
+        # Test step with explicit max turns should show 25
+        assert "- step-1-1-test.md | Phase 1 | sonnet | 25 | TEST" in content, (
+            f"Expected max_turns=25 in TEST step entry.\n{content}"
+        )
+        assert "- step-1-1-impl.md | Phase 1 | sonnet | 25 | IMPLEMENT" in content, (
+            f"Expected max_turns=25 in IMPLEMENT step entry.\n{content}"
         )
 
-        # Step with default max turns should show 30
-        assert "- step-1-2.md | Phase 1 | sonnet | 30 | PHASE_BOUNDARY" in content, (
-            f"Expected max_turns=30 in step entry.\n{content}"
+        # Steps with default max turns should show 30
+        assert "- step-1-2-test.md | Phase 1 | sonnet | 30 | TEST" in content, (
+            f"Expected max_turns=30 in TEST step entry.\n{content}"
         )
+        assert (
+            "- step-1-2-impl.md | Phase 1 | sonnet | 30 | IMPLEMENT | PHASE_BOUNDARY"
+            in content
+        ), f"Expected max_turns=30 in IMPLEMENT step entry.\n{content}"
