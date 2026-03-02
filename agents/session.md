@@ -1,40 +1,26 @@
-# Session Handoff: 2026-03-01
+# Session Handoff: 2026-03-02
 
-**Status:** 4 worktrees active (3 original + 1 deliverable review). Continuation-prepend merged. RCA: lock contention hook fix. Decisions: autostrategy filter, task notation [✗]→[†].
+**Status:** 4 worktrees merged+removed (runbook-recall-expansion, task-classification, wt-rm-dirty, fix-planstate-detector). RCA: task-classification regression. 2 worktrees remain (ups-topic-injection, userpromptsubmit-topic stale).
 
 ## Completed This Session
 
-- **Worktree parallel setup** — 6 tasks branched for parallel execution
-  - Runbook recall expansion, Pushback grounding, Fix planstate detector, UPS topic injection, Task classification, Continuation prepend
-- **Pushback grounding merge** — worktree merged to main and removed
-  - Branch delivered: `plans/pushback-grounding/classification.md`, test additions
-  - Validated: no session.md or learnings.md loss (62 lines pre/post)
-  - flatten-hook-tiers plan status changed to `delivered` during merge
-- **Runbook recall expansion merge** — worktree merged to main and removed
-  - Branch delivered: recall artifact resolution in prepare-runbook.py
-  - 1 new learning (TDD after full codebase exploration)
-  - Validated: learnings 62→66 lines, task removed from Worktree Tasks
-  - `_worktree rm` needed `--force` (directory not empty on merge commits — existing blocker)
-- **Discussion: wt fuzzy matching** — concluded fuzzy matching belongs at agent layer (inherent in LLM name resolution), not CLI. Agent reads session.md, copies exact name. CLI strict matching prevents silent wrong-task matches. Recommend canceling task.
-- **Requirements: worktree-ad-hoc-task** — captured requirements for adding task to session.md before `_worktree new` when task absent from Pending Tasks
-  - Plan: worktree-ad-hoc-task | Status: requirements
-  - Skill-layer fix only (SKILL.md Mode A), no CLI changes
-- **Continuation-prepend merge** — worktree merged to main and removed
-  - Branch delivered: continuation-prepend plan, cooperative-protocol-gaps classification, integration tests
-  - Validator failure during merge: 4 `[x]` tasks from branch leaked into Pending (autostrategy bug)
-  - Manual fix: removed completed tasks, amended merge commit
-- **RCA: lock contention** — 3-layer root cause analysis
-  - Hook message fixed: "retry the git command" → "Retry your git command — do not delete lock files"
-  - Decision updated: `operational-tooling.md` "When git lock error occurs" — concurrent worktree contention
-  - Learning added: "When hook messages conflict with behavioral rules"
-- **Design-context-gate brief** — `/design` tail-call decision based on context budget
-  - Mechanism: UPS hook injects context % from statusline infrastructure (already exists)
-  - Threshold needs empirical calibration
-- **Deliverable review: runbook-recall-expansion worktree** — created with slug `runbook-recall-expansion`
-- **Decisions written** — `operational-tooling.md`:
-  - "When merging completed tasks from branch" — filter `[x]`/`[–]` from additive union
-  - "When choosing task status markers" — `[✗]` → `[†]` (dagger = dead, visually distinct from `[x]`)
-  - Memory index updated with both entries
+- **Worktree merges (4):**
+  - runbook-recall-expansion — clean merge+rm
+  - task-classification — leaked `[x]` tasks (autostrategy bug), regressed `_update_session_and_amend` → `_update_session` in cli.py
+  - wt-rm-dirty — restored amend logic, fixed lifecycle.md dirty-state bug (merge.py stages lifecycle before commit)
+  - fix-planstate-detector — conflict in lifecycle.md, stale wt-rm-dirty entry leaked from branch
+- **RCA: task-classification regression** — design D-4 conflated move semantics with post-merge hygiene
+  - `_update_session_and_amend` served two purposes: (1) move-related session changes, (2) post-merge rm cleanup
+  - Design only identified purpose (1), removed function. Every downstream stage trusted the claim.
+  - Outline review caught incomplete failure mode analysis (Major #1) but accepted "eliminated" as sufficient
+  - Intervention: design-corrector purpose audit on removal claims
+  - Evidence: `plans/task-classification/outline.md` D-4, `reports/outline-review.md` Major #1, `runbook.md` Cycle 7 line 109
+- **Discussion conclusions:**
+  - Autostrategy only applies to session files, other files use standard three-way merge
+  - `_worktree rm` should remove completed task entries when branch session.md has `[x]` — completion signal is branch status, not merge state
+  - Design-corrector gets removal verification rule, not /design skill (corrector independently verifies, avoids prose gate)
+- **Wt rm task cleanup brief** — `plans/wt-rm-task-cleanup/brief.md`
+- **Learning removed:** "When worktree rm reports uncommitted files" — replaced by pending task (Worktree CLI UX)
 
 ## Pending Tasks
 
@@ -146,11 +132,21 @@
   - 23 files reference ✗; active files: execute-rule.md, task-failure-lifecycle.md, error-classification.md, handoff skill, session.md, validators, justfiles
   - Update `extract_task_blocks` regex, session-structure validator
   - Plans/reports are historical — update only active behavioral files
+- [ ] **Wt rm task cleanup** — `/design plans/wt-rm-task-cleanup/brief.md` | sonnet
+  - Plan: wt-rm-task-cleanup | Status: brief
+  - rm removes completed task entry (branch `[x]` check), strips marker only if not completed
 - [ ] **Design context gate** — `/design plans/design-context-gate/brief.md` | sonnet
   - Plan: design-context-gate | Status: brief
   - /design tail-call /inline only when context budget allows, otherwise handoff+commit
   - Mechanism: UPS hook injects context percentage from statusline infrastructure
   - Threshold needs empirical calibration (no confabulated number)
+- [ ] **Worktree CLI UX** — sonnet
+  - `_worktree new`: stdout-only, exit status for success, user-friendly errors instead of tracebacks (task not in session.md, slug length)
+  - `_worktree rm` dirty message: "Run hc in the worktree session, or claude -c to restart it"
+- [ ] **Corrector removal audit** — sonnet
+  - When design proposes removing functions, corrector reads implementation and callers, verifies removal justification covers all purposes
+  - Decision entry with task-classification incident as evidence
+- [ ] **Wt merge-rm shorthand** — update worktree skill: `wt merge rm <slug>` as `merge <slug>` then `rm <slug>` | sonnet
 
 ### Tier 4: Rest
 
@@ -231,10 +227,6 @@
 
 ## Worktree Tasks
 
-- [ ] **Fix planstate detector** — `/design plans/fix-planstate-detector/requirements.md` | sonnet
-  - Plan: fix-planstate-detector | Status: requirements
-  - Missing `outlined` status: outline.md grouped under `requirements` fallback
-
 - [ ] **UPS topic injection** → `ups-topic-injection` — `/runbook plans/userpromptsubmit-topic/outline.md` | sonnet
   - Plan: userpromptsubmit-topic | Status: outlined (planstate detector shows `requirements` — fix-planstate-detector bug)
 
@@ -271,8 +263,8 @@
 **`_worktree rm --force` doesn't restore task to Pending:**
 - `rm --force` removes worktree but leaves task in Worktree Tasks section. Manual session.md edit needed to move back to Pending.
 
-**`_worktree rm` fails on merge commits:**
-- `_update_session_and_amend` calls `git commit --amend` which fails on merge commits (exit 128). Then `--force` can fail on submodule removal. Manual `rm -rf` of directory needed after.
+**`_worktree rm` amend restored but task entry persists:**
+- `_update_session_and_amend` restored after task-classification regression. Amend works but `remove_slug_marker` only strips marker — doesn't remove completed task entry. Pending: wt-rm-task-cleanup (check branch `[x]` status).
 
 **Orphaned remember-skill-update directory:**
 - `/Users/david/code/claudeutils-wt/remember-skill-update` — git deregistered but directory remains. Needs manual removal.
@@ -301,7 +293,7 @@
 - Inline TDD after full codebase exploration produces test-after with ceremony. All 15 tests passed on first attempt — no behavioral RED. Must delegate to test-driver in fresh context when task is marked TDD and design session loaded implementation context. [from: runbook-recall-expansion]
 ## Next Steps
 
-4 worktrees active (fix-planstate-detector, ups-topic-injection, task-classification, runbook-recall-expansion). Userpromptsubmit-topic worktree still registered (merged, needs `wt-rm userpromptsubmit-topic`). Mechanical tasks ready: autostrategy completed filter (single-line fix), task notation migration (23 files). Learnings at 70 lines — approaching `/codify` threshold.
+1 active worktree (ups-topic-injection). userpromptsubmit-topic still registered (merged, needs `wt-rm`). Mechanical tasks ready: merge completed filter (single-line fix), task notation migration (23 files), worktree CLI UX. Learnings at 75 lines — approaching `/codify` threshold.
 
 ## Reference Files
 
@@ -324,3 +316,5 @@
 - `plans/reports/recall-lifecycle-external-research.md` — External research: 10 frameworks (HL7 CRMI, PROV-DM, OpenLineage, ADK, LangGraph, etc.)
 - `plans/pushback-grounding/requirements.md` — Claim verification + recall for `d:` discussion mode
 - `plans/worktree-ad-hoc-task/requirements.md` — Add task to session.md before worktree creation when absent
+- `plans/wt-rm-task-cleanup/brief.md` — rm removes completed task entry (branch `[x]` check)
+- `plans/task-classification/reports/outline-review.md` — Outline review that caught but insufficiently fixed failure mode analysis
