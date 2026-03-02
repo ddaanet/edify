@@ -366,3 +366,25 @@ Corrector dispatch follows standardized template in `agent-core/skills/inline/re
 **Correct pattern:** The proximal requirement points at the structural gap. Fix the gap (inline execution skill covering pre-work + execute + post-work), and the proximal requirement becomes one FR among many.
 
 **Corollary:** Conditional gates ("skip Read if no /design ran") reintroduce prose-gate failure modes. The D+B principle applies: unconditional Read, file absence is the negative path.
+
+## When Classifying Composite Tasks
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Batch-classifying a task containing multiple discrete work items (deliverable review findings, PR comments, multi-FR list). Group reasoning averages heterogeneous items — a behavioral code change gets masked by non-behavioral siblings.
+
+**Correct pattern:** Decompose before classifying. If the input artifact contains N discrete work items, produce a per-item behavioral code check. Any item that adds conditional branches, functions, or logic paths elevates that item to Moderate minimum.
+
+**Distinct from:** Companion tasks (explicit user bundling in session notes). Composite tasks are implicitly bundled by the task's nature — decomposition requires reading the input artifact.
+
+**Evidence:** M-1 (precondition guard adding conditional branch) batch-classified as Simple alongside M-2 (comment) and M-3 (assertion tightening). Third instance of "behavioral code as Simple" pattern.
+
+## When Routing Moderate Classification To Runbook
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Requirements can be behaviorally complete (every FR has testable acceptance criteria) but structurally incomplete (no module layout, function decomposition, wiring decisions). The /design Moderate route skips design entirely — "Route to /runbook."
+
+**Correct pattern:** When requirements lack structural decisions, generate a lightweight outline before /runbook. The outline materializes "how" decisions (module structure, component boundaries, wiring) alongside the "what" (behavioral spec). Skip only when requirements are functionally complete — behavioral + structural.
+
+**Evidence:** Single data point (recall-cli-integration). Trigger condition needs sharper criteria before modifying /design skill.

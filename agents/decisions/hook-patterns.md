@@ -122,3 +122,13 @@ Terminal constraint: "UserPromptSubmit says: " prefix = ~29 chars; ~90 char term
 - Tier 2 injections (discuss, pending, brainstorm, quick, learn): behavioral outline + non-blank line count. Format: `discuss: assess, stress-test, state verdict. (N lines)`
 - Tier 2.5 guards (1-line injections): authored human summary, not verbatim content
 - Terse commands (c, y): same brief text for both audiences — instruction IS the summary
+
+### When Hook Messages Conflict With Behavioral Rules
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Hook blocks a dangerous action (correct) but gives misleading guidance that conflicts with behavioral rules. "Retry the git command" caused the agent to retry rm with a different path instead of stopping — the hook's "retry" directive competed with the "stop on unexpected results" rule.
+
+**Correct pattern:** Hook messages must align with the behavioral rules they enforce. For lock contention: "Retry your git command — do not delete lock files" (specify what to retry). Not "STOP" (triggers halt-and-wait) nor ambiguous "retry" (agent retries the wrong command).
+
+**Evidence:** Agent retried rm twice following hook's "retry" advice. Lock was from concurrent worktree session — transient contention that self-resolves via model latency.

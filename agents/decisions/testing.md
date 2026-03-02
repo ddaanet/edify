@@ -244,3 +244,23 @@ Standard TDD uses prose descriptions instead of full test code (per workflow-adv
 **Correct pattern:** GREEN verification command must be `just check && just test` (or `just lint && just test`). Lint is a required gate before commit, not just test pass.
 
 **Evidence:** Cycle 1.1 GREEN commit had F821 (undefined `Never`) and PLC0415. Fix commit required. TDD audit flagged as primary compliance violation.
+
+## When A Test Fails Only In Suite
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Treating test ordering dependence as "flaky" and retrying or ignoring. A test that fails only when run after other tests has shared mutable state — that's a bug, not noise.
+
+**Correct pattern:** Diagnose the pollution. Run `pytest --lf` to confirm, then bisect with `pytest -x` subsets. Fix the shared state (fixture cleanup, monkeypatch teardown, global mutation). The test or its predecessor is wrong.
+
+**Rationale:** "Passes in isolation" is a diagnostic signal, not a resolution. Merging with a known ordering-dependent failure means the suite is unreliable — future failures get dismissed as "that flaky test."
+
+## When Doing TDD After Full Codebase Exploration
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Writing all tests in one batch after reading the implementation target, then implementing everything at once. The RED phase shows only ImportError, not behavioral failures. Tests cannot guide discovery because the implementation is pre-formed.
+
+**Correct pattern:** When task decomposition marks a task as TDD and the current session loaded implementation context during design/exploration, delegate to test-driver agent in a fresh context. Design and TDD sessions must be different contexts — TDD requires implementation to be unknown.
+
+**Evidence:** 15 tests written at once, all 15 passed on first attempt. No behavioral assertion ever failed. This is test-after development with TDD ceremony.

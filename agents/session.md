@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-02
 
-**Status:** Discussion session — codify-in-branch proposal rejected, learning recorded.
+**Status:** Codify flush — 33 learnings consolidated to permanent docs, learnings.md 157→23 lines.
 
 ## Completed This Session
 
@@ -91,6 +91,14 @@
   - Rejected: merge conflict risk on shared infrastructure files (decisions/, fragments/, memory-index.md) with no ordering guarantee
   - Resolution: "worktree-tasks-only" rule scopes to task classification, not interactive skill execution — `/codify` runs on main directly
   - Learning recorded: "When worktree-tasks-only appears to block maintenance skills"
+- **Codify flush (33 learnings → permanent docs):**
+  - 25 consolidated across 12 files: testing.md (2), implementation-notes.md (3), operational-tooling.md (2), hook-patterns.md (1), pipeline-contracts.md (2), workflow-advanced.md (5), defense-in-depth.md (2), pushback.md (2), delegation.md (2), project-tooling.md (1), execute-rule.md (2), communication.md (1)
+  - 5 already-codified entries removed (proximal requirements, delegating TDD, pipeline skills, precommit cost, deliverable review)
+  - 1 codify-specific learning routed to `.claude/skills/codify/references/learnings.md`
+  - 20 memory-index entries added
+  - 3 learnings retained for continuity (codify branch, recovery context, worktree-tasks-only)
+  - learnings.md: 157 → 23 lines
+  - User correction applied: lint-gated recall entry in defense-in-depth.md updated to PreToolUse-hook-blocks-until-agent-recalls model (agent does semantic matching)
 
 ## In-tree Tasks
 
@@ -127,9 +135,7 @@
   - Phase 3: TDD agent generation + verify-red.sh (4 cycles)
   - Phase 4: SKILL.md rewrite + refactor.md/delegation.md updates (2 steps, opus)
   - Checkpoints: light at phase boundaries, full at Phase 4 (final)
-- [ ] **Execute flag lint** — precommit lint gate for `/inline ... execute` in session.md | haiku | 3.0
-  - Scan session.md pending tasks for `/inline plans/.* execute` pattern
-  - Flag as error: execute entry point in session.md bypasses Phase 2 recall (D+B anchor)
+- [-] **Execute flag lint** — superseded by session validator | haiku | 3.0
 - [x] **Skill disclosure** — `/design plans/skill-progressive-disclosure/requirements.md` | opus | 2.6
   - Plan: skill-progressive-disclosure | Status: requirements
   - Segment loading at gate boundaries: initial load → write-outline → write-design (/design); tier assessment → tier3-planning → expansion (/runbook)
@@ -402,4 +408,4 @@
 
 ## Next Steps
 
-Learnings at 156 lines — well past `/codify` threshold. Run `/codify` on main next.
+Codify complete. All pending work is in Worktree Tasks — use `wt` to dispatch.

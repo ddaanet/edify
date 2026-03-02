@@ -186,3 +186,59 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 **Anti-pattern:** Loading recall entries across multiple passes, then only applying entries that matched the original artifact structure. New entries from later passes can invalidate or extend decisions made before those entries were loaded.
 
 **Correct pattern:** After each recall pass, re-evaluate current artifact decisions against newly loaded entries. Applies to any artifact in progress — requirements, outline, design, runbook. Later passes may reveal structural gaps, not minor refinements.
+
+## .Task and Session Patterns
+
+### When D: Mode Validates A Proposed Change
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** `d:` evaluation concludes with affirmative verdict ("agree, this should be done"), then stops. The validated change exists only in conversation context. No pending task created, no brief written. Change is lost on context rotation.
+
+**Correct pattern:** When `d:` verdict is "agree, this change should be made" (or equivalent), chain to `p:` evaluation — task name, model tier, restart flag. Create brief if discussion produced design context worth preserving.
+
+**Scope:** Applies when discussion conclusion implies future work. Pure analysis ("is X true?") or rejected proposals ("disagree") don't trigger the chain.
+
+**Evidence:** Three consecutive misses in one session (wt-rm-dirty review, 2026-03-01) confirm this is systematic, not incidental.
+
+### When Starting Work On A Task
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Jumping to `/design` because the task description seems clear enough. Session.md task entries are scope (name + one-liner), not specification. The gap between task description and behavioral FRs is where design sessions waste time discovering what they're building.
+
+**Correct pattern:** Always start from `/requirements` unless a requirement-equivalent document already exists. Requirement-equivalent: existing requirements.md, design.md with behavioral FRs, deliverable review report (findings = acceptance criteria for rework). Brief.md is NOT equivalent — transfers context but lacks testable acceptance criteria.
+
+**Rationale:** `/requirements` includes a recall step that grounds extraction against existing infrastructure. Skipping to `/design` produces naive requirements. The `/design` Phase 0 requirements-clarity gate fires at 2.6% rate (1/38 sessions) — too late and too rare to compensate.
+
+### When Pending Tasks Lack Recovery Context
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Task entry has description but no backtick command. Next session's `x` has nothing to invoke. Discussion conclusions (d: mode decisions, agreed refinements, identified reuse paths) exist only in conversation context — lost on session boundary.
+
+**Correct pattern:** Every pending task gets a backtick command in the entry. Discussion conclusions that produce pending work get captured as task notes in session.md, recoverable via `task-context.sh`. The handoff IS the recovery mechanism — if it's not in session.md, it doesn't survive.
+
+### How To Wrap A Discussion Session
+
+**Decision Date:** 2026-03-02
+
+`w` (wrap) is a Tier 1 command (standalone, no colon, no user content). Sequence: findings → takeaways → submit.
+
+- **Findings:** Summarize what the investigation/discussion discovered (factual, not narrative)
+- **Takeaways:** Extract learnings (append to learnings.md), create pending tasks (`p:` evaluation for each validated change), write briefs if discussion produced design context worth preserving
+- **Submit:** `/handoff --commit` (or `hc`)
+
+Trigger: user says `wrap` or `w`. Crystallizes conversation context into persistent artifacts before context rotates out. Pending absorption into directive-skill-promotion task.
+
+### When Converting External Documentation To Recall Entries
+
+**Decision Date:** 2026-03-02
+
+Two trigger classes have different automation profiles:
+- `how` entries (task-descriptive) — extractable mechanically from documentation headings. Sonnet automation with corrector pass
+- `when` entries (situational) — require operational experience to author. Hand-curation from incidents and failures
+
+**Anti-pattern:** Treating all trigger extraction as equivalent quality risk. Applying corrector-heavy workflows to `how` entries (unnecessary) or batch-automating `when` entries (insufficient).
+
+**Structural insight:** Training provides reasoning capability; recall provides authoritative inputs. For operational methodology, explicit recall entries override ambiguous training-data patterns. Interaction structure (skills, tool gates, PreToolUse hooks) enforces application at the right moment.

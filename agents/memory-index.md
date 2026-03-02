@@ -71,6 +71,8 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when gates bypass downstream pipeline stages | union criteria capacity coordination
 /when choosing hook enforcement over permission deny | sandbox denylist ineffective PreToolUse
 /when implementing pre-delegation gates | permissionDecision deny block subagent_type Task hook
+/when loaded decisions miss error context | context rotation PostToolUse injection gate recall
+/when directives outgrow text expansions | promote skill tool gates D+B protocol momentum
 
 ## agents/decisions/deliverable-review.md
 
@@ -102,6 +104,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when writing hook redirect messages | rationale why not just what agent adherence
 /when mapping hook output channel audiences | additionalContext systemMessage permissionDecisionReason stderr
 /when writing hook user-visible messages | terminal constraint 60 chars tier injection
+/when hook messages conflict with behavioral rules | retry guidance alignment lock contention
 
 ## agents/decisions/implementation-notes.md
 
@@ -123,6 +126,9 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when edit tool reports stale success | Write after Bash dropped sandbox git-mv
 /when custom agents not discoverable as subagent types | built-in Task frontmatter restart
 /when phase files contain h2 headers in code blocks | extract_sections code fence boundary
+/when writing multiline strings in indented code | dedent triple-quote flush-left whitespace
+/when editing skill files | description dual-purpose extraction safety control flow D+B entry points
+/when lint-gated recall needs error categorization | errorformat parsing reuse tuick per-error-type
 
 ## agents/decisions/markdown-tooling.md
 
@@ -206,6 +212,8 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when bootstrapping around broken tools | design as execution plan
 /when measuring agent durations | sleep inflation tool use rate
 /when analyzing sub-agent token costs | total_tokens cache decomposition
+/when merge fails on main | rollback abort branch self-update precommit worktree
+/when reclassifying tasks after structural changes | retroactive bulk classification heuristic
 
 ## agents/decisions/orchestration-execution.md
 
@@ -281,6 +289,8 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /how dispatch corrector from inline skill | standardized template baseline diff recall report
 /when triage feedback shows divergence | classification comparison heuristics calibration log
 /when proximal requirements reveal lifecycle gaps | structural gap inline execution pipeline stage
+/when classifying composite tasks | decompose before classify per-item behavioral check moderate
+/when routing moderate classification to runbook | structural incomplete outline lightweight
 
 ## agents/decisions/project-config.md
 
@@ -324,6 +334,8 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when tests simulate merge workflows | branch as merged parent amend preserves
 /when safety checks fail in tests | understand why fix scenario not suppress
 /when green phase verification includes lint | just check test lint commit gate
+/when a test fails only in suite | ordering dependence shared mutable state diagnose pollution
+/when doing TDD after full codebase exploration | fresh context delegate test-driver unknown implementation
 
 ## agents/decisions/validation-quality.md
 
@@ -358,6 +370,11 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when writing recall artifacts | keys only no excerpts downstream resolve
 /when requirements capture needs recall | requirements skill recall step infrastructure
 /when recall loads new entries mid-artifact | re-evaluate each pass invalidate extend requirements outline design
+/when d: mode validates a proposed change | chain p: evaluation task pending brief
+/when starting work on a task | requirements first requirement-equivalent recall grounding
+/when pending tasks lack recovery context | backtick command handoff task-context
+/how wrap a discussion session | findings takeaways submit wrap w
+/when converting external documentation to recall entries | how entries mechanical when experiential automation
 
 ## agents/decisions/workflow-core.md
 

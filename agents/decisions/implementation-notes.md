@@ -317,3 +317,39 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Correct pattern:** Describe fixture content using inline backtick-wrapped text or bullet lists instead of code blocks with actual H2 headers.
 
+## When Writing Multiline Strings In Indented Code
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Triple-quoted strings flush-left or with inconsistent indentation to avoid unwanted whitespace. Breaks visual code structure.
+
+**Correct pattern:** `from textwrap import dedent`, then `dedent("""\n    indented content\n    """)`. Keeps strings visually aligned with surrounding code while stripping common leading whitespace at runtime.
+
+**Scope:** Non-docstring multiline strings (test fixtures, template content, heredoc-style text). Docstrings have their own `inspect.cleandoc` handling.
+
+## When Editing Skill Files
+
+**Decision Date:** 2026-03-02
+
+**Description field:** Dual-purpose — CLI picker display AND agent triggering (no separate field — #28934). Lead with action verb (user display), then trigger phrases (agent matching). H1 title is body content only. Fallback: first paragraph if `description` omitted.
+
+**Extraction safety:** Every content block moved to references/ must leave trigger condition + Read instruction in SKILL.md body.
+
+**Control flow verification:** After restructuring conditional branches, enumerate all paths, verify user-visible output on each.
+
+**D+B gate additions:** Must not change gate decision outcome on existing paths.
+
+**Entry point naming:** Named entry points (`execute`) not `--flag` conventions. Skills parse prose args, not CLI flags.
+
+**Prose quality:** `plans/reports/skill-optimization-grounding.md` — Segment → Attribute → Compress framework.
+
+## When Lint-Gated Recall Needs Error Categorization
+
+**Decision Date:** 2026-03-02
+
+**Reuse path:** `~/code/tuick/` has errorformat parsing: `ErrorformatEntry` (filename, lnum, text, type), `tool_registry.py` (tool detection, custom patterns for ruff/pytest/mypy), `group_entries_by_location`, `group_pytest_entries`. Direct code reuse — not a dependency.
+
+**Integration:** Parse `just precommit` output → structured error entries → extract error codes/categories → map to recall domain keywords → inject matching memory-index entries.
+
+**Per-error-type gating:** Each novel error category triggers fresh recall injection. Hook tracks seen categories, fires on new ones. Not just first-red-after-green.
+

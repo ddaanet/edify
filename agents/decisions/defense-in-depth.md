@@ -166,3 +166,21 @@ When designing a new quality gate or quality process:
 
 **Correct pattern:** Block with `permissionDecision:deny`. Gate by `subagent_type` discriminator (execution agents: artisan, test-driver, corrector, runbook-corrector, design-corrector, outline-corrector, runbook-outline-corrector, tdd-auditor, refactor). Fragments don't load in sub-agents; recall-artifact is the only project context transport.
 
+## When Loaded Decisions Miss Error Context
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Decisions loaded via `/recall broad` early in session aren't functionally present when errors fire later (context rotation). Agent processes lint error against immediate context (error message, rule description), not against decisions loaded 50k+ tokens earlier. Adding another recall pass as prose instruction ("recall after lint failure") is a prose gate — same failure mode.
+
+**Correct pattern:** PreToolUse hook blocks tool execution until the agent runs `claudeutils _recall resolve` with error-relevant triggers. The agent does the semantic matching — it reads the error, identifies relevant recall entries, resolves them. Same principle as all recall: agent performs semantic matching, not scripts. The hook is a structural gate (forces the recall step), not a content injector.
+
+## When Directives Outgrow Text Expansions
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Keeping complex multi-step protocols as UPS text expansions (Tier 2 directives). The d: directive has ground→assess→stress-test→verdict sequence, but text expansions are instructions with no structural enforcement. Steps get skipped under momentum.
+
+**Correct pattern:** When a directive develops a protocol with ordered steps where skipping a step produces observable failure, promote to a skill with tool gates. D+B gates (Read, recall resolve) make steps non-skippable. Text expansions remain appropriate for simple behavioral framing (b:, q:, learn:).
+
+**Evidence:** d: grounding step skipped 2× in one session, p: model classification wrong 3× in one session. Both have loaded rules that weren't applied — the prose-gate failure mode.
+

@@ -343,3 +343,29 @@ Git workflow, platform constraints, code patterns, and naming conventions.
 **Correct pattern:** Use main session first-turn `cache_creation_input_tokens` to measure system prompt size (~43K tokens p50). Use minimal-work agents (≤3 tool uses) for fixed overhead proxy.
 
 **Evidence:** 709 Task calls analyzed. Minimal-work agents: 35.7K total_tokens p50. Main session cache hit rate: 94-100% after warmup.
+
+## .Merge and Reclassification Patterns
+
+### When Merge Fails On Main
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Resolving conflicts and precommit failures on main after `_worktree merge`. Main lacks branch context — it resolves conflicts by reading diff markers, not understanding intent. Precommit failures leave a broken merge commit on main requiring amend.
+
+**Correct pattern:** `git merge --abort` on failure. Branch merges main into itself first (plan: `worktree-merge-from-main`), resolves conflicts in its own context, passes precommit, then main retries. Main-side merge becomes trivially clean.
+
+**Implication:** `worktree-merge-from-main` is a prerequisite for merge resilience, not independent. Sequence: build `merge --from-main` → modify `_worktree merge` to rollback-and-report → skill guides user to update branch then retry.
+
+**Exception:** Session.md/learnings.md auto-resolve (`remerge_session_md`, `remerge_learnings_md`) may still run on main — these are mechanical, context-free. Rollback applies to source conflicts and precommit failures where main lacks resolution context.
+
+**Also:** Never `--force` remove a worktree without first listing uncommitted files. Two uncommitted files lost permanently in one incident.
+
+### When Reclassifying Tasks After Structural Changes
+
+**Decision Date:** 2026-03-02
+
+**Anti-pattern:** Shipping a new classification model (two-section In-tree/Worktree Tasks) without reclassifying existing tasks. Handoff perpetuates defaults — all 60+ tasks stayed In-tree despite D-9 heuristic qualifying most for Worktree Tasks. On main, this left Worktree Tasks empty, making `wt` unable to dispatch.
+
+**Correct pattern:** Structural changes to task organization require a bulk reclassification pass on existing data. Classification heuristics apply retroactively, not just to new tasks.
+
+**Compounding factor:** Stale decision entry in `workflow-advanced.md` (2026-02-20, single-section model) contradicted superseding entry in `operational-tooling.md` (2026-02-28, two-section model). Stale entry never cleaned up on delivery — the plan-completion ceremony gap.
