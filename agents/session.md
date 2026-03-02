@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-02
 
-**Status:** All 4 phases of orchestrate-evolution complete. Deliverable review pending.
+**Status:** All 4 phases complete, deliverable review done. Fix task pending.
 
 ## Completed This Session
 
@@ -45,6 +45,15 @@
 - Corrector review: 4 minor fixes (phase boundary clarification, recall restoration to checkpoint template, Example Execution slop removal, haiku reference in Pre-Delegation Checkpoint)
 - Review: `plans/orchestrate-evolution/reports/phase-4-implementation-review.md`
 
+**Deliverable review:**
+- 3-agent parallel Layer 1 (code, test, prose) + interactive Layer 2 cross-cutting
+- 0 Critical, 3 Major, 16 Minor
+- M-1: Phase Summaries vacuous — `phase_preambles` parameter exists in `generate_default_orchestrator` but never passed or used. Corrector gets "(placeholder)" IN/OUT scope
+- M-2: Dead code — `generate_phase_agent`, `generate_agent_frontmatter` (old `crew-` naming), stale fallback at line 1506
+- M-3: SKILL.md missing refactor agent invocation path — design specifies it but execution loop doesn't wire it
+- Report: `plans/orchestrate-evolution/reports/deliverable-review.md`
+- Layer 1 reports: `deliverable-review-code.md`, `deliverable-review-test.md`, `deliverable-review-prose.md`
+
 ## In-tree Tasks
 
 - [x] **Orch-evo plan format** — `/inline plans/orchestrate-evolution` | sonnet
@@ -56,10 +65,12 @@
 - [x] **Orch-evo skill rewrite** — `/inline plans/orchestrate-evolution` | opus | restart
   - Phase 4: SKILL.md rewrite + refactor.md/delegation.md updates (2 general steps: 4-1, 4-2)
   - Depends on Phase 3 (complete). Opus for architectural prose artifacts.
-- [ ] **Orch-evo review** — `/deliverable-review plans/orchestrate-evolution` | opus | restart
+- [x] **Orch-evo review** — `/deliverable-review plans/orchestrate-evolution` | opus | restart
   - After Phase 4 completes
+  - Result: 0 Critical, 3 Major, 16 Minor — `plans/orchestrate-evolution/reports/deliverable-review.md`
+- [ ] **Fix orch-evo findings** — `/design plans/orchestrate-evolution/reports/deliverable-review.md` | opus
 - [ ] **Codify branch awareness** — Add feature-branch gate to `/codify` + soft-limit age calculation | sonnet
 
 ## Next Steps
 
-Run deliverable review for orchestrate-evolution (`/deliverable-review plans/orchestrate-evolution`). Requires opus model and session restart.
+Fix orchestrate-evolution findings — `/design` triage on the deliverable review report. Opus model for architectural decisions on M-1 (phase summaries) and M-3 (refactor wiring).
