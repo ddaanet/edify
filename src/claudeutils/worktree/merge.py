@@ -365,31 +365,31 @@ def _phase4_merge_commit_and_precommit(slug: str, *, from_main: bool = False) ->
             raise SystemExit(3)
 
 
-def merge(slug: str, *, from_main: bool = False) -> None:  # noqa: ARG001
+def merge(slug: str, *, from_main: bool = False) -> None:
     """Merge worktree branch: validate, resolve submodule, merge parent."""
     state = _detect_merge_state(slug)
 
     if state == "merged":
-        _phase1_validate_clean_trees(slug)
+        _phase1_validate_clean_trees(slug, from_main=from_main)
         _phase2_resolve_submodule(slug)
-        _phase4_merge_commit_and_precommit(slug)
+        _phase4_merge_commit_and_precommit(slug, from_main=from_main)
     elif state == "parent_resolved":
-        _phase4_merge_commit_and_precommit(slug)
+        _phase4_merge_commit_and_precommit(slug, from_main=from_main)
     elif state == "parent_conflicts":
         conflicts = _git("diff", "--name-only", "--diff-filter=U", check=False).split(
             "\n"
         )
         conflicts = [c for c in conflicts if c.strip()]
-        conflicts = _auto_resolve_known_conflicts(conflicts, slug)
+        conflicts = _auto_resolve_known_conflicts(conflicts, slug, from_main=from_main)
         if conflicts:
-            click.echo(_format_conflict_report(conflicts, slug))
+            click.echo(_format_conflict_report(conflicts, slug, from_main=from_main))
             raise SystemExit(3)
-        _phase4_merge_commit_and_precommit(slug)
+        _phase4_merge_commit_and_precommit(slug, from_main=from_main)
     elif state == "submodule_conflicts":
-        _phase3_merge_parent(slug)
-        _phase4_merge_commit_and_precommit(slug)
+        _phase3_merge_parent(slug, from_main=from_main)
+        _phase4_merge_commit_and_precommit(slug, from_main=from_main)
     else:  # clean
-        _phase1_validate_clean_trees(slug)
+        _phase1_validate_clean_trees(slug, from_main=from_main)
         _phase2_resolve_submodule(slug)
-        _phase3_merge_parent(slug)
-        _phase4_merge_commit_and_precommit(slug)
+        _phase3_merge_parent(slug, from_main=from_main)
+        _phase4_merge_commit_and_precommit(slug, from_main=from_main)

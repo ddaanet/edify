@@ -21,10 +21,11 @@ from tests.fixtures_worktree import _run_git
 def _setup_main_merged_into_branch(
     repo: Path, init_repo: Callable[[Path], None]
 ) -> None:
-    """Set up repo where main is ancestor of HEAD.
+    """Set up repo on a feature branch with main already merged in.
 
-    Creates a branch with one commit, merges main into it from the branch side.
-    HEAD is on a branch that has main as an ancestor.
+    Creates a feature branch, adds a commit, then merges main into the branch so
+    main is an ancestor of HEAD. HEAD remains on the feature branch — the
+    correct caller context for from_main=True (worktree pulling in main).
     """
     repo.mkdir(exist_ok=True)
     init_repo(repo)
@@ -40,11 +41,9 @@ def _setup_main_merged_into_branch(
     _run_git(repo, "add", "feature.txt")
     _run_git(repo, "commit", "-m", "feature commit")
 
-    # Return to main — now HEAD is on main, which is an ancestor of feature
-    _run_git(repo, "checkout", "main")
-
-    # Merge feature into main so main is ancestor of HEAD
-    _run_git(repo, "merge", "--no-edit", "feature")
+    # Merge main into the feature branch — main is now an ancestor of HEAD.
+    # HEAD remains on feature (correct caller context for from_main=True).
+    _run_git(repo, "merge", "--no-edit", "main")
 
 
 def test_merge_accepts_from_main_keyword(
@@ -203,17 +202,26 @@ def test_phase3_passes_from_main_to_auto_resolve(
     monkeypatch: pytest.MonkeyPatch,
     init_repo: Callable[[Path], None],
 ) -> None:
-    """_phase3_merge_parent forwards from_main to _auto_resolve."""
+    """_phase3_merge_parent forwards from_main to _auto_resolve.
+
+    Uses a conflicting merge so _auto_resolve_known_conflicts is guaranteed to
+    be called (conflict path is the only path that invokes it).
+    """
     repo = tmp_path / "repo"
     repo.mkdir()
     init_repo(repo)
 
-    # Create feature branch to merge from
+    # Create conflicting file on feature branch
     _run_git(repo, "checkout", "-b", "feature")
-    (repo / "new.txt").write_text("new content")
-    _run_git(repo, "add", "new.txt")
+    (repo / "shared.txt").write_text("feature version")
+    _run_git(repo, "add", "shared.txt")
     _run_git(repo, "commit", "-m", "feature commit")
+
+    # Create conflicting change on main
     _run_git(repo, "checkout", "main")
+    (repo / "shared.txt").write_text("main version")
+    _run_git(repo, "add", "shared.txt")
+    _run_git(repo, "commit", "-m", "main commit")
 
     monkeypatch.chdir(repo)
 
@@ -226,10 +234,8 @@ def test_phase3_passes_from_main_to_auto_resolve(
     ):
         _phase3_merge_parent("feature", from_main=True)
 
-    # If _auto_resolve_known_conflicts was called, from_main must be in kwargs
-    if mock_resolve.called:
-        _, kwargs = mock_resolve.call_args
-        assert kwargs.get("from_main") is True or (
-            len(mock_resolve.call_args.args) >= 3
-            and mock_resolve.call_args.args[2] is True
-        )
+    assert mock_resolve.called, "_auto_resolve_known_conflicts must be called"
+    _, kwargs = mock_resolve.call_args
+    assert kwargs.get("from_main") is True or (
+        len(mock_resolve.call_args.args) >= 3 and mock_resolve.call_args.args[2] is True
+    )
