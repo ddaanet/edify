@@ -112,3 +112,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - For lint-gated recall hook: parse `just precommit` output → structured error entries → extract error codes/categories from `text` field → map to recall domain keywords → inject matching memory-index entries.
 - Only new piece: error category → recall keyword mapping table. Parsing infrastructure already solved.
 - Per-error-type gating (not just first-red-after-green): each novel error category triggers fresh recall injection. Hook tracks seen categories, fires on new ones.
+## When pending tasks lack recovery context
+- Anti-pattern: Task entry has description but no backtick command. Next session's `x` has nothing to invoke. Worse: discussion conclusions (d: mode decisions, agreed refinements, identified reuse paths) exist only in conversation context — lost on session boundary.
+- Correct pattern: Every pending task gets a backtick command in the entry. Discussion conclusions that produce pending work get captured as task notes in session.md, recoverable via `task-context.sh`. The handoff IS the recovery mechanism — if it's not in session.md, it doesn't survive.
+- Evidence: Codify branch awareness task had no command. Lint-gated recall refinement (tuick reuse, per-error-type gating) existed only in conversation until manually captured.
