@@ -41,7 +41,11 @@ Add `from_main: bool = False` parameter to `merge()` and thread to all phase fun
 
 **GREEN:** Add `from_main` parameter to `merge()` signature. Thread to `_phase1_validate_clean_trees`, `_phase2_resolve_submodule`, `_phase3_merge_parent`, `_phase4_merge_commit_and_precommit`. Each phase function adds the parameter but does not yet branch on it (pass-through). Existing behavior unchanged.
 
-**Depends on:** nothing (foundation)
+**Dependencies:** None (foundation cycle)
+
+**Stop/Error Conditions:**
+- RED passes without implementation → parameter may already exist, check merge.py
+- Existing tests break after GREEN → parameter threading changed a signature incorrectly
 
 ## Cycle 1.2: Batch `from_main` adaptation of merge.py phase functions
 
@@ -62,7 +66,12 @@ Adapt 4 independent functions in merge.py to branch on `from_main`:
 
 **GREEN:** Add `from_main` conditionals to each function. `_auto_resolve_known_conflicts` gains `from_main` parameter (pass-through for now — policies in Phase 2).
 
-**Depends on:** Cycle 1.1
+**Dependencies:** Cycle 1.1
+
+**Stop/Error Conditions:**
+- RED passes before implementation → function may already branch on from_main
+- Existing worktree→main tests break → from_main=False default not preserving existing behavior
+- "cannot merge main into itself" test passes on wrong branch → verify git symbolic-ref detection
 
 **Checkpoint:** `just precommit` — all existing tests pass, new direction parameter accepted.
 
@@ -78,7 +87,11 @@ When `from_main=True`, keep ours entirely — no additive merge. Checkout --ours
 
 **GREEN:** Add `from_main: bool = False` to `resolve_session_md`. When from_main: `git checkout --ours agents/session.md`, `git add agents/session.md`, return filtered conflicts. Skip `_merge_session_contents` entirely.
 
-**Depends on:** Phase 1
+**Dependencies:** Phase 1 (Cycles 1.1, 1.2)
+
+**Stop/Error Conditions:**
+- RED passes before implementation → session.md may not be in conflicts list; verify test fixture creates actual conflict
+- Branch session content changes after resolution → checkout --ours not working correctly
 
 ## Cycle 2.2: `remerge_session_md` from-main policy (FR-1)
 
@@ -92,7 +105,11 @@ When `from_main=True`, keep ours entirely in phase 4 remerge (skip structural me
 
 **GREEN:** Add `from_main: bool = False` to `remerge_session_md`. When from_main: `git add agents/session.md` (current working tree version is already the branch's content). Skip `_merge_session_contents` call.
 
-**Depends on:** Cycle 2.1
+**Dependencies:** Cycle 2.1
+
+**Stop/Error Conditions:**
+- RED passes before implementation → remerge may not be called in test fixture; verify MERGE_HEAD state exists
+- Regression test fails → from_main=False default not preserving existing structural merge behavior
 
 ## Cycle 2.3: Delete/modify conflict auto-resolution (FR-3)
 
@@ -106,7 +123,12 @@ When `from_main=True`, auto-resolve delete/modify conflicts by accepting theirs 
 
 **GREEN:** In `_auto_resolve_known_conflicts(conflicts, slug, from_main)`: when from_main, detect DU conflicts via `git status --porcelain`, resolve each by `git rm <file>` + `git add <file>`, remove from conflicts list. Report resolved files via `click.echo`.
 
-**Depends on:** Phase 1
+**Dependencies:** Phase 1 (Cycles 1.1, 1.2)
+
+**Stop/Error Conditions:**
+- RED passes before implementation → DU conflict may not be in test fixture; verify delete/modify scenario creates proper conflict markers
+- `git status --porcelain` shows unexpected markers → verify merge state is active (MERGE_HEAD exists)
+- Regression test (worktree→main) changes behavior → from_main guard not gating correctly
 
 ## Cycle 2.4: E2E integration — session.md + structural resolution
 
@@ -118,7 +140,12 @@ End-to-end test with real git repos verifying FR-1 and FR-3 together.
 
 **GREEN:** Should already pass from Cycles 2.1-2.3. If not, debug the integration gap.
 
-**Depends on:** Cycles 2.1, 2.2, 2.3
+**Dependencies:** Cycles 2.1, 2.2, 2.3
+
+**Stop/Error Conditions:**
+- RED passes before all prior cycles implemented → test fixture may not exercise the right code paths
+- Integration fails despite unit cycles passing → wiring issue between merge pipeline and resolution functions
+- Session.md content differs from branch's original → resolve or remerge not keeping ours
 
 **Checkpoint:** `just precommit` — session.md and structural resolution verified for both directions.
 
@@ -134,7 +161,12 @@ When `from_main=True`, invert ours/theirs in diff3: main (theirs) is base, branc
 
 **GREEN:** Add `from_main: bool = False` to `resolve_learnings_md`. When from_main: swap ours/theirs when calling `diff3_merge_segments` — pass theirs_segs as ours and ours_segs as theirs. The diff3 merge then treats main as the authoritative base and branch entries as additions.
 
-**Depends on:** Phase 1
+**Dependencies:** Phase 1 (Cycles 1.1, 1.2)
+
+**Stop/Error Conditions:**
+- RED passes before implementation → conflict fixture may not include learnings.md; verify index stages :1:/:2:/:3: exist
+- Entries doubled in result → ours/theirs swap logic incorrect; check which side is base vs delta
+- Branch-only entries missing → diff3 treating branch entries as deletions instead of additions
 
 ## Cycle 3.2: `remerge_learnings_md` from-main policy (FR-2)
 
@@ -148,7 +180,12 @@ When `from_main=True`, invert ours/theirs in the phase 4 all-paths learnings mer
 
 **GREEN:** Add `from_main: bool = False` to `remerge_learnings_md`. When from_main: swap ours_segs/theirs_segs in `diff3_merge_segments` call, and swap role in statistics output.
 
-**Depends on:** Cycle 3.1
+**Dependencies:** Cycle 3.1
+
+**Stop/Error Conditions:**
+- RED passes before implementation → verify MERGE_HEAD exists in test fixture
+- Regression test fails → from_main=False default not preserving existing ours-base behavior
+- Statistics output wrong → ours/theirs labels swapped but counts not adjusted
 
 ## Cycle 3.3: CLI `--from-main` flag (C-3)
 
@@ -163,7 +200,12 @@ Add Click `--from-main` flag to merge command. Mutually exclusive with slug argu
 
 **GREEN:** Make slug optional (`required=False`). Add `--from-main` flag. Validation: if from_main and slug → error; if not from_main and not slug → error. When from_main: call `merge_impl("main", from_main=True)`.
 
-**Depends on:** Phase 1
+**Dependencies:** Phase 1 (Cycles 1.1, 1.2)
+
+**Stop/Error Conditions:**
+- RED passes before implementation → CliRunner may be catching exceptions differently; verify exit codes
+- Click argument parsing conflicts → optional slug + flag may need callback-based validation
+- Existing `merge <slug>` tests break → slug must remain positional and functional when --from-main absent
 
 ## Cycle 3.4: Full E2E — `--from-main` merge happy path
 
@@ -175,7 +217,13 @@ End-to-end via CliRunner with real git repos exercising all FRs.
 
 **GREEN:** Should already pass from all prior cycles. If not, debug integration gap.
 
-**Depends on:** Cycles 3.1, 3.2, 3.3, Phase 2
+**Dependencies:** Cycles 3.1, 3.2, 3.3, Phase 2
+
+**Stop/Error Conditions:**
+- RED passes before all prior cycles → test fixture may not exercise all code paths
+- CliRunner exit code non-zero → check stderr output for specific error
+- Learnings content wrong → verify diff3 inversion producing main-base + branch delta
+- Session content wrong → verify ours-keep policy active in full pipeline
 
 **Checkpoint:** `just precommit` — all FRs verified, CLI working, full E2E passing.
 
