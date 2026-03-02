@@ -1,0 +1,7 @@
+- **Classification:** Moderate
+- **Implementation certainty:** High — approach specified in requirements, prior art in both skills (existing references/ extraction pattern)
+- **Requirement stability:** High — 5 FRs with concrete mechanisms, acceptance criteria, line-count targets
+- **Behavioral code check:** No — content extraction between files. No new functions, no changed logic paths, no conditional branches. FR-5 requires byte-identical behavior.
+- **Work type:** Production — delivers reduced token attention competition for agent consumers
+- **Artifact destination:** agentic-prose (`agent-core/skills/`)
+- **Evidence:** Both skills already use references/ pattern (3 and 8 files respectively). Requirements enumerate exact cut points. Recalled "when triaging behavioral code as simple" — not applicable since no behavioral code changes. Recalled "when selecting model for prose artifact edits" — opus required for execution regardless of edit complexity.
