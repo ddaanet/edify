@@ -241,7 +241,7 @@ Design review, orchestration, TDD, runbook artifacts, and skill chaining pattern
 - D-6: Two parsing modes (inline prose, multi-line list) — single skills pass through
 - D-7: Prose-to-explicit translation limited to explicit `/skill` references
 
-**Anti-pattern:** Hardcoded tail-calls (e.g., skill always invokes `/handoff --commit`)
+**Anti-pattern:** Hardcoded tail-calls (e.g., skill always invokes a specific chain)
 
 **Correct pattern:** Skill reads continuation from args/additionalContext, peels first entry, tail-calls remainder. When no continuation: skill implements its own default-exit behavior at runtime (skills manage their own standalone exit logic).
 

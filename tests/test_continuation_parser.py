@@ -37,15 +37,15 @@ _DESIGN_ONLY = {"design": _SKILL}
 _DESIGN_WITH_EXIT = {
     "design": {
         "cooperative": True,
-        "default-exit": ["/handoff --commit", "/commit"],
+        "default-exit": ["/handoff", "/commit"],
     }
 }
 _DESIGN_PLAN = {"design": _SKILL, "plan": _SKILL}
 _FULL_REGISTRY = {
-    "design": {"cooperative": True, "default-exit": ["/handoff --commit", "/commit"]},
-    "plan": {"cooperative": True, "default-exit": ["/handoff --commit", "/commit"]},
-    "execute": {"cooperative": True, "default-exit": ["/handoff --commit", "/commit"]},
-    "handoff": {"cooperative": True, "default-exit": ["/commit"]},
+    "design": {"cooperative": True, "default-exit": ["/handoff", "/commit"]},
+    "plan": {"cooperative": True, "default-exit": ["/handoff", "/commit"]},
+    "execute": {"cooperative": True, "default-exit": ["/handoff", "/commit"]},
+    "handoff": {"cooperative": True, "default-exit": []},
     "commit": {"cooperative": True, "default-exit": []},
 }
 
@@ -90,8 +90,8 @@ class TestSingleSkillPassThrough:
             ("/design plans/foo", _DESIGN_WITH_EXIT),
             ("/commit", _COMMIT_ONLY),
             (
-                "/handoff --commit --force",
-                {"handoff": {"cooperative": True, "default-exit": ["/commit"]}},
+                "/handoff --force",
+                {"handoff": {"cooperative": True, "default-exit": []}},
             ),
         ],
         ids=["with-default-exit", "terminal", "with-complex-args"],
@@ -112,7 +112,7 @@ class TestModeInlineProse:
             **_DESIGN_WITH_EXIT,
             "plan": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
         }
         result = parse_continuation("/design plans/foo, /plan", registry)
@@ -212,7 +212,7 @@ class TestEdgeCases:
         registry = {
             "execute": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             }
         }
         assert (
@@ -233,7 +233,7 @@ class TestFormatContinuationContext:
             "current": {"skill": "design", "args": "plans/foo"},
             "continuation": [
                 {"skill": "plan-adhoc", "args": ""},
-                {"skill": "handoff", "args": "--commit"},
+                {"skill": "handoff", "args": ""},
                 {"skill": "commit", "args": ""},
             ],
         }
@@ -253,7 +253,7 @@ class TestFormatContinuationContext:
         """Format includes Task tool warning."""
         parsed = {
             "current": {"skill": "design", "args": "plans/foo"},
-            "continuation": [{"skill": "handoff", "args": "--commit"}],
+            "continuation": [{"skill": "handoff", "args": ""}],
         }
         context = format_continuation_context(parsed)
         assert "Do NOT include continuation metadata in Task tool prompts" in context
@@ -339,7 +339,7 @@ class TestFalsePositiveFiltering:
             **_DESIGN_WITH_EXIT,
             "plan": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
         }
         result = parse_continuation("/design plans/foo, /plan", registry)

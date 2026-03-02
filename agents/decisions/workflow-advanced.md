@@ -227,7 +227,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 - **Findings:** Summarize what the investigation/discussion discovered (factual, not narrative)
 - **Takeaways:** Extract learnings (append to learnings.md), create pending tasks (`p:` evaluation for each validated change), write briefs if discussion produced design context worth preserving
-- **Submit:** `/handoff --commit` (or `hc`)
+- **Submit:** `/handoff` then `/commit` (or `hc`)
 
 Trigger: user says `wrap` or `w`. Crystallizes conversation context into persistent artifacts before context rotates out. Pending absorption into directive-skill-promotion task.
 

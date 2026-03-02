@@ -180,9 +180,9 @@ description: |
 
 **Decision Date:** 2026-02-04
 
-**Decision:** Flags are exact tokens (`--commit`), not prose containing flag-like words.
+**Decision:** Flags are exact tokens, not prose containing flag-like words. (Historical: `/handoff --commit` flag was removed in favor of separate `/handoff` → `/commit` chain.)
 
-**Anti-pattern:** Parsing `/handoff describe commit` as having `--commit` flag (substring match).
+**Anti-pattern:** Parsing prose after a command as flags (substring match).
 
 **Correct pattern:** User prose after command is guidance for the skill, not flags. When ambiguous, assume no flag.
 

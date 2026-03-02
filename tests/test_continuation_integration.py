@@ -42,13 +42,13 @@ class TestTwoSkillChain:
         registry = {
             "design": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
             "plan_adhoc": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
-            "handoff": {"cooperative": True, "default-exit": ["/commit"]},
+            "handoff": {"cooperative": True, "default-exit": []},
             "commit": {"cooperative": True, "default-exit": []},
         }
 
@@ -73,23 +73,22 @@ class TestTwoSkillChain:
         assert "Do NOT include continuation metadata in Task tool prompts" in context
 
     def test_handoff_commit_chain(self) -> None:
-        """Test /handoff --commit, /commit chain (explicit multi-skill)."""
+        """Test /handoff, /commit chain (explicit multi-skill)."""
         registry = {
-            "handoff": {"cooperative": True, "default-exit": ["/commit"]},
+            "handoff": {"cooperative": True, "default-exit": []},
             "commit": {"cooperative": True, "default-exit": []},
         }
 
         # Single skill returns None — skill handles own default-exit
-        single_input = "/handoff --commit"
+        single_input = "/handoff"
         assert parse_continuation(single_input, registry) is None
 
         # Explicit multi-skill chain triggers continuation parsing
-        user_input = "/handoff --commit, /commit"
+        user_input = "/handoff, /commit"
         parsed = parse_continuation(user_input, registry)
 
         assert parsed is not None
         assert parsed["current"]["skill"] == "handoff"
-        assert "--commit" in parsed["current"]["args"]
         assert len(parsed["continuation"]) == 1
         assert parsed["continuation"][0]["skill"] == "commit"
 
@@ -103,17 +102,17 @@ class TestTwoSkillChain:
         registry = {
             "design": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
             "plan": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
             "orchestrate": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
-            "handoff": {"cooperative": True, "default-exit": ["/commit"]},
+            "handoff": {"cooperative": True, "default-exit": []},
             "commit": {"cooperative": True, "default-exit": []},
         }
 
@@ -142,17 +141,17 @@ class TestTwoSkillChain:
         registry = {
             "design": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
             "plan": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
             "orchestrate": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
-            "handoff": {"cooperative": True, "default-exit": ["/commit"]},
+            "handoff": {"cooperative": True, "default-exit": []},
             "commit": {"cooperative": True, "default-exit": []},
         }
 
@@ -175,37 +174,35 @@ class TestTwoSkillChain:
         assert "handoff" not in continuation_map
         assert "commit" not in continuation_map
 
-    def test_handoff_without_commit_terminal_in_chain(self) -> None:
-        """Test /design, /handoff (no --commit) stops chain."""
+    def test_handoff_terminal_in_chain(self) -> None:
+        """Test /design, /handoff stops chain (handoff is terminal)."""
         registry = {
             "design": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
-            "handoff": {"cooperative": True, "default-exit": ["/commit"]},
+            "handoff": {"cooperative": True, "default-exit": []},
         }
 
-        # Step 1: Parse chain ending with /handoff (no --commit)
+        # Step 1: Parse chain ending with /handoff (terminal skill)
         user_input = "/design foo, /handoff"
         parsed = parse_continuation(user_input, registry)
 
         assert parsed is not None
         assert parsed["current"]["skill"] == "design"
 
-        # Continuation: handoff but NOT commit (handoff without --commit is terminal)
+        # Continuation: handoff only — no commit appended
         continuation_skills = [e["skill"] for e in parsed["continuation"]]
         assert "handoff" in continuation_skills
 
-        # Find handoff entry and verify it has no --commit flag
+        # Handoff has empty args (no flags)
         handoff_entry = next(
             (e for e in parsed["continuation"] if e["skill"] == "handoff"), None
         )
         assert handoff_entry is not None
-        assert "--commit" not in handoff_entry["args"]
+        assert handoff_entry["args"] == ""
 
-        # After handoff, continuation should be empty (terminal)
-        # Since handoff is last and has no --commit, no commit should be appended
-        # Check that commit is NOT in continuation
+        # Commit is NOT in continuation — user explicitly chose /handoff only
         assert "commit" not in continuation_skills
 
 
@@ -214,14 +211,14 @@ class TestContinuationExtraction:
 
     def test_extract_continuation_from_args(self) -> None:
         """Test extracting [CONTINUATION: ...] from args string."""
-        args = "some regular args [CONTINUATION: /handoff --commit, /commit]"
+        args = "some regular args [CONTINUATION: /handoff, /commit]"
 
         # Extract continuation
         cont_match = re.search(r"\[CONTINUATION:\s*(.+?)\]", args)
         assert cont_match is not None
 
         cont_str = cont_match.group(1)
-        assert "/handoff --commit" in cont_str
+        assert "/handoff" in cont_str
         assert "/commit" in cont_str
 
         # Extract regular args (before continuation)
@@ -278,14 +275,14 @@ class TestChainCompletion:
         registry = {
             "design": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             },
-            "handoff": {"cooperative": True, "default-exit": ["/commit"]},
+            "handoff": {"cooperative": True, "default-exit": []},
             "commit": {"cooperative": True, "default-exit": []},
         }
 
         # Explicit chain with args
-        user_input = "/design some-file-path.md, /handoff --commit"
+        user_input = "/design some-file-path.md, /handoff"
         parsed = parse_continuation(user_input, registry)
 
         assert parsed is not None
@@ -302,18 +299,18 @@ class TestContinuationPrepend:
 
     def test_prepend_preserves_original_chain(self) -> None:
         """Prepending entries keeps original chain as immutable suffix."""
-        # Simulate: skill has [/handoff --commit, /commit]
+        # Simulate: skill has [/handoff, /commit]
         # Needs /commit checkpoint first → prepend /commit
-        original = ["/handoff --commit", "/commit"]
+        original = ["/handoff", "/commit"]
         prepended = ["/commit", *original]
 
-        assert prepended == ["/commit", "/handoff --commit", "/commit"]
+        assert prepended == ["/commit", "/handoff", "/commit"]
         # Original chain unchanged as suffix
         assert prepended[1:] == original
 
     def test_prepend_consume_resumes_chain(self) -> None:
         """After consuming prepended entry, remainder is the original chain."""
-        original = ["/handoff --commit", "/commit"]
+        original = ["/handoff", "/commit"]
         prepended = ["/commit", *original]
 
         # Consume first (the prepended subroutine)
@@ -321,61 +318,61 @@ class TestContinuationPrepend:
         remainder = prepended[1:]
 
         assert consumed == "/commit"
-        assert remainder == ["/handoff --commit", "/commit"]
+        assert remainder == ["/handoff", "/commit"]
 
     def test_multiple_prepends_consumed_in_order(self) -> None:
         """Multiple prepended entries are consumed in prepend order."""
-        original = ["/handoff --commit", "/commit"]
+        original = ["/handoff", "/commit"]
         # Skill needs /review then /commit before chain resumes
         prepended = ["/review", "/commit", *original]
 
-        assert prepended == ["/review", "/commit", "/handoff --commit", "/commit"]
+        assert prepended == ["/review", "/commit", "/handoff", "/commit"]
 
         # Consume first: /review
         first = prepended[0]
         after_first = prepended[1:]
         assert first == "/review"
-        assert after_first == ["/commit", "/handoff --commit", "/commit"]
+        assert after_first == ["/commit", "/handoff", "/commit"]
 
         # Consume second: /commit (the checkpoint)
         second = after_first[0]
         after_second = after_first[1:]
         assert second == "/commit"
-        assert after_second == ["/handoff --commit", "/commit"]
+        assert after_second == ["/handoff", "/commit"]
         # Original chain intact
         assert after_second == original
 
     def test_prepend_with_args_in_transport_format(self) -> None:
         """Prepend works correctly when parsed from transport format."""
-        args = "myplan [CONTINUATION: /handoff --commit, /commit]"
+        args = "myplan [CONTINUATION: /handoff, /commit]"
 
         cont_match = re.search(r"\[CONTINUATION:\s*(.+?)\]", args)
         assert cont_match is not None
 
         cont_str = cont_match.group(1)
         entries = [e.strip() for e in cont_str.split(",")]
-        assert entries == ["/handoff --commit", "/commit"]
+        assert entries == ["/handoff", "/commit"]
 
         prepended = ["/commit", *entries]
 
         new_cont = ", ".join(prepended)
-        assert new_cont == "/commit, /handoff --commit, /commit"
+        assert new_cont == "/commit, /handoff, /commit"
 
         first = prepended[0]
         remainder = prepended[1:]
         remainder_str = ", ".join(remainder)
         assert first == "/commit"
-        assert remainder_str == "/handoff --commit, /commit"
+        assert remainder_str == "/handoff, /commit"
 
     def test_no_prepend_skips_step(self) -> None:
         """Skills that don't prepend behave identically to original protocol."""
-        entries = ["/handoff --commit", "/commit"]
+        entries = ["/handoff", "/commit"]
 
         # No prepend — consume directly (step 2 skipped)
         first = entries[0]
         remainder = entries[1:]
 
-        assert first == "/handoff --commit"
+        assert first == "/handoff"
         assert remainder == ["/commit"]
 
     def test_prepend_empty_continuation_creates_chain(self) -> None:

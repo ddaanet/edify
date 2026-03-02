@@ -17,7 +17,7 @@ The skill is a 474-line document implementing the weak orchestrator pattern:
 - **Phase boundaries:** Detected by comparing `Phase:` field between consecutive step files. Triggers vet-fix-agent checkpoint delegation
 - **Error escalation:** Haiku -> Sonnet -> User (three levels)
 - **Completion:** TDD runbooks get vet + review-tdd-process; general runbooks get vet suggestion
-- **Continuation:** Cooperative with continuation passing system (default-exit: `/handoff --commit`, `/commit`)
+- **Continuation:** Cooperative with continuation passing system (default-exit: `/handoff`, `/commit`)
 
 Key constraint in Section "Critical Constraints":
 > Always sequential unless orchestrator plan explicitly allows parallel

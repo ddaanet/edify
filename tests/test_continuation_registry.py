@@ -42,7 +42,7 @@ get_plugin_install_path = hook_module.get_plugin_install_path
 _COOP_WITH_EXIT = (
     "---\nname: {name}\ncontinuation:\n"
     "  cooperative: true\n  default-exit:\n"
-    "    - /handoff --commit\n    - /commit\n---\n"
+    "    - /handoff\n    - /commit\n---\n"
 )
 _COOP_EMPTY_EXIT = (
     "---\nname: {name}\ncontinuation:\n  cooperative: true\n  default-exit: []\n---\n"
@@ -87,7 +87,7 @@ name: design
 continuation:
   cooperative: true
   default-exit:
-    - /handoff --commit
+    - /handoff
     - /commit
 ---
 
@@ -184,7 +184,7 @@ class TestRegistryCaching:
         registry = {
             "design": {
                 "cooperative": True,
-                "default-exit": ["/handoff --commit", "/commit"],
+                "default-exit": ["/handoff", "/commit"],
             }
         }
         save_registry_cache(registry, [str(skill_file)], cache_path)

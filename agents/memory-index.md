@@ -411,7 +411,7 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 ## agents/decisions/workflow-optimization.md
 
 /how end workflow with handoff and commit | chain handoff tail calls
-/when handoff includes commit flag
+/when handoff precedes commit
 /when context already loaded for delegation
 /when complexity assessed twice | assessing routing layer efficiency double assessment
 /when reusing review agent context

@@ -10,31 +10,31 @@ Patterns for efficient workflow execution, delegation, and resource usage.
 
 **Decision Date:** 2026-02-01
 
-**Decision:** All tiers (1/2/3) must end with `/handoff --commit`, never bare `/commit`.
+**Decision:** All tiers (1/2/3) must end with `/handoff` → `/commit` chain, never bare `/commit`.
 
 **Anti-pattern:** Tier 1/2 skip handoff because "no session restart needed"
 
-**Correct pattern:** Always tail-call `/handoff --commit` — handoff captures session context and learnings regardless of tier
+**Correct pattern:** Always chain `/handoff` → `/commit` — handoff captures session context and learnings regardless of tier
 
 **Rationale:** Handoff is about context preservation, not just session restart. Even direct implementations produce learnings and update pending task state.
 
 **Impact:** Consistent workflow termination across all tier levels.
 
-### When Handoff Includes Commit Flag
+### When Handoff Precedes Commit
 
 **Handoff commit assumption:**
 
-**Decision Date:** 2026-02-01
+**Decision Date:** 2026-02-01 (updated 2026-03-02: `--commit` flag removed, handoff and commit are separate skills in chain)
 
-**Decision:** session.md reflects post-commit state when `--commit` flag is used.
+**Decision:** When `/handoff` is followed by `/commit` in a continuation chain, session.md reflects post-commit state.
 
-**Anti-pattern:** Writing "Ready to commit" in Status or "pending commit" in footer when `--commit` flag is active
+**Anti-pattern:** Writing "Ready to commit" in Status or "pending commit" in footer when commit follows in chain
 
-**Correct pattern:** Write status reflecting post-commit state — the tail-call makes commit atomic with handoff
+**Correct pattern:** Write status reflecting post-commit state — the chain makes commit follow handoff atomically
 
 **Rationale:** Next session reads session.md post-commit. Stale commit-pending language causes agents to re-attempt already-completed commits. The rule against commit tasks in Pending/Next Steps must extend to ALL sections.
 
-**Generalization:** Next Steps must contain only actions performable from the current context. Cross-context actions (commit when `--commit` active, merge-to-main from source worktree) create false affordances that agents promote into STATUS task slots. Same principle, different venues.
+**Generalization:** Next Steps must contain only actions performable from the current context. Cross-context actions (commit when in chain, merge-to-main from source worktree) create false affordances that agents promote into STATUS task slots. Same principle, different venues.
 
 **Impact:** Prevents duplicate commit attempts and cross-context action leakage in subsequent sessions.
 

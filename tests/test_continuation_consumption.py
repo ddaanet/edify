@@ -92,7 +92,7 @@ class TestParseConsumptionFormat:
         ("input_str", "expected"),
         [
             ("[CONTINUATION: /commit]", [("commit", "")]),
-            ("[CONTINUATION: /handoff --commit]", [("handoff", "--commit")]),
+            ("[CONTINUATION: /handoff]", [("handoff", "")]),
             (
                 "[CONTINUATION: /plan, /execute, /commit]",
                 [("plan", ""), ("execute", ""), ("commit", "")],
@@ -165,12 +165,10 @@ class TestPeelFirstEntry:
 
     def test_peel_with_args(self) -> None:
         """Entry with arguments preserves args in target."""
-        target, remainder = peel_continuation(
-            "[CONTINUATION: /handoff --commit, /commit]"
-        )
+        target, remainder = peel_continuation("[CONTINUATION: /handoff, /commit]")
         assert target is not None
         assert target["skill"] == "handoff"
-        assert target["args"] == "--commit"
+        assert target["args"] == ""
         assert remainder is not None
         assert "/commit" in remainder
 

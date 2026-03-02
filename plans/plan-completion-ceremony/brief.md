@@ -4,7 +4,7 @@
 
 When a plan delivers and its directory is deleted, superseded decision entries in other files persist. Agents load both the old and new entry, get contradictory guidance.
 
-The delivery workflow (`/handoff --commit` → plan-archive → trim) has no supercession check. It updates the target decision file but never scans for entries the new decision contradicts.
+The delivery workflow (`/handoff` → `/commit` → plan-archive → trim) has no supercession check. It updates the target decision file but never scans for entries the new decision contradicts.
 
 ## Evidence
 
@@ -16,7 +16,7 @@ The delivery workflow (`/handoff --commit` → plan-archive → trim) has no sup
 
 ## Existing Delivery Chain
 
-Per "How to end workflow with handoff and commit" (workflow-optimization.md): all tiers end with `/handoff --commit`. Handoff captures context and learnings, plan-archive records delivery, trim removes the task. None of these steps check for superseded entries.
+Per "How to end workflow with handoff and commit" (workflow-optimization.md): all tiers end with `/handoff` → `/commit`. Handoff captures context and learnings, plan-archive records delivery, trim removes the task. None of these steps check for superseded entries.
 
 Per "When writing recall artifacts" (workflow-advanced.md): artifacts are keys only, downstream resolves current content. This means stale *entries* (not stale *excerpts*) are the problem — an entry pointing to a superseded decision resolves to contradictory content.
 

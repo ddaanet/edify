@@ -228,14 +228,14 @@ plans/<stream-name>/
 - Total scope: <6 files
 - Single session, single model
 - No parallelization benefit
-- **Sequence:** Implement directly → vet agent → apply fixes → `/handoff --commit`
+- **Sequence:** Implement directly → vet agent → apply fixes → `/handoff` → `/commit`
 
 **Tier 2 (Lightweight Delegation):**
 - Design complete, scope moderate (6-15 files or 2-4 logical components)
 - Work benefits from agent isolation but not full orchestration
 - Components are sequential (no parallelization benefit)
 - No model switching needed
-- **Sequence:** Delegate via Task tool (artisan/test-driver) with context in prompts → vet agent → `/handoff --commit`
+- **Sequence:** Delegate via Task tool (artisan/test-driver) with context in prompts → vet agent → `/handoff` → `/commit`
 - **Repetitive pattern variant:** ~15-20 cycles with same pattern qualifies as Tier 2 — plan cycle descriptions, delegate individually, checkpoint every 3-5 cycles. Full runbook overhead not justified for simple repetitive work
 
 **Tier 3 (Full Runbook):**
