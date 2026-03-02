@@ -298,7 +298,7 @@ class TestRecallInjectionE2E:
         ):
             exit_code = _run_main(monkeypatch, runbook_path)
         assert exit_code == 0
-        agent = tmp_path / ".claude" / "agents" / "crew-rt.md"
+        agent = tmp_path / ".claude" / "agents" / "rt-task.md"
         agent_content = agent.read_text()
         assert "Resolved Recall" in agent_content
         assert "Resolved content" in agent_content
@@ -311,7 +311,7 @@ class TestRecallInjectionE2E:
         runbook_path = tmp_path / "plans" / "nr" / "runbook.md"
         exit_code = _run_main(monkeypatch, runbook_path)
         assert exit_code == 0
-        agent = tmp_path / ".claude" / "agents" / "crew-nr.md"
+        agent = tmp_path / ".claude" / "agents" / "nr-task.md"
         assert "Resolved Recall" not in agent.read_text()
 
     def test_phase_recall_in_step_files(
@@ -364,8 +364,6 @@ class TestRecallInjectionE2E:
         assert "Phase 2 recall content" not in p1_content
 
         # Shared recall in agent (not phase-specific)
-        # Multi-phase → check both phase agents
-        agent_p1 = tmp_path / ".claude" / "agents" / "crew-pr-p1.md"
-        agent_p2 = tmp_path / ".claude" / "agents" / "crew-pr-p2.md"
-        assert "Shared recall content" in agent_p1.read_text()
-        assert "Shared recall content" in agent_p2.read_text()
+        # Single task agent for all phases
+        task_agent = tmp_path / ".claude" / "agents" / "pr-task.md"
+        assert "Shared recall content" in task_agent.read_text()

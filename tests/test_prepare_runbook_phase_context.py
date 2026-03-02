@@ -117,7 +117,7 @@ Phase 2 constraints: no breaking changes.
 Step 2.1 content.
 """,
         )
-        cycle_content = (steps_dir / "step-1-1.md").read_text()
+        cycle_content = (steps_dir / "step-1-1-test.md").read_text()
         step_content = (steps_dir / "step-2-1.md").read_text()
 
         assert "## Phase Context" in cycle_content
@@ -168,7 +168,7 @@ Some preamble here.
 Step content.
 """,
         )
-        cycle_content = (steps_dir / "step-1-1.md").read_text()
+        cycle_content = (steps_dir / "step-1-1-test.md").read_text()
         step_content = (steps_dir / "step-2-1.md").read_text()
 
         assert "## Phase Context" not in cycle_content
@@ -205,7 +205,7 @@ Implement it.
 **Stop/Error Conditions:** STOP if unexpected.
 """,
         )
-        content = (steps_dir / "step-1-1.md").read_text()
+        content = (steps_dir / "step-1-1-test.md").read_text()
         assert "**Execution Model**: sonnet" in content
 
     def test_gapped_phase_numbering_preserved(
@@ -254,12 +254,12 @@ Implement it.
 **Stop/Error Conditions:** STOP if unexpected.
 """,
         )
-        assert (steps_dir / "step-1-1.md").exists()
-        assert (steps_dir / "step-3-1.md").exists()
-        assert (steps_dir / "step-5-1.md").exists()
-        assert not (steps_dir / "step-2-1.md").exists()
-        assert "**Phase**: 3" in (steps_dir / "step-3-1.md").read_text()
-        assert "**Phase**: 5" in (steps_dir / "step-5-1.md").read_text()
+        assert (steps_dir / "step-1-1-test.md").exists()
+        assert (steps_dir / "step-3-1-test.md").exists()
+        assert (steps_dir / "step-5-1-test.md").exists()
+        assert not (steps_dir / "step-2-1-test.md").exists()
+        assert "**Phase**: 3" in (steps_dir / "step-3-1-test.md").read_text()
+        assert "**Phase**: 5" in (steps_dir / "step-5-1-test.md").read_text()
 
 
 class TestPhaseContextCompleteness:

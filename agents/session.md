@@ -105,13 +105,17 @@
 - [ ] **Calibrate topic params** — extend session-scraper.py | sonnet
   - Blocked by: UPS topic injection (needs production data first)
 
+- [ ] **Codify branch awareness** — `/design` | opus
+  - Add feature-branch gate to `/codify` + soft-limit age calculation
+  - From learning: "Do not codify on feature branches. Decision file changes create merge conflicts with main's decisions/."
+
 ## Worktree Tasks
 
 - [ ] **Active recall system** — `/requirements plans/active-recall/brief.md` | opus
   - Plan: active-recall
   - Hierarchical index, automated documentation conversion, memory format grounding
   - Relates to: recall tool consolidation, generate memory index, recall dedup, recall pipeline, recall learnings design
-- [ ] **Orchestrate evolution** → `orchestrate-evolution` — `/orchestrate orchestrate-evolution` | sonnet | restart | 6.0
+- [ ] **Orchestrate evolution** — `/orchestrate orchestrate-evolution` | sonnet | restart | 6.0
   - 14 steps: 12 TDD cycles (sonnet) + 2 general steps (opus)
   - Phase 1: agent caching model (4 cycles)
   - Phase 2: orchestrator plan format + verify-step.sh (4 cycles)

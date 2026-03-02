@@ -15,6 +15,7 @@ _spec.loader.exec_module(_mod)  # type: ignore[union-attr]
 
 assemble_phase_files = _mod.assemble_phase_files
 extract_phase_models = _mod.extract_phase_models
+extract_step_metadata = _mod.extract_step_metadata
 generate_default_orchestrator = _mod.generate_default_orchestrator
 parse_frontmatter = _mod.parse_frontmatter
 extract_sections = _mod.extract_sections
@@ -43,6 +44,13 @@ def _run_validate(tmp_path: Path, runbook_content: str, name: str) -> tuple[bool
         phase_models,
     )
     return result, steps_dir
+
+
+_THREE_PHASE_CYCLES = [
+    {"major": 1, "minor": 1, "number": "1.1", "title": "First", "content": "test 1"},
+    {"major": 1, "minor": 2, "number": "1.2", "title": "Second", "content": "test 2"},
+    {"major": 2, "minor": 1, "number": "2.1", "title": "Third", "content": "test 3"},
+]
 
 
 class TestOrchestratorPlan:
@@ -198,3 +206,191 @@ Implement cleanup.
         assert "## Phase Models" not in content, (
             f"Phase Models section should be absent without model info.\n{content}"
         )
+
+    def test_orchestrator_plan_structured_format(self) -> None:
+        """Orchestrator plan uses structured header and step list."""
+        content = generate_default_orchestrator(
+            "test-job",
+            cycles=_THREE_PHASE_CYCLES,
+            phase_models={1: "sonnet", 2: "opus"},
+        )
+
+        # TDD runbooks use none (tester/implementer dispatch)
+        assert "**Agent:** none" in content, (
+            f"Expected Agent: none for TDD runbook (no general task agent).\n{content}"
+        )
+        assert "**Corrector Agent:** test-job-corrector" in content, (
+            f"Expected multi-phase corrector agent in header.\n{content}"
+        )
+        assert "**Type:** tdd" in content, f"Expected Type field set to tdd.\n{content}"
+
+        # Check Steps section exists
+        assert "## Steps" in content, f"Expected Steps section.\n{content}"
+
+        # Check pipe-delimited step format with TEST/IMPLEMENT role markers
+        assert "- step-1-1-test.md | Phase 1 | sonnet | 30 | TEST" in content, (
+            f"Expected TEST step entry for cycle 1.1.\n{content}"
+        )
+        assert "- step-1-1-impl.md | Phase 1 | sonnet | 30 | IMPLEMENT" in content, (
+            f"Expected IMPLEMENT step entry for cycle 1.1.\n{content}"
+        )
+        assert (
+            "- step-1-2-impl.md | Phase 1 | sonnet | 30 | IMPLEMENT | PHASE_BOUNDARY"
+            in content
+        ), f"Expected phase boundary marker for last phase 1 item.\n{content}"
+        assert "- step-2-1-test.md | Phase 2 | opus | 30 | TEST" in content, (
+            f"Expected TEST step entry for cycle 2.1.\n{content}"
+        )
+
+    def test_orchestrator_plan_single_phase_corrector_agent(self) -> None:
+        """Single-phase runbook has 'none' for corrector agent."""
+        content = generate_default_orchestrator(
+            "single-phase-job",
+            steps={
+                "1.1": "first",
+                "1.2": "second",
+            },
+            step_phases={"1.1": 1, "1.2": 1},
+            phase_models={1: "haiku"},
+        )
+
+        assert "**Corrector Agent:** none" in content, (
+            f"Expected corrector agent as none for single-phase.\n{content}"
+        )
+
+    def test_orchestrator_plan_boundaries_and_summaries(self) -> None:
+        """Orchestrator plan marks phase boundaries and phase summaries."""
+        content = generate_default_orchestrator(
+            "test-job",
+            cycles=_THREE_PHASE_CYCLES,
+            inline_phases={3: "inline phase 3 content"},
+            phase_models={1: "sonnet", 2: "opus", 3: "haiku"},
+        )
+
+        # PHASE_BOUNDARY markers on last step of each phase (impl is last in TDD)
+        assert (
+            "step-1-2-impl.md | Phase 1 | sonnet | 30 | IMPLEMENT | PHASE_BOUNDARY"
+            in content
+        )
+        assert (
+            "step-2-1-impl.md | Phase 2 | opus | 30 | IMPLEMENT | PHASE_BOUNDARY"
+            in content
+        )
+        assert "- INLINE | Phase 3 | —" in content
+        # Phase Summaries with per-phase subsections
+        assert "## Phase Summaries" in content
+        assert "### Phase 1:" in content
+        assert "### Phase 2:" in content
+        assert "### Phase 3:" in content
+
+        # Check IN:/OUT: bullet items in summaries
+        assert "- IN:" in content, f"Expected IN: bullets in summaries.\n{content}"
+        assert "- OUT:" in content, f"Expected OUT: bullets in summaries.\n{content}"
+
+    def test_max_turns_extraction_and_propagation(self) -> None:
+        """Max Turns extracted from metadata and propagated to orchestrator."""
+        cycle_with_max_turns = {
+            "major": 1,
+            "minor": 1,
+            "number": "1.1",
+            "title": "First",
+            "content": "**MAX TURNS**: 25\n\nTest content",
+        }
+        cycle_default_max_turns = {
+            "major": 1,
+            "minor": 2,
+            "number": "1.2",
+            "title": "Second",
+            "content": "Test content without max turns",
+        }
+
+        # Test extract_step_metadata
+        metadata_with_max = extract_step_metadata(cycle_with_max_turns["content"])
+        assert "max_turns" in metadata_with_max, (
+            f"Expected max_turns in metadata. Got {metadata_with_max}"
+        )
+        assert metadata_with_max["max_turns"] == 25, (
+            f"Expected max_turns=25, got {metadata_with_max.get('max_turns')}"
+        )
+
+        metadata_default = extract_step_metadata(cycle_default_max_turns["content"])
+        assert "max_turns" in metadata_default, (
+            f"Expected max_turns in metadata. Got {metadata_default}"
+        )
+        assert metadata_default["max_turns"] == 30, (
+            f"Expected max_turns=30 (default), got {metadata_default.get('max_turns')}"
+        )
+
+        # Test orchestrator plan uses extracted max_turns
+        content = generate_default_orchestrator(
+            "test-job",
+            cycles=[cycle_with_max_turns, cycle_default_max_turns],
+            phase_models={1: "sonnet"},
+        )
+
+        # Test step with explicit max turns should show 25
+        assert "- step-1-1-test.md | Phase 1 | sonnet | 25 | TEST" in content, (
+            f"Expected max_turns=25 in TEST step entry.\n{content}"
+        )
+        assert "- step-1-1-impl.md | Phase 1 | sonnet | 25 | IMPLEMENT" in content, (
+            f"Expected max_turns=25 in IMPLEMENT step entry.\n{content}"
+        )
+
+        # Steps with default max turns should show 30
+        assert "- step-1-2-test.md | Phase 1 | sonnet | 30 | TEST" in content, (
+            f"Expected max_turns=30 in TEST step entry.\n{content}"
+        )
+        assert (
+            "- step-1-2-impl.md | Phase 1 | sonnet | 30 | IMPLEMENT | PHASE_BOUNDARY"
+            in content
+        ), f"Expected max_turns=30 in IMPLEMENT step entry.\n{content}"
+
+
+class TestPhaseSummariesFromPreambles:
+    """Phase Summaries section uses preamble text instead of placeholders."""
+
+    def test_preambles_populate_in_scope(self) -> None:
+        """Phase preambles appear as IN scope in Phase Summaries."""
+        content = generate_default_orchestrator(
+            "testjob",
+            steps={"1.1": "Work here.", "2.1": "More work."},
+            step_phases={"1.1": 1, "2.1": 2},
+            default_model="sonnet",
+            phase_preambles={1: "Core data model", 2: "API layer"},
+        )
+        assert "- IN: Core data model" in content
+        assert "- IN: API layer" in content
+
+    def test_missing_preamble_shows_not_specified(self) -> None:
+        """Phases without preamble text show '(not specified)'."""
+        content = generate_default_orchestrator(
+            "testjob",
+            steps={"1.1": "Work here."},
+            default_model="sonnet",
+        )
+        assert "- IN: (not specified)" in content
+
+    def test_out_scope_references_other_phases(self) -> None:
+        """OUT scope lists other phase numbers."""
+        content = generate_default_orchestrator(
+            "testjob",
+            steps={"1.1": "Work.", "2.1": "More.", "3.1": "Final."},
+            step_phases={"1.1": 1, "2.1": 2, "3.1": 3},
+            default_model="sonnet",
+            phase_preambles={1: "Core", 2: "API", 3: "Docs"},
+        )
+        # Phase 1 OUT should reference phases 2 and 3
+        p1_section = content.split("### Phase 1:")[1].split("### Phase 2:")[0]
+        out_line = next(x for x in p1_section.splitlines() if x.startswith("- OUT:"))
+        assert "Phase 2" in out_line
+        assert "Phase 3" in out_line
+
+    def test_single_phase_out_scope(self) -> None:
+        """Single-phase plan shows '(single phase)' for OUT."""
+        content = generate_default_orchestrator(
+            "testjob",
+            steps={"1.1": "Work here."},
+            default_model="sonnet",
+            phase_preambles={1: "Everything"},
+        )
+        assert "- OUT: (single phase)" in content

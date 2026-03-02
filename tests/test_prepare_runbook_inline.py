@@ -193,7 +193,7 @@ class TestMixedRunbookWithInline:
 
         step_files = sorted((tmp_path / steps_dir).glob("*.md"))
         step_names = [f.name for f in step_files]
-        assert "step-2-1.md" in step_names
+        assert "step-2-1-test.md" in step_names
         assert not any("phase-1" in n or "inline" in n for n in step_names)
 
     def test_orchestrator_plan_marks_inline(
@@ -234,7 +234,7 @@ class TestMixedRunbookWithInline:
         )
 
         orch_content = (tmp_path / orch_path).read_text()
-        assert "Execution: inline" in orch_content
+        assert "- INLINE | Phase" in orch_content
 
 
 class TestInlineOnlyRunbook:
@@ -315,7 +315,7 @@ class TestInlineOnlyRunbook:
         )
 
         orch_content = (tmp_path / orch_path).read_text()
-        assert "Execution: inline" in orch_content
+        assert "- INLINE | Phase" in orch_content
         assert "steps/step-" not in orch_content
 
 

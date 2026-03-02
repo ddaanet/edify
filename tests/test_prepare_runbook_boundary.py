@@ -250,7 +250,7 @@ class TestProvenanceMetadata:
         )
         assert result is True
 
-        cycle_file = steps_dir / "step-1-1.md"
+        cycle_file = steps_dir / "step-1-1-test.md"
         content = cycle_file.read_text()
 
         assert "runbook-phase-1.md" in content
@@ -288,7 +288,7 @@ class TestProvenanceMetadata:
         )
         assert result is True
 
-        cycle_file = steps_dir / "step-1-1.md"
+        cycle_file = steps_dir / "step-1-1-test.md"
         content = cycle_file.read_text()
 
         assert "runbook.md`" in content
