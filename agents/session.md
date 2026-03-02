@@ -88,7 +88,7 @@
 - [ ] **Execute flag lint** → `execute-flag-lint` — precommit lint gate for `/inline ... execute` in session.md | haiku | 3.0
   - Scan session.md pending tasks for `/inline plans/.* execute` pattern
   - Flag as error: execute entry point in session.md bypasses Phase 2 recall (D+B anchor)
-- [ ] **Skill disclosure** → `skill-disclosure` — `/design plans/skill-progressive-disclosure/requirements.md` | opus | 2.6
+- [ ] **Skill disclosure** — `/design plans/skill-progressive-disclosure/requirements.md` | opus | 2.6
   - Plan: skill-progressive-disclosure | Status: requirements
   - Segment loading at gate boundaries: initial load → write-outline → write-design (/design); tier assessment → tier3-planning → expansion (/runbook)
   - Complementary with skills-quality-pass FR-3 extractions
