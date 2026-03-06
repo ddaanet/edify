@@ -298,7 +298,6 @@ def _build_heading(operator: str, trigger: str) -> str:
     """Build heading from operator and trigger."""
     words = trigger.split()
     # Preserve all-caps acronyms, capitalize normal words
-    # Note: Same pattern in recall/topic_matcher.py:_capitalize_heading
     capitalized = " ".join(w if w.isupper() else w.capitalize() for w in words)
     if operator == "how":
         return f"How to {capitalized}"
