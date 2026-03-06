@@ -341,3 +341,17 @@ This is not full test code — it is precise prose that preserves the specificat
 **Correct pattern:** Simple criteria include "no behavioral code changes." Behavioral code (new functions, changed logic paths, conditional branches) routes to Moderate → `/runbook` → TDD phase-type assessment. Test discipline gated at triage, not emergent from routing.
 
 **Root cause chain:** Motivated reasoning → resolved ambiguity downward → Simple path had no test gate → behavioral code shipped untested.
+
+### When Design Proposes Removing Functions
+
+**Decision Date:** 2026-03-02
+
+**Rule:** When a design proposes removing a function, the corrector must read the function's implementation and all callers to verify the removal justification covers every purpose the function serves.
+
+**Anti-pattern:** Accepting removal claims at face value. A function may serve multiple purposes. If the design identifies purpose (1) and justifies removing it, purpose (2) survives undetected. Every downstream stage trusts the claim.
+
+**Correct pattern:** Corrector reads the function body and uses Grep to find all call sites. For each caller, verify the design accounts for how that caller's needs are met post-removal. Removal justification must cover all purposes, not just the one the design identified.
+
+**Evidence:** task-classification plan D-4 conflated move semantics with post-merge hygiene. `_update_session_and_amend` served two purposes: (1) move-related session changes, (2) post-merge rm cleanup. Design only identified purpose (1), removed function. Outline review caught incomplete failure mode analysis (Major #1) but accepted "eliminated" as sufficient. Regression required restoring the function.
+
+**Placement:** Design-corrector agent, not /design skill. Corrector independently verifies — avoids coupling verification to the same agent that proposed the removal.

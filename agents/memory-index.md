@@ -447,3 +447,4 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when tdd cycles grow shared test file | line-limit split conditional 400 refactor
 /when step file inventory misses codebase references | discovery grep propagation rename
 /when triaging behavioral code changes as simple | structural criteria functions logic-paths moderate
+/when design proposes removing functions | corrector removal verification callers purposes

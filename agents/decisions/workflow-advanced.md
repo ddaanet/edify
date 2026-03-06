@@ -86,11 +86,9 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Problem:** Skills not triggered 56% of cases — decision about "when to invoke" is failure point.
 
-**Correct pattern:** Embed critical knowledge in loaded context (CLAUDE.md, memory-index).
+**Correct pattern:** Embed critical knowledge in loaded context (CLAUDE.md @-references for always-available rules; memory-index for on-demand recall via `/recall` skill).
 
-**Directive:** "Prefer retrieval-led reasoning over pre-training knowledge" (memory-index.md header).
-
-**Impact:** Always-available context beats sometimes-invoked skills.
+**Impact:** Always-available context beats sometimes-invoked skills. Memory-index is loaded on-demand by recall, not @-referenced from CLAUDE.md.
 
 ### When Memory-Index Amplifies Thin User Input
 

@@ -104,7 +104,7 @@ Output block shows:
 
 **Artifact-type model override (Lines 60-68):**
 - Editing skills, fragments, agents, workflow decisions → opus required regardless of task complexity
-- These are LLM-consumed prose: wording directly determines downstream agent behavior
+- These are agentic prose: wording directly determines downstream agent behavior
 
 ---
 

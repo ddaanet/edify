@@ -129,7 +129,7 @@ Unchanged. Two axes: implementation certainty × requirement stability → Simpl
 | Destination | Quality Obligations | Convention Set |
 |------------|-------------------|----------------|
 | `src/`, `agent-core/` | Production: tests, lint, module structure, review | Full production conventions |
-| `agent-core/skills/`, `agents/` | LLM-consumed prose: wording quality, behavioral verification | Opus-tier editing, behavior invariance |
+| `agent-core/skills/`, `agents/` | Agentic prose: wording quality, behavioral verification | Opus-tier editing, behavior invariance |
 | `plans/prototypes/`, `plans/spikes/` | Exploration: functional, documented purpose, no test mirrors | Minimal conventions |
 | `plans/reports/`, `agents/decisions/` | Investigation: accuracy, completeness, grounding | Prose quality conventions |
 | `tmp/` | Ephemeral: none | No conventions |
@@ -190,7 +190,7 @@ If exploration or investigation work reaches /runbook (e.g., large exploration w
 |-------------|-----------------|-------------------|
 | Production (`src/`) | Include test mirrors, lint, module split | Full TDD cycles |
 | Exploration (`plans/prototypes/`) | Script files only, no test mirrors | General steps (write, verify, iterate) |
-| LLM-prose (`agent-core/skills/`) | Skill files + behavior verification | Prose review cycles |
+| Agentic prose (`agent-core/skills/`) | Skill files + behavior verification | Prose review cycles |
 | Investigation (`plans/reports/`) | Report files only | General steps |
 
 **Effect:** A single-file prototype in `plans/prototypes/` assessed against exploration conventions → Tier 1 (direct, <6 files, single session). Same script assessed against production conventions → inflated count from test mirrors, lint setup, module structure.
