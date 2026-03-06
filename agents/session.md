@@ -29,7 +29,7 @@
   - Superseded (3): merge-submodule-ordering (absorbed by merge-lifecycle-audit), fix-planstate-detector (all FRs implemented), cooperative-protocol-gaps (superseded by Retrofit skill pre-work)
   - Plan-archive updated with entries for all 14
 - **Worktree cleanup:** userpromptsubmit-topic worktree removed (was merged but registered)
-- **Prioritization rescore:** 73 tasks scored via `tmp/score.py` (file: `plans/reports/prioritization-2026-03-02.md`)
+- **Prioritization rescore:** 73 tasks scored via `plans/prototypes/score.py` (file: `plans/reports/prioritization-2026-03-02.md`)
   - 8 removed (5 delivered, 1 absorbed, 1 no-task, 1 canceled), 10 new tasks scored
   - Top 5: Orchestrate evolution (6.0), Merge completed filter (4.0), Execute flag lint (3.0), Skill disclosure (2.6), Session.md validator (2.4)
   - 12 unscheduled plans identified (plans with artifacts but no session.md task)
@@ -50,7 +50,7 @@
 - **Reprioritization + tier removal:**
   - 6 new tasks scored: Directive skill promotion (1.6), Plan-completion ceremony (1.4), agent-core lint coverage (1.0), Worktree exit ceremony (1.6), Discuss-to-pending chain (1.6), Worktree merge resilience (2.2)
   - Tier headings (1-4) removed from session.md. Flat WSJF-ordered list with scores inline.
-  - Score prototype parameterized: `tmp/score.py --new <file>` accepts JSON task data (file: `plans/reports/prioritization-2026-03-02b.md`)
+  - Score prototype parameterized: `plans/prototypes/score.py --new <file>` accepts JSON task data (file: `plans/reports/prioritization-2026-03-02b.md`)
 - **Merge completed filter (TDD):**
   - Added `completed_re` filter in `_merge_session_contents` (`resolve.py:84`) — excludes `[x]` and `[–]` blocks from additive union
   - Test: `test_merge_session_filters_completed_tasks_from_theirs` in `test_worktree_merge_session_resolution.py`
@@ -316,7 +316,10 @@
 - [ ] **Upstream skills field** — PR/issue for missing skills frontmatter | sonnet | 1.0
 - [ ] **Registry cache to tmp** — inline | sonnet | 1.0
   - Move continuation registry cache from TMPDIR to project-local tmp/
-- [ ] **Update prioritize skill** — use `claudeutils _worktree ls` instead of `list_plans()` ad-hoc Python; use prototype script for scoring arithmetic | sonnet | 1.0
+- [ ] **Update prioritize skill** → `update-prioritize-skill` — use `claudeutils _worktree ls` instead of `list_plans()` ad-hoc Python; use prototype script for scoring arithmetic | sonnet | 1.0
+  - Phase 1: optimize skill to use `plans/prototypes/score.py` for computation
+  - Phase 2: integrate as `claudeutils _prioritize score` CLI command (replace prototype)
+  - JSON input for scores (agent-produced, unambiguous parsing), markdown output for reports
 - [ ] **Merge lock retry** — add lock-contention retry to `claudeutils _worktree merge` | sonnet | 0.9
   - Catch index.lock errors, retry after model latency (no explicit sleep)
   - Bounded retries (3 attempts), report after exhaustion
