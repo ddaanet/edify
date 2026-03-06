@@ -1,0 +1,12 @@
+### Cycle 2.2: remerge_session_md from-main policy 2026-03-02
+- Status: RED_VERIFIED
+- Test command: `just test tests/test_worktree_merge_from_main.py::test_remerge_session_md_from_main_keeps_ours_exactly tests/test_worktree_merge_from_main.py::test_remerge_session_md_default_direction_still_merges`
+- RED result: FAIL as expected
+  - `test_remerge_session_md_from_main_keeps_ours_exactly`: `TypeError: remerge_session_md() got an unexpected keyword argument 'from_main'`
+  - `test_remerge_session_md_default_direction_still_merges`: `AssertionError: assert 'Main task' in ...` (no MERGE_HEAD → function returns early, no additive merge occurs)
+- GREEN result: N/A
+- Regression check: N/A
+- Refactoring: none (RED phase only)
+- Files modified: `tests/test_worktree_merge_from_main.py`
+- Stop condition: none
+- Decision made: Regression test failure (no MERGE_HEAD → early return) is a valid RED failure; implementation will set up MERGE_HEAD correctly via `_setup_remerge_session_md_conflict`

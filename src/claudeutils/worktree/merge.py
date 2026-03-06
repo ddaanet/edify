@@ -50,7 +50,9 @@ def _format_git_error(e: subprocess.CalledProcessError) -> str:
     )
 
 
-def _format_conflict_report(conflicts: list[str], slug: str) -> str:
+def _format_conflict_report(
+    conflicts: list[str], slug: str, *, from_main: bool = False
+) -> str:
     """Format conflict report: status codes, diff stats, divergence, hint."""
     lines = [f"Conflicts in merge of `{slug}`:"]
 
@@ -77,9 +79,11 @@ def _format_conflict_report(conflicts: list[str], slug: str) -> str:
     )
 
     lines.append("")
-    lines.append(
-        f"Resolve conflicts, git add, then re-run: claudeutils _worktree merge {slug}"
-    )
+    if from_main:
+        hint = f"claudeutils _worktree merge --from-main {slug}"
+    else:
+        hint = f"claudeutils _worktree merge {slug}"
+    lines.append(f"Resolve conflicts, git add, then re-run: {hint}")
 
     return "\n".join(lines)
 
@@ -124,21 +128,19 @@ def _check_clean_for_merge(
         raise SystemExit(1)
 
 
-def _phase1_validate_clean_trees(slug: str) -> None:
+def _phase1_validate_clean_trees(slug: str, *, from_main: bool = False) -> None:
     """Phase 1: Verify branch exists and clean trees (OURS and THEIRS)."""
-    r = subprocess.run(
-        ["git", "rev-parse", "--verify", slug],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if r.returncode != 0:
-        click.echo(f"Branch {slug} not found")
-        raise SystemExit(2)
-
-    worktree_dir = wt_path(slug)
-    if not worktree_dir.exists():
-        click.echo("Worktree directory not found, merging branch only")
+    if from_main:
+        current_branch = _git("symbolic-ref", "--short", "HEAD", check=False).strip()
+        if current_branch == "main":
+            click.echo("cannot merge main into itself")
+            raise SystemExit(2)
+    else:
+        if _git("rev-parse", "--verify", slug, check=False) == "":
+            click.echo(f"Branch {slug} not found")
+            raise SystemExit(2)
+        if not wt_path(slug).exists():
+            click.echo("Worktree directory not found, merging branch only")
 
     _check_clean_for_merge(
         exempt_paths={
@@ -201,7 +203,12 @@ def _phase2_resolve_submodule(slug: str) -> None:
             _git("commit", "-m", f"🔀 Merge agent-core from {slug}")
 
 
-def _auto_resolve_known_conflicts(conflicts: list[str], slug: str) -> list[str]:
+def _auto_resolve_known_conflicts(
+    conflicts: list[str],
+    slug: str,
+    *,
+    from_main: bool = False,  # noqa: ARG001
+) -> list[str]:
     """Auto-resolve known conflicts: agent-core (ours), session.md, learnings.md."""
     if "agent-core" in conflicts:
         _git("checkout", "--ours", "agent-core")
@@ -211,7 +218,7 @@ def _auto_resolve_known_conflicts(conflicts: list[str], slug: str) -> list[str]:
     return resolve_learnings_md(conflicts)
 
 
-def _phase3_merge_parent(slug: str) -> None:
+def _phase3_merge_parent(slug: str, *, from_main: bool = False) -> None:
     """Phase 3: Initiate parent merge and auto-resolve known conflicts."""
     result = subprocess.run(
         ["git", "merge", "--no-commit", "--no-ff", slug],
@@ -255,10 +262,10 @@ def _phase3_merge_parent(slug: str) -> None:
 
     conflicts = _git("diff", "--name-only", "--diff-filter=U", check=False).split("\n")
     conflicts = [c for c in conflicts if c.strip()]
-    conflicts = _auto_resolve_known_conflicts(conflicts, slug)
+    conflicts = _auto_resolve_known_conflicts(conflicts, slug, from_main=from_main)
 
     if conflicts:
-        click.echo(_format_conflict_report(conflicts, slug))
+        click.echo(_format_conflict_report(conflicts, slug, from_main=from_main))
         raise SystemExit(3)
 
 
@@ -290,7 +297,7 @@ def _validate_merge_result(slug: str) -> None:
         click.echo(f"Warning: merge commit has {parent_count} parent(s)")
 
 
-def _phase4_merge_commit_and_precommit(slug: str) -> None:
+def _phase4_merge_commit_and_precommit(slug: str, *, from_main: bool = False) -> None:
     """Phase 4: Stage lifecycle.md, commit merge, run precommit validation.
 
     Stages lifecycle 'delivered' entries before committing so they are included
@@ -299,8 +306,9 @@ def _phase4_merge_commit_and_precommit(slug: str) -> None:
     """
     remerge_learnings_md()
     remerge_session_md(slug)
-    for lf in _append_lifecycle_delivered(Path("plans")):
-        _git("add", str(lf))
+    if not from_main:
+        for lf in _append_lifecycle_delivered(Path("plans")):
+            _git("add", str(lf))
 
     merge_in_progress = (
         subprocess.run(
@@ -357,31 +365,31 @@ def _phase4_merge_commit_and_precommit(slug: str) -> None:
             raise SystemExit(3)
 
 
-def merge(slug: str) -> None:
+def merge(slug: str, *, from_main: bool = False) -> None:
     """Merge worktree branch: validate, resolve submodule, merge parent."""
     state = _detect_merge_state(slug)
 
     if state == "merged":
-        _phase1_validate_clean_trees(slug)
+        _phase1_validate_clean_trees(slug, from_main=from_main)
         _phase2_resolve_submodule(slug)
-        _phase4_merge_commit_and_precommit(slug)
+        _phase4_merge_commit_and_precommit(slug, from_main=from_main)
     elif state == "parent_resolved":
-        _phase4_merge_commit_and_precommit(slug)
+        _phase4_merge_commit_and_precommit(slug, from_main=from_main)
     elif state == "parent_conflicts":
         conflicts = _git("diff", "--name-only", "--diff-filter=U", check=False).split(
             "\n"
         )
         conflicts = [c for c in conflicts if c.strip()]
-        conflicts = _auto_resolve_known_conflicts(conflicts, slug)
+        conflicts = _auto_resolve_known_conflicts(conflicts, slug, from_main=from_main)
         if conflicts:
-            click.echo(_format_conflict_report(conflicts, slug))
+            click.echo(_format_conflict_report(conflicts, slug, from_main=from_main))
             raise SystemExit(3)
-        _phase4_merge_commit_and_precommit(slug)
+        _phase4_merge_commit_and_precommit(slug, from_main=from_main)
     elif state == "submodule_conflicts":
-        _phase3_merge_parent(slug)
-        _phase4_merge_commit_and_precommit(slug)
+        _phase3_merge_parent(slug, from_main=from_main)
+        _phase4_merge_commit_and_precommit(slug, from_main=from_main)
     else:  # clean
-        _phase1_validate_clean_trees(slug)
+        _phase1_validate_clean_trees(slug, from_main=from_main)
         _phase2_resolve_submodule(slug)
-        _phase3_merge_parent(slug)
-        _phase4_merge_commit_and_precommit(slug)
+        _phase3_merge_parent(slug, from_main=from_main)
+        _phase4_merge_commit_and_precommit(slug, from_main=from_main)

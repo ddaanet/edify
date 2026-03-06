@@ -119,10 +119,18 @@ def _merge_session_contents(ours: str, theirs: str, slug: str | None = None) -> 
     return "\n".join(result_lines)
 
 
-def resolve_session_md(conflicts: list[str], slug: str | None = None) -> list[str]:
+def resolve_session_md(
+    conflicts: list[str], slug: str | None = None, *, from_main: bool = False
+) -> list[str]:
     """Resolve session.md conflict: keep ours, merge new content from theirs."""
     if "agents/session.md" not in conflicts:
         return conflicts
+
+    if from_main:
+        # Branch session is authoritative when merging main in — keep ours exactly
+        _git("checkout", "--ours", "agents/session.md")
+        _git("add", "agents/session.md")
+        return [c for c in conflicts if c != "agents/session.md"]
 
     ours_content = _git("show", ":2:agents/session.md", check=False)
     theirs_content = _git("show", ":3:agents/session.md", check=False)

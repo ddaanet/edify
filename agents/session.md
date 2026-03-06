@@ -170,8 +170,8 @@
   - Segment-level diff3 merge for learnings.md, precommit structural validation
 - [x] **Session scraping** — sonnet | 2.2
   - Plan: session-scraping | Status: delivered
-- [ ] **Worktree merge from main** → `worktree-merge-from-main` — `/design plans/worktree-merge-from-main/requirements.md` | sonnet | 2.2
-  - Plan: worktree-merge-from-main | Status: requirements
+- [x] **Worktree merge from main** — `/orchestrate worktree-merge-from-main` | sonnet | 2.2
+  - Plan: worktree-merge-from-main | Status: ready
   - Branch self-updates before merge to main; main rollbacks on failure instead of fixing on main
   - Prerequisite for merge resilience — eliminates most merge failures at source
 - [x] **Handoff --commit removal** — remove --commit from /handoff, expand standalone to chain, deduplicate [handoff, commit] | sonnet | 2.2
@@ -341,7 +341,7 @@
 - [ ] **Wt new --base submodule** — `_worktree new --base` doesn't resolve agent-core to branch commit | sonnet
   - Missing submodule resolution on `--base` code path in `cli.py`
   - Requires TDD: write test, then fix
-- [ ] **Agentic programming retrospective** → `retrospective` — Scrape session logs and git history for evolution of memory system (remember rule → active-recall), pushback protocol design process, deliverable-review and ground skill origins. Produce raw materials for blog post series on ddaa.net | opus
+- [ ] **Agentic retrospective** → `retrospective` — Scrape session logs and git history for evolution of memory system (remember rule → active-recall), pushback protocol design process, deliverable-review and ground skill origins. Produce raw materials for blog post series on ddaa.net | opus
 
 ## Blockers / Gotchas
 

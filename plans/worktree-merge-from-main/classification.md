@@ -1,0 +1,7 @@
+- **Classification:** Moderate
+- **Implementation certainty:** High — requirements specify exactly which functions are shared vs direction-specific. Existing 4-phase merge pipeline is the template. C-1 maps shared/new code explicitly.
+- **Requirement stability:** High — 5 mechanism-specified FRs, Q-1 resolved, no open questions
+- **Behavioral code check:** Yes — new direction-aware orchestration function, new delete/modify conflict resolution, changed logic paths parameterizing direction through shared phases, conditional branches for direction-specific resolution policies
+- **Work type:** Production
+- **Artifact destination:** production (`src/claudeutils/worktree/`)
+- **Evidence:** Recall "when behavioral code" confirms Moderate minimum for new functions/logic paths. Both Stacey axes high but behavioral code → Moderate. Extensive existing test suite (35 worktree test files) provides regression safety net.

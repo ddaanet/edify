@@ -78,7 +78,7 @@ def remerge_learnings_md() -> None:
         )
 
 
-def remerge_session_md(slug: str | None = None) -> None:
+def remerge_session_md(slug: str | None = None, *, from_main: bool = False) -> None:
     """Structural session.md merge for all paths; skips when no MERGE_HEAD."""
     merge_head_check = subprocess.run(
         ["git", "rev-parse", "--verify", "MERGE_HEAD"],
@@ -89,6 +89,14 @@ def remerge_session_md(slug: str | None = None) -> None:
         return
 
     if not Path("agents/session.md").exists():
+        return
+
+    if from_main:
+        # Branch session is authoritative; working tree already has our content.
+        # Just stage it to resolve the conflict marker without merging main's tasks.
+        ours_content = _git("show", "HEAD:agents/session.md", check=False)
+        Path("agents/session.md").write_text(ours_content)
+        _git("add", "agents/session.md")
         return
 
     ours_content = _git("show", "HEAD:agents/session.md", check=False)
