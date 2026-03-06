@@ -265,11 +265,12 @@ class TestValidate:
 
     def test_clean_session(self, tmp_path: Path) -> None:
         """Valid session with in-tree tasks passes."""
+        (tmp_path / "plans" / "foo").mkdir(parents=True)
         (tmp_path / "session.md").write_text(
             "# Session Handoff: 2026-03-02\n\n"
             "**Status:** Valid\n\n"
             "## In-tree Tasks\n\n"
-            "- [ ] **Task One** \u2014 desc\n"
+            "- [ ] **Task One** \u2014 `/design plans/foo/` | sonnet\n"
         )
         errors, _warnings = validate("session.md", tmp_path)
         assert errors == []
@@ -281,23 +282,25 @@ class TestValidate:
 
     def test_worktree_task_without_slug_ok(self, tmp_path: Path) -> None:
         """Worktree task without slug is valid (pre-dispatch classification)."""
+        (tmp_path / "plans" / "foo").mkdir(parents=True)
         (tmp_path / "session.md").write_text(
             "# Session Handoff: 2026-03-02\n\n"
             "**Status:** Valid\n\n"
             "## Worktree Tasks\n\n"
-            "- [ ] **My Task** \u2014 pre-dispatch\n"
+            "- [ ] **My Task** \u2014 `/design plans/foo/` | sonnet\n"
         )
         errors, _warnings = validate("session.md", tmp_path)
         assert errors == []
 
     def test_cross_section_duplicate(self, tmp_path: Path) -> None:
         """Task in both In-tree and Worktree detected."""
+        (tmp_path / "plans" / "foo").mkdir(parents=True)
         (tmp_path / "session.md").write_text(
             "# Session Handoff: 2026-03-02\n\n**Status:** Valid\n\n"
             "## In-tree Tasks\n\n"
-            "- [ ] **Dup Task** \u2014 in in-tree\n\n"
+            "- [ ] **Dup Task** \u2014 `/design plans/foo/` | sonnet\n\n"
             "## Worktree Tasks\n\n"
-            "- [ ] **Dup Task** \u2192 `slug` \u2014 in worktree\n"
+            "- [ ] **Dup Task** \u2192 `slug` \u2014 `/design plans/foo/` | sonnet\n"
         )
         errors, _warnings = validate("session.md", tmp_path, worktree_slugs={"slug"})
         assert len(errors) == 1
@@ -330,39 +333,64 @@ class TestValidate:
 
     def test_no_worktree_section_ok(self, tmp_path: Path) -> None:
         """No Worktree Tasks section is valid."""
+        (tmp_path / "plans" / "foo").mkdir(parents=True)
         (tmp_path / "session.md").write_text(
-            "# Session Handoff: 2026-03-02\n\n"
-            "**Status:** Valid\n\n"
+            "# Session Handoff: 2026-03-02\n\n**Status:** Valid\n\n"
             "## In-tree Tasks\n\n"
-            "- [ ] **Task** \u2014 desc\n"
+            "- [ ] **Task** \u2014 `/design plans/foo/` | sonnet\n"
         )
         errors, _warnings = validate("session.md", tmp_path)
         assert errors == []
 
     def test_multiple_error_types(self, tmp_path: Path) -> None:
         """All error types reported together."""
+        (tmp_path / "plans" / "foo").mkdir(parents=True)
         (tmp_path / "session.md").write_text(
             "# Session Handoff: 2026-03-02\n\n**Status:** Valid\n\n"
             "## In-tree Tasks\n\n"
-            "- [ ] **Shared** \u2014 in-tree\n\n"
+            "- [ ] **Shared** \u2014 `/design plans/foo/` | sonnet\n\n"
             "## Worktree Tasks\n\n"
-            "- [ ] **No Arrow** \u2014 pre-dispatch\n"
-            "- [ ] **Shared** \u2192 `slug` \u2014 duplicate\n\n"
+            "- [ ] **No Arrow** \u2014 `/design plans/foo/` | sonnet\n"
+            "- [ ] **Shared** \u2192 `slug` \u2014 `/design plans/foo/` | sonnet\n\n"
             "## Reference Files\n\n"
             "- `missing.md` \u2014 gone\n"
         )
         errors, _warnings = validate("session.md", tmp_path, worktree_slugs=set())
-        assert (
-            len(errors) == 3
-        )  # cross-section duplicate + missing ref + missing worktree
+        # cross-section duplicate + missing ref + missing worktree
+        assert len(errors) == 3
 
-    def test_orphaned_worktree_produces_warning(self, tmp_path: Path) -> None:
-        """Worktree not referenced by any task produces warning, not error."""
+    def test_command_lint_missing_and_unknown(self, tmp_path: Path) -> None:
+        """Command lint gate catches missing commands and unknown skills."""
+        (tmp_path / "session.md").write_text(
+            "# Session Handoff: 2026-03-02\n\n**Status:** Valid\n\n"
+            "## In-tree Tasks\n\n"
+            "- [ ] **No Cmd** \u2014 plain description\n"
+            "- [ ] **Bad Skill** \u2014 `/frobnicate plans/foo/` | sonnet\n"
+        )
+        errors, _warnings = validate("session.md", tmp_path)
+        assert any("missing command" in e.lower() for e in errors)
+        assert any("unknown skill" in e.lower() for e in errors)
+
+    def test_valid_skill_command_passes(self, tmp_path: Path) -> None:
+        """Task with valid workflow skill passes all checks."""
+        (tmp_path / "plans" / "foo").mkdir(parents=True)
         (tmp_path / "session.md").write_text(
             "# Session Handoff: 2026-03-02\n\n"
             "**Status:** Valid\n\n"
             "## In-tree Tasks\n\n"
-            "- [ ] **Task** — desc\n"
+            "- [ ] **Good Task** \u2014 `/design plans/foo/` | opus\n"
+        )
+        errors, _warnings = validate("session.md", tmp_path)
+        assert errors == []
+
+    def test_orphaned_worktree_produces_warning(self, tmp_path: Path) -> None:
+        """Worktree not referenced by any task produces warning, not error."""
+        (tmp_path / "plans" / "foo").mkdir(parents=True)
+        (tmp_path / "session.md").write_text(
+            "# Session Handoff: 2026-03-02\n\n"
+            "**Status:** Valid\n\n"
+            "## In-tree Tasks\n\n"
+            "- [ ] **Task** \u2014 `/design plans/foo/` | sonnet\n"
         )
         errors, warnings = validate(
             "session.md", tmp_path, worktree_slugs={"orphan-slug"}

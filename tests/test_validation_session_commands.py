@@ -1,6 +1,10 @@
 """Tests for session.md command semantic validation."""
 
-from claudeutils.validation.session_commands import check_command_semantics
+from claudeutils.validation.session_commands import (
+    check_command_presence,
+    check_command_semantics,
+    check_skill_allowlist,
+)
 
 
 class TestCheckCommandSemantics:
@@ -79,3 +83,115 @@ class TestCheckCommandSemantics:
         errors = check_command_semantics(lines)
         assert len(errors) == 1
         assert "line 4" in errors[0]
+
+
+class TestCheckCommandPresence:
+    """Tests for check_command_presence (FR-1)."""
+
+    def test_pending_task_without_command_is_error(self) -> None:
+        """Pending task without backtick command produces error."""
+        lines = ["- [ ] **My Task** — plain description | sonnet"]
+        errors = check_command_presence(lines)
+        assert len(errors) == 1
+        assert "line 1" in errors[0]
+        assert "My Task" in errors[0]
+        assert "missing command" in errors[0].lower()
+
+    def test_pending_task_with_command_passes(self) -> None:
+        """Pending task with backtick command passes."""
+        lines = ["- [ ] **My Task** — `/design plans/foo/` | sonnet"]
+        errors = check_command_presence(lines)
+        assert errors == []
+
+    def test_in_progress_without_command_is_error(self) -> None:
+        """In-progress task without command produces error."""
+        lines = ["- [>] **Active Task** — doing stuff | sonnet"]
+        errors = check_command_presence(lines)
+        assert len(errors) == 1
+        assert "Active Task" in errors[0]
+
+    def test_completed_without_command_passes(self) -> None:
+        """Completed task without command is exempt."""
+        lines = ["- [x] **Done Task** — was completed"]
+        errors = check_command_presence(lines)
+        assert errors == []
+
+    def test_blocked_without_command_passes(self) -> None:
+        """Blocked task without command is exempt."""
+        lines = ["- [!] **Blocked Task** — waiting on signal"]
+        errors = check_command_presence(lines)
+        assert errors == []
+
+    def test_failed_without_command_passes(self) -> None:
+        """Failed task without command is exempt."""
+        lines = ["- [\u2020] **Failed Task** — terminal failure"]
+        errors = check_command_presence(lines)
+        assert errors == []
+
+    def test_canceled_without_command_passes(self) -> None:
+        """Canceled task without command is exempt."""
+        lines = ["- [-] **Canceled Task** — user canceled"]
+        errors = check_command_presence(lines)
+        assert errors == []
+
+    def test_mixed_checkboxes(self) -> None:
+        """Only pending and in-progress without commands produce errors."""
+        lines = [
+            "- [ ] **Pending No Cmd** — description",
+            "- [x] **Done No Cmd** — description",
+            "- [>] **Active No Cmd** — description",
+            "- [!] **Blocked No Cmd** — description",
+            "- [\u2020] **Failed No Cmd** — description",
+            "- [-] **Canceled No Cmd** — description",
+        ]
+        errors = check_command_presence(lines)
+        assert len(errors) == 2
+        assert "Pending No Cmd" in errors[0]
+        assert "Active No Cmd" in errors[1]
+
+
+class TestCheckSkillAllowlist:
+    """Tests for check_skill_allowlist (FR-2)."""
+
+    def test_known_skill_passes(self) -> None:
+        """Command with known skill name passes."""
+        lines = ["- [ ] **My Task** — `/design plans/foo/` | opus"]
+        errors = check_skill_allowlist(lines)
+        assert errors == []
+
+    def test_unknown_skill_is_error(self) -> None:
+        """Command with unknown skill name produces error."""
+        lines = ["- [ ] **My Task** — `/frobnicate plans/foo/` | sonnet"]
+        errors = check_skill_allowlist(lines)
+        assert len(errors) == 1
+        assert "line 1" in errors[0]
+        assert "My Task" in errors[0]
+        assert "frobnicate" in errors[0]
+
+    def test_all_allowlisted_skills_pass(self) -> None:
+        """All 7 workflow skills pass validation."""
+        skills = [
+            "requirements",
+            "design",
+            "runbook",
+            "orchestrate",
+            "deliverable-review",
+            "inline",
+            "ground",
+        ]
+        for skill in skills:
+            lines = [f"- [ ] **Task** — `/{skill} plans/foo/` | sonnet"]
+            errors = check_skill_allowlist(lines)
+            assert errors == [], f"/{skill} should be allowed"
+
+    def test_non_slash_command_not_validated(self) -> None:
+        """Commands without / prefix are not checked."""
+        lines = ["- [ ] **My Task** — `just some-recipe` | sonnet"]
+        errors = check_skill_allowlist(lines)
+        assert errors == []
+
+    def test_completed_task_not_validated(self) -> None:
+        """Completed tasks are exempt from allowlist check."""
+        lines = ["- [x] **Done** — `/frobnicate plans/foo/` | sonnet"]
+        errors = check_skill_allowlist(lines)
+        assert errors == []

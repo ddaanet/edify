@@ -10,7 +10,11 @@ Checks:
 import re
 from pathlib import Path
 
-from claudeutils.validation.session_commands import check_command_semantics
+from claudeutils.validation.session_commands import (
+    check_command_presence,
+    check_command_semantics,
+    check_skill_allowlist,
+)
 from claudeutils.validation.session_paths import check_task_paths
 from claudeutils.validation.session_worktrees import check_worktree_markers
 from claudeutils.validation.task_parsing import (
@@ -361,16 +365,14 @@ def validate(
     errors: list[str] = []
     warnings: list[str] = []
 
-    # H1 header and status line validation
     errors.extend(check_status_line(lines))
-
-    # Section schema validation
     errors.extend(check_section_schema(lines))
 
-    # Command semantic validation
-    errors.extend(check_command_semantics([line.rstrip() for line in lines]))
+    stripped_lines = [line.rstrip() for line in lines]
+    errors.extend(check_command_presence(stripped_lines))
+    errors.extend(check_skill_allowlist(stripped_lines))
+    errors.extend(check_command_semantics(stripped_lines))
 
-    # Section-aware task line validation
     errors.extend(check_task_section_lines(lines))
 
     sections = parse_sections(lines)
@@ -385,11 +387,11 @@ def validate(
         errors.extend(check_reference_files(sections["Reference Files"], root))
 
     # Backtick path validation in task metadata
-    errors.extend(check_task_paths([line.rstrip() for line in lines], root))
+    errors.extend(check_task_paths(stripped_lines, root))
 
     # Worktree marker validation
     marker_errors, marker_warnings = check_worktree_markers(
-        [line.rstrip() for line in lines], worktree_slugs=worktree_slugs
+        stripped_lines, worktree_slugs=worktree_slugs
     )
     errors.extend(marker_errors)
     warnings.extend(marker_warnings)

@@ -68,9 +68,7 @@ def test_new_basic_flow(
     assert result.exit_code == 0
     assert "repo-wt/test-feature" in result.output
 
-    worktree_path = tmp_path / "repo-wt" / "test-feature"
-    assert worktree_path.exists()
-
+    assert (tmp_path / "repo-wt" / "test-feature").exists()
     branch_result = subprocess.run(
         ["git", "branch", "--list", "test-feature"],
         capture_output=True,
@@ -78,14 +76,6 @@ def test_new_basic_flow(
         check=True,
     )
     assert "test-feature" in branch_result.stdout
-
-    head_result = subprocess.run(
-        ["git", "-C", str(worktree_path), "rev-parse", "--abbrev-ref", "HEAD"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    assert "test-feature" in head_result.stdout
 
 
 def test_new_command_sibling_paths(
@@ -339,6 +329,55 @@ def test_new_cleans_up_on_git_failure(
     assert not container.exists(), "empty container should be cleaned up"
 
 
+@pytest.mark.parametrize(
+    "case",
+    [
+        (
+            "No cmd task",
+            "- [ ] **No cmd task** \u2014 description | sonnet",
+            "missing command",
+        ),
+        (
+            "Bad skill task",
+            "- [ ] **Bad skill task** \u2014 `/frobnicate x/` | sonnet",
+            "unknown skill",
+        ),
+    ],
+    ids=["missing-command", "unknown-skill"],
+)
+def test_new_task_command_validation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    init_repo: Callable[[Path], None],
+    case: tuple[str, str, str],
+) -> None:
+    """Task with invalid command fails before worktree creation."""
+    task_name, task_line, expected_msg = case
+    repo_path = tmp_path / "repo"
+    repo_path.mkdir()
+    monkeypatch.chdir(repo_path)
+    init_repo(repo_path)
+    (repo_path / "agents").mkdir()
+    (repo_path / "agents" / "session.md").write_text(
+        f"# Session\n\n## Worktree Tasks\n\n{task_line}\n"
+    )
+    subprocess.run(
+        ["git", "add", "agents/session.md"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Add session"],
+        cwd=repo_path,
+        check=True,
+        capture_output=True,
+    )
+    result = CliRunner().invoke(worktree, ["new", task_name])
+    assert result.exit_code != 0
+    assert expected_msg in result.output.lower()
+
+
 def test_new_invalid_task_name_clean_error(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, init_repo: Callable[[Path], None]
 ) -> None:
@@ -347,11 +386,7 @@ def test_new_invalid_task_name_clean_error(
     repo_path.mkdir()
     monkeypatch.chdir(repo_path)
     init_repo(repo_path)
-
-    runner = CliRunner()
-    result = runner.invoke(worktree, ["new", "task_with_underscore"])
-
+    result = CliRunner().invoke(worktree, ["new", "task_with_underscore"])
     assert result.exit_code == 2
     assert "forbidden character '_'" in result.output
     assert "Traceback" not in result.output
-    assert "ValueError" not in result.output

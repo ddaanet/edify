@@ -10,6 +10,12 @@ from typing import Never
 
 import click
 
+from claudeutils.validation.session_commands import (
+    _COMMAND_REQUIRED_CHECKBOXES,
+    _SKILL_NAME_PATTERN,
+    WORKFLOW_SKILLS,
+)
+from claudeutils.validation.task_parsing import parse_task_line
 from claudeutils.validation.tasks import validate_task_name_format
 from claudeutils.worktree.display import format_rich_ls
 from claudeutils.worktree.git_ops import (
@@ -33,6 +39,29 @@ from claudeutils.worktree.session import (
     remove_slug_marker,
 )
 from claudeutils.worktree.session import focus_session as focus_session  # noqa: PLC0414
+
+
+def _validate_task_command(session_md_path: Path, task_name: str) -> None:
+    """Validate task has a valid command before worktree creation.
+
+    Checks command presence and skill allowlist (FR-1, FR-2, FR-4).
+    """
+    lines = session_md_path.read_text().splitlines()
+    for i, line in enumerate(lines, 1):
+        parsed = parse_task_line(line, lineno=i)
+        if not parsed or parsed.name != task_name:
+            continue
+        if parsed.checkbox not in _COMMAND_REQUIRED_CHECKBOXES:
+            return  # exempt checkbox
+        if not parsed.command:
+            _fail(f"Missing command in **{task_name}** — cannot create worktree")
+        m = _SKILL_NAME_PATTERN.match(parsed.command)
+        if m and m.group(1) not in WORKFLOW_SKILLS:
+            _fail(
+                f"Unknown skill /{m.group(1)} in **{task_name}** — "
+                "cannot create worktree"
+            )
+        return  # found and valid
 
 
 def _fail(msg: str, code: int = 1) -> Never:
@@ -202,6 +231,7 @@ def new(
             session_md_path = Path(session_md)
             if not session_md_path.exists():
                 _fail(f"Error: session.md not found at {session_md}")
+            _validate_task_command(session_md_path, task_name)
             add_slug_marker(session_md_path, task_name, slug)
             with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".md") as f:
                 f.write(focus_session(task_name, session_md))
