@@ -23,3 +23,17 @@ Caused by task-classification (D-4) which replaced `remove_worktree_task()` with
 - wt-rm-dirty plan (delivered): fixed lifecycle.md dirty-state blocking amend
 - task-classification RCA: design conflated move semantics with post-merge hygiene, also removed `_update_session_and_amend` (restored in wt-rm-dirty fix)
 - Design-corrector finding: when design proposes removing functions, corrector should verify all purposes are addressed (purpose audit)
+
+## 2026-03-06: Stale markers block validator, compound failure
+
+### Evidence
+
+During commit on discuss branch, `just precommit` failed because session-validator flagged 3 stale worktree markers (`session-scraping`, `explore-anthropic-plugins`, `wt-ls-session-ordering`) as "worktree marker not found" errors. These worktrees were previously removed via `_worktree rm` but markers persisted — the known `remove_slug_marker` gap.
+
+### Compound Failure
+
+Two systems interact: (1) `_worktree rm` doesn't clean markers (this task's scope), (2) session-validator treats stale markers as blocking errors (exit code 1, not warning). The validator is correct — a marker pointing to a nonexistent worktree IS invalid state. But the root cause is rm not cleaning up, not the validator being too strict.
+
+### Implication for Design
+
+The `[x]` branch-check approach in this brief's design decision should also handle the case where `_worktree rm` runs after worktree removal (no branch to check). The marker itself should be stripped unconditionally by rm — the `[x]` check governs whether the entire task entry is removed, not whether the marker is stripped.

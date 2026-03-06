@@ -23,3 +23,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Investing in skill description optimization (eval loops, train/test splits) when the workflow is fully structured — all skill invocations are explicit (shortcuts, backtick commands, chaining, frontmatter injection).
 - Correct pattern: Skill description optimization matters only when automatic triggering operates — i.e., unstructured user input where Claude autonomously decides which skill to invoke. In structured workflows with explicit invocation rails, descriptions serve as documentation only.
 - Evidence: 32 project skills, zero relying on automatic triggering. Entry points (`d:` directive, `/requirements`) are both explicit. Skill-creator eval infrastructure exists for marketplace plugins where auto-triggering does matter.
+## When Edit tool fails repeatedly
+- Anti-pattern: Switching to `sed -i` after Edit tool errors. sed presents opaque commands in permission prompts — user sees syntax, not content diff. Degrades the human review gate that Edit provides (old/new content visible).
+- Correct pattern: Stop and report the Edit failure after the second identical error. The stop-on-unexpected rule exists precisely for this case. Edit's permission UX is part of human oversight design — bypassing it with sed is not a neutral tool substitution.
+- Evidence: 6 identical `replace_all` type errors without diagnosis, escaped to sed, user rejected an opaque sed command they couldn't verify.

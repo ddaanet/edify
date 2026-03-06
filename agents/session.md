@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-06
 
-**Status:** Infrastructure fixes + handoff-commit-removal merge.
+**Status:** Active-recall design inputs from discussion session. Brief updated.
 
 ## Completed This Session
 
@@ -114,6 +114,15 @@
 - **Worktree batch dispatch (7 parallel):**
   - session-scraping, worktree-merge-from-main, handoff-commit-removal, explore-anthropic-plugins, wt-ls-session-ordering, recall-tool-consolidation, active-recall-system
   - Skill caching confirmed: loaded worktree SKILL.md had stale model-tier filter (already removed on disk), caused sonnet-only batch excluding opus tasks
+- **Active-recall design discussion (2026-03-06):**
+  - 5 design inputs added to `plans/active-recall/brief.md`: orphan branch storage, capture-time memory writes, embedded keywords + derived index, memory-corrector agent, recall as nested skill
+  - Orphan branch: memory content on git orphan branch, resolver reads from shared ref, all worktrees see updates. Prerequisite: @-reference migration
+  - Capture-time writes: eliminate learnings.md staging + /codify batch. Write to permanent locations when context is richest
+  - Embedded keywords: entries carry trigger metadata, index is generated (build step). Absorbs "Generate memory index" task
+  - Memory-corrector: CURATE lifecycle role, follows vet-false-positives "Do NOT Flag" pattern. Expanded from bulk-conversion-only to all writes
+  - Recall as nested skill: grounded that "skills cannot nest" is not a constraint (worktree nests /handoff+/commit via Skill tool). CPS governs user-composed chains only
+  - Cross-tree test sentinel: content-hash in `~/.cache/` replaces mtime sentinel. Independent of active-recall
+  - Open: merge strategy for concurrent writes, session cost of capture-time writes, corrector timing
 
 ## In-tree Tasks
 
@@ -143,6 +152,7 @@
   - Plan: active-recall
   - Hierarchical index, automated documentation conversion, memory format grounding
   - Relates to: recall tool consolidation, generate memory index, recall dedup, recall pipeline, recall learnings design
+  - Brief updated 2026-03-06: orphan branch storage, capture-time writes, embedded keywords, memory-corrector, recall as nested skill
 - [x] **Orchestrate evolution** — `/orchestrate orchestrate-evolution` | sonnet | restart | 6.0
   - 14 steps: 12 TDD cycles (sonnet) + 2 general steps (opus)
   - Phase 1: agent caching model (4 cycles)
@@ -161,7 +171,7 @@
 - [ ] **Worktree merge resilience** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.2
   - Plan: worktree-merge-resilience | Status: outlined
   - Segment-level diff3 merge for learnings.md, precommit structural validation
-- [ ] **Session scraping** → `session-scraping` — `/runbook plans/session-scraping/outline.md` | sonnet | 2.2
+- [ ] **Session scraping** — `/runbook plans/session-scraping/outline.md` | sonnet | 2.2
   - Plan: session-scraping | Status: outlined
   - Key decisions: all ~/.claude/projects/ (not just claudeutils), agent files are first-class sources, many-to-many session↔commit, tool I/O noise by default
 - [ ] **Worktree merge from main** → `worktree-merge-from-main` — `/design plans/worktree-merge-from-main/requirements.md` | sonnet | 2.2
@@ -171,8 +181,8 @@
 - [x] **Handoff --commit removal** — remove --commit from /handoff, expand standalone to chain, deduplicate [handoff, commit] | sonnet | 2.2
   - ~60 occurrences: skills, fragments, tests, continuation infrastructure, decision files
   - Motivation: decouple handoff from commit-ready state (handoff should work on dirty tree)
-- [ ] **Explore Anthropic plugins** → `explore-anthropic-plugins` — Install all 28 official plugins | sonnet | restart | 2.0
-- [ ] **Wt ls session ordering** → `wt-ls-session-ordering` — `_worktree ls` prints plans in pending task order from session.md | sonnet | 2.0
+- [ ] **Explore Anthropic plugins** — Install all 28 official plugins | sonnet | restart | 2.0
+- [ ] **Wt ls session ordering** — `_worktree ls` prints plans in pending task order from session.md | sonnet | 2.0
 - [ ] **Tool deviation hook** — PostToolUse hook: agents declare expected Bash outcome, hook validates actual vs declared | sonnet | 1.9
   - General framework: agent declares expected exit code + output pattern before Bash call
   - PostToolUse hook compares actual result, stops or redirects to diagnose-and-compensate on mismatch
@@ -268,6 +278,9 @@
 - [ ] **Agentic prose terminology** — replace "LLM prose"/"LLM-consumed prose" variants across codebase | sonnet | 1.3
   - Search: "llm prose", "llm-prose", "LLM-prose", "LLM-consumed prose", "LLM generated prose" (with/without hyphens)
   - Replace with "agentic prose" / "agentic-prose" as appropriate per context
+- [ ] **Corrector audit** — audit 5 review-class agents for false positive evidence, add "Do NOT Flag" sections where warranted, update agent-development guidance | sonnet
+  - Agents: outline-corrector, design-corrector, runbook-outline-corrector, tdd-auditor, runbook-simplifier
+  - Pattern: vet-false-positives "Do NOT Flag" (categorical, evidence-grounded per NFR-1)
 - [ ] **Corrector removal audit** — sonnet | 1.2
   - When design proposes removing functions, corrector reads implementation and callers, verifies removal justification covers all purposes
   - Decision entry with task-classification incident as evidence
@@ -281,6 +294,8 @@
   - Single data point so far — trigger condition needs sharper criteria before implementing
   - Self-modification risk: editing /design during active use
 - [ ] **Dev integration branch** — `/design` persistent worktree for merge landing, async issue resolution | opus | 1.1
+- [ ] **Cross-tree test sentinel** — replace mtime sentinel with content-hash in user-global cache database, skip suite on hash hit across worktrees | sonnet
+  - Hash: `src/**/*.py tests/**/*.py pyproject.toml`. Key: `(repo-identity, content-hash)`
 - [ ] **Worktree CLI UX** — sonnet | 1.0
   - `_worktree new`: stdout-only, exit status for success, user-friendly errors instead of tracebacks (task not in session.md, slug length)
   - `_worktree rm` dirty message: "Run hc in the worktree session, or claude -c to restart it"
@@ -414,9 +429,11 @@
 - `plans/worktree-ad-hoc-task/requirements.md` — Add task to session.md before worktree creation when absent
 - `plans/wt-rm-task-cleanup/brief.md` — rm removes completed task entry (branch `[x]` check)
 - `plans/merge-lifecycle-audit/brief.md` — State machine audit for merge→rm lifecycle (absorbs merge-submodule-ordering)
-- `plans/active-recall/brief.md` — Active recall system: hierarchical index, documentation conversion, trigger classes, invalidation
-- `tmp/active-recall.md` — Discussion decisions: recall-explore-recall, tree navigation, benchmark landscape
+- `plans/active-recall/brief.md` — Active recall system brief (updated 2026-03-06): hierarchical index, documentation conversion, orphan branch, capture-time writes, memory-corrector
+
 
 ## Next Steps
 
 6 worktrees active (all have justfile shebang fix). Continue worktree sessions, merge each as completed.
+
+Merge discuss to main for active-recall brief update. Import brief from main into active-recall-system worktree via `git show main:plans/active-recall/brief.md`.

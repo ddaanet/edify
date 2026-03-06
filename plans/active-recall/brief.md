@@ -1,6 +1,6 @@
 # Active Recall System
 
-Brief from architectural discussion (2026-03-02).
+Brief from architectural discussions (2026-03-02, 2026-03-06).
 
 ## Vision
 
@@ -38,6 +38,56 @@ External reference documentation (Python stdlib, pytest, pydantic, click, ruff, 
 ### Memory Format Grounding
 
 Prerequisite before bulk conversion. Needs `/ground` on: naming conventions, trigger structure, how/when distinction formalization, index hierarchy design.
+
+### Orphan Branch Storage (2026-03-06)
+
+Memory content (decisions, index, triggers) delivered via git orphan branch, decoupled from feature branch lineage. Resolver reads from shared ref — all worktrees see updates immediately without merge-from-main.
+
+- **Write path:** `/codify` or capture-time writes commit to orphan branch via git plumbing (`hash-object` → `mktree` → `commit-tree` → `update-ref`), wrapped in `claudeutils` helper
+- **Read path:** `_recall resolve` reads from orphan ref instead of working tree. Transparent to callers.
+- **Propagation:** SessionStart or first-access checks `git log -1 --format=%H memory` against cached hash, pulls latest snapshot if stale
+- **Prerequisite:** @-reference migration — recall resolution must fully replace @-reference-based loading for decisions before content moves off working tree
+
+### Capture-Time Memory Writes (2026-03-06)
+
+Eliminate learnings.md staging area and /codify batch consolidation. Write decisions/memory entries to permanent locations at capture time — when the agent has richest context for routing (which file, which section, trigger keywords).
+
+- `learn: X` → agent writes to appropriate decision file + memory entry immediately
+- learnings.md goes away (no staging area)
+- /codify goes away as a skill (no batch consolidation)
+- /handoff becomes lighter (no learnings section to manage)
+- Eliminates: soft-limit management, "don't codify on branches" constraint, codify-branch-awareness task
+
+### Embedded Keywords + Derived Index (2026-03-06)
+
+Memory entries carry their own trigger keywords as structured metadata. Memory-index is generated (deterministic build step), not hand-maintained.
+
+- No index drift — keywords live with the content they describe
+- Write path: write entry with keywords → index regenerates automatically
+- Absorbs "Generate memory index" task — becomes a build step, not a design task
+- Concurrent writes to orphan branch conflict only on entries, never on index
+
+### Memory-Corrector Agent (2026-03-06)
+
+CURATE role in lifecycle (Pattern 3 from recall-lifecycle-grounding.md). Clean-context agent validates all memory writes — expanded from brief's original scope (bulk conversion only, line 36) to all memory writes.
+
+- **Quality criteria:** trigger specificity, format compliance, duplicate detection, when/how classification, keyword quality
+- **Pattern:** follows vet-false-positives "Do NOT Flag" shape — categorical suppression taxonomy, not confidence scores
+- **Timing:** design-session decision (synchronous vs post-handoff vs per-entry)
+- **Lifecycle role:** positioned between CREATE (session agent) and CONSUME (resolver)
+
+### Recall as Nested Skill (2026-03-06)
+
+Skills needing recall invoke `/recall` via Skill tool mid-execution (subroutine call). Grounded finding: "skills cannot nest" is not a constraint — worktree skill already nests /handoff and /commit via Skill tool. CPS tail-call semantics govern user-composed chains only, not intra-skill subroutine calls.
+
+- Direct nesting is simpler than continuation-prepend and already proven
+- No salience difference between the two approaches — equivalent context layouts
+
+## Open Design Questions
+
+- **Memory branch merge strategy:** concurrent write handling, file-level semantic validation on merge
+- **Session cost of capture-time writes:** append-only vs whole-file edit, quality tradeoff, correction strategies
+- **Corrector timing:** synchronous (per-write) vs post-handoff (per-session batch) vs asynchronous
 
 ## Relationship to Existing Work
 
