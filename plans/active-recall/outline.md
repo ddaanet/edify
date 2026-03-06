@@ -1,184 +1,317 @@
-# Active Recall System: Design Outline
+# Active Recall System: Design Outline (Redraft)
 
-## Approach
+Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. Replaces prior linear Phase 1-6 outline that conflated sub-problems with execution ordering.
 
-Six phases, dependency-ordered per constraints C-1 through C-3. Each phase is independently deployable — partial completion leaves the system functional.
+## Sub-Problems
 
-## Phase 1: Token Count Caching (C-3 prerequisite)
+### S-A: Token Count Cache
 
-Token counting infrastructure already exists (`src/claudeutils/tokens.py`, `tokens_cli.py` — Anthropic API, model alias resolution, multi-file support). What's missing is a **token count cache** to avoid redundant API calls during migration and authoring workflows.
+**What (FR):** Token counting with caching for repeated calls (C-3 prerequisite for FR-1 split threshold).
 
-- **Storage:** sqlite via sqlalchemy — O(1) indexed lookup, handles concurrent worktree access, growth path for future caches (Context7, recall usage)
-- **Cache key:** `(md5_hex, model_id)` composite — md5 sufficient for non-adversarial local cache, model in key because different models tokenize differently
-- **Schema:** single table via `metadata.create_all()`, no alembic. Columns: `md5 TEXT`, `model TEXT`, `count INTEGER`, `last_used TEXT`. Composite primary key on `(md5, model)`.
-- **Cache location:** `platformdirs.user_cache_dir("claudeutils") / "token_cache.db"`
-- **Eviction:** `last_used` updated on every hit. Periodic prune of entries older than N days (on write, not on read).
-- **Integration:** into existing `count_tokens_for_file()` — check cache before API call
-- **CLI unchanged:** `claudeutils tokens <path>` already works, just becomes faster on repeated calls
-- **New dependency:** `sqlalchemy` (core + ORM, no alembic, no async)
+**How (DP):** sqlite cache via sqlalchemy wrapping existing `count_tokens_for_file()`. Composite key `(md5_hex, model_id)`, `last_used` for eviction, `platformdirs.user_cache_dir("claudeutils") / "token_cache.db"`.
 
-## Phase 2: Recall Tool Consolidation (FR-8)
+**Type:** Implementation
+**Readiness:** Executable — all design decisions resolved (storage, schema, key structure, integration point).
 
-Merge three modules into one before changing index structure. Reduces migration surface.
+**Inputs:** `src/claudeutils/tokens.py`, `tokens_cli.py` (pre-existing)
+**Outputs:** Cached token counting API — `count_tokens_for_file()` checks cache before Anthropic API call
+**Controls:** NFR-4 (token budget as design target)
+**Mechanism:** sonnet, worktree
 
-**Current state (discovered via exploration):**
-- `recall/` (9 files) — recall *analysis* (measuring agent behavior, not resolution). Models: `IndexEntry`, `RecallAnalysis`, `EntryRecall`, `DiscoveryPattern`. This is a measurement/analytics tool.
-- `recall_cli/` (3 files) — `_recall` CLI commands (resolve, check, diff). Uses `when/resolver.py` for actual resolution.
-- `when/` (6 files) — core resolver: `WhenEntry` model, fuzzy matching, section extraction, heading search. Also the `_when` CLI.
+**File set:** `src/claudeutils/tokens.py`, new `src/claudeutils/token_cache.py` (or similar), tests
 
-**Consolidation approach:**
-- Merge `when/` resolver, fuzzy, index_parser into `recall/` (the resolver is the core capability)
-- Merge `recall_cli/` into `recall/cli.py` (already has a cli.py for analysis — combine under one Click group)
-- Unify `IndexEntry` and `WhenEntry` models into single model (they parse the same format with different fields)
-- Keep `_recall` as the canonical CLI group. `_when` becomes a thin alias during deprecation, then removed
-- `/when` and `/how` skills updated to use `claudeutils _recall resolve` (already do via allowed-tools)
-- 22 test files consolidated — shared fixtures, no coverage loss
-- Deprecation: `_when` CLI warns on use, removed after one release cycle
+---
 
-## Phase 3: Hierarchical Index Structure (FR-1)
+### S-B: Recall Module Consolidation
 
-Migrate flat `agents/memory-index.md` to `agents/memory/` hierarchy.
+**What (FR):** Unify three modules into one recall interface (FR-8). Includes NFR-2 deprecation alias for `_when` CLI.
 
-**Structure:**
-```
-agents/memory/index.md                    # Root (branch): domain list + paths + keywords
-agents/memory/cli/index.md               # Leaf: entries for cli.md
-agents/memory/testing/index.md           # Leaf: entries for testing.md
-agents/memory/workflow/index.md          # Branch: points to sub-domain leaves
-agents/memory/workflow/core/index.md     # Leaf: entries from workflow-core.md
-agents/memory/workflow/planning/index.md # Leaf: entries from workflow-planning.md
-agents/memory/pydantic/index.md          # Branch: points to version leaves
-agents/memory/pydantic/v2/index.md       # Leaf: version-specific entries
-```
+**How (DP):** Merge `when/` resolver + `recall_cli/` into `recall/`. Unify `IndexEntry` and `WhenEntry` into single model. `_recall` as canonical CLI group, `_when` as thin deprecation alias with warning. 22 test files consolidated with shared fixtures.
 
-**Index types (no mixed indices):**
-- **Branch index:** contains only references to child indices (with keywords, entry counts). No inline entries. Used for root index and intermediate grouping nodes.
-- **Leaf index:** contains only entries (`/when trigger | extras`) and/or references to content files. No child references.
-- **Rationale:** Mixed indices create discoverability imbalance — inline entries are immediately visible and individually selectable, while child-referenced entries require an extra navigation step. Clean separation ensures uniform discovery paths for all entries.
+**Type:** Implementation (refactor + migration)
+**Readiness:** Executable — merge targets identified, model unification approach clear.
 
-**Design decisions:**
-- Key structure: prefix-free, colon-delimited domains — `<key>` at root, `<domain>: <key>` nested. Prefix-free constraint functions as quality signal (verbose keys creating prefix collisions should be tightened). (From design discussion.)
-- Domain path mapping: space in domain name maps contextually to `/` (hierarchical parent-child) or `-` (compound noun). `workflow planning` → `workflow/planning/` (planning is sub-domain of workflow). `code smells` → `code-smells/` (compound noun, no parent-child). Decision made at domain creation, validated by corrector during bulk conversion.
-- Hyphen (`-`) for compound-noun separators — consistent with project convention (decision files, plan directories all use hyphens)
-- Version sub-domains: dependency domains can have version children. `pydantic/v2/` enables FR-3 subtree-scoped re-evaluation at version granularity.
-- Domain names derived from decision file names (strip `agents/decisions/` prefix, strip `.md`)
-- Related files grouped: `workflow-core.md`, `workflow-advanced.md`, `workflow-planning.md`, `workflow-execution.md`, `workflow-optimization.md` → `workflow/` branch with per-file leaves
-- Split trigger: file exceeds token budget (design target from NFR-4, determined in design phase)
-- Branch index format: domain name + path + entry count + keywords (keywords enable domain selection without loading child indices)
-- Leaf index format: same as current memory-index entries (`/when trigger | extras`)
-- Memory content files (decision file sections) remain in `agents/decisions/` — index reorganization only, not content relocation
+**Inputs:** `src/claudeutils/recall/` (9 modules), `src/claudeutils/recall_cli/` (2 modules), `src/claudeutils/when/` (5 modules), 22 test files (pre-existing)
+**Outputs:** Unified `src/claudeutils/recall/` module with single `IndexEntry` model, single CLI group, deprecation alias
+**Controls:** NFR-2 (backward compat during migration), C-4 (infrastructure accounting)
+**Mechanism:** sonnet, worktree
 
-**Parser changes:**
-- `parse_memory_index()` updated: detect branch index (contains child references) vs leaf index (contains entries) — two distinct line types, no mixed mode
-- Branch index lines: `## domain-name` followed by child path, entry count, and keywords
-- Leaf index lines: `/when trigger | extras` or `/how trigger | extras`
-- Recursive traversal: root (branch) → intermediate branches → leaves, arbitrary depth
-- `_recall resolve` follows the chain transparently
+**File set:** `src/claudeutils/recall/`, `src/claudeutils/recall_cli/`, `src/claudeutils/when/`, `tests/` (22 files)
 
-**Recall loop update (FR-1 acceptance criterion):**
-- Current: skill reads memory-index.md, selects entries, resolves via CLI
-- New: skill reads `agents/memory/index.md` (root), navigates to relevant domain indices, selects entries
-- `default` mode: resolve until all items are entries (not further indices) — FR-7 requirement
-- `all` mode: tail-recursive through domain indices
+---
 
-**Scaling (NFR-1):**
-- Hierarchical lookup is O(log_k(N)) with branching factor k — root index narrows to domain, domain index narrows to entry
-- Agent context budget: only root index + selected domain index loaded per recall invocation (not full corpus)
-- Branching factor and per-file token budget (NFR-4, Q-1) jointly determine max entries per level — design phase sets thresholds
+### S-C: Memory Format Grounding
 
-**Backward compatibility (NFR-2):**
-- `claudeutils _recall resolve` — preserved, follows hierarchy transparently
-- `claudeutils _recall check` — preserved, validates against hierarchical structure
-- `claudeutils _recall diff` — preserved, diff semantics unchanged
-- `claudeutils _when` — thin alias during deprecation, removed after one release cycle
-- `/when` and `/how` skills — updated to use `_recall resolve` (already do via allowed-tools)
-- pretooluse-recall-check hook — updated for new index path (see Phase 3 hook update below)
+**What (FR):** Ground trigger format, when/how distinction, naming conventions before bulk conversion (FR-5). Research may suggest formats beyond current when/how — remain open.
 
-**Migration strategy (NFR-3):**
-- Write `agents/memory/index.md` referencing both migrated domain files and unmigrated sections inline
-- Parser handles mixed format: child references AND inline entries in same file
-- Migrate one domain at a time, validate `_recall resolve` works after each
+**How (DP):** `/ground` skill — research trigger naming conventions, trigger structure formalization, index hierarchy validation (branching factor, navigation). Produce format specification consumable by S-G's extraction agent.
 
-**PreToolUse hook update:**
-- pretooluse-recall-check hook references memory-index.md path — update to `agents/memory/index.md`
-- Hook logic may need adjustment for hierarchical traversal (currently checks flat index)
+**Type:** Design input (research)
+**Readiness:** Groundable — open research question, unknown output shape.
 
-**Existing infrastructure accounting (C-4):**
-- `src/claudeutils/recall/` (9 modules) — consolidated in Phase 2
-- `src/claudeutils/recall_cli/` (2 modules) — merged in Phase 2
-- `src/claudeutils/when/` (5 modules) — merged in Phase 2
-- `agents/memory-index.md` (366 entries) — migrated in Phase 3
-- `/recall` skill — updated for two modes in Phase 4 (FR-7)
-- `/when` and `/how` skills — updated for `_recall resolve` path in Phase 2
-- pretooluse-recall-check hook — updated for new index path in Phase 3
-- 20+ test files — consolidated in Phase 2 (22 files identified)
+**Inputs:** Existing 366 entries in `agents/memory-index.md`, current when/how format, brief.md vision (pre-existing)
+**Outputs:** `plans/reports/memory-format-grounding.md` — format specification with trigger syntax, validation rules, taxonomy decision
+**Controls:** C-1 (must complete before FR-4 bulk conversion)
+**Mechanism:** opus, worktree
 
-## Phase 4: Trigger Class Formalization (FR-2) + Learning Categories (FR-3)
+**File set:** No code changes — research artifact only
 
-Metadata additions to the unified index model. Lightweight — builds on consolidated model from Phase 2.
+---
 
-**Ordering note:** Phase 4 commits to metadata fields before Phase 5 grounding validates the taxonomy. Risk: grounding may suggest alternatives to `when`/`how` or `internal`/`external`/`hybrid`. Mitigation: metadata fields are additive (new fields on existing model) — if grounding changes taxonomy, model fields change but code structure (Phase 2-3) is unaffected. Accept this risk to avoid blocking all metadata work on grounding research.
+### S-D: Hierarchical Index Structure
 
-**FR-2: Trigger class:**
-- Already implicit in `/when` vs `/how` prefix. Make explicit in `IndexEntry.trigger_class: Literal["when", "how"]`
-- Per-entry decision, not per-document. Same domain index can mix `when` and `how` entries
-- No behavioral change to resolution — metadata only
-- Recall-informed: `when` entries require hand-curation (situational triggers from operational experience); `how` entries are automation-safe (task-descriptive, extractable from documentation headings). This distinction affects FR-4 pipeline design — corrector intensity differs by class.
+**What (FR):** Migrate flat index to tree structure with arbitrary nesting (FR-1). Includes parser updates, migration tooling, hook/skill path updates, recall loop update for multi-level traversal.
 
-**FR-3: Learning categories:**
-- Add `IndexEntry.category: Literal["internal", "external", "hybrid"] = "internal"` (default preserves backward compat)
-- External entries grouped by dependency in index hierarchy (e.g., `agents/memory/pytest/index.md`)
-- Category derivable from index path: entries under a dependency-named domain are external
-- Version detection: deferred to design (Q-1 — multiple valid approaches)
+**How (DP):**
+- Branch indices (index-of-indices only) vs leaf indices (entries only) — no mixed indices
+- Parser detects index type, traverses recursively at arbitrary depth
+- Migration script splits `agents/memory-index.md` into `agents/memory/` hierarchy
+- Domain path mapping: space → `/` (parent-child) or `-` (compound noun)
+- Token budget threshold measurement using S-A cache to determine split boundaries
+- pretooluse-recall-check hook updated from `memory-index.md` to `agents/memory/index.md`
+- `/when` and `/how` skill paths updated for new index location
 
-**Recall mode simplification (FR-7):**
-- Remove `everything` mode from `/recall` skill
-- Remove `broad` and `deep` modes (no aliases)
-- Two modes remain: `default` (per-key, two passes) and `all` (per-file, tail-recursive)
-- Update 10 pipeline recall points across skills
+**Type:** Implementation
+**Readiness:** Designable — structural decisions resolved (branch/leaf, no mixed), but traversal semantics, migration tooling details, token budget threshold, and incremental migration strategy (NFR-3) need design.
 
-## Phase 5: Memory Format Grounding (FR-5)
+**Inputs:**
+- Unified `IndexEntry` model from S-B (structural dependency)
+- Token cache from S-A (data dependency — split threshold measurement)
+**Outputs:**
+- `agents/memory/` hierarchy with root branch index + domain leaf indices
+- Updated `parse_memory_index()` with recursive traversal
+- Migration script/tooling
+- Updated hook and skill paths
+**Controls:** NFR-1 (scaling), NFR-3 (incremental migration), NFR-4 (token budget targets)
+**Mechanism:** sonnet, worktree
 
-Research prerequisite before bulk conversion. Uses `/ground` skill.
+**File set:** `src/claudeutils/recall/index_parser.py`, `agents/memory/` (new), `agents/memory-index.md` (removed after migration), migration script, hook config, skill files (`/when`, `/how`), tests
 
-- Ground trigger naming conventions, when/how distinction, index hierarchy design
-- Research may suggest formats beyond current when/how — remain open
-- Produce format specification in `plans/reports/memory-format-grounding.md`
-- Validate existing 366 entries against grounded format
-- Output consumed by Phase 6 extraction agent
+**Tear decision (S-C/S-D coupling):** FR-5 scope includes "index hierarchy design" but structural decisions (branch/leaf, no mixed indices) are already resolved from design discussion. S-D proceeds with current hierarchy design. If S-C produces different hierarchy recommendations, they feed into S-D's design phase as revision input, not a blocker. The C→D knowledge edge is limited to entry format, not index structure. S-D does NOT depend on S-C.
 
-## Phase 6: Automated Documentation Conversion Pipeline (FR-4)
+---
 
-Bulk conversion with grounded format. Depends on Phases 1, 3, 5.
+### S-E: Trigger Class & Category Metadata
 
+**What (FR):** Formalize trigger classes (FR-2) and learning categories (FR-3) as IndexEntry metadata.
+
+**How (DP):**
+- `IndexEntry.trigger_class: Literal["when", "how"]` — explicit field for implicit prefix distinction
+- `IndexEntry.category: Literal["internal", "external", "hybrid"] = "internal"` — default preserves backward compat
+- Category derivable from index path (dependency-named domain = external)
+- Per-entry class decision, not per-document
+
+**Type:** Implementation
+**Readiness:** At most groundable (readiness propagation) — depends on S-C (knowledge dependency: taxonomy validation). If S-C validates when/how taxonomy, readiness upgrades to executable. If S-C suggests alternatives, S-E adapts.
+
+**Inputs:**
+- Format specification from S-C (knowledge dependency — taxonomy)
+- Unified `IndexEntry` model from S-B (structural dependency)
+**Outputs:** IndexEntry with trigger_class and category fields, updated tests
+**Controls:** FR-2 (per-entry class decision), FR-3 (partition by dependency)
+**Mechanism:** sonnet, worktree
+
+**File set:** `src/claudeutils/recall/models.py`, tests
+
+**Merge dependency with S-D:** Both modify IndexEntry. S-E must merge after S-D to avoid conflicts. Sequential, not parallel.
+
+---
+
+### S-F: Recall Mode Simplification
+
+**What (FR):** Reduce 5 modes to 2 (FR-7). Update 10 pipeline recall points across skills.
+
+**How (DP):**
+- Two modes: `default` (per-key, convergence-based) and `all` (per-file, tail-recursive)
+- `default` has two recursion loops: structural (navigate hierarchy until leaf entries reached) and semantic (loaded content reveals new relevant domains → re-enter structural traversal → converge when no new domains discovered). Replaces flat-index "two-pass" which assumed all entries visible from one read.
+- Remove `broad`, `deep`, `everything` — clean removal, no aliases
+- `/recall` skill updated for hierarchical traversal semantics
+- 10 pipeline recall points updated in skills
+
+**Type:** Implementation
+**Readiness:** Executable (modes decided) — but structurally depends on S-D for hierarchical traversal to be meaningful.
+
+**Inputs:** Hierarchical index from S-D (structural dependency — recursion semantics), consolidated module from S-B (structural dependency)
+**Outputs:** Updated `/recall` skill with 2 modes, 10 skill files with updated pipeline recall points
+**Controls:** FR-7 acceptance criteria (no behavioral regression)
+**Mechanism:** sonnet, worktree
+
+**File set:** recall skill, 10+ skill files with pipeline recall points
+
+---
+
+### S-G: Automated Documentation Conversion Pipeline
+
+**What (FR):** Convert external documentation into recall entries (FR-4). First target: anthropic plugins exploration report (`plans/reports/anthropic-plugin-exploration.md`) — comparative analysis with actionable findings, tests a different input shape from API docs. Subsequent targets: pytest, click, pydantic.
+
+**How (DP):**
 - Pipeline: source docs → sonnet extraction agent → corrector pass → index integration
-- First targets: pytest, click, pydantic (project dependencies)
 - Entries can be `when` or `how` per FR-2 (per-entry decision)
-- Scope includes methodology collections (GOF patterns, refactoring catalogs)
 - Corrector validates: trigger specificity, no duplicates, actionable content
 - Idempotent: re-run on same source produces no duplicates
-- Context7 MCP as one source option (query-keyed cache, not bulk import)
+- Scope includes methodology collections (GOF patterns, refactoring catalogs)
+- Context7 MCP as one source option
 
-## Cross-Cutting: Recall-Explore-Recall Pattern (FR-6)
+**Type:** Implementation
+**Readiness:** Groundable (propagated) — pipeline architecture needs design (designable intrinsically), but depends on S-C (knowledge: format spec) which is groundable. Readiness propagation: at most groundable until S-C completes, then designable.
 
-Not a separate phase — documented as a decision entry during Phase 4. Pattern already works via `/recall` skill's tail-recursion. Confirm no regression after Phase 3 index changes.
+**Inputs:**
+- Format specification from S-C (knowledge dependency — trigger syntax, validation rules)
+- Hierarchical index from S-D (structural dependency — target for integrated entries)
+- Token cache from S-A (data dependency — measure generated entries)
+**Outputs:** Extraction pipeline, first target entries integrated into hierarchy
+**Controls:** C-1 (format grounding before bulk conversion), C-2 (hierarchy before bulk conversion)
+**Mechanism:** sonnet (pipeline), opus (extraction agent design), worktree
 
-- Document pattern as a retrievable `when` entry in the recall index (FR-6 acceptance criterion)
-- Verify pipeline recall points (design A.1, runbook Phase 0.5) implement the two-pass pattern post-migration
-- Confirm `/recall` tail-recursion primitive handles hierarchical traversal (Phase 3 parser changes)
+**File set:** New pipeline module, generated index files under `agents/memory/`
+
+---
+
+### S-H: Integration Validation
+
+**What (FR):** Verify recall-explore-recall pattern (FR-6) and cross-sub-problem regression after all implementation.
+
+**How (DP):**
+- Document recall-explore-recall as retrievable decision entry (FR-6 acceptance criterion)
+- Verify pipeline recall points implement convergence-based pattern post-migration
+- Confirm `/recall` tail-recursion handles hierarchical traversal
+- End-to-end `_recall resolve` through full hierarchy
+
+**Type:** Validation
+**Readiness:** Executable — structurally dependent on S-D (hierarchy must exist for traversal verification) and S-F (modes must be simplified for pipeline point verification).
+
+**Inputs:**
+- Hierarchical index from S-D (structural dependency — end-to-end traversal target)
+- Simplified modes from S-F (structural dependency — pipeline recall points use new modes)
+**Outputs:** Decision entry documenting the pattern, regression verification report
+**Controls:** FR-6 acceptance criteria
+**Mechanism:** sonnet, in-tree (small, verification only)
+
+**File set:** Decision entry file, test verification
+
+---
+
+## Dependency Graph
+
+```
+Edges (source → target, type):
+  S-A → S-D  (data: token cache for split threshold measurement)
+  S-B → S-D  (structural: unified IndexEntry model, consolidated parser)
+  S-B → S-E  (structural: unified IndexEntry model for field additions)
+  S-B → S-F  (structural: consolidated module for skill integration)
+  S-C → S-E  (knowledge: taxonomy validation — may change trigger classes)
+  S-C → S-G  (knowledge: format spec for extraction agent prompts)
+  S-D → S-E  (merge: both modify IndexEntry — S-E merges after S-D)
+  S-D → S-F  (structural: hierarchical traversal for recursive mode semantics)
+  S-A → S-G  (data: token cache for measuring generated entry sizes)
+  S-D → S-G  (structural: hierarchy exists as target for generated entries)
+  S-D → S-H  (structural: hierarchy must exist for end-to-end traversal verification)
+  S-F → S-H  (validation: pattern verified with new modes and hierarchy)
+
+Absent edges (explicitly independent):
+  S-A ⊥ S-B  (disjoint file sets, no data flow)
+  S-A ⊥ S-C  (code vs research, no interaction)
+  S-B ⊥ S-C  (code vs research, no interaction)
+  S-C ⊥ S-D  (TEAR: hierarchy structure independent of entry format — see S-D)
+  S-E ⊥ S-F  (disjoint file sets: models.py vs skill files)
+  S-E ⊥ S-G  (disjoint: metadata fields vs pipeline module)
+  S-E ⊥ S-H  (disjoint: metadata fields vs pattern verification)
+  S-F ⊥ S-G  (disjoint: skill mode logic vs pipeline module)
+  S-G ⊥ S-H  (disjoint: pipeline module vs pattern verification)
+```
+
+## Bands (Partial Ordering)
+
+```
+Band 0 (roots — no dependencies):
+  S-A: Token Count Cache          [executable]
+  S-B: Recall Module Consolidation [executable]
+  S-C: Memory Format Grounding     [groundable]
+
+  Parallelism: 3 concurrent — all file sets disjoint.
+
+Band 1 (depends on Band 0):
+  S-D: Hierarchical Index Structure [designable]
+    needs: S-A (data), S-B (structural)
+
+  Parallelism: 1. S-C may still be in progress (groundable, longer duration).
+
+Band 2 (depends on Band 1):
+  S-E: Trigger Class & Category    [groundable → executable after S-C]
+    needs: S-B (structural), S-C (knowledge), S-D (merge order)
+  S-F: Recall Mode Simplification  [executable]
+    needs: S-B (structural), S-D (structural)
+  S-G: Documentation Pipeline      [groundable → designable after S-C]
+    needs: S-A (data), S-C (knowledge), S-D (structural)
+
+  Parallelism: S-E, S-F, S-G are pairwise file-set-disjoint.
+  Max 3 concurrent if S-C has completed. If S-C pending, only S-F starts.
+  S-E and S-G gate on S-C completion.
+
+Band 3 (depends on Band 1 + Band 2):
+  S-H: Integration Validation      [executable]
+    needs: S-D (structural), S-F (validation)
+
+  Parallelism: 1. Terminal node.
+```
+
+## Tear Points
+
+**T-1: S-C/S-D (format grounding / hierarchical index):**
+Index hierarchy structure (branch/leaf, no mixed indices) is resolved from design discussion. S-D proceeds without waiting for S-C. If S-C's hierarchy recommendations differ, they enter S-D's design as revision input. Risk: rework on parser if grounding changes branching factor or navigation semantics. Mitigation: parser's recursive traversal is format-agnostic — hierarchy depth/shape changes don't affect traversal algorithm.
+
+**T-2: S-C/S-E (format grounding / metadata):**
+Not torn — S-E explicitly waits for S-C. This is the Phase 4/5 inversion fix. Readiness propagation: S-E is groundable until S-C completes. Cost: S-E is blocked during Band 0-1. Benefit: no rework if grounding changes taxonomy.
+
+## Completeness Check (100% Rule)
+
+| FR/NFR | Sub-problem | Coverage |
+|--------|------------|----------|
+| FR-1 | S-A (cache prereq) + S-D (hierarchy) | Token-counted splits, arbitrary nesting, parser, migration |
+| FR-2 | S-E | Trigger class metadata |
+| FR-3 | S-E | Learning categories, dependency partitioning |
+| FR-4 | S-G | Extraction pipeline, corrector, first targets |
+| FR-5 | S-C | Format grounding research |
+| FR-6 | S-H | Pattern documentation and regression verification |
+| FR-7 | S-F | Mode reduction, pipeline point updates |
+| FR-8 | S-B | Module merge, model unification, deprecation alias |
+| NFR-1 | S-D | O(log_k(N)) hierarchical lookup |
+| NFR-2 | S-B (deprecation alias) + S-D (path migration) | Backward compat during transition |
+| NFR-3 | S-D | Incremental migration strategy |
+| NFR-4 | S-A (measurement) + S-D (threshold) | Token budget as design target |
+| C-1 | S-C → S-G edge | Format before bulk conversion |
+| C-2 | S-D → S-G edge | Hierarchy before bulk conversion |
+| C-3 | S-A → S-D edge | Token counting before split |
+| C-4 | S-B | Infrastructure accounting |
+
+**Mutual exclusivity check:** FR-1 spans S-A (cache prerequisite) and S-D (hierarchy implementation) — this is a prerequisite-to-consumer relationship, not scope overlap. S-A's deliverable (cache API) is fully distinct from S-D's deliverable (hierarchy + parser + migration). S-B provides model consumed by S-D, S-E, S-F (structural prerequisite, not overlap). No two sub-problems produce the same deliverable.
+
+## Readiness Summary
+
+| Sub-problem | Readiness | Blocker | Pipeline routing |
+|------------|-----------|---------|-----------------|
+| S-A | Executable | — | `/runbook` → `/orchestrate` |
+| S-B | Executable | — | `/runbook` → `/orchestrate` |
+| S-C | Groundable | — | `/ground` |
+| S-D | Designable | S-A, S-B | `/design` → `/runbook` |
+| S-E | Groundable (propagated) | S-C, S-D | Wait for S-C → `/runbook` |
+| S-F | Executable | S-D | `/runbook` → `/orchestrate` |
+| S-G | Groundable (propagated) | S-A, S-C, S-D | Wait for S-C → `/design` → `/runbook` |
+| S-H | Executable | S-D, S-F | `/runbook` or inline |
 
 ## Scope Boundaries
 
 **IN:**
-- Token counting infrastructure
+- Token count caching (sqlite/sqlalchemy)
 - Module consolidation (recall + recall_cli + when → unified recall)
-- Hierarchical index with arbitrary nesting depth
+- Memory format grounding research
+- Hierarchical index with arbitrary nesting, branch/leaf separation
 - Trigger class and learning category metadata
 - Recall mode reduction (5 → 2)
-- Format grounding research
-- Documentation conversion pipeline (first targets)
-- PreToolUse hook update for new paths
+- Documentation conversion pipeline (first targets: pytest, click, pydantic)
+- Hook and skill path updates
 - 22 test files migrated
+- Deprecation alias for `_when` CLI
 
 **OUT:**
 - Post-resolve scoring / usage tracking
@@ -187,19 +320,21 @@ Not a separate phase — documented as a decision entry during Phase 4. Pattern 
 - Lifecycle role contract enforcement
 - PreToolUse lint-gated recall hook
 - SWE-ContextBench benchmarking
-- Version-change detection implementation (mechanism selected in design via Q-4, but implementation deferred past this project)
+- Version-change detection implementation (mechanism selected in design, implementation deferred)
 
 ## Open Questions for Design
 
-- Q-1: Token budget threshold for index/content file splits (NFR-4 says "design target")
-- Q-2: Grouping heuristic for related decision files (e.g., all `workflow-*.md` → `workflow/` domain)
-- Q-3: Root index metadata format — how much information per domain entry to enable agent selection without reading child indices?
-- Q-4: Version-change detection mechanism for FR-3 external entries
-- Q-5: Migration tooling — script to split memory-index.md into hierarchy, or manual?
+- Q-1: Token budget threshold for index/content splits (NFR-4) — measured during S-D design using S-A cache
+- Q-2: Grouping heuristic for related decision files → `workflow/` domain mapping — resolved during S-D design
+- Q-3: Root index metadata format (keywords, entry counts per domain) — resolved during S-D design
+- Q-4: Version-change detection mechanism for FR-3 external entries — mechanism selection during S-D/S-E design (per requirements Q-1), implementation deferred past this project (OUT of scope)
+- Q-5: Migration tooling approach (script vs manual) — resolved during S-D design
 
 ## Risks
 
-- **Test migration scope:** 22 test files, shared fixtures, import path changes. High mechanical effort.
-- **Pipeline recall point updates:** 10+ skills reference recall modes or CLI paths. Broad but mechanical.
-- **Backward compat window:** Old CLI paths need deprecation schedule. Risk of breaking worktree sessions using old paths during migration.
-- **Format grounding (Phase 5) may invalidate Phase 4 decisions:** Grounding research could suggest different metadata model. Mitigated by Phase 5 being research-only — format spec feeds Phase 6, doesn't retroactively change Phase 2-4 code structure.
+- **S-C invalidating S-D decisions:** Mitigated by tear point T-1 — hierarchy structure is format-agnostic. Only entry format changes would affect parser, not traversal.
+- **S-C invalidating when/how taxonomy:** Mitigated by NOT tearing T-2 — S-E waits for S-C. Cost is schedule (S-E blocked during Bands 0-1), benefit is no rework.
+- **Test migration scope (S-B):** 22 test files, shared fixtures, import path changes. High mechanical effort but well-scoped.
+- **Pipeline recall point updates (S-F):** 10+ skills reference recall modes. Broad but mechanical.
+- **Backward compat window:** Old CLI paths need deprecation. Risk of breaking worktree sessions using old paths during S-D migration.
+- **S-D scope:** Largest sub-problem (parser, migration, hook, skill paths). May need internal decomposition during `/design` phase. Leaf-schedulable at this level — enters pipeline once, runbook handles internal steps.

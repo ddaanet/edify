@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-06
 
-**Status:** Decomposition methodology grounded (Strong). 7 principles from DSM + Axiomatic Design + TRL adapted with project-specific desiderata. Outline redraft unblocked.
+**Status:** Outline redrafted with decomposition methodology (8 sub-problems, DAG, banded partial ordering). Corrector-reviewed, discussion deltas applied. Phase B sufficiency gate next.
 
 ## Completed This Session
 
@@ -36,60 +36,61 @@
 **Outline critique (d: mode):**
 - Current outline conflates "subtasks" (logical units of work) with "execution phases" (implementation ordering)
 - Grounding (Phase 5) is a design input but sequenced as an execution phase after Phase 4 commits to metadata model — premature commitment
-- Phase 4 ordering note (line 120) acknowledges the risk but mitigation ("fields are additive") is weak — if grounding invalidates when/how taxonomy, Phase 4 is rework
 - Root cause: outline has no concept of decomposition without sequencing
-- Identified need for a new tier above Tier 3 — decomposition of complex jobs into sub-problems with dependency graph, each sub-problem enters Tier 1-3 pipeline independently
-- Decomposition methodology needs grounding before implementation (work breakdown structures, design readiness assessment)
+- Decomposition methodology needs grounding before implementation
 
 **Decomposition methodology grounding:**
 - 7 frameworks evaluated (DSM, Axiomatic Design, WBS, IDEF0, NASA V-Model, DAG/toposort, TRL)
 - 3 primary frameworks selected: DSM (banding for partial ordering), Axiomatic Design (zigzag decomposition), TRL (readiness scale)
-- 7 adapted principles: zigzag decomposition, dependency discovery during decomposition, banding for partial order, tearing for coupled sub-problems, readiness scale (groundable/designable/executable), 100% completeness rule, DAG as primary output
-- 12 project-specific desiderata from internal conceptual analysis (context-window scoping, testable boundaries, type annotation, minimal interfaces, etc.)
-- 5 dependency types identified: data, structural, knowledge, merge, validation
-- Grounding quality: Strong (3 established frameworks with direct applicability)
+- 7 adapted principles, 12 project-specific desiderata, 5 dependency types
+- Grounding quality: Strong
 
-**Design discussion — skill update sequencing:**
-- Agreed: decomposition methodology should eventually be encoded into `/design` skill
-- But not before validation — use methodology manually on outline redraft first, then codify
-- Rationale: encoding untested methodology is same class of error as confabulating one (just with citations)
+**Outline redraft (Phase A.5 revision):**
+- Applied 7 decomposition principles to replace linear Phase 1-6 with 8 sub-problems + DAG
+- Sub-problems: S-A (token cache), S-B (module consolidation), S-C (format grounding), S-D (hierarchical index), S-E (metadata), S-F (mode simplification), S-G (conversion pipeline), S-H (integration validation)
+- 4 bands: Band 0 (A,B,C parallel), Band 1 (D), Band 2 (E,F,G parallel), Band 3 (H)
+- Phase 4/5 fix: S-E blocked on S-C via readiness propagation (T-2 not torn)
+- Tear T-1: S-C/S-D torn — hierarchy structure independent of entry format
+- Corrector review: 4 major + 3 minor fixed (report: `plans/active-recall/reports/outline-review-redraft.md`)
+
+**Discussion refinements (Phase B):**
+- S-F: `default` recall mode changed from "two-pass" to convergence-based — two recursion loops (structural + semantic). "Two-pass" was flat-index artifact. FR-7 in requirements.md updated.
+- S-G: First pipeline target changed to anthropic plugins exploration report per brief.md — tests different input shape (comparative analysis vs API docs). Subsequent: pytest/click/pydantic.
+
+**Skill update sequencing:**
+- Decomposition methodology validated on real case (outline redraft) — codification unblocked
 - Branch scope: skill updates are shared infrastructure, belong on main after merge
-- New worktree task captured: "Design skill decomposition tier"
 
 ## In-tree Tasks
 
 - [x] **Decomposition grounding** — `/ground` | opus
   - How established design methodologies break complex jobs into sub-problems without premature sequencing
-  - Work breakdown structures, dependency representation, design readiness assessment
   - Output: `plans/reports/decomposition-methodology-grounding.md`
-  - Feeds new workflow tier (above Tier 3) and active recall outline redraft
-- [ ] **Outline redraft** — `/design plans/active-recall/requirements.md` | opus
-  - Apply decomposition methodology to produce sub-problems without premature sequencing
-  - Current outline conflates subtasks with execution phases — grounding (design input) deferred as Phase 5
-  - Design-time activities (format grounding FR-5, metadata model decisions) must not appear as execution phases
-  - Consumes: decomposition grounding report + this session's diagnosis
+- [x] **Outline redraft** — `/design plans/active-recall/requirements.md` | opus
+  - Applied decomposition methodology, corrector-reviewed, discussion deltas applied
 
 ## Worktree Tasks
 
 - [>] **Active recall system** — `/design plans/active-recall/requirements.md` | opus
   - Plan: active-recall
-  - Outline written and reviewed, design discussion in progress
-  - 7 design decisions captured, outline diagnosed as needing redraft
-  - Grounding tasks gate the outline redraft (see in-tree tasks above)
+  - Outline redrafted with decomposition methodology, corrector-reviewed, discussion deltas applied
+  - 7 prior design decisions + 2 discussion refinements (convergence mode, first target)
+  - Next: brief.md update, then Phase B sufficiency gate
   - Relates to: recall tool consolidation, generate memory index, recall dedup, recall pipeline, recall learnings design
 - [ ] **Design decomposition tier** — Encode decomposition methodology (DSM banding, readiness scale, zigzag) into `/design` as new workflow tier above Tier 3 | opus | restart
   - Consumes: validated methodology from outline redraft + grounding report
-  - Blocked on: outline redraft (validates methodology on real case first)
+  - Methodology validated on real case — codification unblocked
   - Behavioral change to `/design` skill — shared infrastructure, merges to main
 
 ## Reference Files
 
-- `plans/active-recall/outline.md` — 6-phase design outline (to be redrafted — conflates subtasks with execution phases)
-- `plans/active-recall/requirements.md` — 8 FRs, 4 NFRs, 4 constraints, 2 open questions
-- `plans/active-recall/recall-artifact.md` — 29 recall entry keys (updated with post-explore entries)
-- `plans/active-recall/reports/outline-review.md` — corrector review with traceability matrix
+- `plans/active-recall/outline.md` — 8 sub-problems with DAG, banded partial ordering (redrafted)
+- `plans/active-recall/requirements.md` — 8 FRs, 4 NFRs, 4 constraints, 2 open questions (FR-7 updated)
+- `plans/active-recall/recall-artifact.md` — 29 recall entry keys
+- `plans/active-recall/reports/outline-review-redraft.md` — corrector review of redrafted outline
+- `plans/active-recall/reports/outline-review.md` — corrector review of original outline (historical)
 - `plans/active-recall/classification.md` — Complex classification
-- `plans/active-recall/brief.md` — architectural discussion distillation
+- `plans/active-recall/brief.md` — architectural discussion distillation (needs update with discussion conclusions)
 - `plans/reports/recall-lifecycle-grounding.md` — lifecycle patterns, mode assignments, three-tier model
 - `plans/reports/decomposition-methodology-grounding.md` — 7 principles from DSM + AD + TRL, Strong grounding
 - `plans/reports/decomposition-internal-conceptual.md` — 12 desiderata, 5 failure modes, 5 dependency types
@@ -97,4 +98,4 @@
 
 ## Next Steps
 
-Run outline redraft (`/design plans/active-recall/requirements.md`). Decomposition grounding complete — apply methodology to produce sub-problems with dependency graph instead of linear phases.
+Continue active recall system design: update brief.md with discussion conclusions, then Phase B sufficiency gate on the redrafted outline.

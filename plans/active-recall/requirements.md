@@ -85,7 +85,7 @@ Acceptance criteria:
 **FR-7: Recall mode simplification**
 Reduce formal recall modes from five to two:
 
-- `default`: per-key, two passes, scored selection (8/10 pipeline recall points). Continues recursing until all resolved items are entries, not recursive indices — ensures full traversal through hierarchy.
+- `default`: per-key, convergence-based, scored selection (8/10 pipeline recall points). Two recursion loops: structural (navigate hierarchy until leaf entries reached — depth determined by index structure, not fixed) and semantic (loaded content reveals new relevant domains → re-enter structural traversal → converge when no new domains discovered). Replaces flat-index "two-pass" which assumed all entries visible from one read.
 - `all`: per-file, tail-recursive (design A.1, runbook Tier 3 Phase 0.5)
 
 Drop `broad` (absorbed by `all`), `deep` (absorbed by `default` two-pass), and `everything` (impractical at scale).
