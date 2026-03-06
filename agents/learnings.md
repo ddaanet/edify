@@ -43,3 +43,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Evidence: Active recall outline placed grounding (Phase 5) after metadata model commitment (Phase 4). The outline acknowledged the risk but accepted it — weak mitigation hiding a structural flaw.
 - Correct pattern: Decomposition (breaking into sub-problems with dependency graph) is a separate activity from sequencing (ordering for implementation). Sub-problems get tagged with design readiness — some are ready for runbook, others need more design. Sequencing happens at runbook time, not decomposition time.
 - Design inputs (grounding, research) belong in the design process, not as execution phases.
+## When output-style plugins conflict with prose rules
+- Anti-pattern: Following `★ Insight` decorative block instructions injected by SessionStart hooks (explanatory-output-style, learning-output-style plugins) when CLAUDE.md prose rules say "no framing, let results speak."
+- Root cause: System-reminder injection carries high perceived authority + specific template + "always" keyword. General prose quality rules lose the salience competition. The directive appeared twice (both plugins enabled simultaneously), reinforcing compliance.
+- Correct pattern: Project CLAUDE.md prose rules govern output style. Disable output-style plugins that conflict (`explanatory-output-style`, `learning-output-style` in settings.json `enabledPlugins`). If educational output is wanted, it should be encoded in CLAUDE.md, not injected via competing system-reminders.
