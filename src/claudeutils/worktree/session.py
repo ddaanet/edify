@@ -222,6 +222,48 @@ def remove_slug_marker(session_path: Path, slug: str) -> None:
         session_path.write_text("\n".join(lines))
 
 
+def _extract_plan_from_block(block: TaskBlock) -> str | None:
+    """Extract plan name from a task block.
+
+    Checks continuation lines for 'Plan: <name>' first, falls back to extracting
+    from backtick command paths.
+    """
+    block_text = "\n".join(block.lines)
+
+    # Primary: "Plan: <name>" in continuation lines
+    if m := re.search(r"[Pp]lan:\s*(\S+)", block_text):
+        return m.group(1)
+
+    # Fallback: plans/<name>/ in backtick command
+    if m := re.search(r"plans/([^/\s`]+)/", block_text):
+        return m.group(1)
+
+    # Fallback: /orchestrate <name> in backtick command
+    if m := re.search(r"/orchestrate\s+([^`|\s]+)", block_text):
+        return m.group(1)
+
+    return None
+
+
+def extract_plan_order(content: str) -> dict[str, int]:
+    """Extract plan ordering from session.md task order.
+
+    Returns mapping of plan_name → position based on document order. Position is
+    0-indexed sequential for tasks that reference plans.
+    """
+    blocks = extract_task_blocks(content)
+    order: dict[str, int] = {}
+    position = 0
+
+    for block in blocks:
+        plan_name = _extract_plan_from_block(block)
+        if plan_name and plan_name not in order:
+            order[plan_name] = position
+            position += 1
+
+    return order
+
+
 def _filter_section(
     content: str, section_name: str, task_name: str, plan_dir: str | None
 ) -> str:

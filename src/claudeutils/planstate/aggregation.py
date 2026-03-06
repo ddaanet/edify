@@ -10,7 +10,7 @@ from typing import NamedTuple
 
 from claudeutils.planstate.inference import list_plans
 from claudeutils.planstate.models import PlanState
-from claudeutils.worktree.session import extract_task_blocks
+from claudeutils.worktree.session import extract_plan_order, extract_task_blocks
 
 
 class TreeInfo(NamedTuple):
@@ -218,5 +218,22 @@ def aggregate_trees(repo_root: Path) -> AggregatedStatus:
             plan.tree_path = tree.path
             plans_dict[plan.name] = plan
 
-    plans = sorted(plans_dict.values(), key=lambda p: p.name)
+    # Sort by session.md task order; unmatched plans alphabetically at end
+    plan_order = _read_plan_order(trees)
+    max_pos = len(plan_order)
+    plans = sorted(
+        plans_dict.values(),
+        key=lambda p: (plan_order.get(p.name, max_pos), p.name),
+    )
     return AggregatedStatus(plans=plans, trees=sorted_trees)
+
+
+def _read_plan_order(trees: list[TreeInfo]) -> dict[str, int]:
+    """Read plan ordering from main tree's session.md."""
+    main_tree = next((t for t in trees if t.is_main), None)
+    if not main_tree:
+        return {}
+    session_path = Path(main_tree.path) / "agents" / "session.md"
+    if not session_path.exists():
+        return {}
+    return extract_plan_order(session_path.read_text())

@@ -142,6 +142,8 @@
   - Add feature-branch gate to `/codify` + soft-limit age calculation
   - From learning: "Do not codify on feature branches. Decision file changes create merge conflicts with main's decisions/."
 
+- [ ] **Command lint gate** — precommit lint: scan backtick commands in task entries for executability | haiku
+
 ## Worktree Tasks
 
 - [ ] **Active recall system** → `active-recall-system` — `/requirements plans/active-recall/brief.md` | opus
@@ -176,7 +178,7 @@
   - ~60 occurrences: skills, fragments, tests, continuation infrastructure, decision files
   - Motivation: decouple handoff from commit-ready state (handoff should work on dirty tree)
 - [x] **Explore Anthropic plugins** — Install all 28 official plugins | sonnet | restart | 2.0
-- [ ] **Wt ls session ordering** → `wt-ls-session-ordering` — `_worktree ls` prints plans in pending task order from session.md | sonnet | 2.0
+- [ ] **Wt ls session ordering** — `_worktree ls` prints plans in pending task order from session.md | sonnet | 2.0
 - [ ] **Tool deviation hook** — PostToolUse hook: agents declare expected Bash outcome, hook validates actual vs declared | sonnet | 1.9
   - General framework: agent declares expected exit code + output pattern before Bash call
   - PostToolUse hook compares actual result, stops or redirects to diagnose-and-compensate on mismatch
