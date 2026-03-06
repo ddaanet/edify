@@ -125,86 +125,53 @@
 
 ## In-tree Tasks
 
-### Blocked / Terminal
+## Worktree Tasks
 
-- [!] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet
-  - Plan: handoff-cli-tool | Status: outlined
-  - `_session` group (handoff, status, commit)
-  - Discussion conclusions baked into outline: amend, git passthrough, deviation-only output, submodule labeling
-- [ ] **Parallel orchestration** — Parallel dispatch via worktree isolation | sonnet
-  - Plan: parallel-orchestration
-- [ ] **Python hook ordering fix** — `/design plans/precommit-python3-redirect/requirements.md` | haiku | restart
-  - `python -c` one-liner allowance evaluated before `uv run` redirect
-  - `uv run` redirect message mentions `uv sync` as dependency-change path
-  - SessionStart: verify `claudeutils` importable, emit `STOP:` if not
-  - agent-core SessionStart can assume claudeutils (all consumers have it; post-migration edify ships in plugin)
-- [ ] **Calibrate topic params** — extend session-scraper.py | sonnet
-  - Blocked by: UPS topic injection (needs production data first)
+### Batch: workflow quick wins (prose-only / low code, parallelizable)
 
-- [ ] **Codify branch awareness** — `/design` | opus
-  - Add feature-branch gate to `/codify` + soft-limit age calculation
-  - From learning: "Do not codify on feature branches. Decision file changes create merge conflicts with main's decisions/."
-
+- [ ] **Agentic prose terminology** — find/replace "LLM prose" variants → "agentic prose" across codebase | haiku | 1.3
+- [ ] **Memory-index loading docs** — update stale refs claiming memory-index is @-ref from CLAUDE.md | haiku | 1.2
+- [ ] **Wt merge-rm shorthand** — prose edit: `wt merge rm <slug>` shorthand in worktree SKILL.md | haiku | 1.2
+- [ ] **Corrector removal audit** — decision entry: corrector must verify removal covers all callers | sonnet | 1.2
+- [ ] **Runbook outline review** — prose edit: user review gate after outline correction in runbook SKILL.md | haiku | 1.1
+- [ ] **Review auto-commit** — prose edit: auto handoff+commit after deliverable-review fixes | haiku | 1.1
+- [ ] **Task notation migration** — replace `[✗]` → `[†]` across active behavioral files + validators | haiku | 0.8
+- [ ] **Discuss divergent step** — `/design plans/discuss-divergent-thinking/brief.md` | sonnet
+  - Plan: discuss-divergent-thinking
+  - Add alternative-framing step to d: directive before assessment
+- [ ] **Settings triage protocol** — `/design plans/settings-triage-protocol/brief.md` | sonnet
+  - Plan: settings-triage-protocol
+  - Commit skill triage step for settings.local.json entries
+- [ ] **Standardize task creation** — `/design plans/standardize-task-creation/requirements.md` | sonnet
+  - Plan: standardize-task-creation
+  - Skills write follow-up tasks to session.md with skill invocation commands
 - [ ] **Command lint gate** — precommit lint: scan backtick commands in task entries for executability | haiku
 
-## Worktree Tasks
+### Active / ready
 
 - [ ] **Active Recall** — `/requirements plans/active-recall/brief.md` | opus
   - Plan: active-recall
   - Hierarchical index, automated documentation conversion, memory format grounding
   - Relates to: recall tool consolidation, generate memory index, recall dedup, recall pipeline, recall learnings design
-- [x] **Orchestrate evolution** — `/orchestrate orchestrate-evolution` | sonnet | restart | 6.0
-  - 14 steps: 12 TDD cycles (sonnet) + 2 general steps (opus)
-  - Phase 1: agent caching model (4 cycles)
-  - Phase 2: orchestrator plan format + verify-step.sh (4 cycles)
-  - Phase 3: TDD agent generation + verify-red.sh (4 cycles)
-  - Phase 4: SKILL.md rewrite + refactor.md/delegation.md updates (2 steps, opus)
-  - Checkpoints: light at phase boundaries, full at Phase 4 (final)
-- [-] **Execute flag lint** — superseded by session validator | haiku | 3.0
-- [x] **Skill disclosure** — `/design plans/skill-progressive-disclosure/requirements.md` | opus | 2.6
-  - Plan: skill-progressive-disclosure | Status: requirements
-  - Segment loading at gate boundaries: initial load → write-outline → write-design (/design); tier assessment → tier3-planning → expansion (/runbook)
-  - Complementary with skills-quality-pass FR-3 extractions
-- [x] **Session.md validator** — Scripted precommit check | sonnet | 2.4
-  - Plan: session-validator
-  - Includes plan-archive coverage check (deleted plans must have archive entry)
 - [ ] **Worktree merge resilience** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.2
   - Plan: worktree-merge-resilience | Status: outlined
   - Segment-level diff3 merge for learnings.md, precommit structural validation
-- [x] **Session scraping** — sonnet | 2.2
-  - Plan: session-scraping | Status: delivered
-- [x] **Worktree merge from main** — `/orchestrate worktree-merge-from-main` | sonnet | 2.2
-  - Plan: worktree-merge-from-main | Status: ready
-  - Branch self-updates before merge to main; main rollbacks on failure instead of fixing on main
-  - Prerequisite for merge resilience — eliminates most merge failures at source
-- [x] **Handoff --commit removal** — remove --commit from /handoff, expand standalone to chain, deduplicate [handoff, commit] | sonnet | 2.2
-  - ~60 occurrences: skills, fragments, tests, continuation infrastructure, decision files
-  - Motivation: decouple handoff from commit-ready state (handoff should work on dirty tree)
-- [x] **Explore Anthropic plugins** — Install all 28 official plugins | sonnet | restart | 2.0
-- [x] **Wt ls session ordering** — `_worktree ls` prints plans in pending task order from session.md | sonnet | 2.0
 - [ ] **Tool deviation hook** — PostToolUse hook: agents declare expected Bash outcome, hook validates actual vs declared | sonnet | 1.9
   - General framework: agent declares expected exit code + output pattern before Bash call
   - PostToolUse hook compares actual result, stops or redirects to diagnose-and-compensate on mismatch
-  - Broader than original scope (was: just when-resolve.py failures)
 - [ ] **Artifact staleness gate** — sonnet | 1.9
   - Mechanical checkpoint at /requirements, /design, /runbook exit points
-  - `claudeutils _recall resolve` touches sentinel; skill compares sentinel mtime to recall-artifact.md AND primary skill artifact (requirements.md, outline.md, design.md, runbook.md)
-  - If recall newer than either artifact, trigger update step
-  - Two drift vectors: stale recall-artifact (entries loaded not persisted) and stale skill artifacts (decisions loaded after artifact written)
+  - `claudeutils _recall resolve` touches sentinel; skill compares sentinel mtime to recall-artifact.md AND primary skill artifact
+  - Two drift vectors: stale recall-artifact and stale skill artifacts
 - [ ] **Lint-gated recall** — PostToolUse hook: inject memory-index on first lint/precommit red after green (state-transition gated) | sonnet | 1.9
 - [ ] **Lint recall gate** — PreToolUse recall pass before lint fix attempt; depends on when-resolve null mode | sonnet | 1.9
-- [-] **Recall tool consolidation** — absorbed into Active Recall (FR-7 mode simplification, C-3 infrastructure consolidation) | sonnet | 1.9
 - [ ] **Ground workflow skills** — `/ground` each per audit | opus | 1.9
   - Audit: `plans/reports/workflow-grounding-audit.md`
-  - Priority: /runbook → review agents (corrector + design-corrector batch) → /orchestrate → /handoff
-  - /design completed — grounded and redesigned
-  - Skip low-benefit: /commit, artisan, test-driver, /shelve
+  - Priority: /runbook → review agents → /orchestrate → /handoff
 - [ ] **Markdown migration** — `/design` | opus | 1.9
   - Wrap existing markdown parser with Claude-specific lenient normalization
-  - Line-wrap all files, replace ad-hoc regex parsers (prepare-runbook, session merge, validate-runbook, markdown cleanup)
+  - Line-wrap all files, replace ad-hoc regex parsers
   - Token counting API + sqlite user cache, threshold migration (line counts → tokens)
-  - `just setup` sandbox config for cache dir
-  - Parsing fixes batch delivered — parser can now replace regex code
 - [ ] **Merge lifecycle audit** — `/design plans/merge-lifecycle-audit/brief.md` | sonnet | 1.8
   - Plan: merge-lifecycle-audit | Status: requirements
   - State machine audit + integration tests for merge→rm lifecycle. Absorbs merge-submodule-ordering.
@@ -214,29 +181,21 @@
 - [ ] **Block cd-chaining in bash** — PreToolUse hook to block `cd * && *` and `cd *; *`, recommend `git -C` or subshell | sonnet | 1.8
 - [ ] **Fix task-context bloat** — Filter/trim output | sonnet | 1.7
 - [ ] **Skill-dev skill** — `/design` | sonnet | 1.6
-  - Front-load plugin-dev:skill-development with project-specific skill editing patterns via ad-hoc continuation passing
-  - Content: description field rules, extraction safety, control flow verification, entry point naming, prose quality ref
+  - Front-load plugin-dev:skill-development with project-specific skill editing patterns
   - Replace ambient `.claude/rules/skill-development.md` path trigger with explicit skill invocation
 - [ ] **Directive skill promotion** — `/design plans/directive-skill-promotion/` | opus | 1.6
   - Plan: directive-skill-promotion
   - d:, p:, w directives have prose-gate failures (grounding skip, model misclassification)
-  - Text expansions can't enforce multi-step protocols; need tool-gated skills
-  - Absorbs: wrap command (`w`), discuss protocol grounding, p: classification gap, discuss-to-pending chain (brief: `plans/directive-skill-promotion/brief.md`)
-  - Evidence: 2× grounding skip, 3× model tier misclassification, 3× d:→p: chain missed in single session
+  - Absorbs: wrap command, discuss protocol grounding, p: classification gap, discuss-to-pending chain
 - [ ] **Entry gate propagation** — `/design` | opus | 1.6
   - Add git-clean + precommit entry gates to /orchestrate, /deliverable-review, corrector agent
-  - Cross-cutting pattern — needs /design to resolve: each skill body vs shared fragment vs hook, and per-consumer questions (corrector double-gating, orchestrate checkpoint overlap, deliverable-review session context)
   - Follow-on after /inline delivery
 - [ ] **Retrofit skill pre-work** — `/design` | opus | 1.6
   - Many skills lack initial task context loading (task-context.sh, brief.md, recall-artifact) and skill-adapted recall
-  - Continuation-passing retrofit: /design and /runbook lack `continuation:` frontmatter blocks and `## Continuation` body sections (cross-skill review: `plans/inline-execute/reports/cross-skill-review.md`, issues 1-4)
-  - /runbook lacks "Downstream Consumers" summary section (issue 5)
-  - Audit skills for cold-start gaps; retrofit where beneficial
   - Follow-on after /inline delivery
 - [ ] **Worktree exit ceremony** — `/requirements plans/wt-exit-ceremony/brief.md` | sonnet | 1.6
   - Plan: wt-exit-ceremony | Status: requirements
   - Two UPS Tier 1 shortcuts (k/ok, g/go) + worktree lifecycle behavior codification
-  - Dropped by autostrategy merge at d78d5fa5 (wt-rm-dirty), restored 2026-03-02
 - [ ] **Tweakcc** — Remove redundant builtin prompts, inject custom | sonnet | 1.6
   - Plan: tweakcc
 - [ ] **Wt rm task cleanup** — `/design plans/wt-rm-task-cleanup/brief.md` | sonnet | 1.6
@@ -247,129 +206,88 @@
   - Add task to session.md before `_worktree new` when task not yet present
 - [ ] **Plugin migration** — Refresh outline then orchestrate | opus | 1.6
   - Plan: plugin-migration | Status: ready (stale — Feb 9)
-  - Recovery: design.md architecture valid, outline Phases 0-3/5-6 recoverable, Phase 4 needs rewrite
 - [ ] **Remove wt rm --force** — remove `--force` flag from `_worktree rm` CLI | sonnet | 1.5
-  - Structural safety: `--force` bypasses the uncommitted-work check that exists to prevent data loss
-  - Emergency cleanup via raw `git worktree remove --force` + `rm -rf`
 - [ ] **Design context gate** — `/design plans/design-context-gate/brief.md` | sonnet | 1.5
   - Plan: design-context-gate | Status: requirements
   - /design tail-call /inline only when context budget allows, otherwise handoff+commit
-  - Mechanism: UPS hook injects context percentage from statusline infrastructure
-  - Threshold needs empirical calibration (no confabulated number)
 - [ ] **Plan-completion ceremony** — `/design plans/plan-completion-ceremony/` | opus | 1.4
   - Plan: plan-completion-ceremony
-  - Handoff trim removes task line but has no plan-completion side effects
-  - Missing: delete plan dir, write plan-archive entry, update lifecycle.md, scan stale references
-  - 7 of 12 orphaned plans traced to this gap
-  - Absorbs: Delivery supercession — memory-index pass for stale decision entries (brief: `plans/plan-completion-ceremony/brief.md`)
+  - Handoff trim lacks plan-completion side effects (delete dir, archive entry, lifecycle.md, stale refs)
+  - Absorbs: Delivery supercession
 - [ ] **Generate memory index** — `/design` | opus | 1.4
-  - Each decision/learning declares keywords for index. Index generated from declarations. Diff displayed after update for agent review. Supersedes manual append workflow in `/codify` step 4a.
+  - Each decision/learning declares keywords for index. Generated from declarations.
 - [ ] **Agent rule injection** — Distill sub-agent rules into agent templates | sonnet | 1.4
 - [ ] **Tier threshold grounding** — calibrate Tier 1/2/3 file-count thresholds against empirical data | opus | 1.4
-  - Thresholds (<6, 6-15, >15) are ungrounded operational parameters
-  - Needs measurement from execution history, not confabulated heuristics
 - [ ] **Handoff insertion policy** — Insert at priority position instead of append | sonnet | 1.3
 - [ ] **Test diagnostic helper** — Replace subprocess.run check=True with stderr surfacing | sonnet | 1.3
 - [ ] **Cross-tree requirements** — `/requirements` skill writes to main from worktree | sonnet | 1.3
   - Transport solved: `git show <branch>:<path>` from main (no sandbox needed)
-  - Remaining: requirements skill path flag/auto-detection, optional CLI subcommand (`_worktree import`)
-  - Absorbs: Revert cross-tree sandbox access (remove `additionalDirectories` from `_worktree new`)
-- [ ] **Agentic prose terminology** — replace "LLM prose"/"LLM-consumed prose" variants across codebase | sonnet | 1.3
-  - Search: "llm prose", "llm-prose", "LLM-prose", "LLM-consumed prose", "LLM generated prose" (with/without hyphens)
-  - Replace with "agentic prose" / "agentic-prose" as appropriate per context
-- [ ] **Corrector removal audit** — sonnet | 1.2
-  - When design proposes removing functions, corrector reads implementation and callers, verifies removal justification covers all purposes
-  - Decision entry with task-classification incident as evidence
-- [ ] **Memory-index loading docs** — update references claiming memory-index is @-ref from CLAUDE.md | sonnet | 1.2
-- [ ] **Wt merge-rm shorthand** — update worktree skill: `wt merge rm <slug>` as `merge <slug>` then `rm <slug>` | sonnet | 1.2
-- [ ] **Runbook outline review** — update runbook skill: user review gate after outline correction, iterative fix cycle until approved | sonnet | 1.1
-- [ ] **TDD test optimization** — Selective test rerun via dependency analysis | sonnet | 1.1
-- [ ] **Review auto-commit** — after fixing all issues in deliverable-review, auto handoff and commit | sonnet | 1.1
-- [ ] **Moderate outline gate** — `/design` skill update | opus | 1.1
-  - When requirements lack structural decisions (module layout, function decomposition, wiring), generate lightweight outline before routing to /runbook
-  - Single data point so far — trigger condition needs sharper criteria before implementing
-  - Self-modification risk: editing /design during active use
-- [ ] **Dev integration branch** — `/design` persistent worktree for merge landing, async issue resolution | opus | 1.1
+  - Absorbs: Revert cross-tree sandbox access
+- [ ] **Codify branch awareness** — `/design` | opus
+  - Add feature-branch gate to `/codify` + soft-limit age calculation
+- [ ] **Update prioritize skill** → `update-prioritize-skill` — use `claudeutils _worktree ls` + prototype script for scoring | sonnet | 1.0
+  - Phase 1: optimize skill to use `plans/prototypes/score.py` for computation
+  - Phase 2: integrate as `claudeutils _prioritize score` CLI command (replace prototype)
+  - JSON input for scores, markdown output for reports. Absorbs: Prioritize script (0.7)
 - [ ] **Worktree CLI UX** — sonnet | 1.0
-  - `_worktree new`: stdout-only, exit status for success, user-friendly errors instead of tracebacks (task not in session.md, slug length)
-  - `_worktree rm` dirty message: "Run hc in the worktree session, or claude -c to restart it"
-- [ ] **Recall deduplication** — integrate session context scraping into `claudeutils _recall resolve` to filter already-loaded entries | sonnet | 1.0
-  - Session scraper prototype: `plans/prototypes/session-scraper.py`
-  - Dedup should be opt-in (`--new-only` flag or `null` mode), not default — explicit queries may resolve for sub-agent prompts
+  - `_worktree new`: stdout-only, user-friendly errors instead of tracebacks
+  - `_worktree rm` dirty message improvement
+- [ ] **Recall deduplication** — integrate session context scraping into `claudeutils _recall resolve` | sonnet | 1.0
 - [ ] **Recall pipeline** — `d:` recall-artifact stdin format parsing, session log dedup | opus | 1.0
-  - Stdin support delivered (basic). Remaining: parse recall-artifact format on stdin (strip post-"|" keywords, post-"—" relevance notes)
-  - Session log scraping to auto-eliminate already-recalled entries
-- [ ] **Recall usage scoring** — Post-resolve relevance scoring at skill transitions (/design exit, /runbook exit, /inline exit) | sonnet | 1.0
-  - Per-entry assessment: referenced / informed / unused. Accumulates in `plans/<job>/recall-usage.md`
-  - Parallel to triage-feedback.sh: compares pre-execution selection against post-execution usage
-  - Grounding: `plans/reports/recall-lifecycle-grounding.md` §Revised Mode Assignment
+- [ ] **Recall usage scoring** — Post-resolve relevance scoring at skill transitions | sonnet | 1.0
 - [ ] **Compensate-continue skill** — `/ground` then `/design` | opus | 1.0
-  - Activated after unexpected stop. Records compensation strategy. Applies trivial workarounds inline (e.g., rename heading to route around parser bug). Creates pending task for proper fix. Resumes interrupted work via continuation-prepend.
-  - Needs grounding on failure recovery patterns, compensation strategies
 - [ ] **Skill prompt-composer** — migrate skill authoring to use prompt-composer pattern | sonnet | 1.0
 - [ ] **Model directive pipeline** — Model guidance design → runbook → execution | opus | 1.0
-- [ ] **Decision drift audit** — audit decision files and learnings.md for stale operational assumptions (e.g., `uv run` references when sandbox-denied) | sonnet | 1.0
+- [ ] **Decision drift audit** — audit decision files for stale operational assumptions | sonnet | 1.0
 - [ ] **agent-core lint coverage** — `/design` | opus | 1.0
-  - ruff excludes agent-core (pyproject.toml), mypy/docformatter scoped to src/tests only
-  - Hook scripts are load-bearing production code with zero mechanical quality enforcement
-  - Design questions: which ruff rules, mypy strict mode, agent-core justfile real precommit
+  - ruff excludes agent-core, mypy/docformatter scoped to src/tests only
 - [ ] **Upstream skills field** — PR/issue for missing skills frontmatter | sonnet | 1.0
 - [ ] **Registry cache to tmp** — inline | sonnet | 1.0
   - Move continuation registry cache from TMPDIR to project-local tmp/
-- [ ] **Update prioritize skill** → `update-prioritize-skill` — use `claudeutils _worktree ls` instead of `list_plans()` ad-hoc Python; use prototype script for scoring arithmetic | sonnet | 1.0
-  - Phase 1: optimize skill to use `plans/prototypes/score.py` for computation
-  - Phase 2: integrate as `claudeutils _prioritize score` CLI command (replace prototype)
-  - JSON input for scores (agent-produced, unambiguous parsing), markdown output for reports
 - [ ] **Merge lock retry** — add lock-contention retry to `claudeutils _worktree merge` | sonnet | 0.9
-  - Catch index.lock errors, retry after model latency (no explicit sleep)
-  - Bounded retries (3 attempts), report after exhaustion
-  - Concurrent worktree sessions cause transient lock contention on shared .git
 - [ ] **Diagnose compression loss** — RCA against commit `0418cedb` | sonnet | 0.9
-- [ ] **Test diamond migration** — Needs scoping | depends on runbook evolution (delivered) | sonnet | 0.9
+- [ ] **Test diamond migration** — Needs scoping | sonnet | 0.9
 - [ ] **Safety review expansion** — Pipeline changes from grounding research | opus | 0.9
-  - Depends on: Explore Anthropic plugins
-- [ ] **Recall learnings design** — `d:` whether learnings.md entries should be resolvable via `claudeutils _recall resolve` | opus | 0.9
-  - Implies memory-index format changes (new source type), resolver changes — genuine design uncertainty
+- [ ] **Recall learnings design** — `d:` whether learnings.md entries should be resolvable via recall | opus | 0.9
 - [ ] **Feature prototypes** — Markdown preprocessor, session extraction, last-output | sonnet | 0.9
   - Plan: prototypes
 - [ ] **Diagnostic opus review** — Post-vet RCA methodology | opus | 0.8
-- [ ] **Task notation migration** — replace `[✗]` → `[†]` across codebase | sonnet | 0.8
-  - 23 files reference ✗; active files: execute-rule.md, task-failure-lifecycle.md, error-classification.md, handoff skill, session.md, validators, justfiles
-  - Update `extract_task_blocks` regex, session-structure validator
-  - Plans/reports are historical — update only active behavioral files
 - [ ] **Infrastructure scripts** — History tooling + agent-core script rewrites | sonnet | 0.7
 - [ ] **Cache expiration** — Debug log token metrics, measure TTL | sonnet | 0.7
-- [ ] **Prioritize script** — Automate mechanical parts of prioritization scoring | sonnet | 0.7
 - [ ] **Design-to-deliverable** — tmux-like session automation | opus | restart | 0.6
 - [ ] **Prose gate terminology** — Find proper name for D+B pattern, ground, update docs | opus | 0.5
 - [ ] **Ground state coverage** — State coverage validation research | opus | 0.5
 - [ ] **Workflow formal analysis** — Formal verification of agent workflow | opus | 0.5
 - [ ] **Behavioral design** — Nuanced conversational pattern intervention | opus | 0.4
 - [ ] **Wt new --base submodule** — `_worktree new --base` doesn't resolve agent-core to branch commit | sonnet
-  - Missing submodule resolution on `--base` code path in `cli.py`
   - Requires TDD: write test, then fix
-- [ ] **Agentic retrospective** → `retrospective` — Scrape session logs and git history for evolution of memory system (remember rule → active-recall), pushback protocol design process, deliverable-review and ground skill origins. Produce raw materials for blog post series on ddaa.net | opus
+- [ ] **Retrospective materials** — `/design plans/retrospective/requirements.md` | opus
+  - Plan: retrospective
+  - Scrape session logs + git history for blog post raw materials on ddaa.net
+- [ ] **Corrector audit** — audit 5 review-class agents for false positive evidence, add "Do NOT Flag" sections | sonnet
+- [ ] **Cross-tree test sentinel** — replace mtime sentinel with content-hash in user-global cache database | sonnet
+- [ ] **Design decomposition tier** — Encode decomposition methodology into `/design` as new tier | opus | restart
 
-- [ ] **Corrector audit** — audit 5 review-class agents for false positive evidence, add "Do NOT Flag" sections where warranted, update agent-development guidance | sonnet
-  - Agents: outline-corrector, design-corrector, runbook-outline-corrector, tdd-auditor, runbook-simplifier
-  - Pattern: vet-false-positives "Do NOT Flag" (categorical, evidence-grounded per NFR-1)
-- [ ] **Cross-tree test sentinel** — replace mtime sentinel with content-hash in user-global cache database, skip suite on hash hit across worktrees | sonnet
-  - Hash: `src/**/*.py tests/**/*.py pyproject.toml`. Key: `(repo-identity, content-hash)`
+### Blocked / terminal
 
-- [ ] **Design decomposition tier** — Encode decomposition methodology (DSM banding, readiness scale, zigzag) into `/design` as new workflow tier above Tier 3 | opus | restart
-  - Consumes: validated methodology from outline redraft + grounding report
-  - Methodology validated on real case — codification unblocked
-  - Behavioral change to `/design` skill — shared infrastructure, merges to main
-- [x] **Remove UPS topics** — Delete UPS topic injection hook (noisy, low relevance) | haiku | restart
-- [ ] **Standardize task creation** — `/design plans/standardize-task-creation/requirements.md` | sonnet
-  - Plan: standardize-task-creation
-  - Skills write follow-up tasks to session.md with skill invocation commands
-- [ ] **Settings triage protocol** — `/design plans/settings-triage-protocol/brief.md` | sonnet
-  - Plan: settings-triage-protocol
-  - Commit skill triage step for settings.local.json entries
-- [ ] **Discuss divergent step** — `/design plans/discuss-divergent-thinking/brief.md` | sonnet
-  - Plan: discuss-divergent-thinking
-  - Add alternative-framing step to d: directive before assessment
+- [!] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet
+  - Plan: handoff-cli-tool | Status: outlined
+- [ ] **Parallel orchestration** — Parallel dispatch via worktree isolation | sonnet
+  - Plan: parallel-orchestration
+- [ ] **Python hook ordering fix** — `/design plans/precommit-python3-redirect/requirements.md` | haiku | restart
+- [-] **Calibrate topic params** — extend session-scraper.py | sonnet
+  - Was blocked by UPS topic injection — now removed. Task may be moot.
+- [-] **Recall tool consolidation** — absorbed into Active Recall | sonnet | 1.9
+- [-] **Execute flag lint** — superseded by session validator | haiku | 3.0
+- [x] **Remove UPS topics** — haiku | restart
+- [x] **Orchestrate evolution** — sonnet | restart | 6.0
+- [x] **Skill disclosure** — opus | 2.6
+- [x] **Session.md validator** — sonnet | 2.4
+- [x] **Session scraping** — sonnet | 2.2
+- [x] **Worktree merge from main** — sonnet | 2.2
+- [x] **Handoff --commit removal** — sonnet | 2.2
+- [x] **Explore Anthropic plugins** — sonnet | restart | 2.0
+- [x] **Wt ls session ordering** — sonnet | 2.0
 
 ## Blockers / Gotchas
 
@@ -433,6 +351,9 @@
 - Encoded project paths use `-` for `/`, but real dashes in directory names are indistinguishable. Acceptable for prototype; production would need a different approach. [from: session-scraping]
 - Task name "Remove UPS topic injection" exceeds 25-char limit (26 chars) — from worktree setup [from: rm-ups-topic]
 - session.md H1 header format mismatch — now fixed by this handoff [from: rm-ups-topic]
+- Retrospective needs to scan across ~90 worktree project directories (each gets its own `~/.claude/projects/` entry) [from: retrospective]
+- Prototype's `scan --prefix` filters by prefix but retrospective needs multiple prefixes per topic [from: retrospective]
+- May need prototype extension (requires separate `/requirements` per C-1) [from: retrospective]
 ## Reference Files
 
 - `plans/reports/workflow-grounding-audit.md` — Grounding provenance for all workflow skills/agents
