@@ -3,6 +3,10 @@
 Completed plans with summaries. Loaded on demand during design research (Phase A.1)
 and diagnostic/RCA sessions.
 
+## worktree-merge-from-main
+
+Added `--from-main` direction parameter to `_worktree merge` CLI. Branch merges main into itself first, resolves conflicts in branch context, passes precommit, then main retries cleanly. 10 TDD cycles covering direction param, session.md ours strategy, learnings inversion, delete/modify handling, CLI integration, and E2E tests. Mode D added to worktree SKILL.md.
+
 ## session-scraping
 
 Session scraper prototype for extracting structured data from Claude Code session logs. Scans all `~/.claude/projects/` directories, treats agent files as first-class sources, supports many-to-many session↔commit mapping. Tool I/O noise filtered by default. Deliverable: `plans/prototypes/session-scraper.py` and supporting infrastructure.

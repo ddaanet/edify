@@ -20,6 +20,9 @@
 - **Session scraping merged + worktree removed:** Session scraper prototype delivered. Plan: session-scraping (delivered).
 - **Discussion worktree created:** `discuss` — bare worktree for discussions that don't block main.
 - **Orphaned worktree directories cleaned up:** handoff-commit-removal, recall-tool-consolidation (git registration removed but filesystem dirs persisted).
+- **Wt ls session ordering merged + worktree removed:** `_worktree ls` now prints plans in session.md pending task order. New in-tree task from branch: Command lint gate (haiku).
+- **Worktree merge from main merged + worktree removed:** 10 TDD cycles + 1 inline step delivered. Plan: worktree-merge-from-main (ready). Adds `_worktree merge --from-main` direction parameter.
+- **Retrospective worktree created:** `retrospective` — focused worktree for agentic programming blog post raw materials.
 
 - **Plan cleanup (14 directories deleted):**
   - Delivered (11): execute-skill-dispatch, flatten-hook-tiers, inline-tdd-dispatch, recall-cli-integration, recall-null, runbook-recall-expansion, task-classification, task-pattern-statuses, userpromptsubmit-topic, when-resolve-fix, wt-rm-dirty
@@ -427,4 +430,4 @@
 
 ## Next Steps
 
-3 worktrees remain: active-recall-system, worktree-merge-from-main, discuss. Create focused worktree for retrospective task.
+3 worktrees active: active-recall-system, discuss, retrospective. Continue worktree sessions.
