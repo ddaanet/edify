@@ -149,7 +149,7 @@
 
 ## Worktree Tasks
 
-- [ ] **Active recall system** — `/requirements plans/active-recall/brief.md` | opus
+- [ ] **Active Recall** → `active-recall-system` — `/requirements plans/active-recall/brief.md` | opus
   - Plan: active-recall
   - Hierarchical index, automated documentation conversion, memory format grounding
   - Relates to: recall tool consolidation, generate memory index, recall dedup, recall pipeline, recall learnings design
@@ -193,7 +193,7 @@
   - Two drift vectors: stale recall-artifact (entries loaded not persisted) and stale skill artifacts (decisions loaded after artifact written)
 - [ ] **Lint-gated recall** — PostToolUse hook: inject memory-index on first lint/precommit red after green (state-transition gated) | sonnet | 1.9
 - [ ] **Lint recall gate** — PreToolUse recall pass before lint fix attempt; depends on when-resolve null mode | sonnet | 1.9
-- [-] **Recall tool consolidation** — absorbed into Active recall system (FR-7 mode simplification, C-3 infrastructure consolidation) | sonnet | 1.9
+- [-] **Recall tool consolidation** — absorbed into Active Recall (FR-7 mode simplification, C-3 infrastructure consolidation) | sonnet | 1.9
 - [ ] **Ground workflow skills** — `/ground` each per audit | opus | 1.9
   - Audit: `plans/reports/workflow-grounding-audit.md`
   - Priority: /runbook → review agents (corrector + design-corrector batch) → /orchestrate → /handoff
@@ -356,6 +356,7 @@
   - Consumes: validated methodology from outline redraft + grounding report
   - Methodology validated on real case — codification unblocked
   - Behavioral change to `/design` skill — shared infrastructure, merges to main
+- [ ] **Remove UPS topics** → `rm-ups-topic` — Delete UPS topic injection hook (noisy, low relevance) | haiku | restart
 
 ## Blockers / Gotchas
 
