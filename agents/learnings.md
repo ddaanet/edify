@@ -19,3 +19,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Proposing workaround branches for codify because "main doesn't allow work." The rule governs where pending tasks live, not what skills can execute.
 - Correct pattern: Run `/codify` on main directly. Dispatch worktrees for implementation tasks after. Sequential, not parallel — worktrees benefit from updated decisions/ anyway.
 - The codify-in-a-branch proposal fails on merge ordering: codify touches decisions/, fragments/, memory-index.md — shared infrastructure with no deterministic merge-first guarantee.
+## When skill description triggering appears important
+- Anti-pattern: Investing in skill description optimization (eval loops, train/test splits) when the workflow is fully structured — all skill invocations are explicit (shortcuts, backtick commands, chaining, frontmatter injection).
+- Correct pattern: Skill description optimization matters only when automatic triggering operates — i.e., unstructured user input where Claude autonomously decides which skill to invoke. In structured workflows with explicit invocation rails, descriptions serve as documentation only.
+- Evidence: 32 project skills, zero relying on automatic triggering. Entry points (`d:` directive, `/requirements`) are both explicit. Skill-creator eval infrastructure exists for marketplace plugins where auto-triggering does matter.
