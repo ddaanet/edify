@@ -225,9 +225,9 @@
   - Absorbs: Revert cross-tree sandbox access
 - [ ] **Codify branch awareness** — `/design` | opus
   - Add feature-branch gate to `/codify` + soft-limit age calculation
-- [ ] **Update prioritize skill** → `update-prioritize-skill` — use `claudeutils _worktree ls` + prototype script for scoring | sonnet | 1.0
-  - Phase 1: optimize skill to use `plans/prototypes/score.py` for computation
-  - Phase 2: integrate as `claudeutils _prioritize score` CLI command (replace prototype)
+- [ ] **Update prioritize skill** — Phase 2: integrate as `claudeutils _prioritize score` CLI command | sonnet | 1.0
+  - Phase 1 complete: prototype rewritten (JSON stdin, validation), SKILL.md updated
+  - Phase 2: Click group, pyproject.toml wiring, tests, replace prototype path in SKILL.md
   - JSON input for scores, markdown output for reports. Absorbs: Prioritize script (0.7)
 - [ ] **Worktree CLI UX** — sonnet | 1.0
   - `_worktree new`: stdout-only, user-friendly errors instead of tracebacks
