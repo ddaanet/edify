@@ -14,7 +14,12 @@
   - Decoupled handoff from commit-ready state
   - Worktree justfile discarded (already on main), worktree removed
 - **Recall tool consolidation absorbed:** Scope covered by Active recall system FR-7 (mode simplification) and C-3 (infrastructure consolidation). Worktree force-removed (no deliverables).
-- **skill-description-evals worktree removed:** Canceled sub-worktree of explore-anthropic-plugins. No deliverables.
+- **skill-description-evals merged + worktree removed:** Canceled after analysis — learning captured ("When skill description triggering appears important"). Branch recreated from commit, merged to preserve analysis, then deleted.
+- **Vet false positives merged + worktree removed:** "Do NOT Flag" false positive suppression added to corrector agents. Plan: vet-false-positives (delivered).
+- **Explore Anthropic plugins worktree removed:** Branch commits reachable via sub-worktree merges.
+- **Session scraping merged + worktree removed:** Session scraper prototype delivered. Plan: session-scraping (delivered).
+- **Discussion worktree created:** `discuss` — bare worktree for discussions that don't block main.
+- **Orphaned worktree directories cleaned up:** handoff-commit-removal, recall-tool-consolidation (git registration removed but filesystem dirs persisted).
 
 - **Plan cleanup (14 directories deleted):**
   - Delivered (11): execute-skill-dispatch, flatten-hook-tiers, inline-tdd-dispatch, recall-cli-integration, recall-null, runbook-recall-expansion, task-classification, task-pattern-statuses, userpromptsubmit-topic, when-resolve-fix, wt-rm-dirty
@@ -161,9 +166,8 @@
 - [ ] **Worktree merge resilience** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.2
   - Plan: worktree-merge-resilience | Status: outlined
   - Segment-level diff3 merge for learnings.md, precommit structural validation
-- [ ] **Session scraping** → `session-scraping` — `/runbook plans/session-scraping/outline.md` | sonnet | 2.2
-  - Plan: session-scraping | Status: outlined
-  - Key decisions: all ~/.claude/projects/ (not just claudeutils), agent files are first-class sources, many-to-many session↔commit, tool I/O noise by default
+- [x] **Session scraping** — sonnet | 2.2
+  - Plan: session-scraping | Status: delivered
 - [ ] **Worktree merge from main** → `worktree-merge-from-main` — `/design plans/worktree-merge-from-main/requirements.md` | sonnet | 2.2
   - Plan: worktree-merge-from-main | Status: requirements
   - Branch self-updates before merge to main; main rollbacks on failure instead of fixing on main
@@ -171,7 +175,7 @@
 - [x] **Handoff --commit removal** — remove --commit from /handoff, expand standalone to chain, deduplicate [handoff, commit] | sonnet | 2.2
   - ~60 occurrences: skills, fragments, tests, continuation infrastructure, decision files
   - Motivation: decouple handoff from commit-ready state (handoff should work on dirty tree)
-- [ ] **Explore Anthropic plugins** — Install all 28 official plugins | sonnet | restart | 2.0
+- [x] **Explore Anthropic plugins** — Install all 28 official plugins | sonnet | restart | 2.0
 - [ ] **Wt ls session ordering** → `wt-ls-session-ordering` — `_worktree ls` prints plans in pending task order from session.md | sonnet | 2.0
 - [ ] **Tool deviation hook** — PostToolUse hook: agents declare expected Bash outcome, hook validates actual vs declared | sonnet | 1.9
   - General framework: agent declares expected exit code + output pattern before Bash call
@@ -420,4 +424,4 @@
 
 ## Next Steps
 
-6 worktrees active (all have justfile shebang fix). Continue worktree sessions, merge each as completed.
+3 worktrees remain: active-recall-system, worktree-merge-from-main, discuss. Merge wt-ls-session-ordering next.

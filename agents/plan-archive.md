@@ -3,6 +3,14 @@
 Completed plans with summaries. Loaded on demand during design research (Phase A.1)
 and diagnostic/RCA sessions.
 
+## session-scraping
+
+Session scraper prototype for extracting structured data from Claude Code session logs. Scans all `~/.claude/projects/` directories, treats agent files as first-class sources, supports many-to-many session↔commit mapping. Tool I/O noise filtered by default. Deliverable: `plans/prototypes/session-scraper.py` and supporting infrastructure.
+
+## vet-false-positives
+
+Added "Do NOT Flag" false positive suppression taxonomy to corrector agent prompts. Categories: pre-existing issues, out-of-scope items, pattern-consistent style, linter-catchable issues. Technique derived from Anthropic code-review plugin's confidence scoring pattern. Delivered via deliverable review cycle.
+
 ## grounding-skill
 
 Ground skill with diverge-converge research procedure. Produces grounded reference documents via parallel internal + external research. Affected: agent-core/skills/ground/. Key decision: mandatory web search for methodology claims.
