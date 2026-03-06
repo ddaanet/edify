@@ -467,3 +467,19 @@ Ground skill redesign: unified brainstorm/explore modes, parallelize branch agen
 ## worktree-rm-error-ux
 
 Remove --confirm gate from worktree rm, improve git error messaging. Two phases (TDD + general). Affected: src/claudeutils/worktree/cli.py.
+
+## discuss-divergent-thinking
+
+Added "Diverge before assessing" step to `d:` discussion evaluation in pushback.md. Requires 3+ alternative framings including at least one problem reframe before forming assessment. Delivered via workflow-quick-wins worktree. Affected: agent-core/fragments/pushback.md.
+
+## settings-triage-protocol
+
+Settings triage classification table added to commit skill. Three categories: Permanent (edit settings.json), Session (remove from settings.local.json), Job-specific (keep if justified). Delivered via workflow-quick-wins worktree. Affected: agent-core/skills/commit/SKILL.md.
+
+## command-lint-gate
+
+Session.md command-lint validator: precommit gate scanning task entries for missing backtick commands. Implemented as `session_commands.py` in validation module. Delivered via workflow-quick-wins worktree with outline. Affected: src/claudeutils/validation/session_commands.py.
+
+## standardize-task-creation
+
+Standardized task creation across skills. Skills write follow-up tasks to session.md with skill invocation commands and consistent metadata format. Delivered via workflow-quick-wins worktree. Affected: agent-core/skills/inline/SKILL.md, agent-core/skills/handoff/SKILL.md.

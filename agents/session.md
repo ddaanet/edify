@@ -153,23 +153,17 @@
 
 ### Batch: workflow quick wins (prose-only / low code, parallelizable)
 
-- [ ] **Agentic prose terminology** — `/inline` find/replace "LLM prose" variants → "agentic prose" across codebase | haiku | 1.3
-- [ ] **Memory-index loading docs** — `/inline` update stale refs claiming memory-index is @-ref from CLAUDE.md | haiku | 1.2
-- [ ] **Wt merge-rm shorthand** — prose edit: `wt merge rm <slug>` shorthand in worktree SKILL.md | haiku | 1.2
-- [ ] **Corrector removal audit** — `/inline` decision entry: corrector must verify removal covers all callers | sonnet | 1.2
-- [ ] **Runbook outline review** — `/inline` prose edit: user review gate after outline correction in runbook SKILL.md | haiku | 1.1
-- [ ] **Review auto-commit** — `/inline` prose edit: auto handoff+commit after deliverable-review fixes | haiku | 1.1
-- [ ] **Task notation migration** — replace `[✗]` → `[†]` across active behavioral files + validators | haiku | 0.8
-- [ ] **Discuss divergent step** — `/design plans/discuss-divergent-thinking/brief.md` | sonnet
-  - Plan: discuss-divergent-thinking
-  - Add alternative-framing step to d: directive before assessment
-- [ ] **Settings triage protocol** — `/design plans/settings-triage-protocol/brief.md` | sonnet
-  - Plan: settings-triage-protocol
-  - Commit skill triage step for settings.local.json entries
-- [ ] **Standardize task creation** — `/design plans/standardize-task-creation/requirements.md` | sonnet
-  - Plan: standardize-task-creation
-  - Skills write follow-up tasks to session.md with skill invocation commands
-- [ ] **Command lint gate** — `/runbook plans/command-lint-gate/outline.md` | haiku
+- [x] **Agentic prose terminology** — haiku
+- [x] **Memory-index loading docs** — haiku
+- [x] **Wt merge-rm shorthand** — haiku
+- [x] **Corrector removal audit** — sonnet
+- [x] **Runbook outline review** — haiku
+- [x] **Review auto-commit** — haiku
+- [x] **Task notation migration** — haiku
+- [x] **Discuss divergent step** — sonnet
+- [x] **Settings triage protocol** — sonnet
+- [x] **Standardize task creation** — sonnet
+- [x] **Command lint gate** — haiku
 
 ### Active / ready
 

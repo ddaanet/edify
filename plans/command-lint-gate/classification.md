@@ -1,7 +1,0 @@
-- **Classification:** Moderate
-- **Implementation certainty:** High — approach known (allowlist check, regex extraction, existing parsing infrastructure)
-- **Requirement stability:** High — FRs mechanism-specified, allowlist defined, integration points identified
-- **Behavioral code check:** Yes — new validation functions, conditional branches (checkbox filtering, allowlist matching, skill name extraction). Moderate minimum.
-- **Work type:** Production — delivers precommit enforcement capability
-- **Artifact destination:** production (`src/claudeutils/validation/`, `src/claudeutils/worktree/`)
-- **Evidence:** "When triaging behavioral code changes as simple" — new functions + conditional branches = Moderate. Both axes high but behavioral code gates at Moderate.

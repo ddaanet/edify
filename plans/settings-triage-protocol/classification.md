@@ -1,7 +1,0 @@
-- **Classification:** Moderate
-- **Implementation certainty:** High — approach is clear (add step to existing skill, D+B pattern is codified)
-- **Requirement stability:** High — FRs mechanism-specified, Q-1 resolved, constraints from recall
-- **Behavioral code check:** Yes — adds conditional classification logic (permanent/session/job), control flow branching on file state (empty/absent/non-empty). Moderate minimum.
-- **Work type:** Production — delivers behavioral change to commit workflow
-- **Artifact destination:** agentic-prose — modifies `agent-core/skills/commit/SKILL.md`
-- **Evidence:** "When Triaging Behavioral Code Changes As Simple" — conditional branches = Moderate. "When Editing Skill Files" — skill modification has specific constraints (D+B gate additions, control flow verification). "When Treating Commits As Sync Points" — this is the extension point pattern.
