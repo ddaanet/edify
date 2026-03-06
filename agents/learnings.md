@@ -19,3 +19,10 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Proposing workaround branches for codify because "main doesn't allow work." The rule governs where pending tasks live, not what skills can execute.
 - Correct pattern: Run `/codify` on main directly. Dispatch worktrees for implementation tasks after. Sequential, not parallel — worktrees benefit from updated decisions/ anyway.
 - The codify-in-a-branch proposal fails on merge ordering: codify touches decisions/, fragments/, memory-index.md — shared infrastructure with no deterministic merge-first guarantee.
+## When choosing storage for persistent caches
+- Anti-pattern: Using JSON file as a key-value store because the codebase has an existing JSON cache (models_cache.json). The existing cache is a special case (bounded, ~50 entries, refreshed on TTL). Extending the pattern to unbounded append-heavy caches cargo-cults the storage choice.
+- Correct pattern: sqlite via sqlalchemy for persistent caches. stdlib sqlite3 handles concurrent access (parallel worktrees), sqlalchemy mapped classes match project's Pydantic-model convention, growth path for future caches without hand-written SQL proliferation.
+- The "JSON is fine at this scale" argument is technically correct but sets a convention. Each future cache copies the pattern, and nobody will detect when aggregate load matters.
+## When designing hierarchical index structures
+- Anti-pattern: Mixed indices containing both entries and child references. Creates discoverability imbalance — inline entries are immediately visible and individually selectable, while child-referenced entries require an extra navigation step. The split is a capacity decision but has an unintended discoverability side effect.
+- Correct pattern: Clean separation — branch indices (index-of-indices only) vs leaf indices (entries only). Uniform discovery paths: root → branch(es) → leaf → entry. Simplifies parser (no mixed-mode detection).

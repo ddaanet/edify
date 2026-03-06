@@ -30,3 +30,7 @@ when loading context for LLM processing — explicit reading required
 when writing methodology — ground skill diverge-converge external research
 when grounding identifies gaps in existing structure — operational constraints vs external methodology
 when starting work on a task — requirements first, brief is not requirement-equivalent
+when triage feedback shows divergence — post-execution classification comparison
+when checking complexity before expansion — callback to previous level if too large
+when triaging behavioral code changes as simple — behavioral code routes to Moderate minimum
+when lint-gated recall needs error categorization — tuick reuse, per-error-type gating

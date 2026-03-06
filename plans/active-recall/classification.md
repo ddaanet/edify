@@ -1,0 +1,7 @@
+- **Classification:** Complex
+- **Implementation certainty:** Low — multiple architectural decisions (traversal semantics, token counting mechanism, version detection, format grounding may change structure)
+- **Requirement stability:** High — 8 FRs mechanism-specified, user-reviewed with annotations
+- **Behavioral code check:** Yes — new functions and changed logic across 16+ modules (parser, CLI, skill, hook)
+- **Work type:** Production — delivers capability to agents
+- **Artifact destination:** production (src/) + agentic-prose (skills, memory files)
+- **Evidence:** 8 FRs with dependency ordering (C-1→C-3), 16+ affected modules, multiple open architectural questions (Q-1, Q-2), recall entries confirm domain complexity (28 entries in recall artifact)
