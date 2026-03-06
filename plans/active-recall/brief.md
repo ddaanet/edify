@@ -53,6 +53,16 @@ Prerequisite before bulk conversion. Needs `/ground` on: naming conventions, tri
 - `plans/reports/recall-lifecycle-internal-codebase.md` — internal inventory
 - `plans/reports/recall-lifecycle-external-research.md` — external frameworks
 
+## Phase 6 Test Target: Plugin Exploration Report
+
+`plans/reports/anthropic-plugin-exploration.md` — analysis of 28 Anthropic official plugins (safety/security overlap, technique extraction, pipeline integration points). Contains domain-specific knowledge about plugin capabilities, hook patterns, review methodologies, and declarative rule engines.
+
+Candidate first target alongside pytest/click/pydantic for extraction pipeline validation. Tests a different input shape: not API documentation but comparative analysis with actionable findings (false positive taxonomies, confidence scoring, session-scoped dedup patterns).
+
+Related pending tasks on main (from plugin exploration discussion):
+- False positive exclusion list for vet/corrector prompts (technique from code-review plugin)
+- Skill description optimization methodology (technique from skill-creator plugin eval loop)
+
 ## Benchmark Positioning
 
 SWE-ContextBench (Zhu et al., Feb 2026): evaluates five experience reuse paradigms, finds only oracle summary reuse reliably improves performance. Gap: no benchmark tests LLM-resolved indexes or recall-explore-recall. Position as sixth paradigm — if it matches oracle performance without an oracle, that demonstrates intentional indexation value.
