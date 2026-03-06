@@ -1,0 +1,7 @@
+- **Classification:** Moderate
+- **Implementation certainty:** High — approach is known: read each skill's task-creation section, apply standardized format and destination
+- **Requirement stability:** High — FRs are mechanism-specified with acceptance criteria, refined through discussion
+- **Behavioral code check:** Yes — agentic-prose artifacts; changing task-creation instructions changes agent behavior
+- **Work type:** Production — delivers standardized behavior to agents
+- **Artifact destination:** agentic-prose (`agent-core/skills/`)
+- **Evidence:** Multiple files (5+ skills), behavioral prose changes, clear mechanical pattern. "Behavioral code" recall confirms Moderate minimum.

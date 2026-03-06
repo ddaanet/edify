@@ -139,7 +139,7 @@
 - [x] **Settings triage protocol** — `/design plans/settings-triage-protocol/brief.md` | sonnet
   - Plan: settings-triage-protocol
   - Commit skill triage step for settings.local.json entries
-- [ ] **Standardize task creation** → `standardize-task-creation` — `/design plans/standardize-task-creation/requirements.md` | sonnet
+- [ ] **Standardize task creation** — `/design plans/standardize-task-creation/requirements.md` | sonnet
   - Plan: standardize-task-creation
   - Skills write follow-up tasks to session.md with skill invocation commands
 
