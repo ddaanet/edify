@@ -505,8 +505,8 @@ release *ARGS: _fail_if_claudecode dev
 # Bash prolog
 [private]
 bash_prolog := \
-    ( if trace == "true" { "/usr/bin/env bash -xeuo pipefail" } \
-    else { "/usr/bin/env bash -euo pipefail" } ) + "\n" + '''
+    ( if trace == "true" { "/usr/bin/env bash\nset -xeuo pipefail" } \
+    else { "/usr/bin/env bash\nset -euo pipefail" } ) + "\n" + '''
 export PATH="$PWD/node_modules/.bin:$PATH"
 COMMAND="''' + style('command') + '''"
 ERROR="''' + style('error') + '''"
