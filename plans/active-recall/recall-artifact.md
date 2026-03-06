@@ -15,7 +15,7 @@ when requirements capture needs recall — recall step between mode detection an
 when recall loads new entries mid-artifact — re-evaluate decisions each pass
 when anchoring gates with tool calls — recall resolve as canonical gate anchor
 when loaded decisions miss error context — PreToolUse hook forces recall step
-when directives outgrow text expansions — promote to skill with tool gates
+when directives outgrow text expansions — promote to skill with tool gates D+B protocol momentum
 when designing context preloading mechanisms — explicit skill invocation over implicit injection
 when assessing fragment demotion — behavioral vs procedural classification
 how to recall sub-agent memory — bash transport for agents without Skill tool
@@ -34,3 +34,13 @@ when triage feedback shows divergence — post-execution classification comparis
 when checking complexity before expansion — callback to previous level if too large
 when triaging behavioral code changes as simple — behavioral code routes to Moderate minimum
 when lint-gated recall needs error categorization — tuick reuse, per-error-type gating
+when removing worktrees with submodules — core.worktree restore, submodule branch merge check
+when submodule commits diverge during orchestration — linear history pointer verify phase-boundary
+when recovering broken submodule worktree refs — core.worktree repair submodule init overwrite
+when task agents skip submodule pointer — parent repo status check orchestrator
+when no-op merge orphans branch — always create merge commit
+when importing artifacts from worktrees — git show branch transport scope ownership
+how chain multiple skills together — continuation passing tail calls subroutine nesting
+when adding entries without documentation — learnings codify permanent doc index entry pipeline
+when requiring per-artifact vet coverage — corrector review batch momentum
+when corrector agents lack recall mechanism — design-corrector outline-corrector recall loading

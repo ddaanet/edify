@@ -167,10 +167,11 @@
 
 ### Active / ready
 
-- [ ] **Active Recall** → `active-recall` — `/requirements plans/active-recall/brief.md` | opus
-  - Plan: active-recall
-  - Hierarchical index, automated documentation conversion, memory format grounding
-  - Relates to: recall tool consolidation, generate memory index, recall dedup, recall pipeline, recall learnings design
+- [ ] **Active Recall** — `/design plans/active-recall/requirements.md` | opus
+  - Plan: active-recall | Status: outlined
+  - Outline Rev 2 reviewed. Next: Phase B (user discussion) → sufficiency gate → design or /runbook
+  - 12 sub-problems across 4 bands, 4 concurrent in Band 0
+  - Stale count in requirements.md C-6: says 38, actual is 42
 - [ ] **Worktree merge resilience** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.2
   - Plan: worktree-merge-resilience | Status: outlined
   - Segment-level diff3 merge for learnings.md, precommit structural validation
