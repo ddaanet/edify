@@ -133,7 +133,7 @@
 
 - [ ] **Prose quick wins** → `prose-quick-wins` — implement 8 ready tasks sequentially | haiku
   - Agentic prose terminology, Memory-index loading docs, Wt merge-rm shorthand, Corrector removal audit, Runbook outline review, Review auto-commit, Task notation migration, Command lint gate
-- [ ] **Discuss divergent step** → `discuss-divergent-step` — `/design plans/discuss-divergent-thinking/brief.md` | sonnet
+- [ ] **Discuss divergent step** — `/design plans/discuss-divergent-thinking/brief.md` | sonnet
   - Plan: discuss-divergent-thinking
   - Add alternative-framing step to d: directive before assessment
 - [ ] **Settings triage protocol** → `settings-triage-protocol` — `/design plans/settings-triage-protocol/brief.md` | sonnet

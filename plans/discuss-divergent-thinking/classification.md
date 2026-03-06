@@ -1,0 +1,7 @@
+- **Classification:** Simple
+- **Implementation certainty:** High — two known files, known insertion points, known content pattern
+- **Requirement stability:** High — all FRs mechanism-specified, Q-1 resolved, scope bounded
+- **Behavioral code check:** No. No new functions, logic paths, or conditional branches. Edits are to a Python string constant and a markdown fragment — agentic prose, not behavioral code.
+- **Work type:** Production — delivers behavior change to agent protocol
+- **Artifact destination:** agentic-prose (fragment + hook expansion)
+- **Evidence:** C-3 bounds scope to two files. Both insertion points are specified (between grounding and assessment). No architectural decisions remain.
