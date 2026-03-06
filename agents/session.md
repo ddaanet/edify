@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-06
 
-**Status:** Active recall outline diagnosed as conflating subtasks with execution phases. Two grounding tasks identified before outline redraft. Prior design decisions (7) remain valid.
+**Status:** Decomposition methodology grounded (Strong). 7 principles from DSM + Axiomatic Design + TRL adapted with project-specific desiderata. Outline redraft unblocked.
 
 ## Completed This Session
 
@@ -41,9 +41,17 @@
 - Identified need for a new tier above Tier 3 — decomposition of complex jobs into sub-problems with dependency graph, each sub-problem enters Tier 1-3 pipeline independently
 - Decomposition methodology needs grounding before implementation (work breakdown structures, design readiness assessment)
 
+**Decomposition methodology grounding:**
+- 7 frameworks evaluated (DSM, Axiomatic Design, WBS, IDEF0, NASA V-Model, DAG/toposort, TRL)
+- 3 primary frameworks selected: DSM (banding for partial ordering), Axiomatic Design (zigzag decomposition), TRL (readiness scale)
+- 7 adapted principles: zigzag decomposition, dependency discovery during decomposition, banding for partial order, tearing for coupled sub-problems, readiness scale (groundable/designable/executable), 100% completeness rule, DAG as primary output
+- 12 project-specific desiderata from internal conceptual analysis (context-window scoping, testable boundaries, type annotation, minimal interfaces, etc.)
+- 5 dependency types identified: data, structural, knowledge, merge, validation
+- Grounding quality: Strong (3 established frameworks with direct applicability)
+
 ## In-tree Tasks
 
-- [ ] **Decomposition grounding** — `/ground` | opus
+- [x] **Decomposition grounding** — `/ground` | opus
   - How established design methodologies break complex jobs into sub-problems without premature sequencing
   - Work breakdown structures, dependency representation, design readiness assessment
   - Output: `plans/reports/decomposition-methodology-grounding.md`
@@ -53,7 +61,6 @@
   - Current outline conflates subtasks with execution phases — grounding (design input) deferred as Phase 5
   - Design-time activities (format grounding FR-5, metadata model decisions) must not appear as execution phases
   - Consumes: decomposition grounding report + this session's diagnosis
-  - Blocked on: decomposition grounding
 
 ## Worktree Tasks
 
@@ -73,7 +80,10 @@
 - `plans/active-recall/classification.md` — Complex classification
 - `plans/active-recall/brief.md` — architectural discussion distillation
 - `plans/reports/recall-lifecycle-grounding.md` — lifecycle patterns, mode assignments, three-tier model
+- `plans/reports/decomposition-methodology-grounding.md` — 7 principles from DSM + AD + TRL, Strong grounding
+- `plans/reports/decomposition-internal-conceptual.md` — 12 desiderata, 5 failure modes, 5 dependency types
+- `plans/reports/decomposition-external-research.md` — 7 frameworks evaluated with comparative matrix
 
 ## Next Steps
 
-Run decomposition methodology grounding (`/ground`). Output feeds the outline redraft which is blocked on it.
+Run outline redraft (`/design plans/active-recall/requirements.md`). Decomposition grounding complete — apply methodology to produce sub-problems with dependency graph instead of linear phases.
