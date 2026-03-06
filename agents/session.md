@@ -31,6 +31,11 @@
 
 - [x] **Explore Anthropic plugins** — Install remaining 16 plugins, explore code-review/security-guidance/feature-dev/superpowers for safety+security relevance, map against custom pipeline | sonnet | restart
 
+## Worktree Tasks
+
+- [ ] **Vet false positives** — Add "do NOT flag" taxonomy to vet/corrector agent prompts: pre-existing issues, OUT-scope items, pattern-consistent style, linter-catchable. From code-review plugin confidence scoring pattern. | sonnet
+- [ ] **Skill description evals** — Adopt skill-creator eval loop for skill descriptions: generate trigger/non-trigger queries, 60/40 train/test split, measure triggering accuracy, iterate. Scripts in skill-creator plugin. | sonnet
+
 ## Blockers / Gotchas
 
 - LSP plugins (11 of 28) require language server binaries installed on system — will show errors if binary missing
