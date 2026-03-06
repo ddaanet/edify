@@ -136,7 +136,7 @@
 - [x] **Discuss divergent step** — `/design plans/discuss-divergent-thinking/brief.md` | sonnet
   - Plan: discuss-divergent-thinking
   - Add alternative-framing step to d: directive before assessment
-- [ ] **Settings triage protocol** — `/design plans/settings-triage-protocol/brief.md` | sonnet
+- [x] **Settings triage protocol** — `/design plans/settings-triage-protocol/brief.md` | sonnet
   - Plan: settings-triage-protocol
   - Commit skill triage step for settings.local.json entries
 - [ ] **Standardize task creation** → `standardize-task-creation` — `/design plans/standardize-task-creation/requirements.md` | sonnet
