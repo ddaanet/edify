@@ -26,3 +26,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 ## When designing hierarchical index structures
 - Anti-pattern: Mixed indices containing both entries and child references. Creates discoverability imbalance — inline entries are immediately visible and individually selectable, while child-referenced entries require an extra navigation step. The split is a capacity decision but has an unintended discoverability side effect.
 - Correct pattern: Clean separation — branch indices (index-of-indices only) vs leaf indices (entries only). Uniform discovery paths: root → branch(es) → leaf → entry. Simplifies parser (no mixed-mode detection).
+## When outlines conflate decomposition with sequencing
+- Anti-pattern: Design outlines that use "phases" to mean both "logical sub-problems" and "execution order." This forces premature ordering and defers design-time activities (grounding, research) into execution phases.
+- Evidence: Active recall outline placed grounding (Phase 5) after metadata model commitment (Phase 4). The outline acknowledged the risk but accepted it — weak mitigation hiding a structural flaw.
+- Correct pattern: Decomposition (breaking into sub-problems with dependency graph) is a separate activity from sequencing (ordering for implementation). Sub-problems get tagged with design readiness — some are ready for runbook, others need more design. Sequencing happens at runbook time, not decomposition time.
+- Design inputs (grounding, research) belong in the design process, not as execution phases.

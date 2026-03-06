@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-06
 
-**Status:** Active recall system design in progress. Requirements updated with user annotations, outline written and reviewed, extensive design discussion produced architectural decisions on caching, index structure, and domain mapping.
+**Status:** Active recall outline diagnosed as conflating subtasks with execution phases. Two grounding tasks identified before outline redraft. Prior design decisions (7) remain valid.
 
 ## Completed This Session
 
@@ -33,18 +33,40 @@
 - Branch index keywords: domain entries include keywords for selection without loading child indices.
 - Anthropic API for token counting (not tiktoken) — exact counts, correct tokenizer, no wrong-ecosystem dependency.
 
+**Outline critique (d: mode):**
+- Current outline conflates "subtasks" (logical units of work) with "execution phases" (implementation ordering)
+- Grounding (Phase 5) is a design input but sequenced as an execution phase after Phase 4 commits to metadata model — premature commitment
+- Phase 4 ordering note (line 120) acknowledges the risk but mitigation ("fields are additive") is weak — if grounding invalidates when/how taxonomy, Phase 4 is rework
+- Root cause: outline has no concept of decomposition without sequencing
+- Identified need for a new tier above Tier 3 — decomposition of complex jobs into sub-problems with dependency graph, each sub-problem enters Tier 1-3 pipeline independently
+- Decomposition methodology needs grounding before implementation (work breakdown structures, design readiness assessment)
+
 ## In-tree Tasks
+
+- [ ] **Decomposition grounding** — `/ground` | opus
+  - How established design methodologies break complex jobs into sub-problems without premature sequencing
+  - Work breakdown structures, dependency representation, design readiness assessment
+  - Output: `plans/reports/decomposition-methodology-grounding.md`
+  - Feeds new workflow tier (above Tier 3) and active recall outline redraft
+- [ ] **Outline redraft** — `/design plans/active-recall/requirements.md` | opus
+  - Apply decomposition methodology to produce sub-problems without premature sequencing
+  - Current outline conflates subtasks with execution phases — grounding (design input) deferred as Phase 5
+  - Design-time activities (format grounding FR-5, metadata model decisions) must not appear as execution phases
+  - Consumes: decomposition grounding report + this session's diagnosis
+  - Blocked on: decomposition grounding
+
+## Worktree Tasks
 
 - [>] **Active recall system** — `/design plans/active-recall/requirements.md` | opus
   - Plan: active-recall
   - Outline written and reviewed, design discussion in progress
-  - Phase B (iterative discussion) partially complete — 7 design decisions captured
-  - Open: Phase 4/5 ordering preference (metadata before or after grounding), outline sufficiency gate
+  - 7 design decisions captured, outline diagnosed as needing redraft
+  - Grounding tasks gate the outline redraft (see in-tree tasks above)
   - Relates to: recall tool consolidation, generate memory index, recall dedup, recall pipeline, recall learnings design
 
 ## Reference Files
 
-- `plans/active-recall/outline.md` — 6-phase design outline with discussion decisions integrated
+- `plans/active-recall/outline.md` — 6-phase design outline (to be redrafted — conflates subtasks with execution phases)
 - `plans/active-recall/requirements.md` — 8 FRs, 4 NFRs, 4 constraints, 2 open questions
 - `plans/active-recall/recall-artifact.md` — 29 recall entry keys (updated with post-explore entries)
 - `plans/active-recall/reports/outline-review.md` — corrector review with traceability matrix
@@ -54,4 +76,4 @@
 
 ## Next Steps
 
-Continue Phase B discussion on outline (user reviewing remaining phases). After outline validated, assess sufficiency gate — outline may be sufficient to skip full design.md and route to `/runbook`.
+Run decomposition methodology grounding (`/ground`). Output feeds the outline redraft which is blocked on it.
