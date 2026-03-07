@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-07
 
-**Status:** Pipeline review protocol — Phase B complete, outline validated with 7 decisions, sufficiency gate passed, ready for /inline execution.
+**Status:** Task classification session — two new hook tasks pending, no execution.
 
 ## Completed This Session
 
@@ -45,10 +45,14 @@
   - Note: Sufficiency gate passed — all prose edits, no implementation loops. Route to /inline not /runbook (see brief.md). Validator requires /runbook command for outlined status
 - [ ] **Bootstrap tag support** — `/design` | sonnet
   - Note: Blocker for Session CLI tool. Two sub-tasks: (1) add Stop/Error Conditions sections to handoff-cli-tool phase files (pre-existing gap), (2) add BOOTSTRAP tag support to prepare-runbook.py for 3-step cycle generation. Skill prose (/runbook tdd-cycle-planning.md) and corrector prose (/review-plan 11.1 vacuity check) already shipped in agent-core commits 7add2e2 + 945fb7f
-- [!] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart
-  - Plan: handoff-cli-tool | Status: ready
+- [!] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet | restart
+  - Plan: handoff-cli-tool | Status: outlined
   - Absorbs: Fix task-context bloat
   - Blocked: runbook.md + step files stale — waiting on Bootstrap tag support task. Then regenerate via `prepare-runbook.py plans/handoff-cli-tool/`
+- [ ] **Hook error after clear** — `/design` | sonnet
+  - Note: Diagnose "SessionStart:clear hook error" after /clear
+- [ ] **Health check UPS fallback** — `/design` | sonnet
+  - Note: Modify session health check to use UserPromptSubmit instead of Stop as fallback when SessionStart hook did not run
 
 ## Worktree Tasks
 
@@ -74,4 +78,4 @@
 
 ## Next Steps
 
-Proof skill execution: `/inline plans/pipeline-review-protocol execute` (opus). Then /codify to clear learnings backlog.
+Two hook tasks queued (diagnose + fix). Bootstrap tag support and Proof skill execution remain pending. `/codify` needed — learnings at soft limit.
