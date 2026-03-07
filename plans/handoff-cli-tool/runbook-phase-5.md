@@ -100,7 +100,7 @@ Tests use real git repos via `tmp_path`.
 - `validate_files(files, amend=False)` with all files appearing in `git status --porcelain` → returns normally (no error)
 - `validate_files(files, amend=False)` with a clean file (not in `git status --porcelain`) → raises `CleanFileError` with:
   - `clean_files` attribute listing the clean file paths
-  - String representation containing `STOP:` directive
+  - String representation matching exact format: `**Error:** Listed files have no uncommitted changes\n- <path>\n\nSTOP: Do not remove files and retry.`
 - `validate_files(files, amend=True)` with a file that's clean in working tree but present in HEAD commit (via `git diff-tree`) → returns normally (amend allows HEAD-committed files)
 - `validate_files(files, amend=True)` with a file in neither working tree changes nor HEAD commit → raises `CleanFileError`
 

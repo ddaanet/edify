@@ -12,7 +12,7 @@ Extract git utilities and establish package structure. Foundation for all subcom
 
 **Execution Model:** Sonnet
 
-**Prerequisite:** Read `src/claudeutils/worktree/git_ops.py:9-23` (current `_git()` implementation) and `src/claudeutils/worktree/git_ops.py:85-112` (current `_is_dirty()` and `_is_submodule_dirty()` — hardcodes `"agent-core"`)
+**Prerequisite:** Read `src/claudeutils/worktree/git_ops.py:9-23` (current `_git()` implementation) and `src/claudeutils/worktree/git_ops.py:78-112` (current `_is_parent_dirty()` at lines 78-97 and `_is_submodule_dirty()` at lines 100-112 — submodule check hardcodes `"agent-core"`)
 
 **Implementation:**
 
@@ -20,7 +20,7 @@ Create `src/claudeutils/git.py` containing:
 
 1. **`_git(*args, check=True, env=None, input_data=None) -> str`** — moved verbatim from `worktree/git_ops.py:9-23`
 
-2. **`_git_ok(*args) -> bool`** — calls `_git(*args, check=False)` and returns `True` if command succeeds (returncode == 0). Uses `subprocess.run` directly with `check=False` since it needs the returncode, not just the output.
+2. **`_git_ok(*args) -> bool`** — uses `subprocess.run(["git", *args], check=False, capture_output=True)` and returns `True` if returncode == 0. Must use `subprocess.run` directly (not `_git()`) because `_git()` returns stdout string, not returncode.
 
 3. **`_fail(msg: str, code: int = 1) -> Never`** — `click.echo(msg)` (stdout, not stderr — S-3 convention) then `raise SystemExit(code)`. Return type `Never` informs type checkers.
 
@@ -28,14 +28,15 @@ Create `src/claudeutils/git.py` containing:
 
 5. **`_is_submodule_dirty(path: str) -> bool`** — generalized from `_is_submodule_dirty()`. Accepts submodule path instead of hardcoded `"agent-core"`. Checks `Path(path).exists()` before querying.
 
-6. **`_is_dirty(exclude_path: str | None = None) -> bool`** — moved verbatim from `worktree/git_ops.py:82-97`
+6. **`_is_dirty(exclude_path: str | None = None) -> bool`** — moved from `worktree/git_ops.py:78-97` (`_is_parent_dirty`). Renamed to `_is_dirty` in the new module (no callers outside git_ops.py so no import update needed).
 
 **Import updates** (verify scope with `grep -r "from claudeutils.worktree.git_ops import" src/`):
-- `worktree/git_ops.py`: Remove `_git`, `_is_submodule_dirty`, `_is_dirty` definitions. Import from `claudeutils.git` instead. Keep worktree-specific functions (`wt_path`, `_classify_branch`, etc.)
+- `worktree/git_ops.py`: Remove `_git`, `_is_submodule_dirty`, `_is_parent_dirty` definitions. Import from `claudeutils.git` instead. Keep worktree-specific functions (`wt_path`, `_classify_branch`, etc.)
 - `worktree/cli.py`: Update `from claudeutils.worktree.git_ops import _git, _is_submodule_dirty` → `from claudeutils.git import _git, _is_submodule_dirty`
 - `worktree/merge.py`: Same import update pattern
 - `worktree/merge_state.py`: Same import update pattern
 - `worktree/resolve.py`: Same import update pattern
+- `worktree/remerge.py`: Update `from claudeutils.worktree.git_ops import _git` → `from claudeutils.git import _git`
 
 **Tests:** `tests/test_git_helpers.py`
 - `test_git_ok_success`: `_git_ok("status")` returns True in a valid git repo
@@ -62,6 +63,8 @@ Create `src/claudeutils/git.py` containing:
 **Script Evaluation:** Small (~30 lines, mostly `__init__.py` stubs)
 
 **Execution Model:** Sonnet
+
+**Prerequisite:** Read `src/claudeutils/cli.py:145-152` — understand existing `cli.add_command(worktree)` registration pattern to replicate for `_session` group.
 
 **Implementation:**
 

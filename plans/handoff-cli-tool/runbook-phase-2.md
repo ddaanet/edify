@@ -46,7 +46,7 @@ Shared parser for session.md consumed by both status and handoff subcommands. Ex
 ## Worktree Tasks
 
 - [ ] **Parallel work** → `my-slug` — `/design plans/parallel/problem.md` | opus | restart
-- [ ] **Future work** — `/design plans/future/problem.md` | sonnet
+- [ ] **Future work** → `wt` — `/design plans/future/problem.md` | sonnet
 ```
 
 **Expected failure:** `ImportError` or `AttributeError` — functions don't exist yet

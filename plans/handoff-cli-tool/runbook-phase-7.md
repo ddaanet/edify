@@ -121,7 +121,7 @@ End-to-end tests with real git repos via `tmp_path`. Verifies complete pipelines
 **Prerequisite:** Shared `tmp_path` fixture creating git repo with submodule (from conftest)
 
 **Assertions — parent-only:**
-- Create dirty file in `tmp_path` repo, stage manually to verify
+- Create modified file in `tmp_path` repo (uncommitted change, appears in `git status --porcelain`)
 - CliRunner invokes `_session commit` with stdin specifying the file + message
 - Git log shows new commit with expected message
 - Output contains `[branch hash] message` format

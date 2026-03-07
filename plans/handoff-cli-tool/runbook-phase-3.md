@@ -151,7 +151,7 @@ Pure data transformation: session.md + filesystem state → STATUS output. No mu
 - Find largest independent set (no shared plan_dir, no blocker references between them)
 - Return task names if group has 2+ members, else None
 
-**Approach:** Simple graph coloring — group tasks by plan_dir, mark dependent pairs, find largest clique of independent tasks. For small task lists (<20), brute force is fine.
+**Approach:** Simple graph algorithm — build dependency edges (shared plan_dir, blocker reference), then find the largest independent set (no edges between members). For small task lists (<20), brute-force over subsets is fine: enumerate all subsets of pending tasks in descending size order, return first subset with no dependency edges between any pair.
 
 **Changes:**
 - File: `src/claudeutils/session/status/render.py`
@@ -193,7 +193,7 @@ Pure data transformation: session.md + filesystem state → STATUS output. No mu
 - `@click.command(name="status")` function
 - Read `agents/session.md` (cwd-relative) → `parse_session()`
 - Call `claudeutils _worktree ls` via subprocess for plan states
-- Parse `_worktree ls` output for plan status information
+- Parse `_worktree ls` output for plan status: lines matching `  Plan: {name} [{status}] → ...` — extract name and status into a dict `{name: status}` passed to `render_pending()`
 - Call render functions (Next, Pending, Worktree, Unscheduled, Parallel)
 - Concatenate non-empty sections with blank line separators
 - Output to stdout, exit 0

@@ -16,7 +16,7 @@ Tests use real git repos via `tmp_path`.
 **Assertions:**
 - `commit_pipeline(commit_input)` with files in parent repo only (no submodule files), precommit passing:
   - Stages listed files via `git add`
-  - Runs `just precommit` (or `just lint` if `just-lint` option)
+  - Runs `just precommit`
   - Commits with message from `CommitInput.message`
   - Returns `CommitResult(success=True, output="[branch hash] message\n N files changed...")` — raw git output
   - Exit code 0
@@ -40,10 +40,10 @@ Tests use real git repos via `tmp_path`.
 **Behavior:**
 - `CommitResult` dataclass: `success: bool`, `output: str`
 - `commit_pipeline(input: CommitInput) -> CommitResult`
-- Stage files: `_git("add", *input.files)`
-- Run validation: `just precommit` (default) or `just lint` (if `just-lint` in options)
-- If vet check enabled (no `no-vet` in options): `vet_check(input.files)` — fail if not passed
-- Commit: `_git("commit", "-m", input.message)`
+- Stage files via `git add`
+- Run `just precommit` (validation level dispatch added in Cycle 6.4)
+- Run vet check via `vet_check(input.files)` (option-gating added in Cycle 6.4)
+- Commit with message from `CommitInput.message`
 - Return raw git commit output on success
 
 **Changes:**
@@ -190,9 +190,10 @@ Tests use real git repos via `tmp_path`.
 **Implementation:** Add option-based validation dispatch to `commit_pipeline()`
 
 **Behavior:**
-- Check options set:
-  - `just-lint` → `subprocess.run(["just", "lint"])` instead of `["just", "precommit"]`
-  - `no-vet` → skip `vet_check()` call
+- Inspect `input.options` set before dispatching validation:
+  - `just-lint` present → run `just lint` instead of `just precommit`
+  - `no-vet` present → skip vet check entirely
+  - Both absent → default: `just precommit` + vet check
   - Orthogonal: each option controls one aspect independently
 
 **Changes:**
@@ -250,7 +251,7 @@ Tests use real git repos via `tmp_path`.
 **Implementation:** Extract output formatting to testable functions
 
 **Behavior:**
-- `format_commit_output(submodule_outputs: dict[str, str], parent_output: str, warnings: list[str]) -> str`
+- Extract output formatting to a dedicated function that accepts submodule outputs (keyed by path), parent output string, and any warning messages
 - Submodule outputs labeled with `<path>:` prefix
 - Parent output appended unlabeled
 - Warnings prepended as `**Warning:**` lines with blank line separator
@@ -274,9 +275,9 @@ Tests use real git repos via `tmp_path`.
 **File:** `tests/test_session_commit_pipeline.py`
 
 **Assertions:**
-- CliRunner with valid commit markdown on stdin → exit 0, stdout contains git commit output
+- CliRunner with valid commit markdown on stdin (real git repo via `tmp_path`, file staged) → exit 0, stdout contains `[branch hash] message` format line
 - CliRunner with files that have no changes → exit 2, stdout contains `**Error:**` and `STOP:`
-- CliRunner with empty stdin → exit 2, stdout contains error about missing input
+- CliRunner with empty stdin → exit 2, stdout contains `**Error:**` and references missing required section
 
 **Expected failure:** Command not registered
 
@@ -301,7 +302,7 @@ Tests use real git repos via `tmp_path`.
 - File: `src/claudeutils/session/commit/cli.py`
   Action: Create with `commit` Click command
 - File: `src/claudeutils/session/cli.py`
-  Action: Register: `from claudeutils.session.commit.cli import commit; session_group.add_command(commit)`
+  Action: Import and register the commit command with the session group (same pattern as worktree subcommand registration in main cli.py)
 
 **Verify lint:** `just lint`
 **Verify GREEN:** `pytest tests/test_session_commit_pipeline.py -v`
