@@ -31,6 +31,11 @@
 - Grounded context:fork behavior via Claude Code docs (skills page + sub-agents page)
 - Routing correction: /inline not /runbook — all prose edits, no implementation loops. Briefed recurrent failure mode (prose routing bias)
 
+**Bootstrap blocker recovery:**
+- Session-scraped prior conversation (session 60d8c11b) to recover lost context
+- Confirmed: /runbook skill prose and /review-plan corrector prose already shipped (agent-core 7add2e2 + 945fb7f)
+- Remaining blocker narrowed to: prepare-runbook.py BOOTSTRAP tag + Stop/Error Conditions in phase files
+
 ## In-tree Tasks
 
 - [x] **Pipeline review protocol** — `/design plans/pipeline-review-protocol/` | opus
@@ -38,10 +43,12 @@
 - [ ] **Proof skill execution** — `/runbook plans/pipeline-review-protocol/outline.md` | opus
   - Plan: pipeline-review-protocol | Status: outlined
   - Note: Sufficiency gate passed — all prose edits, no implementation loops. Route to /inline not /runbook (see brief.md). Validator requires /runbook command for outlined status
-- [ ] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart
+- [ ] **Bootstrap tag support** — `/design` | sonnet
+  - Note: Blocker for Session CLI tool. Two sub-tasks: (1) add Stop/Error Conditions sections to handoff-cli-tool phase files (pre-existing gap), (2) add BOOTSTRAP tag support to prepare-runbook.py for 3-step cycle generation. Skill prose (/runbook tdd-cycle-planning.md) and corrector prose (/review-plan 11.1 vacuity check) already shipped in agent-core commits 7add2e2 + 945fb7f
+- [!] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart
   - Plan: handoff-cli-tool | Status: ready
   - Absorbs: Fix task-context bloat
-  - Note: runbook.md + step files stale — need regeneration via `agent-core/bin/prepare-runbook.py plans/handoff-cli-tool/` after adding Stop/Error Conditions sections to phase files. Bootstrap now separate step — prepare-runbook.py needs BOOTSTRAP tag support for 3-step TDD cycles
+  - Blocked: runbook.md + step files stale — waiting on Bootstrap tag support task. Then regenerate via `prepare-runbook.py plans/handoff-cli-tool/`
 
 ## Worktree Tasks
 
