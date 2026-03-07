@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-07
 
-**Status:** Task consolidation (65 → 25) + prioritize skill update.
+**Status:** Worktree dispatch (5 trees) + blocker cleanup.
 
 ## Completed This Session
 
@@ -16,20 +16,29 @@
 - **Prioritize skill updated:**
   - Added Step 4 "Consolidation Pass" with absorption, merge, thematic cluster, and stale check patterns
   - Removed model tier cohort from scheduling modifiers and parallel batch criteria (SKILL.md + scoring-tables.md)
+- **Worktree dispatch:** Created 5 worktrees: session-cli-tool, plugin-migration, worktree-merge-lifecycle, active-recall, planstate-brief-inference
+- **Blocker cleanup:** Removed 7 blockers:
+  - git merge sandbox bypass — superseded by `_worktree merge` CLI
+  - `_worktree new` sandbox bypass — documented in worktree skill Usage Notes
+  - SessionStart hook #10373 — Stop hook fallback deployed, not blocking any task
+  - Custom agents not discoverable — root cause was missing session restart
+  - Claude Code skill caching — root cause was missing session restart
+  - `test_merge_learnings` ordering dep — non-reproducible, no recurrence
+  - brief.md in planstate inference — converted to Planstate brief inference task
 
 ## In-tree Tasks
 
 ## Worktree Tasks
 
-- [ ] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet | 3.2
+- [ ] **Session CLI tool** → `session-cli-tool` — `/runbook plans/handoff-cli-tool/outline.md` | sonnet | 3.2
   - Plan: handoff-cli-tool | Status: outlined (6 review rounds)
   - Absorbs: Fix task-context bloat
-- [ ] **Plugin migration** — `/orchestrate plugin-migration` (refresh outline first) | opus | 3.2
+- [ ] **Plugin migration** → `plugin-migration` — `/orchestrate plugin-migration` (refresh outline first) | opus | 3.2
   - Plan: plugin-migration | Status: ready (stale — Feb 9)
-- [ ] **Worktree merge lifecycle** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.8
+- [ ] **Worktree merge lifecycle** → `worktree-merge-lifecycle` — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.8
   - Plan: worktree-merge-resilience | Status: outlined
   - Absorbs: Merge lifecycle audit, Plan-completion ceremony (merge-point side effects), Merge lock retry
-- [ ] **Active Recall** — `/design plans/active-recall/requirements.md` | opus | 2.6
+- [ ] **Active Recall** → `active-recall` — `/design plans/active-recall/requirements.md` | opus | 2.6
   - Plan: active-recall | Status: outlined
   - Outline Rev 2 reviewed. Next: Phase B (user discussion) → sufficiency gate → design or /runbook
   - Absorbs: Generate memory index (S-D), Recall learnings design (S-L), Codify branch awareness (S-L removes /codify)
@@ -74,6 +83,8 @@
 - [ ] **Diagnose compression loss** — RCA against commit `0418cedb` | sonnet | 0.8
 - [ ] **Feature prototypes** — `/design plans/prototypes/requirements.md` | sonnet | 0.6
 - [ ] **Upstream skills field** — `/design` PR/issue for missing skills frontmatter | sonnet | 0.5
+- [ ] **Planstate brief inference** → `planstate-brief-inference` — `/inline` | sonnet
+  - Fix planstate to infer correct next-action for brief-only plans (currently uses requirements.md template)
 - [ ] **Research backlog** — `/design` | opus | 0.5
   - Ground state coverage, Workflow formal analysis, Design-to-deliverable (restart), Behavioral design, Compensate-continue skill
 
@@ -86,22 +97,10 @@
 
 ## Blockers / Gotchas
 
-**Never run `git merge` without sandbox bypass:**
-- `git merge` without `dangerouslyDisableSandbox: true` partially checks out files, hits sandbox, leaves 80+ orphaned untracked files
-
 **Post-merge validation (permanent):**
 - After every worktree merge, validate session.md (pending tasks from branch carried over) AND learnings.md (no entries lost from either side)
 - Known failure modes: autostrategy drops branch pending tasks, orphaned duplicate lines in append-only files, branch overwrites main-only learnings entries
 - Not automated — manual check required
-
-**SessionStart hook #10373 still open:**
-- Output discarded for new interactive sessions. Stop hook fallback deployed (Phase 4).
-
-**`_worktree new` requires sandbox bypass:**
-- Writes `.claude/settings.local.json` which is in sandbox deny list. Must use `dangerouslyDisableSandbox: true`.
-
-**Custom agents not discoverable as subagent_types:**
-- `.claude/agents/*.md` files with proper frontmatter weren't available via Task tool. Built-in types work. May need platform investigation.
 
 **`_worktree rm` amend restored but task entry persists:**
 - `_update_session_and_amend` restored after task-classification regression. Amend works but `remove_slug_marker` only strips marker — doesn't remove completed task entry. Pending in Worktree lifecycle CLI.
@@ -111,15 +110,6 @@
 
 **`just sync-to-parent` requires sandbox bypass:**
 - Recipe removes and recreates symlinks in `.claude/` — sandbox blocks `rm` on those paths
-
-**Possible Claude Code skill caching:**
-- On-disk skills current, but `/design` and `/reflect` invocations received older content. No structural fix — awareness only.
-
-**brief.md in planstate inference:**
-- Inferred next-action command uses `requirements.md` template (wrong for brief-only plans). Tasks with brief-only plans must preserve command manually.
-
-**`test_merge_learnings_segment_diff3_prevents_orphans` ordering dep:**
-- Fails during `_worktree merge` precommit, passes in isolation. Non-reproducible after merge completes.
 
 **Main is worktree-tasks-only:**
 - Only trivial fixes belong in In-tree. Plan absence doesn't qualify for in-tree.
@@ -141,4 +131,4 @@
 
 ## Next Steps
 
-No active worktrees. Dispatch top-priority tasks: Session CLI tool (sonnet), Plugin migration (opus), Worktree merge lifecycle (sonnet), Active Recall (opus).
+5 active worktrees dispatched. Merge planstate-brief-inference first (smallest scope), then proceed with top-4 priority tasks in their worktrees.
