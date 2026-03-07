@@ -1,15 +1,22 @@
 # Session Handoff: 2026-03-07
 
-**Status:** Focused worktree for parallel execution.
+**Status:** JIT expansion implemented. Active Recall unblocked.
+
+## Completed This Session
+
+**Design JIT expansion:**
+- Added multi-sub-problem detection in `/design` skill artifact check (SKILL.md)
+- Added multi-sub-problem sufficiency gate in write-outline.md with 6 criteria (concrete scope, dependency graph, FR traceability, scope boundaries, readiness routing, tear points)
+- Exit behavior: outline is terminal design artifact, sub-problems dispatched independently — no `/runbook` prepend
+- Classification: Simple, agentic-prose, opus (file: plans/design-jit-expansion/classification.md)
 
 ## In-tree Tasks
 
-- [ ] **Design JIT expansion** — `/design plans/design-jit-expansion/brief.md` | opus
-  - Plan: design-jit-expansion | Status: requirements
-  - Blocker for Active Recall. /design skill update: multi-sub-problem outlines use JIT expansion, not full design.md generation
-- [!] **Active Recall** — `/design plans/active-recall/brief.md` | opus | 2.6
+- [x] **Design JIT expansion** — `/design plans/design-jit-expansion/brief.md` | opus
+  - Plan: design-jit-expansion
+- [ ] **Active Recall** — `/design plans/active-recall/brief.md` | opus
   - Plan: active-recall | Status: outlined
-  - Phase B complete. Blocks on design-jit-expansion plan
+  - Phase B complete. JIT expansion blocker resolved — re-enter /design, outline should hit multi-sub-problem sufficiency gate
   - Absorbs: Generate memory index (S-D), Recall learnings design (S-L), Codify branch awareness (S-L removes /codify)
 
 ## Reference Files

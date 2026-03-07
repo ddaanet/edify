@@ -1,0 +1,7 @@
+- **Classification:** Simple
+- **Implementation certainty:** High — skill file is known, change is adding a branch in artifact check + sufficiency gate
+- **Requirement stability:** High — FR is mechanism-specified in brief
+- **Behavioral code check:** No — agentic prose (skill markdown), not code
+- **Work type:** Production (delivers capability to agents)
+- **Artifact destination:** agentic-prose
+- **Evidence:** Brief specifies exact mechanism (JIT expansion via per-sub-problem dispatch). Affected files identified (SKILL.md, write-outline.md). "When checking complexity before expansion" recall entry confirms complexity-check-before-expansion pattern. No architectural uncertainty — extending existing artifact check with a new detection branch.
