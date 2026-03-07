@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-07
 
-**Status:** Pipeline review protocol — Phase B complete, outline validated with 7 decisions, sufficiency gate passed, ready for /runbook.
+**Status:** Pipeline review protocol — Phase B complete, outline validated with 7 decisions, sufficiency gate passed, ready for /inline execution.
 
 ## Completed This Session
 
@@ -27,16 +27,17 @@
   - D-5: Post-expansion is a review integration point — earliest systemic defect detection
   - D-6: /requirements is prevention layer, post-expansion is detection layer — complementary
   - D-7: Name "proof" — transparent validation semantics, edify-thematic
-- Sufficiency gate passed — outline is the design, routes to /runbook
+- Sufficiency gate passed — outline is the design
 - Grounded context:fork behavior via Claude Code docs (skills page + sub-agents page)
+- Routing correction: /inline not /runbook — all prose edits, no implementation loops. Briefed recurrent failure mode (prose routing bias)
 
 ## In-tree Tasks
 
 - [x] **Pipeline review protocol** — `/design plans/pipeline-review-protocol/` | opus
   - Plan: pipeline-review-protocol | Status: outlined
-- [ ] **Proof skill runbook** — `/runbook plans/pipeline-review-protocol/outline.md` | opus
+- [ ] **Proof skill execution** — `/runbook plans/pipeline-review-protocol/outline.md` | opus
   - Plan: pipeline-review-protocol | Status: outlined
-  - Note: Outline validated, all questions resolved. Agentic-prose artifact — inline task sequence execution, not Tier 3
+  - Note: Sufficiency gate passed — all prose edits, no implementation loops. Route to /inline not /runbook (see brief.md). Validator requires /runbook command for outlined status
 - [ ] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart
   - Plan: handoff-cli-tool | Status: ready
   - Absorbs: Fix task-context bloat
@@ -45,6 +46,8 @@
 ## Worktree Tasks
 
 - [ ] **Test context-fork model** — create minimal skill with `context: fork` + `AskUserQuestion`, observe interaction behavior | haiku
+- [ ] **Fix prose routing bias** — `/design` | opus
+  - Note: Agent routes prose-only work to /runbook when cross-file scope feels large, despite sufficiency gate. Same class as "design ceremony continues after uncertainty resolves." Brief: `plans/pipeline-review-protocol/brief.md` (Recurrent Failure Mode section). Schedule after session-cli-tool merges to main
 
 ## Blockers / Gotchas
 
@@ -60,7 +63,8 @@
 - `plans/handoff-cli-tool/orchestrator-plan.md` — Orchestrator execution plan
 - `plans/handoff-cli-tool/recall-artifact.md` — 15 recall entries for step agents
 - `plans/design-context-gate/brief.md` — Context budget gate for /design tail-call decisions
+- `plans/pipeline-review-protocol/brief.md` — Routing rationale + recurrent prose routing bias failure mode
 
 ## Next Steps
 
-Pipeline review protocol runbook generation: `/runbook plans/pipeline-review-protocol/outline.md` (opus). Then /codify to clear learnings backlog.
+Proof skill execution: `/inline plans/pipeline-review-protocol execute` (opus). Then /codify to clear learnings backlog.
