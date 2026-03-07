@@ -1,317 +1,88 @@
-# Session Handoff: 2026-03-06
+# Session Handoff: 2026-03-07
 
-**Status:** Infrastructure fixes + worktree batch merge cleanup.
+**Status:** Task consolidation (65 → 25) + prioritize skill update.
 
 ## Completed This Session
 
-- **Justfile bash prolog fix:**
-  - `/usr/bin/env bash -euo pipefail` → shebang + `set` on separate line (env doesn't pass flags portably)
-  - Fixed in main justfile, agent-core `justfile-base.just`, and all 7 active worktrees
-- **docformatter install:** `uv tool install docformatter --python 3.13` (untokenize dependency incompatible with Python 3.14)
-- **Stop hook TMPDIR fix:** `stop-health-fallback.sh` failed under `set -u` when `TMPDIR` unset — added `TMPDIR="${TMPDIR:-/tmp}"` fallback
-- **Handoff --commit removal merged + worktree removed:**
-  - Removed `--commit` flag from `/handoff`, expanded `hc` to chain `/handoff, /commit`
-  - Decoupled handoff from commit-ready state
-  - Worktree justfile discarded (already on main), worktree removed
-- **Recall tool consolidation absorbed:** Scope covered by Active recall system FR-7 (mode simplification) and C-3 (infrastructure consolidation). Worktree force-removed (no deliverables).
-- **skill-description-evals merged + worktree removed:** Canceled after analysis — learning captured ("When skill description triggering appears important"). Branch recreated from commit, merged to preserve analysis, then deleted.
-- **Vet false positives merged + worktree removed:** "Do NOT Flag" false positive suppression added to corrector agents. Plan: vet-false-positives (delivered).
-- **Explore Anthropic plugins worktree removed:** Branch commits reachable via sub-worktree merges.
-- **Session scraping merged + worktree removed:** Session scraper prototype delivered. Plan: session-scraping (delivered).
-- **Discussion worktree created:** `discuss` — bare worktree for discussions that don't block main.
-- **Orphaned worktree directories cleaned up:** handoff-commit-removal, recall-tool-consolidation (git registration removed but filesystem dirs persisted).
-- **Wt ls session ordering merged + worktree removed:** `_worktree ls` now prints plans in session.md pending task order. New in-tree task from branch: Command lint gate (haiku).
-- **Worktree merge from main merged + worktree removed:** 10 TDD cycles + 1 inline step delivered. Plan: worktree-merge-from-main (ready). Adds `_worktree merge --from-main` direction parameter.
-- **Retrospective worktree created:** `retrospective` — focused worktree for agentic programming blog post raw materials.
-
-- **Plan cleanup (14 directories deleted):**
-  - Delivered (11): execute-skill-dispatch, flatten-hook-tiers, inline-tdd-dispatch, recall-cli-integration, recall-null, runbook-recall-expansion, task-classification, task-pattern-statuses, userpromptsubmit-topic, when-resolve-fix, wt-rm-dirty
-  - Superseded (3): merge-submodule-ordering (absorbed by merge-lifecycle-audit), fix-planstate-detector (all FRs implemented), cooperative-protocol-gaps (superseded by Retrofit skill pre-work)
-  - Plan-archive updated with entries for all 14
-- **Worktree cleanup:** userpromptsubmit-topic worktree removed (was merged but registered)
-- **Prioritization rescore:** 73 tasks scored via `plans/prototypes/score.py` (file: `plans/reports/prioritization-2026-03-02.md`)
-  - 8 removed (5 delivered, 1 absorbed, 1 no-task, 1 canceled), 10 new tasks scored
-  - Top 5: Orchestrate evolution (6.0), Merge completed filter (4.0), Execute flag lint (3.0), Skill disclosure (2.6), Session.md validator (2.4)
-  - 12 unscheduled plans identified (plans with artifacts but no session.md task)
-- **Orphan plan RCA + cleanup (7+3+2):**
-  - 7 delivered plan directories deleted + plan-archive entries: complexity-routing, fix-wt-parallel-restart, phase-scoped-agents, runbook-generation-fixes, task-lifecycle, update-grounding-skill, worktree-rm-error-ux
-  - 3 stuck plans fixed: inline-execute lifecycle.md → delivered, stale worktree-merge-resilience Blocker reference removed, pushback-grounding kept (active reference)
-  - 2 dropped tasks restored: discuss-to-pending, wt-exit-ceremony (lost by autostrategy merge at wt-rm-dirty)
-  - Root causes: (1) handoff trim lacks plan-completion ceremony (7 plans), (2) autostrategy merge drops branch-only Pending Tasks (2 tasks), (3) lifecycle.md not updated on rework completion (1 plan)
-- **UPS hook error handling fix:**
-  - Added stderr diagnostic on `ImportError` for `match_topics` (line 38)
-  - Narrowed bare `except Exception: pass` to report error via stderr (line 1047)
-  - Topic injection confirmed working — silent fallback was the bug pattern, not a runtime failure
-- **agent-core lint gap identified:** ruff excludes agent-core (pyproject.toml line 44), mypy scoped to src/tests only, docformatter scoped to src/tests. Hook scripts have zero mechanical quality enforcement.
-- **Unscheduled plan resolution (2 → 0):**
-  - pushback-grounding: FRs 1-3 delivered to pushback.md, FR-4 superseded by directive skill promotion. Plan directory deleted, plan-archive entry written.
-  - worktree-merge-resilience: Active work, task created (Tier 3 → flat list at 2.2)
-- **Learnings merge validation:** All 4 post-diff3 merges validated clean. Monotonically increasing entry counts (5→12→14→17→19). 31→5 drop was intentional `/codify` (fe1ea87e), not data loss.
-- **Reprioritization + tier removal:**
-  - 6 new tasks scored: Directive skill promotion (1.6), Plan-completion ceremony (1.4), agent-core lint coverage (1.0), Worktree exit ceremony (1.6), Discuss-to-pending chain (1.6), Worktree merge resilience (2.2)
-  - Tier headings (1-4) removed from session.md. Flat WSJF-ordered list with scores inline.
-  - Score prototype parameterized: `plans/prototypes/score.py --new <file>` accepts JSON task data (file: `plans/reports/prioritization-2026-03-02b.md`)
-- **Merge completed filter (TDD):**
-  - Added `completed_re` filter in `_merge_session_contents` (`resolve.py:84`) — excludes `[x]` and `[–]` blocks from additive union
-  - Test: `test_merge_session_filters_completed_tasks_from_theirs` in `test_worktree_merge_session_resolution.py`
-  - 1430 tests pass, lint green
-- **Worktree skill model homogeneity removed:**
-  - Removed model tier compatibility check from Mode B parallel group detection (worktree SKILL.md)
-  - Removed from execute-rule.md parallel task detection criteria
-  - Worktrees are filesystem isolation — each session sets its own model at launch
-- **Task absorptions:**
-  - Discuss-to-pending chain → absorbed into Directive skill promotion (brief: `plans/directive-skill-promotion/brief.md`)
-  - Delivery supercession → absorbed into Plan-completion ceremony (brief: `plans/plan-completion-ceremony/brief.md`)
-- **Stale decision cleanup:**
-  - Removed superseded single-section entry from `workflow-advanced.md` (2026-02-20) — contradicted two-section model in `operational-tooling.md` (2026-02-28)
-  - Removed corresponding memory-index trigger (`/when tracking worktree tasks in session`)
-- **RCA: worktree parallelization failure:**
-  - Root cause chain: D-9 classification not applied retroactively → all tasks In-tree → Worktree Tasks empty → `wt` can't dispatch
-  - Compounding: stale single-section decision entry loaded alongside current two-section model
-  - Learning recorded: "When reclassifying tasks after structural changes"
-- **Bulk reclassification + validator fix:**
-  - All 63 pending `[ ]` tasks moved from In-tree to Worktree Tasks
-  - New rule: main is worktree-tasks-only except trivial fixes. Plan absence doesn't qualify for in-tree.
-  - Removed `check_worktree_format` from `session_structure.py` — slug requirement invalid for pre-dispatch classification
-  - Deleted `TestCheckWorktreeFormat` class, updated `test_multiple_error_types` (3→2 errors)
-- **Worktree setup (4 parallel):**
-  - orchestrate-evolution, execute-flag-lint, skill-disclosure, session-md-validator
-  - Blast zone assessed: validator removal contained, merge asymmetry amplified (pre-existing bug, larger surface)
-- **Skill-disclosure worktree merged + removed**
-- **Discussion: merge ceremony redesign:**
-  - Insight: "merge conflict and precommit fixing belongs out of main" — branch self-updates, main rollbacks on failure
-  - Worktree-merge-from-main becomes prerequisite for merge resilience (branch updates itself before merge to main)
-  - Plan-completion ceremony is merge-point side-effect (like `remerge_session_md`), not branch-side or main-side — supercession needs merged state, concurrent merges invalidate branch-side checks
-  - Rejected: splitting ceremony into branch-context (supercession) + main-mechanical (deletion) — supercession must check against main's actual merged state including learnings/decisions from other merged worktrees
-- **Discussion: requirements-first workflow:**
-  - Always start from `/requirements` unless requirement-equivalent document exists (requirements.md, design.md with behavioral FRs, deliverable review report)
-  - Brief.md is NOT requirement-equivalent — context transfer without testable acceptance criteria
-  - 5 tasks have `/design` commands but only brief.md: plan-completion-ceremony, directive-skill-promotion, merge-lifecycle-audit, design-context-gate, wt-rm-task-cleanup
-  - Existing blocker documents this gap (line 316-317): planstate infers requirements.md template for brief-only plans
-- **`w` (wrap) command definition recovered via session scraper:**
-  - Tier 1 command (no colon), sequence: findings → takeaways → submit (handoff+commit)
-  - Absorbed into directive-skill-promotion task
-- **Active recall system architecture discussion:**
-  - Recall vs RAG: keyed recall retrieves by applicability condition (when/where entry applies), not content similarity. Precision improves with model reasoning capability, not embedding quality.
-  - Hierarchical index: root index → child indices → triggers. O(log_k(N)) lookup via existing tail-recursion primitive. Required for scaling beyond ~200 entries.
-  - Two trigger classes: `when` (situational, project decisions, hand-curation) vs `how` (task-descriptive, reference documentation, automation-safe)
-  - Three learning categories: internal decisions (user-invalidated), external environment facts (version-invalidated), hybrid (version-triggers re-evaluation, decision may survive)
-  - Automated documentation conversion: sonnet + corrector pipeline for `how` entries from reference docs (Python stdlib, pytest, pydantic, click, ruff, mypy)
-  - Benchmark positioning: SWE-ContextBench sixth paradigm — recall-explore-recall pattern not covered by existing 5 paradigms
-  - Plan created: `plans/active-recall/brief.md`
-  - Refined `tmp/active-recall.md` — corrected RAG comparison (applicability conditions vs content similarity)
-- **Session-md-validator merge:**
-  - 3 validator bugs fixed on main during merge (anti-pattern — should have rolled back): worktree path pattern (`.claude/worktrees/` → sibling `-wt` container), bare skill commands (`/when`, `/how`) as absolute path false positives, worktree marker pattern matching `→` in rename descriptions
-  - Session.md fixes: section order (Reference Files before Next Steps), stale worktree markers removed, 3 task commands corrected (`requirements.md` → `brief.md`)
-  - Worktree recovery: force-removed without checking 2 uncommitted files (data loss), recreated at merge parent for other-session recovery, re-merged recovery commit
-  - 5 new tests covering validator false positives
-  - Worktree removed after second merge
-- **Discussion: codify-in-branch proposal rejected:**
-  - Proposal: run `/codify` in a dedicated worktree, batch small worktrees on the side
-  - Rejected: merge conflict risk on shared infrastructure files (decisions/, fragments/, memory-index.md) with no ordering guarantee
-  - Resolution: "worktree-tasks-only" rule scopes to task classification, not interactive skill execution — `/codify` runs on main directly
-  - Learning recorded: "When worktree-tasks-only appears to block maintenance skills"
-- **Codify flush (33 learnings → permanent docs):**
-  - 25 consolidated across 12 files: testing.md (2), implementation-notes.md (3), operational-tooling.md (2), hook-patterns.md (1), pipeline-contracts.md (2), workflow-advanced.md (5), defense-in-depth.md (2), pushback.md (2), delegation.md (2), project-tooling.md (1), execute-rule.md (2), communication.md (1)
-  - 5 already-codified entries removed (proximal requirements, delegating TDD, pipeline skills, precommit cost, deliverable review)
-  - 1 codify-specific learning routed to `.claude/skills/codify/references/learnings.md`
-  - 20 memory-index entries added
-  - 3 learnings retained for continuity (codify branch, recovery context, worktree-tasks-only)
-  - learnings.md: 157 → 23 lines
-  - User correction applied: lint-gated recall entry in defense-in-depth.md updated to PreToolUse-hook-blocks-until-agent-recalls model (agent does semantic matching)
-- **Worktree batch dispatch (7 parallel):**
-  - session-scraping, worktree-merge-from-main, handoff-commit-removal, explore-anthropic-plugins, wt-ls-session-ordering, recall-tool-consolidation, active-recall-system
-  - Skill caching confirmed: loaded worktree SKILL.md had stale model-tier filter (already removed on disk), caused sonnet-only batch excluding opus tasks
-- **Worktree batch merges + cleanup:**
-  - Merged discuss (1 commit: active-recall brief update, 2 new tasks, 1 learning)
-  - Merged active-recall-system twice (first: 10 design commits, second: focused session only), re-created fresh from main
-  - Merged rm-ups-topic (UPS topic injection hook removed), worktree removed
-  - Merged retrospective (requirements captured), worktree removed
-  - Merged update-prioritize-skill (Phase 1: score.py rewritten as JSON stdin, SKILL.md updated), worktree removed
-  - All merges validated (session.md tasks carried, learnings preserved)
-- **Delivered plan cleanup:**
-  - inline-execute + orchestrate-evolution: plan-archive entries written, 85 files deleted
-  - Parallel orchestration unblocked (was blocked on orchestrate-evolution)
-- **Unscheduled plans scheduled (3):** standardize-task-creation, settings-triage-protocol, discuss-divergent-thinking
-- **Score prototype moved:** `tmp/score.py` → `plans/prototypes/score.py` (in-tree)
-- **Task restructuring:**
-  - All tasks moved to Worktree Tasks (In-tree empty — main is worktree-tasks-only)
-  - 11 workflow quick wins batched (prose-only/low code, parallelizable)
-  - Prioritize script absorbed into Update prioritize skill
-  - Calibrate topic params marked moot (UPS topic injection removed)
-  - Active recall system renamed to "Active Recall"
-  - Completed/terminal tasks compressed
-- **Discussion: JSON vs markdown for prioritize input** — JSON chosen (agent-produced, unambiguous parsing)
-- **New worktrees created:** active-recall, retrospective-materials, workflow-quick-wins
-- **Reprioritization:** 73 tasks rescored (file: `plans/reports/prioritization-2026-03-06.md`)
-  - Top 5: Runbook outline review (4.0), Active Recall (3.6), Worktree merge resilience (2.8), Standardize task creation (2.6), Plugin migration (2.6)
-  - Active Recall rose (outline exists, ME 5→2); Plugin migration DP increased to 8 (4 weeks stale)
-- **Worktree merges + cleanup (3):**
-  - Merged retrospective-materials: 1 new learning (recall gate misidentifies plan), 3 blockers carried
-  - Merged workflow-quick-wins: 38 tasks needed backtick commands added (branch introduced command-lint validator), 1 plan path corrected (parallel-orchestration: `requirements.md` → `problem.md`), 1 new learning
-  - Merged active-recall: duplicate task resolved (branch In-tree → Worktree per main-is-worktree-tasks-only), outline Rev 2 context carried
-  - All 3 worktrees removed after merge
-- **Task completion evaluation:** 11 tasks from workflow-quick-wins marked `[x]` after codebase verification
-  - Verified against live artifacts: pushback.md divergent step, commit SKILL.md triage table, session_commands.py validator, worktree SKILL.md Mode D, etc.
-  - Standardize task creation confirmed completed by user
-- **Plan cleanup (7 directories deleted):**
-  - Delivered (4 from workflow-quick-wins): discuss-divergent-thinking, settings-triage-protocol, command-lint-gate, standardize-task-creation
-  - Delivered (3 additional): rm-ups-topic, session-validator, skill-progressive-disclosure
-  - Plan-archive entries written for all 7, stale reference file removed
+- **Reprioritization:** 65 tasks scored (file: `plans/reports/prioritization-2026-03-06b.md`)
+  - Top 5: Session CLI tool (3.2), Plugin migration (3.2), Worktree merge lifecycle (2.8), Active Recall (2.6), Directive skill promotion (2.2)
+- **Task consolidation (65 → 25):**
+  - 3 rounds of absorption, merge, and thematic clustering
+  - Absorptions (15): Generate memory index → Active Recall (S-D), Recall learnings design → Active Recall (S-L), Codify branch awareness → Active Recall (S-L removes /codify), Remove wt rm --force → Worktree lifecycle CLI, Pre-inline plan commit → Gate batch, Prose gate terminology → Quality grounding, Merge lock retry → Worktree merge lifecycle, Worktree CLI UX → split into Worktree lifecycle CLI, Handoff insertion policy → Directive skill promotion, Test diamond migration → Code quality, Infrastructure scripts → Code quality, Test diagnostic helper → Code quality, Wt new --base submodule → Worktree lifecycle CLI, Fix task-context bloat → Session CLI tool, Plan-completion ceremony → Worktree merge lifecycle, Decision drift audit → Quality grounding
+  - Merges: Lint-gated recall + Lint recall gate + Tool deviation hook + Block cd-chaining → Hook batch; Recall dedup + Recall pipeline + Recall usage scoring → Recall pipeline; Skill-dev + Skill prompt-composer + Retrofit + Agent rule injection → Skill agent bootstrap; Merge resilience + Lifecycle audit → Worktree merge lifecycle; Corrector audit + Diagnostic opus review → Review agent quality; Model directive pipeline + Design decomposition tier → Design pipeline evolution; Ground workflow skills + Safety review + Decision drift + Prose gate → Quality grounding; Cross-tree requirements + Cross-tree test sentinel → Cross-tree operations
+  - Collapsed: 5 low-priority opus research tasks → Research backlog umbrella
+  - Stale: Retrospective materials → [x] (plan delivered)
+  - Unblocked: Session CLI tool ([!] → [ ], no documented blocker found)
+- **Prioritize skill updated:**
+  - Added Step 4 "Consolidation Pass" with absorption, merge, thematic cluster, and stale check patterns
+  - Removed model tier cohort from scheduling modifiers and parallel batch criteria (SKILL.md + scoring-tables.md)
 
 ## In-tree Tasks
 
 ## Worktree Tasks
 
-### Batch: workflow quick wins (prose-only / low code, parallelizable)
-
-- [x] **Agentic prose terminology** — haiku
-- [x] **Memory-index loading docs** — haiku
-- [x] **Wt merge-rm shorthand** — haiku
-- [x] **Corrector removal audit** — sonnet
-- [x] **Runbook outline review** — haiku
-- [x] **Review auto-commit** — haiku
-- [x] **Task notation migration** — haiku
-- [x] **Discuss divergent step** — sonnet
-- [x] **Settings triage protocol** — sonnet
-- [x] **Standardize task creation** — sonnet
-- [x] **Command lint gate** — haiku
-
-### Active / ready
-
-- [ ] **Active Recall** — `/design plans/active-recall/requirements.md` | opus
+- [ ] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet | 3.2
+  - Plan: handoff-cli-tool | Status: outlined (6 review rounds)
+  - Absorbs: Fix task-context bloat
+- [ ] **Plugin migration** — `/orchestrate plugin-migration` (refresh outline first) | opus | 3.2
+  - Plan: plugin-migration | Status: ready (stale — Feb 9)
+- [ ] **Worktree merge lifecycle** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.8
+  - Plan: worktree-merge-resilience | Status: outlined
+  - Absorbs: Merge lifecycle audit, Plan-completion ceremony (merge-point side effects), Merge lock retry
+- [ ] **Active Recall** — `/design plans/active-recall/requirements.md` | opus | 2.6
   - Plan: active-recall | Status: outlined
   - Outline Rev 2 reviewed. Next: Phase B (user discussion) → sufficiency gate → design or /runbook
-  - 12 sub-problems across 4 bands, 4 concurrent in Band 0
-  - Stale count in requirements.md C-6: says 38, actual is 42
-- [ ] **Worktree merge resilience** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.2
-  - Plan: worktree-merge-resilience | Status: outlined
-  - Segment-level diff3 merge for learnings.md, precommit structural validation
-- [ ] **Tool deviation hook** — `/design` PostToolUse hook: agents declare expected Bash outcome, hook validates actual vs declared | sonnet | 1.9
-  - General framework: agent declares expected exit code + output pattern before Bash call
-  - PostToolUse hook compares actual result, stops or redirects to diagnose-and-compensate on mismatch
-- [ ] **Artifact staleness gate** — `/design` | sonnet | 1.9
-  - Mechanical checkpoint at /requirements, /design, /runbook exit points
-  - `claudeutils _recall resolve` touches sentinel; skill compares sentinel mtime to recall-artifact.md AND primary skill artifact
-  - Two drift vectors: stale recall-artifact and stale skill artifacts
-- [ ] **Lint-gated recall** — `/design` PostToolUse hook: inject memory-index on first lint/precommit red after green (state-transition gated) | sonnet | 1.9
-- [ ] **Lint recall gate** — `/design` PreToolUse recall pass before lint fix attempt; depends on when-resolve null mode | sonnet | 1.9
-- [ ] **Ground workflow skills** — `/ground` each per audit | opus | 1.9
-  - Audit: `plans/reports/workflow-grounding-audit.md`
-  - Priority: /runbook → review agents → /orchestrate → /handoff
-- [ ] **Markdown migration** — `/design` | opus | 1.9
-  - Wrap existing markdown parser with Claude-specific lenient normalization
-  - Line-wrap all files, replace ad-hoc regex parsers
-  - Token counting API + sqlite user cache, threshold migration (line counts → tokens)
-- [ ] **Merge lifecycle audit** — `/design plans/merge-lifecycle-audit/brief.md` | sonnet | 1.8
-  - Plan: merge-lifecycle-audit | Status: requirements
-  - State machine audit + integration tests for merge→rm lifecycle. Absorbs merge-submodule-ordering.
-- [ ] **Codebase sweep** — `/design plans/codebase-sweep/requirements.md` | sonnet | 1.8
-  - Plan: codebase-sweep | Status: requirements
-  - _git_ok, _fail, exception cleanup — mechanical refactoring
-- [ ] **Block cd-chaining in bash** — `/design` PreToolUse hook to block `cd * && *` and `cd *; *`, recommend `git -C` or subshell | sonnet | 1.8
-- [ ] **Fix task-context bloat** — `/design` Filter/trim output | sonnet | 1.7
-- [ ] **Skill-dev skill** — `/design` | sonnet | 1.6
-  - Front-load plugin-dev:skill-development with project-specific skill editing patterns
-  - Replace ambient `.claude/rules/skill-development.md` path trigger with explicit skill invocation
-- [ ] **Directive skill promotion** — `/design plans/directive-skill-promotion/` | opus | 1.6
-  - Plan: directive-skill-promotion
-  - d:, p:, w directives have prose-gate failures (grounding skip, model misclassification)
-  - Absorbs: wrap command, discuss protocol grounding, p: classification gap, discuss-to-pending chain
-- [ ] **Entry gate propagation** — `/design` | opus | 1.6
-  - Add git-clean + precommit entry gates to /orchestrate, /deliverable-review, corrector agent
-  - Follow-on after /inline delivery
-- [ ] **Retrofit skill pre-work** — `/design` | opus | 1.6
-  - Many skills lack initial task context loading (task-context.sh, brief.md, recall-artifact) and skill-adapted recall
-  - Follow-on after /inline delivery
-- [ ] **Worktree exit ceremony** — `/requirements plans/wt-exit-ceremony/brief.md` | sonnet | 1.6
-  - Plan: wt-exit-ceremony | Status: requirements
-  - Two UPS Tier 1 shortcuts (k/ok, g/go) + worktree lifecycle behavior codification
-- [ ] **Tweakcc** — `/design plans/tweakcc/requirements.md` | sonnet | 1.6
-  - Plan: tweakcc
-- [ ] **Wt rm task cleanup** — `/design plans/wt-rm-task-cleanup/brief.md` | sonnet | 1.6
-  - Plan: wt-rm-task-cleanup | Status: requirements
-  - rm removes completed task entry (branch `[x]` check), strips marker only if not completed
-- [ ] **Worktree ad-hoc task** — `/design plans/worktree-ad-hoc-task/requirements.md` | sonnet | 1.6
-  - Plan: worktree-ad-hoc-task | Status: requirements
-  - Add task to session.md before `_worktree new` when task not yet present
-- [ ] **Plugin migration** — `/orchestrate plugin-migration` (refresh outline first) | opus | 1.6
-  - Plan: plugin-migration | Status: ready (stale — Feb 9)
-- [ ] **Remove wt rm --force** — remove `--force` flag from `_worktree rm` CLI | sonnet | 1.5
-- [ ] **Design context gate** — `/design plans/design-context-gate/brief.md` | sonnet | 1.5
-  - Plan: design-context-gate | Status: requirements
-  - /design tail-call /inline only when context budget allows, otherwise handoff+commit
-- [ ] **Plan-completion ceremony** — `/design plans/plan-completion-ceremony/` | opus | 1.4
-  - Plan: plan-completion-ceremony
-  - Handoff trim lacks plan-completion side effects (delete dir, archive entry, lifecycle.md, stale refs)
-  - Absorbs: Delivery supercession
-- [ ] **Generate memory index** — `/design` | opus | 1.4
-  - Each decision/learning declares keywords for index. Generated from declarations.
-- [ ] **Agent rule injection** — `/design` Distill sub-agent rules into agent templates | sonnet | 1.4
-- [ ] **Tier threshold grounding** — `/ground` calibrate Tier 1/2/3 file-count thresholds against empirical data | opus | 1.4
-- [ ] **Handoff insertion policy** — `/design` Insert at priority position instead of append | sonnet | 1.3
-- [ ] **Test diagnostic helper** — `/design` Replace subprocess.run check=True with stderr surfacing | sonnet | 1.3
-- [ ] **Cross-tree requirements** — `/requirements` skill writes to main from worktree | sonnet | 1.3
-  - Transport solved: `git show <branch>:<path>` from main (no sandbox needed)
-  - Absorbs: Revert cross-tree sandbox access
-- [ ] **Codify branch awareness** — `/design` | opus
-  - Add feature-branch gate to `/codify` + soft-limit age calculation
-- [ ] **Update prioritize skill** — Phase 2: integrate as `claudeutils _prioritize score` CLI command | sonnet | 1.0
-  - Phase 1 complete: prototype rewritten (JSON stdin, validation), SKILL.md updated
-  - Phase 2: Click group, pyproject.toml wiring, tests, replace prototype path in SKILL.md
-  - JSON input for scores, markdown output for reports. Absorbs: Prioritize script (0.7)
-- [ ] **Worktree CLI UX** — `/design` | sonnet | 1.0
-  - `_worktree new`: stdout-only, user-friendly errors instead of tracebacks
-  - `_worktree rm` dirty message improvement
-- [ ] **Recall deduplication** — integrate session context scraping into `claudeutils _recall resolve` | sonnet | 1.0
-- [ ] **Recall pipeline** — `d:` recall-artifact stdin format parsing, session log dedup | opus | 1.0
-- [ ] **Recall usage scoring** — `/design` Post-resolve relevance scoring at skill transitions | sonnet | 1.0
-- [ ] **Compensate-continue skill** — `/ground` then `/design` | opus | 1.0
-- [ ] **Skill prompt-composer** — `/design` migrate skill authoring to use prompt-composer pattern | sonnet | 1.0
-- [ ] **Model directive pipeline** — `/design` Model guidance design → runbook → execution | opus | 1.0
-- [ ] **Decision drift audit** — `/design` audit decision files for stale operational assumptions | sonnet | 1.0
-- [ ] **agent-core lint coverage** — `/design` | opus | 1.0
-  - ruff excludes agent-core, mypy/docformatter scoped to src/tests only
-- [ ] **Upstream skills field** — `/design` PR/issue for missing skills frontmatter | sonnet | 1.0
-- [ ] **Registry cache to tmp** — `/inline` | sonnet | 1.0
+  - Absorbs: Generate memory index (S-D), Recall learnings design (S-L), Codify branch awareness (S-L removes /codify)
+- [ ] **Directive skill promotion** — `/design plans/directive-skill-promotion/brief.md` | opus | 2.2
+  - Plan: directive-skill-promotion | Status: requirements
+  - Absorbs: Handoff insertion policy, wrap command, discuss protocol grounding, p: classification gap, discuss-to-pending chain
+- [ ] **Parallel orchestration** — `/design plans/parallel-orchestration/problem.md` | sonnet | 1.8
+  - Plan: parallel-orchestration | Status: requirements
+- [ ] **Gate batch** — `/design` | sonnet | 1.7
+  - Artifact staleness gate + Entry gate propagation + Design context gate + Pre-inline plan commit
+  - Mechanical checkpoints at skill entry/exit/transition points
+- [ ] **Skill agent bootstrap** — `/design` | opus | 1.6
+  - Retrofit skill pre-work + Agent rule injection + Skill-dev skill + Skill prompt-composer
+- [ ] **Worktree lifecycle CLI** — `/design` | sonnet | 1.6
+  - Exit ceremony + Wt rm task cleanup + Worktree ad-hoc task + CLI UX + --base submodule bug
+  - Plans: wt-exit-ceremony, wt-rm-task-cleanup, worktree-ad-hoc-task (all requirements)
+- [ ] **Registry cache to tmp** — `/inline` | sonnet | 1.5
   - Move continuation registry cache from TMPDIR to project-local tmp/
-- [ ] **Merge lock retry** — add lock-contention retry to `claudeutils _worktree merge` | sonnet | 0.9
-- [ ] **Diagnose compression loss** — RCA against commit `0418cedb` | sonnet | 0.9
-- [ ] **Test diamond migration** — `/design` Needs scoping | sonnet | 0.9
-- [ ] **Safety review expansion** — `/design` Pipeline changes from grounding research | opus | 0.9
-- [ ] **Recall learnings design** — `d:` whether learnings.md entries should be resolvable via recall | opus | 0.9
-- [ ] **Feature prototypes** — `/design plans/prototypes/requirements.md` | sonnet | 0.9
-  - Plan: prototypes
-- [ ] **Diagnostic opus review** — `/design` Post-vet RCA methodology | opus | 0.8
-- [ ] **Infrastructure scripts** — `/design` History tooling + agent-core script rewrites | sonnet | 0.7
-- [ ] **Cache expiration** — `/design` Debug log token metrics, measure TTL | sonnet | 0.7
-- [ ] **Design-to-deliverable** — `/design` tmux-like session automation | opus | restart | 0.6
-- [ ] **Prose gate terminology** — `/ground` Find proper name for D+B pattern, update docs | opus | 0.5
-- [ ] **Ground state coverage** — `/ground` State coverage validation research | opus | 0.5
-- [ ] **Workflow formal analysis** — `/design` Formal verification of agent workflow | opus | 0.5
-- [ ] **Behavioral design** — `/design` Nuanced conversational pattern intervention | opus | 0.4
-- [ ] **Wt new --base submodule** — `_worktree new --base` doesn't resolve agent-core to branch commit | sonnet
-  - Requires TDD: write test, then fix
-- [ ] **Retrospective materials** — `/design plans/retrospective/requirements.md` | opus
-  - Plan: retrospective
-  - Scrape session logs + git history for blog post raw materials on ddaa.net
-- [ ] **Corrector audit** — `/design` audit 5 review-class agents for false positive evidence, add "Do NOT Flag" sections | sonnet
-- [ ] **Cross-tree test sentinel** — `/design` replace mtime sentinel with content-hash in user-global cache database | sonnet
-- [ ] **Design decomposition tier** — Encode decomposition methodology into `/design` as new tier | opus | restart
+- [ ] **Code quality** — `/design plans/codebase-sweep/requirements.md` | sonnet | 1.4
+  - Plan: codebase-sweep | Status: requirements
+  - Codebase sweep + agent-core lint coverage + Test diamond migration + Infrastructure scripts + Test diagnostic helper
+- [ ] **Hook batch** — `/design` | sonnet | 1.3
+  - Tool deviation hook (PostToolUse) + Block cd-chaining (PreToolUse) + Lint recall integration (Pre+PostToolUse)
+- [ ] **Update prioritize skill** — Phase 2: `claudeutils _prioritize score` CLI | sonnet | 1.2
+  - Plan: update-prioritize-skill | Status: requirements
+- [ ] **Recall pipeline** — `/design` | opus | 1.1
+  - Recall deduplication + stdin format parsing + usage scoring
+- [ ] **Quality grounding** — `/ground` each per audit | opus | 1.0
+  - Ground workflow skills + Safety review expansion + Decision drift audit + Prose gate terminology
+  - Audit: `plans/reports/workflow-grounding-audit.md`
+- [ ] **Cross-tree operations** — `/design` | sonnet | 1.0
+  - Cross-tree requirements (git show transport) + Cross-tree test sentinel (content-hash cache)
+- [ ] **Review agent quality** — `/design` | sonnet | 1.0
+  - Corrector audit (false positive evidence) + Diagnostic opus review (post-vet RCA)
+- [ ] **Design pipeline evolution** — `/design` | opus | 1.0
+  - Design decomposition tier + Model directive pipeline — both modify /design skill
+- [ ] **Tweakcc** — `/design plans/tweakcc/requirements.md` | sonnet | 1.0
+  - Plan: tweakcc | Status: requirements
+- [ ] **Markdown migration** — `/design` | opus | 0.8
+  - Lenient markdown parser, token counting API + sqlite cache, threshold migration
+- [ ] **Python hook ordering fix** — `/design plans/precommit-python3-redirect/requirements.md` | haiku | restart | 0.8
+- [ ] **Diagnose compression loss** — RCA against commit `0418cedb` | sonnet | 0.8
+- [ ] **Feature prototypes** — `/design plans/prototypes/requirements.md` | sonnet | 0.6
+- [ ] **Upstream skills field** — `/design` PR/issue for missing skills frontmatter | sonnet | 0.5
+- [ ] **Research backlog** — `/design` | opus | 0.5
+  - Ground state coverage, Workflow formal analysis, Design-to-deliverable (restart), Behavioral design, Compensate-continue skill
 
-### Blocked / terminal
+### Terminal
 
-- [!] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet
-  - Plan: handoff-cli-tool | Status: outlined
-- [ ] **Parallel orchestration** — `/design plans/parallel-orchestration/problem.md` | sonnet
-  - Plan: parallel-orchestration
-- [ ] **Python hook ordering fix** — `/design plans/precommit-python3-redirect/requirements.md` | haiku | restart
-- [-] **Calibrate topic params** — extend session-scraper.py | sonnet
-  - Was blocked by UPS topic injection — now removed. Task may be moot.
-- [-] **Recall tool consolidation** — absorbed into Active Recall | sonnet | 1.9
-- [-] **Execute flag lint** — superseded by session validator | haiku | 3.0
-
-- [ ] **Pre-inline plan commit** — `/design` process gap: pipeline planning artifacts dirty tree before inline entry gate | sonnet
+- [x] **Retrospective materials** — plan delivered
+- [-] **Calibrate topic params** — UPS topic injection removed, moot
+- [-] **Recall tool consolidation** — absorbed into Active Recall
+- [-] **Execute flag lint** — superseded by session validator
 
 ## Blockers / Gotchas
 
@@ -323,14 +94,6 @@
 - Known failure modes: autostrategy drops branch pending tasks, orphaned duplicate lines in append-only files, branch overwrites main-only learnings entries
 - Not automated — manual check required
 
-**Validator autofix handles placement:**
-- `claudeutils validate memory-index` autofixes placement (file section) and ordering issues
-- All 37 orphan headers now indexed; 3 duplicates resolved
-
-**Memory index `/how` operator mapping (resolved):**
-- Operator prefix no longer used in matching — bare trigger matching handles both `/when` and `/how` entries
-- `removeprefix("to ")` in resolver strips leftover "to" from "how to X" invocations
-
 **SessionStart hook #10373 still open:**
 - Output discarded for new interactive sessions. Stop hook fallback deployed (Phase 4).
 
@@ -340,11 +103,8 @@
 **Custom agents not discoverable as subagent_types:**
 - `.claude/agents/*.md` files with proper frontmatter weren't available via Task tool. Built-in types work. May need platform investigation.
 
-**`_worktree rm --force` doesn't restore task to Pending:**
-- `rm --force` removes worktree but leaves task in Worktree Tasks section. Manual session.md edit needed to move back to Pending.
-
 **`_worktree rm` amend restored but task entry persists:**
-- `_update_session_and_amend` restored after task-classification regression. Amend works but `remove_slug_marker` only strips marker — doesn't remove completed task entry. Pending: wt-rm-task-cleanup (check branch `[x]` status).
+- `_update_session_and_amend` restored after task-classification regression. Amend works but `remove_slug_marker` only strips marker — doesn't remove completed task entry. Pending in Worktree lifecycle CLI.
 
 **Worktree merge drops session.md Worktree Tasks entries:**
 - Focused session in branch lacks main's full Worktree Tasks section. Autostrategy resolves in favor of branch, dropping main-only entries. Manual post-merge validation required until merge.py fixed.
@@ -356,49 +116,29 @@
 - On-disk skills current, but `/design` and `/reflect` invocations received older content. No structural fix — awareness only.
 
 **brief.md in planstate inference:**
-- Added as recognized artifact so precommit doesn't flag brief-only plans. But inferred next-action command uses `requirements.md` template (wrong for brief-only). Tasks with brief-only plans must preserve `/design plans/{name}/brief.md` command manually in session.md.
-
-- `test_markdown_fixtures.py::test_full_pipeline_remark` xfail renders full traceback in markdown report, visually identical to real failure [from: recall-cli-integration]
-- `just precommit` shows `✗ Precommit failed` when test sentinel invalidates (any test file change forces rerun) [from: recall-cli-integration]
-- All 30 recall tests pass. The `✗` is from xfail report formatting, not a real failure [from: recall-cli-integration]
-- Fix is in `pytest-markdown-report` (separate repo), not here [from: recall-cli-integration]
+- Inferred next-action command uses `requirements.md` template (wrong for brief-only plans). Tasks with brief-only plans must preserve command manually.
 
 **`test_merge_learnings_segment_diff3_prevents_orphans` ordering dep:**
-- Fails during `_worktree merge` precommit, passes in isolation and standalone full suite
-- Non-reproducible after merge completes. On reoccurrence: capture `pytest -v` output to identify predecessor test
-- Root cause unknown — not CWD pollution (test uses monkeypatch.chdir), not UPS tests (verified), not worktree presence
-- Inline TDD after full codebase exploration produces test-after with ceremony. All 15 tests passed on first attempt — no behavioral RED. Must delegate to test-driver in fresh context when task is marked TDD and design session loaded implementation context. [from: runbook-recall-expansion]
+- Fails during `_worktree merge` precommit, passes in isolation. Non-reproducible after merge completes.
 
 **Main is worktree-tasks-only:**
 - Only trivial fixes belong in In-tree. Plan absence doesn't qualify for in-tree.
 
-- Encoded project paths use `-` for `/`, but real dashes in directory names are indistinguishable. Acceptable for prototype; production would need a different approach. [from: session-scraping]
-- Task name "Remove UPS topic injection" exceeds 25-char limit (26 chars) — from worktree setup [from: rm-ups-topic]
-- session.md H1 header format mismatch — now fixed by this handoff [from: rm-ups-topic]
-- Retrospective needs to scan across ~90 worktree project directories (each gets its own `~/.claude/projects/` entry) [from: retrospective]
-- Prototype's `scan --prefix` filters by prefix but retrospective needs multiple prefixes per topic [from: retrospective]
-- May need prototype extension (requires separate `/requirements` per C-1) [from: retrospective]
-- Scraper `scan` decoded paths are lossy (dashes → slashes) — both real and decoded paths work with search/excerpt commands [from: retrospective-materials]
-- `plans/prototypes/recall-artifact.md` created as stub to satisfy pretooluse recall gate (hook infers plan from changed file path, not from actual plan context) [from: retrospective-materials]
-- Topic agents used general-purpose subagent type (no plan-specific agents created) — worked for investigation but wouldn't scale for implementation tasks [from: retrospective-materials]
+- `plans/prototypes/recall-artifact.md` created as stub to satisfy pretooluse recall gate (hook infers plan from file path, not actual plan context)
+- `test_markdown_fixtures.py::test_full_pipeline_remark` xfail renders full traceback in markdown report, visually identical to real failure. Fix is in `pytest-markdown-report` (separate repo).
+
 ## Reference Files
 
+- `plans/reports/prioritization-2026-03-06b.md` — WSJF scoring, 65 tasks ranked + consolidation analysis
 - `plans/reports/workflow-grounding-audit.md` — Grounding provenance for all workflow skills/agents
 - `plans/handoff-cli-tool/outline.md` — Session CLI combined outline (reviewed 6 rounds)
 - `plans/codebase-sweep/requirements.md` — mechanical refactoring (_git_ok, _fail, exceptions)
 - `agents/decisions/cli.md` — LLM-native output decision (from session-cli-tool)
-- `plans/reports/prioritization-2026-03-06.md` — WSJF scoring, 73 tasks ranked (supersedes 2026-03-02b)
-- `plans/reports/design-skill-grounding.md` — Design skill grounding (updated with session empirical data)
-- `agents/decisions/pipeline-contracts.md` — Pipeline contract decision file (new)
-- `plans/reports/recall-lifecycle-grounding.md` — Grounded recall artifact lifecycle (3 patterns, per-point mode assignments, mode reduction)
-- `plans/reports/recall-lifecycle-internal-codebase.md` — Internal inventory: recall-artifact handling across all pipeline skills
-- `plans/reports/recall-lifecycle-external-research.md` — External research: 10 frameworks (HL7 CRMI, PROV-DM, OpenLineage, ADK, LangGraph, etc.)
-- `plans/worktree-ad-hoc-task/requirements.md` — Add task to session.md before worktree creation when absent
-- `plans/wt-rm-task-cleanup/brief.md` — rm removes completed task entry (branch `[x]` check)
-- `plans/merge-lifecycle-audit/brief.md` — State machine audit for merge→rm lifecycle (absorbs merge-submodule-ordering)
-- `plans/active-recall/brief.md` — Active recall system: hierarchical index, documentation conversion, trigger classes, invalidation
+- `plans/reports/design-skill-grounding.md` — Design skill grounding
+- `agents/decisions/pipeline-contracts.md` — Pipeline contract decision file
+- `plans/active-recall/brief.md` — Active recall system: hierarchical index, documentation conversion, trigger classes
 - `tmp/active-recall.md` — Discussion decisions: recall-explore-recall, tree navigation, benchmark landscape
 
 ## Next Steps
 
-No active worktrees. Next: dispatch worktrees for top-priority tasks — Active Recall (opus), Worktree merge resilience (sonnet), Plugin migration (opus).
+No active worktrees. Dispatch top-priority tasks: Session CLI tool (sonnet), Plugin migration (opus), Worktree merge lifecycle (sonnet), Active Recall (opus).
