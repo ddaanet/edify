@@ -1,0 +1,7 @@
+- **Classification:** Moderate
+- **Implementation certainty:** High — two clear bugs/features in prepare-runbook.py
+- **Requirement stability:** High
+- **Behavioral code check:** Yes — new logic paths in assemble_phase_files (mixed-type detection) and split_cycle_content (3-way split) + orchestrator item generation
+- **Work type:** Production
+- **Artifact destination:** production (agent-core/bin/prepare-runbook.py)
+- **Evidence:** Recall "when behavioral code" → Moderate minimum. Two changes: (1) fix mixed-type Common Context injection by detecting cycles across all phase files, not just first; (2) add BOOTSTRAP marker detection to produce 3 step files per cycle
