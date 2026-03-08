@@ -216,12 +216,12 @@ def mock_token_counting(
         # Handle both single count and list of counts
         if isinstance(counts, list):
             mocker.patch(
-                "claudeutils.token_cache.count_tokens_for_file",
+                "claudeutils.token_cache._count_tokens_for_content",
                 side_effect=counts,
             )
         else:
             mocker.patch(
-                "claudeutils.token_cache.count_tokens_for_file",
+                "claudeutils.token_cache._count_tokens_for_content",
                 return_value=counts,
             )
 

@@ -240,7 +240,7 @@ def test_cli_rate_limit_error_shows_message(
         return_value=TokenCache(create_cache_engine(":memory:")),
     )
     mock_count = mocker.patch(
-        "claudeutils.token_cache.count_tokens_for_file", autospec=True
+        "claudeutils.token_cache._count_tokens_for_content", autospec=True
     )
     mock_count.side_effect = ApiRateLimitError()
     with pytest.raises(SystemExit) as exc_info:
@@ -333,7 +333,7 @@ def test_cli_detects_empty_api_key_before_sdk(
         "claudeutils.tokens_cli.resolve_model_alias", autospec=True
     )
     mock_count = mocker.patch(
-        "claudeutils.token_cache.count_tokens_for_file", autospec=True
+        "claudeutils.token_cache._count_tokens_for_content", autospec=True
     )
 
     with pytest.raises(SystemExit) as exc_info:
@@ -373,7 +373,7 @@ def test_cli_detects_missing_api_key_before_sdk(
         "claudeutils.tokens_cli.resolve_model_alias", autospec=True
     )
     mock_count = mocker.patch(
-        "claudeutils.token_cache.count_tokens_for_file", autospec=True
+        "claudeutils.token_cache._count_tokens_for_content", autospec=True
     )
 
     with pytest.raises(SystemExit) as exc_info:

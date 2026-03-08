@@ -1,6 +1,7 @@
 """Token cache database management using SQLAlchemy."""
 
 import hashlib
+import logging
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -11,7 +12,9 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 from claudeutils.exceptions import FileReadError
-from claudeutils.tokens import ModelId, count_tokens_for_file
+from claudeutils.tokens import ModelId, _count_tokens_for_content
+
+logger = logging.getLogger(__name__)
 
 
 class Base(DeclarativeBase):
@@ -93,12 +96,20 @@ def cached_count_tokens_for_file(
         raise FileReadError(str(path), str(e)) from e
     md5_hex = hashlib.md5(content.encode()).hexdigest()  # noqa: S324
 
-    cached = cache.get(md5_hex, model)
+    try:
+        cached = cache.get(md5_hex, model)
+    except Exception:  # noqa: BLE001
+        logger.warning("Cache read failed, falling back to API")
+        cached = None
+
     if cached is not None:
         return cached
 
-    count = count_tokens_for_file(path, model, client)
-    cache.put(md5_hex, model, count)
+    count = _count_tokens_for_content(content, model, client)
+    try:
+        cache.put(md5_hex, model, count)
+    except Exception:  # noqa: BLE001
+        logger.warning("Cache write failed, result not cached")
     return count
 
 

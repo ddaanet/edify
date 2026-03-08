@@ -131,6 +131,29 @@ def resolve_model_alias(model: str, client: Anthropic, cache_dir: Path) -> Model
     return ModelId(model)
 
 
+def _count_tokens_for_content(content: str, model: ModelId, client: Anthropic) -> int:
+    """Count tokens for already-read content via Anthropic API.
+
+    Returns 0 for empty content. Callers handle file I/O.
+    """
+    if not content:
+        return 0
+
+    try:
+        response = client.messages.count_tokens(
+            model=model,
+            messages=[{"role": "user", "content": content}],
+        )
+    except AuthenticationError as e:
+        raise ApiAuthenticationError from e
+    except RateLimitError as e:
+        raise ApiRateLimitError from e
+    except APIError as e:
+        raise ApiError(str(e)) from e
+
+    return response.input_tokens
+
+
 def count_tokens_for_file(path: Path, model: ModelId, client: Anthropic) -> int:
     """Count tokens in a file using Anthropic API.
 
@@ -152,22 +175,7 @@ def count_tokens_for_file(path: Path, model: ModelId, client: Anthropic) -> int:
     except (PermissionError, OSError, UnicodeDecodeError) as e:
         raise FileReadError(str(path), str(e)) from e
 
-    if not content:
-        return 0
-
-    try:
-        response = client.messages.count_tokens(
-            model=model,
-            messages=[{"role": "user", "content": content}],
-        )
-    except AuthenticationError as e:
-        raise ApiAuthenticationError from e
-    except RateLimitError as e:
-        raise ApiRateLimitError from e
-    except APIError as e:
-        raise ApiError(str(e)) from e
-
-    return response.input_tokens
+    return _count_tokens_for_content(content, model, client)
 
 
 def count_tokens_for_files(paths: list[Path], model: ModelId) -> list[TokenCount]:
@@ -188,7 +196,7 @@ def count_tokens_for_files(paths: list[Path], model: ModelId) -> list[TokenCount
     cache = None
     try:
         cache = get_default_cache()
-    except OSError:
+    except Exception:  # noqa: BLE001
         logger.warning("Token cache unavailable, falling back to uncached counting")
 
     results = []

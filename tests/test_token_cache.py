@@ -188,7 +188,7 @@ class TestCacheIntegration:
 
         # Mock count_tokens_for_file in token_cache module to return 10
         mock_count = mocker.patch(
-            "claudeutils.token_cache.count_tokens_for_file", return_value=10
+            "claudeutils.token_cache._count_tokens_for_content", return_value=10
         )
         # Mock get_default_cache to return in-memory cache
         real_cache = TokenCache(create_cache_engine(":memory:"))
@@ -228,6 +228,32 @@ class TestCacheIntegration:
         cache.put("test-md5", "test-model", 42)
         assert cache.get("test-md5", "test-model") == 42
 
+    def test_count_tokens_for_files_fallback_on_cache_init_error(
+        self, tmp_path: Path, mocker: MockerFixture
+    ) -> None:
+        """count_tokens_for_files falls back on any cache init error.
+
+        Given: get_default_cache raises a non-OSError exception (e.g. SQLAlchemy).
+        When: Calling count_tokens_for_files.
+        Then: Falls back to uncached counting, returns correct results.
+        """
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("hello world")
+
+        mocker.patch(
+            "claudeutils.token_cache.get_default_cache",
+            side_effect=RuntimeError("DB schema mismatch"),
+        )
+        mock_count = mocker.patch(
+            "claudeutils.tokens.count_tokens_for_file", return_value=10
+        )
+
+        results = count_tokens_for_files([test_file], ModelId("test-model"))
+
+        assert len(results) == 1
+        assert results[0].count == 10
+        assert mock_count.call_count == 1
+
 
 class TestCachedCountTokens:
     """Tests for cached_count_tokens_for_file wrapper function."""
@@ -249,7 +275,7 @@ class TestCachedCountTokens:
         cache = TokenCache(engine)
 
         mock_count = Mock(return_value=42)
-        mocker.patch("claudeutils.token_cache.count_tokens_for_file", mock_count)
+        mocker.patch("claudeutils.token_cache._count_tokens_for_content", mock_count)
         mock_client = Mock()
 
         result = cached_count_tokens_for_file(
@@ -276,7 +302,7 @@ class TestCachedCountTokens:
         cache.put(content_md5, "test-model", 42)
 
         mock_count = Mock()
-        mocker.patch("claudeutils.token_cache.count_tokens_for_file", mock_count)
+        mocker.patch("claudeutils.token_cache._count_tokens_for_content", mock_count)
         mock_client = Mock()
 
         result = cached_count_tokens_for_file(
@@ -305,7 +331,7 @@ class TestCachedCountTokens:
         cache = TokenCache(engine)
 
         mock_count = Mock(return_value=42)
-        mocker.patch("claudeutils.token_cache.count_tokens_for_file", mock_count)
+        mocker.patch("claudeutils.token_cache._count_tokens_for_content", mock_count)
         mock_client = Mock()
 
         result1 = cached_count_tokens_for_file(
@@ -318,3 +344,56 @@ class TestCachedCountTokens:
         assert result1 == 42
         assert result2 == 42
         assert mock_count.call_count == 1
+
+    def test_cache_get_error_falls_back_to_api(
+        self, tmp_path: Path, mocker: MockerFixture
+    ) -> None:
+        """Cache read failure falls back to API call.
+
+        Given: Cache whose get() raises an exception.
+        When: Calling cached_count_tokens_for_file.
+        Then: API is called, correct count returned despite cache failure.
+        """
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("hello world")
+
+        engine = create_cache_engine(":memory:")
+        cache = TokenCache(engine)
+        mocker.patch.object(cache, "get", side_effect=Exception("DB corrupted"))
+
+        mock_count = Mock(return_value=42)
+        mocker.patch("claudeutils.token_cache._count_tokens_for_content", mock_count)
+        mock_client = Mock()
+
+        result = cached_count_tokens_for_file(
+            test_file, ModelId("test-model"), mock_client, cache
+        )
+
+        assert result == 42
+        assert mock_count.call_count == 1
+
+    def test_cache_put_error_still_returns_count(
+        self, tmp_path: Path, mocker: MockerFixture
+    ) -> None:
+        """Cache write failure still returns the API count.
+
+        Given: Cache whose put() raises an exception.
+        When: Calling cached_count_tokens_for_file on cache miss.
+        Then: API count is returned despite cache write failure.
+        """
+        test_file = tmp_path / "test.txt"
+        test_file.write_text("hello world")
+
+        engine = create_cache_engine(":memory:")
+        cache = TokenCache(engine)
+        mocker.patch.object(cache, "put", side_effect=Exception("disk full"))
+
+        mock_count = Mock(return_value=42)
+        mocker.patch("claudeutils.token_cache._count_tokens_for_content", mock_count)
+        mock_client = Mock()
+
+        result = cached_count_tokens_for_file(
+            test_file, ModelId("test-model"), mock_client, cache
+        )
+
+        assert result == 42
