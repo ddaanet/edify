@@ -183,7 +183,7 @@ def count_tokens_for_files(paths: list[Path], model: ModelId) -> list[TokenCount
     api_key = get_api_key()
     client = Anthropic(api_key=api_key) if api_key else Anthropic()
 
-    from claudeutils.token_cache import cached_count_tokens_for_file, get_default_cache
+    from claudeutils.token_cache import cached_count_tokens_for_file, get_default_cache  # noqa: PLC0415, I001
 
     cache = None
     try:

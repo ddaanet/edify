@@ -14,6 +14,7 @@ from pytest_mock import MockerFixture
 
 from claudeutils.cli import cli
 from claudeutils.exceptions import ApiRateLimitError
+from claudeutils.token_cache import TokenCache, create_cache_engine
 from claudeutils.tokens_cli import handle_tokens
 
 
@@ -233,10 +234,14 @@ def test_cli_rate_limit_error_shows_message(
     mock_resolve = mocker.patch(
         "claudeutils.tokens_cli.resolve_model_alias", autospec=True
     )
-    mock_count = mocker.patch(
-        "claudeutils.tokens_cli.count_tokens_for_file", autospec=True
-    )
     mock_resolve.return_value = "claude-sonnet-4-5-20250929"
+    mocker.patch(
+        "claudeutils.token_cache.get_default_cache",
+        return_value=TokenCache(create_cache_engine(":memory:")),
+    )
+    mock_count = mocker.patch(
+        "claudeutils.token_cache.count_tokens_for_file", autospec=True
+    )
     mock_count.side_effect = ApiRateLimitError()
     with pytest.raises(SystemExit) as exc_info:
         handle_tokens("sonnet", [str(test_file)])
@@ -328,7 +333,7 @@ def test_cli_detects_empty_api_key_before_sdk(
         "claudeutils.tokens_cli.resolve_model_alias", autospec=True
     )
     mock_count = mocker.patch(
-        "claudeutils.tokens_cli.count_tokens_for_file", autospec=True
+        "claudeutils.token_cache.count_tokens_for_file", autospec=True
     )
 
     with pytest.raises(SystemExit) as exc_info:
@@ -368,7 +373,7 @@ def test_cli_detects_missing_api_key_before_sdk(
         "claudeutils.tokens_cli.resolve_model_alias", autospec=True
     )
     mock_count = mocker.patch(
-        "claudeutils.tokens_cli.count_tokens_for_file", autospec=True
+        "claudeutils.token_cache.count_tokens_for_file", autospec=True
     )
 
     with pytest.raises(SystemExit) as exc_info:

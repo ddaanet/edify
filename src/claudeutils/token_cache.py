@@ -10,15 +10,16 @@ from sqlalchemy import Integer, String, create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
+from claudeutils.exceptions import FileReadError
 from claudeutils.tokens import ModelId, count_tokens_for_file
 
 
 class Base(DeclarativeBase):
-    """Base class for SQLAlchemy models."""
+    """SQLAlchemy declarative base."""
 
 
 class TokenCacheEntry(Base):
-    """Cached token count entry."""
+    """Cached token count keyed by (md5_hex, model_id)."""
 
     __tablename__ = "token_cache"
 
@@ -70,11 +71,7 @@ class TokenCache:
 def create_cache_engine(db_path: str) -> Engine:
     """Create database engine and initialize tables.
 
-    Args:
-        db_path: Path to database file (or ":memory:" for in-memory)
-
-    Returns:
-        SQLAlchemy Engine instance with tables created
+    Pass ":memory:" for in-memory.
     """
     engine = create_engine(
         f"sqlite:///{db_path}" if db_path != ":memory:" else "sqlite:///:memory:"
@@ -89,23 +86,11 @@ def cached_count_tokens_for_file(
     client: Anthropic,
     cache: TokenCache,
 ) -> int:
-    """Count tokens with cache lookup and storage.
-
-    Reads file content, computes md5, checks cache, falls back to API.
-
-    Args:
-        path: Path to file to count tokens for
-        model: Model ID for token counting
-        client: Anthropic API client
-        cache: TokenCache instance for storing/retrieving counts
-
-    Returns:
-        Number of tokens in the file
-    """
-    content = path.read_text()
-    if not content:
-        return 0
-
+    """Count tokens via cache; falls back to API on miss and stores result."""
+    try:
+        content = path.read_text()
+    except (PermissionError, OSError, UnicodeDecodeError) as e:
+        raise FileReadError(str(path), str(e)) from e
     md5_hex = hashlib.md5(content.encode()).hexdigest()  # noqa: S324
 
     cached = cache.get(md5_hex, model)
@@ -118,11 +103,7 @@ def cached_count_tokens_for_file(
 
 
 def get_default_cache() -> TokenCache:
-    """Create TokenCache at the default platform cache location.
-
-    Returns:
-        TokenCache instance connected to database at platformdirs cache dir
-    """
+    """Create TokenCache at the default platform cache location."""
     cache_dir = Path(platformdirs.user_cache_dir("claudeutils"))
     cache_dir.mkdir(parents=True, exist_ok=True)
     db_path = str(cache_dir / "token_cache.db")

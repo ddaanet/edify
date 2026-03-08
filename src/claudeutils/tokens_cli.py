@@ -1,12 +1,9 @@
 """CLI handler for tokens subcommand."""
 
 import json
-import logging
 import os
 import sys
 from pathlib import Path
-
-logger = logging.getLogger(__name__)
 
 import platformdirs
 from anthropic import Anthropic, AuthenticationError
@@ -17,9 +14,8 @@ from claudeutils.exceptions import (
     ClaudeUtilsError,
 )
 from claudeutils.tokens import (
-    TokenCount,
     calculate_total,
-    count_tokens_for_file,
+    count_tokens_for_files,
     resolve_model_alias,
 )
 from claudeutils.user_config import get_api_key
@@ -59,27 +55,7 @@ def handle_tokens(model: str, files: list[str], *, json_output: bool = False) ->
         cache_dir = Path(platformdirs.user_cache_dir("claudeutils"))
         resolved_model = resolve_model_alias(model, client, cache_dir)
 
-        from claudeutils.token_cache import (
-            cached_count_tokens_for_file,
-            get_default_cache,
-        )
-
-        token_cache = None
-        try:
-            token_cache = get_default_cache()
-        except OSError:
-            logger.warning("Token cache unavailable, falling back to uncached counting")
-
-        results = []
-        for filepath_str in file_paths:
-            filepath = Path(filepath_str)
-            if token_cache is not None:
-                count = cached_count_tokens_for_file(
-                    filepath, resolved_model, client, token_cache
-                )
-            else:
-                count = count_tokens_for_file(filepath, resolved_model, client)
-            results.append(TokenCount(path=str(filepath), count=count))
+        results = count_tokens_for_files([Path(f) for f in file_paths], resolved_model)
 
         if json_output:
             total = calculate_total(results)
