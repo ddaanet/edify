@@ -1,59 +1,34 @@
-# Session Handoff: 2026-03-07
+# Session Handoff: 2026-03-08
 
-**Status:** Fixed command derivation override, classified hook tasks, corrected Proof skill routing.
+**Status:** Proof skill execution complete — /proof skill created, integrated into 3 hosting skills, discussion-protocol.md replaced.
 
 ## Completed This Session
 
-**Bootstrap as separate step (iteration 2):**
-- Separated Bootstrap from RED phase into own section in 5 phase files (phases 2-6)
-- Python script transformed 17 cycles: moved `**Bootstrap:**` from inside RED to before RED with `---` separator
-- Added missing Bootstrap + fixed expected failure for cycles 4.3 (write_completed) and 6.5 (format_commit_output) — were ImportError-class
-- Updated /runbook skill: tdd-cycle-planning.md template shows Bootstrap as separate step file, anti-patterns.md expanded ImportError-as-RED row
-- All 4 validate-runbook.py checks pass on updated phase files
-
-**RCA: lack of structured feedback gating (/reflect):**
-- 4 deviations identified: executed without checkpoint, validator-instead-of-corrector, no inter-stage gates, loaded skill ignored
-- Root cause: no structured review loop at pipeline review stages; ad-hoc edits bypass corrector
-- Routed to /design — systemic, spans 3 skills + corrector infrastructure
-
-**Pipeline review protocol design (Phase A + B):**
-- Classification: Complex (agentic-prose, low implementation certainty, spans 3 skills)
-- Recall artifact: 14 entries
-- Outline written: 4 components (C1: /proof skill, C2: integration points, C3: author-corrector coupling, C4: automatic corrector after proof)
-- Phase B discussion resolved all 3 open questions via 7 decisions:
-  - D-1: Skill not reference file — enforcement requires tool-call gates
-  - D-2: Inline execution (no context:fork) — needs hosting skill's context
-  - D-4: No continuation push/pop — existing prepend + design-context-gate suffice
-  - D-5: Post-expansion is a review integration point — earliest systemic defect detection
-  - D-6: /requirements is prevention layer, post-expansion is detection layer — complementary
-  - D-7: Name "proof" — transparent validation semantics, edify-thematic
-- Sufficiency gate passed — outline is the design
-- Grounded context:fork behavior via Claude Code docs (skills page + sub-agents page)
-- Routing correction: /inline not /runbook — all prose edits, no implementation loops. Briefed recurrent failure mode (prose routing bias)
-
-**Bootstrap blocker recovery:**
-- Session-scraped prior conversation (session 60d8c11b) to recover lost context
-- Confirmed: /runbook skill prose and /review-plan corrector prose already shipped (agent-core 7add2e2 + 945fb7f)
-- Remaining blocker narrowed to: prepare-runbook.py BOOTSTRAP tag + Stop/Error Conditions in phase files
-
-**Command derivation note-override:**
-- Added note-override clause to handoff skill's command derivation rule (`.claude/skills/handoff/SKILL.md:83`)
-- When existing command differs from derived AND task Note explains routing, preserve existing command
-- Fixed Proof skill execution command: `/runbook` → `/inline` per task note
+**Proof skill execution (/inline plans/pipeline-review-protocol):**
+- Created `agent-core/skills/proof/SKILL.md` — reword-accumulate-sync loop, corrector dispatch table (5 artifact patterns), author-corrector coupling, layered defect model
+- Deleted `agent-core/skills/design/references/discussion-protocol.md` — replaced by /proof skill
+- Integrated 5 review points across 3 hosting skills:
+  - /requirements Step 5 → `/proof` invocation (prevention layer)
+  - /design Phase B → `/proof` on outline.md (replaces discussion-protocol.md reference)
+  - /design C.4.5 → `/proof` on design.md (new user validation stage)
+  - /runbook Phase 0.75 step 5 → `/proof` on runbook-outline.md
+  - /runbook Phase 3.25 → `/proof` on expanded phase files (systemic defect detection)
+- Added author-corrector coupling section to /design SKILL.md (C3) with dependency mapping table
+- Corrector review: 3 issues fixed (integration table label, empty-decision-list skip, Phase B parenthetical update)
 
 ## In-tree Tasks
 
 - [x] **Pipeline review protocol** — `/design plans/pipeline-review-protocol/` | opus
   - Plan: pipeline-review-protocol | Status: outlined
-- [ ] **Proof skill execution** — `/inline plans/pipeline-review-protocol` | opus
+- [x] **Proof skill execution** — `/inline plans/pipeline-review-protocol` | opus
   - Plan: pipeline-review-protocol | Status: outlined
-  - Note: Sufficiency gate passed — all prose edits, no implementation loops. Task note overrides plan-status-derived command
 - [ ] **Bootstrap tag support** — `/design` | sonnet
   - Note: Blocker for Session CLI tool. Two sub-tasks: (1) add Stop/Error Conditions sections to handoff-cli-tool phase files (pre-existing gap), (2) add BOOTSTRAP tag support to prepare-runbook.py for 3-step cycle generation. Skill prose (/runbook tdd-cycle-planning.md) and corrector prose (/review-plan 11.1 vacuity check) already shipped in agent-core commits 7add2e2 + 945fb7f
 - [!] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet | restart
   - Plan: handoff-cli-tool | Status: outlined
   - Absorbs: Fix task-context bloat
   - Blocked: runbook.md + step files stale — waiting on Bootstrap tag support task. Then regenerate via `prepare-runbook.py plans/handoff-cli-tool/`
+- [ ] **Review proof deliverable** — `/deliverable-review plans/pipeline-review-protocol` | opus | restart
 - [ ] **Hook error after clear** — `/design` | sonnet
   - Note: Diagnose "SessionStart:clear hook error" after /clear
 - [ ] **Health check UPS fallback** — `/design` | sonnet
@@ -80,7 +55,8 @@
 - `plans/handoff-cli-tool/recall-artifact.md` — 15 recall entries for step agents
 - `plans/design-context-gate/brief.md` — Context budget gate for /design tail-call decisions
 - `plans/pipeline-review-protocol/brief.md` — Routing rationale + recurrent prose routing bias failure mode
+- `plans/pipeline-review-protocol/reports/review.md` — Corrector review of /proof implementation
 
 ## Next Steps
 
-Proof skill execution next (opus, `/inline`). `/codify` needed — learnings at soft limit.
+Deliverable review next (opus, restart). `/codify` still needed — learnings at soft limit.
