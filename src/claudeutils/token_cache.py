@@ -4,6 +4,7 @@ import hashlib
 from datetime import UTC, datetime
 from pathlib import Path
 
+import platformdirs
 from anthropic import Anthropic
 from sqlalchemy import Integer, String, create_engine
 from sqlalchemy.engine import Engine
@@ -114,3 +115,16 @@ def cached_count_tokens_for_file(
     count = count_tokens_for_file(path, model, client)
     cache.put(md5_hex, model, count)
     return count
+
+
+def get_default_cache() -> TokenCache:
+    """Create TokenCache at the default platform cache location.
+
+    Returns:
+        TokenCache instance connected to database at platformdirs cache dir
+    """
+    cache_dir = Path(platformdirs.user_cache_dir("claudeutils"))
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    db_path = str(cache_dir / "token_cache.db")
+    engine = create_cache_engine(db_path)
+    return TokenCache(engine)

@@ -1,5 +1,6 @@
 """CLI handler for tokens subcommand."""
 
+import contextlib
 import json
 import os
 import sys
@@ -56,10 +57,24 @@ def handle_tokens(model: str, files: list[str], *, json_output: bool = False) ->
         cache_dir = Path(platformdirs.user_cache_dir("claudeutils"))
         resolved_model = resolve_model_alias(model, client, cache_dir)
 
+        from claudeutils.token_cache import (
+            cached_count_tokens_for_file,
+            get_default_cache,
+        )
+
+        token_cache = None
+        with contextlib.suppress(OSError):
+            token_cache = get_default_cache()
+
         results = []
         for filepath_str in file_paths:
             filepath = Path(filepath_str)
-            count = count_tokens_for_file(filepath, resolved_model, client)
+            if token_cache is not None:
+                count = cached_count_tokens_for_file(
+                    filepath, resolved_model, client, token_cache
+                )
+            else:
+                count = count_tokens_for_file(filepath, resolved_model, client)
             results.append(TokenCount(path=str(filepath), count=count))
 
         if json_output:
