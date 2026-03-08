@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-08
 
-**Status:** Active Recall design complete — outline is terminal artifact. 12 sub-problems dispatched.
+**Status:** Band 0 worktrees created — 4 parallel sub-problems dispatched to worktrees.
 
 ## Completed This Session
 
@@ -33,14 +33,14 @@
   - Precommit step: review report timestamp >= production artifact edit timestamp, no triviality exception
   - Implements defense-in-depth.md decision ("gate at chokepoint")
   - Evidence: JIT expansion commit skipped vet checkpoint
-- [ ] **AR Token Cache** — `/runbook plans/active-recall/outline.md` | sonnet
+- [ ] **AR Token Cache** → `ar-token-cache` — `/runbook plans/active-recall/outline.md` | sonnet
   - S-A: sqlite cache via sqlalchemy for count_tokens_for_file(). Band 0 — ready now
-- [ ] **AR Recall Consolidate** — `/runbook plans/active-recall/outline.md` | sonnet
+- [ ] **AR Recall Consolidate** → `ar-recall-consolidate` — `/runbook plans/active-recall/outline.md` | sonnet
   - S-B: merge recall/ + recall_cli/ + when/ into unified recall module. Band 0 — ready now
-- [ ] **AR Format Grounding** — `/ground` | opus
+- [ ] **AR Format Grounding** → `ar-format-grounding` — `/ground` | opus
   - S-C: research trigger format, when/how distinction, index hierarchy validation. Band 0 — ready now
   - Input: plans/active-recall/outline.md
-- [ ] **AR Submodule Refactor** — `/runbook plans/active-recall/outline.md` | sonnet
+- [ ] **AR Submodule Refactor** → `ar-submodule-refactor` — `/runbook plans/active-recall/outline.md` | sonnet
   - S-I: extract 42 hardcoded agent-core refs into configurable submodule registry. Band 0 — ready now
 - [ ] **AR Submodule Setup** — `/design plans/active-recall/outline.md` | sonnet
   - S-J: create memory submodule with shared branch, configure propagation, update resolver paths. Band 1 — blocked: S-I
@@ -65,4 +65,4 @@
 
 ## Next Steps
 
-Band 0 has 4 parallel sub-problems ready: S-A, S-B, S-C, S-I. Set up worktrees with `wt`.
+Band 0 worktrees active: ar-token-cache (S-A), ar-recall-consolidate (S-B), ar-format-grounding (S-C), ar-submodule-refactor (S-I). Merge completed worktrees with `wt merge <slug>`.
