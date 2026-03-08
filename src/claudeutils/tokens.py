@@ -1,6 +1,5 @@
 """Token counting functionality using Anthropic API."""
 
-import contextlib
 import logging
 from datetime import UTC, datetime
 from pathlib import Path
@@ -187,8 +186,10 @@ def count_tokens_for_files(paths: list[Path], model: ModelId) -> list[TokenCount
     from claudeutils.token_cache import cached_count_tokens_for_file, get_default_cache
 
     cache = None
-    with contextlib.suppress(OSError):
+    try:
         cache = get_default_cache()
+    except OSError:
+        logger.warning("Token cache unavailable, falling back to uncached counting")
 
     results = []
     for path in paths:

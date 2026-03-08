@@ -1,10 +1,12 @@
 """CLI handler for tokens subcommand."""
 
-import contextlib
 import json
+import logging
 import os
 import sys
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 import platformdirs
 from anthropic import Anthropic, AuthenticationError
@@ -63,8 +65,10 @@ def handle_tokens(model: str, files: list[str], *, json_output: bool = False) ->
         )
 
         token_cache = None
-        with contextlib.suppress(OSError):
+        try:
             token_cache = get_default_cache()
+        except OSError:
+            logger.warning("Token cache unavailable, falling back to uncached counting")
 
         results = []
         for filepath_str in file_paths:
