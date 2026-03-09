@@ -39,3 +39,17 @@ Whether flat (`_status`, `_handoff`) or grouped (`_session status`, `_session ha
 The `_session commit` subcommand MUST output shortened commit IDs in stdout. Enables session→commit correlation when scraping `~/.claude/projects/` logs. `git commit` already outputs the short hash; the wrapper must preserve it.
 
 **Evidence:** Traced commit `2bb41d96` through git history to recover the original SessionStart hook discussion. Required hash in searchable output.
+
+## 2026-03-08: Markdown AST parser ordering consideration
+
+**Source:** bootstrap-tag-support post-execution review.
+
+The S-4 session.md parser (shared parser in `src/claudeutils/session/parse.py`) is designed as regex-based line-by-line parsing. A new plan (`plans/markdown-ast-parser/brief.md`) proposes a two-stage architecture: preprocessor (fix LLM errors) → standard parser (AST) → domain traversals.
+
+**Ordering decision needed:**
+- **AST-first (prerequisite):** Build S-4 parser directly on AST from the start. Avoids throwaway regex parser. Requires markdown-ast-parser plan to ship first (at least the parser utility layer).
+- **Regex-first (independent):** Build S-4 with regex per current design. markdown-ast-parser becomes a follow-up rewrite. Ships faster but creates technical debt.
+
+**Impact:** S-4 parser is shared infrastructure — handoff, status, and validation all consume it. Building on AST from the start means all consumers inherit structural correctness. Building on regex means rewriting 3 consumers later.
+
+**Blocker status:** Bootstrap tag support task complete — runbook generation unblocked. Next step: regenerate step files via `prepare-runbook.py plans/handoff-cli-tool/`, then orchestrate. The parser ordering decision affects S-4 design, not the overall plan structure.

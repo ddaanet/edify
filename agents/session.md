@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-08
 
-**Status:** Bootstrap tag support complete — prepare-runbook.py fixes for mixed-type Common Context + BOOTSTRAP 3-step cycle generation.
+**Status:** Bootstrap tag support delivered, corrector review done. Post-execution review produced 3 new plans (runbook-quality-directives, inline-lifecycle-gate, markdown-ast-parser) + briefs for codebase-sweep and handoff-cli-tool.
 
 ## Completed This Session
 
@@ -23,16 +23,21 @@
 - Added BOOTSTRAP role to orchestrator plan: sorts before TEST (minor - 1.0)
 - Split tests to `tests/test_prepare_runbook_bootstrap.py` (7 tests, file length limit)
 - Verified handoff-cli-tool phase files now pass validation (26 errors → 0)
+- Corrector review: 2 minor fixes (silent degradation warning on malformed Bootstrap, missing test for no-separator path)
+
+**Post-execution review (discussion mode):**
+- Identified 6 process issues from bootstrap-tag-support execution: over-specific Verify GREEN, vacuous Bootstrap absence statements, redundant integration cycle, double plan output, corrector skip, TDD Common Context scoping
+- Created 3 new plans from findings:
+  - `plans/runbook-quality-directives/brief.md` — Verify GREEN collapse, Bootstrap omission language, Tier 2 consolidation + output-channel, corrector noise rules, `just green` recipe
+  - `plans/inline-lifecycle-gate/brief.md` — Corrector gate D+B anchor (Write-gated escape hatch), triage-feedback.sh review.md check
+  - `plans/markdown-ast-parser/brief.md` — Preprocessor → standard parser → AST traversal architecture, consumer migration path for session validation + prepare-runbook.py + handoff-cli-tool S-4
+- Updated existing plan briefs with cross-session context:
+  - `plans/codebase-sweep/brief.md` — Structural design quality axis proposal, prepare-runbook.py inclusion, scope decision needed
+  - `plans/handoff-cli-tool/brief.md` — AST parser ordering decision for S-4 (AST-first vs regex-first)
+  - `plans/bootstrap-tag-support/brief.md` — Post-execution context, TDD context scoping follow-up, architectural note on AST supersession
 
 ## In-tree Tasks
 
-- [x] **Pipeline review protocol** — `/design plans/pipeline-review-protocol/` | opus
-  - Plan: pipeline-review-protocol | Status: outlined
-- [x] **Proof skill execution** — `/inline plans/pipeline-review-protocol` | opus
-  - Plan: pipeline-review-protocol | Status: outlined
-- [x] **Bootstrap tag support** — `/design` | sonnet
-  - Plan: bootstrap-tag-support
-  - Note: Fixed mixed-type Common Context injection + BOOTSTRAP 3-step cycle generation in prepare-runbook.py
 - [ ] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet | restart
   - Plan: handoff-cli-tool | Status: outlined
   - Absorbs: Fix task-context bloat
@@ -43,12 +48,23 @@
 - [ ] **Health check UPS fallback** — `/design` | sonnet
   - Note: Modify session health check to use UserPromptSubmit instead of Stop as fallback when SessionStart hook did not run
 - [ ] **Review bootstrap work** — `/deliverable-review plans/bootstrap-tag-support` | opus | restart
+- [ ] **Fix TDD context scoping** — `/design` | sonnet
+  - Note: DEFAULT_TDD_COMMON_CONTEXT injected at runbook level, should be phase-scoped. Brief: `plans/bootstrap-tag-support/brief.md`
 
 ## Worktree Tasks
 
 - [ ] **Test context-fork model** — create minimal skill with `context: fork` + `AskUserQuestion`, observe interaction behavior | haiku
 - [ ] **Fix prose routing bias** — `/design` | opus
   - Note: Agent routes prose-only work to /runbook when cross-file scope feels large, despite sufficiency gate. Same class as "design ceremony continues after uncertainty resolves." Brief: `plans/pipeline-review-protocol/brief.md` (Recurrent Failure Mode section). Schedule after session-cli-tool merges to main
+- [ ] **Runbook quality fixes** — `/design plans/runbook-quality-directives/brief.md` | opus
+  - Plan: runbook-quality-directives
+  - Note: Verify GREEN collapse, Bootstrap omission, Tier 2 consolidation, corrector noise rules, `just green` recipe. Author-corrector coupling — all edits must ship together.
+- [ ] **Inline lifecycle gate** — `/design plans/inline-lifecycle-gate/brief.md` | opus
+  - Plan: inline-lifecycle-gate
+  - Note: Corrector gate D+B anchor (Write-gated skip), triage-feedback.sh review.md check. Independent of runbook-quality-directives.
+- [ ] **Markdown AST parser** — `/design plans/markdown-ast-parser/brief.md` | opus
+  - Plan: markdown-ast-parser
+  - Note: Preprocessor → standard parser → AST. Blocks handoff-cli-tool S-4 if AST-first ordering chosen. Complex — new dependency, cross-cutting migration.
 
 ## Blockers / Gotchas
 
@@ -68,7 +84,14 @@
 - `plans/pipeline-review-protocol/reports/review.md` — Corrector review of /proof implementation
 - `plans/bootstrap-tag-support/classification.md` — Moderate, production, prepare-runbook.py
 - `plans/bootstrap-tag-support/runbook.md` — TDD runbook (2 phases, 5 cycles)
+- `plans/bootstrap-tag-support/brief.md` — Post-execution context, TDD context scoping follow-up
+- `plans/bootstrap-tag-support/reports/review.md` — Corrector review (2 minor, both fixed)
+- `plans/runbook-quality-directives/brief.md` — Batch A: runbook planning noise prevention
+- `plans/inline-lifecycle-gate/brief.md` — Batch B: corrector gate enforcement
+- `plans/markdown-ast-parser/brief.md` — Cross-cutting parser infrastructure
+- `plans/codebase-sweep/brief.md` — Updated: structural design quality axis proposal
+- `plans/handoff-cli-tool/brief.md` — Updated: AST parser ordering decision for S-4
 
 ## Next Steps
 
-Session CLI tool unblocked — regenerate step files next. `/codify` still needed — learnings at soft limit.
+Session CLI tool unblocked — regenerate step files next. `/codify` still needed — learnings at soft limit. Three new plans (runbook-quality-directives, inline-lifecycle-gate, markdown-ast-parser) ready for design.

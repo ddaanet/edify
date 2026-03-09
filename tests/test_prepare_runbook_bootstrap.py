@@ -107,6 +107,25 @@ class TestBootstrapSplit:
         assert "RED Phase" in red
         assert "GREEN Phase" in green
 
+    def test_split_bootstrap_missing_separator(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """Bootstrap marker without --- separator: empty bootstrap, warning emitted."""
+        content = (
+            "**Bootstrap:** Create stub.\n"
+            "**RED Phase:**\nWrite test.\n"
+            "**GREEN Phase:**\nImplement."
+        )
+
+        bootstrap, red, green = split_cycle_content(content)
+
+        assert bootstrap == "", "Bootstrap empty when separator missing"
+        assert "Bootstrap" in red, (
+            "Bootstrap text leaks into RED when separator missing"
+        )
+        assert "GREEN Phase" in green
+        assert "WARNING" in capsys.readouterr().err
+
 
 class TestBootstrapStepFiles:
     """Bootstrap cycles generate 3 step files (bootstrap + test + impl)."""
