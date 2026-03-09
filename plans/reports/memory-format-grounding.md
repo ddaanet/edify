@@ -14,6 +14,8 @@
 
 ### Theoretical Foundation
 
+LLMs have strong procedural knowledge from training data but weak conditional knowledge — they know *how* to do things but fail to recognize *when* to apply that knowledge. Spontaneous recall rates are low (~3% self-retrieval in this project's measurements), which is why structured retrieval pipelines exist: they inject the situational recognition that models lack. The memory system is predominantly when-class (304/367 entries) because conditional knowledge is the gap.
+
 Effective retrieval cues encode the *situation of need*, not the knowledge topic. Three frameworks converge:
 
 - **Encoding specificity** (Tulving & Thomson, 1973): A retrieval cue works when it matches the context where the knowledge was originally encoded. Triggers phrased as situations ("when X happens") encode the future retrieval context.
@@ -27,7 +29,7 @@ Effective retrieval cues encode the *situation of need*, not the knowledge topic
 **When-class (conditional knowledge):**
 
 ```
-/when [present-participle] [object]
+- when [present-participle] [object]
 ```
 
 - Present participle verb names the *activity at the decision point*
@@ -36,24 +38,23 @@ Effective retrieval cues encode the *situation of need*, not the knowledge topic
 - Use broadest applicable verb (not hyper-specific outcome)
 
 Examples (validated from codebase):
-- `/when designing quality gates` — activity + domain
-- `/when placing helper functions` — activity + object
-- `/when handling malformed session data` — activity + failure condition
+- `- when designing quality gates` — activity + domain
+- `- when placing helper functions` — activity + object
+- `- when handling malformed session data` — activity + failure condition
 
 **How-class (procedural knowledge):**
 
 ```
-/how [verb] [object]
+- how [verb] [object]
 ```
 
-- Bare verb (imperative, not infinitive) — "format" not "to format"
+- Verb form: pending grounding (bare imperative "format" vs natural infinitive "to format"). Measurement task: fuzzy match score comparison + agent query log analysis via session scraper
 - Object specifies the operation scope
-- No "How to" prefix in trigger text (resolver adds "How to" during heading construction)
 
 Examples (validated from codebase):
-- `/how format runbook phase headers` — verb + object
-- `/how split test modules` — verb + object
-- `/how merge templates safely` — verb + object + manner
+- `- how format runbook phase headers` — verb + object
+- `- how split test modules` — verb + object
+- `- how merge templates safely` — verb + object + manner
 
 ### Trigger Quality Criteria
 
@@ -67,7 +68,7 @@ Derived from CBR indexing vocabulary (Kolodner) and cue overload principle (Tulv
 | **Predictive** | Describes when knowledge helps, not what it contains | Does the trigger describe a situation or a topic? Topics are not triggers |
 | **Recognizable** | Uses vocabulary the retrieving agent naturally encounters | Are the keywords domain terms the agent would see in context (error messages, tool names, code patterns)? |
 
-**Specificity calibration:** Triggers should target 3-20 invocation contexts. Below 3 is over-specific (won't be found); above 20 approaches cue overload (too many matches dilute signal).
+**Specificity calibration:** Triggers should target N-M invocation contexts (default 3-20, calibrate against dataset). Below N is over-specific (won't be found); above M approaches cue overload (too many matches dilute signal). Thresholds are user-configurable.
 
 ### Naming Conventions
 
@@ -78,7 +79,7 @@ Consolidated from codebase analysis (workflow-advanced.md decisions) and CBR qua
 3. **No self-assessment terms** — no "correctly", "properly", "best way to". The entry content provides the quality guidance
 4. **No articles** unless grammatically required — "when placing functions" not "when placing the functions"
 5. **Present participle for when-class** — establishes ongoing activity context. "When designing" not "when designed" or "when to design"
-6. **Bare imperative for how-class** — "how format" not "how formatting" or "how to format" (resolver adds "How to" at heading construction)
+6. **Verb form for how-class** — pending grounding. Bare imperative ("how format") vs natural infinitive ("how to format"). Not gerund ("how formatting"). Measurement needed: fuzzy match scores, agent query logs, retrieval accuracy
 7. **Domain terms over synonyms** — use the term that appears in the codebase/toolchain. "pytest fixtures" not "test setup utilities"
 
 ### Format Drift Patterns (Anti-patterns)
@@ -114,8 +115,8 @@ The distinction is cognitively fundamental (ACT-R, Bloom's, educational psycholo
 
 | Agent need | Classification | Trigger form |
 |-----------|---------------|--------------|
-| "I'm in situation X — what should I do?" | Conditional (`when`) | `/when [situation]` |
-| "I need to accomplish task Y — how?" | Procedural (`how`) | `/how [task]` |
+| "I'm in situation X — what should I do?" | Conditional (`when`) | `- when [situation]` |
+| "I need to accomplish task Y — how?" | Procedural (`how`) | `- how [task]` |
 
 **Decision tree for edge cases:**
 
@@ -146,7 +147,7 @@ Is the core value in WHEN to apply this, or HOW to do it?
 - **Test:** Does the value lie in *recognizing when to delegate* or *how to delegate*?
 - If the entry is about conditions for delegation → `when`
 - If the entry is about delegation mechanics → `how`
-- If both → split: `/when delegating TDD cycles` + `/how delegate to test-driver`
+- If both → split: `- when delegating TDD cycles` + `- how delegate to test-driver`
 
 **Procedural guidelines that feel situational:** "How write init files" — could be "when needing a module structure"
 - **Test:** Is the trigger "I need to write an init file" (task) or "I'm structuring a module" (situation)?
@@ -217,14 +218,15 @@ Current `agents/memory-index.md` sections (H2 headings = decision file paths) se
 **Entry format in leaf index files:**
 
 ```
-/when [trigger text] | [keyword1] [keyword2] [keyword3] ...
+- when [trigger text] | [keyword1] [keyword2] [keyword3] ...
 ```
 
 The pipe-separated keywords are the embedded metadata. This format is already in use (codebase analysis confirmed `extra_triggers` parsing). The specification formalizes what's currently ad-hoc:
 
 | Field | Location | Required | Purpose |
 |-------|----------|----------|---------|
-| **Operator** | Prefix (`/when` or `/how`) | Yes | Knowledge type classification |
+| **List marker** | `- ` prefix | Yes | Markdown list structure |
+| **Operator** | `when` or `how` (lowercase, no `/`) | Yes | Knowledge type classification |
 | **Trigger** | After operator | Yes | Primary retrieval key (situational/task description) |
 | **Keywords** | After `\|` separator | Yes (for new entries) | Disambiguation terms, domain vocabulary, related concepts |
 
@@ -255,48 +257,58 @@ The index is a *generated artifact*, not hand-maintained (per brief.md architect
 
 ## 5. Validation Rules (S-K Corrector Criteria)
 
+All rules are errors (blocking). Agents ignore warnings — a non-blocking flag is no flag. Rules with thresholds require calibration against the 366-entry dataset before activation; all thresholds are user-configurable with feedback pipeline for ongoing calibration.
+
 ### Trigger Validation
 
-| Rule | Check | Severity |
-|------|-------|----------|
-| **Discriminating** | Trigger does not match >20 existing entries by keyword overlap | Error |
-| **Not over-specific** | Trigger contains ≤5 content words (excluding operator) | Warning |
-| **Activity framing** | When-class trigger uses present participle verb | Error |
-| **Imperative framing** | How-class trigger uses bare imperative verb | Error |
-| **No self-assessment** | Trigger contains no adverbs (properly, correctly, efficiently, safely) | Warning |
-| **No articles** | Trigger contains no articles (a, an, the) unless grammatically required | Warning |
-| **Predictive** | Trigger describes situation/task, not topic or content | Error (requires LLM judgment) |
+| Rule | Check | Threshold |
+|------|-------|-----------|
+| **Discriminating** | Trigger does not match >N existing entries by keyword overlap | N=20 — calibrate against dataset |
+| **Not over-specific** | Trigger contains ≤N content words (excluding operator) | N=5 — calibrate against dataset |
+| **Activity framing** | When-class trigger uses present participle verb | — |
+| **Imperative framing** | How-class trigger uses bare imperative verb | — |
+| **No self-assessment** | Trigger contains no adverbs (properly, correctly, efficiently, safely) | — |
+| **No articles** | Trigger contains no articles (a, an, the) unless grammatically required | — |
+| **Predictive** | Trigger describes situation/task, not topic or content | Requires LLM judgment |
 
 ### Classification Validation
 
-| Rule | Check | Severity |
-|------|-------|----------|
-| **Correct class** | Entry classified as when/how matches classification rubric | Error |
-| **No class confusion** | When-entry body is not purely procedural without situational framing | Warning |
+| Rule | Check | Threshold |
+|------|-------|-----------|
+| **Correct class** | Entry classified as when/how matches classification rubric | — |
+| **No class confusion** | When-entry body is not purely procedural without situational framing | — |
 
 ### Metadata Validation
 
-| Rule | Check | Severity |
-|------|-------|----------|
-| **Keywords present** | Entry has ≥3 keywords after pipe separator | Error |
-| **Keyword count** | Entry has ≤7 keywords | Warning |
-| **No trigger duplication** | Keywords don't repeat trigger words | Warning |
-| **No stopwords** | Keywords contain no stopwords | Error |
+| Rule | Check | Threshold |
+|------|-------|-----------|
+| **Keywords present** | Entry has ≥N keywords after pipe separator | N=3 — calibrate against dataset |
+| **Keyword count** | Entry has ≤N keywords | N=7 — calibrate against dataset |
+| **No trigger duplication** | Keywords don't repeat trigger words | — |
+| **No stopwords** | Keywords contain no stopwords | — |
 
 ### Deduplication
 
-| Rule | Check | Severity |
-|------|-------|----------|
-| **Trigger uniqueness** | No two entries have identical trigger text | Error |
-| **Semantic dedup** | No two entries in same domain have keyword overlap >70% | Warning (requires LLM judgment) |
+| Rule | Check | Threshold |
+|------|-------|-----------|
+| **Trigger uniqueness** | No two entries have identical trigger text | — |
+| **Semantic dedup** | No two entries in same domain have keyword overlap >N% | N=70 — calibrate against dataset (requires LLM judgment) |
 
 ### Entry Quality
 
-| Rule | Check | Severity |
-|------|-------|----------|
-| **Atomic** | Entry addresses one decision/procedure, not a compound topic | Warning |
-| **Documentation anchor** | Entry points to permanent documentation (decision file, methodology doc), not orphan index entry | Error |
-| **Heading alignment** | Trigger text maps to an actual heading in the referenced file | Error |
+| Rule | Check | Threshold |
+|------|-------|-----------|
+| **Atomic** | Entry addresses one decision/procedure, not a compound topic | — |
+| **Documentation anchor** | Entry points to permanent documentation (decision file, methodology doc), not orphan index entry | — |
+| **Heading alignment** | Trigger text maps to an actual heading in the referenced file | — |
+
+### Threshold Calibration
+
+All numeric thresholds (N values above) are ungrounded defaults requiring measurement:
+- Measure actual distributions across the 366-entry dataset
+- Set thresholds at natural breakpoints in measured distributions
+- Ship as user-configurable defaults (not hardcoded)
+- Feedback pipeline: corrector flags → user adjudicates → threshold adjusts
 
 ---
 
@@ -326,8 +338,8 @@ The index is a *generated artifact*, not hand-maintained (per brief.md architect
 
 **Gaps remaining:**
 - Branching factor 5-9 at root level is Miller's Law applied analogically to LLM attention — not empirically measured for this specific system. Measurement should occur during S-D implementation using actual token counts (S-A cache).
-- Keyword overlap threshold for semantic dedup (70%) is ungrounded — needs empirical calibration during S-K implementation. Stated as ungrounded per no-confabulation rule.
-- Specificity calibration range (3-20 invocation contexts) is an informed heuristic from CBR quality criteria, not a measured threshold for this system.
+- All validation thresholds (keyword overlap 70%, specificity 3-20, keyword count 3-7, content words ≤5, discriminating >20) require calibration against the 366-entry dataset. Ship as user-configurable defaults with feedback pipeline. No threshold is grounded until measured.
+- How-class verb form (bare imperative vs natural infinitive) requires grounding: fuzzy match score comparison, agent query log analysis via session scraper, retrieval accuracy observation. Decision suspended pending measurement.
 
 ---
 
