@@ -59,3 +59,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Scoring tasks individually without checking for absorptions, merges, or thematic overlap. Produces accurate priority scores on a bloated list — 65 tasks with redundant scope boundaries.
 - Correct pattern: After scoring, run a consolidation pass: absorptions (task is subset of another's plan/outline), merges (overlapping scope, same design session), thematic clusters (shared infrastructure/API, batchable), stale checks (plan delivered but task pending). Multiple passes until no further reductions.
 - Evidence: 65 → 25 tasks in 3 rounds. Model tier is not a batching constraint — worktrees set their own model at launch.
+## When grounding recall system behavior
+- Anti-pattern: Measuring fuzzy matcher round-trip fidelity (query self-matches stored entry) and query distribution from session logs. Both answer "does the plumbing work?" — tautological and contaminated respectively.
+- Index-driven retrieval contaminates query distribution: agents copy triggers they just read from the index, so output query form reflects input format, not natural behavior.
+- Correct framing: (1) Does the fuzzy matcher tolerate prefix noise? (one-token mismatch causing 0.0 scores = matcher failing its purpose). (2) Does the index entry format affect agent recognition during scanning? (behavioral A/B test, not a script test).
+- The distinction between index-driven retrieval (agent copies a key it saw) and spontaneous retrieval (agent generates query from understanding) determines which data is meaningful.
