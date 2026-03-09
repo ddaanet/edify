@@ -1,6 +1,6 @@
-# Session Handoff: 2026-03-08
+# Session Handoff: 2026-03-09
 
-**Status:** Bootstrap tag support delivered, corrector review done. Post-execution review produced 3 new plans (runbook-quality-directives, inline-lifecycle-gate, markdown-ast-parser) + briefs for codebase-sweep and handoff-cli-tool.
+**Status:** Deliverable review of pipeline-review-protocol completed — reviewed (0 critical, 2 major). Fix task created.
 
 ## Completed This Session
 
@@ -36,13 +36,21 @@
   - `plans/handoff-cli-tool/brief.md` — AST parser ordering decision for S-4 (AST-first vs regex-first)
   - `plans/bootstrap-tag-support/brief.md` — Post-execution context, TDD context scoping follow-up, architectural note on AST supersession
 
+**Deliverable review: pipeline-review-protocol:**
+- Reviewed all 12 deliverables (~207 net lines, all agentic prose) against outline.md as conformance baseline
+- 0 Critical, 2 Major, 4 Minor findings
+- Major: `proof <artifact>.md` planstate in outline scope but not implemented (no lifecycle.md entry on /proof entry/exit)
+- Major: Phase 3.25 passes glob `runbook-phase-*.md` to single-artifact /proof skill — ambiguous multi-file invocation
+- Report: `plans/pipeline-review-protocol/reports/deliverable-review.md`
+- Lifecycle: `reviewed` (plans/pipeline-review-protocol/lifecycle.md)
+
 ## In-tree Tasks
 
 - [ ] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet | restart
   - Plan: handoff-cli-tool | Status: outlined
   - Absorbs: Fix task-context bloat
   - Note: Blocker resolved (Bootstrap tag support). Regenerate step files via `prepare-runbook.py plans/handoff-cli-tool/`, then `/orchestrate handoff-cli-tool`
-- [ ] **Review proof deliverable** — `/deliverable-review plans/pipeline-review-protocol` | opus | restart
+- [x] **Review proof deliverable** — `/deliverable-review plans/pipeline-review-protocol` | opus | restart
 - [ ] **Hook error after clear** — `/design` | sonnet
   - Note: Diagnose "SessionStart:clear hook error" after /clear
 - [ ] **Health check UPS fallback** — `/design` | sonnet
@@ -65,6 +73,9 @@
 - [ ] **Markdown AST parser** — `/design plans/markdown-ast-parser/brief.md` | opus
   - Plan: markdown-ast-parser
   - Note: Preprocessor → standard parser → AST. Blocks handoff-cli-tool S-4 if AST-first ordering chosen. Complex — new dependency, cross-cutting migration.
+- [ ] **Fix proof review findings** — `/design plans/pipeline-review-protocol/reports/deliverable-review.md` | opus
+  - Plan: pipeline-review-protocol
+  - Note: 2 major (planstate gap, glob/single-artifact ambiguity), 4 minor. All findings in deliverable-review.md.
 
 ## Blockers / Gotchas
 
@@ -91,7 +102,9 @@
 - `plans/markdown-ast-parser/brief.md` — Cross-cutting parser infrastructure
 - `plans/codebase-sweep/brief.md` — Updated: structural design quality axis proposal
 - `plans/handoff-cli-tool/brief.md` — Updated: AST parser ordering decision for S-4
+- `plans/pipeline-review-protocol/reports/deliverable-review.md` — Deliverable review (0 critical, 2 major, 4 minor)
+- `plans/pipeline-review-protocol/lifecycle.md` — Plan status: reviewed
 
 ## Next Steps
 
-Session CLI tool unblocked — regenerate step files next. `/codify` still needed — learnings at soft limit. Three new plans (runbook-quality-directives, inline-lifecycle-gate, markdown-ast-parser) ready for design.
+Session CLI tool unblocked — regenerate step files next. `/codify` still needed — learnings at soft limit.
