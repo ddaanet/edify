@@ -13,12 +13,14 @@ from tests.fixtures.validate_runbook_fixtures import (
     LIFECYCLE_KNOWN_FILE,
     NON_MARKDOWN_ARTIFACT,
     VALID_TDD,
+    VALID_VERIFY_GREEN_PATHS,
     VIOLATION_LIFECYCLE_DUPLICATE_CREATE,
     VIOLATION_LIFECYCLE_MODIFY_BEFORE_CREATE,
     VIOLATION_MODEL_TAGS,
     VIOLATION_RED_IMPLAUSIBLE,
     VIOLATION_TEST_COUNTS,
     VIOLATION_TEST_COUNTS_PARAMETRIZED,
+    VIOLATION_VERIFY_GREEN_PATHS,
 )
 
 SCRIPT = Path(__file__).parent.parent / "agent-core" / "bin" / "validate-runbook.py"
@@ -237,6 +239,25 @@ def test_model_tags_non_markdown_artifact_not_flagged(
     """Non-.md files under artifact paths are not flagged by model-tags."""
     code, content = run_validate("model-tags", "script-runbook", NON_MARKDOWN_ARTIFACT)
     assert code == 0, "Non-.md file under artifact path should not be flagged"
+    assert "**Result:** PASS" in content
+
+
+def test_verify_green_paths_violation(run_validate: _RunValidateFn) -> None:
+    """Verify-green-paths flags specific pytest paths in Verify GREEN lines."""
+    code, content = run_validate(
+        "verify-green-paths", "specific-paths", VIOLATION_VERIFY_GREEN_PATHS
+    )
+    assert code == 1, "Specific pytest path in Verify GREEN should be flagged"
+    assert "**Result:** FAIL" in content
+    assert "tests/test_example.py" in content
+
+
+def test_verify_green_paths_happy_path(run_validate: _RunValidateFn) -> None:
+    """Verify-green-paths passes when Verify GREEN uses universal recipe."""
+    code, content = run_validate(
+        "verify-green-paths", "universal-recipe", VALID_VERIFY_GREEN_PATHS
+    )
+    assert code == 0, "Universal recipe in Verify GREEN should pass"
     assert "**Result:** PASS" in content
 
 

@@ -339,6 +339,18 @@ title: Ambiguous Red Plausibility Runbook
 ---
 """
 
+# Verify GREEN with specific pytest paths — should trigger verify-green-paths violation
+VIOLATION_VERIFY_GREEN_PATHS = """\
+## Cycle 1.1: scaffold
+**Verify GREEN:** `pytest tests/test_example.py::TestFoo::test_bar -v`
+"""
+
+# Verify GREEN with universal recipe — should pass verify-green-paths
+VALID_VERIFY_GREEN_PATHS = """\
+## Cycle 1.1: scaffold
+**Verify GREEN:** `just green`
+"""
+
 VIOLATION_TEST_COUNTS = """\
 ---
 title: Test Counts Violation Runbook

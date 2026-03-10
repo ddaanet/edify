@@ -331,6 +331,15 @@ lint: format
     run-pytest
     report-end-safe "Lint"
 
+# Verify GREEN: format, lint, test (semantic alias for lint)
+[no-exit-message]
+green *ARGS: format
+    #!{{ bash_prolog }}
+    sync
+    run-lint-checks
+    if [ -n "{{ ARGS }}" ]; then pytest {{ ARGS }}; else run-pytest; fi
+    report-end-safe "Green"
+
 # Format, check without complexity, NO test
 [no-exit-message]
 red-lint: format
