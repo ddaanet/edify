@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-10
 
-**Status:** Proof findings fixed. Deliverable review pending.
+**Status:** Branch work complete. All in-tree tasks done, deliverable review clean (0/0/0).
 
 ## Completed This Session
 
@@ -63,13 +63,19 @@
 - `skills/runbook/references/examples.md` — routing reference
 - `agents/outline-corrector.md` — scope-to-component traceability + cross-component interface checks
 
-**Fix proof findings (this session):**
+**Fix proof findings (prior session):**
 - MA1 (planstate): Added lifecycle management to proof/SKILL.md — `review-pending` on entry, `reviewed` on completion. Uses existing valid_states recognized by inference engine.
 - MA2 (multi-file): Entry section now handles glob patterns via Glob expansion, treats collection as single composite review target. Runbook = one artifact composed of phase files.
 - MI1 (stale filename): Already fixed in prior commit.
 - MI2 (table duplication): Replaced 16-line duplicate Author-Corrector Coupling table in proof/SKILL.md with single-line reference to /design SKILL.md section.
 - MI3 (subagent_type): Changed `corrector` → `runbook-corrector` in Corrector Dispatch table for consistency.
 - Skill-reviewer found: planstate values must use existing valid_states (`review-pending`/`reviewed`) not novel values; terminology mismatch in prose vs code block; all fixed.
+
+**Re-review proof fixes (this session):**
+- Deliverable review: 0 Critical, 0 Major, 0 Minor — all 5 prior findings resolved
+- Cross-cutting verified: planstate format, glob-to-corrector chain, author-corrector reference, integration points
+- Lifecycle: `review-pending` → `reviewed`
+- Report: `plans/pipeline-review-protocol/reports/deliverable-review.md`
 
 ## In-tree Tasks
 
@@ -78,7 +84,7 @@
 - [x] **Review prose routing** — `/deliverable-review plans/pipeline-review-protocol` | opus | restart
 - [x] **Fix proof findings** — `/design plans/pipeline-review-protocol/reports/deliverable-review.md` | opus
   - Note: 2 Major (planstate — implement for cross-session visibility; /proof multi-file artifact support — runbook is one artifact composed of phase files), 3 Minor (1 new stale filename in example, 2 carried: table duplication, subagent_type naming). Drift prevention applied to outline-corrector + review-dispatch-template.
-- [ ] **Review proof fixes** — `/deliverable-review plans/pipeline-review-protocol` | opus | restart
+- [x] **Review proof fixes** — `/deliverable-review plans/pipeline-review-protocol` | opus | restart
 
 ## Worktree Tasks
 
@@ -95,4 +101,4 @@
 
 ## Next Steps
 
-Deliverable review pending for proof findings fix. Then branch work complete.
+Branch work complete.
