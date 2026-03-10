@@ -1,0 +1,7 @@
+- **Classification:** Moderate
+- **Implementation certainty:** Moderate — approach is known (statistical distribution analysis, breakpoint detection), but specific analysis depends on data exploration and human labeling
+- **Requirement stability:** Moderate — thresholds and dataset identified, but "feedback pipeline" lacks mechanism specification
+- **Behavioral code check:** Yes — making thresholds configurable changes function signatures, adds configuration infrastructure → Moderate minimum
+- **Work type:** Investigation — primary deliverable is calibrated values grounded in empirical data. Secondary production work (configurable defaults) depends on investigation results.
+- **Artifact destination:** investigation (`plans/reports/` for analysis) + production (`src/` for configurable defaults)
+- **Evidence:** "When Tier Thresholds Are Ungrounded" recall entry confirms the pattern — ungrounded thresholds need measurement, not design. No-confabulation and no-estimates rules apply directly. Human judgment labeling requirement makes this interactive investigation, not delegatable design.

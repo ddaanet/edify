@@ -28,7 +28,7 @@
   - Measure fuzzy match scores ("how format X" vs "how to format X"), extract agent query patterns via session scraper, observe retrieval accuracy
   - Tools: `fuzzy.py` score_match, `session-scraper.py`, 366-entry index
   - Retrieval accuracy requires agent behavior observation, not just script execution
-- [ ] **Calibrate thresholds** → `ar-threshold-calibration` — `/orchestrate` | sonnet
+- [ ] **Calibrate thresholds** — `/orchestrate` | sonnet
   - Measure distributions for all 5 thresholds against 366-entry dataset, set at natural breakpoints, implement user-configurable defaults with feedback pipeline
   - Thresholds: keyword overlap %, specificity range, keyword count, content words, discriminating count
   - Human judgment needed for "is this a true duplicate" / "is this over-specific" labeling
