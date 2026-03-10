@@ -70,7 +70,7 @@
 - [ ] **Runbook quality fixes** — `/design plans/runbook-quality-directives/brief.md` | opus
   - Plan: runbook-quality-directives
   - Note: Verify GREEN collapse, Bootstrap omission, Tier 2 consolidation, corrector noise rules, `just green` recipe. Author-corrector coupling — all edits must ship together.
-- [ ] **Inline lifecycle gate** → `inline-lifecycle-gate` — `/design plans/inline-lifecycle-gate/brief.md` | opus
+- [ ] **Inline lifecycle gate** — `/design plans/inline-lifecycle-gate/brief.md` | opus
   - Plan: inline-lifecycle-gate
   - Note: Corrector gate D+B anchor (Write-gated skip), triage-feedback.sh review.md check. Independent of runbook-quality-directives.
 - [ ] **Markdown AST parser** — `/design plans/markdown-ast-parser/brief.md` | opus
