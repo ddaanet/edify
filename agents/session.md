@@ -31,6 +31,10 @@
   - Infrastructure built. Blocked on human: curate task-contexts.json, annotate ground-truth.md
   - After human steps: run harness then analysis (commands in README)
 
+- [!] **AR Recall Consolidate** — `/runbook plans/active-recall/outline.md` | sonnet
+  - S-B: merge recall/ + recall_cli/ + when/ into unified recall module. Band 0 — ready now
+  - Blocked: runbook skill improvements needed before re-attempting
+
 ## Worktree Tasks
 
 - [ ] **Review gate** — `/design` | sonnet
@@ -39,8 +43,6 @@
   - Evidence: JIT expansion commit skipped vet checkpoint
 - [ ] **AR Token Cache** — `/runbook plans/active-recall/outline.md` | sonnet
   - S-A: sqlite cache via sqlalchemy for count_tokens_for_file(). Band 0 — ready now
-- [ ] **AR Recall Consolidate** → `ar-recall-consolidate` — `/runbook plans/active-recall/outline.md` | sonnet
-  - S-B: merge recall/ + recall_cli/ + when/ into unified recall module. Band 0 — ready now
 - [ ] **AR Format Grounding** — `/ground` | opus
   - S-C: research trigger format, when/how distinction, index hierarchy validation. Band 0 — ready now
   - Input: plans/active-recall/outline.md
