@@ -1,17 +1,18 @@
 # Session Handoff: 2026-03-11
 
-**Status:** Deliverable review for prose-infra-batch complete — reviewed + delivered. No critical or major findings.
+**Status:** Git config cleanup — fixed author attribution, removed stale branch and config.
 
 ## Completed This Session
 
-- **Deliverable review: prose-infra-batch:**
-  - Layer 2 full-artifact review (< 500 lines total)
-  - 0 critical, 0 major, 4 minor findings (D-5 cross-FR test gap, theoretical regex edge case, sed fallback coverage, SKILL.md placeholder clarity)
-  - All FRs satisfied, corrector fixes verified, precommit passes
-  - Report: `plans/prose-infra-batch/reports/deliverable-review.md`
-  - Lifecycle: reviewed → delivered (on main, no critical findings)
+- **Git config cleanup:**
+  - Removed local git user override (`Test User <test@example.com>`) — now falls through to global (`David Allouche <david@ddaa.net>`)
+  - Rewrote 231 commits via `filter-branch` to correct author/committer on `main` and `feature` branches
+  - Removed stale `vscode-merge-base = origin/tmp` from `.git/config` (caused incorrect "Main branch: tmp" in gitStatus)
+  - Deleted merged `devddaanet` branch
+  - Force-pushed `main` to origin
 
 **Prior session (carried forward):**
+- Deliverable review: prose-infra-batch (0 critical, 0 major, 4 minor)
 - Reprioritization (65 tasks → 25 after consolidation)
 - Prose-infra-batch executed (Phase 1 inline + Phase 2 TDD)
 - 4 worktree merges (active-recall, session-cli-tool, worktree-merge-lifecycle, plugin-migration)
@@ -54,7 +55,7 @@
   - Outline Rev 2 reviewed. Next: Phase B (user discussion) → sufficiency gate → design or /runbook
   - Absorbs: Generate memory index (S-D), Recall learnings design (S-L), Codify branch awareness (S-L removes /codify)
 - [ ] **Directive skill promotion** — `/design plans/directive-skill-promotion/brief.md` | opus | 2.2
-  - Plan: directive-skill-promotion | Status: requirements
+  - Plan: directive-skill-promotion | Status: briefed
   - Absorbs: Handoff insertion policy, wrap command, discuss protocol grounding, p: classification gap, discuss-to-pending chain
 - [ ] **Parallel orchestration** — `/design plans/parallel-orchestration/problem.md` | sonnet | 1.8
   - Plan: parallel-orchestration | Status: requirements
