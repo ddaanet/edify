@@ -1,5 +1,3 @@
-**⚠ UNREVIEWED — Agent-drafted from session.md task descriptions. Validate before design.**
-
 # Review Gate
 
 Precommit gate enforcing review coverage on production artifacts.

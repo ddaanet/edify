@@ -1,8 +1,6 @@
-**⚠ UNREVIEWED — Agent-drafted from session.md task descriptions. Validate before design.**
-
 # Health Check UPS Fallback
 
-Add UserPromptSubmit fallback for session health check when SessionStart hook did not fire.
+Replace Stop hook fallback with UserPromptSubmit fallback for session health check when SessionStart hook did not fire. Current fallback (`stop-health-fallback.sh`) fires at session end — too late to be useful.
 
 ## Requirements
 
@@ -25,7 +23,7 @@ UPS hook already runs `userpromptsubmit-shortcuts.py` on every message. Health c
 ### Out of Scope
 
 - Fixing SessionStart hook reliability (separate root cause)
-- Modifying Stop hook fallback (`stop-health-fallback.sh`) — this adds a parallel UPS fallback
+- Note: Replaces `stop-health-fallback.sh` (Stop hook fallback is useless — fires at session end when health check results can't help)
 
 ### Skill Dependencies (for /design)
 

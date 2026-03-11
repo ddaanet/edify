@@ -1,5 +1,3 @@
-**⚠ UNREVIEWED — Agent-drafted from session.md task descriptions. Validate before design.**
-
 # Planstate Brief Inference
 
 Fix planstate to infer correct next-action for brief-only plans.

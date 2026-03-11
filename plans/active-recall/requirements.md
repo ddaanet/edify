@@ -163,6 +163,16 @@ Acceptance criteria:
 - Corrector rejects or requests revision for entries failing quality criteria
 - False positive suppression taxonomy documented
 
+**FR-12: Usage scoring**
+Track per-entry resolution frequency as informational signal. Absorbed from recall-pipeline.
+- Acceptance: `claudeutils _recall stats` shows per-entry resolution count and last-used date
+- Note: Zero resolutions does not imply low value — scoring informs human judgment, not automated pruning
+
+**FR-13: Recall deduplication**
+Detect and merge duplicate recall entries across decision files (`agents/decisions/*.md`). Duplicates arise from parallel worktrees writing similar entries independently. Absorbed from recall-pipeline.
+- Acceptance: Two entries with identical trigger phrases but different wording → flagged for merge with diff shown
+- Acceptance: Entries with overlapping semantic scope but different triggers → flagged as candidates (not auto-merged)
+
 ### Non-Functional Requirements
 
 **NFR-1: Scaling capacity**
@@ -200,7 +210,6 @@ Worktree lifecycle code (`src/claudeutils/worktree/`) currently hardcodes `agent
 ### Out of Scope
 
 - SWE-ContextBench benchmarking — mentioned in brief as positioning, not implementation work
-- Post-resolve scoring / recall usage tracking — noted in grounding report as downstream infrastructure
 - Stage provenance tags in recall-artifact.md — grounding report Pattern 1, deferred
 - Recall-artifact rejection tracking — grounding report Pattern 2 annotated removal, deferred
 - Lifecycle role contract enforcement — grounding report Pattern 3, convention not mechanically enforced
