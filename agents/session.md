@@ -27,6 +27,10 @@
   - S-H: end-to-end verification of recall-explore-recall pattern, cross-worktree memory visibility, capture-time write path
   - Blocked: S-D, S-F, S-J, S-L (terminal — runs after all other AR sub-problems)
 
+- [!] **Verb form AB test** — see `plans/reports/ab-test/README.md` | sonnet
+  - Infrastructure built. Blocked on human: curate task-contexts.json, annotate ground-truth.md
+  - After human steps: run harness then analysis (commands in README)
+
 ## Worktree Tasks
 
 - [ ] **Review gate** — `/design` | sonnet
@@ -37,7 +41,7 @@
   - S-A: sqlite cache via sqlalchemy for count_tokens_for_file(). Band 0 — ready now
 - [ ] **AR Recall Consolidate** → `ar-recall-consolidate` — `/runbook plans/active-recall/outline.md` | sonnet
   - S-B: merge recall/ + recall_cli/ + when/ into unified recall module. Band 0 — ready now
-- [ ] **AR Format Grounding** → `ar-format-grounding` — `/ground` | opus
+- [ ] **AR Format Grounding** — `/ground` | opus
   - S-C: research trigger format, when/how distinction, index hierarchy validation. Band 0 — ready now
   - Input: plans/active-recall/outline.md
 - [ ] **AR Submodule Refactor** → `ar-submodule-refactor` — `/runbook plans/active-recall/outline.md` | sonnet
@@ -56,6 +60,9 @@
   - S-G: source docs to extraction agent to corrector to index regen. Band 2 — blocked: S-C, S-D, S-K
 - [ ] **AR Capture Writes** — `/design plans/active-recall/outline.md` | opus
   - S-L: /remember skill, eliminate learnings.md + /codify. Band 3 — blocked: S-J, S-K, S-D, S-E
+
+- [ ] **Fix prefix tolerance** — `src/claudeutils/when/fuzzy.py` | sonnet
+  - Zero tolerance for prefix noise (0.0 scores on one-token mismatch). Separate from format decision.
 
 ## Reference Files
 

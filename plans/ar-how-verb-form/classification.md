@@ -1,0 +1,7 @@
+- **Classification:** Simple (Investigation)
+- **Implementation certainty:** High — tools exist (fuzzy.py, session-scraper.py), technique is measurement
+- **Requirement stability:** High — three specific measurements defined in problem.md
+- **Behavioral code check:** No — produces grounding report, not code changes
+- **Work type:** Investigation — produces decision/recommendation about verb form convention
+- **Artifact destination:** investigation (plans/reports/)
+- **Evidence:** No behavioral code. All deliverables are measurements/analysis. Tools exist. Output is recommendation, not implementation.
