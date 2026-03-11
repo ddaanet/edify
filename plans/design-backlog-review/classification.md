@@ -1,0 +1,7 @@
+- **Classification:** Simple
+- **Implementation certainty:** High — review/triage process, not code change
+- **Requirement stability:** High — bounded scope (review existing plan files)
+- **Behavioral code check:** No
+- **Work type:** Investigation — produces approve/kill/refine decisions per plan
+- **Artifact destination:** investigation (plans/reports/)
+- **Evidence:** Problem.md describes batch review. No code delivery. Batch review recall (per-artifact routing) applies. 18 UNREVIEWED files across requirements.md and problem.md types.

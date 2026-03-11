@@ -1,30 +1,25 @@
 # Session Handoff: 2026-03-11
 
-**Status:** Force-codified all 20 learnings. RCA on codify incident-specific drops → new incident-counting plan.
+**Status:** Design backlog review (9 approve, 3 kill, 5 refine). Retro repo expansion briefed + worktree. Reflect: fixed handoff dirty-detection heuristic.
 
 ## Completed This Session
 
-**Codify (force-flush all learnings):**
-- Consolidated 15 entries into 10 target files:
-  - Fragments: error-handling.md (Edit tool), communication.md (output-style plugins), delegation.md (recall content in prompts)
-  - Decisions: implementation-notes.md (JSONL parsing, persistent caches), operational-tooling.md (codify branch, hierarchical index, settings.local.json), workflow-planning.md (decomposition vs sequencing), workflow-optimization.md (skill description, prioritizing, grounding recall), hook-patterns.md (recall gate), pipeline-review.md (multi-item review steps, Simple routing), operational-practices.md (brainstorm-name resume)
-- Dropped 5 already-codified entries (pushback.md, tdd-cycle-planning.md, review-dispatch-template.md)
-- Split pipeline-contracts.md (406 lines) → pipeline-contracts.md (220) + pipeline-review.md (190)
-- Deleted stale pipeline-contracts-2.md
-- Added 12 new memory-index entries, updated 1 existing
-- Configured `~/.config/claudeutils/config.toml` with Anthropic API key for `claudeutils tokens`
-- learnings.md: 95 → 7 lines
+**Design backlog review:**
+- Reviewed all 17 UNREVIEWED plan files (report: `plans/reports/design-backlog-review.md`)
+- Classification written to `plans/design-backlog-review/classification.md`
+- Verdicts: 9 approve, 3 kill (gate-batch absorbed by design-context-gate, prose-infra-batch delivered, markdown-migration absorbed by markdown-ast-parser), 5 refine
+- Awaiting user review of verdicts before executing kills/banner stripping
 
-**RCA + brief:**
-- `/reflect` on codify dropping incident-specific entries — root cause: skill quality criteria too absolute, no carve-out for recurrence tracking
-- Created `plans/incident-counting/brief.md` with investigation scope (recover lost incidents, ground methodology)
-- Scheduled incident-counting task (opus)
+**Retrospective repo expansion:**
+- Scanned ~/code for all git repos (37 found, 16 with agentic artifacts)
+- Created `plans/retrospective-repo-expansion/brief.md` with repo inventory, evidence value, hazards
+- Worktree created: `retro-repo-expansion`
 
-**Prior session (carried forward):**
-- Git config cleanup (author rewrite, stale branch/config removal)
-- Session.md restructured (all tasks to worktree, AR nesting)
-- Deliverable review: prose-infra-batch
-- Reprioritization (65 → 25 tasks)
+**Reflect: handoff dirty-detection:**
+- RCA on handoff merging prior session's Completed items into fresh handoff
+- Root cause: `git diff --name-only` heuristic conflates current-session task edits with prior-session uncommitted handoffs
+- Fix: handoff SKILL.md Step 1 now inspects diff content (Completed section modified → merge; task-only changes → fresh write)
+- Learning appended to learnings.md
 
 ## In-tree Tasks
 
@@ -124,6 +119,9 @@
 - [ ] **Incident counting** — `/design plans/incident-counting/brief.md` | opus
   - Plan: incident-counting | Status: briefed
   - Fix codify's incident-specific rejection, ground methodology for recurrence tracking
+- [ ] **Retro repo expansion** → `retro-repo-expansion` — `/design plans/retrospective-repo-expansion/brief.md` | sonnet
+  - Plan: retrospective-repo-expansion | Status: briefed
+  - Extend retrospective evidence base with 16 additional git repos (pre-claudeutils evolution + parallel projects)
 - [!] **Verb form AB test** — see `plans/reports/ab-test/README.md` | sonnet
   - Infrastructure built. Blocked on human: curate task-contexts.json, annotate ground-truth.md
   - After human steps: run harness then analysis (commands in README)
@@ -177,4 +175,4 @@
 
 ## Next Steps
 
-Design backlog review to validate/kill UNREVIEWED plan files.
+User reviews backlog verdicts (`plans/reports/design-backlog-review.md`), then execute kills and strip UNREVIEWED banners from approved files.
