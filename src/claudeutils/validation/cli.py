@@ -17,6 +17,7 @@ from claudeutils.validation.session_refs import validate as validate_session_ref
 from claudeutils.validation.session_structure import (
     validate as validate_session_structure,
 )
+from claudeutils.validation.task_plans import validate as validate_task_plans
 from claudeutils.validation.tasks import validate as validate_tasks
 
 
@@ -85,6 +86,9 @@ def _run_all_validators(root: Path) -> dict[str, list[str]]:
     except (ValueError, FileNotFoundError, OSError) as e:
         all_errors["session-structure"] = [f"Error: {e}"]
     _run_validator("plan-archive", check_plan_archive_coverage, all_errors, root)
+    _run_validator(
+        "task-plans", validate_task_plans, all_errors, "agents/session.md", root
+    )
 
     return all_errors
 
@@ -194,6 +198,17 @@ def plan_archive() -> None:
     """Validate deleted plans have archive entries."""
     root = find_project_root(Path.cwd())
     errors = check_plan_archive_coverage(root)
+    if errors:
+        for error in errors:
+            click.echo(error, err=True)
+        sys.exit(1)
+
+
+@validate.command()
+def task_plans() -> None:
+    """Validate task plan references."""
+    root = find_project_root(Path.cwd())
+    errors = validate_task_plans("agents/session.md", root)
     if errors:
         for error in errors:
             click.echo(error, err=True)

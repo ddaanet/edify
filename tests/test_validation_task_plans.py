@@ -2,7 +2,10 @@
 
 from pathlib import Path
 
-from claudeutils.validation.task_plans import validate
+from click.testing import CliRunner
+
+from claudeutils.validation.cli import validate
+from claudeutils.validation.task_plans import validate as validate_task_plans
 
 
 def test_valid_plan_passes_invalid_fails(tmp_path: Path) -> None:
@@ -27,7 +30,7 @@ def test_valid_plan_passes_invalid_fails(tmp_path: Path) -> None:
     (agents_dir / "session.md").write_text(session_content)
 
     # Call validate
-    errors = validate("agents/session.md", tmp_path)
+    errors = validate_task_plans("agents/session.md", tmp_path)
 
     # Should have exactly 1 error mentioning "Bad task"
     assert len(errors) == 1
@@ -49,7 +52,7 @@ def test_terminal_tasks_exempt(tmp_path: Path) -> None:
 """
     (agents_dir / "session.md").write_text(session_content)
 
-    errors = validate("agents/session.md", tmp_path)
+    errors = validate_task_plans("agents/session.md", tmp_path)
 
     assert errors == []
 
@@ -72,6 +75,16 @@ def test_slug_only_command(tmp_path: Path) -> None:
 """
     (agents_dir / "session.md").write_text(session_content)
 
-    errors = validate("agents/session.md", tmp_path)
+    errors = validate_task_plans("agents/session.md", tmp_path)
 
     assert errors == []
+
+
+def test_cli_task_plans_command() -> None:
+    """CLI task-plans command exists and is callable."""
+    runner = CliRunner()
+
+    # Just verify the command exists — actual validation tested via validate_task_plans
+    result = runner.invoke(validate, ["task-plans", "--help"])
+    assert result.exit_code == 0
+    assert "task plan" in result.output.lower()
