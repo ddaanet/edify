@@ -28,6 +28,19 @@
 
 ## In-tree Tasks
 
+- [ ] **AR Integration** — `/runbook plans/active-recall/outline.md` | sonnet
+  - S-H: end-to-end verification of recall-explore-recall pattern, cross-worktree memory visibility, capture-time write path
+  - Blocked: S-D, S-F, S-J, S-L (terminal — runs after all other AR sub-problems)
+- [!] **AR Recall Consolidate** — `/runbook plans/active-recall/outline.md` | sonnet
+  - S-B: merge recall/ + recall_cli/ + when/ into unified recall module. Band 0 — ready now
+  - Blocked: runbook skill improvements needed before re-attempting
+- [!] **AR Submodule Refactor** — `/runbook plans/active-recall/outline.md` | sonnet
+  - S-I: extract 42 hardcoded agent-core refs into configurable submodule registry. Band 0 — ready now
+  - Blocked: outline exists but `/runbook` skill on this branch is behind main. Waiting for main's runbook pipeline updates to land, then merge.
+- [!] **Verb form AB test** — see `plans/reports/ab-test/README.md` | sonnet
+  - Infrastructure built. Blocked on human: curate task-contexts.json, annotate ground-truth.md
+  - After human steps: run harness then analysis (commands in README)
+
 ## Worktree Tasks
 
 - [ ] **Session CLI tool** → `session-cli-tool` — `/runbook plans/handoff-cli-tool/outline.md` | sonnet | 3.2
@@ -38,7 +51,7 @@
 - [ ] **Worktree merge lifecycle** → `worktree-merge-lifecycle` — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.8
   - Plan: worktree-merge-resilience | Status: outlined
   - Absorbs: Merge lifecycle audit, Plan-completion ceremony (merge-point side effects), Merge lock retry
-- [ ] **Active Recall** → `active-recall` — `/design plans/active-recall/requirements.md` | opus | 2.6
+- [ ] **Active Recall** — `/design plans/active-recall/requirements.md` | opus | 2.6
   - Plan: active-recall | Status: outlined
   - Outline Rev 2 reviewed. Next: Phase B (user discussion) → sufficiency gate → design or /runbook
   - Absorbs: Generate memory index (S-D), Recall learnings design (S-L), Codify branch awareness (S-L removes /codify)
@@ -94,6 +107,27 @@
 - [-] **Calibrate topic params** — UPS topic injection removed, moot
 - [-] **Recall tool consolidation** — absorbed into Active Recall
 - [-] **Execute flag lint** — superseded by session validator
+
+- [ ] **AR Capture Writes** — `/design plans/active-recall/outline.md` | opus
+  - S-L: /remember skill, eliminate learnings.md + /codify. Band 3 — blocked: S-J, S-K, S-D, S-E
+- [ ] **AR Doc Pipeline** — `/design plans/active-recall/outline.md` | sonnet
+  - S-G: source docs to extraction agent to corrector to index regen. Band 2 — blocked: S-C, S-D, S-K
+- [ ] **AR Hierarchy Index** — `/design plans/active-recall/outline.md` | sonnet
+  - S-D: migrate flat index to tree structure, parser updates, migration tooling, index generation. Band 1 — design blocked: S-A, S-B; impl blocked: S-J
+- [ ] **AR Memory Corrector** — `/design plans/active-recall/outline.md` | opus
+  - S-K: agent definition with quality criteria, suppression taxonomy. Band 2 — blocked: S-C
+- [ ] **AR Mode Simplify** — `/runbook plans/active-recall/outline.md` | sonnet
+  - S-F: reduce 5 modes to 2, update 10 pipeline recall points. Band 2 — blocked: S-D
+- [ ] **AR Submodule Setup** — `/design plans/active-recall/outline.md` | sonnet
+  - S-J: create memory submodule with shared branch, configure propagation, update resolver paths. Band 1 — blocked: S-I
+- [ ] **AR Trigger Metadata** — `/runbook plans/active-recall/outline.md` | sonnet
+  - S-E: formalize trigger_class and category as IndexEntry metadata. Band 2 — blocked: S-C, S-D
+- [ ] **Fix prefix tolerance** — `src/claudeutils/when/fuzzy.py` | sonnet
+  - Zero tolerance for prefix noise (0.0 scores on one-token mismatch). Separate from format decision.
+- [ ] **Review gate** — `/design` | sonnet
+  - Precommit step: review report timestamp >= production artifact edit timestamp, no triviality exception
+  - Implements defense-in-depth.md decision ("gate at chokepoint")
+  - Evidence: JIT expansion commit skipped vet checkpoint
 
 ## Blockers / Gotchas
 

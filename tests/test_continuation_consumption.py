@@ -45,7 +45,7 @@ def parse_continuation_string(
 
         entries.append({"skill": skill, "args": args})
 
-    return entries if entries else None
+    return entries or None
 
 
 def peel_continuation(

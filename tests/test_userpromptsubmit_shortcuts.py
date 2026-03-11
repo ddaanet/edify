@@ -251,7 +251,7 @@ discuss: after fence should match"""
         additional_context = output_after_fence["hookSpecificOutput"][
             "additionalContext"
         ]
-        assert "stress-test" in additional_context.lower()
+        assert "diverge" in additional_context.lower()
         assert "verdict" in additional_context.lower() or (
             "agree" in additional_context.lower()
         )

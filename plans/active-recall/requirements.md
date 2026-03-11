@@ -132,16 +132,21 @@ Acceptance criteria:
 **FR-10: Capture-time memory writes**
 Eliminate learnings.md staging area and /codify batch consolidation. Write decisions and memory entries to permanent locations at capture time — when the agent has richest context for routing (which file, which section, trigger keywords).
 
-- `learn: X` → agent writes to appropriate decision file + memory entry immediately (in memory submodule)
+- `remember: X` (or `learn: X`) → triggers `/remember` skill which handles routing, corrector validation, and index regeneration
+- `/remember` skill enforces process via tool-gating: agent cannot skip corrector pass
+- Corrector (FR-11) invoked as delegated agent (clean context — separate from skill format)
+- Skill supports continuation-prepend for resume state under context pressure
 - learnings.md goes away (no staging area)
 - /codify goes away as a skill (no batch consolidation)
 - /handoff becomes lighter (no learnings section to manage)
 - Eliminates: soft-limit management, "don't codify on branches" constraint
 
 Acceptance criteria:
-- `learn:` directive writes entry to correct decision file in memory submodule
+- `/remember` skill defined with tool-gating enforcing corrector pass
+- Skill routes entry to correct decision file in memory submodule
 - Entry includes embedded keyword metadata (FR-1) for index generation
-- Memory-corrector (FR-11) validates the write
+- Memory-corrector (FR-11) validates the write via agent delegation
+- Skill supports continuation-prepend for handoff under context pressure
 - No learnings.md in project root
 - /codify skill removed
 - /handoff skill updated (no learnings section)

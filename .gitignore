@@ -15,3 +15,4 @@ list/
 
 # IDE cruft
 /.vscode/
+/.mypy_cache/

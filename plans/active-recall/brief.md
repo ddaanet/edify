@@ -113,6 +113,16 @@ Related pending tasks on main (from plugin exploration discussion):
 - False positive exclusion list for vet/corrector prompts (technique from code-review plugin)
 - Skill description optimization methodology (technique from skill-creator plugin eval loop)
 
+## 2026-03-07: Phase B Discussion Conclusions
+
+### S-L: Capture-time writes delivered as `/remember` skill
+
+`learn:` directive replaced by `/remember` skill invocation. Skill wraps the full process: routing (target file/section), tool-gating (enforces corrector pass — agent can't skip it), continuation-prepend (resume state when context pressure requires handoff). Corrector (S-K) runs as delegated agent for clean context — agent delegation is orthogonal to skill format. User prefers `remember` over `learn` as the verb.
+
+### S-G: Pattern/antipattern catalogs default to `when` class
+
+All patterns/antipatterns repositories are best encoded as `when` entries (situational triggers). The model already knows *how* to implement patterns from training — the value-add is the applicability condition ("when you see [problem shape]"). Per-entry class decision (FR-2) still holds, but default expectation for methodology sources should be `when`, not `how`. Affects corrector (S-K) weighting for pattern sources.
+
 ## Benchmark Positioning
 
 SWE-ContextBench (Zhu et al., Feb 2026): evaluates five experience reuse paradigms, finds only oracle summary reuse reliably improves performance. Gap: no benchmark tests LLM-resolved indexes or recall-explore-recall. Position as sixth paradigm — if it matches oracle performance without an oracle, that demonstrates intentional indexation value.

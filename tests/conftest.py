@@ -9,6 +9,7 @@ import pytest
 from anthropic import Anthropic
 from pytest_mock import MockerFixture
 
+from claudeutils.token_cache import TokenCache, create_cache_engine
 from claudeutils.tokens import ModelId
 
 pytest_plugins = ["tests.fixtures_worktree"]
@@ -206,15 +207,21 @@ def mock_token_counting(
             return_value=ModelId(model_id),
         )
 
+        # Use in-memory cache so counts flow through the cache layer without disk I/O
+        mocker.patch(
+            "claudeutils.token_cache.get_default_cache",
+            return_value=TokenCache(create_cache_engine(":memory:")),
+        )
+
         # Handle both single count and list of counts
         if isinstance(counts, list):
             mocker.patch(
-                "claudeutils.tokens_cli.count_tokens_for_file",
+                "claudeutils.token_cache._count_tokens_for_content",
                 side_effect=counts,
             )
         else:
             mocker.patch(
-                "claudeutils.tokens_cli.count_tokens_for_file",
+                "claudeutils.token_cache._count_tokens_for_content",
                 return_value=counts,
             )
 
@@ -245,6 +252,11 @@ def cli_base_mocks(
     """
     # Set fake API key to pass authentication check
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-key")
+
+    mocker.patch(
+        "claudeutils.token_cache.get_default_cache",
+        return_value=TokenCache(create_cache_engine(":memory:")),
+    )
 
     return {
         "anthropic": mocker.patch("claudeutils.tokens_cli.Anthropic", autospec=True),

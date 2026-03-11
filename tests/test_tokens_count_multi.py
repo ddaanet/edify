@@ -6,6 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 from anthropic import APIError
+from pytest_mock import MockerFixture
 
 from claudeutils.exceptions import ApiError
 from claudeutils.tokens import (
@@ -24,6 +25,7 @@ class TestCountTokensForFiles:
         self,
         tmp_path: Path,
         mock_anthropic_client: Callable[..., Mock],
+        mocker: MockerFixture,
     ) -> None:
         """Verify client is reused across multiple files.
 
@@ -47,6 +49,12 @@ class TestCountTokensForFiles:
             Mock(input_tokens=3),
         ]
         mock_client = mock_anthropic_client(side_effect=mock_responses)
+
+        # Bypass token cache so API mock is exercised
+        mocker.patch(
+            "claudeutils.token_cache.get_default_cache",
+            side_effect=Exception("no cache"),
+        )
 
         # Call function
         results = count_tokens_for_files(

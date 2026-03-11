@@ -15,7 +15,7 @@ class TestDirectiveCharacterization:
             "DISCUSS" in additional_context
             or "Evaluate critically" in additional_context
         )
-        assert "stress-test" in additional_context.lower()
+        assert "diverge" in additional_context.lower()
         assert "discuss" in result["systemMessage"].lower()
 
     def test_p_directive_standalone(self) -> None:
@@ -117,7 +117,7 @@ class TestEnhancedDDirective:
         assert "assess" in additional_context.lower() or (
             "verdict" in additional_context.lower()
         )
-        assert "stress-test" in additional_context.lower()
+        assert "diverge" in additional_context.lower()
         assert "agree" in additional_context.lower() or (
             "disagree" in additional_context.lower()
         )

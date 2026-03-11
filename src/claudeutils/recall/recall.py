@@ -1,7 +1,7 @@
 """Calculate recall metrics and discovery patterns."""
 
 import logging
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +14,7 @@ from claudeutils.recall.tool_calls import ToolCall
 logger = logging.getLogger(__name__)
 
 
-class DiscoveryPattern(str, Enum):
+class DiscoveryPattern(StrEnum):
     """Classification of how agent discovered a referenced file."""
 
     DIRECT = "direct"  # Read with no preceding Grep/Glob

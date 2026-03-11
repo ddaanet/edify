@@ -181,17 +181,18 @@ Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. R
 
 ### S-K: Memory-Corrector Agent
 
-**What (FR):** Clean-context agent that validates all memory writes — bulk conversion (FR-4), capture-time `learn:` writes (FR-10), and manual entries (FR-11). CURATE role in lifecycle between CREATE (session agent) and CONSUME (resolver).
+**What (FR):** Clean-context agent that validates all memory writes — bulk conversion (FR-4), `/remember` skill writes (FR-10), and manual entries (FR-11). CURATE role in lifecycle between CREATE (session agent) and CONSUME (resolver).
 
 **How (DP):**
 - Agent definition with system prompt encoding quality criteria
-- **Quality criteria:** trigger specificity, format compliance (against S-C spec), duplicate detection (against current index), when/how classification accuracy, keyword quality
+- **Quality criteria:** trigger specificity, format compliance (against S-C spec), duplicate detection (against current index), when/how classification accuracy, keyword quality, entry points to permanent documentation (not orphan index entries — per "when adding entries without documentation" decision)
 - **Pattern:** follows vet-false-positives "Do NOT Flag" shape — categorical suppression taxonomy, not confidence scores
-- **Invocation:** called by write-path tooling (S-L capture-time, S-G pipeline) — not a standalone workflow
+- **Invocation:** delegated agent called by `/remember` skill (S-L) and extraction pipeline (S-G) — not a standalone workflow
 - **Clean context:** agent loads only format spec + current index for dedup check, not session context (avoids anchoring on author's reasoning)
+- **Recall loading:** agent definition must include recall mechanism (per "when corrector agents lack recall mechanism" — corrector agents without recall cannot flag project-specific failure modes). Self-contained loading in agent body (option a from the decision)
 
 **Type:** Implementation (agent definition + integration points)
-**Readiness:** Designable — agent architecture pattern clear (corrector precedent exists), but quality criteria weights, suppression taxonomy, and integration protocol need design. Depends on S-C for format spec that defines "compliance."
+**Readiness:** Designable — agent architecture pattern clear (corrector precedent: design-corrector, outline-corrector, runbook-corrector agents in `.claude/agents/`), but quality criteria weights, suppression taxonomy, and integration protocol need design. Depends on S-C for format spec that defines "compliance."
 
 **Inputs:**
 - Format specification from S-C (knowledge dependency — defines valid format for compliance check)
@@ -234,7 +235,7 @@ Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. R
 
 **How (DP):**
 - Pipeline: source docs → sonnet extraction agent → corrector pass (S-K memory-corrector) → index regeneration (S-D build step)
-- Entries can be `when` or `how` per FR-2 (per-entry decision)
+- Entries can be `when` or `how` per FR-2 (per-entry decision). Pattern/antipattern catalogs default to `when` — the model knows *how* from training; value-add is the situational trigger
 - Entries include embedded keyword metadata (FR-1) for index generation
 - Corrector validates: trigger specificity, no duplicates, actionable content, format compliance
 - Idempotent: re-run on same source produces no duplicates (corrector dedup check)
@@ -259,30 +260,34 @@ Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. R
 
 ### S-L: Capture-Time Memory Writes
 
-**What (FR):** Eliminate learnings.md staging area and /codify batch consolidation. Write decisions and memory entries to permanent locations at capture time (FR-10).
+**What (FR):** Eliminate learnings.md staging area and /codify batch consolidation. Write decisions and memory entries to permanent locations at capture time (FR-10). Delivered as `/remember` skill.
 
 **How (DP):**
-- `learn: X` directive → agent determines: target decision file, section, trigger keywords, when/how class
+- `/remember` skill with tool-gating enforcing corrector pass (agent cannot skip validation)
+- `remember: X` directive triggers skill invocation
+- Skill handles: routing (target decision file, section), trigger keyword extraction, when/how classification
+- Corrector (S-K) invoked as delegated agent — clean context, separate from skill format
+- Continuation-prepend support for resume state under context pressure (handoff mid-remember). Uses continuation-passing infrastructure (D-2 `[CONTINUATION: ...]` suffix, D-5 sub-agent isolation by convention)
 - Write entry to memory submodule (S-J) with embedded keyword metadata (FR-1)
-- Route through memory-corrector (S-K) for validation
+- Entry must route to permanent documentation (decision file, methodology doc) — not create orphan index entries. Per "when adding entries without documentation": index entries must point somewhere
 - Index regeneration triggered after write (S-D build step)
 - Remove: `agents/learnings.md`, `/codify` skill, learnings section from `/handoff` skill
 - Update `/handoff` — no learnings management, lighter handoff
-- Update `learn:` directive behavior in execute-rule.md fragment
+- Update `learn:`/`remember:` directive behavior in execute-rule.md fragment
 
-**Type:** Implementation
-**Readiness:** Designable — write-path mechanics clear in concept, but integration details need design: how agent determines target file/section (heuristic vs explicit routing), corrector invocation protocol (synchronous vs deferred — Q-5), index regeneration trigger (immediate vs batched), graceful degradation if corrector rejects.
+**Type:** Implementation (skill definition + write-path tooling)
+**Readiness:** Designable — skill architecture clear (tool-gating, agent delegation for corrector, continuation-prepend), but integration details need design: routing heuristic (how skill determines target file/section — Q-6), corrector invocation protocol (synchronous vs deferred — Q-5, resolved during S-K design), index regeneration trigger (immediate vs batched), graceful degradation if corrector rejects.
 
 **Inputs:**
 - Memory submodule from S-J (structural dependency — write target)
 - Memory-corrector from S-K (structural dependency — validation)
 - Hierarchical index from S-D (structural dependency — index regeneration after write)
 - Trigger class metadata from S-E (knowledge dependency — when/how classification for new entries)
-**Outputs:** Capture-time write tooling, updated `learn:` directive, removed learnings.md + /codify + /handoff learnings section
+**Outputs:** `/remember` skill definition, capture-time write tooling, updated `remember:`/`learn:` directive, removed learnings.md + /codify + /handoff learnings section
 **Controls:** FR-10 acceptance criteria
 **Mechanism:** opus (behavioral changes to agent directives), worktree
 
-**File set:** New write-path module, `agents/learnings.md` (removed), `/codify` skill (removed), `/handoff` skill (updated), `execute-rule.md` fragment (updated), tests
+**File set:** `/remember` skill definition, new write-path module, `agents/learnings.md` (removed), `/codify` skill (removed), `/handoff` skill (updated), `execute-rule.md` fragment (updated), tests
 
 ---
 
@@ -294,9 +299,10 @@ Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. R
 - Document recall-explore-recall as retrievable decision entry (FR-6 acceptance criterion)
 - Verify pipeline recall points implement convergence-based pattern post-migration
 - Confirm `/recall` tail-recursion handles hierarchical traversal
+- Verify nested `/recall` invocation from other skills works without special infrastructure (FR-6 acceptance criterion)
 - End-to-end `_recall resolve` through full hierarchy in memory submodule
 - Verify cross-worktree memory visibility (C-5): write in one worktree, fast-forward in another, resolve succeeds
-- Verify capture-time write path (FR-10): `learn:` → entry written → corrector validated → index regenerated → resolvable
+- Verify capture-time write path (FR-10): `remember:` → `/remember` skill → corrector agent validates → index regenerated → resolvable
 
 **Type:** Validation
 **Readiness:** Executable — structurally dependent on S-D (hierarchy), S-F (modes), S-J (submodule), S-L (capture-time writes).
@@ -431,7 +437,7 @@ S-D's design phase can proceed without S-J (design questions are about hierarchy
 | FR-9 | S-I (prereq) + S-J (submodule) | Multi-submodule refactor, submodule creation, propagation, path update |
 | FR-10 | S-L | Capture-time writes, learnings.md removal, /codify removal, /handoff update |
 | FR-11 | S-K | Memory-corrector agent definition, quality criteria, suppression taxonomy |
-| NFR-1 | S-D | O(log_k(N)) hierarchical lookup |
+| NFR-1 | S-D | Hierarchical lookup scales with tree depth, not entry count |
 | NFR-2 | S-B (deprecation alias) + S-D (path migration) | Backward compat during transition |
 | NFR-3 | S-D | Incremental migration strategy |
 | NFR-4 | S-A (measurement) + S-D (threshold) | Token budget as design target |
@@ -510,7 +516,7 @@ S-D's design phase can proceed without S-J (design questions are about hierarchy
 - Q-1: Token budget threshold for index/content splits (NFR-4) — measured during S-D design using S-A cache
 - Q-2: Grouping heuristic for related decision files → domain mapping — resolved during S-D design
 - Q-3: Concurrent write handling (FR-9 Q-3) — fast-forward fails → strategy needed. Resolved during S-J design. May defer implementation if complex
-- Q-4: Version-change detection mechanism for FR-3 external entries — mechanism selection during S-E design, implementation deferred past this project (OUT of scope)
+- Q-4: Version-change detection mechanism for FR-3 external entries — mechanism selection during S-E design, implementation deferred past this project (OUT of scope). FR-3 acceptance criterion "Version-change detection mechanism defined (design phase)" is satisfied by design-only output from S-E; implementation is deferred
 - Q-5: Corrector timing (FR-11 Q-5) — synchronous vs post-handoff vs async. Resolved during S-K design. Trade-off: write latency vs quality assurance
 - Q-6: Capture-time write routing heuristic (FR-10 Q-4) — how agent determines target file/section. Resolved during S-L design
 - Q-7: Migration strategy for existing content into submodule — migrate flat first (S-J) then restructure (S-D), or create empty submodule (S-J) and build hierarchy directly (S-D). Resolved during S-J design

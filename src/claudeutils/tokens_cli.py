@@ -14,9 +14,8 @@ from claudeutils.exceptions import (
     ClaudeUtilsError,
 )
 from claudeutils.tokens import (
-    TokenCount,
     calculate_total,
-    count_tokens_for_file,
+    count_tokens_for_files,
     resolve_model_alias,
 )
 from claudeutils.user_config import get_api_key
@@ -56,11 +55,7 @@ def handle_tokens(model: str, files: list[str], *, json_output: bool = False) ->
         cache_dir = Path(platformdirs.user_cache_dir("claudeutils"))
         resolved_model = resolve_model_alias(model, client, cache_dir)
 
-        results = []
-        for filepath_str in file_paths:
-            filepath = Path(filepath_str)
-            count = count_tokens_for_file(filepath, resolved_model, client)
-            results.append(TokenCount(path=str(filepath), count=count))
+        results = count_tokens_for_files([Path(f) for f in file_paths], resolved_model)
 
         if json_output:
             total = calculate_total(results)

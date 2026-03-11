@@ -4,7 +4,7 @@
 def parse_trigger(entry_line: str) -> str:
     """Strip annotation and normalize operator prefix for resolver lookup."""
     # Strip annotation: split on first ' — ' and take left side
-    base = entry_line.split(" — ")[0].strip()
+    base = entry_line.split(" — ", maxsplit=1)[0].strip()
 
     # Detect operator: check if first word (lowercased) is when/how
     first_word = base.split()[0].lower() if base.split() else ""
@@ -31,6 +31,6 @@ def parse_entry_keys_section(content: str) -> list[str] | None:
                 stripped = entry_line.strip()
                 if stripped and not stripped.startswith("#"):
                     entries.append(stripped)
-            return entries if entries else []
+            return entries or []
 
     return None

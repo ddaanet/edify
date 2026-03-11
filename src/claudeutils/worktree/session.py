@@ -174,7 +174,7 @@ def add_slug_marker(session_path: Path, task_name: str, slug: str) -> None:
     # Find task block within Worktree Tasks section only
     lines = content.split("\n")
     bounds = find_section_bounds(content, "Worktree Tasks")
-    section_start, section_end = bounds if bounds else (0, len(lines))
+    section_start, section_end = bounds or (0, len(lines))
 
     task_start_idx = None
     for i in range(section_start, section_end):
@@ -209,7 +209,7 @@ def remove_slug_marker(session_path: Path, slug: str) -> None:
     # Find line containing the slug marker within Worktree Tasks section only
     pattern = rf" → `{re.escape(slug)}`"
     bounds = find_section_bounds(content, "Worktree Tasks")
-    section_start, section_end = bounds if bounds else (0, len(lines))
+    section_start, section_end = bounds or (0, len(lines))
     modified = False
 
     for i in range(section_start, section_end):

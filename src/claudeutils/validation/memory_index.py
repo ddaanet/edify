@@ -57,7 +57,7 @@ def _extract_entry_key(line: str) -> str | None:
         return f"{operator_prefix} {trigger}".lower()
     if " — " in line:
         # Parse em-dash format
-        key = line.split(" — ")[0].strip()
+        key = line.split(" — ", maxsplit=1)[0].strip()
         return key.lower() if key else None
     # Bare line without valid format
     return line.lower()

@@ -131,6 +131,29 @@ def resolve_model_alias(model: str, client: Anthropic, cache_dir: Path) -> Model
     return ModelId(model)
 
 
+def _count_tokens_for_content(content: str, model: ModelId, client: Anthropic) -> int:
+    """Count tokens for already-read content via Anthropic API.
+
+    Returns 0 for empty content. Callers handle file I/O.
+    """
+    if not content:
+        return 0
+
+    try:
+        response = client.messages.count_tokens(
+            model=model,
+            messages=[{"role": "user", "content": content}],
+        )
+    except AuthenticationError as e:
+        raise ApiAuthenticationError from e
+    except RateLimitError as e:
+        raise ApiRateLimitError from e
+    except APIError as e:
+        raise ApiError(str(e)) from e
+
+    return response.input_tokens
+
+
 def count_tokens_for_file(path: Path, model: ModelId, client: Anthropic) -> int:
     """Count tokens in a file using Anthropic API.
 
@@ -152,26 +175,11 @@ def count_tokens_for_file(path: Path, model: ModelId, client: Anthropic) -> int:
     except (PermissionError, OSError, UnicodeDecodeError) as e:
         raise FileReadError(str(path), str(e)) from e
 
-    if not content:
-        return 0
-
-    try:
-        response = client.messages.count_tokens(
-            model=model,
-            messages=[{"role": "user", "content": content}],
-        )
-    except AuthenticationError as e:
-        raise ApiAuthenticationError from e
-    except RateLimitError as e:
-        raise ApiRateLimitError from e
-    except APIError as e:
-        raise ApiError(str(e)) from e
-
-    return response.input_tokens
+    return _count_tokens_for_content(content, model, client)
 
 
 def count_tokens_for_files(paths: list[Path], model: ModelId) -> list[TokenCount]:
-    """Count tokens in multiple files using Anthropic API.
+    """Count tokens in multiple files using Anthropic API with caching.
 
     Args:
         paths: List of paths to count tokens for
@@ -182,9 +190,21 @@ def count_tokens_for_files(paths: list[Path], model: ModelId) -> list[TokenCount
     """
     api_key = get_api_key()
     client = Anthropic(api_key=api_key) if api_key else Anthropic()
+
+    from claudeutils.token_cache import cached_count_tokens_for_file, get_default_cache  # noqa: PLC0415, I001
+
+    cache = None
+    try:
+        cache = get_default_cache()
+    except Exception:  # noqa: BLE001
+        logger.warning("Token cache unavailable, falling back to uncached counting")
+
     results = []
     for path in paths:
-        count = count_tokens_for_file(path, model, client)
+        if cache is not None:
+            count = cached_count_tokens_for_file(path, model, client, cache)
+        else:
+            count = count_tokens_for_file(path, model, client)
         results.append(TokenCount(path=str(path), count=count))
     return results
 
