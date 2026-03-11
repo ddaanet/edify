@@ -7,8 +7,10 @@ from claudeutils.validation.task_parsing import parse_task_line
 
 _RECOGNIZED_ARTIFACTS = {"requirements.md", "problem.md", "brief.md", "design.md"}
 _PENDING_STATUSES = {" ", ">", "!"}
-_PLAN_PATTERN = re.compile(r"plans/([^/]+)/")
+_PLAN_PATTERN = re.compile(r"plans/([^/\s`'\"]+)")
 _SLUG_PATTERN = re.compile(r"/orchestrate\s+(\S+)")
+# plans/reports/ is the shared reports container, not a plan directory
+_CONTAINER_DIRS = {"reports"}
 
 
 def validate(session_path: str, root: Path) -> list[str]:
@@ -37,22 +39,23 @@ def validate(session_path: str, root: Path) -> list[str]:
         if parsed.checkbox not in _PENDING_STATUSES:
             continue
 
-        # Check for plan reference in command
-        if not parsed.command:
-            errors.append(f"task '{parsed.name}': no plan reference in command")
-            continue
+        # Extract plan slug from command or fall back to raw line scan
+        search_text = parsed.command or parsed.full_line
 
-        # Extract plan slug from command
-        match = _PLAN_PATTERN.search(parsed.command)
+        match = _PLAN_PATTERN.search(search_text)
         if not match:
             # Try slug-only pattern: /orchestrate my-plan
-            slug_match = _SLUG_PATTERN.search(parsed.command)
+            slug_match = _SLUG_PATTERN.search(search_text)
             if not slug_match:
                 errors.append(f"task '{parsed.name}': no plan reference in command")
                 continue
             plan_slug = slug_match.group(1)
         else:
             plan_slug = match.group(1)
+
+        # Skip container directories that are not plan directories
+        if plan_slug in _CONTAINER_DIRS:
+            continue
         plan_dir = root / "plans" / plan_slug
 
         # Check if plan directory exists and has a recognized artifact

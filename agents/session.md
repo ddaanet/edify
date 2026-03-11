@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-11
 
-**Status:** Prose-infra-batch designed (Tier 2 runbook), ready for execution.
+**Status:** Prose-infra-batch executed (Phase 1 inline + Phase 2 TDD), pending deliverable review.
 
 ## Completed This Session
 
@@ -40,6 +40,12 @@
 - **Created prose-infra-batch plan:** 4 FRs (remove opus-design-question, magic-query skill, handoff merge-incremental fix, forbid undocumented tasks rule+validator)
 - **Designed prose-infra-batch:** Classification (composite: 2 simple + 3 moderate), outline (2 phases), Tier 2 runbook (Phase 1 inline opus 5 steps, Phase 2 TDD sonnet 6 cycles), corrector review applied
   - Key decisions: magic-query is agent decoy (`user-invocable: false`), non-biasing description, `~/.claude/` log via sandbox-allowlisted script, plan path required in task commands (no bare `/design`), no `Plan:` note fallback
+- **Executed prose-infra-batch:**
+  - Phase 1 (inline, opus): Removed opus-design-question skill + all references (7 files), created magic-query skill + logging script, fixed handoff merge-incremental detection (date→git-dirty), added plan-backed tasks rule to execute-rule.md, normalized 3 bare `/design` commands, created umbrella plans (worktree-lifecycle-cli, design-backlog-review)
+  - Phase 2 (TDD, sonnet): 6 cycles → 4 executed (2.2/2.3 pre-covered by 2.1 GREEN). New validator `src/claudeutils/validation/task_plans.py` with CLI integration. Corrector found+fixed 2 false positives: nested `plans/reports/` path extraction, non-backtick-wrapped commands
+  - Skill-reviewer fixes: removed sandbox leak from SKILL.md, hardened JSON escaping (jq preferred, sed fallback)
+  - .gitignore: added 14 sandboxing artifacts
+  - Tests: 1651 passed, 1 xfail. Review: `plans/prose-infra-batch/reports/review.md`
 
 ## In-tree Tasks
 
@@ -64,10 +70,10 @@
 
 ## Worktree Tasks
 
-- [ ] **Session CLI tool** — `/runbook plans/handoff-cli-tool/outline.md` | sonnet | restart | 3.2
-  - Plan: handoff-cli-tool | Status: outlined (6 review rounds)
+- [ ] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart | 3.2
+  - Plan: handoff-cli-tool | Status: ready
   - Absorbs: Fix task-context bloat
-  - Note: Blocker resolved (Bootstrap tag support). Regenerate step files via `prepare-runbook.py plans/handoff-cli-tool/`, then `/orchestrate handoff-cli-tool`
+  - Note: Blocker resolved (Bootstrap tag support). Step files generated. `/orchestrate handoff-cli-tool`
 - [ ] **Plugin migration** — `/orchestrate plugin-migration` (refresh outline first) | opus | 3.2
   - Plan: plugin-migration | Status: ready (stale — Feb 9)
 - [ ] **Worktree merge lifecycle** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.8
@@ -122,9 +128,7 @@
   - Plan: research-backlog | Status: requirements
 - [ ] **Small fixes batch** — `/design plans/small-fixes-batch/requirements.md` | sonnet
   - Plan: small-fixes-batch | Status: requirements
-- [ ] **Prose infra batch** — `/runbook plans/prose-infra-batch/outline.md` | opus | restart
-  - Plan: prose-infra-batch | Status: outlined (Tier 2 runbook in `runbook.md`)
-  - Note: Runbook written (Tier 2). `/runbook` will detect existing runbook.md → route to `/inline plans/prose-infra-batch execute`. Phase 1 inline opus, Phase 2 TDD sonnet.
+- [ ] **Review prose-infra** — `/deliverable-review plans/prose-infra-batch` | opus | restart
 - [ ] **Design backlog review** — `/design plans/design-backlog-review/problem.md` | opus | restart
   - Process for batch-reviewing 16 UNREVIEWED plan files. Triage by type (requirements vs problem), bulk approval, kill criteria.
 
@@ -195,4 +199,4 @@
 
 ## Next Steps
 
-Execute prose-infra-batch (opus, restart). Then design backlog review to validate/kill the 16 UNREVIEWED plan files before further work.
+Deliverable review for prose-infra-batch (opus, restart). Then design backlog review to validate/kill the 16 UNREVIEWED plan files.
