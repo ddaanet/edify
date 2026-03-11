@@ -1,28 +1,19 @@
-# Session Handoff: 2026-03-08
+# Session Handoff: 2026-03-11
 
-**Status:** Band 0 worktrees created — 4 parallel sub-problems dispatched to worktrees.
+**Status:** Band 0 merges complete — S-A and S-C delivered, S-B and S-I blocked on runbook pipeline.
 
 ## Completed This Session
 
-**Design JIT expansion:**
-- Added multi-sub-problem detection in `/design` skill artifact check (SKILL.md)
-- Added multi-sub-problem sufficiency gate in write-outline.md with 6 criteria (concrete scope, dependency graph, FR traceability, scope boundaries, readiness routing, tear points)
-- Exit behavior: outline is terminal design artifact, sub-problems dispatched independently — no `/runbook` prepend
-- Classification: Simple, agentic-prose, opus (file: plans/design-jit-expansion/classification.md)
-- Fix-forward: disambiguated re-entry routing (skill-reviewer finding — "Phase B" implied discussion on already-discussed outlines)
-
-**Active Recall design:**
-- Multi-sub-problem sufficiency gate passed — all 6 criteria met
-- Outline (Rev 2) confirmed as terminal design artifact (file: plans/active-recall/outline.md)
-- 12 sub-problems dispatched as independent pending tasks with dependency graph and band ordering
+**Band 0 worktree merges:**
+- S-A (AR Token Cache): merged and removed — sqlite cache for count_tokens_for_file()
+- S-C (AR Format Grounding): merged and removed — grounding research delivered, 3 new learnings, spawned 3 new plans (ar-how-verb-form, ar-idf-weighting, ar-threshold-calibration)
+- S-B (AR Recall Consolidate): merged — landed [!] blocked on runbook skill improvements
+- S-I (AR Submodule Refactor): merged — landed [!] blocked on main's runbook pipeline updates
+- Lint fixes applied during ar-token-cache merge (ruff auto-fix: UP042, PLC0207, FURB110)
+- Duplicate task dedup in session.md during ar-recall-consolidate and ar-submodule-refactor merges (worktree session promoted task to In-tree, Worktree copy persisted)
 
 ## In-tree Tasks
 
-- [x] **Design JIT expansion** — `/design plans/design-jit-expansion/classification.md` | opus
-  - Plan: design-jit-expansion
-- [x] **Active Recall** — `/design plans/active-recall/outline.md` | opus
-  - Plan: active-recall | Decomposed into 12 sub-problem tasks below
-  - Absorbs: Generate memory index (S-D), Recall learnings design (S-L), Codify branch awareness (S-L removes /codify)
 - [ ] **AR Integration** — `/runbook plans/active-recall/outline.md` | sonnet
   - S-H: end-to-end verification of recall-explore-recall pattern, cross-worktree memory visibility, capture-time write path
   - Blocked: S-D, S-F, S-J, S-L (terminal — runs after all other AR sub-problems)
@@ -45,11 +36,10 @@
   - Precommit step: review report timestamp >= production artifact edit timestamp, no triviality exception
   - Implements defense-in-depth.md decision ("gate at chokepoint")
   - Evidence: JIT expansion commit skipped vet checkpoint
-- [ ] **AR Token Cache** — `/runbook plans/active-recall/outline.md` | sonnet
-  - S-A: sqlite cache via sqlalchemy for count_tokens_for_file(). Band 0 — ready now
-- [ ] **AR Format Grounding** — `/ground` | opus
-  - S-C: research trigger format, when/how distinction, index hierarchy validation. Band 0 — ready now
-  - Input: plans/active-recall/outline.md
+- [x] **AR Token Cache** — `/runbook plans/active-recall/outline.md` | sonnet
+  - S-A: sqlite cache via sqlalchemy for count_tokens_for_file(). Band 0 — delivered
+- [x] **AR Format Grounding** — `/ground` | opus
+  - S-C: research trigger format, when/how distinction, index hierarchy validation. Band 0 — delivered
 - [ ] **AR Submodule Setup** — `/design plans/active-recall/outline.md` | sonnet
   - S-J: create memory submodule with shared branch, configure propagation, update resolver paths. Band 1 — blocked: S-I
 - [ ] **AR Hierarchy Index** — `/design plans/active-recall/outline.md` | sonnet
@@ -76,4 +66,4 @@
 
 ## Next Steps
 
-Band 0 worktrees active: ar-token-cache (S-A), ar-recall-consolidate (S-B), ar-format-grounding (S-C), ar-submodule-refactor (S-I). Merge completed worktrees with `wt merge <slug>`.
+Band 0 complete. S-B and S-I blocked on runbook pipeline — unblock when main's runbook improvements land. Band 1+ tasks blocked on S-B/S-I resolution.
