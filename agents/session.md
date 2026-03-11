@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-11
 
-**Status:** Retro repo expansion complete + synthesis updated with spontaneous recall measurement. Deliverable review pending.
+**Status:** Deliverable review complete — 0 critical, 1 major, 3 minor. Fix task pending.
 
 ## Completed This Session
 
@@ -20,14 +20,23 @@
 - No measurement of spontaneous agent recall existed until this session. Now measured: 0%
 - Existing retrospective reports have wrong framing (plans/retrospective/reports/topic-1-memory-system.md) — separate correction task on main
 
+**Deliverable review:**
+- 8 reports reviewed (all Human documentation type, ~1,522 lines)
+- 0 critical, 1 major (repo naming inconsistency — scratch/ prefix dropped creating ambiguity with standalone repos), 3 minor
+- All 6 runbook verification criteria met
+- Report: plans/retrospective-repo-expansion/reports/deliverable-review.md
+- Lifecycle: reviewed (no critical findings)
+
 ## In-tree Tasks
 
 - [x] **Retro repo expansion** → `retro-repo-expansion` — `/design plans/retrospective-repo-expansion/brief.md` | sonnet
   - Plan: retrospective-repo-expansion | Status: review-pending
 - [x] **Measure agent recall** — `/design plans/measure-agent-recall/brief.md` | sonnet
   - 0% spontaneous rate confirmed across 129 invocations
-- [ ] **Review retro expansion** — `/deliverable-review plans/retrospective-repo-expansion` | opus | restart
-  - Plan: retrospective-repo-expansion | Status: review-pending
+- [x] **Review retro expansion** — `/deliverable-review plans/retrospective-repo-expansion` | opus | restart
+  - Plan: retrospective-repo-expansion | Status: reviewed
+- [ ] **Fix retro-expansion** — `/design plans/retrospective-repo-expansion/reports/deliverable-review.md` | opus
+  - Plan: retrospective-repo-expansion | 1 major (naming consistency), 3 minor
 
 ## Blockers / Gotchas
 
@@ -45,7 +54,8 @@
 - `plans/measure-agent-recall/report.md` — spontaneous recall rate measurement (0%)
 - `plans/retrospective-repo-expansion/reports/` — 6 source evidence reports
 - `plans/retrospective/reports/topic-1-memory-system.md` — existing topic report with 4.1% framing (needs correction on main)
+- `plans/retrospective-repo-expansion/reports/deliverable-review.md` — review report with findings
 
 ## Next Steps
 
-Branch work complete.
+Fix retro-expansion findings (1 major naming consistency, 3 minor) then branch work complete.
