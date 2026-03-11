@@ -155,20 +155,22 @@ class TestScanSkillFiles:
 class TestCachePath:
     """Tests for cache path generation."""
 
-    def test_cache_path_deterministic(self) -> None:
+    def test_cache_path_deterministic(self, tmp_path: Path) -> None:
         """Same inputs produce same cache path."""
         paths = ["/skill/design/SKILL.md", "/skill/plan/SKILL.md"]
-        assert get_cache_path(paths, "/project") == get_cache_path(paths, "/project")
+        project = str(tmp_path)
+        assert get_cache_path(paths, project) == get_cache_path(paths, project)
 
-    def test_cache_path_order_invariant(self) -> None:
+    def test_cache_path_order_invariant(self, tmp_path: Path) -> None:
         """Different order of paths produces same cache path."""
         p1 = ["/skill/design/SKILL.md", "/skill/plan/SKILL.md"]
         p2 = ["/skill/plan/SKILL.md", "/skill/design/SKILL.md"]
-        assert get_cache_path(p1, "/project") == get_cache_path(p2, "/project")
+        project = str(tmp_path)
+        assert get_cache_path(p1, project) == get_cache_path(p2, project)
 
-    def test_cache_path_includes_hash(self) -> None:
+    def test_cache_path_includes_hash(self, tmp_path: Path) -> None:
         """Cache path includes hash component."""
-        path = get_cache_path(["/skill/design/SKILL.md"], "/project")
+        path = get_cache_path(["/skill/design/SKILL.md"], str(tmp_path))
         assert "continuation-registry" in str(path)
 
 

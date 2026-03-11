@@ -1,25 +1,21 @@
 # Session Handoff: 2026-03-11
 
-**Status:** Design backlog review (9 approve, 3 kill, 5 refine). Retro repo expansion briefed + worktree. Reflect: fixed handoff dirty-detection heuristic.
+**Status:** Fixed 5 test regressions (2 in test_cli_tokens, 3 in test_continuation_registry). Session scraper investigation traced both to autonomous agent commits without full test suite verification. Briefed skill-gated-session-edits plan.
 
 ## Completed This Session
 
-**Design backlog review:**
-- Reviewed all 17 UNREVIEWED plan files (report: `plans/reports/design-backlog-review.md`)
-- Classification written to `plans/design-backlog-review/classification.md`
-- Verdicts: 9 approve, 3 kill (gate-batch absorbed by design-context-gate, prose-infra-batch delivered, markdown-migration absorbed by markdown-ast-parser), 5 refine
-- Awaiting user review of verdicts before executing kills/banner stripping
+**Test regression investigation and fix:**
+- 5 test failures: 2 in `test_cli_tokens.py` (API key validation), 3 in `test_continuation_registry.py` (cache path mkdir)
+- Session scraper traced both regressions to originating sessions:
+  - `test_cli_tokens.py`: Session `68963394` (ar-token-cache worktree). Agent extracted `_count_tokens_for_content`, did `replace_all` on mock targets. API key tests mocked count function but real issue was `get_api_key()` config file fallback not mocked. Agent ran scoped tests (29 pass), dismissed full-suite failures as "pre-existing"
+  - `test_continuation_registry.py`: Session `63af67bf` (main). User said "jfdi" for cache path fix. Agent changed `get_cache_path` to use `project_dir/tmp/` but `TestCachePath` tests used fake `"/project"` path → `mkdir` on read-only filesystem
+- Fix: mock `get_api_key` in API key tests, use `tmp_path` fixture in cache path tests
+- Full suite green: 1651/1652 passed, 1 xfail
 
-**Retrospective repo expansion:**
-- Scanned ~/code for all git repos (37 found, 16 with agentic artifacts)
-- Created `plans/retrospective-repo-expansion/brief.md` with repo inventory, evidence value, hazards
-- Worktree created: `retro-repo-expansion`
-
-**Reflect: handoff dirty-detection:**
-- RCA on handoff merging prior session's Completed items into fresh handoff
-- Root cause: `git diff --name-only` heuristic conflates current-session task edits with prior-session uncommitted handoffs
-- Fix: handoff SKILL.md Step 1 now inspects diff content (Completed section modified → merge; task-only changes → fresh write)
-- Learning appended to learnings.md
+**Skill-gated session edits brief:**
+- Created `plans/skill-gated-session-edits/brief.md` with causal chain from investigation
+- Core finding: bare directive → no Skill tool → no `/inline` lifecycle → no corrector → agent judgment only → regression committed
+- New pending task (opus, behavioral design)
 
 ## In-tree Tasks
 
@@ -56,6 +52,9 @@
 - [ ] **Directive skill promotion** — `/design plans/directive-skill-promotion/brief.md` | opus | 2.2
   - Plan: directive-skill-promotion | Status: briefed
   - Absorbs: Handoff insertion policy, wrap command, discuss protocol grounding, p: classification gap, discuss-to-pending chain
+- [ ] **Skill-gated session edits** — `/design plans/skill-gated-session-edits/brief.md` | opus
+  - Plan: skill-gated-session-edits | Status: briefed
+  - Default read-only sessions, skill required for production edits. Motivated by regression investigation.
 - [ ] **Parallel orchestration** — `/design plans/parallel-orchestration/problem.md` | sonnet | 1.8
   - Plan: parallel-orchestration | Status: requirements
 - [ ] **Gate batch** — `/design plans/gate-batch/requirements.md` | sonnet | 1.7
@@ -65,8 +64,6 @@
 - [ ] **Worktree lifecycle CLI** — `/design plans/worktree-lifecycle-cli/problem.md` | sonnet | 1.6
   - Exit ceremony + Wt rm task cleanup + Worktree ad-hoc task + CLI UX + --base submodule bug
   - Absorbs plans: wt-exit-ceremony, wt-rm-task-cleanup, worktree-ad-hoc-task
-- [ ] **Registry cache to tmp** — `/design plans/registry-cache-to-tmp/requirements.md` | sonnet | 1.5
-  - Plan: registry-cache-to-tmp | Status: requirements
 - [ ] **Code quality** — `/design plans/codebase-sweep/requirements.md` | sonnet | 1.4
   - Plan: codebase-sweep | Status: requirements
   - Codebase sweep + agent-core lint coverage + Test diamond migration + Infrastructure scripts + Test diagnostic helper
@@ -74,8 +71,6 @@
   - Plan: hook-batch-2 | Status: requirements
 - [ ] **Update prioritize skill** — `/design plans/update-prioritize-skill/requirements.md` | sonnet | 1.2
   - Plan: update-prioritize-skill | Status: requirements
-- [ ] **Recall pipeline** — `/design plans/recall-pipeline/requirements.md` | opus | 1.1
-  - Plan: recall-pipeline | Status: requirements
 - [ ] **Quality grounding** — `/design plans/quality-grounding/problem.md` | opus | 1.0
   - Plan: quality-grounding | Status: requirements
 - [ ] **Cross-tree operations** — `/design plans/cross-tree-operations/requirements.md` | sonnet | 1.0
@@ -134,6 +129,7 @@
 - [-] **Calibrate topic params** — UPS topic injection removed, moot
 - [-] **Recall tool consolidation** — absorbed into Active Recall
 - [-] **Execute flag lint** — superseded by session validator
+- [-] **Registry cache to tmp** — fixed inline, plan killed
 
 ## Blockers / Gotchas
 
@@ -172,7 +168,8 @@
 - `plans/active-recall/brief.md` — Active recall system: hierarchical index, documentation conversion, trigger classes
 - `tmp/active-recall.md` — Discussion decisions: recall-explore-recall, tree navigation, benchmark landscape
 - `plans/prose-infra-batch/reports/deliverable-review.md` — Deliverable review report (0 critical, 0 major, 4 minor)
+- `plans/skill-gated-session-edits/brief.md` — Causal chain: bare directive → no skill gates → regression committed
 
 ## Next Steps
 
-User reviews backlog verdicts (`plans/reports/design-backlog-review.md`), then execute kills and strip UNREVIEWED banners from approved files.
+Fix the two regressions committed. Then skill-gated-session-edits design (opus).

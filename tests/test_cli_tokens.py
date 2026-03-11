@@ -327,13 +327,12 @@ def test_cli_detects_empty_api_key_before_sdk(
     test_file = tmp_path / "test.md"
     test_file.write_text("Hello")
 
+    # Mock config file fallback - should also return no key
+    mocker.patch("claudeutils.tokens_cli.get_api_key", return_value=None)
     # Mock SDK components - should NOT be called
     mock_anthropic = mocker.patch("claudeutils.tokens_cli.Anthropic", autospec=True)
     mock_resolve = mocker.patch(
         "claudeutils.tokens_cli.resolve_model_alias", autospec=True
-    )
-    mock_count = mocker.patch(
-        "claudeutils.token_cache._count_tokens_for_content", autospec=True
     )
 
     with pytest.raises(SystemExit) as exc_info:
@@ -347,7 +346,6 @@ def test_cli_detects_empty_api_key_before_sdk(
     # Verify SDK was never called
     assert not mock_anthropic.called
     assert not mock_resolve.called
-    assert not mock_count.called
 
 
 def test_cli_detects_missing_api_key_before_sdk(
@@ -367,13 +365,12 @@ def test_cli_detects_missing_api_key_before_sdk(
     test_file = tmp_path / "test.md"
     test_file.write_text("Hello")
 
+    # Mock config file fallback - should also return no key
+    mocker.patch("claudeutils.tokens_cli.get_api_key", return_value=None)
     # Mock SDK components - should NOT be called
     mock_anthropic = mocker.patch("claudeutils.tokens_cli.Anthropic", autospec=True)
     mock_resolve = mocker.patch(
         "claudeutils.tokens_cli.resolve_model_alias", autospec=True
-    )
-    mock_count = mocker.patch(
-        "claudeutils.token_cache._count_tokens_for_content", autospec=True
     )
 
     with pytest.raises(SystemExit) as exc_info:
@@ -387,4 +384,3 @@ def test_cli_detects_missing_api_key_before_sdk(
     # Verify SDK was never called (missing key test)
     assert not mock_anthropic.called
     assert not mock_resolve.called
-    assert not mock_count.called
