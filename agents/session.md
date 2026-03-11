@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-11
 
-**Status:** Deliverable review complete — 0 critical, 1 major, 3 minor. Fix task pending.
+**Status:** All deliverable review findings fixed. Branch work complete.
 
 ## Completed This Session
 
@@ -25,18 +25,23 @@
 - 0 critical, 1 major (repo naming inconsistency — scratch/ prefix dropped creating ambiguity with standalone repos), 3 minor
 - All 6 runbook verification criteria met
 - Report: plans/retrospective-repo-expansion/reports/deliverable-review.md
-- Lifecycle: reviewed (no critical findings)
+
+**Fix retro-expansion findings:**
+- Major: Added scratch/ prefix to all scratch repo references in pre-claudeutils-evolution.md (timeline, headings, analytical refs, direct quotes, conclusion) and cross-repo-patterns.md (phase listings, summary timeline, propagation table, template chain)
+- Minor: Removed emojipack Oct 12 "Initial commit (no AGENTS.md)" timeline noise entry
+- Minor: Deleted superseded review-skip.md
+- Minor (content overlap): No action — user confirmed intentional for synthesis
 
 ## In-tree Tasks
 
 - [x] **Retro repo expansion** → `retro-repo-expansion` — `/design plans/retrospective-repo-expansion/brief.md` | sonnet
-  - Plan: retrospective-repo-expansion | Status: review-pending
+  - Plan: retrospective-repo-expansion | Status: reviewed
 - [x] **Measure agent recall** — `/design plans/measure-agent-recall/brief.md` | sonnet
   - 0% spontaneous rate confirmed across 129 invocations
 - [x] **Review retro expansion** — `/deliverable-review plans/retrospective-repo-expansion` | opus | restart
   - Plan: retrospective-repo-expansion | Status: reviewed
-- [ ] **Fix retro-expansion** — `/design plans/retrospective-repo-expansion/reports/deliverable-review.md` | opus
-  - Plan: retrospective-repo-expansion | 1 major (naming consistency), 3 minor
+- [x] **Fix retro-expansion** — `/design plans/retrospective-repo-expansion/reports/deliverable-review.md` | opus
+  - Plan: retrospective-repo-expansion | Fixed 1 major (naming), 2 minor (noise, superseded artifact). Content overlap kept per user directive.
 
 ## Blockers / Gotchas
 
@@ -53,9 +58,8 @@
 - `plans/retrospective-repo-expansion/reports/synthesis.md` — single narrative combining all evidence + recall measurement
 - `plans/measure-agent-recall/report.md` — spontaneous recall rate measurement (0%)
 - `plans/retrospective-repo-expansion/reports/` — 6 source evidence reports
-- `plans/retrospective/reports/topic-1-memory-system.md` — existing topic report with 4.1% framing (needs correction on main)
 - `plans/retrospective-repo-expansion/reports/deliverable-review.md` — review report with findings
 
 ## Next Steps
 
-Fix retro-expansion findings (1 major naming consistency, 3 minor) then branch work complete.
+Branch work complete.

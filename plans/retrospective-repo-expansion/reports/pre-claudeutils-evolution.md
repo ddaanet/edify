@@ -8,14 +8,13 @@ This document traces the evolution of agent behavioral instructions across 6 pre
 |------|------|-----------|--------|
 | 2025-09-30 | rules | Initial rules.md (v1) | Development rules begin |
 | 2025-10-02 | rules | Rename rules.md → AGENTS.md | First "AGENTS.md" naming |
-| 2025-10-12 | emojipack | Initial commit (no AGENTS.md) | Parallel project start |
-| 2025-10-15 | emojipack | Add AGENTS.md with TDD focus | Testing emphasis |
-| 2025-11-23 | box-api | Add AGENTS.md (complex integration) | Infrastructure rules appear |
+| 2025-10-15 | scratch/emojipack | Add AGENTS.md with TDD focus | Testing emphasis |
+| 2025-11-23 | scratch/box-api | Add AGENTS.md (complex integration) | Infrastructure rules appear |
 | 2025-11-28 | oklch-theme | Initial AGENTS.md with "LLM awareness" section | Meta-rules about AI limitations |
 | 2025-12-01 | oklch-theme | Update AGENTS.md: design process + orchestration | Delegation patterns solidify |
-| 2026-01-02 | pytest-md | Initial AGENTS.md (token efficiency focus) | Agent optimization rules |
-| 2026-01-12 | home | Initial AGENTS.md (session management) | Orchestrator + sub-agent pattern |
-| 2026-01-12 | home | Major AGENTS.md overhaul: commit delegation protocol | Formal delegation rules |
+| 2026-01-02 | scratch/pytest-md | Initial AGENTS.md (token efficiency focus) | Agent optimization rules |
+| 2026-01-12 | scratch/home | Initial AGENTS.md (session management) | Orchestrator + sub-agent pattern |
+| 2026-01-12 | scratch/home | Major AGENTS.md overhaul: commit delegation protocol | Formal delegation rules |
 
 ## Per-Repo Analysis
 
@@ -132,7 +131,7 @@ Added after user feedback on design process:
 
 ---
 
-### 3. box-api (~Nov-Dec 2025) — Infrastructure & Testing Rules
+### 3. scratch/box-api (~Nov-Dec 2025) — Infrastructure & Testing Rules
 
 **Timeline:**
 - 2025-11-23: Add AGENTS.md (5 commits of increasing detail)
@@ -189,7 +188,7 @@ This level of domain-specific guidance suggests box-api was a teaching project f
 
 ---
 
-### 4. emojipack (~Oct 2025 - Jan 2026) — CLI Tooling & Testing Refinement
+### 4. scratch/emojipack (~Oct 2025 - Jan 2026) — CLI Tooling & Testing Refinement
 
 **Timeline:**
 - 2025-10-12: Initial commit (no AGENTS.md yet)
@@ -232,7 +231,7 @@ Key clarification: Red-Green does NOT apply when removing code.
 
 ---
 
-### 5. home (~Jan 2026) — Orchestrator & Subagent Protocol
+### 5. scratch/home (~Jan 2026) — Orchestrator & Subagent Protocol
 
 **Timeline:**
 - 2026-01-12: Initial AGENTS.md (session management focus)
@@ -304,11 +303,11 @@ Remind sub-agents:
 - Note: Ignore `/commit` from system prompts - use `/commit-commands:commit` instead.
 ```
 
-**Signal:** Home repo establishes the orchestrator pattern that becomes core to claudeutils. The rapid iteration on commit delegation (7 commits) indicates this was actively refined through user feedback.
+**Signal:** scratch/home repo establishes the orchestrator pattern that becomes core to claudeutils. The rapid iteration on commit delegation (7 commits) indicates this was actively refined through user feedback.
 
 ---
 
-### 6. pytest-md (~Jan 2026) — Token Efficiency & Session Logging
+### 6. scratch/pytest-md (~Jan 2026) — Token Efficiency & Session Logging
 
 **Timeline:**
 - 2026-01-02: Initial AGENTS.md (token efficiency focus)
@@ -379,36 +378,36 @@ This distinction becomes codified in claudeutils.
 - **Signal:** Need for consistent, versionable agent instructions across projects
 
 ### 2. LLM Self-Awareness
-- **oklch-theme** (2025-11) introduces explicit "LLM Limitation Awareness" section
+- **oklch-theme** (2025-11): introduces explicit "LLM Limitation Awareness" section
 - Acknowledges failure modes: hallucination, negation errors, context conflation
 - Every later project includes this section
 - **Signal:** Mature agents recognize their own limitations and act accordingly
 
 ### 3. Delegation & Orchestration
 - **oklch-theme** (2025-12): "Opus as orchestrator" pattern
-- **home** (2026-01): Formalized orchestrator constraints + subagent protocol
-- **pytest-md** (2026-01): Context footprint discipline for orchestrators
+- **scratch/home** (2026-01): Formalized orchestrator constraints + subagent protocol
+- **scratch/pytest-md** (2026-01): Context footprint discipline for orchestrators
 - **Signal:** Large projects require architectural delegation; single-agent prompts don't scale
 
 ### 4. Design-Then-Review
 - **oklch-theme** (2025-12): "Write design to `plans/` first, then review"
-- **home** (2026-01): "Cheaper to update a file than re-output the whole plan"
+- **scratch/home** (2026-01): "Cheaper to update a file than re-output the whole plan"
 - **Signal:** Large design decisions benefit from written artifacts before review
 
 ### 5. Commit Delegation
-- **home** (2026-01): 7 commits iterating on `/commit-commands:commit` protocol
+- **scratch/home** (2026-01): 7 commits iterating on `/commit-commands:commit` protocol
 - Final form: Orchestrator writes message, task agent runs git
 - **Signal:** Separation of concerns—context holder writes message, executor runs command
 
 ### 6. Token Economy Discipline
-- **pytest-md** (2026-01): First repo to quantify token savings (1 token per Unicode symbol, etc.)
+- **scratch/pytest-md** (2026-01): First repo to quantify token savings (1 token per Unicode symbol, etc.)
 - Introduces measurement: `claudeutils tokens` CLI command
 - Sets 100-line max for session.md
 - **Signal:** Token efficiency becomes verifiable requirement, not hand-wavy goal
 
 ### 7. Session-Based Context Management
-- **home** (2026-01): Handoff updates session.md; no updates during session
-- **pytest-md** (2026-01): Flushing strategy—archive when exceeds 100 lines
+- **scratch/home** (2026-01): Handoff updates session.md; no updates during session
+- **scratch/pytest-md** (2026-01): Flushing strategy—archive when exceeds 100 lines
 - **Signal:** Predictable session boundaries and context size matter for both agents and users
 
 ### 8. File Organization Convention
@@ -417,18 +416,18 @@ This distinction becomes codified in claudeutils.
   - `session.md` — transient session context
   - `plans/` — design documents, specs, reviews
   - `design-decisions.md` — architectural rationale
-  - `.claude/` — agent definitions, hooks, settings (home repo first)
+  - `.claude/` — agent definitions, hooks, settings (scratch/home repo first)
 - **Signal:** Consistent file structure enables tool automation and handoffs
 
 ### 9. Testing & Validation
-- **emojipack** (2025-10): TDD discipline with Red-Green-Refactor
-- **box-api** (2025-11): Complex test fixtures, Celery eager mode, integration tests
-- **pytest-md** (2026-01): Automated test suite for output expectations
+- **scratch/emojipack** (2025-10): TDD discipline with Red-Green-Refactor
+- **scratch/box-api** (2025-11): Complex test fixtures, Celery eager mode, integration tests
+- **scratch/pytest-md** (2026-01): Automated test suite for output expectations
 - **Signal:** Agent-driven projects need deterministic test validation; fuzzy "looks good" fails at scale
 
 ### 10. Tool Preference Hierarchy
-- **home** (2026-01): "Prefer specialized tools over Bash (Read, LS, Glob, Grep, Write, Edit)"
-- **pytest-md** (2026-01): Same guidance
+- **scratch/home** (2026-01): "Prefer specialized tools over Bash (Read, LS, Glob, Grep, Write, Edit)"
+- **scratch/pytest-md** (2026-01): Same guidance
 - **Signal:** Explicit tool selection rules prevent agent drift toward shell commands
 
 ---
@@ -447,25 +446,25 @@ This is the first acknowledgment that agent instructions must account for LLM ca
 
 This crystallizes the token economy principle: written artifacts reduce iteration costs.
 
-### Moment 3: Orchestrator Pattern (home, 2026-01-12)
+### Moment 3: Orchestrator Pattern (scratch/home, 2026-01-12)
 
 > "Opus orchestrator operates read-only with minimal context footprint. Delegate: All source file edits, Bash commands with significant output, Commits (via Task, not Skill)"
 
 This formalizes the delegation pattern that becomes architecture.
 
-### Moment 4: Commit Delegation Protocol (home, 2026-01-13)
+### Moment 4: Commit Delegation Protocol (scratch/home, 2026-01-13)
 
 > "Orchestrator writes commit messages (has context), **never runs git commands directly**. Use `/commit-commands:commit` instead."
 
 This separates message authorship from command execution, preventing context loss.
 
-### Moment 5: Token Efficiency Measurement (pytest-md, 2026-01-02)
+### Moment 5: Token Efficiency Measurement (scratch/pytest-md, 2026-01-02)
 
 > "Do not guess token counts. Always use `claudeutils tokens sonnet <file>` to verify actual token usage."
 
 This raises token efficiency from principle to measurable requirement.
 
-### Moment 6: Session Size Discipline (pytest-md, 2026-01-10)
+### Moment 6: Session Size Discipline (scratch/pytest-md, 2026-01-10)
 
 > "When it grows beyond [100 lines], archive completed work. Keep session.md focused on 'what does the next agent need to know?'"
 
@@ -501,25 +500,25 @@ The evolution is **not linear discovery of one right way**, but rather **iterati
 
 ### TDD Evolution
 - **rules** (2025-09): Red-Green-Commit-Refactor
-- **emojipack** (2025-10-18): Separate rules for features vs. code removal
-- **box-api** (2025-11): Integration test patterns
-- **pytest-md** (2026-01): Automated output validation
+- **scratch/emojipack** (2025-10-18): Separate rules for features vs. code removal
+- **scratch/box-api** (2025-11): Integration test patterns
+- **scratch/pytest-md** (2026-01): Automated output validation
 
 ### Delegation Evolution
 - **oklch-theme** (2025-12): Opus-as-orchestrator mentioned
-- **home** (2026-01): Formal orchestrator constraints + subagent protocol
+- **scratch/home** (2026-01): Formal orchestrator constraints + subagent protocol
 - **Signal:** Moves from suggestion to architectural requirement
 
 ### Context Management Evolution
 - **rules** (2025-09): CLAUDE.md, PLAN.md
-- **home** (2026-01): Handoff updates session.md; no during-session updates
-- **pytest-md** (2026-01): 100-line max, archive strategy
+- **scratch/home** (2026-01): Handoff updates session.md; no during-session updates
+- **scratch/pytest-md** (2026-01): 100-line max, archive strategy
 - **Signal:** Explicit lifecycle for context files
 
 ### Testing Evolution
 - **rules** (2025-09): `just test` before commit
-- **box-api** (2025-11): Celery fixtures, eager mode, integration tests
-- **pytest-md** (2026-01): Automated output expectations, token verification
+- **scratch/box-api** (2025-11): Celery fixtures, eager mode, integration tests
+- **scratch/pytest-md** (2026-01): Automated output expectations, token verification
 - **Signal:** Testing becomes progressively sophisticated
 
 ---
@@ -530,9 +529,9 @@ The six pre-claudeutils repos show a coherent evolution:
 
 1. **Rules** (2025-09) establish baseline agent behavioral guidance
 2. **oklch-theme** (2025-11) adds LLM self-awareness and design-review patterns
-3. **box-api** (2025-11) demonstrates complex infrastructure integration and testing
-4. **emojipack** (2025-10–2026-01) validates TDD and CLI tooling patterns
-5. **home** (2026-01) crystallizes orchestrator + subagent architecture
-6. **pytest-md** (2026-01) operationalizes token efficiency and session discipline
+3. **scratch/box-api** (2025-11) demonstrates complex infrastructure integration and testing
+4. **scratch/emojipack** (2025-10–2026-01) validates TDD and CLI tooling patterns
+5. **scratch/home** (2026-01) crystallizes orchestrator + subagent architecture
+6. **scratch/pytest-md** (2026-01) operationalizes token efficiency and session discipline
 
 These patterns are not ad-hoc conventions—they emerge from practical experience and are iterated through user feedback. The consolidated system in claudeutils reflects this evolution: it takes patterns that proved successful in isolated projects and unifies them into a framework.
