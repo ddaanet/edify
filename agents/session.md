@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-11
 
-**Status:** Force-codified all 20 learnings — 15 consolidated into decision files + fragments, 5 dropped (already codified). Split pipeline-contracts.md. Learnings.md cleared to header.
+**Status:** Force-codified all 20 learnings. RCA on codify incident-specific drops → new incident-counting plan.
 
 ## Completed This Session
 
@@ -14,6 +14,11 @@
 - Added 12 new memory-index entries, updated 1 existing
 - Configured `~/.config/claudeutils/config.toml` with Anthropic API key for `claudeutils tokens`
 - learnings.md: 95 → 7 lines
+
+**RCA + brief:**
+- `/reflect` on codify dropping incident-specific entries — root cause: skill quality criteria too absolute, no carve-out for recurrence tracking
+- Created `plans/incident-counting/brief.md` with investigation scope (recover lost incidents, ground methodology)
+- Scheduled incident-counting task (opus)
 
 **Prior session (carried forward):**
 - Git config cleanup (author rewrite, stale branch/config removal)
@@ -116,6 +121,9 @@
   - Plan: research-backlog | Status: requirements
 - [ ] **Small fixes batch** — `/design plans/small-fixes-batch/requirements.md` | sonnet
   - Plan: small-fixes-batch | Status: requirements
+- [ ] **Incident counting** — `/design plans/incident-counting/brief.md` | opus
+  - Plan: incident-counting | Status: briefed
+  - Fix codify's incident-specific rejection, ground methodology for recurrence tracking
 - [!] **Verb form AB test** — see `plans/reports/ab-test/README.md` | sonnet
   - Infrastructure built. Blocked on human: curate task-contexts.json, annotate ground-truth.md
   - After human steps: run harness then analysis (commands in README)
