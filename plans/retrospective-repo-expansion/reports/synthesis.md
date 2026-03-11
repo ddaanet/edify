@@ -243,6 +243,10 @@ The existing retrospective covered five topics from claudeutils' own history. Th
 
 **Arc:** Human-written flat rules → agent retrospective self-update → structured file taxonomy → shared infrastructure (agent-core) → memory-index + recall system.
 
+**Spontaneous recall rate: 0%.** Direct measurement across 129 recall tool invocations in 69 sessions found zero spontaneous agent-initiated lookups. Every invocation was either skill-procedural (87.6% — mandated by `/design` triage, `/runbook` steps, or discussion-mode grounding) or user-triggered (12.4%). The original "actionable index" concept — entries loaded in context that would self-trigger agent recognition — did not produce spontaneous recall behavior. Agents had the tools but never used them without procedural instruction. (Method: `plans/measure-agent-recall/report.md`)
+
+This is a stronger finding than the previously cited 4.1% statistic, which measured user-initiated `/when`/`/how` skill invocations (users testing the tool). The 0% measures agent behavior directly: agents never independently decided to consult the recall system.
+
 ### 2. Pushback
 
 **Pre-history:** Early AGENTS.md actively suppresses pushback: "Proceed autonomously without asking until all tasks complete" (rules, emojipack, tuick). oklch-theme's LLM Limitation Awareness (Nov 2025) is proto-pushback: agent identifies its weaknesses. tuick experiments with "cognitive protocols" (Dec 12) then removes them (Dec 15) — overengineered. scratch/home (Jan 2026) shifts to structural enforcement: "require protocol read before execution."
