@@ -5,7 +5,7 @@ from pathlib import Path
 
 from claudeutils.validation.task_parsing import parse_task_line
 
-_RECOGNIZED_ARTIFACTS = {"requirements.md", "problem.md", "brief.md", "design.md"}
+_RECOGNIZED_ARTIFACTS = {"requirements.md", "brief.md", "design.md"}
 _PENDING_STATUSES = {" ", ">", "!"}
 _PLAN_PATTERN = re.compile(r"plans/([^/\s`'\"]+)")
 _SLUG_PATTERN = re.compile(r"/orchestrate\s+(\S+)")

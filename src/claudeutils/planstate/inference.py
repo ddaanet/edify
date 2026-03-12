@@ -17,7 +17,6 @@ def _collect_artifacts(plan_dir: Path) -> set[str]:
         "requirements.md",
         "design.md",
         "outline.md",
-        "problem.md",
         "lifecycle.md",
     ]:
         if (plan_dir / filename).exists():
@@ -82,9 +81,9 @@ def _determine_status(plan_dir: Path) -> str:
         return "designed"
     if (plan_dir / "outline.md").exists():
         return "outlined"
-    # Brief-only plans (no requirements.md/problem.md) get distinct status
+    # Brief-only plans (no requirements.md) get distinct status
     has_brief_only = (plan_dir / "brief.md").exists() and not (
-        (plan_dir / "requirements.md").exists() or (plan_dir / "problem.md").exists()
+        (plan_dir / "requirements.md").exists()
     )
     return "briefed" if has_brief_only else "requirements"
 

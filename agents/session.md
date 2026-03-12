@@ -1,10 +1,20 @@
 # Session Handoff: 2026-03-12
 
-**Status:** Interactive review implemented — /proof skill restructured with item-by-item review loop, skill-reviewed (6 fixes applied), deliverable review pending.
+**Status:** Problem.md migration complete — 12 files renamed, planstate/validation/prose updated, precommit passes.
 
 ## Completed This Session
 
-**Interactive review grounding + outline (prior session, carried forward):**
+**Problem.md migration:**
+- Renamed 12 `problem.md` → `brief.md` via `git mv` (ar-how-verb-form, ar-idf-weighting, ar-threshold-calibration, design-pipeline-evolution, diagnose-compression-loss, markdown-migration, parallel-orchestration, quality-grounding, research-backlog, review-agent-quality, skill-agent-bootstrap, worktree-lifecycle-cli)
+- Removed `problem.md` from planstate recognition: `_collect_artifacts`, `_determine_status` (inference.py), `_RECOGNIZED_ARTIFACTS` (task_plans.py), `focus-session.py` doc_types
+- Updated 5 agentic-prose files: execute-rule.md artifact list, design/SKILL.md requirements source, reflect/SKILL.md example, write-outline.md and research-protocol.md escape hatches
+- Added `test_problem_md_not_recognized` test, updated 2 parametrized cases (removed problem-only, updated brief+problem)
+- Updated 9 session.md task paths and statuses (requirements → briefed)
+- Review skipped with justification (mechanical grep-replace, verified by grep + precommit): `plans/problem-md-migration/reports/review-skip.md`
+- Runbook: `plans/problem-md-migration/runbook.md`
+- 13th plan (design-backlog-review) from brief no longer exists — 12 actual renames
+
+**Interactive review (prior session, carried forward):**
 - Full `/ground` pass: Fagan inspection, IEEE 1028, GitHub/Gerrit/Phabricator review UX, cognitive load research (Cisco/SmartBear, Microsoft)
 - Grounding report: `plans/reports/interactive-review-grounding.md` (Strong label — 4 frameworks + empirical research)
 - Branch reports: `plans/reports/interactive-review-internal-codebase.md`, `plans/reports/interactive-review-external-research.md`
@@ -14,7 +24,7 @@
 - FR-5 lifted by user (batch-apply only, session resume handles interruption)
 - Classification: Complex, agentic-prose destination
 
-**Supplementary grounding (this session):**
+**Supplementary grounding (prior session):**
 - 4 domain gaps resolved via parallel internal/external research branches
 - D-1: Verdict vocabulary is uniform — variation is in review criteria (corrector dispatch), not verdict actions
 - D-2: Batch-apply confirmed for content-modifying review (formal review pattern, not triage)
@@ -24,20 +34,16 @@
 - Grounding reviewed via dogfooded item-by-item process (4 items, all approved)
 - Outline updated with all grounding findings, all open questions resolved
 
-**Interactive review implementation (this session):**
+**Interactive review implementation (prior session):**
 - Outline sufficiency gate passed — outline IS the design (no design.md generation)
 - /proof SKILL.md restructured: item-by-item review as primary loop, existing reword-accumulate-sync becomes discussion sub-loop
 - New reference: `agent-core/skills/proof/references/item-review.md` (granularity detection, accumulation format, batch-apply)
-- Skill-reviewer found 6 issues (1 critical, 3 major, 2 minor), all applied:
-  - Critical: suspend removed (contradicts outline D-6)
-  - Major: discard planstate transition added (review-abandoned), Terminal Actions restructured, duplicate learn removed
-  - Minor: Skill removed from allowed-tools, revisit wording clarified, UNFIXABLE path specified
+- Skill-reviewer found 6 issues (1 critical, 3 major, 2 minor), all applied
 - SKILL.md: 135 → 164 lines (progressive disclosure working — detail in reference file)
-- Process learning from dogfooding: remove "TOC" label from orientation (noise)
 
 ## In-tree Tasks
 
-- [ ] **Problem.md migration** — `/design plans/problem-md-migration/brief.md` | sonnet
+- [x] **Problem.md migration** — `/design plans/problem-md-migration/brief.md` | sonnet
   - Plan: problem-md-migration | Status: briefed
   - Rename 13 problem.md → brief.md with git history recovery, fix planstate `_derive_next_action`, add precommit gate
 ## Worktree Tasks
@@ -66,8 +72,8 @@
   - S-J: **AR Submodule Setup** — create memory submodule with shared branch, configure propagation. Blocked: S-I
   - S-K: **AR Memory Corrector** — agent definition with quality criteria, suppression taxonomy. Blocked: S-C
   - S-L: **AR Capture Writes** — /remember skill, eliminate learnings.md + /codify. Blocked: S-J, S-K, S-D, S-E
-  - **AR How Verb Form** — Plan: ar-how-verb-form | Status: requirements
-  - **AR IDF Weighting** — Plan: ar-idf-weighting | Status: requirements
+  - **AR How Verb Form** — Plan: ar-how-verb-form | Status: briefed
+  - **AR IDF Weighting** — Plan: ar-idf-weighting | Status: briefed
   - **AR Threshold Calibration** — Plan: ar-threshold-calibration | Status: planned
 - [ ] **Directive skill promotion** — `/design plans/directive-skill-promotion/brief.md` | opus | 2.2
   - Plan: directive-skill-promotion | Status: briefed
@@ -79,14 +85,14 @@
 - [ ] **Skill-gated session edits** — `/design plans/skill-gated-session-edits/brief.md` | opus
   - Plan: skill-gated-session-edits | Status: briefed
   - Default read-only sessions, skill required for production edits. Motivated by regression investigation.
-- [ ] **Parallel orchestration** — `/design plans/parallel-orchestration/problem.md` | sonnet | 1.8
-  - Plan: parallel-orchestration | Status: requirements
+- [ ] **Parallel orchestration** — `/design plans/parallel-orchestration/brief.md` | sonnet | 1.8
+  - Plan: parallel-orchestration | Status: briefed
 - [ ] **Gate batch** — `/design plans/gate-batch/requirements.md` | sonnet | 1.7
   - Plan: gate-batch | Status: requirements
-- [ ] **Skill agent bootstrap** — `/design plans/skill-agent-bootstrap/problem.md` | opus | 1.6
-  - Plan: skill-agent-bootstrap | Status: requirements
-- [ ] **Worktree lifecycle CLI** — `/design plans/worktree-lifecycle-cli/problem.md` | sonnet | 1.6
-  - Plan: worktree-lifecycle-cli | Status: requirements
+- [ ] **Skill agent bootstrap** — `/design plans/skill-agent-bootstrap/brief.md` | opus | 1.6
+  - Plan: skill-agent-bootstrap | Status: briefed
+- [ ] **Worktree lifecycle CLI** — `/design plans/worktree-lifecycle-cli/brief.md` | sonnet | 1.6
+  - Plan: worktree-lifecycle-cli | Status: briefed
   - Exit ceremony + Wt rm task cleanup + Worktree ad-hoc task + CLI UX + --base submodule bug
   - Absorbed plan content migrated this session (wt-exit-ceremony, wt-rm-task-cleanup, worktree-ad-hoc-task)
 - [ ] **Code quality** — `/design plans/codebase-sweep/requirements.md` | sonnet | 1.4
@@ -96,14 +102,14 @@
   - Plan: hook-batch-2 | Status: requirements
 - [ ] **Update prioritize skill** — `/design plans/update-prioritize-skill/requirements.md` | sonnet | 1.2
   - Plan: update-prioritize-skill | Status: requirements
-- [ ] **Quality grounding** — `/design plans/quality-grounding/problem.md` | opus | 1.0
-  - Plan: quality-grounding | Status: requirements
+- [ ] **Quality grounding** — `/design plans/quality-grounding/brief.md` | opus | 1.0
+  - Plan: quality-grounding | Status: briefed
 - [ ] **Cross-tree operations** — `/design plans/cross-tree-operations/requirements.md` | sonnet | 1.0
   - Plan: cross-tree-operations | Status: requirements
-- [ ] **Review agent quality** — `/design plans/review-agent-quality/problem.md` | sonnet | 1.0
-  - Plan: review-agent-quality | Status: requirements
-- [ ] **Design pipeline evolution** — `/design plans/design-pipeline-evolution/problem.md` | opus | 1.0
-  - Plan: design-pipeline-evolution | Status: requirements
+- [ ] **Review agent quality** — `/design plans/review-agent-quality/brief.md` | sonnet | 1.0
+  - Plan: review-agent-quality | Status: briefed
+- [ ] **Design pipeline evolution** — `/design plans/design-pipeline-evolution/brief.md` | opus | 1.0
+  - Plan: design-pipeline-evolution | Status: briefed
 - [ ] **Tweakcc** — `/design plans/tweakcc/requirements.md` | sonnet | 1.0
   - Plan: tweakcc | Status: requirements
 - [ ] **Design review protocol** — `/design plans/resumed-review-protocol/brief.md` | opus | restart
@@ -116,12 +122,12 @@
   - Plan: design-context-gate | Status: briefed
 - [ ] **Design JIT expansion** — `/design plans/design-jit-expansion/brief.md` | sonnet
   - Plan: design-jit-expansion | Status: briefed
-- [ ] **Markdown migration** — `/design plans/markdown-migration/problem.md` | opus | 0.8
-  - Plan: markdown-migration | Status: requirements
+- [ ] **Markdown migration** — `/design plans/markdown-migration/brief.md` | opus | 0.8
+  - Plan: markdown-migration | Status: briefed
 - [ ] **Python hook ordering fix** — `/design plans/precommit-python3-redirect/requirements.md` | haiku | restart | 0.8
   - Plan: precommit-python3-redirect | Status: requirements
-- [ ] **Diagnose compression loss** — `/design plans/diagnose-compression-loss/problem.md` | sonnet | 0.8
-  - Plan: diagnose-compression-loss | Status: requirements
+- [ ] **Diagnose compression loss** — `/design plans/diagnose-compression-loss/brief.md` | sonnet | 0.8
+  - Plan: diagnose-compression-loss | Status: briefed
 - [ ] **Fix TDD context scoping** — `/design plans/tdd-context-scoping/brief.md` | sonnet
   - Plan: tdd-context-scoping | Status: briefed
 - [ ] **Health check UPS fallback** — `/design plans/health-check-ups-fallback/requirements.md` | sonnet
@@ -132,8 +138,8 @@
   - Plan: prototypes | Status: requirements
 - [ ] **Planstate brief inference** — `/design plans/planstate-brief-inference/requirements.md` | sonnet
   - Plan: planstate-brief-inference | Status: requirements
-- [ ] **Research backlog** — `/design plans/research-backlog/problem.md` | opus | 0.5
-  - Plan: research-backlog | Status: requirements
+- [ ] **Research backlog** — `/design plans/research-backlog/brief.md` | opus | 0.5
+  - Plan: research-backlog | Status: briefed
 - [ ] **Small fixes batch** — `/design plans/small-fixes-batch/requirements.md` | sonnet
   - Plan: small-fixes-batch | Status: requirements
   - FR-4 added: remove bottom-to-top edit ordering refs
@@ -214,7 +220,8 @@
 - `plans/interactive-review/outline.md` — Reviewed outline (all grounding gaps resolved)
 - `plans/reports/interactive-review-supplementary-grounding.md` — Supplementary grounding: 4 domain gaps (Strong)
 - `plans/interactive-review/reports/skill-review.md` — Skill reviewer report (1 critical, 3 major, 2 minor — all applied)
+- `plans/problem-md-migration/runbook.md` — Migration runbook (Tier 2)
 
 ## Next Steps
 
-Deliverable review for interactive-review (opus, restart, worktree) — review /proof skill changes and grounding artifacts.
+Pending: `/reflect` on recall gap — /runbook skill didn't read memory-index despite mandatory recall gate.

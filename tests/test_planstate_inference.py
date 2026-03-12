@@ -22,6 +22,16 @@ def test_empty_directory_not_a_plan(tmp_path: Path) -> None:
     assert plans == []
 
 
+def test_problem_md_not_recognized(tmp_path: Path) -> None:
+    """problem.md is not a recognized artifact."""
+    plan_dir = tmp_path / "test-plan"
+    plan_dir.mkdir()
+    (plan_dir / "problem.md").write_text("")
+
+    result = infer_state(plan_dir)
+    assert result is None
+
+
 @pytest.mark.parametrize(
     ("create_artifacts", "expected_status", "expected_artifacts"),
     [
@@ -38,12 +48,6 @@ def test_empty_directory_not_a_plan(tmp_path: Path) -> None:
             {"requirements.md", "outline.md"},
             id="outlined-with-requirements",
         ),
-        pytest.param(
-            ["problem.md"],
-            "requirements",
-            {"problem.md"},
-            id="requirements-problem-only",
-        ),
         pytest.param(["brief.md"], "briefed", {"brief.md"}, id="briefed-brief-only"),
         pytest.param(
             ["brief.md", "classification.md"],
@@ -59,9 +63,9 @@ def test_empty_directory_not_a_plan(tmp_path: Path) -> None:
         ),
         pytest.param(
             ["brief.md", "problem.md"],
-            "requirements",
-            {"brief.md", "problem.md"},
-            id="requirements-brief-plus-problem",
+            "briefed",
+            {"brief.md"},
+            id="briefed-with-unrecognized-problem",
         ),
         (
             ["requirements.md", "design.md"],
