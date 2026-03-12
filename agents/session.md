@@ -22,7 +22,10 @@
 
 ## In-tree Tasks
 
-- [>] **Problem.md migration** — `/design plans/problem-md-migration/brief.md` | sonnet
+- [ ] **Interactive review** — `/ground` then `/design plans/interactive-review/outline.md` | opus | restart
+  - Plan: interactive-review | Status: reviewed
+  - Outline reviewed. Needs supplementary grounding (4 domain gaps: per-domain verdicts, batch-by-domain, per-item size threshold, skip outcome). Then resume design from outline.
+- [ ] **Problem.md migration** — `/design plans/problem-md-migration/brief.md` | sonnet
   - Plan: problem-md-migration | Status: briefed
   - Rename 13 problem.md → brief.md with git history recovery, fix planstate `_derive_next_action`, add precommit gate
 ## Worktree Tasks
@@ -127,9 +130,6 @@
 - [ ] **Retro repo expansion** → `retro-repo-expansion` — `/design plans/retrospective-repo-expansion/brief.md` | sonnet
   - Plan: retrospective-repo-expansion | Status: briefed
   - Extend retrospective evidence base with 16 additional git repos (pre-claudeutils evolution + parallel projects)
-- [ ] **Interactive review** — `/ground` then `/design plans/interactive-review/outline.md` | opus | restart
-  - Plan: interactive-review | Status: reviewed
-  - Outline reviewed. Needs supplementary grounding (4 domain gaps: per-domain verdicts, batch-by-domain, per-item size threshold, skip outcome). Then resume design from outline.
 - [ ] **Recall pipeline** — `/design` | sonnet
   - Deduplication, stdin parsing, usage scoring for recall entries
   - Note: plan dir only exists in retro-repo-expansion worktree, not on main. Create plan dir before design.
@@ -199,4 +199,4 @@
 
 ## Next Steps
 
-Interactive review supplementary grounding (opus, restart) — resolve 4 domain-specific research gaps in outline, then resume design. Or bottom-to-top edit cleanup (sonnet, in-tree).
+Interactive review supplementary grounding (opus, restart, in-tree) — resolve 4 domain-specific research gaps in outline, then resume design.
