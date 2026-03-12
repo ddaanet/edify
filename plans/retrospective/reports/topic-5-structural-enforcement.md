@@ -2,39 +2,85 @@
 
 ## Git Timeline
 
-The progression from prose instructions to structural enforcement spans ~4 weeks. Key commits in chronological order:
+### Phase 0: Pre-history — Commit Gates and Role Separation (Oct 2025–Jan 2026)
+
+Structural enforcement didn't begin with D+B anchoring. The first enforcement mechanisms appeared five months earlier as commit gates and role separation.
+
+| Date | Repo | Hash | Event |
+|------|------|------|-------|
+| 2025-10-12 | scratch/emojipack | `9cc5c62` | "`just agent` before every commit" — first commit gate. Mechanical recipe as enforcement. |
+| 2025-10-25 | tuick | `7d2fa67` | Same commit gate propagated. Template-copy enforcement. |
+| 2025-11-23 | scratch/box-api | `0bbdbf8` | Agent-vs-human command separation: `just agent` (AI), `just dev` (human). Structural role differentiation. |
+| 2025-12-05 | scratch/box-api | `b3aa473` | "One-letter commands" — shorthand for frequent agent operations. |
+| 2026-01-03 | scratch/pytest-md | `fd939eb` | `.claude/settings.json` — platform-level configuration as enforcement. Rules encoded in platform, not prose. |
+| 2026-01-13 | scratch/home | `deb0d91` | Orchestrator constraints: "Allowed/Delegate" model. What orchestrator can and cannot do, structurally enforced. |
+| 2026-01-13 | scratch/home | `37b08e7` | "Require protocol read before execution" — read-before-act gate. |
+| 2026-01-22 | home | `83cef17` | Agent-core submodule — enforcement via shared infrastructure. Rules can't drift per-project. |
+
+**Enforcement escalation in pre-history:**
+
+| Level | Mechanism | First appearance |
+|-------|-----------|-----------------|
+| Recipe gate | `just agent` before commit | emojipack, Oct 2025 |
+| Role separation | Agent vs human commands | box-api, Nov 2025 |
+| Platform config | `.claude/settings.json` | pytest-md, Jan 2026 |
+| Structural constraints | Allowed/Delegate model | scratch/home, Jan 2026 |
+| Read-before-act | Protocol read required | scratch/home, Jan 2026 |
+| Shared infrastructure | Agent-core submodule | home, Jan 2026 |
+
+The pre-history shows enforcement escalating through the same pattern as the claudeutils era — each mechanism addresses failures of the previous one — but at a coarser granularity. `just agent` prevents bad commits; role separation prevents wrong tool usage; platform config prevents configuration drift. The claudeutils era applies the same principle at the instruction-following level.
+
+### Phase A: Foundation (Feb 8)
 
 | Date | Commit | Event |
 |------|--------|-------|
 | 2026-02-08 | `e3d26b1e` | Document defense-in-depth quality gate pattern (first D+B mention) |
+
+Defense-in-depth document (`e3d26b1e`) establishes the four-layer model and names the D+B hybrid pattern: "merge prose gates with adjacent action steps, anchor with tool call." This is the theoretical framework.
+
+### Phase B: Discovery + Inventory (Feb 21-24)
+
+| Date | Commit | Event |
+|------|--------|-------|
 | 2026-02-21 | `5f4801cc` | Deploy first PreToolUse hooks via sync-to-parent |
 | 2026-02-24 | `7ee9d0c0` | Design recall gate tool-anchoring (31 gates inventoried, 61% prose-only) |
 | 2026-02-24 | `66f58df0` | Runbook for recall-tool-anchoring (promoted from outline) |
+
+PreToolUse hooks deployed (`5f4801cc`). Recall gate audit reveals 31 gates across 13 files, 61% prose-only (`7ee9d0c0`). The problem quantified: most quality gates exist only as prose instructions that agents skip under execution momentum.
+
+### Phase C: Structural Remediation (Feb 24-25)
+
+| Date | Commit | Event |
+|------|--------|-------|
 | 2026-02-24 | `cd45d076` | Replace language strengthening with structural remediation in /reflect |
 | 2026-02-24 | `e1a35cd1` | Restructure design skill triage with 4 structural fixes |
 | 2026-02-25 | `59904514` | Anchor recall gates with when-resolve.py in /reflect and /runbook |
 | 2026-02-25 | `8a19b983` | Add PreToolUse hook blocking index.lock removal |
+
+Three commits in 36 hours replace prose gates with tool-call-anchored gates: /reflect (`cd45d076`), /design triage (`e1a35cd1`), recall gates (`59904514`). Language strengthening explicitly rejected in favor of structural fixes.
+
+### Phase D: Hook Evolution (Feb 26-28)
+
+| Date | Commit | Event |
+|------|--------|-------|
 | 2026-02-26 | `f2d49839` | Add python3/uv redirect hook; shorten all hook commands |
 | 2026-02-26 | `97569f3e` | Migrate hooks to permissionDecision:deny; improve UPS systemMessage |
 | 2026-02-28 | `8b9f0185` | Plan recall-null: D+B gate anchoring + post-explore gates |
 | 2026-02-28 | `654f7ec7` | Fix hook cwd-drift bypass via absolute paths |
 | 2026-02-28 | `df886503` | Add null mode to when-resolve.py and propagate D+B gate anchoring |
 | 2026-02-28 | `2293da87` | Runbook outline for UPS topic injection |
+
+PreToolUse hooks gain recipe-redirect (`f2d49839`), permissionDecision:deny (`97569f3e`), cwd-drift fix (`654f7ec7`). D+B null mode (`df886503`) propagated across pipeline skills.
+
+### Phase E: Topic Injection Attempt + Removal (Feb 28–Mar 6)
+
+| Date | Commit | Event |
+|------|--------|-------|
 | 2026-03-01 | `b213939c` | Restructure UPS topic injection from orchestrate to inline |
 | 2026-03-01 | `e253c43f` | UPS topic deliverable review (0C/0Ma/3Mi) |
 | 2026-03-06 | `108a444d` | Remove UPS topic injection (Tier 2.75) — "noisy, low relevance" |
 
-### Timeline Narrative
-
-**Phase A (Feb 8): Foundation.** Defense-in-depth document (`e3d26b1e`) establishes the four-layer model and names the D+B hybrid pattern: "merge prose gates with adjacent action steps, anchor with tool call." This is the theoretical framework.
-
-**Phase B (Feb 21-24): Discovery + Inventory.** PreToolUse hooks deployed (`5f4801cc`). Recall gate audit reveals 31 gates across 13 files, 61% prose-only (`7ee9d0c0`). The problem quantified: most quality gates exist only as prose instructions that agents skip under execution momentum.
-
-**Phase C (Feb 24-25): Structural remediation.** Three commits in 36 hours replace prose gates with tool-call-anchored gates: /reflect (`cd45d076`), /design triage (`e1a35cd1`), recall gates (`59904514`). Language strengthening explicitly rejected in favor of structural fixes.
-
-**Phase D (Feb 26-28): Hook evolution.** PreToolUse hooks gain recipe-redirect (`f2d49839`), permissionDecision:deny (`97569f3e`), cwd-drift fix (`654f7ec7`). D+B null mode (`df886503`) propagated across pipeline skills.
-
-**Phase E (Feb 28 - Mar 6): Topic injection attempt + removal.** UPS topic injection built as ambient recall via keyword matching from user prompts. Delivered with clean review (`e253c43f`). Removed 5 days later (`108a444d`) — "noisy, low relevance." 896 lines deleted. The structural enforcement via hooks (PreToolUse) proved more effective than semantic matching (topic injection).
+UPS topic injection built as ambient recall via keyword matching from user prompts. Delivered with clean review (`e253c43f`). Removed 5 days later (`108a444d`) — "noisy, low relevance." 896 lines deleted. The structural enforcement via hooks (PreToolUse) proved more effective than semantic matching (topic injection).
 
 ---
 
@@ -151,11 +197,25 @@ The implementation replaced prose gates with `when-resolve.py` calls — a scrip
 
 ## Key Inflection Points
 
-### 1. Prose-to-Structure Threshold (Feb 24)
+### Inflection 0: The First Commit Gate (Oct 2025)
+
+**When:** Oct 12, 2025
+**Evidence:** scratch/emojipack `9cc5c62`, tuick `7d2fa67`, scratch/box-api `0bbdbf8`
+**What:** "`just agent` before every commit" — the first structural enforcement of quality. A recipe that must run before committing. Not prose advice ("run tests before committing") but a named gate in the workflow.
+**Significance:** This is structural enforcement at the workflow level, five months before D+B anchoring. The same principle (mechanical check, not advisory instruction) applied to a different problem (commit quality, not instruction following). The evolution: recipe gates → platform config → orchestrator constraints → D+B tool-call anchoring → PreToolUse hooks.
+
+### Inflection 0.5: Platform-Level Configuration (Jan 2026)
+
+**When:** Jan 3, 2026
+**Evidence:** scratch/pytest-md `fd939eb`, scratch/home `deb0d91`
+**What:** `.claude/settings.json` moves enforcement from per-session instructions to platform configuration. Orchestrator constraints (Allowed/Delegate model) structurally limit what the orchestrator can do — not via prose rules but via role definitions.
+**Significance:** The enforcement moves from "instructions the agent should follow" to "configuration the platform enforces." This is the same conceptual step that PreToolUse hooks later take: enforcement at a layer the agent cannot bypass through rationalization.
+
+### Inflection 1: Prose-to-Structure Threshold (Feb 24)
 
 The recall gate skip (session `21fea8cf`) proved that clearly-written prose instructions with conditional skip clauses are systematically unreliable under execution momentum. The agent substituted "related activity" for "specific required action" — a pattern that repeated across multiple contexts. This drove the gate inventory (`7ee9d0c0`) and the systematic D+B remediation.
 
-### 2. Language Strengthening Rejected (Feb 24 - Mar 2)
+### Inflection 2: Language Strengthening Rejected (Feb 24–Mar 2)
 
 Three commits explicitly chose structural fixes over language fixes:
 - `cd45d076`: "Replace language strengthening with structural remediation in /reflect"
@@ -164,11 +224,11 @@ Three commits explicitly chose structural fixes over language fixes:
 
 The evidence was recurrence: the same pattern violated twice despite codified decisions, learnings, and recall entries. Each prose-level mitigation added words; the agent still skipped.
 
-### 3. Conditional-to-Unconditional Gate (Mar 2)
+### Inflection 3: Conditional-to-Unconditional Gate (Mar 2)
 
 Session `4d31c984` revealed that even tool-call-anchored gates fail when conditional: "D+B anchor fired but with wrong arguments." The fix: unconditional execution. The tool always runs. File absence is the signal, not a prose-level decision about whether to run the tool. This is the D+B principle's mature form.
 
-### 4. Hook-Level Enforcement (Feb 21 - Feb 28)
+### Inflection 4: Hook-Level Enforcement (Feb 21–Feb 28)
 
 PreToolUse hooks represent enforcement the agent cannot bypass:
 - `5f4801cc` (Feb 21): First hook deployment
@@ -179,9 +239,32 @@ PreToolUse hooks represent enforcement the agent cannot bypass:
 
 These hooks enforce at the platform level. The agent cannot "momentum-skip" a PreToolUse hook the way it can skip a prose instruction in a skill file.
 
-### 5. Semantic Matching Failure (Feb 28 - Mar 6)
+### Inflection 5: Semantic Matching Failure (Feb 28–Mar 6)
 
-Topic injection (UPS Tier 2.75) was the attempt to use keyword matching for ambient recall — inject relevant decisions into context without the agent needing to request them. Built, reviewed clean, then removed 5 days later as "noisy, low relevance." The structural hook mechanism worked (injection happened reliably); the semantic layer (keyword matching for relevance determination) produced too many false matches. This suggests that structural enforcement works best with deterministic triggers (file existence, tool name matching) rather than semantic matching (keyword overlap between prompts and decision entries).
+Topic injection (UPS Tier 2.75) was the attempt to use keyword matching for ambient recall — inject relevant decisions into context without the agent needing to request them. Built, reviewed clean, then removed 5 days later as "noisy, low relevance." The structural hook mechanism worked (injection happened reliably); the semantic layer (keyword matching for relevance determination) produced too many false matches. Structural enforcement works best with deterministic triggers (file existence, tool name matching) rather than semantic matching (keyword overlap).
+
+---
+
+## The Full Enforcement Ladder
+
+```
+`just agent` commit gate (emojipack, Oct 2025)
+  → Agent-vs-human command separation (box-api, Nov 2025)
+    → Platform config: .claude/settings.json (pytest-md, Jan 2026)
+      → Orchestrator constraints: Allowed/Delegate (scratch/home, Jan 2026)
+        → Shared infrastructure: agent-core submodule (home, Jan 2026)
+          → Defense-in-depth document: D+B named (Feb 8)
+            → Prose gates skipped under momentum (Feb 24)
+              → Gate inventory: 31 gates, 61% prose-only (Feb 24)
+                → Language strengthening rejected (Feb 24)
+                  → Tool-call-anchored gates (Feb 25)
+                    → Conditional gates still fail (Mar 2)
+                      → Unconditional gates: file absence = signal (Mar 2)
+                        → PreToolUse hooks: platform enforcement (Feb 21-28)
+                          → Topic injection: semantic matching fails (Mar 1-6)
+```
+
+Each rung exists because the previous one failed under a specific condition. The pre-claudeutils rungs (Oct 2025–Jan 2026) operated at the workflow level (commit gates, role separation, platform config). The claudeutils rungs (Feb–Mar 2026) operate at the instruction-following level (D+B anchoring, hooks). The principle is the same: replace advisory instructions with structural mechanisms.
 
 ---
 
@@ -191,10 +274,10 @@ Structural enforcement is the meta-pattern that connects the other four retrospe
 
 - **Memory system** (Topic 1): Recall gates were the first domain where prose-only instructions were systematically catalogued (31 gates, 61% prose-only). The D+B remediation originated from recall skip failures.
 
-- **Pushback / ground skill** (Topic 2): Pushback rules are prose instructions that compete with sycophantic momentum. The same pattern: prose rules get overridden by behavioral momentum. D+B anchoring applies (force a specific verification tool call before agreeing).
+- **Pushback** (Topic 2): Pushback rules are prose instructions that compete with sycophantic momentum. The same pattern: prose rules get overridden by behavioral momentum. D+B anchoring applies (force a specific verification tool call before agreeing). Pre-history parallel: tuick's cognitive protocols (overengineered metacognition) were the same failure class as verbose prose gates — more words doesn't mean more compliance.
 
-- **Deliverable review** (Topic 3): The review process itself was a structural gate — requiring a specific review skill invocation before marking work as delivered. The `review-pending` planstate enforces this structurally.
+- **Deliverable review** (Topic 3): The review process itself was a structural gate — requiring a specific review skill invocation before marking work as delivered. The `review-pending` planstate enforces this structurally. External validation: devddaanet ran the full review→fix→re-review cycle (commits `265c8c7`, `cae9155`, `4ffb1ea`), confirming the structural gate works outside claudeutils.
 
 - **Ground skill** (Topic 4): Grounding decisions via tool calls (Read the evidence, resolve recall entries) rather than prose reasoning. Same D+B principle: anchor the verification in a tool call, not in prose instructions to "check carefully."
 
-The progression: prose instructions (easily skipped) -> D+B tool-call anchoring (agent-mediated, mostly reliable) -> recall gates with unconditional execution (format-enforced) -> PreToolUse hooks (platform-enforced, agent cannot bypass) -> topic injection (semantic matching, partially failed). Each step addresses a failure mode of the previous step, except the last, which overreached by applying structural enforcement to a semantic problem.
+The progression: prose instructions (easily skipped) → D+B tool-call anchoring (agent-mediated, mostly reliable) → recall gates with unconditional execution (format-enforced) → PreToolUse hooks (platform-enforced, agent cannot bypass) → topic injection (semantic matching, partially failed). Each step addresses a failure mode of the previous step, except the last, which overreached by applying structural enforcement to a semantic problem.

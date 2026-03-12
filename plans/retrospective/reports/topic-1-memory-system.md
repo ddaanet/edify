@@ -2,7 +2,23 @@
 
 ## 1. Git Timeline
 
-Commits ordered chronologically, tracing the full arc from initial implementation through evaluation and redesign.
+### Phase 0: Pre-history — Agent Instructions as Proto-Memory (Sep 2025–Jan 2026)
+
+Before memory-index.md existed, agent instructions *were* the memory system. The evolution from flat rules to structured memory predates claudeutils by five months.
+
+| Date | Repo | Hash | Event |
+|------|------|------|-------|
+| 2025-09-30 | rules | `7b0a4b4` | Initial `rules.md` — 14 rules, human-curated, agent-consumed. No agent self-modification. |
+| 2025-10-02 | rules | `eacf188` | Rename to AGENTS.md — naming convention born. |
+| 2025-11-28 | oklch-theme | `b0c0d64` | AGENTS.md titled "Agent Memory" with retrospective self-update: "At the end of each session, perform a retrospective and update this file." First agent→file write loop. |
+| 2025-11-23 | scratch/box-api | `0bbdbf8` | Session-specific rules with filtering: "Include any feedback that is general enough in scope." First curation criterion for what to remember. |
+| 2026-01-12 | scratch/home | `e31a4c0` | File organization table: AGENTS.md (behavioral), session.md (transient), design-decisions.md (rationale), plans/ (artifacts). Memory distributed by content type. |
+| 2026-01-12 | scratch/pytest-md | `69bf88b` | Session log design — structured conversation state persistence. 100-line max, archive strategy. |
+| 2026-01-15 | pytest-md/agent-core | `5783aef` | Agent-core initialized — memory patterns extracted into shared infrastructure. |
+
+**Arc:** Human-written flat rules → agent retrospective self-update → filtering criterion for persistence → structured file taxonomy → shared infrastructure. Each step adds a capability: authorship (human→agent), selectivity (what to keep), organization (where to put it), sharing (across projects).
+
+The oklch-theme moment (`b0c0d64`) is notable: it's a Gemini project, not Claude. The agent→file write loop idea emerged independently, suggesting memory-as-file is not Claude-specific but a natural pattern for any stateless agent system.
 
 ### Phase A: Foundation — Memory Index & Always-Loaded Context (Feb 1)
 
@@ -14,6 +30,8 @@ Commits ordered chronologically, tracing the full arc from initial implementatio
 Commit `9a5f9f71` body: "Import memory-index.md in CLAUDE.md for always-loaded discovery. Add 2 path-scoped rules. Document memory index pruning design problem."
 
 Commit `6e88a294` body: "Create agents/memory-index.md with seeded entries (4 sections). Entry format: keyword-rich summaries with arrow separator. Seeding: behavioral rules (5), workflows (7), decisions (9), tools (7)."
+
+The memory-index was the first attempt to bridge the gap between the pre-history (rules scattered across files) and the goal (agents that recall relevant decisions). It aggregated the structured taxonomy from Phase 0 into a single lookup index.
 
 ### Phase B: /when and /how Skills — Active Lookup (Feb 8–13)
 
@@ -37,7 +55,7 @@ The when-recall worktree implemented fuzzy matching for `/when` and `/how` skill
 | 2026-02-23 | `ebbc7936` | Rename /remember skill to /codify (step 6.1) |
 | 2026-02-23 | `ed951bc1` | Ground recall pass: 4-pass pipeline memory model |
 
-### Phase D: The 4.1% Inflection Point (Feb 20)
+### Phase D: The Measurement Inflection (Feb 20)
 
 | Date | Hash | Message |
 |------|------|---------|
@@ -45,6 +63,8 @@ The when-recall worktree implemented fuzzy matching for `/when` and `/how` skill
 | 2026-02-20 | `917122ba` | Context optimization analysis and hook batch scoping |
 
 Commit `c4b1e043` body: "801 sessions scanned across 71 project dirs: 22 /when calls in 8/193 post-merge sessions. Direct decision file reads unchanged (21.2% to 21.8%), 1.1x improvement (noise). Root cause: metacognitive recognition bottleneck, not tool awareness. Unblock memory-index.md (3.7k tokens) demotion in context-optimization brief."
+
+**Note on the 4.1% statistic:** This figure measured `/when`/`/how` skill invocations — a mix of user-initiated testing and procedural usage. It did not measure spontaneous agent recall. A later direct measurement (Phase G) found the spontaneous rate to be 0%.
 
 ### Phase E: Recall Gate Anchoring — Tool-Based Enforcement (Feb 24–Mar 1)
 
@@ -69,6 +89,21 @@ Commit `c4b1e043` body: "801 sessions scanned across 71 project dirs: 22 /when c
 | 2026-03-03 | `cff6fd79` | (session) Design inputs: metacognitive analysis, forced injection, Context7 |
 | 2026-03-06 | `43abd7fe` | Design active recall system: outline + 7 architectural decisions |
 | 2026-03-06 | `de5ddfdd` | Redraft outline with decomposition methodology (8 sub-problems, DAG) |
+
+### Phase G: Spontaneous Recall Measurement — 0% (Mar 2026)
+
+Direct measurement across 129 recall tool invocations in 69 sessions:
+
+| Category | Count | % |
+|----------|-------|---|
+| Skill-procedural | 113 | 87.6% |
+| User-triggered | 16 | 12.4% |
+| Hook-injected | 0 | 0% |
+| Spontaneous | 0 | 0% |
+
+Method: Scanned 265 session files, found 129 actual recall tool invocations. All 37 initially-classified "spontaneous" hits were reclassified on manual review: discussion-grounding (11), test-execution (7), orchestration-phase (6), user-triggered (5), non-recall (5), skill-procedural (3). Report: `plans/measure-agent-recall/report.md`.
+
+The 0% spontaneous rate is a stronger finding than the 4.1% statistic from Phase D. The 4.1% measured `/when`/`/how` skill invocations (users testing the tool). The 0% measures agent behavior directly: agents never independently decided to consult the recall system. The "actionable index" concept — entries loaded in context that would self-trigger agent recognition — did not produce spontaneous recall.
 
 ---
 
@@ -209,20 +244,35 @@ Design discussion that refined how external knowledge enters the system.
 
 ## 3. Key Inflection Points
 
+### Inflection 0: Agent Instructions as Memory (Sep–Nov 2025)
+
+**When:** Sep 30, 2025 (rules.md) → Nov 28, 2025 (oklch-theme "Agent Memory")
+**What changed:** Agent instructions evolved from human-curated static rules (rules.md, `7b0a4b4`) to an agent→file write loop (oklch-theme, `b0c0d64`). The oklch-theme AGENTS.md was titled "Agent Memory" and instructed: "At the end of each session, perform a retrospective and update this file with reusable feedback."
+**Evidence:** rules `7b0a4b4`, oklch-theme `b0c0d64`.
+**Significance:** The memory problem was identified before claudeutils existed. Each agent session started blank; the file was the persistence mechanism. The oklch-theme approach — agent writes to the same file it reads — is the simplest memory architecture. Its limitation: unbounded growth, no structure, no cross-project sharing.
+
+### Inflection 0.5: Structured File Taxonomy (Jan 2026)
+
+**When:** Jan 12, 2026
+**What changed:** scratch/home introduced a file organization table separating behavioral direction (AGENTS.md), session context (session.md), design rationale (design-decisions.md), and artifacts (plans/). Memory was distributed across files by content type rather than dumped into a single file.
+**Evidence:** scratch/home `e31a4c0`.
+**Significance:** This is the architectural predecessor of the memory-index. The problem it solved: a single AGENTS.md containing rules, session state, decisions, and plans grows unwieldy. The solution: separate files with defined roles. This taxonomy transferred directly to claudeutils.
+
 ### Inflection 1: Always-Loaded to Active Lookup
 
-**When:** Feb 1 -> Feb 8-13
+**When:** Feb 1 → Feb 8-13
 **What changed:** memory-index.md started as an always-loaded `@`-reference in CLAUDE.md (3.7k tokens consumed every session). The `/when` and `/how` skills were built to make recall on-demand, reducing token cost.
 **Evidence:** Commits `9a5f9f71`, `6e88a294` (creation), then `00b8ec35` through `f2715734` (when-recall implementation).
 **Trigger:** Token cost concern — 3.7k tokens for an index that grew with every codified learning.
 
-### Inflection 2: The 4.1% Measurement
+### Inflection 2: The Measurement Inflection
 
 **When:** Feb 20
-**What changed:** Quantitative evaluation revealed `/when` was invoked in only 4.1% of post-merge sessions. The tool changed the retrieval mechanism but not the recognition step. Decision file reads were unchanged (21.2% -> 21.8%).
+**What changed:** Quantitative evaluation revealed `/when` was invoked in only 4.1% of post-merge sessions. The tool changed the retrieval mechanism but not the recognition step. Decision file reads were unchanged (21.2% → 21.8%).
 **Evidence:** Commit `c4b1e043`, session `f9e199ea`.
 **Trigger:** Context optimization work needed usage data to justify demoting memory-index from always-loaded.
 **Consequence:** Unblocked memory-index.md demotion. Shifted design direction from "better tools for agents" to "forced injection by infrastructure."
+**Caveat:** The 4.1% figure included user-initiated testing. The actual spontaneous agent recall rate, measured later (Phase G), was 0%.
 
 ### Inflection 3: Metacognitive Recognition Bottleneck Named
 
@@ -240,14 +290,43 @@ Design discussion that refined how external knowledge enters the system.
 
 ### Inflection 5: Forced Injection Architecture
 
-**When:** Feb 20 (conceptualized) -> Mar 1 (implemented) -> Mar 6 (redesigned as active recall)
+**When:** Feb 20 (conceptualized) → Mar 1 (implemented) → Mar 6 (redesigned as active recall)
 **What changed:** Recognition shifted from agent to deterministic code. UserPromptSubmit hooks detect topic keywords and inject relevant decision content. The memory-index becomes a backing store queried by scripts, not by agents.
 **Evidence:** Commit `f4de036b` (topic detector hook), `43abd7fe` (active recall design with 7 architectural decisions).
-**Trigger:** The 4.1% data plus the 84% activation rate for forced-eval hooks (from prior learnings) made the design choice obvious — forced injection at 84% beats voluntary recall at 4.1%.
+**Trigger:** The measurement data plus the 84% activation rate for forced-eval hooks (from prior learnings) made the design choice obvious — forced injection at 84% beats voluntary recall at 0%.
 
 ### Inflection 6: From Flat Index to Hierarchical Domain Tree
 
 **When:** Mar 2-6
-**What changed:** The flat memory-index.md (449 lines, 366 entries) was recognized as unsustainable. Active recall system design introduced hierarchical index: `agents/memory/index.md` -> `agents/memory/<domain>.md` -> sub-domains. Prefix-free key structure with colon-delimited domains.
+**What changed:** The flat memory-index.md (449 lines, 366 entries) was recognized as unsustainable. Active recall system design introduced hierarchical index: `agents/memory/index.md` → `agents/memory/<domain>.md` → sub-domains. Prefix-free key structure with colon-delimited domains.
 **Evidence:** Commit `60de1237` (FR-1), session `cff6fd79` (domain discussion), commit `de5ddfdd` (8 sub-problems DAG).
 **Trigger:** Index growth from codify cycles (24-50 learnings consolidated per session) made flat file unwieldy for both token cost and navigation.
+
+### Inflection 7: 0% Spontaneous Recall Confirmed
+
+**When:** Mar 2026
+**What changed:** Direct measurement across 129 recall tool invocations found zero spontaneous agent-initiated lookups. Every invocation was skill-procedural (87.6%) or user-triggered (12.4%). The "actionable index" concept — always-loaded entries triggering agent recognition — never worked.
+**Evidence:** `plans/measure-agent-recall/report.md`.
+**Significance:** This closes the loop on the memory system narrative. The full arc: rules-as-memory (Sep 2025) → structured files (Jan 2026) → always-loaded index (Feb 1) → active lookup tools (Feb 13) → measured failure (Feb 20) → forced injection (Mar 1) → 0% confirmed (Mar 2026). Every approach that relied on agent recognition failed. The only approaches that achieved recall were procedural (mandated by skill steps) or infrastructural (forced by hooks).
+
+---
+
+## 4. The Full Arc
+
+```
+Human-written flat rules (rules, Sep 2025)
+  → Agent retrospective self-update (oklch-theme, Nov 2025)
+    → Filtering criterion for persistence (box-api, Nov 2025)
+      → Structured file taxonomy (scratch/home, Jan 2026)
+        → Shared infrastructure extraction (agent-core, Jan 2026)
+          → Always-loaded memory index (Feb 2026)
+            → Active lookup tools /when, /how (Feb 2026)
+              → 4.1% usage measured, recognition bottleneck named (Feb 20)
+                → Recall gate inventory, 61% prose-only (Feb 24)
+                  → Tool-call-anchored gates (Feb 25)
+                    → Forced injection via hooks (Mar 1)
+                      → Active recall system design (Mar 6)
+                        → 0% spontaneous recall confirmed (Mar 2026)
+```
+
+The pre-claudeutils history (Sep 2025–Jan 2026) adds five months of evidence showing the memory problem was identified and iterated on before the formal memory-index existed. The post-measurement history (Feb 20 onward) shows the shift from "give agents better tools" to "make infrastructure do the recalling."
