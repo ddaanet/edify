@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-12
 
-**Status:** Problem.md migration + recall gate improvement — both executed inline, RCA-driven fix applied to 3 skill files.
+**Status:** Recall-gate deliverable review completed (0 critical, 0 major, 2 minor). Prior: problem.md migration + recall gate improvement.
 
 ## Completed This Session
 
@@ -50,6 +50,16 @@
 - Skill-reviewer found 6 issues (1 critical, 3 major, 2 minor), all applied
 - SKILL.md: 135 → 164 lines (progressive disclosure working — detail in reference file)
 
+**Recall-gate deliverable review:**
+- 0 critical, 0 major, 2 minor findings
+- M1: tier3-planning-process.md retains old "mandatory tool call on both paths" naming
+- M2: review-dispatch-template.md retains artifact-first branching pattern (out of brief scope but same structural vulnerability)
+- Report: `plans/recall-gate/reports/deliverable-review.md`
+- Lifecycle: reviewed → delivered (on main, no critical findings)
+- Fix task created in Worktree Tasks
+- Minor fixes applied inline: renamed "mandatory tool call on both paths" → "tool call required" across 4 files (tier3-planning-process.md, review-dispatch-template.md, requirements/SKILL.md, design/write-outline.md)
+- review-dispatch-template.md restructured from artifact-first to memory-index-first pattern
+
 ## In-tree Tasks
 
 - [x] **Problem.md migration** — `/design plans/problem-md-migration/brief.md` | sonnet
@@ -57,7 +67,8 @@
   - Rename 13 problem.md → brief.md with git history recovery, fix planstate `_derive_next_action`, add precommit gate
 ## Worktree Tasks
 
-- [ ] **Review recall gate** — `/deliverable-review plans/recall-gate` | opus | restart
+- [x] **Review recall gate** — `/deliverable-review plans/recall-gate` | opus | restart
+- [x] **Fix recall-gate findings** — applied inline (naming + structural fixes across 4 skill files)
 - [ ] **Interactive review** — `/deliverable-review plans/interactive-review` | opus | restart
 - [ ] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart | 3.2
   - Plan: handoff-cli-tool | Status: ready
@@ -231,7 +242,8 @@
 - `plans/reports/interactive-review-supplementary-grounding.md` — Supplementary grounding: 4 domain gaps (Strong)
 - `plans/interactive-review/reports/skill-review.md` — Skill reviewer report (1 critical, 3 major, 2 minor — all applied)
 - `plans/problem-md-migration/runbook.md` — Migration runbook (Tier 2)
+- `plans/recall-gate/reports/deliverable-review.md` — Recall gate review (0 critical, 0 major, 2 minor)
 
 ## Next Steps
 
-Deliverable reviews pending for recall-gate and interactive-review (opus, restart, worktree).
+Deliverable review pending for interactive-review (opus, restart, worktree).
