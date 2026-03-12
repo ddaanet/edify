@@ -28,7 +28,7 @@ Define a pre-work protocol that all skills execute on invocation. Candidates for
 
 Not all skills need all steps. The protocol must support opt-out (e.g., `/commit` has no recall need) without requiring each skill to reimplement the opt-out logic.
 
-**Delivery:** A pre-work specification that existing skills adopt incrementally. Not a runtime framework -- skills are prompt documents, not executable code.
+**Delivery:** A pre-work specification. Validate on 3 high-value skills, then batch-apply remaining in one pass. Not a runtime framework — skills are prompt documents, not executable code.
 
 ### SP-2: Agent rule injection (IN SCOPE)
 
@@ -38,11 +38,20 @@ Current state: `skills` frontmatter injects skill content into agent context. Ea
 
 **Delivery:** Either a convention (standard skills set that all agents include) or a structural mechanism (default skills, inheritance, template).
 
-### SP-3: Skill-dev tooling (KILL -- platform-covered)
+### SP-3: Project skill authoring conventions (REVISED — was KILL)
 
-The `skill-creator` plugin (Anthropic official, enabled in this project) provides skill authoring with eval framework, benchmark scripts, and quality grading agents. The `plugin-dev:skill-development` skill (triggered via rules file on skill path edits) provides structure patterns, frontmatter guidance, and triggering condition best practices. Custom skill-dev tooling would duplicate platform capabilities.
+Platform tools (`skill-creator`, `plugin-dev:skill-development`, `plugin-dev-validation`) cover generic skill structure. Project-specific conventions are not covered:
+- D+B gating (when skills need deterministic anchors vs behavioral instructions)
+- Skill description wording for CLI display and trigger matching
+- Continuation handling (detecting and resuming interrupted execution)
+- Workflow closure (ensuring skills don't leave execution in ambiguous state)
+- Optimization methodology (measuring and improving skill effectiveness)
 
-Additionally, `plugin-dev-validation/SKILL.md` already provides review criteria for skills, agents, hooks, and commands -- consumed by corrector during artifact review.
+**Delivery:** Non-user-invocable skill documenting project-specific skill authoring conventions, layered on `plugin-dev:skill-development` as platform foundation. Two consumption contexts:
+- **Agent context:** Co-loaded via `skills:` frontmatter alongside `plugin-dev:skill-development`
+- **Interactive context:** Declarative dependency via `skills:` frontmatter on the skill itself (spike: does this work?), or PreToolUse hook enforcing load before first tool call
+
+**Open spike:** Does `skills:` frontmatter on skills work for declarative dependency loading?
 
 ### SP-4: Skill prompt-composer (KILL -- no evidence of need)
 
@@ -70,9 +79,13 @@ Either can go first. SP-2 is simpler (smaller surface area, clearer solution spa
 
 ## Success Criteria
 
-- SP-1: Pre-work protocol documented. Audit of all skills classifies each into pre-work tiers (full, partial, exempt). At least 3 high-value skills retrofitted as proof of viability.
+- SP-1: Pre-work protocol documented. Audit of all skills classifies each into pre-work tiers (full, partial, exempt). Validate on 3 high-value skills, then batch-apply remaining in one pass.
 - SP-2: All 13 agent definitions include a consistent baseline operational rule set. Adding a new operational rule requires editing one location, not 13.
-- No custom tooling duplicating `skill-creator`, `plugin-dev:skill-development`, or `plugin-dev-validation`.
+- SP-3: Non-user-invocable skill exists with project conventions, loadable in both agent and interactive contexts. No duplication of platform capabilities — additive only.
+
+## Post-Design Convention
+
+After design phase, split independent sub-problems into separate tasks with explicit dependencies. Parent plan delivers at "designed" status (terminal). SP-1 and SP-2 are independent and split post-design. SP-3 is independent.
 
 ## References
 

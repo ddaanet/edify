@@ -37,13 +37,9 @@ Each skill gets a `/ground` execution producing a grounding report with provenan
 
 **Independent of other sub-problems.** Can execute in any order. Largest sub-problem by volume.
 
-### SP-2: Decision drift audit
+### SP-2: Decision drift audit (EXTRACTED — separate plan)
 
-Audit decision files (`agents/decisions/*.md`) for content that has evolved beyond its original evidence base. Check whether decisions reference superseded state (e.g., stale tooling references, assumptions about capabilities that changed). Compare current content against the commit where each decision was introduced or last substantively changed.
-
-22 decision files exist. Mechanical scan — check each file's claims against current project state.
-
-**Independent of SP-1.** Could run in parallel. Lower cognitive load than SP-1 (verification vs research).
+**Extracted to:** `plans/decision-drift-audit/brief.md`. Independent sub-problem, split pre-design during /proof review (2026-03-12).
 
 ### SP-3: Prose gate terminology
 
@@ -72,6 +68,10 @@ Assess whether grounding findings from SP-1 reveal safety review coverage gaps. 
 - Decision files audited (SP-2) with stale/drifted claims flagged and either updated or marked "ungrounded — needs validation"
 - Prose quality terms (SP-3) either mapped to external terminology or explicitly acknowledged as project-specific
 - Safety gaps identified (SP-4) from grounding findings, with recommendations for review agent updates
+
+## Post-Design Convention
+
+After design phase, split independent sub-problems into separate tasks with explicit dependencies. Parent plan delivers at "designed" status (terminal). Children are new plans starting at "planned." SP-1, SP-2, SP-3 are independent and split post-design. SP-4 depends on SP-1.
 
 ## References
 

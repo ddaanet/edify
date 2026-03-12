@@ -17,32 +17,17 @@ Multiple consumers reimplement markdown structure detection with regex:
 
 **Coupling to markdown-ast-parser:** This sub-problem is fully subsumed by the markdown-ast-parser plan. See Relationship section below.
 
-### 2. Token cache API — exists but underexposed
+### 2. Token cache API (KILL)
 
-`token_cache.py` implements a complete SQLite-backed cache (SQLAlchemy, md5-keyed, model-aware, LRU via `last_used`). `tokens.py` integrates it in `count_tokens_for_files`. The cache works.
+CLI already exposes token counting (`claudeutils tokens`), cache is transparent via `tokens.py` integration. Bulk counting accepts multiple file arguments. Cache management (eviction, stats) assessed as YAGNI at current scale — SQLite with LRU via `last_used` handles eviction implicitly.
 
-What's missing:
-- No CLI command exposes cached counting (only `claudeutils tokens` exists, unclear if it uses cache)
-- No bulk/directory counting API
-- No cache management (eviction, stats, invalidation)
-- The deferred import in `tokens.py:194` (`from claudeutils.token_cache import ...`) suggests the integration was added incrementally
+### 3. Programmatic thresholds (KILL — absorbed)
 
-**Independence:** This sub-problem is fully independent of the parser and threshold work. Can ship separately.
+Threshold grounding (which constants are calibrated vs invented) absorbed into quality-grounding SP-2 (decision drift audit).
 
-### 3. Thresholds — hardcoded in prose and validation code
+### 4. Prose thresholds (KILL)
 
-Operational thresholds scattered across files:
-- `learnings.md`: "Soft limit: 80 lines" (prose instruction, not enforced programmatically)
-- `validation/learnings.py`: `MAX_WORDS = 7` (learning key length)
-- `validation/decision_files.py`: `CONTENT_THRESHOLD = 2` (substantive line count)
-- `runbook/SKILL.md`: file count thresholds marked "(ungrounded — needs calibration)"
-- Various fragment files: line limits, size warnings in prose
-
-Two distinct types:
-- **Programmatic thresholds** (Python constants): could be extracted to a config module
-- **Prose thresholds** (instructions in .md files): can't be programmatically enforced without parsing the prose — making this dependent on the parser
-
-**Independence:** Programmatic threshold extraction is independent. Prose threshold migration depends on having a parser that can locate and potentially rewrite threshold values in markdown — tightly coupled to the parser sub-problem.
+Converting prose-embedded limits to programmatic checks doesn't require AST parsing — write the check directly, keep prose as documentation. The AST dependency was artificial.
 
 ### Coupling analysis
 
@@ -79,7 +64,7 @@ This plan should **not** include parser work. The parser sub-problem is markdown
 - Programmatic threshold extraction (independent)
 - Prose threshold migration (blocked on markdown-ast-parser delivering an AST)
 
-The residual scope is small enough to question whether this plan justifies its own existence vs being absorbed into other work (token cache improvements into a CLI batch, threshold extraction into a code-quality sweep).
+**Post-proof status:** All non-parser sub-problems killed or absorbed. Parser is subsumed by markdown-ast-parser. This plan has no remaining scope — candidate for closure. Token CLI usage message fix tracked as separate pending task.
 
 ## Dependencies
 
@@ -89,10 +74,10 @@ The residual scope is small enough to question whether this plan justifies its o
 
 ## Success Criteria
 
-- Token cache has CLI exposure (count with cache stats, bulk directory counting)
-- Programmatic thresholds extracted to a single config module with named constants
-- Prose thresholds catalogued with migration path (post-AST)
-- No parser work duplicated from markdown-ast-parser
+- No remaining deliverables — plan candidate for closure
+- Parser work covered by markdown-ast-parser
+- Threshold grounding covered by quality-grounding SP-2
+- Token CLI fix tracked separately
 
 ## References
 

@@ -30,28 +30,29 @@ The "Do NOT Flag" suppression taxonomy (plan: vet-false-positives) addressed one
 
 ## Scope
 
-Systematic audit of review agent quality across all corrector types. Two workstreams:
+Unified corrector quality audit across all corrector types. Single workstream covering both failure modes:
 
-1. **False positive corpus:** Mine corrector reports and session history for flagged-then-dismissed findings. Categorize by root cause (rule too broad, missing context, pattern mismatch, model tier). Determine which suppression categories from the existing taxonomy actually reduce false positives vs which are unused.
-2. **Missed-issue RCA:** For each post-review defect that reached commit or delivery, trace back through the review that should have caught it. Identify whether the miss was scope (review didn't look), capability (model couldn't detect), or prompt (instructions didn't ask).
+- **False positives (bad auto-fixes):** Mine for corrector fixes that were reverted, overridden, or produced regressions. In the auto-fix model, false positives aren't "flagged-then-dismissed" — they're "silently applied bad changes." Categorize by root cause (rule too broad, missing context, pattern mismatch, model tier). Assess "Do NOT Flag" taxonomy coverage against observed categories.
+- **False negatives (missed issues):** For each post-review defect that reached commit or delivery, trace back through the review that should have caught it. Classify root cause: scope (review didn't look), capability (model couldn't detect), or prompt (instructions didn't ask).
+
+Corpus feeds corrector rule improvement — grounding material for corrector quality.
 
 Out of scope: redesigning the multi-reviewer architecture. This plan collects evidence to inform future architectural changes.
 
 ## Investigation Approach
 
-- Extract corrector report files from `plans/*/reports/` and categorize findings by verdict (accepted vs rejected by operator)
+- Extract corrector report files from `plans/*/reports/` and categorize auto-fixes by outcome (kept vs reverted/overridden)
 - Cross-reference with git history: commits that followed corrector runs but contained regressions detected later
-- Use session-scraper to mine session transcripts for corrector interactions, especially operator overrides of corrector findings
+- Use session-scraper to mine session transcripts for corrector interactions, especially reversals of auto-applied fixes
 - Catalog the 2x2 diagnostic procedure results if any have been run
 - Assess "Do NOT Flag" taxonomy coverage against observed false positive categories
 
 ## Success Criteria
 
-- Evidence corpus with categorized false positive instances from actual corrector runs (target: 10+)
-- Top 3 false positive root cause categories identified with frequency data
-- At least 3 missed-issue RCAs completed with root cause classification (scope / capability / prompt)
+- Unified evidence corpus: false positives (bad auto-fixes) and false negatives (missed issues), categorized by root cause (target: 10+ instances total)
+- Top 3 root cause categories per failure mode, with frequency data
 - Gap analysis: which false positive categories are not covered by existing "Do NOT Flag" taxonomy
-- Actionable recommendations ranked by expected impact
+- Actionable recommendations ranked by expected impact on corrector rule quality
 
 ## References
 

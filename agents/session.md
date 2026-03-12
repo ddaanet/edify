@@ -1,39 +1,41 @@
 # Session Handoff: 2026-03-12
 
-**Status:** 7 unreviewed briefs rewritten with git archeology + session scraping context. /proof started (22 items identified), deferred to next session.
+**Status:** /proof completed on 7 rewritten briefs (22 items). 8 approved, 7 revised, 7 killed. Decision drift audit extracted to own plan. markdown-migration has no remaining scope. 3 new tasks created. Post-design-split convention established.
 
 ## Completed This Session
 
-**Brief rewriting (7 plans):**
-- Rewrote 7 ex-`problem.md` briefs from agent-drafted stubs into proper briefs with grounded context
-- Used `session-scraper.py search` + `excerpt` for discussion recovery, `task-context.sh` + git archeology for introduction context
-- Plans upgraded: quality-grounding, skill-agent-bootstrap, research-backlog, design-pipeline-evolution, review-agent-quality, diagnose-compression-loss, markdown-migration
-- Key findings during rewrite:
-  - skill-agent-bootstrap: SP-3 (skill-dev) killed as platform-covered, SP-4 (prompt-composer) killed as speculative
-  - markdown-migration: parser sub-problem fully subsumed by markdown-ast-parser; residual scope may not justify independent plan
-  - research-backlog: SP-1/SP-2 likely absorbed by system-property-tracing; SP-3/SP-5 partially stale given infrastructure built since filing
-- 7 parallel agents dispatched, all completed successfully
+**/proof of 7 briefs (22 items):**
+- Reviewed: quality-grounding, skill-agent-bootstrap, research-backlog, design-pipeline-evolution, review-agent-quality, diagnose-compression-loss, markdown-migration
+- Verdicts: 8 approved, 7 revised, 7 killed (absorbed or no remaining scope)
+- Key revisions:
+  - quality-grounding SP-2 → extracted to `plans/decision-drift-audit/` (two phases: automated scan → human proof)
+  - skill-agent-bootstrap SP-1 → validate on 3, batch-apply remaining
+  - skill-agent-bootstrap SP-3 → un-killed, non-user-invocable skill for project conventions (spike: skills: frontmatter on skills?)
+  - research-backlog SP-1/SP-2/SP-3 → absorbed into system-property-tracing
+  - research-backlog SP-5 → reframed as degraded-function protocol
+  - design-pipeline-evolution S-A → add grounding step before design
+  - design-pipeline-evolution S-B → late-binding model selection per pipeline stage
+  - review-agent-quality → merged two workstreams into unified corrector quality audit
+- Kills: SP-4 prompt-composer (no need), token cache API (YAGNI), programmatic thresholds (absorbed into SP-2), prose thresholds (artificial AST dependency)
+- Post-design-split addendum added to 5 briefs
+- markdown-migration: all sub-problems killed/absorbed/subsumed — plan candidate for closure
 
-**Session scraper fix:**
-- Fixed error swallowing in `plans/prototypes/session-scraper.py` — 5 silent `except` clauses now emit warnings to stderr
-- Root cause of earlier search failures: sandbox blocked `~/.claude/projects/` reads, `scan_projects` returned empty silently
-
-**/proof orientation:**
-- Batch review of 7 briefs set up with 22 items (nested by sub-problem)
-- Item list presented and accepted by user
-- No verdicts issued yet — continue `/proof` next session
+**Process decisions:**
+- Post-design-split convention: multi-SP plans stay together through design, split into separate tasks post-design. Parent delivers at "designed" (terminal). Learning added.
+- Late-binding model selection: per pipeline stage, not per task
+- merge-parent-generalization identified as enabler for worktree-from-worktree workflows
 
 ## In-tree Tasks
 
 - [x] **Problem.md migration** — `/design plans/problem-md-migration/brief.md` | sonnet
   - Plan: problem-md-migration | Status: briefed
-  - Rename 13 problem.md → brief.md with git history recovery, fix planstate `_derive_next_action`, add precommit gate
+
 ## Worktree Tasks
 
 - [x] **Review recall gate** — `/deliverable-review plans/recall-gate` | opus | restart
-- [x] **Fix recall-gate findings** — applied inline (naming + structural fixes across 4 skill files)
+- [x] **Fix recall-gate findings** — applied inline
 - [x] **Interactive review** — delivered, plan archived
-- [x] **Fix proof review findings** — applied inline (M-1 skip semantics, M-2 dropped as defensible)
+- [x] **Fix proof review findings** — applied inline
 - [ ] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart | 3.2
   - Plan: handoff-cli-tool | Status: ready
   - Absorbs: Fix task-context bloat
@@ -42,78 +44,94 @@
   - Plan: plugin-migration | Status: ready (stale — Feb 9)
 - [ ] **Worktree merge lifecycle** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.8
   - Plan: worktree-merge-resilience | Status: outlined
-  - Absorbs: Merge lifecycle audit, Plan-completion ceremony (content migrated this session)
+  - Absorbs: Merge lifecycle audit, Plan-completion ceremony
 - [ ] **Active Recall** — `/design plans/active-recall/outline.md` | opus | 2.6
   - Plan: active-recall | Status: outlined
   - Outline Rev 2 reviewed. Next: Phase B (user discussion) → sufficiency gate → design or /runbook
   - Absorbs: Generate memory index (S-D), Recall learnings design (S-L), Codify branch awareness (S-L removes /codify)
-  - S-B: **AR Recall Consolidate** [!] — merge recall/ + recall_cli/ + when/ into unified recall module. Blocked: runbook skill improvements
-  - S-D: **AR Hierarchy Index** — migrate flat index to tree structure, parser updates, migration tooling. Blocked: S-A, S-B (design), S-J (impl)
-  - S-E: **AR Trigger Metadata** — formalize trigger_class and category as IndexEntry metadata. Blocked: S-C, S-D
-  - S-F: **AR Mode Simplify** — reduce 5 modes to 2, update 10 pipeline recall points. Blocked: S-D
-  - S-G: **AR Doc Pipeline** — source docs to extraction agent to corrector to index regen. Blocked: S-C, S-D, S-K
-  - S-H: **AR Integration** — end-to-end verification of recall-explore-recall pattern, cross-worktree memory visibility. Blocked: S-D, S-F, S-J, S-L (terminal)
-  - S-I: **AR Submodule Refactor** [!] — extract 42 hardcoded agent-core refs into configurable submodule registry. Blocked: runbook pipeline updates
-  - S-J: **AR Submodule Setup** — create memory submodule with shared branch, configure propagation. Blocked: S-I
-  - S-K: **AR Memory Corrector** — agent definition with quality criteria, suppression taxonomy. Blocked: S-C
-  - S-L: **AR Capture Writes** — /remember skill, eliminate learnings.md + /codify. Blocked: S-J, S-K, S-D, S-E
+  - S-B: **AR Recall Consolidate** [!] — Blocked: runbook skill improvements
+  - S-D: **AR Hierarchy Index** — Blocked: S-A, S-B (design), S-J (impl)
+  - S-E: **AR Trigger Metadata** — Blocked: S-C, S-D
+  - S-F: **AR Mode Simplify** — Blocked: S-D
+  - S-G: **AR Doc Pipeline** — Blocked: S-C, S-D, S-K
+  - S-H: **AR Integration** — Blocked: S-D, S-F, S-J, S-L (terminal)
+  - S-I: **AR Submodule Refactor** [!] — Blocked: runbook pipeline updates
+  - S-J: **AR Submodule Setup** — Blocked: S-I
+  - S-K: **AR Memory Corrector** — Blocked: S-C
+  - S-L: **AR Capture Writes** — Blocked: S-J, S-K, S-D, S-E
   - **AR How Verb Form** — Plan: ar-how-verb-form | Status: briefed
   - **AR IDF Weighting** — Plan: ar-idf-weighting | Status: briefed
   - **AR Threshold Calibration** — Plan: ar-threshold-calibration | Status: planned
+- [ ] **Merge any parent** — `/design plans/merge-parent-generalization/brief.md` | sonnet
+  - Plan: merge-parent-generalization | Status: briefed
+  - Generalize `_worktree merge` to accept arbitrary parent branch. Enables worktree-from-worktree workflows.
 - [ ] **Directive skill promotion** — `/design plans/directive-skill-promotion/brief.md` | opus | 2.2
   - Plan: directive-skill-promotion | Status: briefed
   - Absorbs: Handoff insertion policy, wrap command, discuss protocol grounding, p: classification gap, discuss-to-pending chain
+- [ ] **Decision drift audit** — `/design plans/decision-drift-audit/brief.md` | sonnet
+  - Plan: decision-drift-audit | Status: briefed
+  - Split from quality-grounding SP-2. Two phases: automated consistency scan → human proof. Feeds system-property-tracing.
 - [ ] **System property tracing** — `/design plans/system-property-tracing/brief.md` | opus
   - Plan: system-property-tracing | Status: briefed
-  - Two phases: (1) system invariants as formal requirements, (2) pipeline traceability for FR survival across workflow stages
-  - Partially absorbs: quality-grounding, review-gate
+  - Two phases: (1) system invariants as formal requirements, (2) pipeline traceability
+  - Absorbs: research-backlog SP-1 (ground state coverage), SP-2 (workflow formal analysis), SP-3 (context loss as grounding input)
 - [ ] **Skill-gated session edits** — `/design plans/skill-gated-session-edits/brief.md` | opus
   - Plan: skill-gated-session-edits | Status: briefed
-  - Default read-only sessions, skill required for production edits. Motivated by regression investigation.
 - [ ] **Parallel orchestration** — `/design plans/parallel-orchestration/brief.md` | sonnet | 1.8
   - Plan: parallel-orchestration | Status: briefed
 - [ ] **Gate batch** — `/design plans/gate-batch/requirements.md` | sonnet | 1.7
   - Plan: gate-batch | Status: requirements
 - [ ] **Skill agent bootstrap** — `/design plans/skill-agent-bootstrap/brief.md` | opus | 1.6
   - Plan: skill-agent-bootstrap | Status: briefed
+  - SP-3 revised: non-user-invocable skill for project conventions (spike: skills: frontmatter on skills?)
 - [ ] **Worktree lifecycle CLI** — `/design plans/worktree-lifecycle-cli/brief.md` | sonnet | 1.6
   - Plan: worktree-lifecycle-cli | Status: briefed
   - Exit ceremony + Wt rm task cleanup + Worktree ad-hoc task + CLI UX + --base submodule bug
-  - Absorbed plan content migrated this session (wt-exit-ceremony, wt-rm-task-cleanup, worktree-ad-hoc-task)
 - [ ] **Code quality** — `/design plans/codebase-sweep/requirements.md` | sonnet | 1.4
   - Plan: codebase-sweep | Status: requirements
-  - Codebase sweep + agent-core lint coverage + Test diamond migration + Infrastructure scripts + Test diagnostic helper
 - [ ] **Hook batch** — `/design plans/hook-batch-2/requirements.md` | sonnet | 1.3
   - Plan: hook-batch-2 | Status: requirements
 - [ ] **Update prioritize skill** — `/design plans/update-prioritize-skill/requirements.md` | sonnet | 1.2
   - Plan: update-prioritize-skill | Status: requirements
 - [ ] **Quality grounding** — `/design plans/quality-grounding/brief.md` | opus | 1.0
   - Plan: quality-grounding | Status: briefed
+  - SP-2 extracted to decision-drift-audit. Remaining: SP-1 (ground skills), SP-3 (prose terminology), SP-4 (safety review)
 - [ ] **Cross-tree operations** — `/design plans/cross-tree-operations/requirements.md` | sonnet | 1.0
   - Plan: cross-tree-operations | Status: requirements
 - [ ] **Review agent quality** — `/design plans/review-agent-quality/brief.md` | sonnet | 1.0
   - Plan: review-agent-quality | Status: briefed
+  - Unified corrector quality audit: false positives (bad auto-fixes) + false negatives (missed issues)
 - [ ] **Design pipeline evolution** — `/design plans/design-pipeline-evolution/brief.md` | opus | 1.0
   - Plan: design-pipeline-evolution | Status: briefed
+  - S-A: add grounding before design. S-B: late-binding model selection per stage.
 - [ ] **Tweakcc** — `/design plans/tweakcc/requirements.md` | sonnet | 1.0
   - Plan: tweakcc | Status: requirements
 - [ ] **Design review protocol** — `/design plans/resumed-review-protocol/brief.md` | opus | restart
   - Plan: resumed-review-protocol | Status: briefed
-  - Note: Two features — (1) runbook reuses corrector across phases, (2) orchestration ping-pong FIX/PASS
+  - Two features: (1) runbook reuses corrector across phases, (2) orchestration ping-pong FIX/PASS
 - [ ] **Markdown AST parser** — `/design plans/markdown-ast-parser/brief.md` | opus
   - Plan: markdown-ast-parser | Status: briefed
-  - Note: Preprocessor → standard parser → AST. Blocks handoff-cli-tool S-4 if AST-first ordering chosen. Complex — new dependency, cross-cutting migration.
+  - Preprocessor → standard parser → AST. Complex — new dependency, cross-cutting migration.
 - [ ] **Design context gate** — `/design plans/design-context-gate/brief.md` | sonnet
   - Plan: design-context-gate | Status: briefed
 - [ ] **Design JIT expansion** — `/design plans/design-jit-expansion/brief.md` | sonnet
   - Plan: design-jit-expansion | Status: briefed
-- [ ] **Markdown migration** — `/design plans/markdown-migration/brief.md` | opus | 0.8
-  - Plan: markdown-migration | Status: briefed
-  - Note: Parser subsumed by markdown-ast-parser. Residual scope (token cache API, threshold extraction) may not justify independent plan — consider absorption into codebase-sweep.
+- [ ] **Update tokens CLI** — `/design plans/update-tokens-cli/brief.md` | haiku
+  - Plan: update-tokens-cli | Status: briefed
+  - Make sonnet default model, update usage message
+- [ ] **Threshold token migration** — `/design plans/threshold-token-migration/brief.md` | sonnet
+  - Plan: threshold-token-migration | Status: briefed
+  - Migrate line-based thresholds to token-based. Large blast radius expected.
+- [ ] **Markdown migration** — `claudeutils _planstate close markdown-migration` | sonnet
+  - Plan: markdown-migration | Status: reviewed
+  - All sub-problems killed/absorbed/subsumed. Parser → markdown-ast-parser. Thresholds → decision-drift-audit. Token cache → YAGNI.
 - [ ] **Python hook ordering fix** — `/design plans/precommit-python3-redirect/requirements.md` | haiku | restart | 0.8
   - Plan: precommit-python3-redirect | Status: requirements
 - [ ] **Diagnose compression loss** — `/design plans/diagnose-compression-loss/brief.md` | sonnet | 0.8
   - Plan: diagnose-compression-loss | Status: briefed
+- [ ] **Research backlog** — `/design plans/research-backlog/brief.md` | opus | 0.5
+  - Plan: research-backlog | Status: briefed
+  - SP-1/SP-2/SP-3 absorbed into system-property-tracing. Remaining: SP-4 (behavioral design), SP-5 (degraded-function protocol)
 - [ ] **Fix TDD context scoping** — `/design plans/tdd-context-scoping/brief.md` | sonnet
   - Plan: tdd-context-scoping | Status: briefed
 - [ ] **Health check UPS fallback** — `/design plans/health-check-ups-fallback/requirements.md` | sonnet
@@ -124,27 +142,20 @@
   - Plan: prototypes | Status: requirements
 - [ ] **Planstate brief inference** — `/design plans/planstate-brief-inference/requirements.md` | sonnet
   - Plan: planstate-brief-inference | Status: requirements
-- [ ] **Research backlog** — `/design plans/research-backlog/brief.md` | opus | 0.5
-  - Plan: research-backlog | Status: briefed
-  - Note: SP-1/SP-2 likely absorbed by system-property-tracing. SP-3/SP-5 partially stale. SP-4 (behavioral design) remains open.
 - [ ] **Small fixes batch** — `/design plans/small-fixes-batch/requirements.md` | sonnet
   - Plan: small-fixes-batch | Status: requirements
   - FR-4 added: remove bottom-to-top edit ordering refs
 - [ ] **Incident counting** — `/design plans/incident-counting/brief.md` | opus
   - Plan: incident-counting | Status: briefed
-  - Fix codify's incident-specific rejection, ground methodology for recurrence tracking
 - [ ] **Retro repo expansion** → `retro-repo-expansion` — `/design plans/retrospective-repo-expansion/brief.md` | sonnet
   - Plan: retrospective-repo-expansion | Status: briefed
-  - Extend retrospective evidence base with 16 additional git repos (pre-claudeutils evolution + parallel projects)
 - [ ] **Recall pipeline** — `/design` | sonnet
   - Deduplication, stdin parsing, usage scoring for recall entries
   - Note: plan dir only exists in retro-repo-expansion worktree, not on main. Create plan dir before design.
 - [ ] **Skill exit commit** — `/design plans/skill-exit-commit/requirements.md` | sonnet
   - Plan: skill-exit-commit | Status: requirements
-  - /design and /runbook commit dirty tree before routing to /inline
 - [!] **Verb form AB test** — see `plans/reports/ab-test/README.md` | sonnet
-  - Infrastructure built. Blocked on human: curate task-contexts.json, annotate ground-truth.md
-  - After human steps: run harness then analysis (commands in README)
+  - Blocked on human: curate task-contexts.json, annotate ground-truth.md
 
 ### Terminal
 
@@ -160,53 +171,44 @@
 ## Blockers / Gotchas
 
 **Post-merge validation (permanent):**
-- After every worktree merge, validate session.md (pending tasks from branch carried over) AND learnings.md (no entries lost from either side)
-- Known failure modes: autostrategy drops branch pending tasks, orphaned duplicate lines in append-only files, branch overwrites main-only learnings entries
-- Not automated — manual check required
+- After every worktree merge, validate session.md and learnings.md
+- Known failure modes: autostrategy drops branch pending tasks, orphaned duplicates, branch overwrites main-only entries
 
 **`_worktree rm` amend restored but task entry persists:**
-- `_update_session_and_amend` restored after task-classification regression. Amend works but `remove_slug_marker` only strips marker — doesn't remove completed task entry. Pending in Worktree lifecycle CLI.
+- `remove_slug_marker` only strips marker — doesn't remove completed task entry. Pending in Worktree lifecycle CLI.
 
 **Worktree merge drops session.md Worktree Tasks entries:**
-- Focused session in branch lacks main's full Worktree Tasks section. Autostrategy resolves in favor of branch, dropping main-only entries. Manual post-merge validation required until merge.py fixed.
+- Focused session in branch lacks main's full Worktree Tasks section. Manual post-merge validation required.
 
-**`just sync-to-parent` requires sandbox bypass:**
-- Recipe removes and recreates symlinks in `.claude/` — sandbox blocks `rm` on those paths
+**`just sync-to-parent` requires sandbox bypass**
 
-**Main is worktree-tasks-only:**
-- Only trivial fixes belong in In-tree. Plan absence doesn't qualify for in-tree.
+**Main is worktree-tasks-only**
 
 **Planstate CLI bug for briefed plans:**
-- `_worktree ls` displays `requirements.md` path for plans at `briefed` status. Use the status field `[briefed]` as source of truth, not the displayed path.
+- `_worktree ls` displays `requirements.md` path for `briefed` status. Use status field as source of truth.
 
-- `plans/prototypes/recall-artifact.md` created as stub to satisfy pretooluse recall gate (hook infers plan from file path, not actual plan context)
-- `test_markdown_fixtures.py::test_full_pipeline_remark` xfail renders full traceback in markdown report, visually identical to real failure. Fix is in `pytest-markdown-report` (separate repo).
+**Reviewed plans show no derived command:**
+- Plans at `[reviewed]` status (post-/proof) have no mapped command in planstate. Next action is `/design plans/{name}/brief.md`.
 
-- `session.py:307` produces `# Session: Worktree — {name}` but validator expects `# Session Handoff: YYYY-MM-DD`. Data-fixed this session. Code fix (validator or session.py) is separate behavioral change — not in scope here. [from: fix-prose-routing-bias] [from: session-cli-tool]
+**`session.py:307` format mismatch:**
+- Produces `# Session: Worktree — {name}` but validator expects `# Session Handoff: YYYY-MM-DD`.
 
-**`git stash` on `.claude/settings.local.json` requires sandbox bypass:**
-- File locked by running process. Sandbox can't write to locked file but unsandboxed git can. Use `dangerouslyDisableSandbox: true` for git stash on this file.
+**`git stash` on `.claude/settings.local.json` requires sandbox bypass**
+
+**markdown-migration candidate for closure:**
+- All sub-problems killed/absorbed/subsumed after /proof. No remaining deliverables.
 
 ## Reference Files
 
-- `plans/reports/prioritization-2026-03-06b.md` — WSJF scoring, 65 tasks ranked + consolidation analysis
-- `plans/reports/workflow-grounding-audit.md` — Grounding provenance for all workflow skills/agents
-- `plans/handoff-cli-tool/outline.md` — Session CLI combined outline (reviewed 6 rounds)
-- `plans/codebase-sweep/requirements.md` — mechanical refactoring (_git_ok, _fail, exceptions)
-- `agents/decisions/cli.md` — LLM-native output decision (from session-cli-tool)
-- `plans/reports/design-skill-grounding.md` — Design skill grounding
-- `agents/decisions/pipeline-contracts.md` — Pipeline contract decision file
-- `agents/decisions/pipeline-review.md` — Pipeline review patterns (split from pipeline-contracts.md)
-- `plans/active-recall/brief.md` — Active recall system: hierarchical index, documentation conversion, trigger classes
-- `tmp/active-recall.md` — Discussion decisions: recall-explore-recall, tree navigation, benchmark landscape
-- `plans/prose-infra-batch/reports/deliverable-review.md` — Deliverable review report (0 critical, 0 major, 4 minor)
-- `plans/skill-gated-session-edits/brief.md` — Causal chain: bare directive → no skill gates → regression committed
-- `plans/system-property-tracing/brief.md` — System invariants + pipeline traceability concept
-- `plans/reports/interactive-review-grounding.md` — Grounding report: Fagan, Gerrit, Phabricator, cognitive load (Strong)
-- `plans/reports/interactive-review-supplementary-grounding.md` — Supplementary grounding: 4 domain gaps (Strong)
-- `plans/problem-md-migration/runbook.md` — Migration runbook (Tier 2)
-- `plans/recall-gate/reports/deliverable-review.md` — Recall gate review (0 critical, 0 major, 2 minor)
+- `plans/reports/prioritization-2026-03-06b.md` — WSJF scoring, 65 tasks ranked
+- `plans/reports/workflow-grounding-audit.md` — Grounding provenance for workflow skills
+- `plans/handoff-cli-tool/outline.md` — Session CLI combined outline
+- `plans/active-recall/brief.md` — Active recall system
+- `plans/system-property-tracing/brief.md` — System invariants + pipeline traceability
+- `plans/decision-drift-audit/brief.md` — Decision file consistency audit (split from quality-grounding)
+- `plans/merge-parent-generalization/brief.md` — Generalize merge to arbitrary parent branch
+- `plans/threshold-token-migration/brief.md` — Line-based to token-based threshold migration
 
 ## Next Steps
 
-Continue `/proof` on 7 rewritten briefs (22 items, nested by sub-problem). No verdicts issued yet — start item iteration.
+Continue with highest-priority ready tasks (Session CLI tool, Plugin migration) via worktree setup, or close markdown-migration plan.

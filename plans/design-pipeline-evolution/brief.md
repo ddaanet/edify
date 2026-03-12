@@ -26,7 +26,9 @@ The `/design` skill's triage routes jobs into three tiers (Simple, Moderate, Com
 
 ## Sub-problems
 
-### S-A: Decomposition Tier
+### S-A: Decomposition Tier (REVISED — add grounding)
+
+Ground triage classification against task decomposition literature (software project management, agile estimation, systems engineering) before designing the tier.
 
 Define when triage should classify a job as "decomposition" rather than "complex."
 
@@ -38,16 +40,19 @@ Design questions:
 - What is the decomposition tier's output artifact? The current multi-sub-problem outline format may already be sufficient.
 - How does the existing "Composite Task Decomposition" (pre-classification item-level breakdown of multi-item input artifacts) relate? That mechanism operates before classification on heterogeneous inputs; this tier would operate as a classification on homogeneous-but-large jobs.
 
-### S-B: Model Directives
+### S-B: Late-Binding Model Selection (REVISED — was Model Directives)
 
-Define how decomposition outputs carry model tier metadata for downstream routing.
-
-Current state: Model tier is assigned once per task in session.md. When decomposition produces sub-problems that become independent pending tasks, each gets its own model assignment via the `p:` directive heuristic. But this happens manually at handoff time — the designer's knowledge of which sub-problems need opus vs sonnet is not captured in the decomposition artifact.
+Replace early-binding model directives in decomposition output with late-binding model selection per pipeline stage. Each stage picks its own model based on its constraints:
+- Requirements/brief → design model (opus for architectural reasoning)
+- Runbook writing → planning model (sonnet or opus by complexity)
+- Orchestration → orchestration model (different for /inline vs /orchestrate)
+- Test-driver → execution model (sonnet, maybe haiku for simple)
+- Corrector → review model (sonnet or opus)
 
 Design questions:
-- Should model directives be metadata on sub-problem entries in the outline (readiness summary already has per-sub-problem routing)?
-- How do model directives interact with the artifact-type override (agentic prose → opus)?
-- Should model directives be advisory (informing `p:` classification) or prescriptive (overriding session-level assignment)?
+- What selection criteria does each stage use?
+- How do per-stage criteria interact with the artifact-type override (agentic prose → opus)?
+- How does this replace the current `p:` task-level model assignment?
 
 ### Coupling Analysis
 
@@ -80,6 +85,10 @@ What exists today relevant to decomposition:
 - Existing Multi-Sub-Problem Sufficiency Gate integrates with (or is subsumed by) the decomposition tier output
 - No regression in Simple/Moderate/Complex/Defect routing
 - Boundary between decomposition tier and Tier 3 outline expansion is explicit and testable
+
+## Post-Design Convention
+
+After design phase, split sub-problems into separate tasks with explicit dependencies. S-A and S-B are loosely coupled — S-B depends on S-A's output format. Design together, execute as separate tasks with S-B depending on S-A.
 
 ## References
 
