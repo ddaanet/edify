@@ -121,7 +121,7 @@ def scan_projects(prefix: str | None = None) -> list[SessionFile]:
         try:
             encoded_prefix = encode_project_path(prefix)
         except ValueError:
-            pass
+            print(f"warning: invalid prefix path: {prefix}", file=sys.stderr)
 
     results: list[SessionFile] = []
     for history_dir in sorted(projects_dir.iterdir()):
@@ -196,7 +196,8 @@ def parse_session_file(path: Path, file_type: str = "uuid") -> list[TimelineEntr
 
     try:
         lines = path.read_text().splitlines()
-    except OSError:
+    except OSError as exc:
+        print(f"warning: cannot read session file {path}: {exc}", file=sys.stderr)
         return []
 
     for raw in lines:
@@ -437,7 +438,11 @@ def build_session_tree(root_session_id: str, project_dir: str) -> SessionTree:
             try:
                 first_line = agent_file.read_text().split("\n")[0].strip()
                 first_entry = json.loads(first_line) if first_line else {}
-            except (json.JSONDecodeError, OSError):
+            except (json.JSONDecodeError, OSError) as exc:
+                print(
+                    f"warning: cannot read agent file {agent_file.name}: {exc}",
+                    file=sys.stderr,
+                )
                 continue
             agent_id = first_entry.get("agentId", "")
             if not agent_id or agent_id in seen:
@@ -479,8 +484,10 @@ def _git_commit_info(commit_hash: str, git_dir: str) -> CommitInfo | None:
             text=True,
             check=True,
         )
-    except subprocess.CalledProcessError:
-        print(f"warning: unknown commit {commit_hash}", file=sys.stderr)
+    except subprocess.CalledProcessError as exc:
+        print(
+            f"warning: git log failed for commit {commit_hash}: {exc}", file=sys.stderr
+        )
         return None
     lines = r.stdout.strip().splitlines()
     if not lines:
@@ -662,7 +669,7 @@ def search_sessions(
         try:
             encoded_targets.add(encode_project_path(pdir))
         except ValueError:
-            pass
+            print(f"warning: cannot encode project path: {pdir}", file=sys.stderr)
         # Also try matching against decoded project_dir from scan
         encoded_targets.add(pdir)
 
@@ -674,6 +681,10 @@ def search_sessions(
         try:
             encoded = encode_project_path(sf.project_dir)
         except ValueError:
+            print(
+                f"warning: cannot encode session project_dir: {sf.project_dir}",
+                file=sys.stderr,
+            )
             encoded = ""
         # Match against encoded name or decoded project_dir
         if encoded in encoded_targets or sf.project_dir in encoded_targets:

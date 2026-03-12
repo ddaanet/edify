@@ -1,22 +1,27 @@
 # Session Handoff: 2026-03-12
 
-**Status:** Interactive-review deliverable review completed (0 critical, 0 major, 2 minor). Plan delivered.
+**Status:** 7 unreviewed briefs rewritten with git archeology + session scraping context. /proof started (22 items identified), deferred to next session.
 
 ## Completed This Session
 
-**Interactive-review deliverable review:**
-- 0 critical, 0 major, 2 minor findings
-- Report: `plans/interactive-review/reports/deliverable-review.md`
-- Plan lifecycle: reviewed → delivered, plan directory removed, archive entry written
-- M-1 fixed inline: appended "no tracking obligation" to skip semantics (`agent-core/skills/proof/SKILL.md:103`)
-- M-2 dropped: current placement defensible (condition within apply flow)
-- Discussion: fix task disproportionate — inline fix + drop
+**Brief rewriting (7 plans):**
+- Rewrote 7 ex-`problem.md` briefs from agent-drafted stubs into proper briefs with grounded context
+- Used `session-scraper.py search` + `excerpt` for discussion recovery, `task-context.sh` + git archeology for introduction context
+- Plans upgraded: quality-grounding, skill-agent-bootstrap, research-backlog, design-pipeline-evolution, review-agent-quality, diagnose-compression-loss, markdown-migration
+- Key findings during rewrite:
+  - skill-agent-bootstrap: SP-3 (skill-dev) killed as platform-covered, SP-4 (prompt-composer) killed as speculative
+  - markdown-migration: parser sub-problem fully subsumed by markdown-ast-parser; residual scope may not justify independent plan
+  - research-backlog: SP-1/SP-2 likely absorbed by system-property-tracing; SP-3/SP-5 partially stale given infrastructure built since filing
+- 7 parallel agents dispatched, all completed successfully
 
-**RCA: Completed This Session accumulation:**
-- `/reflect` on repeated failure to trim prior-session content from Completed section
-- Root cause: rule gap — handoff protocol's fresh-write path didn't specify Completed resets; carry-forward instruction for tasks bled into narrative section
-- Fix: added "Fresh write resets Completed" instruction at generation point (Step 1), not trim point (Step 6)
-- User refinement: append-then-trim is structurally weak — same class as generate-then-validate
+**Session scraper fix:**
+- Fixed error swallowing in `plans/prototypes/session-scraper.py` — 5 silent `except` clauses now emit warnings to stderr
+- Root cause of earlier search failures: sandbox blocked `~/.claude/projects/` reads, `scan_projects` returned empty silently
+
+**/proof orientation:**
+- Batch review of 7 briefs set up with 22 items (nested by sub-problem)
+- Item list presented and accepted by user
+- No verdicts issued yet — continue `/proof` next session
 
 ## In-tree Tasks
 
@@ -104,6 +109,7 @@
   - Plan: design-jit-expansion | Status: briefed
 - [ ] **Markdown migration** — `/design plans/markdown-migration/brief.md` | opus | 0.8
   - Plan: markdown-migration | Status: briefed
+  - Note: Parser subsumed by markdown-ast-parser. Residual scope (token cache API, threshold extraction) may not justify independent plan — consider absorption into codebase-sweep.
 - [ ] **Python hook ordering fix** — `/design plans/precommit-python3-redirect/requirements.md` | haiku | restart | 0.8
   - Plan: precommit-python3-redirect | Status: requirements
 - [ ] **Diagnose compression loss** — `/design plans/diagnose-compression-loss/brief.md` | sonnet | 0.8
@@ -120,6 +126,7 @@
   - Plan: planstate-brief-inference | Status: requirements
 - [ ] **Research backlog** — `/design plans/research-backlog/brief.md` | opus | 0.5
   - Plan: research-backlog | Status: briefed
+  - Note: SP-1/SP-2 likely absorbed by system-property-tracing. SP-3/SP-5 partially stale. SP-4 (behavioral design) remains open.
 - [ ] **Small fixes batch** — `/design plans/small-fixes-batch/requirements.md` | sonnet
   - Plan: small-fixes-batch | Status: requirements
   - FR-4 added: remove bottom-to-top edit ordering refs
@@ -202,4 +209,4 @@
 
 ## Next Steps
 
-Session CLI tool (`/orchestrate handoff-cli-tool`) is highest-priority worktree task (3.2 WSJF).
+Continue `/proof` on 7 rewritten briefs (22 items, nested by sub-problem). No verdicts issued yet — start item iteration.

@@ -1,29 +1,83 @@
-**⚠ UNREVIEWED — Agent-drafted from session.md task descriptions. Validate before design.**
-
-# Skill Agent Bootstrap
+# Brief: Skill Agent Bootstrap
 
 ## Problem
 
-Skill pre-work patterns (context loading, recall passes, gate checks) are inconsistently implemented across skills. Agent context injection (operational rules, project conventions) is manual and error-prone. Four related sub-problems:
+Skills and sub-agents have two distinct bootstrap gaps:
 
-- **Retrofit skill pre-work:** Skills have ad-hoc pre-work (some run recall, some check gates, some do neither). Need a standardized pre-work phase that all skills execute.
+**1. Skill pre-work is ad-hoc.** Each skill implements its own pre-work sequence (recall gate, context loading, continuation checks) or omits steps entirely. Examples from the codebase:
+- `/design`, `/runbook`, `/inline`, `/requirements` all implement recall gates but with varying patterns (some read `memory-index.md` first, some don't; some write recall artifacts, some skip)
+- `/proof`, `/deliverable-review` do per-item recall instead of upfront recall
+- Several skills (`/commit`, `/handoff`, `/codify`, `/reflect`) have no recall gate at all
+- The `cooperative-protocol-gaps` plan (archived) identified continuation protocol inconsistencies across `/design`, `/runbook`, `/worktree`, `/commit` and was superseded by this task
 
-- **Agent rule injection:** Sub-agents launched via Task tool lack operational rules (no-confabulation, error-handling, token-economy) unless manually injected in each prompt. Need automatic injection mechanism.
+The inconsistency means new skills copy-paste from existing ones and miss steps. Recall gates that were added (e.g., recall-gate plan) required manual retrofit across multiple skills.
 
-- **Skill-dev skill:** No tooling exists for developing, testing, or validating skills. Creating a new skill requires manual file creation, frontmatter authoring, and trial-and-error testing.
+**2. Sub-agent operational rules are manually curated.** Agents launched via Task tool receive operational rules through the `skills` frontmatter field. Currently 9 of 13 agents include `project-conventions`; only 2 include `error-handling`; none include `no-confabulation` or `token-economy`. Adding a new operational rule requires updating every agent definition individually. There is no mechanism to inject a baseline set of operational rules into all sub-agents.
 
-- **Skill prompt-composer:** Skills compose prompts from fragments manually. Need a composition tool that assembles skill content from reusable fragments with consistent formatting.
+## Scope
+
+Four sub-problems were originally bundled. Platform capability analysis (per design-backlog-review REFINE verdict) resolves two:
+
+### SP-1: Standardized skill pre-work (IN SCOPE)
+
+Define a pre-work protocol that all skills execute on invocation. Candidates for standardization:
+- Recall gate (read index, select triggers, resolve, write artifact)
+- Continuation detection (check if resuming interrupted skill execution)
+- Plan context loading (read design/outline if plan-backed)
+- Session context (read session.md for task metadata)
+
+Not all skills need all steps. The protocol must support opt-out (e.g., `/commit` has no recall need) without requiring each skill to reimplement the opt-out logic.
+
+**Delivery:** A pre-work specification that existing skills adopt incrementally. Not a runtime framework -- skills are prompt documents, not executable code.
+
+### SP-2: Agent rule injection (IN SCOPE)
+
+Mechanism to ensure all sub-agents receive baseline operational rules without manual per-agent maintenance.
+
+Current state: `skills` frontmatter injects skill content into agent context. Each agent definition manually lists which skills to load. The set is inconsistent (some get `error-handling`, most don't; none get `no-confabulation`).
+
+**Delivery:** Either a convention (standard skills set that all agents include) or a structural mechanism (default skills, inheritance, template).
+
+### SP-3: Skill-dev tooling (KILL -- platform-covered)
+
+The `skill-creator` plugin (Anthropic official, enabled in this project) provides skill authoring with eval framework, benchmark scripts, and quality grading agents. The `plugin-dev:skill-development` skill (triggered via rules file on skill path edits) provides structure patterns, frontmatter guidance, and triggering condition best practices. Custom skill-dev tooling would duplicate platform capabilities.
+
+Additionally, `plugin-dev-validation/SKILL.md` already provides review criteria for skills, agents, hooks, and commands -- consumed by corrector during artifact review.
+
+### SP-4: Skill prompt-composer (KILL -- no evidence of need)
+
+Fragment composition is a mechanical editing task. Skills reference other content via `@`-includes and section cross-references. No evidence from the codebase that manual composition is a failure source. The problem statement was speculative.
+
+## Sub-problem Analysis
+
+### Independence
+
+SP-1 and SP-2 are **independent**. They address different artifact types (skills vs agent definitions), different mechanisms (protocol specification vs frontmatter/injection), and can be designed and implemented separately.
+
+### Coupling
+
+SP-1 could inform SP-2: if the pre-work protocol includes recall, and sub-agents execute skills that have pre-work, the agent's skill set affects what pre-work runs. But this coupling is indirect -- the agent frontmatter `skills` field already controls skill loading. SP-2 is about which skills are in the baseline set, not about changing the skill loading mechanism.
+
+### Sequencing
+
+Either can go first. SP-2 is simpler (smaller surface area, clearer solution space). SP-1 requires auditing all 33 skills to classify their pre-work patterns and designing opt-out semantics.
 
 ## Dependencies
 
-- Interacts with plugin-dev skills (skill-development, agent-development)
-- Check platform plugin capabilities before building custom tooling
+- **Active Recall (upstream):** AR plans to consolidate recall infrastructure. SP-1's recall gate standardization should use the current recall interface but be aware that the interface may change. Design for the current `claudeutils _recall resolve` API.
+- **Plugin migration (related):** Plugin migration may restructure skill/agent file locations. SP-1 and SP-2 should be location-agnostic (reference skill names, not paths).
+- **Cooperative-protocol-gaps (absorbed):** Archived plan covering continuation protocol compliance. SP-1 absorbs this scope.
 
 ## Success Criteria
 
-- Design identifies which sub-problems are independent vs. coupled
-- Architecture for standardized pre-work that existing skills can adopt incrementally
+- SP-1: Pre-work protocol documented. Audit of all skills classifies each into pre-work tiers (full, partial, exempt). At least 3 high-value skills retrofitted as proof of viability.
+- SP-2: All 13 agent definitions include a consistent baseline operational rule set. Adding a new operational rule requires editing one location, not 13.
+- No custom tooling duplicating `skill-creator`, `plugin-dev:skill-development`, or `plugin-dev-validation`.
 
-### Skill Dependencies (for /design)
+## References
 
-- Load `plugin-dev:skill-development` and `plugin-dev:agent-development` before design
+- `plans/reports/design-backlog-review.md` line 64-65 -- REFINE verdict with platform overlap analysis
+- `plans/reports/anthropic-plugin-exploration.md` -- Plugin inventory (skill-creator, plugin-dev details)
+- `agents/plan-archive.md` cooperative-protocol-gaps entry -- superseded by this task
+- `agent-core/skills/plugin-dev-validation/SKILL.md` -- Existing review criteria for plugin components
+- `.claude/rules/skill-development.md`, `.claude/rules/agent-development.md` -- Platform skill triggers
