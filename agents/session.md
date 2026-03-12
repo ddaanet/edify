@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-12
 
-**Status:** Recall-gate deliverable review completed (0 critical, 0 major, 2 minor). Prior: problem.md migration + recall gate improvement.
+**Status:** Interactive-review deliverable review completed (0 critical, 0 major, 2 minor). Plan delivered.
 
 ## Completed This Session
 
@@ -60,6 +60,14 @@
 - Minor fixes applied inline: renamed "mandatory tool call on both paths" → "tool call required" across 4 files (tier3-planning-process.md, review-dispatch-template.md, requirements/SKILL.md, design/write-outline.md)
 - review-dispatch-template.md restructured from artifact-first to memory-index-first pattern
 
+**Interactive-review deliverable review:**
+- 0 critical, 0 major, 2 minor findings
+- M1: D-8 skip semantics omits "no tracking obligation" property (3 of 4 grounding properties covered)
+- M2: "Skip corrector when" condition precedes Corrector Dispatch section (organizational)
+- Report: `plans/interactive-review/reports/deliverable-review.md`
+- Lifecycle: reviewed → delivered (on main, no critical findings)
+- Fix task created in Worktree Tasks
+
 ## In-tree Tasks
 
 - [x] **Problem.md migration** — `/design plans/problem-md-migration/brief.md` | sonnet
@@ -69,7 +77,8 @@
 
 - [x] **Review recall gate** — `/deliverable-review plans/recall-gate` | opus | restart
 - [x] **Fix recall-gate findings** — applied inline (naming + structural fixes across 4 skill files)
-- [ ] **Interactive review** — `/deliverable-review plans/interactive-review` | opus | restart
+- [x] **Interactive review** — `/deliverable-review plans/interactive-review` | opus | restart
+- [ ] **Fix proof review findings** — `/design plans/interactive-review/reports/deliverable-review.md` | opus
 - [ ] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart | 3.2
   - Plan: handoff-cli-tool | Status: ready
   - Absorbs: Fix task-context bloat
@@ -243,7 +252,8 @@
 - `plans/interactive-review/reports/skill-review.md` — Skill reviewer report (1 critical, 3 major, 2 minor — all applied)
 - `plans/problem-md-migration/runbook.md` — Migration runbook (Tier 2)
 - `plans/recall-gate/reports/deliverable-review.md` — Recall gate review (0 critical, 0 major, 2 minor)
+- `plans/interactive-review/reports/deliverable-review.md` — Interactive review deliverable review (0 critical, 0 major, 2 minor)
 
 ## Next Steps
 
-Deliverable review pending for interactive-review (opus, restart, worktree).
+Session CLI tool (`/orchestrate handoff-cli-tool`) is highest-priority worktree task (3.2 WSJF).
