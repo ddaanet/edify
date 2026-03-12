@@ -33,3 +33,4 @@ list/
 /hooks
 /objects
 /refs
+/.claude/settings.json
