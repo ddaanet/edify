@@ -14,6 +14,12 @@
 - Topics 3 (deliverable-review) and 4 (ground skill) left as-is — minimal expansion benefit (T3: devddaanet validation noted in cross-topic; T4: origins remain claudeutils-internal)
 - The 4.1% framing correction is now applied directly (was previously flagged as separate task on main)
 
+**Reorganize retrospective reports:**
+- Consolidated expansion reports from `plans/retrospective-repo-expansion/reports/` into `plans/retrospective/`
+- Separated blog content from plan artifacts: `content/` (13 blog raw materials) vs `reports/` (4 plan execution artifacts)
+- Added `plans/retrospective/content/README.md` with reading order and file index
+- Expansion plan's `deliverable-review.md` stays in `plans/retrospective-repo-expansion/reports/` (planstate dependency)
+
 ## In-tree Tasks
 
 - [x] **Retro repo expansion** → `retro-repo-expansion` — `/design plans/retrospective-repo-expansion/brief.md` | sonnet
@@ -35,11 +41,8 @@
 
 ## Reference Files
 
-- `plans/retrospective/reports/topic-1-memory-system.md` — updated with pre-history + 0% recall
-- `plans/retrospective/reports/topic-2-pushback.md` — updated with anti-pushback reversal arc
-- `plans/retrospective/reports/topic-5-structural-enforcement.md` — updated with enforcement ladder pre-history
-- `plans/retrospective/reports/cross-topic-connections.md` — updated with extended timeline + pre-history
-- `plans/retrospective-repo-expansion/reports/synthesis.md` — single narrative combining all evidence
+- `plans/retrospective/content/` — all 13 blog raw materials (topics, synthesis, expansion evidence)
+- `plans/retrospective/reports/` — plan execution artifacts (reviews)
 - `plans/measure-agent-recall/report.md` — spontaneous recall rate measurement (0%)
 
 ## Next Steps
