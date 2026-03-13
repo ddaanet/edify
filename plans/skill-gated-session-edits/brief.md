@@ -40,8 +40,37 @@ The `/inline` skill exists precisely for this: corrector dispatch, baseline diff
 
 Default session behavior should be read-only (research, discussion, status). Edits to production artifacts (source code, tests, config) should require skill invocation — either explicit (`/inline`, `/orchestrate`) or via continuation chain. The skill provides the gates; without it, the agent's own judgment is the only defense, and that judgment failed twice in one session.
 
+## Platform Research (2026-03-13, plugin-migration session)
+
+Grounded findings from Claude Code docs:
+
+**Plugin `agent` key:** Plugin `settings.json` can set `"agent": "agent-name"` — activates that agent as the main thread with its system prompt, tool restrictions, and model. This is the only supported key in plugin settings.json.
+
+**Agent tool restrictions are hard caps.** If the base agent denies Write, no skill can re-enable it. Skill `allowed-tools` only pre-approves tools for auto-permission — it doesn't unlock tools the agent denied.
+
+**Transcript-based skill detection (feasible mechanism):** PreToolUse hooks receive `transcript_path` (conversation JSONL). A hook can:
+1. Read transcript JSONL
+2. Find most recent Skill tool_use entry (e.g., `skill: "design"`)
+3. Check policy: design allows `Write(plans/*)`, commit allows `Write(.git/*)`
+4. Compare `tool_input.file_path` against allowed patterns
+5. Return allow/deny
+
+**This bypasses the platform limitation.** Instead of skill-scoped tool escalation (which doesn't exist), the hook reads conversation state to check whether an appropriate skill was invoked in this session. Session-level unlock, not active-skill tracking — once `/design` is invoked, `Write(plans/*)` is unlocked for the remainder of the session. No skill start/end detection needed.
+
+**Concerns:**
+- Performance: JSONL parsing on every Write/Edit/Bash (transcript grows during session)
+- Reliability: Determining "active skill" from transcript is heuristic — no explicit start/end markers
+- Fragility: Depends on transcript JSONL format (internal, not public API)
+
+**Per-skill policy examples:**
+- `/design`, `/runbook` → `Write(plans/*)`, `Bash(just precommit:*)`
+- `/commit` → `Bash(git:*)`, `Write(.git/*)`
+- `/handoff` → `Write(agents/session.md)`, `Write(agents/learnings.md)`
+- `/inline` → `Write(src/*)`, `Write(tests/*)`, `Bash(just:*)`
+- No active skill → read-only (Read, Glob, Grep, Skill, Agent only)
+
 ## Scope Boundaries
 
-- **In scope:** Behavioral rule defining when skill invocation is required vs when direct execution is acceptable. Hook or structural enforcement mechanism.
+- **In scope:** Behavioral rule defining when skill invocation is required vs when direct execution is acceptable. Hook or structural enforcement mechanism. PreToolUse hook with transcript-based skill detection and per-skill write policies.
 - **Out of scope:** Fixing the two specific regressions (separate task). Changing how `/inline` or corrector works internally.
 - **Tension:** "jfdi" and quick fixes are valuable — gating everything through `/inline` adds ceremony. The design must distinguish trivial edits (typo fix, config tweak) from refactors that change behavior.
