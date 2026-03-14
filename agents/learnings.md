@@ -54,3 +54,16 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Keep sub-problems together through design (shared context benefits). After design, split into separate tasks with explicit dependencies. Parent plan delivers at "designed" status (terminal). Children are new plans starting at "planned." Each gets own WSJF score, model tier, worktree classification.
 - Exception: Dependent sub-problems (S-B depends on S-A's output format) stay together through design but execute as separate tasks with cross-task dependency.
 - Design coherence under change: if a sub-problem's execution reveals the shared design was wrong, propagation via "merge parent" (worktree merge from parent branch) handles updates.
+
+## When invariant: worktree concurrency cap
+- Max 5 concurrent unblocked worktrees. Human burnout prevention (even 5 is generous).
+- Main session and discussion (`d:`) are exempt — not parallel execution.
+
+## When invariant: blocked by dependency
+- Items depending on a not-completed item are blocked.
+- Blocked items excluded from parallel selection and `Next:` pickup.
+
+## When documenting system invariants
+- System invariants documented as learnings or decisions. Relevant invariants referenced in recall artifact by key.
+- Invariant keys use `when invariant: <property>` format for systematic discovery via recall resolve.
+- Until system-property-tracing plan provides a proper home, learnings + recall artifact is the interim vehicle.

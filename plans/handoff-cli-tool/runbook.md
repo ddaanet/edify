@@ -5,7 +5,7 @@ model: sonnet
 
 # Session CLI Tool
 
-**Context**: `claudeutils _session` command group — mechanical CLI for handoff, commit, and status operations. Internal (underscore prefix, hidden from `--help`). Skills remain the user interface; CLI handles writes, validation, subprocess orchestration.
+**Context**: `claudeutils _handoff`, `_commit`, `_status` — mechanical CLI commands for handoff, commit, and status operations. Internal (underscore prefix, hidden from `--help`). Skills remain the user interface; CLI handles writes, validation, subprocess orchestration.
 **Design**: `plans/handoff-cli-tool/outline.md`
 **Status**: Ready
 **Created**: 2026-03-07
@@ -14,16 +14,16 @@ model: sonnet
 
 ## Weak Orchestrator Metadata
 
-**Total Steps**: 29
+**Total Steps**: 25
 
 **Execution Model**:
 - Steps 1.1-1.3: Sonnet (infrastructure extraction, package setup, git CLI)
 - Cycles 2.1-2.2: Sonnet (session.md parser)
 - Cycles 3.1-3.4: Sonnet (status subcommand rendering + CLI wiring)
-- Cycles 4.1-4.7: Sonnet (handoff pipeline with state caching)
+- Cycles 4.1-4.4, 4.6-4.7: Sonnet (handoff pipeline with state caching)
 - Cycles 5.1-5.3: Sonnet (commit parser + vet check)
 - Cycles 6.1-6.6: Sonnet (commit pipeline + submodule coordination)
-- Cycles 7.1-7.4: Sonnet (integration tests)
+- Cycle 7.1: Sonnet (integration tests)
 
 **Step Dependencies**: Sequential within phases, phases sequential (2 depends on 1, 3 on 2, 4 on 2, 5 independent, 6 on 5, 7 on all)
 
@@ -32,7 +32,7 @@ model: sonnet
 
 **Report Locations**: `plans/handoff-cli-tool/reports/`
 
-**Success Criteria**: All three subcommands (`_session status`, `_session handoff`, `_session commit`) functional with full test coverage. `just precommit` passes.
+**Success Criteria**: All three commands (`_status`, `_handoff`, `_commit`) functional with full test coverage. `just precommit` passes.
 
 **Prerequisites**:
 - `src/claudeutils/worktree/git_ops.py` exists with `_git()` function (verified via Glob)
@@ -45,17 +45,17 @@ model: sonnet
 ## Common Context
 
 **Requirements (from design):**
-- S-1: Package structure — `_session` command group registered in main cli.py
+- S-1: Package structure — `_handoff`, `_commit`, `_status` top-level commands registered individually in main cli.py via `cli.add_command()`
 - S-2: `_git()` extraction — move from worktree to shared `claudeutils/git.py` with submodule discovery
 - S-3: Output/error — all stdout, exit code carries signal, no stderr
 - S-4: Session.md parser — shared parser extending existing `worktree/session.py`
-- S-5: Git status/diff — unified parent + submodule view CLI
-- Handoff: stdin parsing, session.md writes, committed detection, state caching, diagnostics
+- S-5: `_git changes` — unified parent + submodule status+diff in one call
+- Handoff: stdin parsing, session.md writes, committed detection, state caching, diagnostics (git status/diff only — precommit is pre-handoff gate)
 - Commit: stdin parsing, scripted vet check, submodule coordination, structured output
 - Status: pure data transformation, session.md + filesystem → STATUS format
 
 **Scope boundaries:**
-- IN: `_session` group (handoff, commit, status), `_git` group (status, diff), shared parser, git extraction, tests
+- IN: `_handoff`, `_commit`, `_status` commands, `_git changes`, shared parser, git extraction, tests
 - OUT: Gate A (LLM judgment), commit message drafting, gitmoji, skill modifications, pending task mutations
 
 **Key Constraints:**
@@ -82,7 +82,7 @@ model: sonnet
 - Phases are sequential: Phase N depends on Phase N-1 unless noted otherwise
 - Phase 5 is independent of Phases 3-4 (commit parser has no dependency on status/handoff)
 - Phase 6 depends on Phase 5 (commit pipeline uses commit parser + vet check)
-- Phase 7 depends on all prior phases (integration tests)
+- Phase 7 depends on Phases 3-4 (cross-subcommand contract test between status and handoff)
 
 ### Phase 1: Shared infrastructure (type: general, model: sonnet)
 
@@ -142,51 +142,53 @@ Create `src/claudeutils/git.py` containing:
 
 ---
 
-## Step 1.2: Create `claudeutils/session/` package structure
+## Step 1.2: Create `claudeutils/session/` flat package structure
 
-**Objective:** Create package skeleton for all three subcommands. Register `_session` group in main CLI.
+**Objective:** Create flat package with individual module files for all three commands. Register `_handoff`, `_commit`, `_status` as individual hidden commands in main CLI.
 
-**Script Evaluation:** Small (~30 lines, mostly `__init__.py` stubs)
+**Script Evaluation:** Small (~30 lines, mostly stubs)
 
 **Execution Model:** Sonnet
 
-**Prerequisite:** Read `src/claudeutils/cli.py:145-152` — understand existing `cli.add_command(worktree)` registration pattern to replicate for `_session` group.
+**Prerequisite:** Read `src/claudeutils/cli.py:145-152` — understand existing `cli.add_command(worktree)` registration pattern to replicate for individual session commands.
 
 **Implementation:**
 
-Create directory structure:
+Create flat directory structure (no subdirectories):
 ```
 src/claudeutils/session/
   __init__.py           (empty)
-  cli.py                Click group: `_session`
-  handoff/
-    __init__.py          (empty)
-  commit/
-    __init__.py          (empty)
-  status/
-    __init__.py          (empty)
+  cli.py                Individual Click commands: _handoff, _commit, _status
+  parse.py              (placeholder — session.md parser, Phase 2)
+  handoff.py            (placeholder — handoff pipeline, Phase 4)
+  commit.py             (placeholder — commit parser + pipeline, Phases 5-6)
+  commit_gate.py        (placeholder — scripted vet check, Phase 5)
+  status.py             (placeholder — STATUS rendering, Phase 3)
 ```
 
 `session/cli.py`:
-- Define `@click.group(name="_session", hidden=True)` group
-- Add help text: "Session management (internal)"
+- Define individual Click commands (stubs for now): `handoff_cmd`, `commit_cmd`, `status_cmd`
+- Each command is a `@click.command()` with `hidden=True` — not a group
 
 Main `cli.py` registration:
-- `from claudeutils.session.cli import session_group`
-- `cli.add_command(session_group)` — same pattern as line 152 (`cli.add_command(worktree)`)
+- `from claudeutils.session.cli import handoff_cmd, commit_cmd, status_cmd`
+- `cli.add_command(handoff_cmd, "_handoff")` — same `cli.add_command()` pattern as worktree
+- `cli.add_command(commit_cmd, "_commit")`
+- `cli.add_command(status_cmd, "_status")`
+- Each command registered with `hidden=True` so it does not appear in `--help`
 
-**Expected Outcome:** `claudeutils _session --help` shows group with no subcommands. `claudeutils --help` does NOT show `_session` (hidden).
+**Expected Outcome:** `claudeutils _handoff --help`, `claudeutils _commit --help`, `claudeutils _status --help` all work. `claudeutils --help` does NOT show them (hidden).
 
 **Error Conditions:**
 - Missing `__init__.py` → import failures
 
-**Validation:** `claudeutils _session --help` succeeds; `just precommit` passes.
+**Validation:** `claudeutils _handoff --help` succeeds; `just precommit` passes.
 
 ---
 
-## Step 1.3: Add `claudeutils _git status` and `claudeutils _git diff` subcommands
+## Step 1.3: Add `claudeutils _git changes` command
 
-**Objective:** Unified parent + submodule git status/diff view as structured markdown. Consumers: commit skill, commit CLI validation, handoff diagnostics.
+**Objective:** Unified parent + submodule view returning BOTH status AND diff in one call. Consumers: commit skill (input for `## Files` and `## Submodule`), handoff CLI (H-3 diagnostics).
 
 **Script Evaluation:** Medium (~80 lines new code + tests)
 
@@ -198,36 +200,47 @@ Main `cli.py` registration:
 
 Create `src/claudeutils/git_cli.py` (CLI commands for the `_git` group):
 - `@click.group(name="_git", hidden=True)` group
-- `@git_group.command(name="status")` — runs `git status --porcelain` for parent, then for each discovered submodule. Output format:
+- `@git_group.command(name="changes")` — runs `git status --porcelain` AND `git diff` for parent, then for each discovered submodule. Output is a data transformation — paths are rewritten, not raw git passthrough. If tree is clean, output says so. If dirty, output includes both the file list AND the diff. Output format:
+
+**Path prefixing:** Submodule file paths must be prefixed with submodule directory. `git -C agent-core status --porcelain` outputs relative paths — prefix each with `agent-core/`. This is a data transformation, not git passthrough.
+
+**Clean sections omitted:** Only dirty repos shown in output. Token economy — only report deviations.
+
+**Blank line separation:** Within a section, status and diff are separated by a blank line.
 
 ```markdown
 ## Parent
-<git status --porcelain output or "(clean)">
+<git status --porcelain output>
 
-## Submodule: agent-core
-<git -C agent-core status --porcelain output or "(clean)">
+<git diff output>
 ```
 
-- `@git_group.command(name="diff")` — same pattern with `git diff` (staged + unstaged). Output format:
+**Whole-tree clean:**
+```markdown
+Tree is clean.
+```
 
+When submodules present and dirty:
 ```markdown
 ## Parent
-<git diff output or "(no changes)">
+<status + diff>
 
 ## Submodule: agent-core
-<git -C agent-core diff output or "(no changes)">
+<status + diff (paths prefixed with agent-core/)>
 ```
 
 Register in main `cli.py`: `from claudeutils.git_cli import git_group` + `cli.add_command(git_group)`
 
+Internal Python functions (`git_status()`, `git_diff()` in `git.py`) serve commit CLI validation (C-2/C-3) separately from the unified CLI command.
+
 **Tests:** `tests/test_git_cli.py`
 - Tests use `tmp_path` to create real git repos with submodules
-- `test_git_status_clean_repo`: CliRunner invokes `_git status`, output contains `## Parent` and `(clean)`
-- `test_git_status_dirty_repo`: Create dirty file, output contains filename in parent section
-- `test_git_status_with_submodule`: Create repo with submodule, output contains `## Submodule:` section
-- `test_git_diff_with_changes`: Stage a change, verify diff output appears under correct section
+- `test_git_changes_clean_repo`: CliRunner invokes `_git changes`, output contains "clean"
+- `test_git_changes_dirty_repo`: Create dirty file, output contains filename and diff under `## Parent`
+- `test_git_changes_with_submodule`: Create repo with dirty submodule, output contains `## Submodule:` section with status and diff. Must verify submodule file paths include the submodule prefix (e.g., `agent-core/fragments/foo.md` not `fragments/foo.md`)
+- `test_git_changes_clean_submodule_omitted`: Parent dirty + submodule clean → only parent section shown, no submodule section present in output
 
-**Expected Outcome:** `claudeutils _git status` and `claudeutils _git diff` produce structured markdown output. Exit 0 always (status is informational).
+**Expected Outcome:** `claudeutils _git changes` produces structured markdown output with both status and diff. Exit 0 always (informational).
 
 **Error Conditions:**
 - Not in a git repo → `_git()` raises CalledProcessError. Let it propagate (informational command).
@@ -260,7 +273,7 @@ Shared parser for session.md consumed by both status and handoff subcommands. Ex
 
 **Edge case tests:**
 - `test_parse_status_line_missing` — content without `# Session Handoff:` returns None
-- `test_parse_tasks_old_format` — task line without pipe-separated metadata returns ParsedTask with `model=None`, `restart=False`
+- `test_parse_tasks_old_format` — task line without pipe-separated metadata raises `SessionFileError` (mandatory metadata — no silent defaults)
 - `test_parse_tasks_empty_section` — section heading present but no tasks returns `[]`
 - `test_parse_completed_section_empty` — heading present, no content returns `[]`
 
@@ -272,7 +285,7 @@ Shared parser for session.md consumed by both status and handoff subcommands. Ex
 
 ## Completed This Session
 
-**Phase 1 infrastructure:**
+### Phase 1 infrastructure
 - Extracted git helpers
 - Created package structure
 
@@ -336,7 +349,7 @@ Shared parser for session.md consumed by both status and handoff subcommands. Ex
 
 **Error handling tests:**
 - `test_parse_session_missing_file` — `parse_session(Path("nonexistent.md"))` raises `SessionFileError` (custom exception, not generic FileNotFoundError) — ST-2 fatal error
-- `test_parse_session_old_format` — session.md with tasks lacking pipe-separated metadata → `ParsedTask` objects with `model=None`, `restart=False` (defaults, not error)
+- `test_parse_session_old_format` — session.md with tasks lacking pipe-separated metadata → raises `SessionFileError` (exit 2). Mandatory metadata enforces plan-backed task rule — no silent defaults
 
 **Expected failure:** `ImportError` — `SessionData` class doesn't exist
 
@@ -399,7 +412,7 @@ Pure data transformation: session.md + filesystem state → STATUS output. No mu
 
 **Expected failure:** `ImportError` — `render_next` doesn't exist
 
-**Why it fails:** No `session/status/render.py` module
+**Why it fails:** No `session/status.py` module
 
 **Verify RED:** `pytest tests/test_session_status.py::test_render_next_task -v`
 
@@ -407,15 +420,16 @@ Pure data transformation: session.md + filesystem state → STATUS output. No mu
 
 **GREEN Phase:**
 
-**Implementation:** Create `src/claudeutils/session/status/render.py` with `render_next()`
+**Implementation:** Create `src/claudeutils/session/status.py` with `render_next()`
 
 **Behavior:**
 - Iterate tasks, find first with `checkbox == " "` and `worktree_marker is None`
-- Format as `Next:` block with command, model, restart
+- If the next task is the first in-tree task (single-task case or next == first), suppress the separate `Next:` section. Instead, return a marker value (e.g., task index) so the caller merges Next metadata (command, model, restart) into the in-tree item with `▶` marker
+- Otherwise, format as `Next:` block with command, model, restart
 - Model defaults to "sonnet" if None. Restart shows "yes" if True, "no" if False
 
 **Changes:**
-- File: `src/claudeutils/session/status/render.py`
+- File: `src/claudeutils/session/status.py`
   Action: Create with `render_next(tasks: list[ParsedTask]) -> str`
 
 **Verify lint:** `just lint`
@@ -431,14 +445,16 @@ Pure data transformation: session.md + filesystem state → STATUS output. No mu
 **Test:** `test_render_section[pending]`, `test_render_section[worktree]`, `test_render_section[unscheduled]`, `test_render_empty_section[pending]`, `test_render_empty_section[worktree]`, `test_render_empty_section[unscheduled]`
 **File:** `tests/test_session_status.py`
 
-**Assertions — Pending section:**
+**Assertions — In-tree section:**
 - `render_pending(tasks, plan_states)` with two tasks returns:
   ```
-  Pending:
-  - Build parser (sonnet)
-    - Plan: parser | Status: outlined
+  In-tree:
+  ▶ Build parser (sonnet)
+    `/runbook plans/parser/design.md`
+    Plan: parser | Status: outlined
   - Fix bug (haiku)
   ```
+- First pending task gets `▶` marker with command when Next is suppressed (single-task or first-in-tree case)
 - Task with non-default model shows `(model)`. Default (sonnet) omitted
 - Task with associated plan directory shows nested plan/status line
 - Completed tasks (`checkbox == "x"`) excluded
@@ -465,28 +481,36 @@ Pure data transformation: session.md + filesystem state → STATUS output. No mu
 **Empty section assertions (all three):**
 - Each render function returns `""` when input list is empty
 
+**Additional test:** `test_render_session_continuation`
+**Assertions:**
+- `render_session_continuation(is_dirty=True, review_pending_plans=[])` returns `Session: uncommitted changes — \`/handoff\`, \`/commit\``
+- `render_session_continuation(is_dirty=True, review_pending_plans=["foo"])` returns `Session: uncommitted changes — \`/handoff\`, \`/commit\`, \`/deliverable-review plans/foo\``
+- `render_session_continuation(is_dirty=False, review_pending_plans=[])` returns `""` (omit entirely when clean)
+
 **Expected failure:** `ImportError` — render functions don't exist
 
 **Why it fails:** No rendering functions for these sections
 
-**Verify RED:** `pytest tests/test_session_status.py -k "render_section or render_empty" -v`
+**Verify RED:** `pytest tests/test_session_status.py -k "render_section or render_empty or render_session" -v`
 
 ---
 
 **GREEN Phase:**
 
-**Implementation:** Add `render_pending()`, `render_worktree()`, `render_unscheduled()` to `session/status/render.py`
+**Implementation:** Add `render_pending()`, `render_worktree()`, `render_unscheduled()`, `render_session_continuation()` to `session/status.py`
 
 **Behavior:**
-- `render_pending(tasks, plan_states)`: Filter to pending tasks (checkbox `" "`), format with optional plan status. Non-default model shown in parens. Plan status from `plan_states` dict mapping plan name → status string
+- `render_pending(tasks, plan_states, next_task_idx)`: Filter to pending tasks (checkbox `" "`), format with optional plan status. First pending task gets `▶` marker and merged Next metadata when `next_task_idx` indicates suppression. Non-default model shown in parens. Plan status from `plan_states` dict mapping plan name → status string
 - `render_worktree(tasks)`: Format worktree tasks with `→` markers
 - `render_unscheduled(all_plans, task_plan_dirs)`: Filter plans not in `task_plan_dirs` set, exclude `delivered`, sort alphabetically, format with `—` separator
+- `render_session_continuation(is_dirty, review_pending_plans)`: When dirty, render `Session: uncommitted changes — /handoff, /commit` header. If any review-pending plans, append `/deliverable-review plans/<name>`. Omit when clean
+- All output uses ANSI colors for status section headers
 
 **Approach:** Each function produces a section string or empty string. Caller concatenates non-empty sections.
 
 **Changes:**
-- File: `src/claudeutils/session/status/render.py`
-  Action: Add three rendering functions
+- File: `src/claudeutils/session/status.py`
+  Action: Add rendering functions including session continuation
 
 **Verify lint:** `just lint`
 **Verify GREEN:** `pytest tests/test_session_status.py -v`
@@ -496,17 +520,20 @@ Pure data transformation: session.md + filesystem state → STATUS output. No mu
 
 ## Cycle 3.3: Parallel group detection
 
+**Note: Design revision pending.** ST-1 "largest independent group" selection replaced with "first eligible consecutive group" (document order, cap 5). The "top priority unblocked items" change primarily affects the cap and consecutive constraint retention — both are implemented here. Outline update required before orchestration to align wording.
+
 **RED Phase:**
 
 **Test:** `test_detect_parallel_group`, `test_detect_parallel_no_group`, `test_detect_parallel_shared_plan`
 **File:** `tests/test_session_status.py`
 
 **Assertions:**
-- `detect_parallel(tasks, blockers)` with 3 tasks having different `plan_dir` values and no blockers returns group of all 3 task names
+- `detect_parallel(tasks, blockers)` with 3 consecutive tasks having different `plan_dir` values and no blockers returns group of all 3 task names
 - `detect_parallel(tasks, blockers)` with single task returns `None` (no group)
 - `detect_parallel(tasks, blockers)` with 2 tasks sharing `plan_dir="parser"` returns `None` (shared plan = dependent)
-- `detect_parallel(tasks, blockers)` with 4 tasks where 2 share a plan returns group of 2 independent tasks (largest independent subset)
-- Blocker text mentioning task name creates dependency (excluded from group)
+- `detect_parallel(tasks, blockers)` with tasks where a dependency breaks consecutive run → returns first eligible consecutive group (before the break)
+- `detect_parallel(tasks, blockers)` with 7 consecutive independent tasks → returns first 5 (cap at 5 concurrent sessions)
+- Blocker text mentioning task name creates dependency (breaks consecutive run)
 
 **Expected failure:** `ImportError` — `detect_parallel` doesn't exist
 
@@ -518,18 +545,21 @@ Pure data transformation: session.md + filesystem state → STATUS output. No mu
 
 **GREEN Phase:**
 
-**Implementation:** Add `detect_parallel()` to `session/status/render.py`
+**Implementation:** Add `detect_parallel()` to `session/status.py`
 
 **Behavior:**
 - `detect_parallel(tasks: list[ParsedTask], blockers: list[list[str]]) -> list[str] | None`
-- Build dependency graph: tasks with shared `plan_dir` are dependent. Tasks mentioned in blocker text are dependent on the blocker
-- Find largest independent set (no shared plan_dir, no blocker references between them)
+- Only consecutive independent tasks form a group (not arbitrary subsets)
+- Walk tasks in document order, building a consecutive run of independent tasks. A task is dependent if it shares `plan_dir` with any task in the current run, or is mentioned in blocker text
+- A dependency breaks the consecutive run — start a new run
+- First eligible group in document order (2+ consecutive independent tasks)
+- Cap at 5 concurrent sessions
 - Return task names if group has 2+ members, else None
 
-**Approach:** Simple graph algorithm — build dependency edges (shared plan_dir, blocker reference), then find the largest independent set (no edges between members). For small task lists (<20), brute-force over subsets is fine: enumerate all subsets of pending tasks in descending size order, return first subset with no dependency edges between any pair.
+**Approach:** Linear scan — iterate tasks, extend current consecutive group while independent. On dependency, check if current group qualifies (2+), return it. If not, reset and continue. Cap group size at 5.
 
 **Changes:**
-- File: `src/claudeutils/session/status/render.py`
+- File: `src/claudeutils/session/status.py`
   Action: Add `detect_parallel()` function
 
 **Verify lint:** `just lint`
@@ -538,47 +568,49 @@ Pure data transformation: session.md + filesystem state → STATUS output. No mu
 
 ---
 
-## Cycle 3.4: CLI wiring — `claudeutils _session status`
+## Cycle 3.4: CLI wiring — `claudeutils _status`
 
 **RED Phase:**
 
-**Test:** `test_session_status_cli`, `test_session_status_missing_session`
+**Test:** `test_status_cli`, `test_status_missing_session`, `test_status_old_format_fatal`
 **File:** `tests/test_session_status.py`
 
 **Assertions:**
-- CliRunner invoking `_session status` with a real session.md file in cwd produces output containing:
-  - `Next:` section with first pending task
-  - `Pending:` section
+- CliRunner invoking `_status` with a real session.md file in cwd produces output containing:
+  - In-tree section with first pending task (with `▶` marker if single-task)
   - Output exits with code 0
-- CliRunner invoking `_session status` without session.md file → exit code 2, output contains `**Error:**`
+- CliRunner invoking `_status` without session.md file → exit code 2, output contains `**Error:**`
+- CliRunner invoking `_status` with session.md containing tasks without pipe-separated metadata → exit code 2 (old format = fatal, mandatory metadata)
 
-**Expected failure:** Command `_session status` not registered — Click returns non-zero with "No such command"
+**Expected failure:** Command `_status` not registered — Click returns non-zero with "No such command"
 
-**Why it fails:** No status subcommand registered in session CLI group
+**Why it fails:** No `_status` command registered in main CLI
 
-**Verify RED:** `pytest tests/test_session_status.py::test_session_status_cli -v`
+**Verify RED:** `pytest tests/test_session_status.py::test_status_cli -v`
 
 ---
 
 **GREEN Phase:**
 
-**Implementation:** Create `src/claudeutils/session/status/cli.py` with Click command, register in session group
+**Implementation:** Wire the `status_cmd` Click command in `src/claudeutils/session/cli.py`, already registered in main `cli.py` from Step 1.2
 
 **Behavior:**
-- `@click.command(name="status")` function
+- `status_cmd` Click command implementation
 - Read `agents/session.md` (cwd-relative) → `parse_session()`
 - Call `claudeutils _worktree ls` via subprocess for plan states
 - Parse `_worktree ls` output for plan status: lines matching `  Plan: {name} [{status}] → ...` — extract name and status into a dict `{name: status}` passed to `render_pending()`
-- Call render functions (Next, Pending, Worktree, Unscheduled, Parallel)
-- Concatenate non-empty sections with blank line separators
+- Check git tree dirty state for session continuation header
+- Check plan states for any `review-pending` plans
+- Call render functions (session continuation, Next/merged, Pending, Worktree, Unscheduled, Parallel)
+- Concatenate non-empty sections with blank line separators, ANSI-colored output
 - Output to stdout, exit 0
 - Missing session.md → `_fail("**Error:** Session file not found: agents/session.md", code=2)`
+- Old format (missing metadata) → exit 2 (fatal, propagated from parser)
 
 **Changes:**
-- File: `src/claudeutils/session/status/cli.py`
-  Action: Create with `status` Click command
 - File: `src/claudeutils/session/cli.py`
-  Action: Import and register: `from claudeutils.session.status.cli import status; session_group.add_command(status)`
+  Action: Implement `status_cmd` with full pipeline
+  Location hint: Status command stub from Step 1.2
 
 **Verify lint:** `just lint`
 **Verify GREEN:** `pytest tests/test_session_status.py -v`
@@ -590,7 +622,7 @@ Pure data transformation: session.md + filesystem state → STATUS output. No mu
 
 ### Phase 4: Handoff pipeline (type: tdd, model: sonnet)
 
-Stdin parsing, session.md writes, committed detection, state caching, diagnostics.
+Stdin parsing, session.md writes, committed detection, state caching, diagnostics. Precommit is a pre-handoff gate (skill responsibility), not an internal CLI step.
 
 ---
 
@@ -614,14 +646,14 @@ Stdin parsing, session.md writes, committed detection, state caching, diagnostic
 
 ## Completed This Session
 
-**Handoff CLI tool design (Phase A):**
+### Handoff CLI tool design (Phase A)
 - Produced outline
 - Review by outline-review-agent
 ```
 
 **Expected failure:** `ImportError` — no `parse_handoff_input` function
 
-**Why it fails:** No `session/handoff/` module with parsing
+**Why it fails:** No `session/handoff.py` module with parsing
 
 **Verify RED:** `pytest tests/test_session_handoff.py::test_parse_handoff_input -v`
 
@@ -629,7 +661,7 @@ Stdin parsing, session.md writes, committed detection, state caching, diagnostic
 
 **GREEN Phase:**
 
-**Implementation:** Create `src/claudeutils/session/handoff/parse.py`
+**Implementation:** Create `src/claudeutils/session/handoff.py`
 
 **Behavior:**
 - `HandoffInput` dataclass: `status_line: str`, `completed_lines: list[str]`
@@ -637,7 +669,7 @@ Stdin parsing, session.md writes, committed detection, state caching, diagnostic
 - `HandoffInputError` exception for missing required markers
 
 **Changes:**
-- File: `src/claudeutils/session/handoff/parse.py`
+- File: `src/claudeutils/session/handoff.py`
   Action: Create with `HandoffInput`, `HandoffInputError`, `parse_handoff_input()`
 
 **Verify lint:** `just lint`
@@ -669,7 +701,7 @@ Stdin parsing, session.md writes, committed detection, state caching, diagnostic
 
 **GREEN Phase:**
 
-**Implementation:** Add `overwrite_status()` to `src/claudeutils/session/handoff/pipeline.py`
+**Implementation:** Add `overwrite_status()` to `src/claudeutils/session/handoff.py`
 
 **Behavior:**
 - Read session.md, find line after `# Session Handoff:` and before first `## ` heading
@@ -678,8 +710,8 @@ Stdin parsing, session.md writes, committed detection, state caching, diagnostic
 - Write back to file
 
 **Changes:**
-- File: `src/claudeutils/session/handoff/pipeline.py`
-  Action: Create with `overwrite_status(session_path: Path, status_text: str) -> None`
+- File: `src/claudeutils/session/handoff.py`
+  Action: Add `overwrite_status(session_path: Path, status_text: str) -> None`
 
 **Verify lint:** `just lint`
 **Verify GREEN:** `pytest tests/test_session_handoff.py -v`
@@ -721,7 +753,7 @@ Tests use real git repos via `tmp_path` — committed detection requires `git di
 
 **GREEN Phase:**
 
-**Implementation:** Add `write_completed()` to `session/handoff/pipeline.py`
+**Implementation:** Add `write_completed()` to `session/handoff.py`
 
 **Behavior:**
 - Compare completed section in working tree vs HEAD via `git diff HEAD -- agents/session.md`
@@ -731,7 +763,7 @@ Tests use real git repos via `tmp_path` — committed detection requires `git di
 **Approach:** Use `_git("diff", "HEAD", "--", str(session_path))` to get diff. Parse for completed section hunk. Absence of hunk → overwrite mode. Hunk with only additions → append mode. Hunk with preserved old + new → auto-strip mode.
 
 **Changes:**
-- File: `src/claudeutils/session/handoff/pipeline.py`
+- File: `src/claudeutils/session/handoff.py`
   Action: Add `write_completed(session_path: Path, new_lines: list[str]) -> None`
 
 **Verify lint:** `just lint`
@@ -751,7 +783,7 @@ Tests use real git repos via `tmp_path` — committed detection requires `git di
 - `save_state(input_md, step="write_session")` creates `tmp/.handoff-state.json` with `input_markdown`, `timestamp` (ISO format), `step_reached` fields
 - `load_state()` returns `HandoffState` with same fields, or `None` if no state file
 - `clear_state()` removes the state file
-- `step_reached` values: `"write_session"`, `"precommit"`, `"diagnostics"`
+- `step_reached` values: `"write_session"`, `"diagnostics"`
 - State file survives across function calls (not deleted on load)
 
 **Expected failure:** `ImportError` — state caching functions don't exist
@@ -764,7 +796,7 @@ Tests use real git repos via `tmp_path` — committed detection requires `git di
 
 **GREEN Phase:**
 
-**Implementation:** Add state caching to `src/claudeutils/session/handoff/pipeline.py`
+**Implementation:** Add state caching to `src/claudeutils/session/handoff.py`
 
 **Behavior:**
 - `HandoffState` dataclass: `input_markdown: str`, `timestamp: str`, `step_reached: str`
@@ -773,7 +805,7 @@ Tests use real git repos via `tmp_path` — committed detection requires `git di
 - `clear_state() -> None` — delete state file if exists
 
 **Changes:**
-- File: `src/claudeutils/session/handoff/pipeline.py`
+- File: `src/claudeutils/session/handoff.py`
   Action: Add `HandoffState`, `save_state()`, `load_state()`, `clear_state()`
 
 **Verify lint:** `just lint`
@@ -782,45 +814,7 @@ Tests use real git repos via `tmp_path` — committed detection requires `git di
 
 ---
 
-**Mid-phase checkpoint:** `just precommit` — mutations + recovery established before external tool integration.
-
----
-
-## Cycle 4.5: Precommit integration
-
-**RED Phase:**
-
-**Test:** `test_handoff_precommit_pass`, `test_handoff_precommit_fail`
-**File:** `tests/test_session_handoff.py`
-
-**Assertions:**
-- `run_precommit()` calls `just precommit` subprocess, returns `PrecommitResult` with `success: bool`, `output: str`
-- On failure: `success == False`, `output` contains the precommit failure text
-- On success: `success == True`, `output` contains passing summary
-
-**Expected failure:** `ImportError` — `run_precommit` doesn't exist
-
-**Why it fails:** No precommit integration
-
-**Verify RED:** `pytest tests/test_session_handoff.py::test_handoff_precommit_pass -v`
-
----
-
-**GREEN Phase:**
-
-**Implementation:** Add `run_precommit()` to `session/handoff/pipeline.py`
-
-**Behavior:**
-- `PrecommitResult` dataclass: `success: bool`, `output: str`
-- `run_precommit() -> PrecommitResult` — `subprocess.run(["just", "precommit"], capture_output=True, text=True, check=False)`. Return success based on returncode.
-
-**Changes:**
-- File: `src/claudeutils/session/handoff/pipeline.py`
-  Action: Add `PrecommitResult`, `run_precommit()`
-
-**Verify lint:** `just lint`
-**Verify GREEN:** `pytest tests/test_session_handoff.py -v`
-**Verify no regression:** `just precommit`
+**Mid-phase checkpoint:** `just precommit` — mutations + recovery established before diagnostics integration.
 
 ---
 
@@ -828,43 +822,35 @@ Tests use real git repos via `tmp_path` — committed detection requires `git di
 
 **RED Phase:**
 
-**Test:** `test_diagnostics_precommit_pass`, `test_diagnostics_precommit_fail`, `test_diagnostics_learnings_age`
+**Test:** `test_diagnostics_output`
 **File:** `tests/test_session_handoff.py`
 
 **Assertions:**
-- `format_diagnostics(precommit_result, git_status, learnings_age)` when precommit passed:
-  - Contains precommit output
-  - Contains git status/diff markdown
-  - No learnings age warning if all entries < 7 days
-- When precommit failed:
-  - Contains precommit failure output
-  - Does NOT contain git status/diff (conditional — only on pass)
-  - Contains learnings age summary if any ≥ 7 days
-- When learnings have entries ≥ 7 active days:
-  - Output contains `**Learnings:** N entries ≥7 days — consider /codify`
+- `format_diagnostics(git_output)` returns structured markdown containing the git status/diff output
+- `format_diagnostics("")` with empty git output returns empty string (nothing to report)
 
 **Expected failure:** `ImportError`
 
 **Why it fails:** No diagnostics formatting function
 
-**Verify RED:** `pytest tests/test_session_handoff.py::test_diagnostics_precommit_pass -v`
+**Verify RED:** `pytest tests/test_session_handoff.py::test_diagnostics_output -v`
 
 ---
 
 **GREEN Phase:**
 
-**Implementation:** Add `format_diagnostics()` to `session/handoff/context.py`
+**Implementation:** Add `format_diagnostics()` to `session/handoff.py`
 
 **Behavior:**
-- `format_diagnostics(precommit: PrecommitResult, git_output: str | None, learnings_age_days: int | None) -> str`
-- Always include precommit result block
-- If precommit passed: include git status/diff output
-- If any learnings ≥ 7 days: append age summary line
-- All output as structured markdown
+- `format_diagnostics(git_output: str) -> str`
+- If git output non-empty: return it as structured markdown
+- If empty: return empty string
+- No precommit result (precommit is pre-handoff gate, not CLI responsibility)
+- No learnings age/weight (SessionStart hook concern, not actionable mid-session)
 
 **Changes:**
-- File: `src/claudeutils/session/handoff/context.py`
-  Action: Create with `format_diagnostics()`
+- File: `src/claudeutils/session/handoff.py`
+  Action: Add `format_diagnostics()`
 
 **Verify lint:** `just lint`
 **Verify GREEN:** `pytest tests/test_session_handoff.py -v`
@@ -872,44 +858,42 @@ Tests use real git repos via `tmp_path` — committed detection requires `git di
 
 ---
 
-## Cycle 4.7: CLI wiring — `claudeutils _session handoff`
+## Cycle 4.7: CLI wiring — `claudeutils _handoff`
 
 **RED Phase:**
 
-**Test:** `test_session_handoff_cli_fresh`, `test_session_handoff_cli_resume`, `test_session_handoff_cli_no_stdin_no_state`
+**Test:** `test_handoff_cli_fresh`, `test_handoff_cli_resume`, `test_handoff_cli_no_stdin_no_state`
 **File:** `tests/test_session_handoff.py`
 
 **Assertions:**
-- CliRunner with stdin input → exit 0, session.md status line updated, completed section written, diagnostics output
-- CliRunner without stdin but with existing state file → exit 0, resumes from `step_reached`
-- CliRunner without stdin and no state file → exit 2, output contains error message about missing input
+- CliRunner invoking `_handoff` with stdin input → exit 0, session.md status line updated, completed section written, diagnostics output
+- CliRunner invoking `_handoff` without stdin but with existing state file → exit 0, resumes from `step_reached`
+- CliRunner invoking `_handoff` without stdin and no state file → exit 2, output contains error message about missing input
 
 **Expected failure:** Command not registered
 
-**Why it fails:** No handoff subcommand
+**Why it fails:** No `_handoff` command implementation
 
-**Verify RED:** `pytest tests/test_session_handoff.py::test_session_handoff_cli_fresh -v`
+**Verify RED:** `pytest tests/test_session_handoff.py::test_handoff_cli_fresh -v`
 
 ---
 
 **GREEN Phase:**
 
-**Implementation:** Create `src/claudeutils/session/handoff/cli.py` with Click command, wire full pipeline
+**Implementation:** Wire the `handoff_cmd` Click command in `src/claudeutils/session/cli.py`, already registered in main `cli.py` from Step 1.2
 
 **Behavior:**
-- `@click.command(name="handoff")` function
+- `handoff_cmd` Click command implementation
 - Read stdin (if available) → `parse_handoff_input()`
 - If no stdin: check for state file → `load_state()` → resume
 - If no stdin and no state: `_fail("**Error:** No input on stdin and no state file", code=2)`
-- Fresh pipeline: parse → save_state → overwrite_status → write_completed → run_precommit → diagnostics → clear_state
+- Fresh pipeline: parse → save_state → overwrite_status → write_completed → diagnostics (git status/diff via _git changes) → clear_state
 - Resume: load state → skip to `step_reached` → continue pipeline
-- On precommit failure: output result + diagnostics, leave state file, exit 1
 
 **Changes:**
-- File: `src/claudeutils/session/handoff/cli.py`
-  Action: Create with `handoff` Click command orchestrating full pipeline
 - File: `src/claudeutils/session/cli.py`
-  Action: Register: `from claudeutils.session.handoff.cli import handoff; session_group.add_command(handoff)`
+  Action: Implement `handoff_cmd` with full pipeline
+  Location hint: Handoff command stub from Step 1.2
 
 **Verify lint:** `just lint`
 **Verify GREEN:** `pytest tests/test_session_handoff.py -v`
@@ -972,12 +956,15 @@ Markdown stdin parser (commit-specific format) and scripted vet check.
 - `result.message == "✨ Add commit CLI with scripted vet check\n\n- Structured markdown I/O\n- Submodule-aware commit pipeline"`
 - Blockquote `> ` prefix stripped
 - `## ` lines within blockquote treated as message body (not section boundaries)
-- Missing `## Message` → `CommitInputError`
+- Missing `## Message` → `CommitInputError` (unless `amend` + `no-edit` in Options)
 - Missing `## Files` → `CommitInputError`
+- `no-edit` in Options without `amend` → `CommitInputError` with message indicating `no-edit` requires `amend`
+- `amend` + `no-edit` without `## Message` → valid (message not required)
+- `no-edit` with `## Message` present → `CommitInputError` (contradictory input — no-edit means keep existing message)
 
 **Expected failure:** `ImportError` — no commit parser module
 
-**Why it fails:** No `session/commit/parse.py`
+**Why it fails:** No `session/commit.py`
 
 **Verify RED:** `pytest tests/test_session_commit.py -k "parse_commit" -v`
 
@@ -985,21 +972,23 @@ Markdown stdin parser (commit-specific format) and scripted vet check.
 
 **GREEN Phase:**
 
-**Implementation:** Create `src/claudeutils/session/commit/parse.py`
+**Implementation:** Create `src/claudeutils/session/commit.py`
 
 **Behavior:**
-- `CommitInput` dataclass: `files: list[str]`, `options: set[str]`, `submodules: dict[str, str]`, `message: str`
+- `CommitInput` dataclass: `files: list[str]`, `options: set[str]`, `submodules: dict[str, str]`, `message: str | None`
 - `parse_commit_input(text: str) -> CommitInput` — section-based parsing
 - Split on `## ` at line start. Known section names: `Files`, `Options`, `Submodule <path>`, `Message`
 - `## Message` is always last — everything from `## Message` to EOF is message body
 - Blockquote stripping: remove leading `> ` or `>` from each line
-- Valid options: `no-vet`, `just-lint`, `amend`. Unknown → raise `CommitInputError`
+- Valid options: `no-vet`, `just-lint`, `amend`, `no-edit`. Unknown → raise `CommitInputError`
+- `no-edit` without `amend` → raise `CommitInputError` (exit 2 — `no-edit` requires `amend`)
+- When `amend` + `no-edit`: `## Message` section not required in input, `message` is `None`
 - `CommitInputError` exception for missing required sections or unknown options
 
 **Approach:** Sequential parsing — find each `## ` boundary, classify section, delegate to section-specific parser. Message section greedily consumes to EOF (safe for `## ` in blockquotes).
 
 **Changes:**
-- File: `src/claudeutils/session/commit/parse.py`
+- File: `src/claudeutils/session/commit.py`
   Action: Create with `CommitInput`, `CommitInputError`, `parse_commit_input()`
 
 **Verify lint:** `just lint`
@@ -1035,7 +1024,7 @@ Tests use real git repos via `tmp_path`.
 
 **GREEN Phase:**
 
-**Implementation:** Add `validate_files()` to `src/claudeutils/session/commit/gate.py`
+**Implementation:** Add `validate_files()` to `src/claudeutils/session/commit_gate.py`
 
 **Behavior:**
 - `CleanFileError` exception with `clean_files: list[str]` attribute
@@ -1046,7 +1035,7 @@ Tests use real git repos via `tmp_path`.
 - Collect clean files → raise `CleanFileError` with STOP directive
 
 **Changes:**
-- File: `src/claudeutils/session/commit/gate.py`
+- File: `src/claudeutils/session/commit_gate.py`
   Action: Create with `CleanFileError`, `validate_files()`
 
 **Verify lint:** `just lint`
@@ -1081,7 +1070,7 @@ Tests use `tmp_path` with pyproject.toml and plan report directories.
 
 **GREEN Phase:**
 
-**Implementation:** Add vet check to `src/claudeutils/session/commit/gate.py`
+**Implementation:** Add vet check to `src/claudeutils/session/commit_gate.py`
 
 **Behavior:**
 - `VetResult` dataclass: `passed: bool`, `reason: str | None`, `unreviewed_files: list[str]`, `stale_info: str | None`
@@ -1094,8 +1083,9 @@ Tests use `tmp_path` with pyproject.toml and plan report directories.
 - Stale (production newer) → fail with stale info
 
 **Changes:**
-- File: `src/claudeutils/session/commit/gate.py`
+- File: `src/claudeutils/session/commit_gate.py`
   Action: Add `VetResult`, `vet_check()`
+  Note: Hardcode `agent-core/bin/**`, `agent-core/skills/**/*.sh` patterns (not configurable). Config model for submodule patterns (unified parent config vs per-repo pyproject.toml) deferred to separate plan.
 
 **Verify lint:** `just lint`
 **Verify GREEN:** `pytest tests/test_session_commit.py -v`
@@ -1134,7 +1124,7 @@ Tests use real git repos via `tmp_path`.
 
 **Expected failure:** `ImportError` — no commit pipeline
 
-**Why it fails:** No `session/commit/pipeline.py`
+**Why it fails:** No commit pipeline in `session/commit.py`
 
 **Verify RED:** `pytest tests/test_session_commit_pipeline.py::test_commit_parent_only -v`
 
@@ -1142,7 +1132,7 @@ Tests use real git repos via `tmp_path`.
 
 **GREEN Phase:**
 
-**Implementation:** Create `src/claudeutils/session/commit/pipeline.py`
+**Implementation:** Add commit pipeline to `src/claudeutils/session/commit.py`
 
 **Behavior:**
 - `CommitResult` dataclass: `success: bool`, `output: str`
@@ -1154,8 +1144,8 @@ Tests use real git repos via `tmp_path`.
 - Return raw git commit output on success
 
 **Changes:**
-- File: `src/claudeutils/session/commit/pipeline.py`
-  Action: Create with `CommitResult`, `commit_pipeline()`
+- File: `src/claudeutils/session/commit.py`
+  Action: Add `CommitResult`, `commit_pipeline()`
 
 **Verify lint:** `just lint`
 **Verify GREEN:** `pytest tests/test_session_commit_pipeline.py -v`
@@ -1211,7 +1201,7 @@ Tests use real git repos with submodules via `tmp_path` (shared fixture).
 - Output: submodule output prefixed with `<path>:`, parent output unlabeled
 
 **Changes:**
-- File: `src/claudeutils/session/commit/pipeline.py`
+- File: `src/claudeutils/session/commit.py`
   Action: Add submodule partitioning and coordination to `commit_pipeline()`
 
 **Verify lint:** `just lint`
@@ -1255,13 +1245,14 @@ Tests use real git repos via `tmp_path`.
 
 **Behavior:**
 - If `amend` in `input.options`: add `--amend` to `git commit` args
+- If `no-edit` in `input.options`: add `--no-edit` to `git commit` args, `## Message` section not used
 - Pass `amend=True` to `validate_files()` — enables HEAD file acceptance
 - Submodule amend: `_git("-C", path, "commit", "--amend", "-m", message)` then re-stage pointer
-- Message always provided (never `--no-edit`)
+- Submodule amend + `no-edit`: `_git("-C", path, "commit", "--amend", "--no-edit")` then re-stage pointer
 
 **Changes:**
-- File: `src/claudeutils/session/commit/pipeline.py`
-  Action: Add amend flag handling throughout pipeline
+- File: `src/claudeutils/session/commit.py`
+  Action: Add amend and no-edit flag handling throughout pipeline
 
 **Verify lint:** `just lint`
 **Verify GREEN:** `pytest tests/test_session_commit_pipeline.py -v`
@@ -1304,7 +1295,7 @@ Tests use real git repos via `tmp_path`.
   - Orthogonal: each option controls one aspect independently
 
 **Changes:**
-- File: `src/claudeutils/session/commit/pipeline.py`
+- File: `src/claudeutils/session/commit.py`
   Action: Add option dispatch logic before validation calls
 
 **Verify lint:** `just lint`
@@ -1362,11 +1353,12 @@ Tests use real git repos via `tmp_path`.
 - Submodule outputs labeled with `<path>:` prefix
 - Parent output appended unlabeled
 - Warnings prepended as `**Warning:**` lines with blank line separator
+- Strip git `hint:` and advice lines from output — LLM agents interpret these as instructions (e.g., "remove index.lock" → agent deletes the file)
 - For failures: separate formatting per gate type already produces structured markdown
 
 **Changes:**
-- File: `src/claudeutils/session/commit/pipeline.py`
-  Action: Extract `format_commit_output()` from pipeline logic
+- File: `src/claudeutils/session/commit.py`
+  Action: Extract `format_commit_output()` from pipeline logic, include hint-line stripping
 
 **Verify lint:** `just lint`
 **Verify GREEN:** `pytest tests/test_session_commit_pipeline.py -v`
@@ -1374,42 +1366,42 @@ Tests use real git repos via `tmp_path`.
 
 ---
 
-## Cycle 6.6: CLI wiring — `claudeutils _session commit`
+## Cycle 6.6: CLI wiring — `claudeutils _commit`
 
 **RED Phase:**
 
-**Test:** `test_session_commit_cli_success`, `test_session_commit_cli_validation_error`
+**Test:** `test_commit_cli_success`, `test_commit_cli_validation_error`, `test_commit_cli_vet_failure`
 **File:** `tests/test_session_commit_pipeline.py`
 
 **Assertions:**
-- CliRunner with valid commit markdown on stdin (real git repo via `tmp_path`, file staged) → exit 0, stdout contains `[branch hash] message` format line
-- CliRunner with files that have no changes → exit 2, stdout contains `**Error:**` and `STOP:`
-- CliRunner with empty stdin → exit 2, stdout contains `**Error:**` and references missing required section
+- CliRunner invoking `_commit` with valid commit markdown on stdin (real git repo via `tmp_path`, file staged) → exit 0, stdout contains `[branch hash] message` format line
+- CliRunner invoking `_commit` with files that have no changes → exit 2, stdout contains `**Error:**` and `STOP:`
+- CliRunner invoking `_commit` with empty stdin → exit 2, stdout contains `**Error:**` and references missing required section
+- CliRunner invoking `_commit` with files matching `require-review` patterns in pyproject.toml, no vet report present → exit 1, stdout contains `**Vet check:**` and `unreviewed`
 
 **Expected failure:** Command not registered
 
-**Why it fails:** No commit subcommand
+**Why it fails:** No `_commit` command implementation
 
-**Verify RED:** `pytest tests/test_session_commit_pipeline.py::test_session_commit_cli_success -v`
+**Verify RED:** `pytest tests/test_session_commit_pipeline.py::test_commit_cli_success -v`
 
 ---
 
 **GREEN Phase:**
 
-**Implementation:** Create `src/claudeutils/session/commit/cli.py` with Click command
+**Implementation:** Wire the `commit_cmd` Click command in `src/claudeutils/session/cli.py`, already registered in main `cli.py` from Step 1.2
 
 **Behavior:**
-- `@click.command(name="commit")` function
+- `commit_cmd` Click command implementation
 - Read all stdin → `parse_commit_input()`
 - Call `commit_pipeline(input)` → `CommitResult`
 - Output `result.output` to stdout
 - Exit 0 on success, 1 on pipeline error, 2 on input validation error
 
 **Changes:**
-- File: `src/claudeutils/session/commit/cli.py`
-  Action: Create with `commit` Click command
 - File: `src/claudeutils/session/cli.py`
-  Action: Import and register the commit command with the session group (same pattern as worktree subcommand registration in main cli.py)
+  Action: Implement `commit_cmd` with full pipeline
+  Location hint: Commit command stub from Step 1.2
 
 **Verify lint:** `just lint`
 **Verify GREEN:** `pytest tests/test_session_commit_pipeline.py -v`
@@ -1421,175 +1413,11 @@ Tests use real git repos via `tmp_path`.
 
 ### Phase 7: Integration tests (type: tdd, model: sonnet)
 
-End-to-end tests with real git repos via `tmp_path`. Verifies complete pipelines through CLI entry points.
+Cross-subcommand contract test. Verifies parser consistency between handoff writes and status reads.
 
 ---
 
-## Cycle 7.1: Status integration
-
-**RED Phase:**
-
-**Test:** `test_status_integration`
-**File:** `tests/test_session_integration.py`
-
-**Prerequisite:** Read `src/claudeutils/session/status/cli.py` — understand full pipeline from CLI entry
-
-**Assertions:**
-- Create `tmp_path` git repo with:
-  - `agents/session.md` (realistic fixture with in-tree tasks, worktree tasks, reference files)
-  - `plans/parser/` directory with design artifacts (triggers plan state inference)
-  - At least one plan directory not referenced by any task (triggers unscheduled detection)
-- CliRunner invokes `_session status`
-- Output contains `Next:` section with correct task name and command
-- Output contains `Pending:` section with plan status
-- Output contains `Worktree:` section with slug markers
-- Output contains `Unscheduled Plans:` section with orphan plan
-- Exit code 0
-
-**Expected failure:** Integration path not fully wired — individual components may work but full pipeline from CLI to output untested
-
-**Why it fails:** End-to-end path through CliRunner exercises wiring gaps
-
-**Verify RED:** `pytest tests/test_session_integration.py::test_status_integration -v`
-
----
-
-**GREEN Phase:**
-
-**Implementation:** Fix any wiring gaps discovered by integration test
-
-**Behavior:**
-- The test exercises: CLI command → parse_session() → render functions → formatted output
-- Fixes are targeted at wiring issues (import paths, function signatures, data threading)
-- No new production code expected — all components built in Phases 2-3
-
-**Changes:**
-- Fix any import or wiring issues discovered
-- May require adjusting function signatures for data threading
-
-**Verify lint:** `just lint`
-**Verify GREEN:** `pytest tests/test_session_integration.py::test_status_integration -v`
-**Verify no regression:** `just precommit`
-
----
-
-## Cycle 7.2: Handoff integration
-
-**RED Phase:**
-
-**Test:** `test_handoff_fresh_integration`, `test_handoff_resume_integration`
-**File:** `tests/test_session_integration.py`
-
-**Prerequisite:** Read `src/claudeutils/session/handoff/cli.py` — understand full pipeline
-
-**Assertions — fresh mode:**
-- Create `tmp_path` git repo with `agents/session.md` (committed initial state)
-- CliRunner invokes `_session handoff` with stdin:
-  ```
-  **Status:** Phase 1 complete.
-
-  ## Completed This Session
-
-  **Infrastructure work:**
-  - Extracted git helpers
-  ```
-- After invocation:
-  - `agents/session.md` status line updated to "Phase 1 complete."
-  - Completed section contains "Infrastructure work:" and "Extracted git helpers"
-  - Output contains diagnostics (precommit result)
-  - No state file remains (cleaned up on success)
-  - Exit code 0
-
-**Assertions — resume mode:**
-- Create state file at `tmp/.handoff-state.json` with `step_reached: "precommit"`
-- CliRunner invokes `_session handoff` without stdin
-- Pipeline resumes from precommit step (skips write steps)
-- Exit code 0
-
-**Expected failure:** End-to-end pipeline wiring gaps
-
-**Why it fails:** Fresh/resume modes exercise different pipeline paths
-
-**Verify RED:** `pytest tests/test_session_integration.py::test_handoff_fresh_integration -v`
-
----
-
-**GREEN Phase:**
-
-**Implementation:** Fix wiring issues discovered by integration test
-
-**Behavior:**
-- Fresh mode exercises: stdin → parse → state cache → status overwrite → completed write → precommit → diagnostics → cleanup
-- Resume mode exercises: state load → skip to step → precommit → diagnostics → cleanup
-- Fixes targeted at data threading and error propagation
-
-**Changes:**
-- Fix any discovered wiring issues
-
-**Verify lint:** `just lint`
-**Verify GREEN:** `pytest tests/test_session_integration.py -v`
-**Verify no regression:** `just precommit`
-
----
-
-## Cycle 7.3: Commit integration
-
-**RED Phase:**
-
-**Test:** `test_commit_parent_integration`, `test_commit_submodule_integration`, `test_commit_amend_integration`
-**File:** `tests/test_session_integration.py`
-
-**Prerequisite:** Shared `tmp_path` fixture creating git repo with submodule (from conftest)
-
-**Assertions — parent-only:**
-- Create modified file in `tmp_path` repo (uncommitted change, appears in `git status --porcelain`)
-- CliRunner invokes `_session commit` with stdin specifying the file + message
-- Git log shows new commit with expected message
-- Output contains `[branch hash] message` format
-- Exit code 0
-
-**Assertions — submodule:**
-- Create dirty file in submodule directory
-- CliRunner with stdin specifying submodule file, submodule message, and parent message
-- Submodule git log shows new commit
-- Parent git log shows new commit (with submodule pointer update)
-- Output contains `<path>:` labeled submodule output followed by parent output
-- Exit code 0
-
-**Assertions — amend:**
-- Create initial commit, then create new dirty file
-- CliRunner with `amend` option → amend the previous commit
-- Git log shows only one commit (amended, not new)
-- Output contains `Date:` line (amend output format)
-- Exit code 0
-
-**Expected failure:** End-to-end commit pipeline wiring
-
-**Why it fails:** Full pipeline through real git operations
-
-**Verify RED:** `pytest tests/test_session_integration.py::test_commit_parent_integration -v`
-
----
-
-**GREEN Phase:**
-
-**Implementation:** Fix wiring issues in commit pipeline
-
-**Behavior:**
-- Parent-only: stdin → parse → validate → precommit → stage → commit → output
-- Submodule: partition → submodule commit → pointer stage → parent commit
-- Amend: same pipeline with `--amend` flag propagation
-
-**Changes:**
-- Fix any discovered wiring issues
-
-**Verify lint:** `just lint`
-**Verify GREEN:** `pytest tests/test_session_integration.py -v`
-**Verify no regression:** `just precommit`
-
----
-
-## Cycle 7.4: Cross-subcommand — handoff then status
+## Cycle 7.1: Cross-subcommand — handoff then status
 
 **RED Phase:**
 
@@ -1598,8 +1426,8 @@ End-to-end tests with real git repos via `tmp_path`. Verifies complete pipelines
 
 **Assertions:**
 - Create `tmp_path` git repo with `agents/session.md`
-- CliRunner invokes `_session handoff` with stdin (updates session.md)
-- Then CliRunner invokes `_session status` (reads updated session.md)
+- CliRunner invokes `_handoff` with stdin (updates session.md)
+- Then CliRunner invokes `_status` (reads updated session.md)
 - Status output reflects the new status line from handoff input
 - Status output reflects the updated completed section
 - Verifies parser consistency: handoff writes → status reads the same format
@@ -1630,3 +1458,12 @@ End-to-end tests with real git repos via `tmp_path`. Verifies complete pipelines
 ---
 
 **Phase 7 Checkpoint (full):** `just precommit` — all tests pass, full suite green. Final checkpoint covers all 7 phases.
+
+---
+
+## Outstanding Design Revisions
+
+The following design-level changes were identified during /proof review and must be applied to the outline (`plans/handoff-cli-tool/outline.md`) before orchestration:
+
+- **ST-1 semantics:** Parallel detection changed from "largest independent group" to "first eligible consecutive group, cap 5." Outline wording update required before orchestration.
+- **Handoff pipeline reordering:** Precommit removed from handoff CLI (pre-handoff gate, skill responsibility). H-3 diagnostics simplified to git status/diff only. Learnings age/weight removed (SessionStart hook concern).
