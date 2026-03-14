@@ -32,11 +32,21 @@
 
 ## Worktree Tasks
 
-- [ ] **Discuss redesign** — `/design plans/discuss-redesign/brief.md` | opus | restart
-  - Plan: discuss-redesign | Replace current discuss protocol with lighter grounding → position → claim validation
-- [ ] **Fix brief skill trigger** — edit `agent-core/skills/brief/SKILL.md` description to lead with general mechanism | opus
+- [>] **Discuss redesign** — `/inline plans/discuss-redesign` | opus | restart
+  - Plan: discuss-redesign | Outline approved. Execute C1 (pushback.md rewrite) + C2 (execute-rule.md bd: addition)
+- [ ] **Fix brief trigger** — edit `agent-core/skills/brief/SKILL.md` description to lead with general mechanism | opus
   - Plan: none — direct edit. Brief skill description starts with "Transfer context... to a worktree task" causing mid-sentence `/brief` invocations to be missed
 - [ ] **Review blog series** — `/deliverable-review plans/blog-series` | opus | restart
+- [ ] **Remove fuzzy recall** — `/design plans/remove-fuzzy-recall/brief.md` | sonnet
+  - Plan: remove-fuzzy-recall | Hard failure on no-match, "read memory-index" guidance. Target: claudeutils repo.
+- [ ] **Remove index skill** — `/design plans/remove-memory-index-skill/brief.md` | opus
+  - Plan: remove-memory-index-skill | Delete vestigial skill, update corrector.md to Read file directly
+- [ ] **Anchor proof state** — `/design plans/proof-state-anchor/brief.md` | opus | restart
+  - Plan: proof-state-anchor | Visible state + actions output at each transition. D+B anchor + user feedback.
+- [ ] **Outline density gate** — `/design plans/outline-downgrade-density/brief.md` | opus
+  - Plan: outline-downgrade-density | Content density check in write-outline.md downgrade criteria
+- [ ] **Centralize recall** — `/design plans/centralize-recall/brief.md` | opus | restart
+  - Plan: centralize-recall | Segmented /recall skill (<1ktok core), replace inline recall across skills/agents. Depends on: remove-fuzzy-recall, remove-memory-index-skill
 
 ## Blockers / Gotchas
 

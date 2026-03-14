@@ -1,0 +1,7 @@
+- **Classification:** Complex
+- **Implementation certainty:** Moderate — 3-step core agreed, mechanism specifics for grounding and claim validation still open
+- **Requirement stability:** Moderate-high — direction settled through discussion, several open questions remain at design level
+- **Behavioral code check:** No code changes — agentic prose only (fragments, possibly skill files)
+- **Work type:** Production — changes core behavioral infrastructure consumed by every session
+- **Artifact destination:** agentic-prose (fragments, skill definitions)
+- **Evidence:** Multiple design decisions remain open (grounding mechanism, claim validation timing, bd: scope, agreement momentum, artifact disposition). Touches pushback.md which is loaded in every session via CLAUDE.md. Recall: "prose artifact edits → opus." Brief explicitly flags 6 open questions. Session.md already classified as opus.
