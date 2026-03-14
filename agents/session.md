@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-14
 
-**Status:** Anchor proof state implemented, pending deliverable review.
+**Status:** Anchor proof state complete. Branch ready for merge.
 
 ## Completed This Session
 
@@ -16,8 +16,7 @@
 
 - [x] **Anchor proof state** — `/design plans/proof-state-anchor/brief.md` | opus | restart
   - Plan: proof-state-anchor | Visible state + actions output at each transition. D+B anchor + user feedback.
-- [ ] **Review proof anchor** — `/deliverable-review plans/proof-state-anchor` | opus | restart
 
 ## Next Steps
 
-Deliverable review on main after merge, then branch work complete.
+Branch work complete.
