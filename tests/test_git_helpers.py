@@ -9,31 +9,7 @@ import pytest
 from click.testing import CliRunner
 
 from claudeutils.git import _fail, _git_ok, _is_submodule_dirty, discover_submodules
-
-
-def _init_repo(path: Path) -> None:
-    """Initialize a git repo with an initial commit."""
-    subprocess.run(["git", "init", str(path)], capture_output=True, check=True)
-    subprocess.run(
-        ["git", "-C", str(path), "config", "user.email", "test@test.com"],
-        capture_output=True,
-        check=True,
-    )
-    subprocess.run(
-        ["git", "-C", str(path), "config", "user.name", "Test"],
-        capture_output=True,
-        check=True,
-    )
-    readme = path / "README.md"
-    readme.write_text("init")
-    subprocess.run(
-        ["git", "-C", str(path), "add", "."], capture_output=True, check=True
-    )
-    subprocess.run(
-        ["git", "-C", str(path), "commit", "-m", "init"],
-        capture_output=True,
-        check=True,
-    )
+from tests.pytest_helpers import init_repo_at as _init_repo
 
 
 def test_git_ok_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

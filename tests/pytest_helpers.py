@@ -49,6 +49,33 @@ def setup_cli_mocks(
         )
 
 
+def init_repo_at(path: Path) -> None:
+    """Initialize a git repo at path with an initial commit.
+
+    Uses -C style so path need not be cwd. Suitable for multi-repo test setups.
+    """
+    subprocess.run(["git", "init", str(path)], capture_output=True, check=True)
+    subprocess.run(
+        ["git", "-C", str(path), "config", "user.email", "test@test.com"],
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(path), "config", "user.name", "Test"],
+        capture_output=True,
+        check=True,
+    )
+    (path / "README.md").write_text("init")
+    subprocess.run(
+        ["git", "-C", str(path), "add", "."], capture_output=True, check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(path), "commit", "-m", "init"],
+        capture_output=True,
+        check=True,
+    )
+
+
 def setup_git_repo(tmp_path: Path) -> None:
     """Initialize a git repo in tmp_path for git add in validate_and_create."""
     subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True, check=False)

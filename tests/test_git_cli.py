@@ -9,31 +9,7 @@ import pytest
 from click.testing import CliRunner
 
 from claudeutils.git_cli import git_group
-
-
-def _init_repo(path: Path) -> None:
-    """Initialize a git repo with an initial commit."""
-    subprocess.run(["git", "init", str(path)], capture_output=True, check=True)
-    subprocess.run(
-        ["git", "-C", str(path), "config", "user.email", "test@test.com"],
-        capture_output=True,
-        check=True,
-    )
-    subprocess.run(
-        ["git", "-C", str(path), "config", "user.name", "Test"],
-        capture_output=True,
-        check=True,
-    )
-    readme = path / "README.md"
-    readme.write_text("init")
-    subprocess.run(
-        ["git", "-C", str(path), "add", "."], capture_output=True, check=True
-    )
-    subprocess.run(
-        ["git", "-C", str(path), "commit", "-m", "init"],
-        capture_output=True,
-        check=True,
-    )
+from tests.pytest_helpers import init_repo_at as _init_repo
 
 
 def _add_submodule_gitlink(parent: Path, sub_name: str) -> Path:
@@ -46,28 +22,7 @@ def _add_submodule_gitlink(parent: Path, sub_name: str) -> Path:
     sub_path.mkdir()
 
     # Initialize the submodule as its own git repo
-    subprocess.run(["git", "init", str(sub_path)], capture_output=True, check=True)
-    subprocess.run(
-        ["git", "-C", str(sub_path), "config", "user.email", "test@test.com"],
-        capture_output=True,
-        check=True,
-    )
-    subprocess.run(
-        ["git", "-C", str(sub_path), "config", "user.name", "Test"],
-        capture_output=True,
-        check=True,
-    )
-    (sub_path / "README.md").write_text("submodule init")
-    subprocess.run(
-        ["git", "-C", str(sub_path), "add", "."],
-        capture_output=True,
-        check=True,
-    )
-    subprocess.run(
-        ["git", "-C", str(sub_path), "commit", "-m", "submodule init"],
-        capture_output=True,
-        check=True,
-    )
+    _init_repo(sub_path)
 
     # Register the gitmodules config
     (parent / ".gitmodules").write_text(
