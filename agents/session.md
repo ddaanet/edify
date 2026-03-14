@@ -1,21 +1,31 @@
-# Session Handoff: 2026-03-12
+# Session Handoff: 2026-03-14
 
-**Status:** Re-prioritized 42 tasks via WSJF scoring. Session CLI tool rises to #1 (3.7). All task scores updated in session.md. Report: `plans/reports/prioritization-2026-03-12.md`.
+**Status:** Re-prioritized 42 tasks. Merged retro-repo-expansion + anchor-proof-state. 8 plans delivered via merges. Proof SKILL.md conflict resolved + review fixes applied. Worktrees dispatched for Session CLI tool + Plugin migration + Discussion.
 
 ## Completed This Session
 
 **Re-prioritization (42 tasks):**
-- Scored all pending tasks via WSJF methodology using `plans/prototypes/score.py`
-- Session CLI tool rises from 3.2 → 3.7 (ME=1, plan ready)
-- Plugin migration holds at 3.2 (DP=8, 5+ weeks stale)
-- Consolidation: Gate batch + Review gate merge candidate; Design context gate + Design JIT expansion merge candidate; maintenance batch at bottom
-- All task priority scores updated in session.md
+- Scored all pending tasks via WSJF using `plans/prototypes/score.py`
+- Session CLI tool rises to #1 (3.7, ME=1). Plugin migration holds #2 (3.2, DP=8)
 - Report: `plans/reports/prioritization-2026-03-12.md`
 
-## In-tree Tasks
+**Worktree merges:**
+- Merged retro-repo-expansion — plans + learnings, worktree preserved
+- Merged anchor-proof-state — resolved proof SKILL.md conflicts (4 regions, kept HEAD's item-level review protocol), worktree preserved
 
-- [x] **Problem.md migration** — `/design plans/problem-md-migration/brief.md` | sonnet
-  - Plan: problem-md-migration | Status: briefed
+**Proof SKILL.md review fixes (skill-reviewer):**
+- Removed `/review-plan` parenthetical from corrector dispatch table
+- Simplified author-corrector coupling to point directly to `pipeline-contracts.md`
+- Deduplicated kill sub-action description (reference file defers to SKILL.md)
+
+**Plans delivered via merges (8):**
+- skill-agent-bootstrap, quality-grounding, review-agent-quality, design-pipeline-evolution
+- markdown-migration, diagnose-compression-loss, research-backlog, retrospective-repo-expansion
+
+**Worktree dispatch:**
+- Created session-cli-tool, plugin-migration, discussion worktrees
+
+## In-tree Tasks
 
 - [ ] **Centralize recall** — `/design plans/centralize-recall/brief.md` | opus | restart
   - Plan: centralize-recall | Segmented /recall skill (<1ktok core), replace inline recall across skills/agents. Depends on: remove-fuzzy-recall, remove-index-skill
@@ -26,10 +36,6 @@
 
 ## Worktree Tasks
 
-- [x] **Review recall gate** — `/deliverable-review plans/recall-gate` | opus | restart
-- [x] **Fix recall-gate findings** — applied inline
-- [x] **Interactive review** — delivered, plan archived
-- [x] **Fix proof review findings** — applied inline
 - [ ] **Session CLI tool** → `session-cli-tool` — `/orchestrate handoff-cli-tool` | sonnet | restart | 3.7
   - Plan: handoff-cli-tool | Status: ready
   - Absorbs: Fix task-context bloat
@@ -75,9 +81,7 @@
   - Plan: parallel-orchestration | Status: briefed
 - [ ] **Gate batch** — `/design plans/gate-batch/requirements.md` | sonnet | 1.6
   - Plan: gate-batch | Status: requirements
-- [ ] **Skill agent bootstrap** — `/design plans/skill-agent-bootstrap/brief.md` | opus | 1.4
-  - Plan: skill-agent-bootstrap | Status: briefed
-  - SP-3 revised: non-user-invocable skill for project conventions (spike: skills: frontmatter on skills?)
+- [x] **Skill agent bootstrap** — plan delivered
 - [ ] **Worktree lifecycle CLI** — `/design plans/worktree-lifecycle-cli/brief.md` | sonnet | 1.6
   - Plan: worktree-lifecycle-cli | Status: briefed
   - Exit ceremony + Wt rm task cleanup + Worktree ad-hoc task + CLI UX + --base submodule bug
@@ -87,17 +91,11 @@
   - Plan: hook-batch-2 | Status: requirements
 - [ ] **Update prioritize skill** — `/design plans/update-prioritize-skill/requirements.md` | sonnet | 1.2
   - Plan: update-prioritize-skill | Status: requirements
-- [ ] **Quality grounding** — `/design plans/quality-grounding/brief.md` | opus | 1.0
-  - Plan: quality-grounding | Status: briefed
-  - SP-2 extracted to decision-drift-audit. Remaining: SP-1 (ground skills), SP-3 (prose terminology), SP-4 (safety review)
+- [x] **Quality grounding** — plan delivered
 - [ ] **Cross-tree operations** — `/design plans/cross-tree-operations/requirements.md` | sonnet | 1.0
   - Plan: cross-tree-operations | Status: requirements
-- [ ] **Review agent quality** — `/design plans/review-agent-quality/brief.md` | sonnet | 1.0
-  - Plan: review-agent-quality | Status: briefed
-  - Unified corrector quality audit: false positives (bad auto-fixes) + false negatives (missed issues)
-- [ ] **Design pipeline evolution** — `/design plans/design-pipeline-evolution/brief.md` | opus | 1.0
-  - Plan: design-pipeline-evolution | Status: briefed
-  - S-A: add grounding before design. S-B: late-binding model selection per stage.
+- [x] **Review agent quality** — plan delivered
+- [x] **Design pipeline evolution** — plan delivered
 - [ ] **Tweakcc** — `/design plans/tweakcc/requirements.md` | sonnet | 1.0
   - Plan: tweakcc | Status: requirements
 - [ ] **Design review protocol** — `/design plans/resumed-review-protocol/brief.md` | opus | restart | 1.6
@@ -116,16 +114,11 @@
 - [ ] **Threshold token migration** — `/design plans/threshold-token-migration/brief.md` | sonnet | 1.3
   - Plan: threshold-token-migration | Status: briefed
   - Migrate line-based thresholds to token-based. Large blast radius expected.
-- [ ] **Markdown migration** — `claudeutils _planstate close markdown-migration` | sonnet | 1.5
-  - Plan: markdown-migration | Status: reviewed
-  - All sub-problems killed/absorbed/subsumed. Parser → markdown-ast-parser. Thresholds → decision-drift-audit. Token cache → YAGNI.
+- [x] **Markdown migration** — plan delivered
 - [ ] **Python hook ordering fix** — `/design plans/precommit-python3-redirect/requirements.md` | haiku | restart | 0.8
   - Plan: precommit-python3-redirect | Status: requirements
-- [ ] **Diagnose compression loss** — `/design plans/diagnose-compression-loss/brief.md` | sonnet | 1.0
-  - Plan: diagnose-compression-loss | Status: briefed
-- [ ] **Research backlog** — `/design plans/research-backlog/brief.md` | opus | 0.8
-  - Plan: research-backlog | Status: briefed
-  - SP-1/SP-2/SP-3 absorbed into system-property-tracing. Remaining: SP-4 (behavioral design), SP-5 (degraded-function protocol)
+- [x] **Diagnose compression loss** — plan delivered
+- [x] **Research backlog** — plan delivered
 - [ ] **Fix TDD context scoping** — `/design plans/tdd-context-scoping/brief.md` | sonnet | 1.4
   - Plan: tdd-context-scoping | Status: briefed
 - [ ] **Health check UPS fallback** — `/design plans/health-check-ups-fallback/requirements.md` | sonnet | 0.6
@@ -141,8 +134,7 @@
   - FR-4 added: remove bottom-to-top edit ordering refs
 - [ ] **Incident counting** — `/design plans/incident-counting/brief.md` | opus | 0.6
   - Plan: incident-counting | Status: briefed
-- [ ] **Retro repo expansion** → `retro-repo-expansion` — `/design plans/retrospective-repo-expansion/brief.md` | sonnet | 0.7
-  - Plan: retrospective-repo-expansion | Status: briefed
+- [x] **Retro repo expansion** → `retro-repo-expansion` — plan delivered
 - [ ] **Recall pipeline** — `/design` | sonnet | 1.0
   - Deduplication, stdin parsing, usage scoring for recall entries
   - Note: plan dir only exists in retro-repo-expansion worktree, not on main. Create plan dir before design.
@@ -151,18 +143,6 @@
 - [ ] **Discussion** → `discussion` — `d:` | sonnet
 - [!] **Verb form AB test** — see `plans/reports/ab-test/README.md` | sonnet | 0.5
   - Blocked on human: curate task-contexts.json, annotate ground-truth.md
-
-### Terminal
-
-- [x] **Retrospective materials** — plan delivered
-- [x] **Review prose-infra** — `/deliverable-review plans/prose-infra-batch` | opus | restart
-- [x] **Review bootstrap work** — plan delivered
-- [x] **Design backlog review** — completed two sessions ago
-- [-] **Calibrate topic params** — UPS topic injection removed, moot
-- [-] **Recall tool consolidation** — absorbed into Active Recall
-- [-] **Execute flag lint** — superseded by session validator
-- [-] **Registry cache to tmp** — fixed inline, plan killed
-
 - [ ] **Anchor proof state** → `anchor-proof-state` — `/design plans/proof-state-anchor/brief.md` | opus | restart
   - Plan: proof-state-anchor | Visible state + actions output at each transition. D+B anchor + user feedback.
 - [ ] **Fix brief trigger** — edit `agent-core/skills/brief/SKILL.md` description to lead with general mechanism | opus
@@ -170,6 +150,13 @@
 - [ ] **Outline density gate** → `outline-density-gate` — `/design plans/outline-downgrade-density/brief.md` | opus
   - Plan: outline-downgrade-density | Content density check in write-outline.md downgrade criteria
 - [ ] **Review blog series** — `/deliverable-review plans/blog-series` | opus | restart
+
+### Terminal
+
+- [-] **Calibrate topic params** — UPS topic injection removed, moot
+- [-] **Recall tool consolidation** — absorbed into Active Recall
+- [-] **Execute flag lint** — superseded by session validator
+- [-] **Registry cache to tmp** — fixed inline, plan killed
 
 ## Blockers / Gotchas
 
@@ -190,18 +177,13 @@
 **Planstate CLI bug for briefed plans:**
 - `_worktree ls` displays `requirements.md` path for `briefed` status. Use status field as source of truth.
 
-**Reviewed plans show no derived command:**
-- Plans at `[reviewed]` status (post-/proof) have no mapped command in planstate. Next action is `/design plans/{name}/brief.md`.
-
 **`session.py:307` format mismatch:**
 - Produces `# Session: Worktree — {name}` but validator expects `# Session Handoff: YYYY-MM-DD`.
 
 **`git stash` on `.claude/settings.local.json` requires sandbox bypass**
 
-**markdown-migration candidate for closure:**
-- All sub-problems killed/absorbed/subsumed after /proof. No remaining deliverables.
+**Must complete both recall prerequisites before centralizing recall instructions**
 
-- Must complete both prerequisites before centralizing recall instructions [from: retro-repo-expansion]
 ## Reference Files
 
 - `plans/reports/prioritization-2026-03-12.md` — WSJF scoring, 42 tasks ranked
@@ -215,4 +197,4 @@
 
 ## Next Steps
 
-Dispatch Batch A: Session CLI tool (3.7, sonnet) + Plugin migration (3.2, opus) via `wt`. Both plans `ready`, no overlap.
+Session CLI tool and Plugin migration active in worktrees. Discussion worktree available. Anchor-proof-state and outline-density-gate worktrees preserved from merge — continue or `wt-rm`.
