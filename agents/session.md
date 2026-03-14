@@ -1,19 +1,26 @@
 # Session Handoff: 2026-03-14
 
-**Status:** Blog series synthesis complete — 5-post series structure, per-post evidence syntheses, and claims audit produced.
+**Status:** Discuss-redesign implemented — pushback.md rewritten with 3-step core protocol, 5 infrastructure improvement tasks briefed from reflect session.
 
 ## Completed This Session
 
-**Blog series synthesis (all 5 runbook steps):**
+**Blog series synthesis (prior session, carried forward):**
 - Series structure: 5-post arc organized by insight, didactic ordering preserved (`plans/blog-series/series-structure.md`)
-- Post 1: "The Rule That Changes the Rules" — rules.md to CLAUDE.md journey
-- Post 2: "When Your Agent Invents Instead of Researching" — confabulation, ground skill
-- Post 3: "Zero Percent" — 0% spontaneous recall, recognition bottleneck
-- Post 4: "385 Tests Pass, 8 Bugs Ship" — quality gates, defense-in-depth
-- Post 5: "Constrain, Don't Persuade" — structural enforcement thesis, pushback arc
 - Claims audit: 18 claims flagged, 11 grounded, 7 adjusted (file: `plans/blog-series/claims-audit.md`)
-- Research: arXiv 2509.21305 confirmed real, arXiv 2601.03359 exists but "<30%" claim not in paper, RAG "42-68%" untraceable, "84% forced-eval" untraceable — all adjusted by removing unverifiable percentages
-- Current counts updated: 33 skills, 27 fragments, 13 agents (were 18/23/14 in claude.ai conversation)
+
+**Discuss-redesign design + execution:**
+- Outline: 8 decisions resolving all brief open questions, approved via /proof
+- C1: pushback.md §Design Discussion Evaluation rewritten — 3-step core (ground → state position → validate claims), stress-test removed, brainstorm demoted to `bd:` directive
+- C2: execute-rule.md — `bd:` added to Tier 2 directives table
+- Corrector review: 0 critical, 0 major, 2 minor fixed (grounding step ambiguity, bd: label alignment)
+
+**Reflect session findings (5 tasks briefed):**
+- Unanchored recall: 11 speculative triggers fired, 6 missed — root cause: no index-read anchor in /design A.1
+- /proof protocol dropped: state machine invisible, committed documented anti-pattern
+- Corrector skip: downgrade criteria miss content density
+- Memory-index skill vestigial: sub-agent injection mechanism used from main session
+- Skill re-injection test: Skill tool duplicates content on repeated calls (no dedup)
+- Centralize recall design direction: segmented /recall skill (<1ktok core + reference files per mode)
 
 ## In-tree Tasks
 
@@ -29,11 +36,12 @@
   - Updated T1, T2, T5, cross-topic with pre-history and corrected measurements
 - [x] **Blog series synthesis** — `/design plans/blog-series/brief.md` | opus | restart
   - Plan: blog-series | 5-post series synthesized, claims audited, adjustments applied
+- [ ] **Review discuss redesign** — `/deliverable-review plans/discuss-redesign` | opus | restart
 
 ## Worktree Tasks
 
-- [>] **Discuss redesign** — `/inline plans/discuss-redesign` | opus | restart
-  - Plan: discuss-redesign | Outline approved. Execute C1 (pushback.md rewrite) + C2 (execute-rule.md bd: addition)
+- [x] **Discuss redesign** — `/inline plans/discuss-redesign` | opus | restart
+  - Plan: discuss-redesign | Executed C1 (pushback.md) + C2 (execute-rule.md). Corrector-reviewed.
 - [ ] **Fix brief trigger** — edit `agent-core/skills/brief/SKILL.md` description to lead with general mechanism | opus
   - Plan: none — direct edit. Brief skill description starts with "Transfer context... to a worktree task" causing mid-sentence `/brief` invocations to be missed
 - [ ] **Review blog series** — `/deliverable-review plans/blog-series` | opus | restart
@@ -54,19 +62,19 @@
 - Artisan agents cannot `git -C ~/code/<repo>` outside project tree
 - Workaround: execute git commands directly from parent session
 
-**Claims audit unverifiable items (sandbox limitation):**
-- Commit timestamps (C2.2), line counts (C5.2), tuick AGENTS.md count (C1.3) — cannot verify via git on external repos from this worktree
-- "1,459 commits with agentic evidence" (C1.1) — sum methodology unclear, adjusted to omit
+**Centralize-recall depends on remove-fuzzy-recall + remove-index-skill:**
+- Must complete both prerequisites before centralizing recall instructions
+- remove-fuzzy-recall targets claudeutils repo (different worktree)
 
 ## Reference Files
 
-- `plans/retrospective/content/` — 14 blog raw materials (topics, synthesis, expansion evidence, appendix)
-- `plans/blog-series/series-structure.md` — final 5-post series ordering with rationale
-- `plans/blog-series/posts/` — 5 post syntheses with evidence chains
-- `plans/blog-series/claims-audit.md` — claim verification results (18 claims, 7 adjusted)
-- `plans/blog-series/runbook.md` — 5-step execution plan
-- `plans/discuss-redesign/brief.md` — discuss protocol redesign context
+- `plans/discuss-redesign/outline.md` — approved outline with 8 decisions
+- `plans/discuss-redesign/reports/review.md` — corrector review of implementation
+- `plans/discuss-redesign/reports/outline-review.md` — outline corrector review
+- `plans/centralize-recall/brief.md` — segmented /recall design direction
+- `plans/blog-series/series-structure.md` — 5-post series ordering
+- `plans/blog-series/claims-audit.md` — claim verification results
 
 ## Next Steps
 
-Deliverable review of blog-series is the next actionable task.
+Deliverable review of discuss-redesign is the next actionable in-tree task.
