@@ -15,6 +15,7 @@ from claudeutils.discovery import list_top_level_sessions
 from claudeutils.exceptions import ClaudeUtilsError
 from claudeutils.extraction import extract_feedback_recursively
 from claudeutils.filtering import categorize_feedback, filter_feedback
+from claudeutils.git_cli import git_group
 from claudeutils.markdown import process_file
 from claudeutils.model.cli import model
 from claudeutils.models import FeedbackItem
@@ -154,6 +155,7 @@ cli.add_command(worktree)
 cli.add_command(handoff_cmd, "_handoff")
 cli.add_command(commit_cmd, "_commit")
 cli.add_command(status_cmd, "_status")
+cli.add_command(git_group)
 
 
 @cli.command(help="Extract feedback from session")

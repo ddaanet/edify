@@ -80,6 +80,43 @@ def _is_submodule_dirty(path: str) -> bool:
     return bool(result.stdout.strip())
 
 
+def git_status(repo_dir: str | None = None) -> str:
+    """Return raw `git status --porcelain` output (empty string if clean).
+
+    repo_dir: if given, run git in that directory via -C flag.
+    """
+    args = ["status", "--porcelain"]
+    if repo_dir:
+        args = ["-C", repo_dir, *args]
+    result = subprocess.run(
+        ["git", *args],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return result.stdout.strip()
+
+
+def git_diff(repo_dir: str | None = None) -> str:
+    """Return combined staged + unstaged diff output (empty string if none).
+
+    Runs `git diff HEAD` to capture all changes relative to HEAD,
+    which covers both staged and unstaged modifications.
+
+    repo_dir: if given, run git in that directory via -C flag.
+    """
+    args = ["diff", "HEAD"]
+    if repo_dir:
+        args = ["-C", repo_dir, *args]
+    result = subprocess.run(
+        ["git", *args],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return result.stdout.strip()
+
+
 def _is_dirty(exclude_path: str | None = None) -> bool:
     """Return True if repo has staged/unstaged/untracked changes.
 
