@@ -21,6 +21,7 @@ from claudeutils.models import FeedbackItem
 from claudeutils.paths import get_project_history_dir
 from claudeutils.recall.cli import recall
 from claudeutils.recall_cli.cli import recall_cmd
+from claudeutils.session.cli import commit_cmd, handoff_cmd, status_cmd
 from claudeutils.statusline.cli import statusline
 from claudeutils.tokens_cli import handle_tokens
 from claudeutils.validation.cli import validate
@@ -150,6 +151,9 @@ cli.add_command(statusline)
 cli.add_command(validate)
 cli.add_command(when_cmd)
 cli.add_command(worktree)
+cli.add_command(handoff_cmd, "_handoff")
+cli.add_command(commit_cmd, "_commit")
+cli.add_command(status_cmd, "_status")
 
 
 @cli.command(help="Extract feedback from session")
