@@ -14,13 +14,14 @@ model: sonnet
 
 ## Weak Orchestrator Metadata
 
-**Total Steps**: 25
+**Total Steps**: 26
 
 **Execution Model**:
 - Steps 1.1-1.3: Sonnet (infrastructure extraction, package setup, git CLI)
 - Cycles 2.1-2.2: Sonnet (session.md parser)
 - Cycles 3.1-3.4: Sonnet (status subcommand rendering + CLI wiring)
 - Cycles 4.1-4.4, 4.6-4.7: Sonnet (handoff pipeline with state caching)
+- Step 4.8: Opus (handoff skill precommit gate — agentic prose)
 - Cycles 5.1-5.3: Sonnet (commit parser + vet check)
 - Cycles 6.1-6.6: Sonnet (commit pipeline + submodule coordination)
 - Cycle 7.1: Sonnet (integration tests)
@@ -901,7 +902,33 @@ Tests use real git repos via `tmp_path` — committed detection requires `git di
 
 ---
 
-**Phase 4 Checkpoint:** `just precommit` — handoff subcommand fully functional.
+## Step 4.8: Update handoff skill — add pre-handoff precommit gate
+
+**Objective:** Add `just precommit` as a gate in the handoff skill (`agent-core/skills/handoff/SKILL.md`). The handoff CLI no longer runs precommit (removed from pipeline); the skill must run it before STATUS display. Without this update, precommit validation drops out of the handoff flow entirely.
+
+**Script Evaluation:** Small (~10 lines skill edit)
+
+**Execution Model:** Opus (agentic prose — skill file, wording determines downstream agent behavior)
+
+**Actions:**
+1. Read `agent-core/skills/handoff/SKILL.md`
+2. Add a precommit gate step after all writes (session.md, learnings, plan-archive, trim) and before Step 7 (Display STATUS):
+   - Run `just precommit`
+   - On failure: output precommit result, stop (agent fixes issues and retries)
+   - On success: continue to STATUS display
+3. Verify the step integrates coherently with the existing protocol flow — precommit validates all writes made during handoff (session.md, learnings.md, plan-archive.md)
+
+**Changes:**
+- File: `agent-core/skills/handoff/SKILL.md`
+  Action: Add precommit gate step between current Step 6 (Trim Completed Tasks) and Step 7 (Display STATUS)
+
+**Expected Outcome:** Handoff skill runs `just precommit` after all writes and before STATUS display. Failed precommit surfaces output and stops the flow so agent can fix issues. Passing precommit proceeds to STATUS display unchanged.
+
+**Validation:** Read modified skill, verify precommit gate is positioned after all writes and before STATUS display.
+
+---
+
+**Phase 4 Checkpoint:** `just precommit` — handoff subcommand and skill precommit gate complete.
 
 ### Phase 5: Commit parser + vet check (type: tdd, model: sonnet)
 
@@ -1463,7 +1490,7 @@ Cross-subcommand contract test. Verifies parser consistency between handoff writ
 
 ## Outstanding Design Revisions
 
-The following design-level changes were identified during /proof review and must be applied to the outline (`plans/handoff-cli-tool/outline.md`) before orchestration:
+All revisions applied (2026-03-14). Outline and runbook-outline updated:
 
-- **ST-1 semantics:** Parallel detection changed from "largest independent group" to "first eligible consecutive group, cap 5." Outline wording update required before orchestration.
-- **Handoff pipeline reordering:** Precommit removed from handoff CLI (pre-handoff gate, skill responsibility). H-3 diagnostics simplified to git status/diff only. Learnings age/weight removed (SessionStart hook concern).
+- **ST-1 semantics:** ✓ Outline already had correct wording (consecutive + cap 5). Runbook-outline notes updated.
+- **Handoff pipeline reordering:** ✓ Precommit removed from handoff pipeline (H-1, pipeline steps, H-3, H-4 step_reached). Added to OUT scope as skill responsibility. Runbook-outline Cycle 4.5 removed, H-3 notes simplified.

@@ -42,3 +42,17 @@ Archeology session on pipeline-review-protocol MA2 (phase-file separation) led t
 - **Context budget** — reuse agents until 150K tokens, then restart with review history as context seed
 - **Checkpoint commits** — every review-implement cycle commits, creating clean truncation boundaries
 - **TDD generalization** — reviewer is third agent alongside tester and implementer, runs after both RED and GREEN steps
+
+## 2026-03-14: Rework artifact model gaps
+
+Discussion during handoff-cli-tool runbook preparation surfaced two gaps in the brief's coverage.
+
+### Rework reports as named artifacts
+
+Reviewer feedback needs a concrete artifact type. Per-cycle, reviewer produces 1-3 rework reports — one per reviewed work item (tester output, coder output). Reports use PASS/REWORK verdicts. Naming convention undecided — needs design (e.g., `reports/phase-N/cycle-M-tester-rework.md`, or structured differently).
+
+Cardinality: 1-3 rework reports per TDD cycle (one per agent's work item reviewed). Each rework round produces a new report if verdict is REWORK. Reports accumulate per phase.
+
+### Restarted agents consume rework reports
+
+Brief says restarted agents get "access to the reviews of all the previous cycles" — but doesn't distinguish between review reports (reviewer's assessment) and rework reports (reviewer's feedback to authors). When tester or coder agents restart at 150K context, they need the rework reports specifically (targeted feedback for their role), not just the reviewer's assessment. Reviewer on restart reads all reports from the phase (both its own assessments and the rework artifacts).

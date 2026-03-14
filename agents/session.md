@@ -1,32 +1,35 @@
 # Session Handoff: 2026-03-14
 
-**Status:** Runbook updated with outline revisions, proofed, corrector reviewed. Blocked on design revisions before orchestration.
+**Status:** Outline design revisions applied, runbook updated, step files generated. Ready for orchestration.
 
 ## Completed This Session
 
-### Runbook outline revision propagation
-- Updated runbook.md (74KB) with 14 outline changes: flat CLI, `_git changes`, `no-edit`, session continuation, `### ` completed, strip hints, H-3 simplification, ST-1 consecutive/cap, ST-2 fatal, C-1 agent-core, ANSI, Next suppression, learnings token weight, flat package layout
-- Agent-assisted bulk update, then manual verification
+### Outline design revisions applied
+- Handoff pipeline: removed precommit from CLI (H-1, pipeline steps 5→6, H-3 simplified to git status/diff, H-4 step_reached removed "precommit")
+- ST-1: already correct in outline (confirmed via grep — "largest" absent). Updated runbook-outline notes column
+- Coupled skill update added to IN scope: handoff skill must add precommit gate (ships with CLI)
+- Runbook-outline: removed killed Cycle 4.5, simplified H-3 notes, updated checkpoint guidance
 
-### Runbook /proof review (9 items)
-- 3 approved, 6 revised, 0 killed
-- Key revisions: `_git changes` path prefixing (data transform not passthrough), ST-1 → priority-first unblocked (design revision), handoff precommit → pre-handoff gate (skill responsibility), kill Cycle 4.5, simplify H-3 to git status/diff only, remove learnings diagnostics (SessionStart hook), `no-edit` + Message → error, hardcode agent-core vet patterns, vet failure integration test in 6.6, kill Phase 7 cycles 7.1-7.3 (integration-first — absorbed into wiring cycles)
-- Corrector review: 3 minor fixed, 1 expected escalation (ST-1 outline alignment)
-- Reports: `plans/handoff-cli-tool/reports/runbook-proof-review.md`
+### Runbook Step 4.8 added
+- New general step (opus): update handoff skill with pre-handoff precommit gate
+- Phase 4 checkpoint moved after Step 4.8 (validates complete phase, not just TDD subset)
+- Corrector review: 1 major fixed (checkpoint text premature), 1 minor fixed (missing Expected Outcome)
+- Report: `plans/handoff-cli-tool/reports/runbook-revision-review.md`
 
-### New plan briefs (6)
-- planstate-disambiguation, historical-proof-feedback, learnings-startup-report, submodule-vet-config, resolve-learning-refs, runbook-integration-first
+### Step files generated
+- `prepare-runbook.py plans/handoff-cli-tool/runbook.md` — 52 step files, 6 agents, 1 orchestrator plan
+- 26 total steps (48 TDD test/impl splits + 4 general steps)
+- Warnings expected: non-existent file refs are files created during execution; 4.4→4.6 gap is killed 4.5
 
-### Learnings (3 entries)
-- Invariant: worktree concurrency cap (max 5 unblocked)
-- Invariant: blocked by dependency
-- System invariant documentation pattern (learnings + recall artifact interim)
+### Brief: resumed-review-protocol gaps
+- Appended rework artifact model gaps to `plans/resumed-review-protocol/brief.md`
+- Two gaps: rework report artifact (type, naming, cardinality) and restart-reads-rework-reports distinction
 
 ## In-tree Tasks
 
-- [ ] **Session CLI tool** — `/design plans/handoff-cli-tool/outline.md` | opus
+- [ ] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart
   - Plan: handoff-cli-tool | Status: ready
-  - Note: Runbook proofed. Outline needs design revisions (ST-1 semantics, handoff pipeline reordering) before runbook regeneration and orchestration. See `plans/handoff-cli-tool/runbook.md` Outstanding Design Revisions section
+  - New agents generated — restart required for agent definitions
 - [ ] **Runbook warnings** — `/design plans/runbook-warnings/brief.md` | sonnet
   - Plan: runbook-warnings | Status: briefed
 - [ ] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
@@ -47,21 +50,17 @@
 
 ## Blockers / Gotchas
 
-**Outline design revisions block orchestration:**
-- ST-1 semantics: "largest independent group" → "first eligible consecutive group, cap 5"
-- Handoff pipeline: precommit removed from CLI (pre-handoff gate), H-3 → git status/diff only, learnings removed
-- Both changes affect outline.md which must update before runbook step files can be generated
-
 **Proof skill gap identified:**
 - Revise verdicts should trace back to generator skill gap (insufficient requirements, incomplete exploration, faulty expansion)
 - Brief skill description too narrow (only cross-tree transfer, should also cover creating plan briefs from conversation)
 
 ## Reference Files
 
-- `plans/handoff-cli-tool/runbook.md` — Updated runbook (25 steps, 7 phases)
-- `plans/handoff-cli-tool/reports/runbook-proof-review.md` — Corrector review
-- `plans/handoff-cli-tool/outline.md` — Source outline (needs design revisions)
+- `plans/handoff-cli-tool/runbook.md` — Updated runbook (26 steps, 7 phases)
+- `plans/handoff-cli-tool/orchestrator-plan.md` — Generated orchestrator plan
+- `plans/handoff-cli-tool/reports/runbook-revision-review.md` — Corrector review of revisions
+- `plans/handoff-cli-tool/outline.md` — Source outline (revisions applied)
 
 ## Next Steps
 
-Apply outline design revisions (ST-1, handoff pipeline), then generate step files via prepare-runbook.py.
+Restart session, then `/orchestrate handoff-cli-tool`.

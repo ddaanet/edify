@@ -14,7 +14,7 @@
 | S-5: Git status/diff utility | 1 | 1.3 | `_git` CLI group with status/diff subcommands |
 | H-1: Domain boundaries | 4 | — | Design constraint, not a deliverable step |
 | H-2: Committed detection | 4 | 4.3 | Diff-based three-mode write |
-| H-3: Diagnostics | 4 | 4.6 | Conditional: precommit, git status/diff, learnings age |
+| H-3: Diagnostics | 4 | 4.6 | Git status/diff (always) |
 | H-4: State caching | 4 | 4.4 | tmp/.handoff-state.json with step_reached resume |
 | C-1: Scripted vet check | 5 | 5.3 | pyproject.toml patterns, report freshness |
 | C-2: Submodule coordination | 6 | 6.2 | Per-submodule partition + commit + stage pointer |
@@ -22,7 +22,7 @@
 | C-4: Validation levels | 6 | 6.4 | Orthogonal: just-lint, no-vet, amend |
 | C-5: Amend semantics | 6 | 6.3 | HEAD file check + submodule amend propagation |
 | ST-0: Worktree-destined tasks | 3 | 3.1 | Skip `→ slug` and `→ wt` in Next selection |
-| ST-1: Parallel group detection | 3 | 3.3 | Largest independent group only |
+| ST-1: Parallel group detection | 3 | 3.3 | First eligible consecutive group, cap 5 |
 | ST-2: Preconditions + degradation | 2, 3 | 2.2, 3.4 | Missing session.md → exit 2; old format → defaults |
 | Integration tests | 7 | 7.1–7.4 | E2E with real git repos via tmp_path |
 
@@ -101,7 +101,7 @@ Pure data transformation: session.md + filesystem state → STATUS output. No mu
 
 - Cycle 3.3: Parallel group detection (ST-1)
   - Independent when: no shared plan directory, no logical dependency
-  - Largest group only, omit section if none
+  - First eligible consecutive group, cap 5, omit section if none
 
 - Cycle 3.4: CLI wiring — `claudeutils _session status` Click command
   - Parse session.md, call `_worktree ls`, render output, exit 0
@@ -133,13 +133,8 @@ Stdin parsing, session.md writes, committed detection, state caching, diagnostic
   - Contents: input_markdown, timestamp, step_reached
   - Resume mode: no stdin → load from state file, re-execute from step_reached
 
-- Cycle 4.5: Precommit integration
-  - Run `just precommit` after session.md writes
-  - Failure: output precommit result + learnings age, leave state file, exit 1
-
 - Cycle 4.6: Diagnostic output (H-3)
-  - Precommit result (always), git status/diff (on pass), learnings age (≥7 active days)
-  - Diagnostics conditional on precommit success
+  - Git status/diff (always after session.md writes)
 
 - Cycle 4.7: CLI wiring — `claudeutils _session handoff` with fresh/resume modes
   - Fresh: stdin has content → full pipeline
@@ -147,6 +142,10 @@ Stdin parsing, session.md writes, committed detection, state caching, diagnostic
   - Depends on: Phase 2 (SessionData parser for session.md read/locate)
 
 **Checkpoint:** `just precommit` — handoff subcommand fully functional.
+
+- Step 4.8: Update handoff skill — add pre-handoff precommit gate (type: general, model: opus)
+  - Add `just precommit` gate to `agent-core/skills/handoff/SKILL.md` after all writes, before STATUS display
+  - Coupled deliverable: without this, precommit drops out of handoff flow
 
 ---
 
@@ -259,7 +258,7 @@ The following recommendations should be incorporated during full runbook expansi
 - `_is_submodule_dirty()` in `worktree/git_ops.py` (line 100-112) hardcodes "agent-core" — Step 1.1 must generalize to accept path parameter
 
 **Checkpoint guidance:**
-- Phase 4 (handoff) has 7 cycles — consider mid-phase checkpoint after Cycle 4.4 (state caching) before precommit integration (4.5). State caching is a natural boundary: mutations + recovery established before external tool integration
+- Phase 4 (handoff) has 6 cycles (4.5 killed) — consider mid-phase checkpoint after Cycle 4.4 (state caching) before diagnostics integration (4.6). State caching is a natural boundary: mutations + recovery established before diagnostic output
 - Each phase checkpoint is `just precommit`
 
 **Cycle expansion:**
