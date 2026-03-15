@@ -65,6 +65,7 @@ def status_cmd() -> None:
     parallel = detect_parallel(data.in_tree_tasks, [])
     if parallel:
         names = "\n  - ".join(parallel)
-        sections.append(f"Parallel ({len(parallel)} tasks, independent):\n  - {names}")
+        header = f"Parallel ({len(parallel)} tasks, independent):"
+        sections.append(f"{header}\n  - {names}\n  `wt` to set up worktrees")
 
     click.echo("\n\n".join(sections))

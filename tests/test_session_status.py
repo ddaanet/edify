@@ -245,7 +245,7 @@ def test_detect_parallel_shared_plan() -> None:
 
 
 def test_detect_parallel_mixed() -> None:
-    """Four tasks, 2 sharing plan → largest independent subset returned."""
+    """Four tasks, 2 sharing plan → largest consecutive independent subset."""
     tasks = [
         _task_with_plan("Dep1", "shared"),
         _task_with_plan("Dep2", "shared"),
@@ -254,7 +254,9 @@ def test_detect_parallel_mixed() -> None:
     ]
     result = detect_parallel(tasks, [])
     assert result is not None
-    # Largest independent group: 3 tasks (Dep1 or Dep2 + Ind1 + Ind2)
+    # Dep1 and Dep2 share a plan — they are never both in the same group.
+    # Largest consecutive independent window: Dep2 + Ind1 + Ind2 (positions 1-3).
+    assert "Dep1" not in result or "Dep2" not in result
     assert len(result) >= 2
 
 

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from itertools import combinations
-
 from claudeutils.validation.task_parsing import ParsedTask
 
 
@@ -54,7 +52,7 @@ def render_pending(
         lines.append(f"- {task.name}{model_suffix}")
         if task.plan_dir and task.plan_dir in plan_states:
             lines.append(
-                f"  - Plan: {task.plan_dir} | Status: {plan_states[task.plan_dir]}"
+                f"  Plan: {task.plan_dir} | Status: {plan_states[task.plan_dir]}"
             )
     return "\n".join(lines)
 
@@ -133,13 +131,18 @@ def _is_independent(subset: tuple[int, ...], edges: set[tuple[int, int]]) -> boo
     )
 
 
+_PARALLEL_CAP = 5
+
+
 def detect_parallel(
     tasks: list[ParsedTask],
     blockers: list[list[str]],
 ) -> list[str] | None:
-    """Find largest group of independent pending tasks.
+    """Find largest group of independent consecutive pending tasks.
 
-    Returns task names if group has 2+ members, else None.
+    ST-1: Only consecutive tasks in document order form a group.
+    Cap at 5 concurrent sessions. Returns task names if group has
+    2+ members, else None.
     """
     pending = [t for t in tasks if t.checkbox == " "]
     if len(pending) < 2:
@@ -147,9 +150,13 @@ def detect_parallel(
 
     names = [t.name for t in pending]
     edges = _build_dependency_edges(pending, blockers)
+    n = len(pending)
+    cap = min(n, _PARALLEL_CAP)
 
-    for size in range(len(pending), 1, -1):
-        for subset in combinations(range(len(pending)), size):
+    # Search consecutive windows from largest to smallest
+    for size in range(cap, 1, -1):
+        for start in range(n - size + 1):
+            subset = tuple(range(start, start + size))
             if _is_independent(subset, edges):
                 return [names[idx] for idx in subset]
 
