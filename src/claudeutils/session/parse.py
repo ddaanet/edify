@@ -1,4 +1,4 @@
-"""Session.md parser — shared by handoff and status subcommands (Phase 2).
+"""Session.md parser — shared by handoff and status subcommands.
 
 Composes existing functions from worktree/session.py and
 validation/task_parsing.py rather than reimplementing parsing logic.

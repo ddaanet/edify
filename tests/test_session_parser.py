@@ -1,4 +1,4 @@
-"""Tests for session.md parser (Phase 2)."""
+"""Tests for session.md parser."""
 
 from pathlib import Path
 
@@ -124,9 +124,6 @@ def test_parse_completed_section_empty() -> None:
 """
     lines = parse_completed_section(content)
     assert lines == []
-
-
-# --- Cycle 2.2: Full session parse ---
 
 
 def test_parse_session(tmp_path: Path) -> None:
