@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
-import pytest
+from pathlib import Path
 
+import pytest
+from click.testing import CliRunner
+
+from claudeutils.cli import cli
 from claudeutils.session.status.render import (
     detect_parallel,
     render_next,
@@ -263,3 +267,58 @@ def test_detect_parallel_blocker_excludes() -> None:
     blockers = [["Blocker: Alpha blocks Beta"]]
     result = detect_parallel(tasks, blockers)
     assert result is None
+
+
+# --- Cycle 3.4: CLI wiring ---
+
+
+def test_session_status_cli(tmp_path: Path) -> None:
+    """_status with real session.md produces output with exit 0."""
+    agents_dir = tmp_path / "agents"
+    agents_dir.mkdir()
+    (agents_dir / "session.md").write_text(SESSION_FIXTURE)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["_status"],
+        catch_exceptions=False,
+        env={"CLAUDEUTILS_SESSION_FILE": str(agents_dir / "session.md")},
+    )
+    assert result.exit_code == 0
+    assert "Next:" in result.output or "In-tree:" in result.output
+
+
+def test_session_status_missing_session(tmp_path: Path) -> None:
+    """_status without session.md exits 2 with error message."""
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["_status"],
+        env={
+            "CLAUDEUTILS_SESSION_FILE": str(tmp_path / "agents" / "session.md"),
+        },
+    )
+    assert result.exit_code == 2
+    assert "Error" in result.output
+
+
+SESSION_FIXTURE = """\
+# Session Handoff: 2026-03-15
+
+**Status:** Phase 3 in progress.
+
+## Completed This Session
+
+- Built parser
+
+## In-tree Tasks
+
+- [ ] **Build CLI** — `/runbook plans/cli/r.md` | sonnet
+  - Plan: cli | Status: ready
+- [ ] **Fix tests** — `just fix` | haiku
+
+## Worktree Tasks
+
+- [ ] **Remote work** → `wt` — `/design plans/remote/b.md` | sonnet
+"""

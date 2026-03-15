@@ -2,6 +2,10 @@
 
 import click
 
+from claudeutils.session.status.cli import status_cmd
+
+__all__ = ["commit_cmd", "handoff_cmd", "status_cmd"]
+
 
 @click.command(hidden=True)
 def handoff_cmd() -> None:
@@ -13,9 +17,3 @@ def handoff_cmd() -> None:
 def commit_cmd() -> None:
     """Commit staged changes via structured markdown input."""
     raise NotImplementedError("_commit not yet implemented")
-
-
-@click.command(hidden=True)
-def status_cmd() -> None:
-    """Render STATUS output from session.md."""
-    raise NotImplementedError("_status not yet implemented")
