@@ -1,10 +1,15 @@
 """Tests for session.md parser (Phase 2)."""
 
+from pathlib import Path
+
 import pytest
 
 from claudeutils.session.parse import (
     ParsedTask,
+    SessionData,
+    SessionFileError,
     parse_completed_section,
+    parse_session,
     parse_status_line,
     parse_tasks,
 )
@@ -29,7 +34,7 @@ SESSION_MD_FIXTURE = """\
 
 ## Worktree Tasks
 
-- [ ] **Parallel work** → `my-slug` — `/design plans/parallel/problem.md` | opus | restart
+- [ ] **Parallel work** → `my-slug` — `/design plans/par/p.md` | opus | restart
 - [ ] **Future work** → `wt` — `/design plans/future/problem.md` | sonnet
 """
 
@@ -58,6 +63,7 @@ def test_parse_session_sections(section_key: str) -> None:
         assert isinstance(tasks[0], ParsedTask)
         # Build parser task
         assert tasks[0].model == "sonnet"
+        assert tasks[0].command is not None
         assert "/runbook" in tasks[0].command
         assert tasks[0].restart is False
         assert tasks[0].plan_dir == "parser"
@@ -118,3 +124,48 @@ def test_parse_completed_section_empty() -> None:
 """
     lines = parse_completed_section(content)
     assert lines == []
+
+
+# --- Cycle 2.2: Full session parse ---
+
+
+def test_parse_session(tmp_path: Path) -> None:
+    """parse_session() returns SessionData with all fields populated."""
+    session_file = tmp_path / "session.md"
+    session_file.write_text(SESSION_MD_FIXTURE)
+
+    data = parse_session(session_file)
+    assert isinstance(data, SessionData)
+    assert data.date == "2026-03-07"
+    assert data.status_line is not None
+    assert "Phase 1 complete" in data.status_line
+    assert len(data.completed) > 0
+    assert data.in_tree_tasks[0].name == "Build parser"
+    assert data.in_tree_tasks[0].plan_dir == "parser"
+    assert data.worktree_tasks[0].worktree_marker == "my-slug"
+
+
+def test_parse_session_missing_file(tmp_path: Path) -> None:
+    """parse_session() raises SessionFileError for nonexistent file."""
+    with pytest.raises(SessionFileError):
+        parse_session(tmp_path / "nonexistent.md")
+
+
+def test_parse_session_old_format(tmp_path: Path) -> None:
+    """Session with old format tasks returns ParsedTask with defaults."""
+    content = """\
+# Session Handoff: 2026-01-01
+
+**Status:** Old format session.
+
+## In-tree Tasks
+
+- [ ] **Old task** — `some-command`
+"""
+    session_file = tmp_path / "session.md"
+    session_file.write_text(content)
+
+    data = parse_session(session_file)
+    assert len(data.in_tree_tasks) == 1
+    assert data.in_tree_tasks[0].model is None
+    assert data.in_tree_tasks[0].restart is False

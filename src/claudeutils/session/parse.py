@@ -7,6 +7,8 @@ validation/task_parsing.py rather than reimplementing parsing logic.
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass, field
+from pathlib import Path
 
 from claudeutils.validation.task_parsing import ParsedTask, parse_task_line
 from claudeutils.worktree.session import (
@@ -15,7 +17,30 @@ from claudeutils.worktree.session import (
     find_section_bounds,
 )
 
-__all__ = ["ParsedTask", "parse_completed_section", "parse_status_line", "parse_tasks"]
+__all__ = [
+    "ParsedTask",
+    "SessionData",
+    "SessionFileError",
+    "parse_completed_section",
+    "parse_session",
+    "parse_status_line",
+    "parse_tasks",
+]
+
+
+class SessionFileError(Exception):
+    """Raised when session.md cannot be read."""
+
+
+@dataclass
+class SessionData:
+    """Structured representation of a parsed session.md file."""
+
+    date: str | None
+    status_line: str | None
+    completed: list[str]
+    in_tree_tasks: list[ParsedTask]
+    worktree_tasks: list[ParsedTask] = field(default_factory=list)
 
 
 def parse_status_line(content: str) -> str | None:
@@ -39,7 +64,7 @@ def parse_status_line(content: str) -> str | None:
         collected.append(line)
 
     text = "\n".join(collected).strip()
-    return text if text else None
+    return text or None
 
 
 def parse_completed_section(content: str) -> list[str]:
@@ -82,3 +107,39 @@ def parse_tasks(content: str, section: str = "In-tree Tasks") -> list[ParsedTask
         tasks.append(parsed)
 
     return tasks
+
+
+def _extract_date(content: str) -> str | None:
+    """Extract date from ``# Session Handoff: YYYY-MM-DD`` header."""
+    m = re.search(r"^# Session Handoff:\s*(\d{4}-\d{2}-\d{2})", content, re.MULTILINE)
+    return m.group(1) if m else None
+
+
+def parse_session(path: Path) -> SessionData:
+    """Parse a session.md file into structured data.
+
+    Args:
+        path: Path to session.md file.
+
+    Returns:
+        SessionData with all sections parsed.
+
+    Raises:
+        SessionFileError: If file does not exist or cannot be read.
+    """
+    try:
+        content = path.read_text()
+    except FileNotFoundError:
+        msg = f"Session file not found: {path}"
+        raise SessionFileError(msg) from None
+    except OSError as e:
+        msg = f"Cannot read session file: {e}"
+        raise SessionFileError(msg) from None
+
+    return SessionData(
+        date=_extract_date(content),
+        status_line=parse_status_line(content),
+        completed=parse_completed_section(content),
+        in_tree_tasks=parse_tasks(content, section="In-tree Tasks"),
+        worktree_tasks=parse_tasks(content, section="Worktree Tasks"),
+    )
