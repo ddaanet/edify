@@ -14,7 +14,7 @@ Wire version consistency and release coordination. Runs early — creates `.edif
 1. Create `.edify.yaml` in project root:
    ```yaml
    # Edify plugin version marker
-   # Written by /edify:init, updated by edify-setup.sh on session start
+   # Written by /edify:init, updated by sessionstart-health.sh on session start
    version: "0.0.2"
    sync_policy: nag  # nag | auto-with-report (future)
    ```

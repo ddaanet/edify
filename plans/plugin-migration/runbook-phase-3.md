@@ -22,9 +22,10 @@ Create `/edify:init` and `/edify:update` skills — agentic prose artifacts requ
    - **Concrete actions, not open-ended conversation.** The outline specifies the operations: copy fragments, rewrite refs, scaffold structure, write `.edify.yaml`. The skill must execute these, not ask the user to decide them.
    - Skill behavior (per outline FR-3 and Component 4):
      - Copy fragments from `agent-core/fragments/` to `agents/rules/`
-     - Rewrite CLAUDE.md `@agent-core/fragments/` refs to `@agents/rules/` local copies
+     - CLAUDE.md handling (conditional):
+     - If CLAUDE.md exists in project root: rewrite `@agent-core/fragments/` refs to `@agents/rules/`
+     - If CLAUDE.md does not exist: generate from `agent-core/templates/CLAUDE.template.md`
      - Scaffold `agents/` structure: `session.md`, `learnings.md`, `jobs.md`
-     - Generate CLAUDE.md from `agent-core/templates/CLAUDE.template.md`
      - Write `.edify.yaml` with current plugin version and sync policy (`nag` default)
    - Reference points the skill needs to be aware of:
      - Fragment inventory (`agent-core/fragments/*.md`)
@@ -43,7 +44,7 @@ Create `/edify:init` and `/edify:update` skills — agentic prose artifacts requ
    - Must be a starting point, not a complete CLAUDE.md — consumer fills in project-specific details
 
 **Expected Outcome**:
-- `agent-core/skills/init/SKILL.md` exists with valid skill frontmatter and conversational design
+- `agent-core/skills/init/SKILL.md` exists with valid skill frontmatter and concrete action-oriented behavior (CLAUDE.md conditional, fragment copy, scaffold, `.edify.yaml` write)
 - `agent-core/templates/CLAUDE.template.md` exists with template structure
 - Skill references template path correctly
 
@@ -65,8 +66,10 @@ Create `/edify:init` and `/edify:update` skills — agentic prose artifacts requ
 **Script Evaluation**: Prose (agentic skill definition)
 **Execution Model**: Opus (architectural artifact — agentic prose)
 
+**⚠️ Design dependency:** The outline does not specify a conflict policy for fragment updates. Before implementing, the outline must define: (a) conflict definition (consumer file content differs from plugin's version), (b) update policy (warn-and-skip, never silent overwrite), (c) `--force` mechanism for intentional overwrite. Do not implement conflict detection without this policy.
+
 **Prerequisites**:
-- Read outline.md Component 4 `/edify:update` section
+- Read outline.md Component 4 `/edify:update` section (verify conflict policy has been added)
 - Read `agent-core/skills/init/SKILL.md` (created in Step 3.1 — understand separation of concerns)
 - Read 1-2 existing skills for format reference
 

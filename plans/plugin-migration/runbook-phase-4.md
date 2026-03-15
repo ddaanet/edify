@@ -17,9 +17,8 @@ Extract portable recipes and update root justfile.
 - Check if D-5 redesign has occurred (thematic modules vs single file)
 
 **Implementation**:
-1. **If D-5 redesign completed** (thematic modules): create separate module files per design
-2. **If D-5 not redesigned** (default): create single `agent-core/portable.just`
-3. Extract these recipes (per D-5):
+1. Create `agent-core/portable.just` containing all portable recipes
+2. Extract these recipes (per D-5):
    - `claude` / `claude0` — opinionated launch wrapper (system prompt replacement, plugin config)
    - `lint` / `format` / `check` — ruff, mypy, docformatter
    - `red-lint` — permissive TDD variant (recipe name in justfile is `red-lint`, not `red`; D-5 outline uses `red` as shorthand)
@@ -56,8 +55,7 @@ Extract portable recipes and update root justfile.
 - If `just` import syntax doesn't support the module structure → simplify to single file
 
 **Validation**:
-- Single-file case: `just --justfile agent-core/portable.just --list` shows all expected recipes
-- Thematic case: `just --justfile agent-core/<module>.just --list` for each module file
+- `just --justfile agent-core/portable.just --list` shows all expected recipes
 - `just --justfile agent-core/portable.just --evaluate bash_prolog` shows the prolog string (confirms variable is defined)
 - No project-specific recipes present (`release`, `line-limits` absent from listing)
 
@@ -72,10 +70,9 @@ Extract portable recipes and update root justfile.
 - Read `justfile` (current state)
 
 **Implementation**:
-1. Add import statement(s) at top of `justfile`:
-   - Single file: `import 'agent-core/portable.just'`
-   - Thematic: `import 'agent-core/lint.just'` etc.
-2. If using single `portable.just` with potential overrides: add `set allow-duplicate-recipes`
+1. Add import statement at top of `justfile`:
+   `import 'agent-core/portable.just'`
+2. Add `set allow-duplicate-recipes` for intentional recipe overrides
 3. Remove recipes that moved to portable module(s):
    - `claude`, `claude0`, `lint`, `format`, `check`, `red-lint`, `precommit-base`, `test`, `wt-new`, `wt-task`, `wt-ls`, `wt-rm`, `wt-merge`
 4. Keep in root justfile:

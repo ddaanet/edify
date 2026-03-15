@@ -57,3 +57,19 @@ Agentic-prose edits across skill files + corrector. No behavioral code changes (
 
 - `just green` recipe must exist before tdd-cycle-planning.md references it
 - No dependency on other pending plans
+
+---
+
+## 2026-03-14: Unresolved mechanical dependencies passed through to steps
+
+**Failure mode:** /runbook skill generated plugin-migration phase steps that reference a tmux verification mechanism ("standard tmux interaction", "same tmux verification mechanism as Step 1.3") without the mechanism being designed. The dependency was flagged during outline /proof, flagged again during corrector review, and assigned a resolution point ("pre-Phase-1 spike or during Phase 1 expansion") — but the runbook skill generated the steps anyway, embedding the unresolved dependency in the text rather than surfacing it structurally.
+
+**What the skill should have done:** When a step depends on a mechanism not yet specified, either:
+1. Design the mechanism inline (spike step before the checkpoint step), or
+2. Escalate: emit a structured design gap notice, halt runbook generation for that phase, and update the design artifact
+
+**What it did instead:** Generated steps with placeholder language ("standard tmux interaction") that looks specified but isn't. The mechanism for driving a live Claude session via tmux — sending commands, waiting for output, capturing structured results — is genuinely complex and requires design work.
+
+**Directive for /runbook skill:** Add a dependency-resolution check during step generation. When a step references a mechanism not specified in the design artifact, classify as either (a) well-understood (document inline) or (b) novel/unspecified (emit design gap, do not generate the step with placeholder language). Placeholder language in step text is not acceptable — it defers a design decision to the executor.
+
+**Evidence:** `plans/plugin-migration/runbook-phase-1.md` Step 1.3, `runbook-phase-2.md` Step 2.4, `runbook-phase-6.md` Steps 6.1 and 6.3 — all reference tmux mechanism. Corrector review reports at `plans/plugin-migration/reports/` flagged it as unresolved.

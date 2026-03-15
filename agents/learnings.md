@@ -49,6 +49,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Place the correctional instruction at the generation point. "Fresh write → Completed contains only this conversation's work." Content is correct from the start — no append-then-trim cycle. Same class as "validate at input, not output."
 - Evidence: Completed This Session accumulated 66 lines across 4+ prior sessions. Step 6 trim instruction was the initial fix; user identified it as structurally weak. Moved to Step 1 generation point.
 
+## When runbook steps reference undesigned mechanisms
+- Anti-pattern: Runbook skill generates steps with placeholder language ("standard tmux interaction", "same mechanism as Step X") for mechanisms not in the design artifact. Looks specified but isn't. Passes correctors and /proof orientation without surfacing as a blocker.
+- Correct pattern: When a step depends on a mechanism not in the design artifact, either (a) design it inline as a preceding spike step, or (b) emit a structured design gap and halt — do not generate the step with placeholder text.
+- Evidence: Steps 1.3, 2.4, 6.1, 6.3 in plugin-migration all referenced "standard tmux interaction" — mechanism for driving live Claude session via tmux not designed. Flagged in session.md blockers, brief written, /proof skipped Item 3 as blocked.
+
 ## When multi-sub-problem plans reach design
 - Anti-pattern: Batching independent sub-problems through entire plan lifecycle (design → runbook → orchestrate → deliver). Creates delivery ordering problems — can't ship SP-3 until SP-1 finishes, can't prioritize independently.
 - Correct pattern: Keep sub-problems together through design (shared context benefits). After design, split into separate tasks with explicit dependencies. Parent plan delivers at "designed" status (terminal). Children are new plans starting at "planned." Each gets own WSJF score, model tier, worktree classification.
