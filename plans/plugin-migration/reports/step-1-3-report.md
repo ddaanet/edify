@@ -38,10 +38,12 @@ Both plugin agents AND plan-specific agents present with no conflicts:
 
 Run from `tmp/plugin-verify`, requested write to `/tmp/hook-test.txt`:
 
-`pretooluse-block-tmp.sh` fired — model reported block:
+Model reported block:
 > "The sandbox is blocking writes to both `/tmp` and the fallback temp directory."
 
-Hook successfully prevented the `/tmp` write. Full output: `tmp/plugin-verify-hooks.txt`
+The `/tmp` write was blocked. Full output: `tmp/plugin-verify-hooks.txt`
+
+**Note:** The output does not isolate whether the block came from `pretooluse-block-tmp.sh` or the Claude Code sandbox permissions deny rule (both independently block `/tmp` writes in this environment). Hook loading is inferred from checks 1-3 confirming hooks.json is loaded and parsed — the hook is present and would fire, but this specific output does not prove it ran independently of the sandbox.
 
 ## Check 5 — NFR-1 Dev Mode Reload (PENDING — HUMAN ACTION REQUIRED)
 
