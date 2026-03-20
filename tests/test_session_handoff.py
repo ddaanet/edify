@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from claudeutils.session.handoff.parse import (
@@ -9,6 +11,7 @@ from claudeutils.session.handoff.parse import (
     HandoffInputError,
     parse_handoff_input,
 )
+from claudeutils.session.handoff.pipeline import overwrite_status
 
 HANDOFF_INPUT_FIXTURE = """\
 **Status:** Design Phase A complete — outline reviewed.
@@ -21,7 +24,7 @@ HANDOFF_INPUT_FIXTURE = """\
 """
 
 
-# --- Cycle 4.1: parse handoff stdin ---
+# Cycle 4.1: parse handoff stdin
 
 
 def test_parse_handoff_input() -> None:
@@ -51,3 +54,70 @@ def test_parse_handoff_missing_completed() -> None:
 """
     with pytest.raises(HandoffInputError, match="Completed"):
         parse_handoff_input(text)
+
+
+# Cycle 4.2: status line overwrite
+
+SESSION_FIXTURE = """\
+# Session Handoff: 2026-03-15
+
+**Status:** Old status text.
+
+## Completed This Session
+
+- Task A done
+
+## In-tree Tasks
+
+- [ ] **Task B** — `cmd` | sonnet
+"""
+
+
+def test_overwrite_status_line(tmp_path: Path) -> None:
+    """overwrite_status replaces the Status line in session.md."""
+    session_file = tmp_path / "session.md"
+    session_file.write_text(SESSION_FIXTURE)
+
+    overwrite_status(session_file, "New status text.")
+
+    content = session_file.read_text()
+    assert "**Status:** New status text." in content
+    assert "**Status:** Old status text." not in content
+    # Other sections preserved
+    assert "## Completed This Session" in content
+    assert "## In-tree Tasks" in content
+    assert "Task A done" in content
+    assert "Task B" in content
+
+
+def test_overwrite_status_line_idempotent(tmp_path: Path) -> None:
+    """Subsequent overwrite_status calls replace, not append."""
+    session_file = tmp_path / "session.md"
+    session_file.write_text(SESSION_FIXTURE)
+
+    overwrite_status(session_file, "First update.")
+    overwrite_status(session_file, "Second update.")
+
+    content = session_file.read_text()
+    assert "**Status:** Second update." in content
+    assert "**Status:** First update." not in content
+    assert content.count("**Status:**") == 1
+
+
+def test_overwrite_status_line_multiline(tmp_path: Path) -> None:
+    """Preserves multiline status text between heading and first ## section."""
+    session_file = tmp_path / "session.md"
+    session_file.write_text(SESSION_FIXTURE)
+
+    multiline_status = "Line one of status.\nLine two of status."
+    overwrite_status(session_file, multiline_status)
+
+    content = session_file.read_text()
+    assert "Line one of status." in content
+    assert "Line two of status." in content
+    # Both lines must appear before the first ## section heading
+    heading_pos = content.index("# Session Handoff:")
+    first_section_pos = content.index("## ", heading_pos)
+    status_region = content[heading_pos:first_section_pos]
+    assert "Line one of status." in status_region
+    assert "Line two of status." in status_region
