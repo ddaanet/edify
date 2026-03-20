@@ -10,7 +10,6 @@ from pathlib import Path
 import click
 
 from claudeutils.git import _fail
-from claudeutils.session.handoff.context import PrecommitResult, format_diagnostics
 from claudeutils.session.handoff.parse import (
     HandoffInput,
     HandoffInputError,
@@ -31,20 +30,6 @@ def _parse_or_fail(text: str) -> HandoffInput:
         return parse_handoff_input(text)
     except HandoffInputError as e:
         _fail(f"**Error:** {e}", code=2)
-
-
-def _run_precommit() -> PrecommitResult:
-    """Run ``just precommit`` and return result.
-
-    Patchable in tests.
-    """
-    result = subprocess.run(
-        ["just", "precommit"], capture_output=True, text=True, check=False
-    )
-    return PrecommitResult(
-        passed=result.returncode == 0,
-        output=result.stdout.strip(),
-    )
 
 
 @click.command(name="handoff", hidden=True)
@@ -69,35 +54,21 @@ def handoff_cmd() -> None:
     overwrite_status(session_path, handoff_input.status_line)
     write_completed(session_path, handoff_input.completed_lines)
 
-    precommit_result = _run_precommit()
-
-    git_output: str | None = None
-    if precommit_result.passed:
-        status_result = subprocess.run(
-            ["git", "status", "--porcelain"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        diff_result = subprocess.run(
-            ["git", "diff", "HEAD"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        parts = [
-            p for p in [status_result.stdout.strip(), diff_result.stdout.strip()] if p
-        ]
-        git_output = "\n".join(parts) or None
-
-    diagnostics = format_diagnostics(
-        precommit_result,
-        git_output=git_output,
-        learnings_age_days=None,
+    status_result = subprocess.run(
+        ["git", "status", "--porcelain"],
+        capture_output=True,
+        text=True,
+        check=False,
     )
-    click.echo(diagnostics)
-
-    if not precommit_result.passed:
-        sys.exit(1)
+    diff_result = subprocess.run(
+        ["git", "diff", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    parts = [p for p in [status_result.stdout.strip(), diff_result.stdout.strip()] if p]
+    git_output = "\n".join(parts)
+    if git_output:
+        click.echo(f"**Git status:**\n\n```\n{git_output}\n```")
 
     clear_state()

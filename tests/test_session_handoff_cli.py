@@ -8,9 +8,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-import claudeutils.session.handoff.cli as handoff_cli_mod
 from claudeutils.cli import cli
-from claudeutils.session.handoff.context import PrecommitResult
 from claudeutils.session.handoff.pipeline import save_state
 
 
@@ -86,14 +84,9 @@ def test_session_handoff_cli_fresh(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Fresh handoff updates session.md and outputs diagnostics."""
+    """Fresh handoff updates session.md and outputs git diagnostics."""
     monkeypatch.chdir(tmp_path)
     session_file = _setup_cli_repo(tmp_path)
-    monkeypatch.setattr(
-        handoff_cli_mod,
-        "_run_precommit",
-        lambda: PrecommitResult(passed=True, output="All checks passed"),
-    )
 
     runner = CliRunner()
     result = runner.invoke(
@@ -108,7 +101,8 @@ def test_session_handoff_cli_fresh(
     assert "Phase 4 complete." in content
     assert "Implemented write_completed" in content
     assert "Previous task" not in content
-    assert "All checks passed" in result.output
+    # Git diagnostics emitted (session.md modified relative to HEAD)
+    assert "Git status" in result.output
     # State file cleared after successful pipeline
     assert not (tmp_path / "tmp" / ".handoff-state.json").exists()
 
@@ -120,11 +114,6 @@ def test_session_handoff_cli_resume(
     """Handoff with existing state file resumes without stdin."""
     monkeypatch.chdir(tmp_path)
     session_file = _setup_cli_repo(tmp_path)
-    monkeypatch.setattr(
-        handoff_cli_mod,
-        "_run_precommit",
-        lambda: PrecommitResult(passed=True, output="OK"),
-    )
     # Pre-populate state file
     save_state(HANDOFF_STDIN, step="write_session")
 

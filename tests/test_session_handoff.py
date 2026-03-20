@@ -185,15 +185,11 @@ def _commit_session(path: Path, session_file: Path) -> None:
     )
 
 
-def test_write_completed_overwrite(tmp_path: Path) -> None:
-    """write_completed overwrites section when working tree matches HEAD."""
-    (tmp_path / "agents").mkdir()
-    session_file = tmp_path / "agents" / "session.md"
+def test_write_completed_replaces_section(tmp_path: Path) -> None:
+    """write_completed replaces section content with new_lines."""
+    session_file = tmp_path / "session.md"
     session_file.write_text(SESSION_WITH_COMPLETED)
-    _init_repo(tmp_path)
-    _commit_session(tmp_path, session_file)
 
-    # Working tree matches HEAD — overwrite mode
     write_completed(session_file, ["- New task done."])
 
     content = session_file.read_text()
@@ -205,15 +201,9 @@ def test_write_completed_overwrite(tmp_path: Path) -> None:
     assert "## In-tree Tasks" in content
 
 
-def test_write_completed_append(tmp_path: Path) -> None:
-    """write_completed writes only new_lines when agent cleared old content."""
-    (tmp_path / "agents").mkdir()
-    session_file = tmp_path / "agents" / "session.md"
-    session_file.write_text(SESSION_WITH_COMPLETED)
-    _init_repo(tmp_path)
-    _commit_session(tmp_path, session_file)
-
-    # Agent cleared old completed content from working tree
+def test_write_completed_with_empty_section(tmp_path: Path) -> None:
+    """write_completed writes new_lines when prior section is empty."""
+    session_file = tmp_path / "session.md"
     cleared = SESSION_WITH_COMPLETED.replace("- Old task A\n- Old task B\n", "")
     session_file.write_text(cleared)
 
@@ -225,15 +215,9 @@ def test_write_completed_append(tmp_path: Path) -> None:
     assert "- Old task B" not in content
 
 
-def test_write_completed_auto_strip(tmp_path: Path) -> None:
-    """Strips HEAD-committed lines when old content persists in working tree."""
-    (tmp_path / "agents").mkdir()
-    session_file = tmp_path / "agents" / "session.md"
-    session_file.write_text(SESSION_WITH_COMPLETED)
-    _init_repo(tmp_path)
-    _commit_session(tmp_path, session_file)
-
-    # Old content still present + new additions in working tree
+def test_write_completed_with_accumulated_content(tmp_path: Path) -> None:
+    """write_completed replaces accumulated prior-session content."""
+    session_file = tmp_path / "session.md"
     accumulated = SESSION_WITH_COMPLETED.replace(
         "- Old task B\n",
         "- Old task B\n- New task done.\n",
@@ -244,7 +228,6 @@ def test_write_completed_auto_strip(tmp_path: Path) -> None:
 
     content = session_file.read_text()
     assert "- New task done." in content
-    # Committed lines stripped
     assert "- Old task A" not in content
     assert "- Old task B" not in content
 
