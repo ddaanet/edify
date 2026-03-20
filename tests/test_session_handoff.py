@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from claudeutils.session.handoff.context import PrecommitResult, format_diagnostics
 from claudeutils.session.handoff.parse import (
     HandoffInput,
     HandoffInputError,
@@ -298,3 +299,53 @@ def test_state_cache_cleanup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     assert load_state() is None
     # No error on second clear
     clear_state()
+
+
+# Cycle 4.6: diagnostic output
+
+
+def test_diagnostics_precommit_pass() -> None:
+    """format_diagnostics includes precommit output and git info when passed."""
+    result = format_diagnostics(
+        PrecommitResult(passed=True, output="All checks passed"),
+        git_output="M agents/session.md",
+        learnings_age_days=None,
+    )
+    assert "All checks passed" in result
+    assert "M agents/session.md" in result
+    # No age warning when learnings_age_days is None
+    assert "Learnings" not in result
+
+    # Also verify computed-but-young (below threshold) produces no warning
+    result_young = format_diagnostics(
+        PrecommitResult(passed=True, output="All checks passed"),
+        git_output="M agents/session.md",
+        learnings_age_days=3,
+    )
+    assert "Learnings" not in result_young
+
+
+def test_diagnostics_precommit_fail() -> None:
+    """Excludes git output on failure; includes learnings warning when stale."""
+    result = format_diagnostics(
+        PrecommitResult(passed=False, output="lint failed: E501"),
+        git_output="M agents/session.md",
+        learnings_age_days=8,
+    )
+    assert "lint failed: E501" in result
+    # Git output excluded on failure
+    assert "M agents/session.md" not in result
+    # Learnings age warning included when >= 7 days even on failure
+    assert "Learnings" in result
+
+
+def test_diagnostics_learnings_age() -> None:
+    """format_diagnostics includes age warning when learnings_age_days >= 7."""
+    result = format_diagnostics(
+        PrecommitResult(passed=True, output="OK"),
+        git_output="nothing to show",
+        learnings_age_days=10,
+    )
+    assert "Learnings" in result
+    assert "10" in result
+    assert "codify" in result.lower()
