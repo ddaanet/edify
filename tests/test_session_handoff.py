@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -12,7 +13,14 @@ from claudeutils.session.handoff.parse import (
     HandoffInputError,
     parse_handoff_input,
 )
-from claudeutils.session.handoff.pipeline import overwrite_status, write_completed
+from claudeutils.session.handoff.pipeline import (
+    HandoffState,
+    clear_state,
+    load_state,
+    overwrite_status,
+    save_state,
+    write_completed,
+)
 
 HANDOFF_INPUT_FIXTURE = """\
 **Status:** Design Phase A complete — outline reviewed.
@@ -238,3 +246,55 @@ def test_write_completed_auto_strip(tmp_path: Path) -> None:
     # Committed lines stripped
     assert "- Old task A" not in content
     assert "- Old task B" not in content
+
+
+# Cycle 4.4: state caching
+
+
+def test_state_cache_create(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """save_state creates tmp/.handoff-state.json with required fields."""
+    monkeypatch.chdir(tmp_path)
+
+    save_state("# input markdown", step="write_session")
+
+    state_file = tmp_path / "tmp" / ".handoff-state.json"
+    assert state_file.exists()
+    data = json.loads(state_file.read_text())
+    assert data["input_markdown"] == "# input markdown"
+    assert data["step_reached"] == "write_session"
+    assert "timestamp" in data
+    # Timestamp is ISO format (contains 'T' separator)
+    assert "T" in data["timestamp"]
+
+
+def test_state_cache_resume(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """load_state returns HandoffState when state file exists, else None."""
+    monkeypatch.chdir(tmp_path)
+
+    # No file yet
+    assert load_state() is None
+
+    save_state("# my input", step="precommit")
+    result = load_state()
+
+    assert isinstance(result, HandoffState)
+    assert result.input_markdown == "# my input"
+    assert result.step_reached == "precommit"
+    # File survives load (not deleted)
+    assert (tmp_path / "tmp" / ".handoff-state.json").exists()
+
+
+def test_state_cache_cleanup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """clear_state removes the state file; idempotent when already absent."""
+    monkeypatch.chdir(tmp_path)
+
+    # Idempotent when no file
+    clear_state()
+
+    save_state("# input", step="diagnostics")
+    assert load_state() is not None
+
+    clear_state()
+    assert load_state() is None
+    # No error on second clear
+    clear_state()

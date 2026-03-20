@@ -2,8 +2,55 @@
 
 from __future__ import annotations
 
+import json
 import re
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from pathlib import Path
+
+_STATE_FILE = Path("tmp") / ".handoff-state.json"
+
+
+@dataclass
+class HandoffState:
+    """Persisted handoff pipeline state for crash recovery."""
+
+    input_markdown: str
+    timestamp: str
+    step_reached: str
+
+
+def save_state(input_md: str, step: str) -> None:
+    """Write HandoffState to tmp/.handoff-state.json.
+
+    Args:
+        input_md: Raw handoff stdin markdown.
+        step: Pipeline step label (e.g. ``"write_session"``).
+    """
+    _STATE_FILE.parent.mkdir(exist_ok=True)
+    state = HandoffState(
+        input_markdown=input_md,
+        timestamp=datetime.now(tz=UTC).isoformat(),
+        step_reached=step,
+    )
+    _STATE_FILE.write_text(json.dumps(asdict(state)))
+
+
+def load_state() -> HandoffState | None:
+    """Load HandoffState from tmp/.handoff-state.json.
+
+    Returns:
+        HandoffState if the file exists, None otherwise.
+    """
+    if not _STATE_FILE.exists():
+        return None
+    data = json.loads(_STATE_FILE.read_text())
+    return HandoffState(**data)
+
+
+def clear_state() -> None:
+    """Delete the state file; no-op if absent."""
+    _STATE_FILE.unlink(missing_ok=True)
 
 
 def overwrite_status(session_path: Path, status_text: str) -> None:
