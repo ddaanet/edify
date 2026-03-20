@@ -1,0 +1,7 @@
+- **Classification:** Moderate
+- **Implementation certainty:** High — brief specifies insertion points precisely; open items (outline format, Tier 2 content) resolved inline from existing Tier 3 and Complex patterns
+- **Requirement stability:** High — direction agreed per brief; no open questions
+- **Behavioral code check:** Yes — adds logic paths to SKILL.md files → Moderate minimum
+- **Work type:** Production — delivers behavioral changes to agent pipeline
+- **Artifact destination:** agentic-prose (`agent-core/skills/`)
+- **Evidence:** 4 FRs across 2 skill files + 1 reference file + 1 integration table update; author-corrector coupling checked (no corrector updates needed)
