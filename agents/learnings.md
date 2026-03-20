@@ -58,3 +58,13 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Keep sub-problems together through design (shared context benefits). After design, split into separate tasks with explicit dependencies. Parent plan delivers at "designed" status (terminal). Children are new plans starting at "planned." Each gets own WSJF score, model tier, worktree classification.
 - Exception: Dependent sub-problems (S-B depends on S-A's output format) stay together through design but execute as separate tasks with cross-task dependency.
 - Design coherence under change: if a sub-problem's execution reveals the shared design was wrong, propagation via "merge parent" (worktree merge from parent branch) handles updates.
+
+## When dispatching corrector with plan-path-containing prompts
+- Anti-pattern: Including template notation like `plans/{plan}/` or `plans/<name>/` anywhere in the corrector prompt text. The PreToolUse recall-check hook uses `re.search(r"plans/([^/]+)/", prompt)` to extract the job name — it finds the FIRST match, which may be template text rather than the actual plan path.
+- Correct pattern: Put the actual plan path (`plans/outline-proofing/`) as the FIRST `plans/X/` reference in the prompt (e.g., "Plan: plans/outline-proofing/ — review implementation changes"). Avoid template-style placeholders in requirement text; use natural language descriptions instead.
+- Root cause: `re.search` returns first match, not best match. Template text like `plans/{plan}/outline.md` in a requirements bullet appears before the actual plan path references.
+
+## When calling triage-feedback.sh
+- Anti-pattern: Calling `triage-feedback.sh plans/outline-proofing baseline` — the script prepends `plans/` to `$1`, so the reports dir becomes `plans/plans/outline-proofing/reports` (double-prefixed).
+- Correct pattern: Pass just the job name: `triage-feedback.sh outline-proofing baseline`. The script constructs `plans/outline-proofing/reports` internally.
+- Note: The inline skill's documented invocation is `triage-feedback.sh plans/<job>` — this is incorrect. The script implementation uses the arg as a suffix to `plans/`.

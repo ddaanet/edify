@@ -1,36 +1,31 @@
 # Session Handoff: 2026-03-20
 
-**Status:** Design reviewed. Ready for implementation.
+**Status:** Implement proofing complete. Deliverable review pending.
 
 ## Completed This Session
 
-**Outline proofing /proof review:**
-- Resumed proof from prior session (Items 1–3 already approved with revisions)
-- Scraped prior session log via `plans/prototypes/session-scraper.py` to recover 150k-token discussion context
-- Applied 5 accumulated decisions from prior session to design.md (inline-plan.md artifact, unconditional post-0.86 proof, no corrector for inline-plan, inference.py scope, outlined→/design routing fix)
-- Reviewed Items 4–7: D3 revised (STOP gate on direct /runbook calls), D4 revised (corrector tier-awareness for Tier 2), D5 approved, D6 approved (count fix 9→8)
-- Total: 8 decisions applied to design.md
-
-**Briefs written (4 new plans from proof discussion):**
-- `plans/invariant-tracking/brief.md` — prose-only prototype for requirement traceability via corrector criteria
-- `plans/interaction-graph/brief.md` — render agentic-prose dependency graph for classification aid
-- `plans/context-adaptive-proof/brief.md` — context compression via session fork+summary
-- `plans/sycophancy-probe/brief.md` — mediator pattern with reversed claims for sycophancy testing
-
-**Discussion: sycophancy probe architecture:**
-- Reversed framing technique (user agrees while demonstrating counterpoint) as sycophancy test
-- Mediator pattern: persistent sub-agent with full context, main agent curates what it sees
-- Out-of-platform tool (Option A) is prototype-weight, session-scraper is the transport
-- Anthropic session forking API (restricted) would reduce cost of context duplication
+**Outline proofing implementation (D1–D6):**
+- `agent-core/skills/design/SKILL.md` — Moderate routing (D2): agentic-prose path generates inline-plan.md + /proof, non-prose path generates outline.md + /proof
+- `agent-core/skills/design/references/write-inline-plan.md` — new reference file for inline-plan format (D1)
+- `agent-core/skills/runbook/SKILL.md` — Two-Tier Assessment (D3/D4): Tier 1 removed, prerequisites STOP gate added, Tier 2 now generates runbook-outline.md → corrector → /proof
+- `agent-core/skills/runbook/references/tier3-planning-process.md` — Phase 0.87 added (D5), /proof removed from Phase 0.75 step 5
+- `agent-core/skills/runbook/references/tier3-outline-process.md` — Phase 0.87 added to overview list
+- `agent-core/skills/proof/SKILL.md` — integration points 5→8, inline-plan.md dispatch row added (D6)
+- `src/claudeutils/planstate/inference.py` — `inline-planned` status detection, `outlined` routing fix (→ /design not /runbook), `_determine_pre_ready_status` helper extracted (PLR0911 fix)
+- `tests/test_planstate_inference.py` — inline-planned test cases, outlined routing fix; lifecycle tests extracted
+- `tests/test_planstate_inference_lifecycle.py` — new file: lifecycle tests split out (400-line limit)
+- `plans/outline-proofing/recall-artifact.md` — created for corrector dispatch gate
+- Reviews: corrector (review-code.md) and skill-reviewer (review-skills.md) both passed; no UNFIXABLE
 
 ## In-tree Tasks
 
 - [x] **Outline proofing** — `/design plans/outline-proofing/brief.md` | opus | restart
   - Plan: outline-proofing | Design reviewed. 6 affected files, all agentic prose.
+- [ ] **Outline proofing review** — `/deliverable-review plans/outline-proofing` | opus | restart
 
 ## Worktree Tasks
 
-- [ ] **Implement proofing** — `/runbook plans/outline-proofing/design.md` | opus
+- [x] **Implement proofing** — `/runbook plans/outline-proofing/design.md` | opus
   - Plan: outline-proofing | 6 files: design/SKILL.md, write-inline-plan.md (new), runbook/SKILL.md, tier3-planning-process.md, proof/SKILL.md, inference.py
 - [ ] **Invariant tracking** — `/design plans/invariant-tracking/brief.md` | opus
   - Plan: invariant-tracking | Prose-only exploration: express invariants as recall entries + corrector criteria
@@ -51,8 +46,9 @@
 
 - `plans/outline-proofing/design.md` — reviewed design with all 8 decisions applied
 - `plans/outline-proofing/lifecycle.md` — full proof state history
-- `plans/outline-proofing/brief.md` — original brief with root cause and evidence
+- `plans/outline-proofing/reports/review-code.md` — corrector review (passed)
+- `plans/outline-proofing/reports/review-skills.md` — skill review (passed)
 
 ## Next Steps
 
-Branch work complete for design phase. Implementation dispatches as worktree task.
+Run `/deliverable-review plans/outline-proofing` to complete the review gate before merging.

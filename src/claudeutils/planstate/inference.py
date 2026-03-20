@@ -15,6 +15,7 @@ def _collect_artifacts(plan_dir: Path) -> set[str]:
         "brief.md",
         "classification.md",
         "requirements.md",
+        "inline-plan.md",
         "design.md",
         "outline.md",
         "lifecycle.md",
@@ -62,36 +63,45 @@ def _parse_lifecycle_status(plan_dir: Path) -> str | None:
     return state if state in valid_states else None
 
 
-def _determine_status(plan_dir: Path) -> str:
-    """Determine status from artifacts.
+def _determine_pre_ready_status(plan_dir: Path) -> str:
+    """Determine pre-ready status from artifacts.
 
-    Priority: lifecycle > ready > planned > designed > outlined > requirements.
+    Priority: ready > planned > inline-planned > designed > outlined > requirements.
+    (briefed is a sub-case of requirements: brief.md present, no requirements.md)
     """
-    # Check lifecycle.md first (post-ready states take priority)
-    lifecycle_status = _parse_lifecycle_status(plan_dir)
-    if lifecycle_status is not None:
-        return lifecycle_status
-
-    # Fall through to pre-ready detection
     if (plan_dir / "steps").is_dir() and (plan_dir / "orchestrator-plan.md").exists():
         return "ready"
     if list(plan_dir.glob("runbook-phase-*.md")):
         return "planned"
+    if (plan_dir / "inline-plan.md").exists():
+        return "inline-planned"
     if (plan_dir / "design.md").exists():
         return "designed"
     if (plan_dir / "outline.md").exists():
         return "outlined"
-    # Brief-only plans (no requirements.md) get distinct status
     has_brief_only = (plan_dir / "brief.md").exists() and not (
         (plan_dir / "requirements.md").exists()
     )
     return "briefed" if has_brief_only else "requirements"
 
 
+def _determine_status(plan_dir: Path) -> str:
+    """Determine status from artifacts.
+
+    Checks lifecycle.md first; delegates to _determine_pre_ready_status
+    otherwise.
+    """
+    lifecycle_status = _parse_lifecycle_status(plan_dir)
+    if lifecycle_status is not None:
+        return lifecycle_status
+    return _determine_pre_ready_status(plan_dir)
+
+
 _NEXT_ACTION_TEMPLATES: dict[str, str | None] = {
     "briefed": "/design plans/{plan_name}/brief.md",
     "requirements": "/design plans/{plan_name}/requirements.md",
-    "outlined": "/runbook plans/{plan_name}/outline.md",
+    "outlined": "/design plans/{plan_name}/outline.md",
+    "inline-planned": "/inline plans/{plan_name}",
     "designed": "/runbook plans/{plan_name}/design.md",
     "planned": "agent-core/bin/prepare-runbook.py plans/{plan_name}",
     "ready": "/orchestrate {plan_name}",
