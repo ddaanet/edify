@@ -68,3 +68,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Calling `triage-feedback.sh plans/outline-proofing baseline` — the script prepends `plans/` to `$1`, so the reports dir becomes `plans/plans/outline-proofing/reports` (double-prefixed).
 - Correct pattern: Pass just the job name: `triage-feedback.sh outline-proofing baseline`. The script constructs `plans/outline-proofing/reports` internally.
 - Note: The inline skill's documented invocation is `triage-feedback.sh plans/<job>` — this is incorrect. The script implementation uses the arg as a suffix to `plans/`.
+## When referencing format files in skill steps
+- Anti-pattern: "Generate X using format from `references/foo.md`" — implies reading but doesn't require it. Agent may rationalize from memory rather than reading the file, producing format drift.
+- Correct pattern: Explicit Read instruction: "Read `references/foo.md`. Generate X using that format." Matches Complex path convention ("Read `references/write-outline.md`") and removes ambiguity.
+- Evidence: M2 in outline-proofing deliverable review — Moderate agentic-prose path step used implicit form while Complex path used explicit form.

@@ -14,3 +14,4 @@
 ## Key insight: session logs contain dialogue only, not thinking tokens (grounded: parsing.py has no thinking block handling)
 2026-03-18 review-pending — /proof plans/outline-proofing/design.md
 2026-03-18 reviewed — /proof plans/outline-proofing/design.md
+2026-03-20 reviewed — /deliverable-review

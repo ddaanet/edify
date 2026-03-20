@@ -1,27 +1,22 @@
 # Session Handoff: 2026-03-20
 
-**Status:** Implement proofing complete. Deliverable review pending.
+**Status:** Deliverable review complete. 2 minor findings, fix task created.
 
 ## Completed This Session
 
-**Outline proofing implementation (D1–D6):**
-- `agent-core/skills/design/SKILL.md` — Moderate routing (D2): agentic-prose path generates inline-plan.md + /proof, non-prose path generates outline.md + /proof
-- `agent-core/skills/design/references/write-inline-plan.md` — new reference file for inline-plan format (D1)
-- `agent-core/skills/runbook/SKILL.md` — Two-Tier Assessment (D3/D4): Tier 1 removed, prerequisites STOP gate added, Tier 2 now generates runbook-outline.md → corrector → /proof
-- `agent-core/skills/runbook/references/tier3-planning-process.md` — Phase 0.87 added (D5), /proof removed from Phase 0.75 step 5
-- `agent-core/skills/runbook/references/tier3-outline-process.md` — Phase 0.87 added to overview list
-- `agent-core/skills/proof/SKILL.md` — integration points 5→8, inline-plan.md dispatch row added (D6)
-- `src/claudeutils/planstate/inference.py` — `inline-planned` status detection, `outlined` routing fix (→ /design not /runbook), `_determine_pre_ready_status` helper extracted (PLR0911 fix)
-- `tests/test_planstate_inference.py` — inline-planned test cases, outlined routing fix; lifecycle tests extracted
-- `tests/test_planstate_inference_lifecycle.py` — new file: lifecycle tests split out (400-line limit)
-- `plans/outline-proofing/recall-artifact.md` — created for corrector dispatch gate
-- Reviews: corrector (review-code.md) and skill-reviewer (review-skills.md) both passed; no UNFIXABLE
+**Outline-proofing deliverable review:**
+- Reviewed 9 files (260 lines): 1 code, 2 test, 6 agentic prose
+- All 7 design IN-scope items confirmed delivered, 4 OUT-scope items unchanged
+- 2 minor findings: M1 prerequisites check scope (Tier 3 path missing D3 gate), M2 implicit Read instruction for write-inline-plan.md
+- Report: `plans/outline-proofing/reports/deliverable-review.md`
 
 ## In-tree Tasks
 
 - [x] **Outline proofing** — `/design plans/outline-proofing/brief.md` | opus | restart
   - Plan: outline-proofing | Design reviewed. 6 affected files, all agentic prose.
-- [ ] **Outline proofing review** — `/deliverable-review plans/outline-proofing` | opus | restart
+- [x] **Outline proofing review** — `/deliverable-review plans/outline-proofing` | opus | restart
+- [ ] **Fix outline findings** — `/design plans/outline-proofing/reports/deliverable-review.md` | opus
+  - Plan: outline-proofing | 2 minor findings: M1 prerequisites check scope (Tier 3), M2 implicit Read instruction
 
 ## Worktree Tasks
 
@@ -48,7 +43,8 @@
 - `plans/outline-proofing/lifecycle.md` — full proof state history
 - `plans/outline-proofing/reports/review-code.md` — corrector review (passed)
 - `plans/outline-proofing/reports/review-skills.md` — skill review (passed)
+- `plans/outline-proofing/reports/deliverable-review.md` — deliverable review (2 minor findings)
 
 ## Next Steps
 
-Run `/deliverable-review plans/outline-proofing` to complete the review gate before merging.
+Run `/design plans/outline-proofing/reports/deliverable-review.md` to fix the 2 minor findings, then merge the branch.
