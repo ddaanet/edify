@@ -72,3 +72,13 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Dispatching tester/implementer agents with `git show main:plans/<name>/steps/step-X.md` — worktree doesn't have `main` as a resolvable ref. Agent spends 15+ tool calls searching for step files, then either operates in wrong directory or produces no persisted changes.
 - Correct pattern: When step files exist only in main worktree, either (1) read step content in orchestrator and pass inline, (2) provide absolute path to main worktree copy, or (3) implement RED/GREEN directly in orchestrator. Option 3 proved most efficient for this runbook.
 - Evidence: Tester agent (step 2-1) returned "success" but zero changes persisted. Implementer agent (step 2-1) built full context then wrote to unreachable path. Both wasted ~30K tokens.
+
+## When writing test docstrings under docformatter
+- Anti-pattern: Writing docstrings of any length without checking the char limit. docformatter wraps at `wrap-summaries = 80`, producing a two-line form that ruff D205 then rejects ("1 blank line required between summary line and description"). Fix attempt to collapse to single line re-triggers docformatter wrap.
+- Correct pattern: Keep docstring summary content ≤70 chars (4 indent + 3 `"""` + 70 content + 3 `"""` = 80 exactly). Count before writing. Correctors writing long replacements trigger the same cycle.
+- Evidence: Three separate D205 failures across cycles 4.2, 4.3, 4.7 — all caused by corrector-generated docstrings exceeding 80 chars total.
+
+## When mode detection yields identical outputs
+- Anti-pattern: Implementing mode-detection logic (overwrite/append/auto-strip) that routes all branches to the same operation. Dead detection block adds complexity, subprocess calls, and false code structure that correctors must remove.
+- Correct pattern: Before writing detection logic, verify the modes produce distinct required outcomes. If all modes write `new_lines` to the section, detection is unnecessary. Write a simple direct call instead.
+- Evidence: Cycle 4.3 `write_completed` had full git diff parsing + two branches — impl corrector removed everything, leaving direct delegation to `_write_completed_section`.
