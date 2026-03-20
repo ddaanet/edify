@@ -14,7 +14,7 @@ __pycache__/
 list/
 
 # IDE cruft
-/.vscode/
+/.vscode
 /.mypy_cache/
 /.idea
 
@@ -34,4 +34,3 @@ list/
 /objects
 /refs
 /.claude/settings.json
-/.vscode/
