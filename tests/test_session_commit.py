@@ -1,6 +1,11 @@
-"""Tests for session commit parser (Phase 5)."""
+"""Tests for session commit parser and gates (Phase 5)."""
 
 from __future__ import annotations
+
+import os
+import subprocess
+import time
+from pathlib import Path
 
 import pytest
 
@@ -8,6 +13,11 @@ from claudeutils.session.commit import (
     CommitInput,
     CommitInputError,
     parse_commit_input,
+)
+from claudeutils.session.commit_gate import (
+    CleanFileError,
+    validate_files,
+    vet_check,
 )
 
 COMMIT_INPUT_FIXTURE = """\
@@ -147,3 +157,177 @@ def test_parse_commit_blockquote_stripping() -> None:
     assert not any(line.startswith("> ") for line in result.message.split("\n"))
     assert "First line" in result.message
     assert "- Detail line" in result.message
+
+
+# Cycle 5.2: validate_files — clean files check
+
+
+def _init_repo(path: Path) -> None:
+    """Initialize a minimal git repo for commit gate testing."""
+    subprocess.run(["git", "init"], cwd=path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@test.com"],
+        cwd=path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test"],
+        cwd=path,
+        check=True,
+        capture_output=True,
+    )
+
+
+def test_validate_files_dirty(tmp_path: Path) -> None:
+    """All listed files appear in git status → passes."""
+    _init_repo(tmp_path)
+    # Create and commit a file, then modify it
+    f = tmp_path / "src" / "foo.py"
+    f.parent.mkdir(parents=True)
+    f.write_text("original")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "init"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+    f.write_text("modified")
+
+    # Should not raise
+    validate_files(["src/foo.py"], cwd=tmp_path)
+
+
+def test_validate_files_clean_error(tmp_path: Path) -> None:
+    """Clean file raises CleanFileError with STOP directive."""
+    _init_repo(tmp_path)
+    f = tmp_path / "clean.py"
+    f.write_text("content")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "init"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+    # File is committed, not modified — clean
+
+    with pytest.raises(CleanFileError) as exc_info:
+        validate_files(["clean.py"], cwd=tmp_path)
+
+    err = exc_info.value
+    assert "clean.py" in err.clean_files
+    assert "STOP" in str(err)
+    assert "no uncommitted changes" in str(err).lower()
+
+
+def test_validate_files_amend(tmp_path: Path) -> None:
+    """Amend mode accepts files in HEAD commit even if clean."""
+    _init_repo(tmp_path)
+    f = tmp_path / "src" / "bar.py"
+    f.parent.mkdir(parents=True)
+    f.write_text("content")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "init"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # File in HEAD commit, clean in working tree — amend allows it
+    validate_files(["src/bar.py"], cwd=tmp_path, amend=True)
+
+    # File not in HEAD and not dirty — amend still rejects
+    (tmp_path / "other.py").write_text("x")
+    subprocess.run(
+        ["git", "add", "other.py"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "other"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+    with pytest.raises(CleanFileError):
+        validate_files(["src/bar.py"], cwd=tmp_path, amend=True)
+
+
+# Cycle 5.3: scripted vet check
+
+
+def test_vet_check_no_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """No [tool.claudeutils.commit] section → passes."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "pyproject.toml").write_text("[tool.ruff]\n")
+
+    result = vet_check(["src/foo.py"])
+    assert result.passed is True
+
+
+def test_vet_check_pass(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """File matches pattern with fresh report → passes."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "pyproject.toml").write_text(
+        '[tool.claudeutils.commit]\nrequire-review = ["src/**/*.py"]\n'
+    )
+    src = tmp_path / "src" / "foo.py"
+    src.parent.mkdir(parents=True)
+    src.write_text("code")
+
+    # Create a report newer than the source file
+    report_dir = tmp_path / "plans" / "bar" / "reports"
+    report_dir.mkdir(parents=True)
+    report = report_dir / "vet-review.md"
+    report.write_text("reviewed")
+
+    result = vet_check(["src/foo.py"])
+    assert result.passed is True
+
+
+def test_vet_check_unreviewed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """File matches pattern with no report → unreviewed."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "pyproject.toml").write_text(
+        '[tool.claudeutils.commit]\nrequire-review = ["src/**/*.py"]\n'
+    )
+    src = tmp_path / "src" / "foo.py"
+    src.parent.mkdir(parents=True)
+    src.write_text("code")
+    # No plans/*/reports/ directories
+
+    result = vet_check(["src/foo.py"])
+    assert result.passed is False
+    assert result.reason == "unreviewed"
+    assert "src/foo.py" in result.unreviewed_files
+
+
+def test_vet_check_stale(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Report older than source file → stale."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "pyproject.toml").write_text(
+        '[tool.claudeutils.commit]\nrequire-review = ["src/**/*.py"]\n'
+    )
+    # Create report first (older mtime)
+    report_dir = tmp_path / "plans" / "bar" / "reports"
+    report_dir.mkdir(parents=True)
+    report = report_dir / "vet-review.md"
+    report.write_text("reviewed")
+
+    # Set report mtime to 10 seconds ago
+    old_time = time.time() - 10
+    os.utime(report, (old_time, old_time))
+
+    # Create source file (newer mtime)
+    src = tmp_path / "src" / "foo.py"
+    src.parent.mkdir(parents=True)
+    src.write_text("new code")
+
+    result = vet_check(["src/foo.py"])
+    assert result.passed is False
+    assert result.reason == "stale"
+    assert result.stale_info is not None
