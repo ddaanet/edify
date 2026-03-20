@@ -36,3 +36,44 @@ def overwrite_status(session_path: Path, status_text: str) -> None:
         raise ValueError(msg)
 
     session_path.write_text(new_text)
+
+
+def write_completed(session_path: Path, new_lines: list[str]) -> None:
+    """Write new_lines to the ## Completed This Session section of session.md.
+
+    All three committed-detection modes (overwrite, append, auto-strip) result
+    in writing new_lines and discarding prior section content — handled
+    uniformly by _write_completed_section.
+
+    Args:
+        session_path: Path to session.md file.
+        new_lines: Lines to write into the completed section.
+    """
+    _write_completed_section(session_path, new_lines)
+
+
+def _write_completed_section(session_path: Path, new_lines: list[str]) -> None:
+    """Replace ## Completed This Session content with new_lines."""
+    text = session_path.read_text()
+    lines = text.splitlines(keepends=True)
+
+    start_idx: int | None = None
+    end_idx: int | None = None
+    for i, line in enumerate(lines):
+        if line.strip() == "## Completed This Session":
+            start_idx = i + 1
+        elif start_idx is not None and line.startswith("## "):
+            end_idx = i
+            break
+
+    if start_idx is None:
+        msg = f"## Completed This Session not found in {session_path}"
+        raise ValueError(msg)
+
+    if end_idx is None:
+        end_idx = len(lines)
+
+    # Build replacement: blank line, new_lines, blank line before next section
+    replacement = ["\n"] + [line + "\n" for line in new_lines] + ["\n"]
+    new_lines_list = lines[:start_idx] + replacement + lines[end_idx:]
+    session_path.write_text("".join(new_lines_list))

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -11,7 +12,7 @@ from claudeutils.session.handoff.parse import (
     HandoffInputError,
     parse_handoff_input,
 )
-from claudeutils.session.handoff.pipeline import overwrite_status
+from claudeutils.session.handoff.pipeline import overwrite_status, write_completed
 
 HANDOFF_INPUT_FIXTURE = """\
 **Status:** Design Phase A complete — outline reviewed.
@@ -121,3 +122,119 @@ def test_overwrite_status_line_multiline(tmp_path: Path) -> None:
     status_region = content[heading_pos:first_section_pos]
     assert "Line one of status." in status_region
     assert "Line two of status." in status_region
+
+
+# Cycle 4.3: completed section write with committed detection
+
+
+SESSION_WITH_COMPLETED = """\
+# Session Handoff: 2026-03-15
+
+**Status:** Previous session status.
+
+## Completed This Session
+
+- Old task A
+- Old task B
+
+## In-tree Tasks
+
+- [ ] **Task C** — `cmd` | sonnet
+"""
+
+
+def _init_repo(path: Path) -> None:
+    """Initialize a minimal git repo for testing write_completed."""
+    subprocess.run(["git", "init"], cwd=path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@test.com"],
+        cwd=path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Test"],
+        cwd=path,
+        check=True,
+        capture_output=True,
+    )
+
+
+def _commit_session(path: Path, session_file: Path) -> None:
+    """Stage and commit session.md in the test repo."""
+    subprocess.run(
+        ["git", "add", str(session_file.relative_to(path))],
+        cwd=path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "Initial commit"],
+        cwd=path,
+        check=True,
+        capture_output=True,
+    )
+
+
+def test_write_completed_overwrite(tmp_path: Path) -> None:
+    """write_completed overwrites section when working tree matches HEAD."""
+    (tmp_path / "agents").mkdir()
+    session_file = tmp_path / "agents" / "session.md"
+    session_file.write_text(SESSION_WITH_COMPLETED)
+    _init_repo(tmp_path)
+    _commit_session(tmp_path, session_file)
+
+    # Working tree matches HEAD — overwrite mode
+    write_completed(session_file, ["- New task done."])
+
+    content = session_file.read_text()
+    assert "## Completed This Session" in content
+    assert "- New task done." in content
+    assert "- Old task A" not in content
+    assert "- Old task B" not in content
+    # Other sections preserved
+    assert "## In-tree Tasks" in content
+
+
+def test_write_completed_append(tmp_path: Path) -> None:
+    """write_completed writes only new_lines when agent cleared old content."""
+    (tmp_path / "agents").mkdir()
+    session_file = tmp_path / "agents" / "session.md"
+    session_file.write_text(SESSION_WITH_COMPLETED)
+    _init_repo(tmp_path)
+    _commit_session(tmp_path, session_file)
+
+    # Agent cleared old completed content from working tree
+    cleared = SESSION_WITH_COMPLETED.replace("- Old task A\n- Old task B\n", "")
+    session_file.write_text(cleared)
+
+    write_completed(session_file, ["- New task done."])
+
+    content = session_file.read_text()
+    assert "- New task done." in content
+    assert "- Old task A" not in content
+    assert "- Old task B" not in content
+
+
+def test_write_completed_auto_strip(tmp_path: Path) -> None:
+    """Strips HEAD-committed lines when old content persists in working tree."""
+    (tmp_path / "agents").mkdir()
+    session_file = tmp_path / "agents" / "session.md"
+    session_file.write_text(SESSION_WITH_COMPLETED)
+    _init_repo(tmp_path)
+    _commit_session(tmp_path, session_file)
+
+    # Old content still present + new additions in working tree
+    accumulated = SESSION_WITH_COMPLETED.replace(
+        "- Old task B\n",
+        "- Old task B\n- New task done.\n",
+    )
+    session_file.write_text(accumulated)
+
+    write_completed(session_file, ["- New task done."])
+
+    content = session_file.read_text()
+    assert "- New task done." in content
+    # Committed lines stripped
+    assert "- Old task A" not in content
+    assert "- Old task B" not in content
