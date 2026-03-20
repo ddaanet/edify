@@ -1,49 +1,66 @@
 # Step 2.1
 
-**Plan**: `plans/plugin-migration/runbook.md`
-**Execution Model**: haiku
-**Phase**: 1
+**Plan**: `plans/plugin-migration/runbook-phase-2.md`
+**Execution Model**: sonnet
+**Phase**: 2
 
 ---
 
-## Step 2.1: Verify agent structure
+## Phase Context
 
-**Objective:** Confirm `edify-plugin/agents/` contains 14 agent `.md` files and structure matches plugin auto-discovery requirements.
+Migrate all hooks to plugin, create consolidated setup hook, audit scripts for env var usage.
+Phase 5 must complete first (`.edify.yaml` exists for setup hook to read/update).
 
-**Execution Model:** Haiku (inline verification)
+**Step numbering note:** Step 2.2 (originally "Apply hook script fixes from audit") was absorbed into Step 2.1 during /proof. Step 2.4 (originally "Wire setup hook into hooks.json") was absorbed into Step 2.3 during /proof. The gaps in step numbering are intentional — outline requirements traceability uses original step IDs.
 
-**Implementation:**
+---
 
-Verify agent structure:
+---
 
-```bash
-# Count agent .md files
-agent_count=$(find edify-plugin/agents -maxdepth 1 -name "*.md" -type f | wc -l)
-echo "Agent count: $agent_count"
+## Step 2.1: Audit hook scripts for env var usage
 
-# List agent files
-find edify-plugin/agents -maxdepth 1 -name "*.md" -type f | sort
-```
+**Objective**: Audit 4 hook scripts for `$CLAUDE_PROJECT_DIR` usage and hardcoded paths that may not resolve correctly under plugin context.
 
-**Expected count:** 14 agent files
+**Prerequisites**:
+- Read outline.md Component 2 hook script changes table (authoritative list of which scripts need audit)
+- Read each of the 4 scripts:
+  - `agent-core/hooks/pretooluse-recipe-redirect.py`
+  - `agent-core/hooks/pretooluse-recall-check.py`
+  - `agent-core/hooks/sessionstart-health.sh`
+  - `agent-core/hooks/stop-health-fallback.sh`
 
-**Design Reference:**
-- Design Component 1: "Plugin agents are discovered from `edify-plugin/agents/`. Plan-specific agents (`*-task.md`) live in `.claude/agents/` as regular files."
-- Plugin auto-discovery: All `.md` files in `agents/` directory load automatically
+**Implementation**:
+1. For each script, check:
+   - Uses of `$CLAUDE_PROJECT_DIR` — these are correct (available in all hook types, resolves to project root)
+   - Hardcoded `agent-core/` paths — these need `$CLAUDE_PLUGIN_ROOT` substitution (or `$EDIFY_PLUGIN_ROOT` after setup hook runs)
+   - Relative path references — must use absolute paths via env vars
+2. Record findings per script in a report at `plans/plugin-migration/reports/hook-audit.md`:
+   - Script name
+   - Finding: no-change-needed OR specific edits required (with line numbers)
+   - Rationale
+3. Apply fixes per audit findings:
+   - Replace hardcoded `agent-core/` paths with `$CLAUDE_PLUGIN_ROOT` or `$EDIFY_PLUGIN_ROOT`
+   - Fix any relative path references to use absolute resolution
+4. Delete `agent-core/hooks/pretooluse-symlink-redirect.sh` — purpose eliminated by plugin migration
+5. Verify no remaining bare references: `grep -r 'agent-core/' agent-core/hooks/*.py agent-core/hooks/*.sh` returns no matches (except comments)
 
-**Validation:**
-- Agent count equals 14: `[ "$agent_count" -eq 14 ]`
-- All files are `.md` extension
-- Files are at `agents/` root level (not nested in subdirectories)
+**Expected Outcome**:
+- `plans/plugin-migration/reports/hook-audit.md` exists with per-script findings
+- Each script classified as no-change or with specific edits listed
+- Audit fixes applied to all scripts requiring changes
+- `pretooluse-symlink-redirect.sh` deleted
+- No remaining bare `agent-core/` references in hook scripts
 
-**Expected Outcome:** 14 agent `.md` files confirmed at `edify-plugin/agents/`.
+**Error Conditions**:
+- If a script uses env vars not available in plugin context → escalate (design assumption violated)
+- If a script has complex path resolution logic → document and escalate for careful review
+- If audit found no changes needed → skip fix step, proceed to deletion
+- If grep finds unexpected references → investigate and fix or escalate
 
-**Error Conditions:**
-- Count mismatch → Investigate missing or extra files
-- Nested subdirectories found → Agents must be at root level for auto-discovery
-
-**Success Criteria:**
-- Exactly 14 `.md` files in `edify-plugin/agents/`
-- All agents at root level (no subdirectories)
+**Validation**:
+- Audit report exists with entries for all 4 scripts
+- No scripts left unaudited
+- `grep -r 'agent-core/' agent-core/hooks/*.py agent-core/hooks/*.sh` returns no matches (except comments)
+- `ls agent-core/hooks/pretooluse-symlink-redirect.sh` returns "No such file"
 
 ---

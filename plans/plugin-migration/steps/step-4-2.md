@@ -1,97 +1,58 @@
 # Step 4.2
 
-**Plan**: `plans/plugin-migration/runbook.md`
-**Execution Model**: haiku
-**Phase**: 3
+**Plan**: `plans/plugin-migration/runbook-phase-4.md`
+**Execution Model**: sonnet
+**Phase**: 4
 
 ---
 
-## Step 4.2: Update root justfile with import
+## Phase Context
 
-**Objective:** Add import statement to root justfile, remove migrated recipes, keep project-specific recipes.
+Extract portable recipes and update root justfile.
 
-**Implementation:**
-
-1. **Add import at top of root justfile (after prolog):**
-
-Add this line after the `bash_prolog` definition:
-
-```just
-import 'edify-plugin/just/portable.just'
-```
-
-2. **Remove migrated recipes from root justfile:**
-
-Delete these recipe definitions (now provided by import):
-- `claude`
-- `claude0`
-- `wt-new`
-- `wt-ls`
-- `wt-rm`
-- `wt-merge`
-- Remove `precommit-base` subset from `precommit` recipe (validators are now called via import)
-
-3. **Update precommit recipe to call precommit-base:**
-
-Change `precommit` recipe to use dependency pattern (base validators run first, then project-specific):
-
-```just
-precommit: precommit-base
-    # Add language-specific checks after base validators
-    ruff check
-    mypy
-    pytest
-```
-
-Note: The dependency `precommit: precommit-base` ensures base validators run before project-specific checks.
-
-4. **Keep project-specific recipes:**
-
-These remain in root justfile:
-- `help`
-- `dev`
-- `cache`
-- `test`
-- `line-limits`
-- `lint`
-- `check`
-- `format`
-- `release`
-
-5. **Keep full bash_prolog:**
-
-Root justfile retains full bash prolog with project-specific helpers (sync, run-checks, pytest-quiet) — not just the minimal fail/visible/colors subset used by portable.just.
-
-**Design References:**
-- D-5: justfile import mechanism
-- Component 5: Root justfile changes table
-- Outline expansion guidance: portable.just bash prolog scope (fail, visible, colors only)
-
-**Validation:**
-- Import line added: `grep "import 'edify-plugin/just/portable.just'" justfile`
-- Migrated recipes removed: `! grep -E "^(claude|claude0|wt-new|wt-ls|wt-rm|wt-merge):" justfile`
-- Project recipes remain: `grep -E "^(help|dev|cache|test):" justfile`
-- Justfile parses: `just --list` runs without error
-- End-to-end test: `just --list` shows both imported and local recipes, `just claude` invokes imported recipe
-
-**Expected Outcome:**
-- Root justfile imports portable.just
-- Migrated recipes removed from root
-- Project-specific recipes and full prolog remain
-- `just --list` shows both imported and local recipes
-
-**Unexpected Result Handling:**
-- If import fails: verify path `edify-plugin/just/portable.just` exists and is valid Just syntax
-- If `just --list` fails: check for syntax errors, duplicate recipe definitions
-- If recipes missing: ensure import added before removing local definitions
-
-**Success Criteria:**
-- Import statement present in root justfile
-- All 7 migrated recipes removed from root
-- Project-specific recipes remain intact
-- `just --list` succeeds and shows combined recipes
-- `just claude` works (calls imported recipe)
-
-**Report Path:** `plans/plugin-migration/reports/phase-4-execution.md`
+**Depends on D-5 redesign:** Current D-5 specifies a single `portable.just`. Thematic modules are the better design — consumers import only what they need. Module boundaries need design work before this phase executes. If D-5 redesign has not occurred by execution time, proceed with single `portable.just` as originally designed.
 
 ---
+
+---
+
+## Step 4.2: Update root justfile to import portable modules
+
+**Objective**: Replace extracted recipes with import statement(s) and verify all recipes work.
+
+**Prerequisites**:
+- Step 4.1 complete (portable module(s) exist)
+- Read `justfile` (current state)
+
+**Implementation**:
+1. Add import statement at top of `justfile`:
+   `import 'agent-core/portable.just'`
+2. Add `set allow-duplicate-recipes` for intentional recipe overrides
+3. Remove recipes that moved to portable module(s):
+   - `claude`, `claude0`, `lint`, `format`, `check`, `red-lint`, `precommit-base`, `test`, `wt-new`, `wt-task`, `wt-ls`, `wt-rm`, `wt-merge`
+4. Keep in root justfile:
+   - `release` (project-specific)
+   - `line-limits` (project-specific)
+   - `bash_prolog` for project-specific helper functions
+   - `precommit` (may need project-specific additions beyond base)
+   - Project-specific worktree helpers
+5. Generate or regenerate cached help files (these may not exist yet):
+   - `just --list > .cache/just-help.txt` (create `.cache/` directory first if needed)
+   - `.cache/just-help-edify-plugin.txt` — generate only if referenced by plugin hooks or skills
+
+**Expected Outcome**:
+- Root `justfile` imports portable module(s)
+- Extracted recipes removed from root (no duplication unless `allow-duplicate-recipes` for intentional overrides)
+- All recipes functional
+
+**Error Conditions**:
+- If `just claude` fails → check import path, portable module syntax
+- If recipe override doesn't work → verify `set allow-duplicate-recipes` or restructure imports
+- If `just --list` missing recipes → check import path resolution
+
+**Validation**:
+- `just --list` shows both imported and project-specific recipes
+- `just lint` works (imported recipe)
+- `just release --help` works (project-specific recipe, if exists)
+- `just precommit` passes (end-to-end validation)
+- `.cache/just-help.txt` exists and matches `just --list` output

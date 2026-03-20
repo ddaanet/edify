@@ -1,77 +1,50 @@
 # Step 5.2
 
-**Plan**: `plans/plugin-migration/runbook.md`
-**Execution Model**: haiku
-**Phase**: 3
+**Plan**: `plans/plugin-migration/runbook-phase-5.md`
+**Execution Model**: sonnet
+**Phase**: 5
 
 ---
 
-## Step 5.2: Cleanup configuration and documentation
+## Phase Context
 
-**Objective:** Remove `hooks` section from settings.json, remove `sync-to-parent` recipe from edify-plugin justfile, update fragment documentation to remove sync-to-parent references.
-
-**Implementation:**
-
-1. **Remove hooks section from .claude/settings.json:**
-
-Delete the entire `hooks` key and its contents. Result should be:
-
-```json
-{
-  "permissions": { ... },
-  "attribution": { ... },
-  "plansDirectory": "plans/claude/",
-  "sandbox": { ... }
-}
-```
-
-**Verification:** `jq '.hooks' .claude/settings.json` should return `null` (key removed entirely)
-
-2. **Remove sync-to-parent recipe from edify-plugin/justfile:**
-
-Delete the `sync-to-parent` recipe definition from `edify-plugin/justfile`.
-
-**Verification:** `grep -q sync-to-parent edify-plugin/justfile` should exit 1 (not found)
-
-3. **Update fragment documentation:**
-
-Remove or update references to `sync-to-parent` in these files:
-
-- `edify-plugin/fragments/claude-config-layout.md`:
-  - Remove "Symlinks in .claude/" section
-  - Remove `just sync-to-parent` references in hook configuration section
-
-- `edify-plugin/fragments/sandbox-exemptions.md`:
-  - Remove `just sync-to-parent` subsection
-
-- `edify-plugin/fragments/project-tooling.md`:
-  - Remove example: "Symlink management → `just sync-to-parent`"
-
-- `edify-plugin/fragments/delegation.md`:
-  - Update example showing `just sync-to-parent` to use plugin auto-discovery instead
-
-**Update strategy:**
-- Replace symlink workflow examples with plugin auto-discovery examples
-- Remove sections that only apply to symlink-based distribution
-- Preserve sections that remain relevant (hook configuration patterns, permission patterns)
-
-**Expected Outcome:**
-- `hooks` key removed from settings.json
-- `sync-to-parent` recipe removed from edify-plugin justfile
-- Fragment documentation updated to reflect plugin-based workflow
-
-**Unexpected Result Handling:**
-- If settings.json becomes invalid JSON: restore `hooks` key and try manual edit
-- If fragments have additional sync-to-parent references: search with `grep -r "sync-to-parent" edify-plugin/fragments/`
-
-**Validation:**
-- `jq . .claude/settings.json` succeeds (valid JSON) and `jq '.hooks' .claude/settings.json` returns `null`
-- `! grep -q sync-to-parent edify-plugin/justfile` (recipe removed)
-- `grep -r "sync-to-parent" edify-plugin/fragments/` returns 0 results (all references removed)
-
-**Success Criteria:**
-- settings.json valid with no `hooks` section
-- edify-plugin justfile has no sync-to-parent recipe
-- Fragment documentation updated (no sync-to-parent references)
+Wire version consistency and release coordination. Runs early — creates `.edify.yaml` before Phase 2's setup hook needs it.
 
 ---
+
+---
+
+## Step 5.2: Add version consistency precommit check
+
+**Objective**: Add a check that `plugin.json` version == `pyproject.toml` version, integrated into `just precommit` and `just release`.
+
+**Prerequisites**:
+- **Prerequisite**: Read `justfile:386-513` — understand the existing `release` recipe: it uses `uv version --bump "$BUMP"` (not explicit version arg), commits `pyproject.toml uv.lock` together, tags, and publishes. The `plugin.json` bump must be inserted after `uv version --bump "$BUMP"` (line ~478) and before `git add pyproject.toml uv.lock` (line ~480).
+- **Prerequisite**: Read `justfile:18-30` — understand current `precommit` recipe: calls `run-checks` then `run-pytest` then `run-line-limits`. Insert version check after `run-checks` call.
+- **Prerequisite**: Read `agent-core/.claude-plugin/plugin.json` — confirm `version` field name and JSON structure (created in Step 1.1)
+
+**Implementation**:
+1. Create version consistency check script at `agent-core/bin/check-version-consistency.py`:
+   - Read `pyproject.toml` version
+   - Read `agent-core/.claude-plugin/plugin.json` version
+   - Compare — exit 0 if match, exit 1 with message if mismatch
+2. Add to `just precommit` recipe (after lint, before test):
+   - `python3 agent-core/bin/check-version-consistency.py`
+3. Update the existing `just release` recipe to bump `plugin.json` alongside `pyproject.toml`:
+   - After `visible uv version --bump "$BUMP"` (which bumps `pyproject.toml`), insert: `python3 -c "import json, sys; p='agent-core/.claude-plugin/plugin.json'; d=json.load(open(p)); d['version']='$(uv version)'; json.dump(d,open(p,'w'),indent=2)"`
+   - Extend the existing `git add pyproject.toml uv.lock` line to: `git add pyproject.toml uv.lock agent-core/.claude-plugin/plugin.json`
+   - Run consistency check after: `python3 agent-core/bin/check-version-consistency.py`
+   - No changes to the recipe's flags, argument handling, or publish logic
+
+**Expected Outcome**:
+- `agent-core/bin/check-version-consistency.py` exists (invoked as `python3 agent-core/bin/check-version-consistency.py`, not as a direct executable)
+- `just precommit` includes version consistency check
+- Mismatched versions cause precommit failure
+
+**Error Conditions**:
+- If `plugin.json` path changes → update script and release recipe accordingly
+
+**Validation**:
+1. Run `just precommit` — should pass (versions match)
+2. Temporarily change `plugin.json` version → `just precommit` should fail
+3. Restore `plugin.json` version

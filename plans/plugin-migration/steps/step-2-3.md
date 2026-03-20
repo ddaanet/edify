@@ -1,94 +1,75 @@
 # Step 2.3
 
-**Plan**: `plans/plugin-migration/runbook.md`
-**Execution Model**: haiku
-**Phase**: 1
+**Plan**: `plans/plugin-migration/runbook-phase-2.md`
+**Execution Model**: sonnet
+**Phase**: 2
 
 ---
 
-## Step 2.3: Create /edify:init skill
+## Phase Context
 
-**Objective:** Create `/edify:init` skill at `edify-plugin/skills/init/SKILL.md` for dev mode scaffolding.
+Migrate all hooks to plugin, create consolidated setup hook, audit scripts for env var usage.
+Phase 5 must complete first (`.edify.yaml` exists for setup hook to read/update).
 
-**Execution Model:** Sonnet (skill design)
-
-**Implementation:**
-
-Create skill directory and SKILL.md:
-
-```bash
-mkdir -p edify-plugin/skills/init
-```
-
-Then create `edify-plugin/skills/init/SKILL.md` with:
-
-**YAML frontmatter:**
-```yaml
----
-name: edify:init
-description: Scaffold CLAUDE.md structure and fragment references for edify plugin (dev mode only)
-version: 1.0.0
----
-```
-
-**Skill content structure:**
-
-1. **Purpose section:**
-   - Scaffolds project structure for edify plugin
-   - Dev mode only (submodule present)
-   - Idempotent (safe to re-run)
-
-2. **When to Use:**
-   - New project setup
-   - Adding edify to existing project
-   - After cloning project with edify-plugin submodule
-
-3. **Behavior:**
-   - Detect installation mode: `test -d edify-plugin` (check `edify-plugin/` directory exists)
-   - Create `agents/` directory if missing: `mkdir -p agents`
-   - Create `agents/session.md` from template if missing: copy from `edify-plugin/templates/session.template.md`
-   - Create `agents/learnings.md` from template if missing: copy from `edify-plugin/templates/learnings.template.md`
-   - Create `agents/jobs.md` from template if missing: copy from `edify-plugin/templates/jobs.template.md`
-   - If no CLAUDE.md: copy `edify-plugin/templates/CLAUDE.template.md` with `@edify-plugin/fragments/` references
-   - If CLAUDE.md exists: no modification (preserve user content)
-   - Write `.edify-version` with current plugin version from `edify-plugin/.version`
-   - Use Bash tool for all file operations (mkdir, cp, version writes)
-
-4. **Consumer mode handling:**
-   - Detect consumer mode: `test ! -d edify-plugin` (no `edify-plugin/` directory)
-   - Add TODO markers: "Consumer mode fragment copying not yet implemented" (per D-7: Consumer Mode Deferred)
-   - Exit with clear message directing to dev mode setup
-
-5. **Idempotency guarantees:**
-   - Every operation checks before acting (if file exists, skip copy)
-   - Re-running applies only missing pieces
-   - No data destruction risk
-   - **Why init-specific**: Init scaffolds missing structure (safe to re-run); update overwrites (explicit sync action)
-
-**Design References:**
-- Component 1: Plugin auto-discovery (skills/*/SKILL.md pattern)
-- Component 4: `/edify:init` scaffolding behavior
-- D-3: Fragment distribution via skill, not script
-- D-7: Consumer mode deferred (dev mode only in this migration)
-
-**Validation:**
-- Skill file exists at `edify-plugin/skills/init/SKILL.md`
-- YAML frontmatter is valid: contains required fields (name, description, version), name is `edify:init`, version follows semver (1.0.0), no YAML parse errors
-- Skill description triggers on "scaffold", "setup", "init"
-- Dev mode logic is complete with explicit bash commands
-- Consumer mode has TODO markers referencing D-7
-
-**Expected Outcome:** `/edify:init` skill created with dev mode implementation.
-
-**Error Conditions:**
-- Invalid YAML frontmatter → Fix syntax, validate with `python -c 'import yaml; yaml.safe_load(open("..."))'`
-- Missing template files → Verify templates exist in `edify-plugin/templates/`, copy template from upstream if missing
-- Logic errors → Review behavior against design Component 4 and D-3
-
-**Success Criteria:**
-- Skill file exists and is well-formed
-- Skill invokable via `/edify:init` command
-- Dev mode behavior complete per design
-- Consumer mode clearly marked as TODO
+**Step numbering note:** Step 2.2 (originally "Apply hook script fixes from audit") was absorbed into Step 2.1 during /proof. Step 2.4 (originally "Wire setup hook into hooks.json") was absorbed into Step 2.3 during /proof. The gaps in step numbering are intentional — outline requirements traceability uses original step IDs.
 
 ---
+
+---
+
+## Step 2.3: Integrate setup into sessionstart-health.sh (checkpoint)
+
+**Objective**: Update `sessionstart-health.sh` to include setup responsibilities — env var export, CLI install, version write, and staleness nag. Replaces the originally-planned separate `edify-setup.sh`. All setup failures reported via `systemMessage`, not as crashes.
+
+**Script Evaluation**: Moderate (additions to existing script)
+**Execution Model**: Sonnet
+
+**Prerequisites**:
+- Read `agent-core/hooks/sessionstart-health.sh` (current state — understand existing structure)
+- Read outline.md Component 2 "Consolidated setup hook" section
+- Read outline.md §Key Decisions D-7 (python deps mechanism)
+- Step 5.1 complete (`.edify.yaml` exists)
+- Recall: "when using session start hooks" — SessionStart output discarded for new interactive sessions (#10373). UPS fallback already handled by existing session flag (`$TMPDIR/health-${session_id}`).
+
+**Implementation**:
+1. Edit `agent-core/hooks/sessionstart-health.sh`, inserting setup sections before existing health checks:
+   a. **Export `EDIFY_PLUGIN_ROOT`** via `$CLAUDE_ENV_FILE`:
+      ```bash
+      if [ -n "${CLAUDE_ENV_FILE:-}" ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+          echo "EDIFY_PLUGIN_ROOT=$CLAUDE_PLUGIN_ROOT" >> "$CLAUDE_ENV_FILE"
+      fi
+      ```
+   b. **Install edify CLI** into plugin-local venv (failure → append warning to message):
+      - Check for `uv` availability: `command -v uv`
+      - If available: create plugin-local venv (`uv venv "$CLAUDE_PLUGIN_ROOT/.venv"` if not present), install (`uv pip install --python "$CLAUDE_PLUGIN_ROOT/.venv/bin/python" claudeutils==X.Y.Z`)
+      - If not: fall back to `pip install --target "$CLAUDE_PLUGIN_ROOT/.venv/lib"` or append `⚠️ CLI install failed: uv not found` to message
+      - Package name is `claudeutils` (current PyPI name; rename to `edify` is separate work)
+      - Version pinned in script, updated with each plugin release
+   c. **Write version provenance** to `.edify.yaml` (FR-10):
+      - Read plugin version from `$CLAUDE_PLUGIN_ROOT/.claude-plugin/plugin.json`
+      - Update `version` field in `.edify.yaml`
+      - On failure: append `⚠️ Version write failed` to message
+   d. **Compare versions and nag if stale** (FR-5):
+      - Compare `.edify.yaml` `version` with plugin version
+      - If mismatch: append `⚠️ Fragments may be stale. Run /edify:update` to message
+2. UPS fallback: existing session flag (`touch "$TMPDIR/health-${session_id}"`) already provides idempotency — no additional marker needed
+3. Guard all setup operations: `if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then ... fi` — skip silently if not in plugin context
+4. All setup failures are non-fatal — append to `message` variable, script continues to health checks and outputs `systemMessage`
+
+**Expected Outcome**:
+- `sessionstart-health.sh` includes setup sections before health checks
+- Setup failures reported in `systemMessage` output alongside health status
+- No separate `edify-setup.sh` file created
+- After run: `.edify.yaml` version matches `plugin.json` version
+
+**Error Conditions**:
+- If `$CLAUDE_ENV_FILE` is not set → skip env var export silently
+- If `$CLAUDE_PLUGIN_ROOT` is not set → skip all setup operations silently
+- If `uv` and `pip` both unavailable → append warning to message, continue
+- If `.edify.yaml` doesn't exist → create it (first run scenario)
+
+**Validation**:
+- Script runs without error from project root: `bash agent-core/hooks/sessionstart-health.sh`
+- After run: `.edify.yaml` version matches `plugin.json` version
+- Script is idempotent: running twice produces same result
+- **STOP and report Phase 2 results to orchestrator before proceeding to Phase 3**

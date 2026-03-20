@@ -1,94 +1,47 @@
 # Step 1.1
 
-**Plan**: `plans/plugin-migration/runbook.md`
-**Execution Model**: haiku
+**Plan**: `plans/plugin-migration/runbook-phase-1.md`
+**Execution Model**: sonnet
 **Phase**: 1
 
 ---
 
-## Step 1.1: Create Plugin Infrastructure
+## Phase Context
 
-**Objective:** Create plugin.json manifest and .version marker for plugin discovery and fragment version tracking.
+Create the plugin structure inside existing `agent-core/` directory. Checkpoint at end gates all downstream phases.
 
-**Implementation:**
+---
 
-1. **Create plugin manifest directory and file:**
-```bash
-mkdir -p edify-plugin/.claude-plugin
-cat > edify-plugin/.claude-plugin/plugin.json <<'EOF'
-{
-  "name": "edify",
-  "version": "1.0.0",
-  "description": "Workflow infrastructure for Claude Code projects"
-}
-EOF
-```
+---
 
-**Manifest design notes:**
-- Minimal structure per D-1 (name + version + description only)
-- Plugin name = `edify` (Latin *aedificare* = "to build" + "to instruct")
-- Auto-discovery handles skills/agents/hooks from conventional directories
-- No custom path overrides needed (edify-plugin already uses standard layout)
+## Step 1.1: Create plugin manifest
 
-2. **Create version marker:**
-```bash
-printf '1.0.0' > edify-plugin/.version
-```
+**Objective**: Create `agent-core/.claude-plugin/plugin.json` with plugin name and version matching `pyproject.toml`.
 
-**Version marker purpose:**
-- Source version for fragment staleness detection (Component 7)
-- Compared against project's `.edify-version` by version-check hook
-- Semantic versioning: major = breaking CLAUDE.md structure, minor = new fragment, patch = content fix
+**Prerequisites**:
+- Read `pyproject.toml` (extract current version — currently `0.0.2`)
 
-3. **Validate file creation:**
-```bash
-# Verify plugin.json exists
-test -f edify-plugin/.claude-plugin/plugin.json
+**Implementation**:
+1. Create directory `agent-core/.claude-plugin/`
+2. Create `agent-core/.claude-plugin/plugin.json`:
+   ```json
+   {
+     "name": "edify",
+     "version": "0.0.2",
+     "description": "Opinionated agent framework for Claude Code"
+   }
+   ```
+3. Version must match `pyproject.toml` `version` field exactly
 
-# Verify plugin.json parses as valid JSON (fallback to python if jq unavailable)
-if command -v jq >/dev/null 2>&1; then
-  jq . edify-plugin/.claude-plugin/plugin.json >/dev/null
-else
-  python3 -m json.tool edify-plugin/.claude-plugin/plugin.json >/dev/null
-fi
+**Expected Outcome**:
+- `agent-core/.claude-plugin/plugin.json` exists with valid JSON
+- `name` is `edify`, `version` matches `pyproject.toml`
 
-# Verify .version exists
-test -f edify-plugin/.version
+**Error Conditions**:
+- If `.claude-plugin/` directory already exists → check contents, do not overwrite without verifying
+- If `pyproject.toml` version format is unexpected → escalate
 
-# Verify .version contains exact string "1.0.0"
-[ "$(cat edify-plugin/.version)" = "1.0.0" ]
-
-# Verify .version has exactly 5 bytes (no trailing newline)
-[ "$(wc -c < edify-plugin/.version)" -eq 5 ]
-```
-
-**Expected Outcome:**
-- `edify-plugin/.claude-plugin/plugin.json` created with valid JSON
-- `edify-plugin/.version` created with `1.0.0` content (exactly 5 bytes)
-- Both validation commands exit 0
-- Files ready for plugin auto-discovery after Phase 2-3 (skills/agents/hooks)
-
-**Unexpected Result Handling:**
-- If `.claude-plugin/` creation fails: check permissions on edify-plugin/ directory
-- If plugin.json file test fails: verify directory creation succeeded, check write permissions
-- If JSON validation fails: check syntax (trailing commas, quotes, malformed JSON)
-- If .version file test fails: verify write permissions on edify-plugin/ directory
-- If .version content test fails: verify exact string `1.0.0` with no trailing newline (use `printf` not `echo`)
-- If .version byte count fails: check for trailing newline, spaces, or other hidden characters
-
-**Validation:**
-- `test -f edify-plugin/.claude-plugin/plugin.json` returns true
-- `test -f edify-plugin/.version` returns true
-- JSON validation succeeds (jq or python3 -m json.tool exit 0)
-- `[ "$(cat edify-plugin/.version)" = "1.0.0" ]` returns true
-- `[ "$(wc -c < edify-plugin/.version)" -eq 5 ]` returns true (no trailing newline)
-
-**Success Criteria:**
-- Both files created successfully
-- plugin.json parses as valid JSON with required fields (name, version, description)
-- .version contains semver string with exact byte count
-- Ready for plugin discovery components (Phase 2-3)
-
-**Report Path:** `plans/plugin-migration/reports/phase-1-execution.md`
+**Validation**:
+- `cat agent-core/.claude-plugin/plugin.json | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['name']=='edify'; print('OK:', d['version'])"`
 
 ---
