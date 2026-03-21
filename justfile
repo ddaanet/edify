@@ -137,7 +137,7 @@ release *ARGS: _fail_if_claudecode dev
 
     # Perform local changes: version bump, commit, build
     visible uv version --bump "$BUMP"
-    version=$(uv version)
+    version=$(uv version --short)
     agent-core/bin/bump-plugin-version.py "$version"
     agent-core/bin/check-version-consistency.py
     git add pyproject.toml uv.lock agent-core/.claude-plugin/plugin.json
