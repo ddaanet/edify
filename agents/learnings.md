@@ -82,3 +82,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Implementing mode-detection logic (overwrite/append/auto-strip) that routes all branches to the same operation. Dead detection block adds complexity, subprocess calls, and false code structure that correctors must remove.
 - Correct pattern: Before writing detection logic, verify the modes produce distinct required outcomes. If all modes write `new_lines` to the section, detection is unnecessary. Write a simple direct call instead.
 - Evidence: Cycle 4.3 `write_completed` had full git diff parsing + two branches — impl corrector removed everything, leaving direct delegation to `_write_completed_section`.
+
+## When parsing git status porcelain format
+- Anti-pattern: Using `_git_output()` (which calls `.strip()`) on `git status --porcelain`. Strip removes the leading space from XY format (` M src/foo.py` → `M src/foo.py`), shifting column positions. `line[3:]` then yields `rc/foo.py` instead of `src/foo.py`.
+- Correct pattern: Use raw `result.stdout.splitlines()` without `.strip()` on the full output. Each line's fixed-width XY+space prefix (positions 0-2) must be preserved for `line[3:]` path extraction.
+
+## When matching glob patterns with zero-depth wildcards
+- Anti-pattern: Using `PurePath.match("src/**/*.py")` — it requires `**` to match at least one directory level. `src/foo.py` returns `False`.
+- Correct pattern: Use `PurePath.full_match()` (Python 3.13+) which handles `**` matching zero or more directory levels. `PurePath("src/foo.py").full_match("src/**/*.py")` returns `True`.

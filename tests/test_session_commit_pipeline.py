@@ -1,4 +1,4 @@
-"""Tests for session commit pipeline (Phase 6)."""
+"""Tests for session commit pipeline (Phase 6, Cycle 6.1)."""
 
 from __future__ import annotations
 
@@ -27,7 +27,6 @@ def _init_repo(path: Path) -> None:
         check=True,
         capture_output=True,
     )
-    # Initial commit so HEAD exists
     (path / "README.md").write_text("init")
     subprocess.run(["git", "add", "."], cwd=path, check=True, capture_output=True)
     subprocess.run(
@@ -46,7 +45,6 @@ def test_commit_parent_only(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
     monkeypatch.chdir(tmp_path)
     _init_repo(tmp_path)
 
-    # Create a modified file
     f = tmp_path / "src" / "foo.py"
     f.parent.mkdir(parents=True)
     f.write_text("new content")
@@ -66,7 +64,6 @@ def test_commit_parent_only(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
     assert result.success is True
     assert "foo" in result.output.lower() or "1 file" in result.output
 
-    # Verify file was committed
     log = subprocess.run(
         ["git", "log", "--oneline", "-1"],
         cwd=tmp_path,
@@ -102,7 +99,6 @@ def test_commit_precommit_failure(
     assert result.success is False
     assert "Precommit" in result.output or "failed" in result.output
 
-    # File should be staged but NOT committed
     status = subprocess.run(
         ["git", "status", "--porcelain"],
         cwd=tmp_path,

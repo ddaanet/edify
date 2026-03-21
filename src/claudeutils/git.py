@@ -39,7 +39,7 @@ def _fail(msg: str, code: int = 1) -> Never:
     raise SystemExit(code)
 
 
-def discover_submodules() -> list[str]:
+def discover_submodules(cwd: Path | None = None) -> list[str]:
     """Return list of submodule paths from `git submodule status`.
 
     Each output line: [space/+/-] <hash> <path> [(<describe>)]
@@ -47,6 +47,7 @@ def discover_submodules() -> list[str]:
     """
     result = subprocess.run(
         ["git", "submodule", "status"],
+        cwd=cwd,
         capture_output=True,
         text=True,
         check=False,

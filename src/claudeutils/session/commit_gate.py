@@ -40,9 +40,10 @@ def _git_output(
 
 def _dirty_files(cwd: Path | None = None) -> set[str]:
     """Get files with uncommitted changes from git status."""
-    # Use raw stdout — strip() destroys leading space in porcelain XY format
+    # Use raw stdout — strip() destroys leading space in porcelain XY format.
+    # -u lists individual untracked files, not just their parent directories.
     result = subprocess.run(
-        ["git", "status", "--porcelain"],
+        ["git", "status", "--porcelain", "-u"],
         cwd=cwd,
         capture_output=True,
         text=True,

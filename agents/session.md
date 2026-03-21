@@ -1,29 +1,31 @@
-# Session Handoff: 2026-03-15
+# Session Handoff: 2026-03-20
 
-**Status:** Orchestration in progress — Phases 1-3 complete, Phase 4 started (Cycle 4.1 done, 4.2-4.7 + 4.8 remaining).
+**Status:** Phase 6 Cycle 6.1 complete — commit pipeline parent-only path done, 5 cycles remaining.
 
 ## Completed This Session
 
-### Phases 1-3 of handoff-cli-tool orchestration
-- **Phase 1** (general, 3 steps): Git extraction to `claudeutils/git.py`, session package stubs, `_git changes` command
-- **Phase 2** (TDD, 2 cycles): Session.md parser — `parse_status_line`, `parse_completed_section`, `parse_tasks`, `SessionData`, `parse_session()`. Added `plan_dir` to `ParsedTask`
-- **Phase 3** (TDD, 4 cycles): Status subcommand — `render_next`, `render_pending`, `render_worktree`, `render_unscheduled`, `detect_parallel` (consecutive + 5-cap), CLI wiring via `_status` command with env var `CLAUDEUTILS_SESSION_FILE`
-- **Phase 4 Cycle 4.1**: `parse_handoff_input()` with `HandoffInput` dataclass, `HandoffInputError` for missing markers
-- Checkpoint reviews at each phase boundary (reports: `checkpoint-{1,2,3}-review.md`)
-- Corrector fixes: test helper dedup (P1), consecutive parallel detection + plan line format (P3)
+**Phase 4 completion (Cycles 4.7–4.8):**
+- Split `tests/test_session_handoff.py` (467→351 lines) + new `tests/test_session_handoff_cli.py` (157 lines) to fix 400-line limit
+- Committed `handoff/cli.py` with full pipeline + CLI wiring
+- Dispatched Cycle 4.7 test + impl correctors: extracted `_parse_or_fail()` helper, added `git diff HEAD` to diagnostics, state-file cleanup assertions, tightened error format assertion
+- Step 4.8: added precommit gate (Step 7) to handoff skill `SKILL.md` between trim and STATUS display
+- Phase 4 checkpoint corrector: removed precommit from CLI (skill owns it per design), renamed misleading write_completed test names (report: `plans/handoff-cli-tool/reports/checkpoint-4-review.md`)
 
-### Operational findings
-- Plan-specific agents (tester/implementer) cannot find step files in worktree — step files exist only in main worktree at `/Users/david/code/claudeutils/plans/handoff-cli-tool/steps/`
-- Agent writes don't persist when agent can't find step files (navigates to wrong directory)
-- Converted `status.py` and `handoff.py` stubs to packages (`status/`, `handoff/`) during implementation
-- `combinations` import removed from render.py — replaced with consecutive window search per ST-1
+**Phase 5 completion (Cycles 5.1–5.3):**
+- Cycle 5.1: `parse_commit_input()` in `session/commit.py` with Files/Options/Submodule/Message section parsing, blockquote stripping, option validation
+- Cycle 5.2: `validate_files()` in `session/commit_gate.py` — git status porcelain parsing (raw stdout, not stripped), `--root` flag for diff-tree on initial commits, `CleanFileError` with STOP directive
+- Cycle 5.3: `vet_check()` with `pyproject.toml` pattern loading, `PurePath.full_match()` for glob patterns, mtime-based report freshness, `VetResult` dataclass
+- Phase 5 checkpoint corrector: fixed `lstrip("- ")` → `removeprefix("- ")`, added hardcoded agent-core patterns, pinned mtime in vet_check_pass test (report: `plans/handoff-cli-tool/reports/checkpoint-5-review.md`)
+
+**Phase 6 Cycle 6.1:**
+- `commit_pipeline()` in `session/commit_pipeline.py` — stages files, runs patchable `_run_precommit`, commits with message, returns `CommitResult`
 
 ## In-tree Tasks
 
 - [>] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart
   - Plan: handoff-cli-tool | Status: ready
-  - Progress: Phase 4 Cycle 4.1 complete. Next: Cycle 4.2 (overwrite_status)
-  - Step files in main worktree: `/Users/david/code/claudeutils/plans/handoff-cli-tool/steps/`
+  - Progress: Phase 6 Cycle 6.1 done. Next: Cycle 6.2 (submodule coordination), then 6.3 (amend), 6.4 (validation levels), 6.5 (output formatting), 6.6 (CLI wiring), Phase 6 checkpoint, then Phase 7 (cross-subcommand contract test).
+  - Agent dispatch issue: tester/implementer agents can't find step files in worktree (no `main` ref). Implementing RED/GREEN directly in orchestrator is the working approach.
 - [ ] **Runbook warnings** — `/design plans/runbook-warnings/brief.md` | sonnet
   - Plan: runbook-warnings | Status: briefed
 - [ ] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
@@ -44,29 +46,31 @@
 
 ## Blockers / Gotchas
 
-**Proof skill gap identified:**
-- Revise verdicts should trace back to generator skill gap (insufficient requirements, incomplete exploration, faulty expansion)
-- Brief skill description too narrow (only cross-tree transfer, should also cover creating plan briefs from conversation)
-
 **Agent step file access in worktree:**
-- Plan-specific agents (handoff-cli-tool-tester, handoff-cli-tool-implementer) can't find step files via `git show main:` — worktree doesn't have `main` as a local ref
-- Working approach: read step files directly from main worktree path, or implement inline (orchestrator writes RED/GREEN directly)
-- Task agents that need step files should be given the main worktree path explicitly
+- Plan-specific agents can't find step files via `git show main:` — no local `main` ref
+- Working approach: implement RED/GREEN directly in orchestrator (read steps from local path)
+- Step files at `plans/handoff-cli-tool/steps/`
 
-**Phase 2 corrector UNFIXABLE (deferred):**
-- Old-format tasks: strict enforcement at parser vs command layer. Decision: lenient parser, strict in Phase 3 `_status`. Status: correctly implemented as decided
+**Docstring 80-char wrapping cycle:**
+- docformatter wraps at 80 chars; ruff D205 rejects two-line form; keep content ≤70 chars
+
+**Learnings at soft limit (93 lines):**
+- Next session should run `/codify` to consolidate older learnings into permanent documentation
+
+**Submodule agent-core commit:**
+- Step 4.8 committed handoff skill change inside submodule — submodule pointer shows as modified in parent
 
 ## Reference Files
 
-- `plans/handoff-cli-tool/orchestrator-plan.md` — 71 steps across 7 phases
-- `plans/handoff-cli-tool/reports/checkpoint-1-review.md` — Phase 1 boundary review
-- `plans/handoff-cli-tool/reports/checkpoint-2-review.md` — Phase 2 boundary review
-- `plans/handoff-cli-tool/reports/checkpoint-3-review.md` — Phase 3 boundary review
-- `src/claudeutils/session/parse.py` — Shared parser (Phase 2)
-- `src/claudeutils/session/status/render.py` — Status renderers (Phase 3)
-- `src/claudeutils/session/status/cli.py` — _status CLI wiring
-- `src/claudeutils/session/handoff/parse.py` — Handoff stdin parser (Cycle 4.1)
+- `plans/handoff-cli-tool/orchestrator-plan.md` — step list; Phase 6 is Cycles 6.1–6.6
+- `src/claudeutils/session/commit_pipeline.py` — Cycle 6.1 commit pipeline (parent-only)
+- `src/claudeutils/session/commit.py` — commit parser
+- `src/claudeutils/session/commit_gate.py` — validate_files, vet_check
+- `tests/test_session_commit_pipeline.py` — Cycle 6.1 tests (2 tests)
+- `tests/test_session_commit.py` — Cycles 5.1-5.3 tests (15 tests)
+- `plans/handoff-cli-tool/reports/checkpoint-4-review.md` — Phase 4 review
+- `plans/handoff-cli-tool/reports/checkpoint-5-review.md` — Phase 5 review
 
 ## Next Steps
 
-Continue `/orchestrate handoff-cli-tool` from Phase 4 Cycle 4.2. Orchestrator should implement RED/GREEN directly rather than dispatching to tester/implementer agents (step file access issue).
+Continue Phase 6: Cycle 6.2 (submodule coordination with 4-cell matrix), then Cycles 6.3–6.6, Phase 6 checkpoint, Phase 7 contract test.
