@@ -140,7 +140,7 @@
   - Note: plan dir only exists in retro-repo-expansion worktree, not on main. Create plan dir before design.
 - [ ] **Skill exit commit** — `/design plans/skill-exit-commit/requirements.md` | sonnet | 1.0
   - Plan: skill-exit-commit | Status: requirements
-- [ ] **Discussion** — `d:` | sonnet
+- [ ] **Discussion** → `discussion` — `d:` | sonnet
 - [!] **Verb form AB test** — see `plans/reports/ab-test/README.md` | sonnet | 0.5
   - Blocked on human: curate task-contexts.json, annotate ground-truth.md
 - [ ] **Anchor proof state** → `anchor-proof-state` — `/design plans/proof-state-anchor/brief.md` | opus | restart
@@ -158,7 +158,7 @@
 - [-] **Execute flag lint** — superseded by session validator
 - [-] **Registry cache to tmp** — fixed inline, plan killed
 
-- [ ] **Outline proofing** — `/design plans/outline-proofing/brief.md` | opus | restart
+- [ ] **Outline proofing** → `outline-proofing` — `/design plans/outline-proofing/brief.md` | opus | restart
   - Plan: outline-proofing | Add /proof gate on all planning artifacts: /design Moderate, /runbook Tier 2, /runbook Tier 3. Eliminates Tier 1.
 
 ## Blockers / Gotchas
