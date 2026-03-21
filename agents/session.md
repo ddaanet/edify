@@ -158,8 +158,19 @@
 - [-] **Execute flag lint** — superseded by session validator
 - [-] **Registry cache to tmp** — fixed inline, plan killed
 
-- [ ] **Outline proofing** → `outline-proofing` — `/design plans/outline-proofing/brief.md` | opus | restart
+- [ ] **Outline proofing** — `/design plans/outline-proofing/brief.md` | opus | restart
   - Plan: outline-proofing | Add /proof gate on all planning artifacts: /design Moderate, /runbook Tier 2, /runbook Tier 3. Eliminates Tier 1.
+
+- [ ] **Adaptive proof** — `/design plans/context-adaptive-proof/brief.md` | opus
+  - Plan: context-adaptive-proof | Fork+summary when proof hits context limit
+- [ ] **Interaction graph** — `/design plans/interaction-graph/brief.md` | sonnet
+  - Plan: interaction-graph | DOT/HTML visualization of agentic-prose dependency structure
+- [ ] **Invariant tracking** — `/design plans/invariant-tracking/brief.md` | opus
+  - Plan: invariant-tracking | Prose-only exploration: express invariants as recall entries + corrector criteria
+- [ ] **Proof verdict UX** — `/design plans/proof-verdict-ux/brief.md` | opus
+  - Plan: proof-verdict-ux | Remove a/r/k/s; natural language carries verdicts
+- [ ] **Sycophancy probe** — `/design plans/sycophancy-probe/brief.md` | sonnet
+  - Plan: sycophancy-probe | Out-of-platform tool using session-scraper + API calls
 
 ## Blockers / Gotchas
 

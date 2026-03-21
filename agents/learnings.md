@@ -58,3 +58,21 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Keep sub-problems together through design (shared context benefits). After design, split into separate tasks with explicit dependencies. Parent plan delivers at "designed" status (terminal). Children are new plans starting at "planned." Each gets own WSJF score, model tier, worktree classification.
 - Exception: Dependent sub-problems (S-B depends on S-A's output format) stay together through design but execute as separate tasks with cross-task dependency.
 - Design coherence under change: if a sub-problem's execution reveals the shared design was wrong, propagation via "merge parent" (worktree merge from parent branch) handles updates.
+
+## When dispatching corrector with plan-path-containing prompts
+- Anti-pattern: Including template notation like `plans/{plan}/` or `plans/<name>/` anywhere in the corrector prompt text. The PreToolUse recall-check hook uses `re.search(r"plans/([^/]+)/", prompt)` to extract the job name — it finds the FIRST match, which may be template text rather than the actual plan path.
+- Correct pattern: Put the actual plan path (`plans/outline-proofing/`) as the FIRST `plans/X/` reference in the prompt (e.g., "Plan: plans/outline-proofing/ — review implementation changes"). Avoid template-style placeholders in requirement text; use natural language descriptions instead.
+- Root cause: `re.search` returns first match, not best match. Template text like `plans/{plan}/outline.md` in a requirements bullet appears before the actual plan path references.
+
+## When calling triage-feedback.sh
+- Anti-pattern: Calling `triage-feedback.sh plans/outline-proofing baseline` — the script prepends `plans/` to `$1`, so the reports dir becomes `plans/plans/outline-proofing/reports` (double-prefixed).
+- Correct pattern: Pass just the job name: `triage-feedback.sh outline-proofing baseline`. The script constructs `plans/outline-proofing/reports` internally.
+- Note: The inline skill's documented invocation is `triage-feedback.sh plans/<job>` — this is incorrect. The script implementation uses the arg as a suffix to `plans/`.
+## When referencing format files in skill steps
+- Anti-pattern: "Generate X using format from `references/foo.md`" — implies reading but doesn't require it. Agent may rationalize from memory rather than reading the file, producing format drift.
+- Correct pattern: Explicit Read instruction: "Read `references/foo.md`. Generate X using that format." Matches Complex path convention ("Read `references/write-outline.md`") and removes ambiguity.
+- Evidence: M2 in outline-proofing deliverable review — Moderate agentic-prose path step used implicit form while Complex path used explicit form.
+## When writing inline skill deliverable review task
+- Anti-pattern: Using the inline skill's template `Deliverable review: <job>` verbatim — contains a colon (forbidden by task validator) and exceeds the 25-character limit for any job name longer than 9 characters.
+- Correct pattern: Use a short noun phrase without colon: e.g. `<Job> fix review` (≤25 chars, no colon). Fix the template in inline/SKILL.md to use a valid task name format.
+- Evidence: Precommit caught "contains forbidden character ':'" and "exceeds 25 character limit" when writing the deliverable review task for outline-proofing.
