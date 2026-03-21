@@ -15,8 +15,9 @@
 - [x] **Outline proofing** — `/design plans/outline-proofing/brief.md` | opus | restart
   - Plan: outline-proofing | Design reviewed. 6 affected files, all agentic prose.
 - [x] **Outline proofing review** — `/deliverable-review plans/outline-proofing` | opus | restart
-- [ ] **Fix outline findings** — `/design plans/outline-proofing/reports/deliverable-review.md` | opus
+- [x] **Fix outline findings** — `/design plans/outline-proofing/reports/deliverable-review.md` | opus
   - Plan: outline-proofing | 2 minor findings: M1 prerequisites check scope (Tier 3), M2 implicit Read instruction
+- [ ] **Outline fix review** — `/deliverable-review plans/outline-proofing` | opus | restart
 
 ## Worktree Tasks
 
