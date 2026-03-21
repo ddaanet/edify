@@ -1,31 +1,31 @@
-# Session Handoff: 2026-03-20
+# Session Handoff: 2026-03-21
 
-**Status:** Phase 6 Cycle 6.1 complete — commit pipeline parent-only path done, 5 cycles remaining.
+**Status:** handoff-cli-tool orchestration complete — all 7 phases delivered, review-pending.
 
 ## Completed This Session
 
-**Phase 4 completion (Cycles 4.7–4.8):**
-- Split `tests/test_session_handoff.py` (467→351 lines) + new `tests/test_session_handoff_cli.py` (157 lines) to fix 400-line limit
-- Committed `handoff/cli.py` with full pipeline + CLI wiring
-- Dispatched Cycle 4.7 test + impl correctors: extracted `_parse_or_fail()` helper, added `git diff HEAD` to diagnostics, state-file cleanup assertions, tightened error format assertion
-- Step 4.8: added precommit gate (Step 7) to handoff skill `SKILL.md` between trim and STATUS display
-- Phase 4 checkpoint corrector: removed precommit from CLI (skill owns it per design), renamed misleading write_completed test names (report: `plans/handoff-cli-tool/reports/checkpoint-4-review.md`)
+**Phase 6 completion (Cycles 6.2–6.6):**
+- Cycle 6.2: Submodule coordination — `_partition_by_submodule`, `_commit_submodule`, four-cell matrix (files+msg, files-no-msg, no-files+msg, no-files-no-msg). Real git submodule tests via `protocol.file.allow=always`
+- Cycle 6.3: Amend semantics — `--amend`/`--no-edit` flags propagated through pipeline and `_commit_submodule` via options set
+- Cycle 6.4: Validation levels — `_run_lint` for just-lint option, `vet_check` integration in pipeline, `_validate()` dispatch function
+- Cycle 6.5: Output formatting — `format_commit_output()` with `_strip_hints()` for git hint line removal
+- Cycle 6.6: CLI wiring — `commit_cmd` reads stdin markdown, calls `parse_commit_input` → `commit_pipeline`, exit codes 0/1/2
+- Phase 6 checkpoint corrector: 5 fixes — `validate_files` integration, `-u` flag for porcelain, `format_commit_output` wired into pipeline, vet output header, orphan warning text (report: `plans/handoff-cli-tool/reports/checkpoint-6-review.md`)
 
-**Phase 5 completion (Cycles 5.1–5.3):**
-- Cycle 5.1: `parse_commit_input()` in `session/commit.py` with Files/Options/Submodule/Message section parsing, blockquote stripping, option validation
-- Cycle 5.2: `validate_files()` in `session/commit_gate.py` — git status porcelain parsing (raw stdout, not stripped), `--root` flag for diff-tree on initial commits, `CleanFileError` with STOP directive
-- Cycle 5.3: `vet_check()` with `pyproject.toml` pattern loading, `PurePath.full_match()` for glob patterns, mtime-based report freshness, `VetResult` dataclass
-- Phase 5 checkpoint corrector: fixed `lstrip("- ")` → `removeprefix("- ")`, added hardcoded agent-core patterns, pinned mtime in vet_check_pass test (report: `plans/handoff-cli-tool/reports/checkpoint-5-review.md`)
+**Phase 7 completion (Cycle 7.1):**
+- Cross-subcommand contract test: `test_handoff_then_status` — handoff writes session.md, status reads it back, parsers consistent
+- Phase 7 checkpoint corrector: `discover_submodules()` got `cwd` parameter, orphan warning assertion strengthened (report: `plans/handoff-cli-tool/reports/checkpoint-7-review.md`)
 
-**Phase 6 Cycle 6.1:**
-- `commit_pipeline()` in `session/commit_pipeline.py` — stages files, runs patchable `_run_precommit`, commits with message, returns `CommitResult`
+**Orchestration lifecycle:**
+- Plan-specific agents cleaned up (6 agent files removed)
+- Lifecycle updated to `review-pending`
+- Test file splits: pipeline tests across 5 files to stay under 400-line limit
 
 ## In-tree Tasks
 
-- [>] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart
-  - Plan: handoff-cli-tool | Status: ready
-  - Progress: Phase 6 Cycle 6.1 done. Next: Cycle 6.2 (submodule coordination), then 6.3 (amend), 6.4 (validation levels), 6.5 (output formatting), 6.6 (CLI wiring), Phase 6 checkpoint, then Phase 7 (cross-subcommand contract test).
-  - Agent dispatch issue: tester/implementer agents can't find step files in worktree (no `main` ref). Implementing RED/GREEN directly in orchestrator is the working approach.
+- [x] **Session CLI tool** — `/orchestrate handoff-cli-tool` | sonnet | restart
+  - Plan: handoff-cli-tool | Status: review-pending
+- [ ] **Review handoff CLI** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
 - [ ] **Runbook warnings** — `/design plans/runbook-warnings/brief.md` | sonnet
   - Plan: runbook-warnings | Status: briefed
 - [ ] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
@@ -46,31 +46,22 @@
 
 ## Blockers / Gotchas
 
-**Agent step file access in worktree:**
-- Plan-specific agents can't find step files via `git show main:` — no local `main` ref
-- Working approach: implement RED/GREEN directly in orchestrator (read steps from local path)
-- Step files at `plans/handoff-cli-tool/steps/`
-
 **Docstring 80-char wrapping cycle:**
 - docformatter wraps at 80 chars; ruff D205 rejects two-line form; keep content ≤70 chars
 
 **Learnings at soft limit (93 lines):**
 - Next session should run `/codify` to consolidate older learnings into permanent documentation
 
-**Submodule agent-core commit:**
-- Step 4.8 committed handoff skill change inside submodule — submodule pointer shows as modified in parent
-
 ## Reference Files
 
-- `plans/handoff-cli-tool/orchestrator-plan.md` — step list; Phase 6 is Cycles 6.1–6.6
-- `src/claudeutils/session/commit_pipeline.py` — Cycle 6.1 commit pipeline (parent-only)
-- `src/claudeutils/session/commit.py` — commit parser
-- `src/claudeutils/session/commit_gate.py` — validate_files, vet_check
-- `tests/test_session_commit_pipeline.py` — Cycle 6.1 tests (2 tests)
-- `tests/test_session_commit.py` — Cycles 5.1-5.3 tests (15 tests)
-- `plans/handoff-cli-tool/reports/checkpoint-4-review.md` — Phase 4 review
-- `plans/handoff-cli-tool/reports/checkpoint-5-review.md` — Phase 5 review
+- `plans/handoff-cli-tool/reports/checkpoint-6-review.md` — Phase 6 review (5 fixes)
+- `plans/handoff-cli-tool/reports/checkpoint-7-review.md` — Phase 7 final review + lifecycle audit
+- `src/claudeutils/session/commit_pipeline.py` — full commit pipeline (submodule, amend, validation, formatting)
+- `src/claudeutils/session/cli.py` — `_commit` CLI command
+- `tests/test_session_commit_pipeline_ext.py` — Cycles 6.2-6.3 tests (submodule/amend)
+- `tests/test_session_commit_validation.py` — Cycle 6.4 tests (validation levels)
+- `tests/test_session_integration.py` — Cycle 7.1 contract test
 
 ## Next Steps
 
-Continue Phase 6: Cycle 6.2 (submodule coordination with 4-cell matrix), then Cycles 6.3–6.6, Phase 6 checkpoint, Phase 7 contract test.
+Deliverable review for handoff-cli-tool plan, then codify learnings (at soft limit).
