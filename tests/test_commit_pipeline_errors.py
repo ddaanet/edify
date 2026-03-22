@@ -12,6 +12,7 @@ import pytest
 from claudeutils.session.commit import CommitInput
 from claudeutils.session.commit_pipeline import (
     CommitResult,
+    _error,
     _git_commit,
     commit_pipeline,
 )
@@ -101,6 +102,33 @@ def test_pipeline_returns_failure_on_stage_error(
 
     assert result.success is False
     assert "**Error:**" in result.output
+
+
+# Cycle 1.2: Structured error messages without Python repr
+
+
+def test_error_structured_with_empty_stderr() -> None:
+    """_error() produces structured output with empty stderr."""
+    exc = subprocess.CalledProcessError(1, ["git", "commit"])
+    exc.stderr = ""  # Empty stderr — the problematic path
+
+    result = _error("staging failed", exc)
+
+    assert result.success is False
+    assert "**Error:** staging failed" in result.output
+    assert "Command '[" not in result.output  # No raw repr
+
+
+def test_error_structured_with_populated_stderr() -> None:
+    """_error() includes stderr content when present."""
+    exc = subprocess.CalledProcessError(128, ["git", "add"])
+    exc.stderr = "fatal: not a git repository"
+
+    result = _error("staging failed", exc)
+
+    assert result.success is False
+    assert "**Error:** staging failed" in result.output
+    assert "fatal: not a git repository" in result.output
 
 
 # Cycle 1.2: validation before submodule commit

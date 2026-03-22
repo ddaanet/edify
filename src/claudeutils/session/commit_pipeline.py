@@ -213,10 +213,11 @@ def format_commit_output(
 
 
 def _error(label: str, exc: subprocess.CalledProcessError) -> CommitResult:
-    """Build failure result from a subprocess error."""
+    """Build failure result from subprocess error."""
+    detail = exc.stderr or f"exit code {exc.returncode}"
     return CommitResult(
         success=False,
-        output=f"**Error:** {label}: {exc.stderr or exc}",
+        output=f"**Error:** {label}: {detail}",
     )
 
 
