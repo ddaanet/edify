@@ -58,6 +58,20 @@ All 18 addressed findings verified against rework delta:
 - **Impact:** Line 77 instructs "Run `Bash: claudeutils _worktree ls`" for command derivation. Allowed-tools `Bash(just:*,wc:*,git:*)` does not include `claudeutils`. The skill agent cannot execute this command — plan state discovery for command derivation is blocked.
 - **Source:** Prose Layer 1
 
+### 3. Error messages not informative or actionable
+
+- **File:** `src/claudeutils/session/commit_pipeline.py:215-220`
+- **Axis:** Error signaling, conformance
+- **Design req:** S-3 — "Error and warning output uses `**Header:** content` format." Error messages must be informative (why it failed) and helpful (how to correct).
+- **Impact:** `_error()` helper falls back to `str(exc)` when `exc.stderr` is empty, dumping raw `CalledProcessError` repr with command array (e.g., `Command '['git', 'commit', '-m', '...']' returned non-zero exit status 1`). Not structured markdown, not informative, not actionable. Needs exploration to determine if this pattern exists elsewhere in the codebase.
+
+### 4. Skills don't reference CLI tools
+
+- **File:** `agent-core/skills/commit/SKILL.md`, `agent-core/skills/handoff/SKILL.md`
+- **Axis:** Conformance, functional completeness
+- **Design req:** "Skill integration (future): After CLI exists, `/commit` skill simplifies to: Gate A → discovery (`claudeutils _git changes`) → draft message + gitmoji → pipe to `claudeutils _commit`." Also: "Coupled skill update" — skill changes are in-scope.
+- **Impact:** CLI tools (`_commit`, `_handoff`, `_status`) exist but skills don't reference them. Commit skill reimplements staging/validation/commit instead of piping to `_commit`. Handoff skill writes session.md directly instead of piping to `_handoff`. Execute-rule.md MODE 1 contains inline STATUS template instead of delegating to `_status`. Pattern across handoff, commit, and status display surfaces.
+
 ## Minor Findings
 
 **Code (3):**
@@ -104,7 +118,7 @@ All 18 addressed findings verified against rework delta:
 | Severity | Count |
 |----------|-------|
 | Critical | 1 |
-| Major | 1 |
+| Major | 3 |
 | Minor | 6 |
 
-17 of 18 findings fully fixed. One Critical remains: `_commit_submodule` git commit returncode not checked — same bug class as C#2, explicitly called out in round 1 but missed during rework. One Major: SKILL.md allowed-tools blocks `claudeutils _worktree ls` command derivation. Six minor issues (dead `render_next`, worktree-marker skip, `_is_dirty` strip, dead `step_reached`, old section name bypass, weak test assertion).
+17 of 18 findings fully fixed. One Critical remains: `_commit_submodule` git commit returncode not checked. Three Major: SKILL.md allowed-tools gap, error messages not informative/actionable (S-3 violation, needs pattern exploration), skills don't reference CLI tools (design "Skill integration" requirement). Six minor issues (dead `render_next`, worktree-marker skip, `_is_dirty` strip, dead `step_reached`, old section name bypass, weak test assertion).

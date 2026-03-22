@@ -104,3 +104,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Modifying `.claude/agents/*.md` files mid-session and expecting dispatched agents to use the new content. Agent system prompts are built at startup and cached — file modifications are not picked up. Binary search via file edits is ineffective.
 - Correct pattern: Agent definitions require session restart to take effect. Duration is a diagnostic signal: if reported total_tokens is high but duration_ms is low (~2-3s for ~19K tokens), the response is coming from cached content. To test agent variants without restart, use `claude -p` to spawn fresh sessions that read current files.
 - Evidence: 4 dispatch tests with progressively stripped plan context all returned 0 tool uses with fabricated content in ~2.6s — identical behavior regardless of file edits.
+
+## When reviewing CLI-skill integration
+- Anti-pattern: Design specifies "Skill integration (future)" for wiring skills to CLI tools. Each review phase treats "(future)" as out-of-scope. Three review rounds pass without catching that skills never reference the CLI. The qualifier creates a permanent deferral — no phase owns it.
+- Correct pattern: "(future)" on an in-scope requirement is a delivery gap, not a scope exclusion. When the CLI exists, integration is no longer future — it's current. Reviewers must check "Skill integration" items against actual CLI availability, not accept the "(future)" label at face value.
+- Evidence: `_commit`, `_handoff`, `_status` all delivered. Round 1 review, rework, round 2 review — none caught that commit/handoff skills still reimplement what the CLI does. Agent hand-constructed STATUS output in the same session it reviewed the `_status` CLI.
