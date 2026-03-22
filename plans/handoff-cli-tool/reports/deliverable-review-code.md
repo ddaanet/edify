@@ -1,92 +1,102 @@
-# Deliverable Review: Code — handoff-cli-tool
+# Code Review: handoff-cli-tool (Round 2)
 
-**Reviewer:** Opus 4.6 (Layer 1)
+**Reviewer:** Opus 4.6
 **Design reference:** `plans/handoff-cli-tool/outline.md`
 
-## Critical
+## Fix Verification
 
-### CR-1: `_git_commit` ignores non-zero exit code
+### C#2 (CR-1): `_git_commit` ignores non-zero exit code — PARTIALLY FIXED
 
-- **File:** `src/claudeutils/session/commit_pipeline.py:77-84`
+- **Parent commit:** FIXED. `_git_commit()` now uses `check=True` (`commit_pipeline.py:82`), and the caller catches `CalledProcessError` at line 313.
+- **Submodule commit:** NOT FIXED. `_commit_submodule()` still uses `check=False` for the `git commit` subprocess (`commit_pipeline.py:139`). If the submodule commit fails, the function silently proceeds to stage the (unchanged) submodule pointer in the parent (line 142-147) and returns whatever stdout was produced. The `CalledProcessError` catch at the call site (line 305) only fires from the `git add` calls (which use `check=True`), not from a failed commit.
+
+### C#3 (CR-2): Submodule committed before validation gate — FIXED
+
+- The pipeline now follows correct ordering: `_validate_inputs` (line 272) → `_stage_files` (line 285) → `_validate` precommit/vet (line 290) → submodule commits (line 296) → parent commit (line 310).
+- Evidence: submodule commit loop at lines 296-307 is after validation gate at lines 289-292.
+
+### C#4: Exit code 2 for CleanFileError — FIXED
+
+- `session/cli.py:31-32` catches `CleanFileError` and calls `_fail(str(e), code=2)`.
+
+### MN-1: Uncaught CalledProcessError from `_stage_files` — FIXED
+
+- `commit_pipeline.py:283-287` wraps `_stage_files` in `try/except subprocess.CalledProcessError`, returning `_error("staging failed", e)`.
+
+### M#10 (MJ-5): `git_status()` strip bug — FIXED
+
+- `git.py:98` now uses `return result.stdout.rstrip("\n")` instead of `.strip()`.
+
+### M#11: Handoff uses shared `git_changes()` — FIXED
+
+- `handoff/cli.py:13` imports `git_changes` from `claudeutils.git_cli`.
+- `handoff/cli.py:57` calls `git_changes()` and echoes the result.
+
+### M#7 (MJ-2): Plan state discovery — FIXED
+
+- `status/cli.py:11` imports `list_plans` from `claudeutils.planstate.inference`.
+- `status/cli.py:54` builds `all_plans` dict from real lifecycle states via `list_plans(Path("plans"))`.
+- `status/cli.py:58` populates `plan_states` from `all_plans.get(task.plan_dir, "")`.
+
+### M#8 (MJ-1): Session continuation header — FIXED
+
+- `status/cli.py:63` calls `render_continuation(is_dirty=_is_dirty(), plan_states=plan_states)`.
+- `render.py:8-21` implements `render_continuation` — returns header when dirty, appends `/deliverable-review` for `review-pending` plans, returns empty string when clean.
+
+### M#9 (MJ-3): Output format — FIXED
+
+- `render.py:70` uses `▶` marker for the first eligible pending task.
+- The `▶` task is rendered inline in the In-tree section with command, model, and restart metadata.
+- No separate `Next:` section in the CLI output path (`status/cli.py` does not call `render_next`).
+
+### M#12: Old format enforcement — FIXED
+
+- `status/cli.py:48-52` compares `_count_raw_tasks(content)` against `len(data.in_tree_tasks)`. Mismatch exits with code 2: "Old-format tasks missing metadata."
+
+## New Findings
+
+### N-1: `_commit_submodule` silently ignores submodule commit failure
+
+- **File:** `src/claudeutils/session/commit_pipeline.py:134-148`
 - **Axis:** Robustness, error signaling
-- **Description:** `_git_commit()` uses `check=False` and returns `result.stdout.strip()` without inspecting `result.returncode`. The calling code in `commit_pipeline()` (line 281-289) unconditionally returns `CommitResult(success=True, ...)`. If `git commit` fails (e.g., nothing staged after validation, hook rejection, lock contention), the pipeline reports success with empty or error-containing output. Same issue in `_commit_submodule()` (line 134-148) — submodule commit failure is silently treated as success.
+- **Severity:** Major
+- **Description:** This is the remaining half of the original C#2 finding. The submodule `git commit` at line 134-140 uses `check=False` without inspecting `result.returncode`. If the commit fails (empty commit, hook rejection, lock contention), the function proceeds to stage the submodule pointer in the parent and returns potentially empty or error-containing stdout. The caller's `CalledProcessError` catch (line 305) never fires for this failure mode. Fix: either use `check=True` (and let the existing catch handle it) or inspect `result.returncode` and raise on failure.
 
-### CR-2: Submodule committed before validation gate
+### N-2: `render_next` is dead code
 
-- **File:** `src/claudeutils/session/commit_pipeline.py:254-273`
-- **Axis:** Conformance, robustness
-- **Description:** The outline specifies pipeline order: "validate → vet check → precommit → stage → submodule commit → parent commit." The implementation commits submodules (line 256-264) and stages parent files (line 267-268) before running the validation gate (line 271). If precommit or vet check fails after submodule commit, the submodule has an irrevocable commit but the parent doesn't, leaving an inconsistent state. The submodule commit cannot be rolled back without explicit `--amend` or reset.
+- **File:** `src/claudeutils/session/status/render.py:24-47`
+- **Axis:** Excess
+- **Severity:** Minor
+- **Description:** `render_next()` is defined and tested (10 tests in `test_session_status.py`) but never called from production code. The `▶` integration in `render_pending` replaced its purpose. The function and its tests add maintenance burden without contributing to the production path.
 
-## Major
+### N-3: `step_reached` field is unused in handoff resume
 
-### MJ-1: Status command missing session continuation header
+- **File:** `src/claudeutils/session/handoff/pipeline.py:21`, `src/claudeutils/session/handoff/cli.py:46-52`
+- **Axis:** Vacuity
+- **Severity:** Minor
+- **Description:** `HandoffState.step_reached` is saved (line 29-35 of `pipeline.py`) but never read during resume. The resume path at `cli.py:46-52` loads the state file and re-parses `input_markdown`, then unconditionally re-executes all pipeline steps. The field is dead data. This is acceptable because the operations are idempotent (overwrite, not append), but the dead field adds misleading complexity suggesting partial-resume capability.
 
-- **File:** `src/claudeutils/session/status/cli.py`, `src/claudeutils/session/status/render.py`
-- **Axis:** Functional completeness (conformance)
-- **Description:** The outline specifies: "Session continuation header: When git tree is dirty, prepend `Session: uncommitted changes — /handoff, /commit`. If any plan-associated task has status review-pending, append `/deliverable-review plans/<name>`." This feature is entirely absent from the implementation. The status command never checks git dirty state and never renders the session continuation header.
+### N-4: `_count_raw_tasks` does not detect old section name
 
-### MJ-2: Status command does not query plan lifecycle states
-
-- **File:** `src/claudeutils/session/status/cli.py:31-34`
-- **Axis:** Functional completeness (conformance)
-- **Description:** The outline pipeline step 2 says: "claudeutils _worktree ls for plan states and worktree info." The implementation populates `plan_states` with empty strings (line 34: `plan_states.setdefault(task.plan_dir, "")`) and passes an empty dict for unscheduled plan discovery (line 60: `render_unscheduled({}, task_plan_dirs)`). Rendered output shows `Plan: <dir> | Status: ` (blank status). Plan lifecycle states are never read from the filesystem.
-
-### MJ-3: Status output format deviates from outline
-
-- **File:** `src/claudeutils/session/status/render.py:8-31`
-- **Axis:** Conformance
-- **Description:** The outline specifies the first in-tree task should use `▶` marker with command, model, and restart metadata inline, suppressing the separate `Next:` section for single-task cases. The implementation renders a separate `Next:` section (always, even for single-task) using `Next: <name>` format without `▶`. The `render_pending` function renders all in-tree tasks identically with `- <name>` prefix, without distinguishing the first task.
-
-### MJ-4: Dead code — `handoff/context.py` unused
-
-- **File:** `src/claudeutils/session/handoff/context.py`
-- **Axis:** Excess, vacuity
-- **Description:** `PrecommitResult` and `format_diagnostics()` are defined (45 lines) but never imported or used by the handoff CLI pipeline. The handoff CLI (`cli.py`) runs git status/diff inline (lines 57-72) and formats output directly. These were written for an earlier design where the CLI ran precommit internally, which was removed during checkpoint-4 review. Tests exist for this dead code (`test_session_handoff.py:291-330`) adding to the maintenance burden.
-
-### MJ-5: `git_status()` corrupts first line of porcelain output
-
-- **File:** `src/claudeutils/git.py:84-98`
-- **Axis:** Robustness, functional correctness
-- **Description:** `git_status()` returns `result.stdout.strip()`. For `git status --porcelain`, the first line may start with a space (e.g., ` M file.py` for unstaged modification). `strip()` removes the leading space, corrupting the XY status code of the first line from ` M` to `M`. Downstream consumer `_prefix_status_lines()` in `git_cli.py` parses `line[:3]` as the status code — the corrupted first line yields `M f` instead of ` M ` plus `file.py`. This is the same class of bug documented in learnings.md ("When parsing git status porcelain format"). The `commit_gate.py:_dirty_files()` correctly avoids this by using raw `result.stdout.splitlines()`.
-
-## Minor
-
-### MN-1: Uncaught `CalledProcessError` from `_stage_files`
-
-- **File:** `src/claudeutils/session/commit_pipeline.py:52-59, 267-268`
-- **Axis:** Robustness, error signaling
-- **Description:** `_stage_files()` uses `check=True`, so it raises `subprocess.CalledProcessError` on failure. This exception is not caught in `commit_pipeline()`, producing an unhandled traceback rather than a structured `CommitResult` with exit code 1 per S-3. Same issue for `_commit_submodule()` line 121-126 which uses `check=True` for `git add`.
-
-### MN-2: `_fail` duplication across modules
-
-- **File:** `src/claudeutils/git.py:33-39`, `src/claudeutils/worktree/cli.py:66-68`
-- **Axis:** Modularity
-- **Description:** `_fail()` is defined in `git.py` and duplicated identically in `worktree/cli.py`. The session commands correctly import from `git.py`, but the worktree module retains its local copy. Pre-existing issue, not introduced by this deliverable, but the extraction to `git.py` was an opportunity to remove the duplicate.
-
-### MN-3: `_strip_hints` only filters `hint:` prefix
-
-- **File:** `src/claudeutils/session/commit_pipeline.py:187-189`
+- **File:** `src/claudeutils/session/status/cli.py:22-34, 47-52`
 - **Axis:** Robustness
-- **Description:** The docstring says "Remove git hint/advice lines" but the filter only checks `line.startswith("hint:")`. While git primarily uses the `hint:` prefix, some configurations may produce differently-prefixed advice lines. Low risk since the existing filter covers the common case.
+- **Severity:** Minor
+- **Description:** If session.md uses the old section name `## Pending Tasks` instead of `## In-tree Tasks`, both `_count_raw_tasks` and `parse_tasks` return 0 (neither finds the section). The validation `0 != 0` is false, so the check passes silently. Status output shows "No in-tree tasks" instead of the intended exit-2 error. The old-format enforcement only catches metadata-format issues within the correct section name, not the section name itself.
 
-### MN-4: Status `render_pending` omits restart metadata
+### N-5: Redundant `task.checkbox == " "` check in `render_pending`
 
-- **File:** `src/claudeutils/session/status/render.py:34-57`
-- **Axis:** Conformance
-- **Description:** The outline format shows `Restart: <yes/no>` for in-tree tasks. The `render_pending` function only renders model in parentheses; restart flag is only shown in the separate `Next:` section (via `render_next`). The in-tree listing omits restart information for all tasks except the first.
-
-### MN-5: Plan status line renders with empty value
-
-- **File:** `src/claudeutils/session/status/render.py:54-56`
-- **Axis:** Robustness
-- **Description:** When `plan_states[task.plan_dir]` is empty string (always, per MJ-2), the output reads `Plan: <dir> | Status: ` with trailing empty value. If plan discovery is deferred, the status should be omitted or show a placeholder.
+- **File:** `src/claudeutils/session/status/render.py:67`
+- **Axis:** Excess
+- **Severity:** Trivial
+- **Description:** Line 67 checks `task.checkbox == " "` but `pending` is already filtered to `checkbox == " "` at line 59. The condition is always true. Harmless but adds noise.
 
 ## Summary
 
-| Severity | Count |
+| Category | Count |
 |----------|-------|
-| Critical | 2 |
-| Major | 5 |
-| Minor | 5 |
+| Fix verifications | 10 |
+| FIXED | 9 |
+| PARTIALLY FIXED | 1 (C#2 — parent path fixed, submodule path not) |
+| New findings | 5 (1 Major, 3 Minor, 1 Trivial) |
 
-The core parsing (commit input, handoff input, session.md) and git extraction (S-2, S-5) are well-implemented. The commit gate logic (C-1, C-3, C-5) is solid. The handoff pipeline (H-1 through H-4) works correctly. The critical issues are both in the commit pipeline's error handling — silent success on git commit failure and ordering violation with submodule commits before validation. The major issues are concentrated in the status subcommand, which is missing several outline-specified features.
+The rework addressed the majority of round 1 findings. The one remaining issue is N-1 (submodule commit failure not checked), which is the other half of the original C#2 that was fixed for the parent commit path but missed for the submodule commit path. The new minor findings are dead code (`render_next`, `step_reached`) and edge-case robustness gaps.
