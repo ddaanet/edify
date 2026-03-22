@@ -147,3 +147,42 @@ def test_pipeline_validates_before_submodule_commit(
     assert result.success is False
     # The bug: submodule committed before validation
     commit_sub.assert_not_called()
+
+
+# C#5: amend+no-edit pipeline test
+
+
+def test_commit_amend_no_edit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Amend+no-edit preserves existing commit message."""
+    monkeypatch.chdir(tmp_path)
+    _init_repo(tmp_path)
+
+    f = tmp_path / "tracked.py"
+    f.write_text("v1")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "Original message"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+
+    f.write_text("v2")
+
+    ci = CommitInput(files=["tracked.py"], message=None, options={"amend", "no-edit"})
+
+    with patch(
+        "claudeutils.session.commit_pipeline._run_precommit",
+        return_value=(True, "ok"),
+    ):
+        result = commit_pipeline(ci, cwd=tmp_path)
+
+    assert result.success is True
+    log = subprocess.run(
+        ["git", "log", "--oneline", "-1"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert "Original message" in log.stdout

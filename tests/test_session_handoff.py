@@ -232,6 +232,22 @@ def test_write_completed_with_accumulated_content(tmp_path: Path) -> None:
     assert "- Old task B" not in content
 
 
+def test_write_completed_overwrites_not_appends(tmp_path: Path) -> None:
+    """write_completed replaces section, does not append."""
+    session_file = tmp_path / "session.md"
+    session_file.write_text(SESSION_WITH_COMPLETED)
+
+    # First write
+    write_completed(session_file, ["- First session work."])
+    # Second write should replace, not append
+    write_completed(session_file, ["- Second session work."])
+
+    content = session_file.read_text()
+    assert "- Second session work." in content
+    assert "- First session work." not in content
+    assert "- Old task A" not in content
+
+
 # Cycle 4.4: state caching
 
 

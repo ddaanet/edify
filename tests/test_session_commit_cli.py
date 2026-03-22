@@ -100,7 +100,8 @@ def test_commit_cli_vet_failure(
         result = runner.invoke(commit_cmd, input=stdin)
 
     assert result.exit_code == 1
-    assert "unreviewed" in result.output.lower() or "Vet" in result.output
+    assert "unreviewed" in result.output.lower()
+    assert "Vet" in result.output
 
 
 # Cycle 1.3: CleanFileError exit code 2

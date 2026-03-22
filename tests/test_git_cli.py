@@ -103,7 +103,8 @@ def test_git_changes_dirty_repo(
     # Status output includes README.md
     assert "README.md" in result.output
     # Diff output should also be present
-    assert "modified content" in result.output or "diff" in result.output.lower()
+    assert "modified content" in result.output
+    assert "diff" in result.output.lower()
 
 
 def test_git_changes_with_submodule(

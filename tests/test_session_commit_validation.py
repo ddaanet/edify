@@ -67,7 +67,9 @@ def test_commit_just_lint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
     assert result.success is True
 
 
-def test_commit_no_vet(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_commit_default_calls_vet(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Default pipeline calls vet_check."""
     monkeypatch.chdir(tmp_path)
     _init_repo(tmp_path)
@@ -90,6 +92,32 @@ def test_commit_no_vet(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         commit_pipeline(ci, cwd=tmp_path)
 
     vet.assert_called_once()
+
+
+def test_commit_skips_vet_when_no_vet(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """No-vet option skips vet_check entirely."""
+    monkeypatch.chdir(tmp_path)
+    _init_repo(tmp_path)
+    (tmp_path / "f.py").write_text("x")
+
+    ci = CommitInput(files=["f.py"], message="msg", options={"no-vet"})
+
+    vet = MagicMock()
+    with (
+        patch(
+            "claudeutils.session.commit_pipeline._run_precommit",
+            return_value=(True, "ok"),
+        ),
+        patch(
+            "claudeutils.session.commit_pipeline.vet_check",
+            vet,
+        ),
+    ):
+        commit_pipeline(ci, cwd=tmp_path)
+
+    vet.assert_not_called()
 
 
 def test_commit_combined_options(
@@ -143,3 +171,66 @@ def test_commit_combined_options(
     )
     commits = [ln for ln in log.stdout.strip().split("\n") if ln]
     assert len(commits) == 2
+
+
+def test_validate_stale_vet_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Stale vet failure includes stale_info in output."""
+    monkeypatch.chdir(tmp_path)
+    _init_repo(tmp_path)
+    (tmp_path / "f.py").write_text("x")
+
+    ci = CommitInput(files=["f.py"], message="msg")
+
+    stale_result = MagicMock()
+    stale_result.passed = False
+    stale_result.reason = "stale"
+    stale_result.stale_info = "report is 3 days old"
+    stale_result.unreviewed_files = []
+    with (
+        patch(
+            "claudeutils.session.commit_pipeline._run_precommit",
+            return_value=(True, "ok"),
+        ),
+        patch(
+            "claudeutils.session.commit_pipeline.vet_check",
+            return_value=stale_result,
+        ),
+    ):
+        result = commit_pipeline(ci, cwd=tmp_path)
+
+    assert result.success is False
+    assert "stale" in result.output.lower()
+    assert "3 days old" in result.output
+
+
+def test_validate_unknown_reason(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Unknown vet failure reason shows 'unknown' in output."""
+    monkeypatch.chdir(tmp_path)
+    _init_repo(tmp_path)
+    (tmp_path / "f.py").write_text("x")
+
+    ci = CommitInput(files=["f.py"], message="msg")
+
+    unknown_result = MagicMock()
+    unknown_result.passed = False
+    unknown_result.reason = None
+    unknown_result.stale_info = None
+    unknown_result.unreviewed_files = []
+    with (
+        patch(
+            "claudeutils.session.commit_pipeline._run_precommit",
+            return_value=(True, "ok"),
+        ),
+        patch(
+            "claudeutils.session.commit_pipeline.vet_check",
+            return_value=unknown_result,
+        ),
+    ):
+        result = commit_pipeline(ci, cwd=tmp_path)
+
+    assert result.success is False
+    assert "unknown" in result.output.lower()
