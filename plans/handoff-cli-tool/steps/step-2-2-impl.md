@@ -1,42 +1,32 @@
 # Cycle 2.2
 
-**Plan**: `plans/handoff-cli-tool/runbook.md`
+**Plan**: `plans/handoff-cli-tool/runbook-rework.md`
 **Execution Model**: sonnet
 **Phase**: 2
 
 ---
 
-## Phase Context
-
-Shared parser for session.md consumed by both status and handoff subcommands. Extends existing `worktree/session.py` parsing.
-
----
-
----
-
 **GREEN Phase:**
 
-**Implementation:** Add `SessionData` dataclass and `parse_session()` to `session/parse.py`
+**Implementation:** Extract git changes logic into shared function
 
 **Behavior:**
-- `SessionData` dataclass with typed fields for all sections
-- `parse_session(path: Path) -> SessionData` — reads file, calls section parsers from Cycle 2.1, assembles into `SessionData`
-- Missing file → raise `SessionFileError` (defined in `session/parse.py` or `claudeutils/exceptions.py`)
-- Date extraction: parse from `# Session Handoff: YYYY-MM-DD` header line via regex
-
-**Approach:** Thin orchestration function composing the section parsers.
+- New `git_changes() -> str` function in `git_cli.py` containing `changes_cmd`'s output logic
+- `changes_cmd` delegates to `git_changes()`
+- Handoff CLI imports `git_changes()` and uses it instead of inline subprocess
+- Submodule changes now visible in handoff diagnostics
 
 **Changes:**
-- File: `src/claudeutils/session/parse.py`
-  Action: Add `SessionData` dataclass and `parse_session()` function
-  Location hint: After section parser functions
-- File: `src/claudeutils/exceptions.py` (if appropriate)
-  Action: Add `SessionFileError(ClaudeUtilsError)` if exceptions are centralized there
+- File: `git_cli.py`
+  Action: Extract function `git_changes() -> str` from `changes_cmd` body
+  Location: Before `changes_cmd`
 
-**Verify lint:** `just lint`
-**Verify GREEN:** `pytest tests/test_session_parser.py -v`
-**Verify no regression:** `just precommit`
+- File: `git_cli.py`
+  Action: `changes_cmd` calls `git_changes()` and echoes result
+  Location: `changes_cmd` body
 
----
+- File: `handoff/cli.py`
+  Action: Replace lines 57-72 with `from claudeutils.git_cli import git_changes` and call
+  Location: After `write_completed` / before `clear_state`
 
-**Phase 2 Checkpoint:** All parser tests pass, `just precommit` clean.
+**Verify GREEN:** `just green`

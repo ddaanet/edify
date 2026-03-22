@@ -1,37 +1,31 @@
 # Cycle 3.4
 
-**Plan**: `plans/handoff-cli-tool/runbook.md`
+**Plan**: `plans/handoff-cli-tool/runbook-rework.md`
 **Execution Model**: sonnet
 **Phase**: 3
 
 ---
 
-## Phase Context
+## Cycle 3.4: Old format enforcement
 
-Pure data transformation: session.md + filesystem state → STATUS output. No mutations, no stdin.
+**Finding:** M#12
+
+**Prerequisite:** Read `src/claudeutils/session/parse.py:84-109` and `src/claudeutils/validation/task_parsing.py` — understand what `parse_task_line` returns for old-format lines
 
 ---
-
----
-
-## Cycle 3.4: CLI wiring — `claudeutils _status`
 
 **RED Phase:**
 
-**Test:** `test_status_cli`, `test_status_missing_session`, `test_status_old_format_fatal`
-**File:** `tests/test_session_status.py`
-
+**Test:** `test_status_rejects_old_format`
 **Assertions:**
-- CliRunner invoking `_status` with a real session.md file in cwd produces output containing:
-  - In-tree section with first pending task (with `▶` marker if single-task)
-  - Output exits with code 0
-- CliRunner invoking `_status` without session.md file → exit code 2, output contains `**Error:**`
-- CliRunner invoking `_status` with session.md containing tasks without pipe-separated metadata → exit code 2 (old format = fatal, mandatory metadata)
+- Session.md with old-format task lines (e.g., `- [ ] Task name` without `—` command/model metadata) → CLI exits with code 2
+- Error output contains message about mandatory metadata
+- Well-formed sessions (with metadata) parse and render successfully
 
-**Expected failure:** Command `_status` not registered — Click returns non-zero with "No such command"
+**Expected failure:** `AssertionError` — parser returns `None` for unparseable lines (silently filtered), CLI exits 0
 
-**Why it fails:** No `_status` command registered in main CLI
+**Why it fails:** `parse_task_line` returns `None` for old-format, `parse_tasks` filters None, CLI renders whatever parsed successfully.
 
-**Verify RED:** `pytest tests/test_session_status.py::test_status_cli -v`
+**Verify RED:** `pytest tests/test_session_status.py::test_status_rejects_old_format -v`
 
 ---

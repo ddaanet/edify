@@ -1,40 +1,32 @@
 # Cycle 3.3
 
-**Plan**: `plans/handoff-cli-tool/runbook.md`
+**Plan**: `plans/handoff-cli-tool/runbook-rework.md`
 **Execution Model**: sonnet
 **Phase**: 3
 
 ---
 
-## Phase Context
+## Cycle 3.3: Output format alignment
 
-Pure data transformation: session.md + filesystem state → STATUS output. No mutations, no stdin.
+**Finding:** M#9
+
+**Prerequisite:** Read `src/claudeutils/session/status/render.py:8-57` — current rendering
 
 ---
-
----
-
-## Cycle 3.3: Parallel group detection
-
-**Note: Design revision pending.** ST-1 "largest independent group" selection replaced with "first eligible consecutive group" (document order, cap 5). The "top priority unblocked items" change primarily affects the cap and consecutive constraint retention — both are implemented here. Outline update required before orchestration to align wording.
 
 **RED Phase:**
 
-**Test:** `test_detect_parallel_group`, `test_detect_parallel_no_group`, `test_detect_parallel_shared_plan`
-**File:** `tests/test_session_status.py`
-
+**Test:** `test_status_format_merged_next`
 **Assertions:**
-- `detect_parallel(tasks, blockers)` with 3 consecutive tasks having different `plan_dir` values and no blockers returns group of all 3 task names
-- `detect_parallel(tasks, blockers)` with single task returns `None` (no group)
-- `detect_parallel(tasks, blockers)` with 2 tasks sharing `plan_dir="parser"` returns `None` (shared plan = dependent)
-- `detect_parallel(tasks, blockers)` with tasks where a dependency breaks consecutive run → returns first eligible consecutive group (before the break)
-- `detect_parallel(tasks, blockers)` with 7 consecutive independent tasks → returns first 5 (cap at 5 concurrent sessions)
-- Blocker text mentioning task name creates dependency (breaks consecutive run)
+- First eligible pending task in In-tree list is prefixed with `▶`
+- No separate `Next:` section in output when first in-tree is next task
+- First task line includes command in backticks, model, and restart metadata
+- Non-first tasks show model (if non-default) but not command/restart
 
-**Expected failure:** `ImportError` — `detect_parallel` doesn't exist
+**Expected failure:** `AssertionError` — separate `Next:` section always rendered, `render_pending` uses `- name` without `▶`
 
-**Why it fails:** No parallel detection function
+**Why it fails:** `render_next` always generates separate section; `render_pending` doesn't distinguish first task.
 
-**Verify RED:** `pytest tests/test_session_status.py::test_detect_parallel_group -v`
+**Verify RED:** `pytest tests/test_session_status.py::test_status_format_merged_next -v`
 
 ---

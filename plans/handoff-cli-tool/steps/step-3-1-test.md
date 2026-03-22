@@ -1,41 +1,31 @@
 # Cycle 3.1
 
-**Plan**: `plans/handoff-cli-tool/runbook.md`
+**Plan**: `plans/handoff-cli-tool/runbook-rework.md`
 **Execution Model**: sonnet
 **Phase**: 3
 
 ---
 
-## Phase Context
+## Cycle 3.1: Plan state discovery
 
-Pure data transformation: session.md + filesystem state → STATUS output. No mutations, no stdin.
+**Finding:** M#7 + MN-5
+
+**Prerequisite:** Read `src/claudeutils/session/status/cli.py:31-34, 55-60`. Discover `list_plans` import path — `Grep` for `def list_plans` in `src/`.
 
 ---
-
----
-
-## Cycle 3.1: Render Next task
 
 **RED Phase:**
 
-**Test:** `test_render_next_task`, `test_render_next_skips_worktree_markers`, `test_render_next_no_pending`
-**File:** `tests/test_session_status.py`
-
+**Test:** `test_status_shows_plan_states`
 **Assertions:**
-- `render_next(tasks)` where first task is pending (checkbox `" "`) with no `→` marker returns:
-  ```
-  Next: Build parser
-    `/runbook plans/parser/design.md`
-    Model: sonnet | Restart: no
-  ```
-- `render_next(tasks)` where first task has `worktree_marker="my-slug"` and second has `worktree_marker="wt"` and third is plain pending → returns third task's info
-- `render_next([])` returns `""` (empty string, no Next section)
-- Tasks with checkbox `"x"`, `"!"`, `"†"`, `"-"` are all skipped (only `" "` without marker is eligible)
+- Task with `plan_dir = "plans/foo"` where `plans/foo/lifecycle.md` exists → status output contains actual lifecycle state (e.g., `Status: planned`), not `Status: ` (empty)
+- `render_unscheduled` receives populated dict → orphan plans shown in output
+- Task with plan_dir but no lifecycle.md → `Status:` line omitted (not blank)
 
-**Expected failure:** `ImportError` — `render_next` doesn't exist
+**Expected failure:** `AssertionError` — `plan_states` populated with empty strings, `render_unscheduled` always receives empty dict
 
-**Why it fails:** No `session/status.py` module
+**Why it fails:** Lines 31-34 hardcode empty strings; lines 55-60 pass empty dict.
 
-**Verify RED:** `pytest tests/test_session_status.py::test_render_next_task -v`
+**Verify RED:** `pytest tests/test_session_status.py::test_status_shows_plan_states -v`
 
 ---
