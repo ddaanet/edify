@@ -1,1 +1,8 @@
-{}
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude -p \"list your available agents\" --plugin-dir ./agent-core)",
+      "WebFetch(domain:http-intake.logs.us5.datadoghq.com)"
+    ]
+  }
+}
