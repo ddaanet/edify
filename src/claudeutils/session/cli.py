@@ -6,6 +6,7 @@ import click
 
 from claudeutils.git import _fail
 from claudeutils.session.commit import CommitInputError, parse_commit_input
+from claudeutils.session.commit_gate import CleanFileError
 from claudeutils.session.commit_pipeline import commit_pipeline
 from claudeutils.session.handoff.cli import handoff_cmd
 from claudeutils.session.status.cli import status_cmd
@@ -25,7 +26,11 @@ def commit_cmd() -> None:
     except CommitInputError as e:
         _fail(f"**Error:** {e}", code=2)
 
-    result = commit_pipeline(ci)
+    try:
+        result = commit_pipeline(ci)
+    except CleanFileError as e:
+        _fail(str(e), code=2)
+
     click.echo(result.output)
 
     if not result.success:

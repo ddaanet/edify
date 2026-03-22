@@ -8,7 +8,7 @@ from pathlib import Path
 
 from claudeutils.git import discover_submodules
 from claudeutils.session.commit import CommitInput
-from claudeutils.session.commit_gate import CleanFileError, validate_files, vet_check
+from claudeutils.session.commit_gate import validate_files, vet_check
 
 
 @dataclass
@@ -79,7 +79,7 @@ def _git_commit(
         cwd=cwd,
         capture_output=True,
         text=True,
-        check=False,
+        check=True,
     )
     return result.stdout.strip()
 
@@ -212,6 +212,51 @@ def format_commit_output(
     return "\n".join(parts)
 
 
+def _error(label: str, exc: subprocess.CalledProcessError) -> CommitResult:
+    """Build failure result from a subprocess error."""
+    return CommitResult(
+        success=False,
+        output=f"**Error:** {label}: {exc.stderr or exc}",
+    )
+
+
+def _validate_inputs(
+    ci: CommitInput,
+    parent_files: list[str],
+    submod_files: dict[str, list[str]],
+    *,
+    cwd: Path | None,
+) -> CommitResult | None:
+    """Validate files and submodule messages.
+
+    None on success.
+    """
+    amend = "amend" in ci.options
+    no_edit = "no-edit" in ci.options
+
+    if ci.message is None and not no_edit:
+        return CommitResult(
+            success=False,
+            output="**Error:** No commit message provided",
+        )
+
+    if parent_files:
+        validate_files(parent_files, amend=amend, cwd=cwd)
+    for path, files in submod_files.items():
+        sub_cwd = Path(cwd or ".") / path
+        validate_files(files, amend=amend, cwd=sub_cwd)
+
+    for path in submod_files:
+        if path not in ci.submodules:
+            return CommitResult(
+                success=False,
+                output=(
+                    f"**Error:** Files under {path}/ but no ## Submodule {path} section"
+                ),
+            )
+    return None
+
+
 def commit_pipeline(
     ci: CommitInput,
     *,
@@ -224,26 +269,9 @@ def commit_pipeline(
     submod_paths = discover_submodules(cwd=cwd)
     submod_files, parent_files = _partition_by_submodule(ci.files, submod_paths)
 
-    # C-3: Validate all files have uncommitted (or amend-eligible) changes.
-    # Parent files checked against parent repo; submodule files checked per-submodule.
-    try:
-        if parent_files:
-            validate_files(parent_files, amend=amend, cwd=cwd)
-        for path, files in submod_files.items():
-            sub_cwd = Path(cwd or ".") / path
-            validate_files(files, amend=amend, cwd=sub_cwd)
-    except CleanFileError as e:
-        return CommitResult(success=False, output=str(e))
-
-    # Validate: submodule files require matching message
-    for path in submod_files:
-        if path not in ci.submodules:
-            return CommitResult(
-                success=False,
-                output=(
-                    f"**Error:** Files under {path}/ but no ## Submodule {path} section"
-                ),
-            )
+    err = _validate_inputs(ci, parent_files, submod_files, cwd=cwd)
+    if err:
+        return err
 
     warnings: list[str] = [
         f"Submodule message provided but no changes found for: {path}. Ignored."
@@ -251,34 +279,39 @@ def commit_pipeline(
         if path not in submod_files
     ]
 
-    # Commit each submodule
-    submodule_outputs: dict[str, str] = {}
-    for path, files in submod_files.items():
-        sub_output = _commit_submodule(
-            path,
-            files,
-            ci.submodules[path],
-            options=ci.options,
-            cwd=cwd,
-        )
-        submodule_outputs[path] = sub_output
+    # Stage parent files before validation so precommit sees staged state
+    try:
+        if parent_files:
+            _stage_files(parent_files, cwd=cwd)
+    except subprocess.CalledProcessError as e:
+        return _error("staging failed", e)
 
-    # Stage parent files
-    if parent_files:
-        _stage_files(parent_files, cwd=cwd)
-
-    # Validation gate
+    # Validation gate — before any irrevocable commits
     err = _validate(ci, cwd=cwd)
     if err:
         return err
 
-    if ci.message is None and not no_edit:
-        return CommitResult(
-            success=False,
-            output="**Error:** No commit message provided",
-        )
+    # Commit each submodule (after validation passes)
+    submodule_outputs: dict[str, str] = {}
+    for path, files in submod_files.items():
+        try:
+            sub_output = _commit_submodule(
+                path,
+                files,
+                ci.submodules[path],
+                options=ci.options,
+                cwd=cwd,
+            )
+        except subprocess.CalledProcessError as e:
+            return _error(f"submodule {path} failed", e)
+        submodule_outputs[path] = sub_output
 
-    parent_output = _git_commit(ci.message or "", amend=amend, no_edit=no_edit, cwd=cwd)
+    try:
+        parent_output = _git_commit(
+            ci.message or "", amend=amend, no_edit=no_edit, cwd=cwd
+        )
+    except subprocess.CalledProcessError as e:
+        return _error("git commit failed", e)
 
     return CommitResult(
         success=True,

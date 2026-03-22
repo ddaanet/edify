@@ -101,3 +101,34 @@ def test_commit_cli_vet_failure(
 
     assert result.exit_code == 1
     assert "unreviewed" in result.output.lower() or "Vet" in result.output
+
+
+# Cycle 1.3: CleanFileError exit code 2
+
+
+def test_commit_cli_clean_file_exits_2(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """CleanFileError (no uncommitted changes) exits 2."""
+    monkeypatch.chdir(tmp_path)
+    _init_repo(tmp_path)
+
+    # Create and commit a file — no uncommitted changes remain
+    (tmp_path / "src").mkdir()
+    f = tmp_path / "src" / "foo.py"
+    f.write_text("committed\n")
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-m", "add foo"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+
+    # File listed but already committed — CleanFileError
+    stdin = "## Files\n- src/foo.py\n\n## Message\n> update\n"
+    runner = CliRunner()
+    result = runner.invoke(commit_cmd, input=stdin)
+
+    assert result.exit_code == 2
+    assert "no uncommitted changes" in result.output.lower()
