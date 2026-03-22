@@ -1,36 +1,40 @@
 # Session Handoff: 2026-03-22
 
-**Status:** Deliverable review complete. 2 Critical, 1 Major, 10 Minor findings. Plan status: rework.
+**Status:** Fixed 9 of 10 actionable deliverable review findings (2 Critical, 7 Minor). Major #3 (UPS fallback) routed to existing `health-check-ups-fallback` plan on main.
 
 ## Completed This Session
 
-**Deliverable review — `/deliverable-review plans/plugin-migration`:**
-- Two-layer review: Layer 1 (2 opus agents — code + prose/config), Layer 2 (interactive cross-cutting)
-- 19 deliverable files reviewed (4 initially listed files confirmed unmodified — excluded)
-- Report: `plans/plugin-migration/reports/deliverable-review.md`
-- Layer 1 sub-reports: `reports/deliverable-review-code.md`, `reports/deliverable-review-prose-config.md`
+**Fix migration findings — Group A inline execution:**
+- Critical #1: Removed version write from sessionstart-health.sh, kept read-and-compare only (FR-5 staleness nag now functional)
+- Critical #2: Fixed portable.just path in update/SKILL.md (`just/portable.just` → `portable.just`)
+- Minor #4: Added EDIFY_VERSION bump to bump-plugin-version.py (release recipe now bumps all version locations)
+- Minor #8: Removed excess `Bash(find:*)`, `Bash(python3:*)` from init/update skill allowed-tools
+- Minor #9: Standardized hooks.json to bare script invocation (removed `bash` prefix)
+- Minor #10: Fixed pip fallback to use `python3 -m venv` + venv pip (proper venv structure)
+- Minor #11: Fixed error message: "neither uv nor python3 found"
+- Minor #12: Added 6 core fragment @-references to CLAUDE.template.md
+- Minor #13: Prescribed `sha256sum` in init/SKILL.md
+- Corrector review: `plans/fix-migration-findings/reports/review.md` — all requirements satisfied, no fixes needed
+- Classification: `plans/fix-migration-findings/classification.md`
 
 ## In-tree Tasks
 
 - [x] **Review plugin migration** — `/deliverable-review plans/plugin-migration` | opus | restart
-- [ ] **Fix migration findings** — `/design plans/plugin-migration/reports/deliverable-review.md` | opus
+- [x] **Fix migration findings** — `/design plans/plugin-migration/reports/deliverable-review.md` | opus
+- [ ] **Review fix findings** — `/deliverable-review plans/fix-migration-findings` | opus | restart
 
 ## Blockers / Gotchas
 
-**Critical #1 — FR-5 staleness nag vacuous:**
-- sessionstart-health.sh writes PLUGIN_VERSION to .edify.yaml (FR-10) BEFORE comparing (FR-5). After successful write, versions always match. Nag never fires for actual staleness.
-- Fix: read and compare before writing. Or separate fields (synced_version vs plugin_version).
-
-**Critical #2 — portable.just path wrong in update skill:**
-- skills/update/SKILL.md:53 references `$CLAUDE_PLUGIN_ROOT/just/portable.just`. Actual file is `$CLAUDE_PLUGIN_ROOT/portable.just`. Guard clause silently skips sync.
+**Major #3 — UPS fallback for setup hook (not addressed):**
+- SessionStart doesn't fire for new interactive sessions (#10373). Setup (env export, CLI install, staleness nag) only runs at session end via Stop fallback.
+- Existing plan on main: `health-check-ups-fallback [requirements]`
 
 **design.md stale:**
 - Contains 5 documented errors (see outline Design Corrections section). Outline supersedes design.md for all decisions.
 
 ## Reference Files
 
-- `plans/plugin-migration/reports/deliverable-review.md` — consolidated review report
-- `plans/plugin-migration/reports/deliverable-review-code.md` — Layer 1 code review
-- `plans/plugin-migration/reports/deliverable-review-prose-config.md` — Layer 1 prose+config review
+- `plans/fix-migration-findings/reports/review.md` — corrector review of Group A fixes
+- `plans/fix-migration-findings/classification.md` — composite triage of all findings
+- `plans/plugin-migration/reports/deliverable-review.md` — original deliverable review report
 - `plans/plugin-migration/outline.md` — authoritative outline
-- `plans/plugin-migration/lifecycle.md` — plan lifecycle log
