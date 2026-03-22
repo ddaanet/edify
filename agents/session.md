@@ -17,11 +17,18 @@
 - Corrector review: `plans/fix-migration-findings/reports/review.md` — all requirements satisfied, no fixes needed
 - Classification: `plans/fix-migration-findings/classification.md`
 
+**Deliverable review of fix-migration-findings:**
+- 0 Critical, 0 Major, 3 Minor — all 9 Group A fixes verified correct
+- Minor findings: corrector review covered 6/9 items, bump script exits 0 on pattern miss, silent pip-absent path
+- Report: `plans/fix-migration-findings/reports/deliverable-review.md`
+- Lifecycle: `reviewed`
+
 ## In-tree Tasks
 
 - [x] **Review plugin migration** — `/deliverable-review plans/plugin-migration` | opus | restart
 - [x] **Fix migration findings** — `/design plans/plugin-migration/reports/deliverable-review.md` | opus
-- [ ] **Review fix findings** — `/deliverable-review plans/fix-migration-findings` | opus | restart
+- [x] **Review fix findings** — `/deliverable-review plans/fix-migration-findings` | opus | restart
+- [ ] **Fix review findings** — `/design plans/fix-migration-findings/reports/deliverable-review.md` | opus
 
 ## Blockers / Gotchas
 
