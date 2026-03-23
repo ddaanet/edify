@@ -41,7 +41,7 @@ def handoff_cmd() -> None:
 
     if stdin_text:
         handoff_input = _parse_or_fail(stdin_text)
-        save_state(stdin_text, step="write_session")
+        save_state(stdin_text)
     else:
         state = load_state()
         if state is None:

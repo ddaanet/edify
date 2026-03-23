@@ -254,13 +254,12 @@ def test_state_cache_create(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
     """save_state creates tmp/.handoff-state.json with required fields."""
     monkeypatch.chdir(tmp_path)
 
-    save_state("# input markdown", step="write_session")
+    save_state("# input markdown")
 
     state_file = tmp_path / "tmp" / ".handoff-state.json"
     assert state_file.exists()
     data = json.loads(state_file.read_text())
     assert data["input_markdown"] == "# input markdown"
-    assert data["step_reached"] == "write_session"
     assert "timestamp" in data
     # Timestamp is ISO format (contains 'T' separator)
     assert "T" in data["timestamp"]
@@ -273,12 +272,11 @@ def test_state_cache_resume(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
     # No file yet
     assert load_state() is None
 
-    save_state("# my input", step="precommit")
+    save_state("# my input")
     result = load_state()
 
     assert isinstance(result, HandoffState)
     assert result.input_markdown == "# my input"
-    assert result.step_reached == "precommit"
     # File survives load (not deleted)
     assert (tmp_path / "tmp" / ".handoff-state.json").exists()
 
@@ -290,7 +288,7 @@ def test_state_cache_cleanup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     # Idempotent when no file
     clear_state()
 
-    save_state("# input", step="diagnostics")
+    save_state("# input")
     assert load_state() is not None
 
     clear_state()

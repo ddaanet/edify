@@ -116,7 +116,7 @@ def test_session_handoff_cli_resume(
     monkeypatch.chdir(tmp_path)
     session_file = _setup_cli_repo(tmp_path)
     # Pre-populate state file
-    save_state(HANDOFF_STDIN, step="write_session")
+    save_state(HANDOFF_STDIN)
 
     runner = CliRunner()
     result = runner.invoke(

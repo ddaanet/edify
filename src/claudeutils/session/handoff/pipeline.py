@@ -17,21 +17,18 @@ class HandoffState:
 
     input_markdown: str
     timestamp: str
-    step_reached: str
 
 
-def save_state(input_md: str, step: str) -> None:
+def save_state(input_md: str) -> None:
     """Write HandoffState to tmp/.handoff-state.json.
 
     Args:
         input_md: Raw handoff stdin markdown.
-        step: Pipeline step label (e.g. ``"write_session"``).
     """
     _STATE_FILE.parent.mkdir(exist_ok=True)
     state = HandoffState(
         input_markdown=input_md,
         timestamp=datetime.now(tz=UTC).isoformat(),
-        step_reached=step,
     )
     _STATE_FILE.write_text(json.dumps(asdict(state)))
 

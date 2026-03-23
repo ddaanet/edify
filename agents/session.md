@@ -1,34 +1,39 @@
-# Session Handoff: 2026-03-22
+# Session Handoff: 2026-03-23
 
-**Status:** Deliverable review round 2 complete — 1C/3M/6m. Post-review: added findings, `.vscode` gitignore fix, rework log tracked.
+**Status:** Handoff-cli round 2 rework complete (10 findings fixed). Corrector caught and fixed 1 critical regression (Python 2 except syntax). Three new pending tasks from session observations.
 
 ## Completed This Session
 
-**Deliverable review round 2 (handoff-cli-tool):**
-- Delta-focused review: rework commits only (778+/196- across 16 files)
-- Three Layer 1 opus agents (code, test, prose+config) + Layer 2 interactive cross-cutting
-- 17/18 original findings verified fixed
-- Final findings: 1C (`_commit_submodule` check=False), 3M (SKILL.md allowed-tools, error formatting S-3, skill-CLI integration), 6m
-- Report: `plans/handoff-cli-tool/reports/deliverable-review.md`
-- Lifecycle updated: `rework` appended
+**Handoff-cli round 2 rework:**
+- Composite triage: 11 findings decomposed, M#4 (skill-CLI integration) split to separate plan
+- Integration-first TDD: 7 cycles across 5 phases, all green
+- C#1: `_commit_submodule` `check=True` — submodule commit failure now propagates error
+- M#2: SKILL.md `claudeutils:*` added to handoff allowed-tools
+- M#3: `_error()` fallback changed from `str(exc)` to `f"exit code {exc.returncode}"` — no more raw CalledProcessError repr
+- M#5: `aggregate_trees` dedup removed — plans shown per-tree, not deduplicated to main
+- m-1: Dead `render_next` deleted (function + 10 tests)
+- m-2: `render_pending` ▶ now skips worktree-marked tasks
+- m-3: `_is_dirty` uses raw subprocess instead of `_git()` to preserve porcelain format
+- m-4: Dead `step_reached` field removed from `HandoffState`
+- m-5: Old section name `## Pending Tasks` detected and rejected with exit 2
+- m-6: Weak `or` assertion split into two separate assertions
+- Corrector review: 1 critical regression caught (Python 2 `except ValueError, AttributeError:` → fixed to tuple form)
+- Report: `plans/handoff-cli-tool/reports/review.md`
 
-**Post-review additions:**
-- M#3 error messages: `_error()` falls back to `str(exc)` — not informative, not actionable. Violates S-3. Needs pattern exploration.
-- M#4 skill-CLI integration: design specified "Skill integration (future)" but skills never wired to CLI. Pattern across handoff, commit, status. Execute-rule.md STATUS template should be reference file, not inline.
-- Root cause: "(future)" qualifier on in-scope requirements creates permanent deferral — no phase owns it
-
-**Cleanup:**
-- Fixed `.vscode` gitignore: trailing slash required directory match, `.vscode` is a char device in sandbox
-- Tracked `rework-execution-log.md` (renamed from `execution-report.md`)
-- Removed `plans/agent-hallucination/` (RCA complete — naming discipline + restart)
-- `.gitignore` previously clobbered by `echo >` — restored and fixed properly
+**RCA: inline recall keywords in delegation prompt:**
+- Deviation: inlined recall keywords in corrector dispatch instead of referencing artifact path
+- Root cause: pattern entrainment from 6 prior test-driver dispatches
+- Classification: insufficient context at decision point + unanchored gate
+- Brief written: `plans/inline-dispatch-recall/brief.md`
 
 ## In-tree Tasks
 
 - [x] **Review handoff-cli rework** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
   - Plan: handoff-cli-tool
-- [ ] **Fix handoff-cli round 2** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | sonnet
-  - Plan: handoff-cli-tool | 1C, 4M, 6m — submodule returncode, SKILL.md tools, error formatting, skill-CLI integration, worktree ls dedup, minor cleanup
+- [x] **Fix handoff-cli round 2** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | sonnet
+  - Plan: handoff-cli-tool | 10 findings fixed, corrector-reviewed
+- [ ] **Handoff-cli RC3** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
+  - Plan: handoff-cli-tool
 - [ ] **Runbook warnings** — `/design plans/runbook-warnings/brief.md` | sonnet
   - Plan: runbook-warnings | Status: briefed
 - [ ] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
@@ -47,21 +52,33 @@
 - [ ] **Runbook integration-first** — `/design plans/runbook-integration-first/brief.md` | sonnet
   - Addendum to runbook-quality-directives plan
 - [ ] **Commit drift guard** — `/design plans/commit-drift-guard/brief.md` | opus
-  - Design how _commit CLI verifies files haven't changed since last diff. Trade-offs: full diff (wasteful), incremental diff (doesn't prevent drift). Needs background research.
+  - Design how _commit CLI verifies files haven't changed since last diff
+- [ ] **Skill-CLI integration** — `/design plans/skill-cli-integration/brief.md` | opus | restart
+  - Split from M#4: wire commit/handoff/status skills to CLI tools
+- [ ] **Inline resume policy** — `/design plans/inline-resume-policy/brief.md` | sonnet
+  - Add resume-between-cycles directive to /inline delegation protocol
+- [ ] **Pending brief generation** — `/design plans/pending-brief-generation/brief.md` | sonnet
+  - p: directive should create plans/<slug>/brief.md to back the task
+- [ ] **Inline dispatch recall** — `/design plans/inline-dispatch-recall/brief.md` | sonnet
+  - Fix review-dispatch-template to enforce artifact-path-only recall pattern
+- [ ] **Worktree ls filtering** — `/design plans/worktree-ls-filtering/brief.md` | sonnet
+  - _worktree ls dumps all plans across all trees; handoff only needs session.md plan dirs
 
 ## Blockers / Gotchas
 
-**Learnings at soft limit (112 lines):**
+**Learnings at soft limit (111 lines):**
 - `/codify` overdue — next session should consolidate older learnings
 
-**Skill-CLI integration gap:**
-- Design specified "Skill integration (future)" but no review round caught the missing wiring. "(future)" qualifier on in-scope requirements creates permanent deferral.
+**pretooluse-recall-check hook regex:**
+- `[^/]+` matches across newlines/spaces, capturing prose text between `plans/` and next `/`. Three blocked dispatches this session. Brief at `plans/inline-dispatch-recall/brief.md` covers fix.
 
 ## Reference Files
 
-- `plans/handoff-cli-tool/reports/deliverable-review.md` — round 2 review report (1C, 3M, 6m)
-- `plans/handoff-cli-tool/lifecycle.md` — now at rework (round 2)
+- `plans/handoff-cli-tool/reports/review.md` — corrector review (1C fixed, 1m deferred)
+- `plans/handoff-cli-tool/reports/deliverable-review.md` — round 2 findings (input)
+- `plans/handoff-cli-tool/runbook.md` — Tier 2 runbook (integration-first TDD)
+- `plans/skill-cli-integration/brief.md` — M#4 split-out brief
 
 ## Next Steps
 
-Fix handoff-cli round 2 findings (1C/3M/6m) via `/design` triage. Learnings `/codify` overdue.
+Deliverable review for handoff-cli round 2 rework, then `/codify` to consolidate learnings (111 lines, soft limit 80).

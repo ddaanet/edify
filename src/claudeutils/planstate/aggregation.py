@@ -109,7 +109,7 @@ def _commits_since_handoff(tree_path: Path) -> int:
 
     try:
         return int(result.stdout.strip())
-    except ValueError, AttributeError:
+    except (ValueError, AttributeError):
         return 0
 
 
@@ -132,7 +132,7 @@ def _latest_commit(tree_path: Path) -> tuple[str, int]:
     subject = lines[0]
     try:
         timestamp = int(lines[1])
-    except ValueError, IndexError:
+    except (ValueError, IndexError):
         timestamp = 0
 
     return (subject, timestamp)
