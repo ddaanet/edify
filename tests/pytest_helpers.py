@@ -76,6 +76,19 @@ def init_repo_at(path: Path) -> None:
     )
 
 
+def init_repo_minimal(path: Path) -> None:
+    """Init a git repo with user config (cwd style)."""
+    for args in [
+        ["git", "init"],
+        ["git", "config", "user.email", "test@test.com"],
+        ["git", "config", "user.name", "Test"],
+    ]:
+        result = subprocess.run(
+            args, cwd=path, check=False, capture_output=True, text=True
+        )
+        assert result.returncode == 0, f"git {' '.join(args)} failed: {result.stderr}"
+
+
 def setup_git_repo(tmp_path: Path) -> None:
     """Initialize a git repo in tmp_path for git add in validate_and_create."""
     subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True, check=False)

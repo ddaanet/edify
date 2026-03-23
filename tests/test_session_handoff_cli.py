@@ -11,23 +11,7 @@ from click.testing import CliRunner
 
 from claudeutils.cli import cli
 from claudeutils.session.handoff.pipeline import save_state
-
-
-def _init_repo(path: Path) -> None:
-    """Initialize a minimal git repo for CLI testing."""
-    subprocess.run(["git", "init"], cwd=path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@test.com"],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test"],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
+from tests.pytest_helpers import init_repo_minimal
 
 
 def _commit_session(path: Path, session_file: Path) -> None:
@@ -76,7 +60,7 @@ def _setup_cli_repo(tmp_path: Path) -> Path:
     agents_dir.mkdir()
     session_file = agents_dir / "session.md"
     session_file.write_text(SESSION_FOR_CLI)
-    _init_repo(tmp_path)
+    init_repo_minimal(tmp_path)
     _commit_session(tmp_path, session_file)
     return session_file
 
@@ -161,7 +145,7 @@ def test_handoff_shows_submodule_changes(
     # Set up parent with submodule
     sub_origin = tmp_path / "sub-origin"
     sub_origin.mkdir()
-    _init_repo(sub_origin)
+    init_repo_minimal(sub_origin)
     (sub_origin / "init.md").write_text("init\n")
     subprocess.run(["git", "add", "."], cwd=sub_origin, check=True, capture_output=True)
     subprocess.run(
@@ -173,7 +157,7 @@ def test_handoff_shows_submodule_changes(
 
     parent = tmp_path / "parent"
     parent.mkdir()
-    _init_repo(parent)
+    init_repo_minimal(parent)
     (parent / "init.md").write_text("init\n")
     subprocess.run(["git", "add", "."], cwd=parent, check=True, capture_output=True)
     subprocess.run(

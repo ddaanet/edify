@@ -21,6 +21,7 @@ from claudeutils.session.handoff.pipeline import (
     save_state,
     write_completed,
 )
+from tests.pytest_helpers import init_repo_minimal
 
 HANDOFF_INPUT_FIXTURE = """\
 **Status:** Design Phase A complete — outline reviewed.
@@ -172,23 +173,6 @@ SESSION_WITH_COMPLETED = """\
 """
 
 
-def _init_repo(path: Path) -> None:
-    """Initialize a minimal git repo for testing write_completed."""
-    subprocess.run(["git", "init"], cwd=path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@test.com"],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test"],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
-
-
 def _commit_session(path: Path, session_file: Path) -> None:
     """Stage and commit session.md in the test repo."""
     subprocess.run(
@@ -266,6 +250,28 @@ def test_write_completed_overwrites_not_appends(tmp_path: Path) -> None:
     assert "- Second session work." in content
     assert "- First session work." not in content
     assert "- Old task A" not in content
+
+
+# M-1: Committed-state overwrite verification
+
+
+def test_write_completed_overwrites_committed_state(
+    tmp_path: Path,
+) -> None:
+    """write_completed overwrites section even after session.md is committed."""
+    init_repo_minimal(tmp_path)
+    agents_dir = tmp_path / "agents"
+    agents_dir.mkdir()
+    session_file = agents_dir / "session.md"
+    session_file.write_text(SESSION_WITH_COMPLETED)
+    _commit_session(tmp_path, session_file)
+
+    write_completed(session_file, ["- New work done."])
+
+    content = session_file.read_text()
+    assert "- New work done." in content
+    assert "- Old task A" not in content
+    assert "- Old task B" not in content
 
 
 # Cycle 4.4: state caching

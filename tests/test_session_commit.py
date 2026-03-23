@@ -18,6 +18,7 @@ from claudeutils.session.commit_gate import (
     validate_files,
     vet_check,
 )
+from tests.pytest_helpers import init_repo_minimal
 
 COMMIT_INPUT_FIXTURE = """\
 ## Files
@@ -160,26 +161,9 @@ def test_parse_commit_blockquote_stripping() -> None:
 # Cycle 5.2: validate_files — clean files check
 
 
-def _init_repo(path: Path) -> None:
-    """Initialize a minimal git repo for commit gate testing."""
-    subprocess.run(["git", "init"], cwd=path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@test.com"],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test"],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
-
-
 def test_validate_files_dirty(tmp_path: Path) -> None:
     """All listed files appear in git status → passes."""
-    _init_repo(tmp_path)
+    init_repo_minimal(tmp_path)
     # Create and commit a file, then modify it
     f = tmp_path / "src" / "foo.py"
     f.parent.mkdir(parents=True)
@@ -199,7 +183,7 @@ def test_validate_files_dirty(tmp_path: Path) -> None:
 
 def test_validate_files_clean_error(tmp_path: Path) -> None:
     """Clean file raises CleanFileError with STOP directive."""
-    _init_repo(tmp_path)
+    init_repo_minimal(tmp_path)
     f = tmp_path / "clean.py"
     f.write_text("content")
     subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
@@ -222,7 +206,7 @@ def test_validate_files_clean_error(tmp_path: Path) -> None:
 
 def test_validate_files_amend(tmp_path: Path) -> None:
     """Amend mode accepts files in HEAD commit even if clean."""
-    _init_repo(tmp_path)
+    init_repo_minimal(tmp_path)
     f = tmp_path / "src" / "bar.py"
     f.parent.mkdir(parents=True)
     f.write_text("content")

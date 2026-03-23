@@ -187,6 +187,14 @@ def test_detect_parallel_mixed() -> None:
     assert len(result) >= 2
 
 
+def test_detect_parallel_caps_at_five() -> None:
+    """Seven independent tasks return exactly 5 (ST-1 cap)."""
+    tasks = [_task_with_plan(f"Task{i}", f"plan-{i}") for i in range(7)]
+    result = detect_parallel(tasks, [])
+    assert result is not None
+    assert len(result) == 5
+
+
 def test_detect_parallel_blocker_excludes() -> None:
     """Blocker referencing task name creates dependency."""
     tasks = [
