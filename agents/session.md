@@ -1,18 +1,15 @@
 # Session Handoff: 2026-03-23
 
-**Status:** Handoff-cli round 3 Moderate batch complete (3/3 findings fixed). All deliverable-review findings now resolved. Deliverable-review task pending.
+**Status:** RC4 deliverable review complete (0C/2M/9m). All RC3 Majors resolved. Fix task queued.
 
 ## Completed This Session
 
-**Handoff-cli round 3 Moderate batch (3 fixes via TDD):**
-- M-pre-1: Blocker detection wired e2e — `SessionData.blockers` field added, `extract_blockers` composed into `parse_session`, `detect_parallel` receives real blockers instead of `[]`
-- M-pre-2: Vet stale output includes per-file detail — `_newest_file` helper returns (mtime, path), `stale_info` formatted with relative paths and timestamps per design spec
-- m-pre-3: Completed parser blank line preservation — both `parse_completed_section` and `parse_handoff_input` preserve internal blank lines, strip only leading/trailing
-- Corrector review: 0C/1M/2m, all fixed (vet paths, handoff leading blanks, tighter test assertions)
-
-**Prior session (already committed):**
-- Design skill loophole fixed (Simple routing "implement directly" removed)
-- Simple batch: 5 of 6 minor pre-existing fixed (m#1 regex, m-pre-1 _fail dedup, m-pre-4 double read, m-pre-5 strip_hints, m-pre-6 init_repo dedup)
+**Handoff-cli RC4 deliverable review:**
+- Full-scope review: Layer 1 (3 opus agents: code, test, prose+config) + Layer 2 (interactive cross-cutting)
+- RC3 fix verification: all 2M+6m code findings verified fixed (blockers wired, stale detail, _fail dedup, blank lines, double read, regex)
+- RC4 findings: 0C/2M/9m — test coverage gap (H-2 committed detection), _init_repo duplication, 9 minor conformance/quality items
+- Report: `plans/handoff-cli-tool/reports/deliverable-review.md`
+- Lifecycle updated: `reviewed`
 
 ## In-tree Tasks
 
@@ -20,7 +17,10 @@
   - Plan: handoff-cli-tool | 0C/0M(delta), 2m(delta), 2M+6m(pre-existing)
 - [x] **Fix handoff-cli round 3** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | sonnet
   - Plan: handoff-cli-tool | All findings resolved: Simple batch (5), Moderate batch (3), corrector fixes applied
-- [ ] **Handoff-cli RC4** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
+- [x] **Handoff-cli RC4** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
+  - Plan: handoff-cli-tool | 0C/2M/9m
+- [ ] **Fix handoff-cli RC4** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | sonnet
+  - Plan: handoff-cli-tool | 2M (test coverage gap, helper dedup) + 9m
 - [ ] **Runbook warnings** — `/design plans/runbook-warnings/brief.md` | sonnet
   - Plan: runbook-warnings | Status: briefed
 - [ ] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
@@ -61,9 +61,10 @@
 
 ## Reference Files
 
-- `plans/handoff-cli-tool/reports/review.md` — corrector review of Moderate batch (0C/1M/2m, all fixed)
-- `plans/handoff-cli-tool/reports/deliverable-review.md` — RC3 findings (source document)
+- `plans/handoff-cli-tool/reports/deliverable-review.md` — RC4 findings (0C/2M/9m)
+- `plans/handoff-cli-tool/reports/deliverable-review-test.md` — RC4 test layer review
+- `plans/handoff-cli-tool/reports/review.md` — corrector review of Moderate batch
 
 ## Next Steps
 
-Deliverable review round 4 via `/deliverable-review plans/handoff-cli-tool` (opus, restart required).
+Fix RC4 findings via `/design plans/handoff-cli-tool/reports/deliverable-review.md` (sonnet).

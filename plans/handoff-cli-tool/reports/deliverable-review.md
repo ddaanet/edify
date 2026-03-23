@@ -1,29 +1,33 @@
-# Deliverable Review: handoff-cli-tool (Round 3)
+# Deliverable Review: handoff-cli-tool (RC4)
 
 **Date:** 2026-03-23
 **Methodology:** agents/decisions/deliverable-review.md
-**Scope:** Rework delta only (325+/143- across 15 files, commits `c2f7bd75..f3017971`)
-**Layer 1:** Three opus agents (code, test, prose+config) — full scope, filtered to delta
-**Layer 2:** Cross-cutting checks + delta verification
+**Approach:** Layer 1 (three opus agents: code, test, prose+config) + Layer 2 (interactive cross-cutting)
 
-## Round 2 Fix Verification
+## Inventory
 
-All 10 findings fixed. Corrector regression fixed.
+| Type | Files | + | - | Net |
+|------|-------|---|---|-----|
+| Code | 26 | +1621 | -95 | +1526 |
+| Test | 20 | +3381 | -16 | +3365 |
+| Agentic prose | 2 | +9 | -6 | +3 |
+| Configuration | 2 | +2 | -2 | +0 |
+| **Total** | **50** | **+5013** | **-119** | **+4894** |
 
-| Finding | Status | Evidence |
-|---------|--------|----------|
-| C#1 `_commit_submodule check=True` | ✅ | `commit_pipeline.py:139` — `check=True`, pipeline catches CalledProcessError at :306 |
-| M#2 SKILL.md `claudeutils:*` | ✅ | `SKILL.md:4` — `Bash(just:*,wc:*,git:*,claudeutils:*)` |
-| M#3 `_error()` fallback | ✅ | `commit_pipeline.py:217` — `exc.stderr or f"exit code {exc.returncode}"` |
-| M#4 Skill-CLI integration | ⏳ DEFERRED | Split to `plans/skill-cli-integration/` — worktree task in session.md |
-| M#5 `aggregate_trees` dedup | ✅ | `aggregation.py:203-208` — all plans appended per-tree, no dict dedup |
-| m-1 Dead `render_next` | ✅ | Function removed from `render.py` |
-| m-2 ▶ worktree-marker skip | ✅ | `render.py:41` — `task.worktree_marker is None` |
-| m-3 `_is_dirty` raw subprocess | ✅ | `git.py:128-134` — raw `subprocess.run`, `rstrip("\n")` preserves porcelain format |
-| m-4 Dead `step_reached` | ✅ | Field removed from `HandoffState`, `save_state()` simplified |
-| m-5 Old section name detection | ✅ | `status/cli.py:22-28` — `_check_old_section_name()` before count validation |
-| m-6 Weak `or` assertion | ✅ | `test_status_rework.py:142-144` — two separate asserts |
-| Corrector: Python 2 except syntax | ✅ | `aggregation.py:112,135` — parenthesized tuple form restored |
+### RC3 Finding Verification
+
+| RC3 Finding | Status |
+|-------------|--------|
+| F-1 (M): Parallel detection ignores blockers | FIXED — `data.blockers` wired at cli.py:99 |
+| F-2 (M): Stale vet lacks file detail | FIXED — `_newest_file` helper, per-file timestamps |
+| F-3 (m): Duplicate `_fail` in worktree/cli.py | FIXED — removed, imports from git.py |
+| F-4 (m): ▶ format deviates from design | Open — see m-3 |
+| F-5 (m): Handoff parser strips blank lines | FIXED — both parsers preserve blanks |
+| F-6 (m): Double read in status CLI | FIXED — content passed via kwarg |
+| F-7 (m): Substring match for old section name | FIXED — uses `re.search` + `re.MULTILINE` |
+| F-8 (m): `_strip_hints` incomplete | Open — see m-4 |
+
+All RC3 Majors resolved. 2 of 6 RC3 Minors remain open.
 
 ## Critical Findings
 
@@ -31,71 +35,77 @@ None.
 
 ## Major Findings
 
-None from rework delta.
+1. **M-1: H-2 committed detection not tested against git state** (test_session_handoff.py, coverage)
+   - Design H-2 specifies three write modes keyed on `git diff HEAD -- agents/session.md`. Implementation validly collapses to always-overwrite. No test verifies this invariant against committed state — all `write_completed` tests operate on bare files without a git repo. A single test that commits session.md, modifies it, then calls `write_completed` would confirm the simplification produces correct results.
+
+2. **M-2: `_init_repo` duplicated across 6+ test files** (tests/test_session_*.py, excess)
+   - Local `_init_repo` variants in test_session_commit.py, test_session_handoff.py, test_session_handoff_cli.py, test_session_integration.py, test_session_commit_pipeline_ext.py, test_session_commit_validation.py. `tests/pytest_helpers.py` exports `init_repo_at` which some files already use. Variants diverge (cwd vs -C, README vs empty commit). Maintenance hazard.
 
 ## Minor Findings
 
-### 1. `_check_old_section_name` uses substring match, not line-anchored
+### Conformance
 
-- **File:** `src/claudeutils/session/status/cli.py:24`
-- **Axis:** Robustness
-- **Introduced by:** m-5 fix
-- `"## Pending Tasks" in content` matches anywhere in session.md, including prose (e.g., "Renamed ## Pending Tasks to ## In-tree Tasks" in a completed entry). `re.search(r"^## Pending Tasks", content, re.MULTILINE)` would be more precise. False-positive risk is low in practice.
+1. **m-1: HandoffState missing `step_reached` field** (session/handoff/pipeline.py:14-19)
+   - Design H-4 specifies `{"input_markdown": "...", "timestamp": "...", "step_reached": "..."}` with values `"write_session"` | `"diagnostics"`. Implementation has only `input_markdown` and `timestamp`. The pipeline replays fully on resume (correct due to idempotent operations) but doesn't match spec.
 
-### 2. `load_state()` backward-incompatible with pre-rework state files
+2. **m-2: No ANSI color in `_status` output** (session/status/render.py)
+   - Design says "ANSI-colored structured text." Implementation produces plain text only. Affects human usability for the direct invocation display path.
 
-- **File:** `src/claudeutils/session/handoff/pipeline.py:44-45`
-- **Axis:** Robustness
-- **Introduced by:** m-4 fix (removed `step_reached`)
-- `HandoffState(**data)` on a state file containing `step_reached` raises `TypeError: unexpected keyword argument`. Crash-recovery path breaks if: handoff crashes before rework → code updated → retry. Impact: near-zero (state files are ephemeral crash recovery in `tmp/`, cleared on success).
+3. **m-3: ▶ line format deviates from design** (session/status/render.py:44)
+   - Design: `▶ <task> (<model>) | Restart: <yes/no>` with command on separate indented line. Implementation: `▶ <task> — \`<cmd>\` | <model> | restart: <restart>` (inline, lowercase). Denser format, arguably better for terminal.
 
-## Pre-existing Findings (not from rework)
+4. **m-4: `_strip_hints` only filters `hint:` and `advice:` prefixed lines** (session/commit_pipeline.py:187-189)
+   - Git hint output includes indented continuation lines. Low impact — hints rare in commit output.
 
-Observed during review but pre-dating the rework delta. Included for tracking — these exist in the current deliverable set regardless of rework.
+### Test Quality
 
-**Major (pre-existing):**
+5. **m-5: Parallel cap-at-5 untested** (test_session_status.py)
+   - Design ST-1: "Cap at 5 concurrent sessions." No test creates 6+ independent tasks to verify.
 
-- **Parallel detection ignores Blockers/Gotchas** — `status/cli.py:98` passes `[]` to `detect_parallel`. Session parser doesn't extract blockers. ST-1 design specifies blocker-based dependency. Unit-tested in `detect_parallel` but never wired e2e.
-- **Stale vet output lacks file-level detail** — `commit_gate.py:160-166` returns time delta, not per-file info with timestamps. Design specifies `Newest change: src/auth.py (date)` format.
+6. **m-6: `or`-disjunction assertions weaken specificity** (test_session_commit_pipeline.py:40,75)
+   - `assert "foo" in output or "1 file" in output` cannot distinguish which held. Pre-existing.
 
-**Minor (pre-existing, 6):**
+7. **m-7: Integration test `test_handoff_then_status` incomplete** (test_session_integration.py:60)
+   - Verifies status shows pending task after handoff but does not check completed section or status line update.
 
-- Duplicate `_fail` in `worktree/cli.py` vs `git.py` (S-2 extraction incomplete)
-- `render_pending` ▶ line format differs from design spec (denser inline format vs separate command line)
-- Handoff completed parser strips blank lines between `### ` groups
-- `session_path.read_text()` called twice in status CLI (parse_session + raw read)
-- `_strip_hints` only removes `hint:` prefix, not `advice` lines
-- `_init_repo` duplicated in 8 test files instead of using shared `pytest_helpers.init_repo_at`
+### Scope
+
+8. **m-8: `.gitignore` and `.claude/settings.local.json` outside design scope** (configuration)
+   - Incidental cleanup attributed to this plan. Functionally correct, benign.
+
+9. **m-9: worktree/cli.py:311 hardcodes "agent-core"** (worktree/cli.py:311)
+   - Design S-2: "Replaces -C agent-core literals with iteration over discovered submodules." New session code uses `discover_submodules()`. Pre-existing worktree caller still hardcodes. Not a regression — pre-existing.
 
 ## Gap Analysis
 
-| Design Requirement | Status |
-|-------------------|--------|
-| S-1 Package structure | ✓ Conforms |
-| S-2 `_git()` extraction | ✓ Conforms |
-| S-3 Output/error conventions | ✓ Conforms |
-| S-4 Session.md parser | ✓ Conforms |
-| S-5 Git changes utility | ✓ Conforms |
-| H-1 Domain boundaries | ✓ Conforms |
-| H-2 Committed detection | ✓ Simplified to overwrite (documented) |
-| H-3 Diagnostic output | ✓ Conforms |
-| H-4 State caching | ✓ Conforms |
-| C-1 Scripted vet check | ✓ Conforms (output detail gap — pre-existing) |
-| C-2 Submodule coordination | ✓ Conforms |
-| C-3 Input validation | ✓ Conforms |
-| C-4 Validation levels | ✓ Conforms |
-| C-5 Amend semantics | ✓ Conforms |
-| ST-0 Worktree-destined tasks | ✓ Conforms |
-| ST-1 Parallel group detection | Partial — blocker check not wired (pre-existing) |
-| ST-2 Preconditions/degradation | ✓ Conforms |
-| CLI registration | ✓ Conforms |
+| Design Requirement | Status | Reference |
+|---|---|---|
+| S-1: Package structure | Covered | session/ package with all specified modules |
+| S-2: `_git()` extraction + submodule discovery | Covered | git.py, worktree imports updated |
+| S-3: Output and error conventions | Covered | stdout only, exit codes, `**Header:** content` |
+| S-4: Session.md parser | Covered | parse.py composes existing functions |
+| S-5: Git changes utility | Covered | git_cli.py with `_git changes` command |
+| H-1: Domain boundaries | Covered | CLI writes status + completed only |
+| H-2: Committed detection | Covered (simplified) | Always-overwrite, test gap (M-1) |
+| H-3: Diagnostic output | Covered | git_changes() after writes |
+| H-4: State caching | Covered (partial) | Missing step_reached (m-1) |
+| C-1: Scripted vet check | Covered | pyproject.toml patterns, report discovery |
+| C-2: Submodule coordination | Covered | Partition, validate, commit-first |
+| C-3: Input validation | Covered | CleanFileError with STOP directive |
+| C-4: Validation levels | Covered | just-lint/no-vet orthogonal options |
+| C-5: Amend semantics | Covered | amend, no-edit, message validation |
+| ST-0: Worktree-destined tasks | Covered | ▶ skips worktree-marked tasks |
+| ST-1: Parallel detection | Covered | Blockers wired, consecutive windows, cap |
+| ST-2: Preconditions | Covered | Missing file=exit 2, old format=exit 2 |
+| Registration in cli.py | Covered | All four commands registered |
+| Coupled skill update | Covered | Handoff skill has precommit gate (pre-existing) |
 
 ## Summary
 
-| Severity | Rework delta | Pre-existing |
-|----------|-------------|-------------|
-| Critical | 0 | 0 |
-| Major | 0 | 2 |
-| Minor | 2 | 6 |
+| Severity | Count |
+|----------|-------|
+| Critical | 0 |
+| Major | 2 |
+| Minor | 9 |
 
-All 10 round 2 findings verified fixed. Corrector regression (Python 2 except syntax) verified fixed. Two minor issues introduced by the rework: substring match in old-section detection, backward-incompatible state file format. Two pre-existing Major findings (blocker detection gap, vet output detail) and six pre-existing Minor findings.
+**Delta from RC3:** RC3 had 2M+6m (code) + 5M+8m (test) + 0M+2m (prose). This round: 2M+9m total. All RC3 code Majors resolved. Test Majors reduced from 5 to 2. Remaining Majors are a test coverage gap (H-2 committed detection) and test helper duplication.

@@ -1,25 +1,23 @@
-# Code Review: handoff-cli-tool (Round 3)
+# Code Deliverable Review (RC4)
 
-**Reviewer:** Opus 4.6
+**Reviewer:** Opus 4.6 [1M]
 **Design reference:** `plans/handoff-cli-tool/outline.md`
-**Scope:** 25 code files, +1585 lines. Full conformance review against design outline.
+**Scope:** 26 code files per review manifest. Full conformance review.
 
-## Round 2 Fix Verification
+## Round 3 Fix Verification
 
 | Finding | Fix Status |
 |---------|-----------|
-| C#1 `_commit_submodule check=True` | FIXED — `commit_pipeline.py:139` uses `check=True` |
-| M#2 SKILL.md `claudeutils:*` | FIXED — verified in prior review report |
-| M#3 `_error()` fallback | FIXED — `commit_pipeline.py:217` uses `exc.stderr or f"exit code {exc.returncode}"` |
-| m-1 Dead `render_next` | FIXED — no `render_next` in `src/` (grep confirmed) |
-| m-2 ▶ skips worktree-marked tasks | FIXED — `render.py:41` checks `task.worktree_marker is None` |
-| m-3 `_is_dirty` raw subprocess | FIXED — `git.py:128-134` uses raw `subprocess.run` with `rstrip("\n")` |
-| m-4 Dead `step_reached` field | FIXED — no `step_reached` in `src/` (grep confirmed) |
-| m-5 Old section name detection | FIXED — `status/cli.py:22-28` checks before count validation |
-| m-6 Weak `or` assertion | FIXED — per prior review verification |
-| Corrector: `except ValueError, AttributeError` | FIXED — `aggregation.py:112,135` restored parenthesized tuples |
+| F-1 Parallel detection ignores blockers | FIXED — `status/cli.py:99` passes `data.blockers`; `parse.py:156` calls `extract_blockers` |
+| F-2 Stale vet output lacks file detail | FIXED — `commit_gate.py:163-176` returns per-file paths with timestamps |
+| F-3 Duplicate `_fail` in worktree/cli | FIXED — removed; imports from `git.py` |
+| F-4 ▶ line format deviation | Acknowledged — format differs from design but is denser; not a correctness issue |
+| F-5 Handoff parser strips blank lines | FIXED — `parse.py:48-57` preserves internal blank lines, strips only leading/trailing |
+| F-6 Double read in status CLI | FIXED — `status/cli.py:53,58` reads once, passes `content=` to parser |
+| F-7 Old section name substring match | FIXED — `status/cli.py:25` uses `re.search(r"^## Pending Tasks", ..., re.MULTILINE)` |
+| F-8 `_strip_hints` continuation lines | Acknowledged — low impact for commit use case |
 
-All 10 round 2 rework fixes verified. No regressions detected from the fix application.
+All 6 actionable fixes verified. No regressions from fix application.
 
 ## New Findings
 
@@ -29,95 +27,58 @@ None.
 
 ### Major
 
-**F-1: Parallel detection ignores Blockers/Gotchas section**
+1. **commit_gate.py:108-129,141 — `vet_check` ignores `cwd` parameter:** `_load_review_patterns()` reads `Path("pyproject.toml")` and `_find_reports()` globs `Path("plans")` — both resolve relative to process CWD, not a configurable root. The rest of `commit_gate.py` (`validate_files`, `_dirty_files`, `_head_files`) consistently accept and propagate `cwd`. `vet_check()` itself accepts no `cwd`, and `commit_pipeline._validate` which holds `cwd` cannot pass it through. If the pipeline is invoked with `cwd != None`, vet check reads wrong config and wrong reports.
+   - **Axis:** Robustness / API consistency
+   - **Severity justification:** The CLI always runs from project root (process CWD = repo root), so this does not cause production failures today. However, tests that use `tmp_path` repos may need `monkeypatch.chdir` to work around this inconsistency. The inconsistency with the rest of the module's API makes it a latent defect.
 
-- `src/claudeutils/session/status/cli.py:98`
-- Axis: Functional completeness
-- Design ST-1: "Independent when: no shared plan directory, no logical dependency (Blockers/Gotchas)." The status CLI calls `detect_parallel(data.in_tree_tasks, [])` — always passing an empty blockers list. The session parser (`parse.py`) does not extract the Blockers/Gotchas section. `_build_dependency_edges` in `render.py:97-119` accepts blockers and joins their text for name-matching, but the input is always empty. Tasks linked via Blockers/Gotchas will be incorrectly classified as parallelizable.
-
-**F-2: Stale report vet check output lacks file-level detail**
-
-- `src/claudeutils/session/commit_gate.py:160-166`
-- Axis: Conformance
-- Design specifies stale-report output as:
-  ```
-  **Vet check:** stale report
-  - Newest change: src/auth.py (2026-02-20 14:32)
-  - Newest report: plans/foo/reports/vet-review.md (2026-02-20 12:15)
-  ```
-  Implementation returns `VetResult(stale_info=f"Source newer than reports by {delta}s")` — a time delta string, not per-file information with timestamps. The consumer at `commit_pipeline.py:176` renders this as `**Vet check:** stale report\n{vr.stale_info}`. The LLM consumer (commit skill) cannot identify which file is newest or which report to regenerate.
+2. **worktree/cli.py:308 — hardcoded `"agent-core"` in `_is_submodule_dirty` call:** Design S-2 states "Replaces `-C agent-core` literals with iteration over discovered submodules." The extraction to `git.py` was done correctly (parametric `path` argument), but this call site reintroduces a hardcoded submodule name instead of iterating `discover_submodules()`. The `_is_submodule_dirty` function was designed to be called per-submodule in a loop.
+   - **Axis:** Conformance (design S-2)
+   - **Severity justification:** Only one submodule exists today (`agent-core`), so behavior is correct. But the design explicitly required eliminating hardcoded names for future-proofing.
 
 ### Minor
 
-**F-3: Duplicate `_fail` function in `worktree/cli.py`**
+1. **worktree/cli.py:104,176 — except tuple parentheses removed:** Diff changed `except (FileNotFoundError, subprocess.CalledProcessError):` to `except FileNotFoundError, subprocess.CalledProcessError:` (same at line 176). Valid in Python 3.14+ (PEP 758) but unconventional. The parenthesized form is universal Python idiom and clearer.
+   - **Axis:** Robustness (readability)
 
-- `src/claudeutils/worktree/cli.py:66-68` vs `src/claudeutils/git.py:33-39`
-- Axis: Modularity
-- Design S-2 specifies extracting shared helpers to `claudeutils/git.py`. Session CLI files import `_fail` from `git.py`. The worktree CLI retains its own local `_fail` with identical behavior. Not a correctness issue — duplication adds maintenance risk (divergent fixes).
+2. **commit_pipeline.py:34,49 — precommit/lint stderr discarded:** `_run_precommit` and `_run_lint` return only `result.stdout.strip()`. Some lint tools write diagnostics to stderr. Design says failure output should include "gate-specific diagnostic output."
+   - **Axis:** Functional completeness
 
-**F-4: `render_pending` ▶ line format deviates from design**
+3. **git.py:24 — `_git()` strips stdout unconditionally:** The shared `_git()` helper applies `.strip()`. Per the porcelain-format learning, `_dirty_files` and `git_status` correctly avoid `_git()`, but any future caller using `_git("status", "--porcelain")` would get silently broken output. A docstring warning would prevent regression.
+   - **Axis:** Robustness (defensive documentation)
 
-- `src/claudeutils/session/status/render.py:44`
-- Axis: Conformance
-- Design specifies:
-  ```
-  ▶ <first task> (<model>) | Restart: <yes/no>
-    `<command>`
-  ```
-  Command on a separate indented line, model in parentheses, `Restart` capitalized. Implementation renders:
-  ```
-  ▶ <task> — `<cmd>` | <model> | restart: <restart>
-  ```
-  Command inline with the marker, model pipe-separated, lowercase `restart`. The implementation format is denser and arguably better for terminal display. Not a correctness issue but differs from design spec.
+4. **handoff/cli.py:57-59 — markdown headers inside code fence:** `git_changes()` returns markdown with `## Parent` / `## Submodule:` headers. Handoff CLI wraps in `` ```...``` `` code fence. Headers inside code fences render as literal text, losing structural formatting.
+   - **Axis:** Conformance (H-3 diagnostic output)
 
-**F-5: Handoff completed parser strips blank lines between content groups**
+5. **status/render.py:44 — ▶ line format differs from design:** Design: `▶ <task> (<model>) | Restart: <yes/no>` with command on next indented line. Implementation: `▶ {name} — \`{cmd}\` | {model} | restart: {restart}` — command inline, model not parenthesized, lowercase `restart`. Plan status also missing from ▶ task (shown for other tasks).
+   - **Axis:** Conformance (carried from F-4)
 
-- `src/claudeutils/session/handoff/parse.py:52`
-- Axis: Functional correctness
-- `parse_handoff_input` filters blank lines: `if line.strip():`. When the completed section contains multiple `### ` heading groups separated by blank lines, the parser strips the separators. `write_completed` in `pipeline.py:121` does not restore them. Result: heading groups written without blank-line separation, causing markdown rendering to merge list items across headings.
-
-**F-6: `session_path.read_text()` called twice in status CLI**
-
-- `src/claudeutils/session/status/cli.py:52,56`
-- Axis: Robustness
-- `parse_session(session_path)` reads the file at line 52, then `session_path.read_text()` reads it again at line 56 for `_check_old_section_name` and `_count_raw_tasks`. Between the two reads, the file could be modified by another process (unlikely but possible during concurrent agent sessions). The second read could see different content than what was parsed. A single read with content reuse would be safer.
-
-**F-7: `_check_old_section_name` uses substring match**
-
-- `src/claudeutils/session/status/cli.py:24`
-- Axis: Robustness
-- `if "## Pending Tasks" in content` matches the string anywhere in session.md, including prose content under other sections (e.g., "Renamed ## Pending Tasks to ## In-tree Tasks" in a completed-session entry). A line-anchored match `re.search(r"^## Pending Tasks", content, re.MULTILINE)` would be more precise.
-
-**F-8: `_strip_hints` only removes `hint:` prefix, not continuation lines**
-
-- `src/claudeutils/session/commit_pipeline.py:187-189`
-- Axis: Functional completeness
-- Design: "Strip git `hint:` and advice lines." Implementation strips lines starting with `hint:` but git hint output includes indented continuation lines (e.g., `hint:   Waiting for your editor to close the file...` followed by `hint:` on its own line). Continuation lines starting with whitespace or `advice.` lines would survive. Low impact — hint lines are rare in the commit use case, and over-filtering risks stripping legitimate output.
+6. **commit_pipeline.py:91 — `allowed` expression relies on subtle precedence:** `dirty | _head_files(cwd) if amend else dirty` parses as `dirty | (_head_files(cwd) if amend else dirty)`. Both branches produce correct results (`dirty | head` when amend, `dirty | dirty` when not). Parenthesizing the ternary would clarify intent and prevent future bugs from expression modification.
+   - **Axis:** Robustness (readability)
 
 ## Conformance Summary
 
 | Design Section | Status |
 |---------------|--------|
-| S-1: Package structure | Conforms — `session/` package with cli, parse, commit, commit_gate, commit_pipeline, handoff/, status/ |
-| S-2: `_git()` extraction | Conforms — extracted to `git.py`, worktree imports updated |
-| S-3: Output/error conventions | Conforms — stdout only, exit codes 0/1/2, `**Header:** content` format |
-| S-4: Session.md parser | Conforms — `parse.py` composes existing functions, handles both sections |
-| S-5: Git changes utility | Conforms — `git_cli.py` provides `git_changes()` + `_git changes` CLI |
-| H-1: Domain boundaries | Conforms — CLI writes status + completed only |
-| H-2: Committed detection | Conforms — simplified to always-overwrite (documented, tested, reviewed) |
-| H-3: Diagnostic output | Conforms — `git_changes()` emitted after writes |
-| H-4: State caching | Conforms — `tmp/.handoff-state.json`, save before mutation, clear on success |
-| C-1: Scripted vet check | Conforms — pyproject.toml patterns + agent-core patterns, report discovery |
-| C-2: Submodule coordination | Conforms — partition, validate messages, commit submodule first |
-| C-3: Input validation | Conforms — `validate_files` checks `git status --porcelain` + HEAD files for amend |
-| C-4: Validation levels | Conforms — `just-lint`/`no-vet` options orthogonal |
-| C-5: Amend semantics | Conforms — amend flag, no-edit flag, message validation |
-| ST-0: Worktree-destined tasks | Conforms — ▶ skips tasks with worktree markers |
-| ST-1: Parallel group detection | Partial — plan_dir check works, blocker check not wired (F-1) |
-| ST-2: Preconditions and degradation | Conforms — missing session.md = exit 2, old format = exit 2 |
-| Registration in `cli.py` | Conforms — `_handoff`, `_commit`, `_status`, `_git` all registered |
+| S-1: Package structure | Conforms |
+| S-2: `_git()` extraction + submodule discovery | Partial — extraction done, one hardcoded call site remains (M-2) |
+| S-3: Output/error conventions | Conforms |
+| S-4: Session.md parser | Conforms |
+| S-5: Git changes utility | Conforms |
+| H-1: Domain boundaries | Conforms |
+| H-2: Committed detection | Conforms |
+| H-3: Diagnostic output | Conforms (minor formatting issue m-4) |
+| H-4: State caching | Conforms |
+| C-1: Scripted vet check | Conforms (cwd gap M-1) |
+| C-2: Submodule coordination | Conforms |
+| C-3: Input validation | Conforms |
+| C-4: Validation levels | Conforms |
+| C-5: Amend semantics | Conforms |
+| ST-0: Worktree-destined tasks | Conforms |
+| ST-1: Parallel group detection | Conforms (blockers now wired) |
+| ST-2: Preconditions and degradation | Conforms |
+| Registration in `cli.py` | Conforms |
 
-## Verdict
+## Summary
 
 | Severity | Count |
 |----------|-------|
@@ -125,6 +86,6 @@ None.
 | Major | 2 |
 | Minor | 6 |
 
-No critical issues. Two major findings: F-1 (parallel detection ignores blockers — functional completeness gap) and F-2 (stale vet output lacks file detail — conformance gap with design output format). Six minor findings covering code duplication, format deviations, edge-case robustness, and a blank-line stripping issue in handoff parsing.
+No critical issues. Two major findings: M-1 (vet check `cwd` gap — API inconsistency, no production impact today) and M-2 (hardcoded `"agent-core"` contradicts design S-2's elimination of hardcoded submodule names). Six minor findings covering style, documentation, formatting, and readability.
 
-The round 2 rework successfully addressed all 10 targeted findings with no regressions. The remaining issues are either conformance gaps against the detailed design output specifications or robustness improvements for edge cases.
+All 6 actionable round 3 fixes verified with no regressions.

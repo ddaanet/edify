@@ -1,49 +1,75 @@
-# Prose+Config Review: handoff-cli-tool (RC3)
+# Prose & Config Deliverable Review (RC4)
 
 **Design reference:** `plans/handoff-cli-tool/outline.md`
 **Date:** 2026-03-23
-**Scope:** Agentic prose (1 file) + configuration (2 files). Cumulative review of all plan-attributed changes.
+**Scope:** Four files (2 agentic prose, 2 configuration). Full-scope review — not delta-scoped.
+**Prior review:** RC3 prose review (0C/0M/2m). Both minor findings were observations, not action items.
 
 ## Files Reviewed
 
 | File | Type | Delta |
 |------|------|-------|
+| `agent-core/skills/design/SKILL.md` | Agentic prose | +3/-4 |
 | `agent-core/skills/handoff/SKILL.md` | Agentic prose | +6/-2 |
 | `.claude/settings.local.json` | Configuration | +1/-1 |
 | `.gitignore` | Configuration | +1/-1 |
 
-## Prior Finding Verification
+## RC3 Finding Verification
 
-| Finding | Round | Status |
-|---------|-------|--------|
-| C#1 (round 1): `Bash(wc:*)` missing `just:*`, `git:*` | R1 | FIXED — `Bash(just:*,wc:*,git:*,claudeutils:*)` |
-| N-1 (round 2): Missing `Bash(claudeutils:*)` | R2 | FIXED — `claudeutils:*` present at line 4 |
+| Finding | Status |
+|---------|--------|
+| RC3 m-1: Step 7 placement diverges from outline wording | Observation only — no fix needed. Verified: Step 7 correctly positioned after writes, before STATUS. Outline's "before calling `_handoff` CLI" has no anchor while skill-CLI integration is deferred. |
+| RC3 m-2: `.gitignore` and `settings.local.json` outside scope | Observation only — no fix needed. Verified: both still present, both benign. |
+| Prior C#1: `Bash(wc:*)` missing tool prefixes | FIXED — `Bash(just:*,wc:*,git:*,claudeutils:*)` at line 4 |
+| Prior N-1: Missing `Bash(claudeutils:*)` | FIXED — present at line 4 |
 
-## New Findings
+## Findings
 
-No critical or major findings.
+### Critical
+
+None.
+
+### Major
+
+None.
 
 ### Minor
 
-**1. SKILL.md Step 7 placement diverges from outline wording**
+1. **design/SKILL.md change is outside plan scope**
 
-- **File:** `agent-core/skills/handoff/SKILL.md:147-149`
-- **Axis:** Conformance
-- **Severity:** Minor
+   - **File:** `agent-core/skills/design/SKILL.md:135-139`
+   - **Axis:** Excess (scope boundary)
 
-Outline says: "Handoff skill must add `just precommit` as a pre-handoff gate (before calling `_handoff` CLI)." SKILL.md places the precommit gate as Step 7 "after all writes (session.md, learnings.md, plan-archive.md)" — i.e. post-write, pre-STATUS. The skill does not call the `_handoff` CLI (skill-CLI integration deferred to `plans/skill-cli-integration/`), so "before calling `_handoff` CLI" has no anchor point. Current placement is the correct adaptation: validates after all file mutations, before display. When skill-CLI integration lands, the gate will need repositioning to satisfy the outline's "before calling `_handoff` CLI" placement. No action needed now — documenting for traceability.
+   The outline's Scope OUT says "Skill modifications (commit/status skills updated separately)." The Coupled skill update exception covers only the handoff skill precommit gate. The design SKILL.md change (removing "implement directly" from Simple routing, chaining to `/inline`) is a design skill behavioral fix unrelated to handoff-cli-tool delivery. Committed as `1c5a55aa` during the same session as RC3 fixes but not traceable to any RC3 finding or outline requirement.
 
-**2. `.gitignore` and `.claude/settings.local.json` are outside outline scope**
+   The change itself is functionally correct (closes a known loophole per learning "When skill steps offer competing execution paths") and well-motivated. The excess finding is purely about plan attribution — this change should not be in the handoff-cli-tool deliverable set. No action needed (the fix is good), but future reviews of this plan should exclude it from scope.
 
-- **Files:** `.gitignore:17`, `.claude/settings.local.json:1`
-- **Axis:** Excess
-- **Severity:** Minor
+## Per-File Assessment
 
-Neither file appears in the outline's IN scope. Changes are incidental cleanup during plan execution:
-- `.gitignore`: `/.vscode/` changed to `/.vscode` — removes trailing slash so pattern matches sandbox char-device artifact (not a directory). Functionally correct.
-- `.claude/settings.local.json`: Reduced from 9-line sandbox/permissions config to `{}`. Permissions now handled by `settings.json`. Functionally correct.
+### `agent-core/skills/handoff/SKILL.md`
 
-Both changes are benign and justified by their commit messages. No conformance issue — flagged only because they are attributed to this plan's deliverable set but have no design basis.
+- **Conformance:** Step 7 "Precommit Gate" satisfies the outline's coupled skill update requirement. `just precommit` runs after all writes, before STATUS display.
+- **Functional correctness:** Gate behavior correct — failure stops with output, success continues. Placement after file mutations ensures all changes are validated.
+- **Functional completeness:** All three mutations (session.md, learnings.md, plan-archive.md) listed as preceding the gate. No gaps.
+- **Vacuity:** No vacuous directives. "On failure: output the precommit result, STOP" is specific and actionable.
+- **Excess:** No unnecessary additions.
+- **Constraint precision:** "fix issues and retry" is appropriately open-ended for a failure recovery instruction.
+- **Determinism:** Step ordering (7 before 8) is unambiguous.
+- **Scope boundaries:** Step 7 added, Step 8 renumbered. No other skill content modified.
+- **`allowed-tools`:** `Bash(just:*,wc:*,git:*,claudeutils:*)` covers all tools the skill needs — `just precommit`, `wc` for size checks, `git` for dirty detection, `claudeutils` for future CLI integration.
+
+### `agent-core/skills/design/SKILL.md`
+
+- **Functional correctness:** The change is correct. Removing "implement directly" from step 3 and adding an explicit prohibition closes the competing-paths loophole. `/inline` provides corrector gates.
+- **Scope:** Outside plan scope (see Minor finding 1).
+
+### `.claude/settings.local.json`
+
+Content is `{}`. No meaningful change from baseline (trailing newline difference at most). No findings.
+
+### `.gitignore`
+
+`/.vscode/` changed to `/.vscode`. Trailing slash removal means the pattern now matches both files and directories named `.vscode`. Functionally correct for the intended purpose (IDE artifacts). Outside plan scope but benign.
 
 ## Summary
 
@@ -51,8 +77,8 @@ Both changes are benign and justified by their commit messages. No conformance i
 |----------|-------|
 | Critical | 0 |
 | Major | 0 |
-| Minor | 2 |
+| Minor | 1 |
 
-All prior findings (C#1, N-1) verified fixed. Two minor observations: Step 7 placement is a correct adaptation of the outline's coupled-skill-update requirement given deferred CLI integration; two config files are out-of-scope cleanup included in the deliverable set.
+One minor scope-attribution finding (design SKILL.md change attributed to handoff-cli-tool plan but unrelated to its outline). All prior findings verified. The handoff skill precommit gate (coupled skill update) is correctly implemented per design specification.
 
 **Verdict:** Pass. No blocking findings.
