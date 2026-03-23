@@ -10,32 +10,7 @@ import pytest
 from click.testing import CliRunner
 
 from claudeutils.session.cli import commit_cmd
-
-
-def _init_repo(path: Path) -> None:
-    """Initialize a minimal git repo for CLI testing."""
-    subprocess.run(["git", "init"], cwd=path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@test.com"],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test"],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
-    (path / "README.md").write_text("init")
-    subprocess.run(["git", "add", "."], cwd=path, check=True, capture_output=True)
-    subprocess.run(
-        ["git", "commit", "-m", "init"],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
-
+from tests.pytest_helpers import init_repo_at as _init_repo
 
 # Cycle 6.6: CLI wiring
 

@@ -7,7 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.worktree.cli import _fail, add_sandbox_dir, derive_slug, focus_session
+from claudeutils.git import _fail
+from claudeutils.worktree.cli import add_sandbox_dir, derive_slug, focus_session
 from claudeutils.worktree.git_ops import wt_path
 
 

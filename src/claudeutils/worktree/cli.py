@@ -6,11 +6,10 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Never
 
 import click
 
-from claudeutils.git import _git, _is_submodule_dirty
+from claudeutils.git import _fail, _git, _is_submodule_dirty
 from claudeutils.validation.session_commands import (
     _COMMAND_REQUIRED_CHECKBOXES,
     _SKILL_NAME_PATTERN,
@@ -61,11 +60,6 @@ def _validate_task_command(session_md_path: Path, task_name: str) -> None:
                 "cannot create worktree"
             )
         return  # found and valid
-
-
-def _fail(msg: str, code: int = 1) -> Never:
-    click.echo(msg)
-    raise SystemExit(code)
 
 
 def derive_slug(task_name: str) -> str:
@@ -291,6 +285,7 @@ def _guard_branch_removal(slug: str) -> tuple[bool, str | None]:
         else f"Branch {slug} has {count} unmerged commit(s). Merge first."
     )
     _fail(msg, 2)
+    return None
 
 
 def _delete_branch(slug: str, removal_type: str | None) -> None:

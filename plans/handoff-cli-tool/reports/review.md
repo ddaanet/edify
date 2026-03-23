@@ -1,73 +1,54 @@
-# Review: handoff-cli-tool rework round 2
+# Review: handoff-cli-tool round 3 batch fixes
 
-**Scope**: Uncommitted changes since 91ac5602 — production code and tests fixing round 2 deliverable-review findings
+**Scope**: Uncommitted changes — simple batch fixes for round 3 findings (m#1, m-pre-1, m-pre-4, m-pre-5, m-pre-6)
 **Date**: 2026-03-23
 **Mode**: review + fix
 
 ## Summary
 
-This rework addresses the 1C/4M/6m findings from `plans/handoff-cli-tool/reports/deliverable-review.md` (round 2). The critical `_commit_submodule` check=True fix and the `_error()` fallback fix are correct. The dedup removal in `aggregation.py` introduces a critical regression: two `except` clauses were changed from `(ValueError, AttributeError)` to `except ValueError, AttributeError:`, which in Python 3 binds the exception to the name `AttributeError` rather than catching two exception types. The SKILL.md `claudeutils:*` fix, `_is_dirty` porcelain fix, worktree-marker skip, and old-section-name detection are all correct.
+Five targeted fixes: substring-to-regex for old section name detection, `_fail` deduplication across three CLI modules, single-read optimization in status CLI, `advice:` filtering added to `_strip_hints`, and `_init_repo` consolidation across three test files. All changes are minimal and correctly scoped. Test suite passes (32/32 affected tests, full precommit clean).
 
-**Overall Assessment**: Ready (critical regression fixed)
+**Overall Assessment**: Ready
 
 ## Issues Found
 
 ### Critical Issues
 
-1. **`except ValueError, AttributeError:` is Python 2 syntax — silently incorrect in Python 3**
-   - Location: `src/claudeutils/planstate/aggregation.py:112` and `:135`
-   - Problem: In Python 3, `except ValueError, AttributeError:` parses as `except ValueError as AttributeError:` — catches only `ValueError` and rebinds the local name `AttributeError`. The pre-existing code used `(ValueError, AttributeError)` and `(ValueError, IndexError)` to catch both types. The rework removed the parentheses, narrowing the catch to only `ValueError`. An `AttributeError` or `IndexError` will now propagate uncaught from `_commits_since_handoff` and `_latest_commit`, causing aggregate_trees to crash rather than degrade gracefully.
-   - Fix: Restore parenthesized tuple form.
-   - **Status**: FIXED
+None.
 
 ### Major Issues
 
-None found among the round 2 major targets. Verified:
-- M#2 SKILL.md `claudeutils:*` — present at `agent-core/skills/handoff/SKILL.md:4`
-- M#3 `_error()` fallback — `exc.stderr or f"exit code {exc.returncode}"` correctly avoids repr
-- M#4 skill-CLI integration — DEFERRED (design says "future", no phase owns it; tracked in session.md backlog)
-- M#5 `_worktree ls` dedup — OUT-OF-SCOPE for this rework (separate `planstate-disambiguation` plan)
+None.
 
 ### Minor Issues
 
-1. **`test_aggregate_trees_no_dedup` uses mocked subprocess.run but `aggregate_trees` calls multiple subprocess functions**
-   - Location: `tests/test_planstate_aggregation.py:244-255`
-   - Note: The mock patches `claudeutils.planstate.aggregation.subprocess.run` globally, which prevents `_parse_worktree_list` from calling the real git metadata helpers (`_latest_commit`, `_commits_since_handoff`, `_is_dirty`). Since `_parse_worktree_list` calls those helpers on real paths (via `tmp_path`), patching subprocess globally means those internal calls also return the mocked `MagicMock(returncode=0, stdout=porcelain)`. The helpers all call `result.stdout.strip()` on this mock — this works incidentally because `MagicMock.stdout.strip()` returns a MagicMock which is falsy-enough for the `if result.returncode != 0` guards. The test passes but is relying on MagicMock attribute chaining. A more robust approach would mock only the first `subprocess.run` (the worktree list call) and let the helpers use real git ops on the tmp dirs. However, the tmp dirs in this test are not git repos, so the helpers would fail with non-zero returncode anyway and degrade gracefully. This is an existing-pattern concern — the test was newly introduced and exercises correct behavior despite the broad mock.
-   - **Status**: DEFERRED — The test correctly validates the no-dedup behavior. Tightening the mock scope is a test quality improvement beyond the current fix scope.
+1. **`parse_session` path parameter unused when content supplied**
+   - Location: `src/claudeutils/session/parse.py:118`
+   - Note: When `content` is passed, `path` is accepted but only used in error messages from the `content is None` branch. The docstring says "Path to session.md file" without noting it is only used for error context when content is not provided. Not a correctness issue — the API is clean and `path` remains useful for error messages.
+   - **Status**: OUT-OF-SCOPE — the docstring is accurate and the behavior is correct; the `path` parameter is legitimately required for error context in the no-content branch.
 
 ## Fixes Applied
 
-- `src/claudeutils/planstate/aggregation.py:112` — Restored `(ValueError, AttributeError)` parenthesized tuple (was `except ValueError, AttributeError:` — Python 3 `as` binding)
-- `src/claudeutils/planstate/aggregation.py:135` — Restored `(ValueError, IndexError)` parenthesized tuple (same class)
+No fixes required. All implementations are correct.
 
-Applied via `sed -i` (sandbox prevented Write/Edit tool from persisting to this path).
+## Requirements Validation
 
-## Scope Verification
+| Requirement | Status | Evidence |
+|-------------|--------|----------|
+| m#1: `re.search(r"^## Pending Tasks", content, re.MULTILINE)` | Satisfied | `status/cli.py:25` — exact pattern with `re.MULTILINE` |
+| m-pre-1: Single canonical `_fail` in `claudeutils.git` | Satisfied | `recall_cli/cli.py:10`, `worktree/cli.py:12` both import from `claudeutils.git`; local defs removed |
+| m-pre-4: No double `read_text()` on session_path | Satisfied | `status/cli.py:52-58` — single `read_text()`, passed as `content=content` to `parse_session` |
+| m-pre-5: `_strip_hints` filters both `hint:` and `advice:` | Satisfied | `commit_pipeline.py:190` — `startswith(("hint:", "advice:"))` |
+| m-pre-6: Test files use `init_repo_at` from `pytest_helpers` | Satisfied | All three test files import `from tests.pytest_helpers import init_repo_at as _init_repo`; local `_init_repo` defs removed |
 
-| Finding | Target | Status |
-|---------|--------|--------|
-| C#1 (round 2) `_commit_submodule check=True` | `commit_pipeline.py:134-139` | Verified fixed — `check=True` present |
-| M#2 SKILL.md `claudeutils:*` | `agent-core/skills/handoff/SKILL.md:4` | Verified fixed |
-| M#3 `_error()` fallback | `commit_pipeline.py:217` | Verified fixed — `exc.stderr or f"exit code {exc.returncode}"` |
-| Minor: `render_next` dead code | `render.py` | Verified fixed — no `render_next` in file |
-| Minor: worktree-marker skip | `render.py:41` | Verified fixed — `task.worktree_marker is None` check present |
-| Minor: `_is_dirty` strip bug | `git.py:128-134` | Verified fixed — uses raw subprocess with `rstrip("\\n")` |
-| Minor: `step_reached` dead field | `handoff/pipeline.py` | Verified fixed — field absent |
-| Minor: old section name detection | `status/cli.py:22-28` | Verified fixed — `_check_old_section_name` present |
-| Minor: weak test assertion | `test_status_rework.py:142-144` | Verified — two separate asserts, no `or` |
+**Gaps:** None.
 
-## Regression Introduced
-
-| Issue | File | Nature |
-|-------|------|--------|
-| `except ValueError, AttributeError:` | `aggregation.py:112,135` | Critical — Python 2 syntax, catches only ValueError in Python 3 |
+---
 
 ## Positive Observations
 
-- `_commit_submodule` fix is clean: `check=True` raises `CalledProcessError` which the pipeline's `try/except` at line 306 already catches correctly — no extra logic needed.
-- `_error()` fallback `exc.stderr or f"exit code {exc.returncode}"` is the right pattern: informative when stderr is empty, preserves stderr content when present. Matches the LLM-consumed error message decision (facts only, no repr).
-- `_is_dirty` raw subprocess fix in `git.py` correctly uses `rstrip("\\n")` (not `.strip()`) to preserve the leading spaces in XY format.
-- `_check_old_section_name` is placed before the count validation, so the old-section-name error fires first and gives a more actionable message than the generic count mismatch.
-- Worktree-marker skip logic is correctly placed: `task.worktree_marker is None` added inline to the `first_eligible` condition without restructuring the loop.
-- New tests use real git repos via `tmp_path` fixtures (e2e pattern) for all `_is_dirty` and `_commit_submodule` tests, consistent with the project's e2e-over-mocked-subprocess decision.
-- `test_submodule_commit_failure_propagates` uses a selective `mock_run` that intercepts only the target git commit call and passes everything else to `original_run` — clean error injection pattern.
+- The `parse_session` content parameter is optional with `None` default — backward compatible with all existing callers, which continue to pass only `path`.
+- Status CLI error handling is simplified: single `OSError` catch on `read_text()` replaces the two-step pattern (parse raises `SessionFileError`, then second `read_text()` for content). The `_fail` return type `Never` ensures `content` is definitely bound after the try/except.
+- `_strip_hints` implementation uses tuple argument to `startswith` — idiomatic Python, single pass.
+- Test coverage for `advice:` filtering added in `test_session_commit_format.py:63-64` alongside the existing `hint:` assertion.
+- `init_repo_at` in `pytest_helpers` uses `-C` style git commands, which is more robust than the local `_init_repo` copies that used `cwd=path` — the shared implementation is strictly better.

@@ -115,11 +115,12 @@ def _extract_date(content: str) -> str | None:
     return m.group(1) if m else None
 
 
-def parse_session(path: Path) -> SessionData:
+def parse_session(path: Path, content: str | None = None) -> SessionData:
     """Parse a session.md file into structured data.
 
     Args:
         path: Path to session.md file.
+        content: Pre-read file content (avoids double read).
 
     Returns:
         SessionData with all sections parsed.
@@ -127,14 +128,15 @@ def parse_session(path: Path) -> SessionData:
     Raises:
         SessionFileError: If file does not exist or cannot be read.
     """
-    try:
-        content = path.read_text()
-    except FileNotFoundError:
-        msg = f"Session file not found: {path}"
-        raise SessionFileError(msg) from None
-    except OSError as e:
-        msg = f"Cannot read session file: {e}"
-        raise SessionFileError(msg) from None
+    if content is None:
+        try:
+            content = path.read_text()
+        except FileNotFoundError:
+            msg = f"Session file not found: {path}"
+            raise SessionFileError(msg) from None
+        except OSError as e:
+            msg = f"Cannot read session file: {e}"
+            raise SessionFileError(msg) from None
 
     return SessionData(
         date=_extract_date(content),

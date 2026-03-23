@@ -186,7 +186,9 @@ def _validate(ci: CommitInput, *, cwd: Path | None = None) -> CommitResult | Non
 
 def _strip_hints(text: str) -> str:
     """Remove git hint/advice lines from output."""
-    return "\n".join(line for line in text.split("\n") if not line.startswith("hint:"))
+    return "\n".join(
+        line for line in text.split("\n") if not line.startswith(("hint:", "advice:"))
+    )
 
 
 def format_commit_output(

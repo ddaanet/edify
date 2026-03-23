@@ -56,8 +56,10 @@ def test_format_strips_hints() -> None:
     """Git hint/advice lines stripped from output."""
     output = format_commit_output(
         parent_output=(
-            "[main abc1234] msg\nhint: some advice\nhint: more advice\n 1 file changed"
+            "[main abc1234] msg\nhint: some advice\nhint: more advice\n"
+            "advice: update git\n 1 file changed"
         ),
     )
     assert "hint:" not in output
+    assert "advice:" not in output
     assert "1 file changed" in output

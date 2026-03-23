@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 import click
 
 from claudeutils.git import _fail, _is_dirty
 from claudeutils.planstate.inference import list_plans
-from claudeutils.session.parse import SessionFileError, parse_session
+from claudeutils.session.parse import parse_session
 from claudeutils.session.status.render import (
     detect_parallel,
     render_continuation,
@@ -21,7 +22,7 @@ from claudeutils.session.status.render import (
 
 def _check_old_section_name(content: str) -> None:
     """Reject old section name 'Pending Tasks'."""
-    if "## Pending Tasks" in content:
+    if re.search(r"^## Pending Tasks", content, re.MULTILINE):
         _fail(
             "**Error:** Old section name 'Pending Tasks' — rename to 'In-tree Tasks'",
             code=2,
@@ -49,12 +50,12 @@ def status_cmd() -> None:
     session_path = Path(os.environ.get("CLAUDEUTILS_SESSION_FILE", "agents/session.md"))
 
     try:
-        data = parse_session(session_path)
-    except SessionFileError:
+        content = session_path.read_text()
+    except OSError:
         _fail(f"**Error:** Session file not found: {session_path}", code=2)
 
-    content = session_path.read_text()
     _check_old_section_name(content)
+    data = parse_session(session_path, content=content)
 
     if _count_raw_tasks(content) != len(data.in_tree_tasks):
         _fail(
