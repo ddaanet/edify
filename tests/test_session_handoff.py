@@ -65,6 +65,27 @@ def test_parse_handoff_missing_completed() -> None:
         parse_handoff_input(text)
 
 
+def test_parse_handoff_preserves_blank_lines() -> None:
+    """Parser preserves blank lines in completed section."""
+    text = """\
+**Status:** Done.
+
+## Completed This Session
+
+### Group A
+- Item 1
+
+### Group B
+- Item 2
+"""
+    result = parse_handoff_input(text)
+    # Should preserve internal blank line
+    assert "" in result.completed_lines
+    # Both groups should be present
+    assert any("### Group A" in line for line in result.completed_lines)
+    assert any("### Group B" in line for line in result.completed_lines)
+
+
 # Cycle 4.2: status line overwrite
 
 SESSION_FIXTURE = """\

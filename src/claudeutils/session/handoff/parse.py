@@ -49,7 +49,9 @@ def parse_handoff_input(text: str) -> HandoffInput:
     for line in lines[start_idx:]:
         if line.startswith("## "):
             break
-        if line.strip():
-            completed.append(line)
+        completed.append(line)
+
+    while completed and not completed[-1].strip():
+        completed.pop()
 
     return HandoffInput(status_line=status_line, completed_lines=completed)
