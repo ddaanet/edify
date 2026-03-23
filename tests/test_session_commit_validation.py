@@ -252,5 +252,5 @@ require-review = ["src/**/*.py"]
     assert result.passed is False
     assert result.reason == "stale"
     assert result.stale_info is not None
-    assert "foo.py" in result.stale_info
-    assert "vet-review.md" in result.stale_info
+    assert "src/foo.py" in result.stale_info
+    assert "plans/review-2026-01/reports/vet-review.md" in result.stale_info

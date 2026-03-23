@@ -1,12 +1,12 @@
-# Review: handoff-cli-tool round 3 batch fixes
+# Review: handoff-cli-tool Moderate batch (M-pre-1, M-pre-2, m-pre-3)
 
-**Scope**: Uncommitted changes — simple batch fixes for round 3 findings (m#1, m-pre-1, m-pre-4, m-pre-5, m-pre-6)
+**Scope**: Changes since 8f6c5581 — blocker wiring, vet stale detail, blank line preservation
 **Date**: 2026-03-23
 **Mode**: review + fix
 
 ## Summary
 
-Five targeted fixes: substring-to-regex for old section name detection, `_fail` deduplication across three CLI modules, single-read optimization in status CLI, `advice:` filtering added to `_strip_hints`, and `_init_repo` consolidation across three test files. All changes are minimal and correctly scoped. Test suite passes (32/32 affected tests, full precommit clean).
+Three findings addressed: blocker extraction wired to `detect_parallel`, stale vet output with per-file detail, and blank line preservation in both completed-section parsers. Core logic is correct across all three. Two issues found: stale output uses `.name` (filename only) where spec requires relative path, and `handoff/parse.py` strips trailing blanks but not leading blanks.
 
 **Overall Assessment**: Ready
 
@@ -18,37 +18,48 @@ None.
 
 ### Major Issues
 
-None.
+1. **Stale vet output uses filename only, spec requires relative path**
+   - Location: `src/claudeutils/session/commit_gate.py:174-175`
+   - Problem: `newest_source_path.name` returns `foo.py`; spec (outline.md:205-206) shows `src/auth.py` and `plans/foo/reports/vet-review.md` — relative paths, not bare filenames. Both the source and report paths use `.name`.
+   - Fix: Replace `.name` with relative path string (cast via `str(newest_source_path)` / `str(newest_report_path)`).
+   - **Status**: FIXED
 
 ### Minor Issues
 
-1. **`parse_session` path parameter unused when content supplied**
-   - Location: `src/claudeutils/session/parse.py:118`
-   - Note: When `content` is passed, `path` is accepted but only used in error messages from the `content is None` branch. The docstring says "Path to session.md file" without noting it is only used for error context when content is not provided. Not a correctness issue — the API is clean and `path` remains useful for error messages.
-   - **Status**: OUT-OF-SCOPE — the docstring is accurate and the behavior is correct; the `path` parameter is legitimately required for error context in the no-content branch.
+1. **`handoff/parse.py` strips trailing blanks but not leading blanks**
+   - Location: `src/claudeutils/session/handoff/parse.py:48-55`
+   - Note: The scope requirement states both parsers should handle leading/trailing stripping. `session/parse.py` (the other parser) strips both. `handoff/parse.py` only strips trailing — leading blank after the heading is preserved in `completed_lines`. The test passes because it only checks that `""` exists (not that it's internal). This creates a leading blank in the written completed section.
+   - Fix: Add leading-blank strip loop mirroring `session/parse.py`.
+   - **Status**: FIXED
+
+2. **Test for stale detail only checks filenames, not paths**
+   - Location: `tests/test_session_commit_validation.py:255-256`
+   - Note: Test asserts `"foo.py" in result.stale_info` and `"vet-review.md" in result.stale_info`. After fixing to use relative paths, the test still passes (filename is a substring of relative path). No behavioral gap — correct by containment — but the assertion could be tightened to verify the path prefix is present.
+   - Fix: Tighten assertions to verify relative path presence.
+   - **Status**: FIXED
 
 ## Fixes Applied
 
-No fixes required. All implementations are correct.
+- `src/claudeutils/session/commit_gate.py:174-175` — Changed `.name` to `str(path)` for both source and report paths to match spec format
+- `src/claudeutils/session/handoff/parse.py:48-55` — Added leading-blank strip loop after the trailing-blank strip
+- `tests/test_session_commit_validation.py:255-256` — Tightened assertions to check `src/foo.py` and `plans/review-2026-01/reports/vet-review.md`
 
 ## Requirements Validation
 
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
-| m#1: `re.search(r"^## Pending Tasks", content, re.MULTILINE)` | Satisfied | `status/cli.py:25` — exact pattern with `re.MULTILINE` |
-| m-pre-1: Single canonical `_fail` in `claudeutils.git` | Satisfied | `recall_cli/cli.py:10`, `worktree/cli.py:12` both import from `claudeutils.git`; local defs removed |
-| m-pre-4: No double `read_text()` on session_path | Satisfied | `status/cli.py:52-58` — single `read_text()`, passed as `content=content` to `parse_session` |
-| m-pre-5: `_strip_hints` filters both `hint:` and `advice:` | Satisfied | `commit_pipeline.py:190` — `startswith(("hint:", "advice:"))` |
-| m-pre-6: Test files use `init_repo_at` from `pytest_helpers` | Satisfied | All three test files import `from tests.pytest_helpers import init_repo_at as _init_repo`; local `_init_repo` defs removed |
+| M-pre-1: Parallel detection uses blockers from session.md (ST-1) | Satisfied | `parse.py:156` extracts blockers; `status/cli.py:99` passes `data.blockers` to `detect_parallel` |
+| M-pre-2: Stale vet output includes per-file detail with timestamps | Satisfied (after fix) | `commit_gate.py:173-175` — filenames+timestamps; paths fixed to match spec |
+| m-pre-3: Completed section parser preserves blank lines between groups | Satisfied | `parse.py:85-88` strips leading/trailing only; `handoff/parse.py:54-55` strips trailing (leading fixed) |
 
-**Gaps:** None.
+**Gaps:** None after fixes.
 
 ---
 
 ## Positive Observations
 
-- The `parse_session` content parameter is optional with `None` default — backward compatible with all existing callers, which continue to pass only `path`.
-- Status CLI error handling is simplified: single `OSError` catch on `read_text()` replaces the two-step pattern (parse raises `SessionFileError`, then second `read_text()` for content). The `_fail` return type `Never` ensures `content` is definitely bound after the try/except.
-- `_strip_hints` implementation uses tuple argument to `startswith` — idiomatic Python, single pass.
-- Test coverage for `advice:` filtering added in `test_session_commit_format.py:63-64` alongside the existing `hint:` assertion.
-- `init_repo_at` in `pytest_helpers` uses `-C` style git commands, which is more robust than the local `_init_repo` copies that used `cwd=path` — the shared implementation is strictly better.
+- `extract_blockers` reuse from `worktree/session.py` — zero reimplementation, consistent behavior.
+- `_newest_file` helper returns both mtime and path in one call, eliminating the prior double-stat anti-pattern.
+- Both blank-line strip implementations follow the same loop pattern (`while list and not list[-1].strip(): list.pop()`), making the approach visually consistent across files.
+- Test for blocker wiring (`test_status_parallel_uses_blockers`) uses real `CliRunner` + filesystem setup — correctly follows e2e-over-mocked pattern.
+- `SessionData.blockers` default factory correctly uses `field(default_factory=list)`.

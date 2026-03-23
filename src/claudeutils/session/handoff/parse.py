@@ -51,6 +51,8 @@ def parse_handoff_input(text: str) -> HandoffInput:
             break
         completed.append(line)
 
+    while completed and not completed[0].strip():
+        completed.pop(0)
     while completed and not completed[-1].strip():
         completed.pop()
 

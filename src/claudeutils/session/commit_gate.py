@@ -171,8 +171,8 @@ def vet_check(files: list[str]) -> VetResult:
             "%Y-%m-%d %H:%M"
         )
         stale_info = (
-            f"- Newest change: {newest_source_path.name} ({source_time})\n"
-            f"- Newest report: {newest_report_path.name} ({report_time})"
+            f"- Newest change: {newest_source_path} ({source_time})\n"
+            f"- Newest report: {newest_report_path} ({report_time})"
         )
         return VetResult(
             passed=False,
