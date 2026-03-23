@@ -1,32 +1,36 @@
-# Classification: Fix handoff-cli round 3 findings
+# Classification: Fix handoff-cli RC4 findings
 
 **Date:** 2026-03-23
-**Input:** plans/handoff-cli-tool/reports/deliverable-review.md (round 3: 0C/0M(delta), 2M+6m(pre-existing))
+**Input:** plans/handoff-cli-tool/reports/deliverable-review.md (RC4: 0C/2M/9m)
 **Plan status:** rework
-**Round:** 3 (prior: round 2 = 1C/4M/6m, round 1 = 5C/11M/12m)
+**Round:** 4 (prior: RC1=5C/11M/12m, RC2=1C/4M/6m, RC3=2M+6m pre-existing)
 
-## Prior Rounds
+## Composite Decomposition
 
-Round 2: 10 findings fixed (integration-first TDD). Round 3 Simple batch: 5 of 6 minor pre-existing fixed, 1 dropped (m-pre-2 ▶ format — design spec outdated). Round 3 delta: 2 minor fixed (m#1 regex, m#2 dropped).
-
-## Composite Decomposition (remaining)
-
-| # | Finding | Behavioral Code? | Classification | Destination |
-|---|---------|-------------------|----------------|-------------|
-| M-pre-1 | Parallel detection ignores Blockers/Gotchas | Yes | Moderate | production |
-| M-pre-2 | Stale vet output lacks file-level detail | Yes | Moderate | production |
-| m-pre-3 | Completed parser strips blank lines between `###` groups | Yes | Moderate | production |
+| # | Finding | Behavioral? | Classification | Destination | Action |
+|---|---------|-------------|----------------|-------------|--------|
+| M-1 | H-2 committed detection test | Yes (new test fn) | Moderate | production | Add test: commit session.md, call write_completed, assert overwrite |
+| M-2 | `_init_repo` duplication | Yes (new helper fn) | Moderate | production | Add `init_repo_minimal(path)` to pytest_helpers.py, replace 5 local variants |
+| m-1 | HandoffState `step_reached` field | Yes (new field, updated fn sig) | Moderate | production | Add field with default, update save_state signature |
+| m-2 | No ANSI color in `_status` | Yes (new logic paths) | Moderate | production | Add `color: bool` param to render fns, use click.style() |
+| m-3 | ▶ format deviation | No (format string edit) | Simple | production | Edit render.py:44 format string to match design spec |
+| m-4 | `_strip_hints` continuation | Yes (new conditional) | Moderate | production | Track in_hint state, skip indented continuation lines |
+| m-5 | Parallel cap-at-5 untested | Yes (new test fn) | Moderate | production | Add test: 6 independent tasks, verify cap returns 5 |
+| m-6 | or-disjunction assertions | No (edit existing) | Simple | production | Split `assert A or B` into separate focused assertions |
+| m-7 | Integration test incomplete | No (extend existing) | Simple | production | Add completed-section and status-line assertions |
+| m-8 | .gitignore/settings.local.json | — | Skip | — | Benign, no action |
+| m-9 | worktree/cli.py:311 hardcodes agent-core | — | Skip | — | Pre-existing, not regression |
 
 ## Overall
 
-- **Classification:** Moderate (composite, 3 items)
-- **Implementation certainty:** High — affected functions identified, target behavior specified
-- **Requirement stability:** High — design spec (ST-1, C-1) and markdown preservation
-- **Behavioral code check:** Yes (all 3 — new parser logic, changed output format, changed parsing logic)
+- **Classification:** Moderate (composite — 6 Moderate + 3 Simple actionable)
+- **Implementation certainty:** High — file:line refs, approach specified
+- **Requirement stability:** High — design specs and observable behaviour
+- **Behavioral code check:** Yes (new helper, new conditionals, new test functions)
 - **Work type:** Production
 - **Artifact destination:** production
 - **Model:** sonnet
-- **Evidence:** All items have concrete file:line refs; M-pre-1/M-pre-2 traced to design spec gaps; m-pre-3 observable in parser output
+- **Evidence:** M-1/M-2 test coverage/quality; m-1 spec conformance; m-2/m-4 add conditional logic; m-3/m-6/m-7 mechanical edits
 
 ## Routing
 
