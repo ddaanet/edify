@@ -31,7 +31,10 @@ def _run_precommit(cwd: Path | None = None) -> tuple[bool, str]:
         text=True,
         check=False,
     )
-    return result.returncode == 0, result.stdout.strip()
+    output = result.stdout.strip()
+    if result.stderr.strip():
+        output += "\n" + result.stderr.strip()
+    return result.returncode == 0, output
 
 
 def _run_lint(cwd: Path | None = None) -> tuple[bool, str]:
@@ -46,7 +49,10 @@ def _run_lint(cwd: Path | None = None) -> tuple[bool, str]:
         text=True,
         check=False,
     )
-    return result.returncode == 0, result.stdout.strip()
+    output = result.stdout.strip()
+    if result.stderr.strip():
+        output += "\n" + result.stderr.strip()
+    return result.returncode == 0, output
 
 
 def _stage_files(files: list[str], *, cwd: Path | None = None) -> None:
@@ -167,7 +173,7 @@ def _validate(ci: CommitInput, *, cwd: Path | None = None) -> CommitResult | Non
         )
 
     if "no-vet" not in ci.options:
-        vr = vet_check(ci.files)
+        vr = vet_check(ci.files, cwd=cwd)
         if not vr.passed:
             if vr.reason == "unreviewed":
                 files_list = "\n".join(f"- {f}" for f in vr.unreviewed_files)
@@ -196,7 +202,7 @@ def _strip_hints(text: str) -> str:
             prev_was_hint = True
         elif prev_was_hint and line and line[0] in (" ", "\t"):
             if line[0] == "\t" or (line[0] == " " and len(line) > 1 and line[1] == " "):
-                prev_was_hint = False
+                prev_was_hint = True
             else:
                 prev_was_hint = False
                 result.append(line)

@@ -55,7 +55,6 @@ def handoff_cmd() -> None:
     write_completed(session_path, handoff_input.completed_lines)
 
     git_output = git_changes()
-    if git_output:
-        click.echo(f"**Git status:**\n\n```\n{git_output}\n```")
+    click.echo(f"**Git status:**\n\n```\n{git_output}\n```")
 
     clear_state()

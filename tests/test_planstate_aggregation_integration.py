@@ -9,28 +9,7 @@ from claudeutils.planstate.aggregation import (
     _task_summary,
     aggregate_trees,
 )
-
-
-def _init_git_repo(repo_path: str) -> None:
-    """Initialize a git repository with standard config."""
-    subprocess.run(
-        ["git", "init"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.com"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test User"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True,
-    )
+from tests.pytest_helpers import init_repo_minimal
 
 
 def test_task_summary_extraction(tmp_path: Path) -> None:
@@ -39,7 +18,7 @@ def test_task_summary_extraction(tmp_path: Path) -> None:
     repo_path.mkdir()
     repo_str = str(repo_path)
 
-    _init_git_repo(repo_str)
+    init_repo_minimal(repo_path)
 
     # Create session.md with In-tree Tasks section
     session_dir = repo_path / "agents"
@@ -83,7 +62,7 @@ def test_tree_sorting_by_timestamp(tmp_path: Path) -> None:
     """Sort trees by latest_commit_timestamp descending."""
     main_repo = tmp_path / "main"
     main_repo.mkdir()
-    _init_git_repo(str(main_repo))
+    init_repo_minimal(main_repo)
 
     # Main commit at T1 (oldest)
     test_file = main_repo / "main.txt"
@@ -193,7 +172,7 @@ def test_per_tree_plan_discovery(tmp_path: Path) -> None:
     """Discover plans from each tree and aggregate with deduplication."""
     main_repo = tmp_path / "main"
     main_repo.mkdir()
-    _init_git_repo(str(main_repo))
+    init_repo_minimal(main_repo)
 
     # plan-a in main
     plans_dir = main_repo / "plans"

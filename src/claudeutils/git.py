@@ -13,6 +13,11 @@ def _git(
     env: dict[str, str] | None = None,
     input_data: str | None = None,
 ) -> str:
+    """Run git command and return stripped stdout.
+
+    Warning: strips leading whitespace, destroying porcelain XY format.
+    Do not use for ``git status --porcelain`` — use raw subprocess instead.
+    """
     r = subprocess.run(
         ["git", *args],
         capture_output=True,

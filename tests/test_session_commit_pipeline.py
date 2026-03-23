@@ -116,3 +116,23 @@ def test_strip_hints_filters_continuation_lines() -> None:
     result3 = _strip_hints(input3)
     assert "regular line" in result3
     assert "more tip" not in result3
+
+
+def test_strip_hints_multi_continuation() -> None:
+    """Multi-line continuations after hint all filtered."""
+    text = "hint: use --force\n  line1\n  line2\n  line3\nnormal"
+    result = _strip_hints(text)
+    assert "normal" in result
+    assert "line1" not in result
+    assert "line2" not in result
+    assert "line3" not in result
+    assert "hint:" not in result
+
+
+def test_strip_hints_single_space_not_continuation() -> None:
+    """Single-space indent is not a continuation line."""
+    text = "hint: tip\n not a continuation\nnormal"
+    result = _strip_hints(text)
+    assert "not a continuation" in result
+    assert "normal" in result
+    assert "hint:" not in result

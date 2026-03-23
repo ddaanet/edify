@@ -88,7 +88,7 @@ def validate_files(
     Raises CleanFileError for files with no changes.
     """
     dirty = _dirty_files(cwd)
-    allowed = dirty | _head_files(cwd) if amend else dirty
+    allowed = (dirty | _head_files(cwd)) if amend else dirty
 
     clean = [f for f in files if f not in allowed]
     if clean:
@@ -105,9 +105,9 @@ class VetResult:
     stale_info: str | None = None
 
 
-def _load_review_patterns() -> list[str]:
+def _load_review_patterns(cwd: Path | None = None) -> list[str]:
     """Load require-review patterns from pyproject.toml."""
-    pyproject = Path("pyproject.toml")
+    pyproject = (cwd or Path()) / "pyproject.toml"
     if not pyproject.exists():
         return []
     with pyproject.open("rb") as f:
@@ -117,9 +117,9 @@ def _load_review_patterns() -> list[str]:
     return patterns
 
 
-def _find_reports() -> list[Path]:
+def _find_reports(cwd: Path | None = None) -> list[Path]:
     """Discover review reports in plans/*/reports/."""
-    reports_root = Path("plans")
+    reports_root = (cwd or Path()) / "plans"
     if not reports_root.exists():
         return []
     return [
@@ -138,9 +138,9 @@ def _newest_file(files: list[Path]) -> tuple[float, Path]:
 _AGENT_CORE_PATTERNS = ["agent-core/bin/**", "agent-core/skills/**/*.sh"]
 
 
-def vet_check(files: list[str]) -> VetResult:
+def vet_check(files: list[str], *, cwd: Path | None = None) -> VetResult:
     """Check files against require-review patterns."""
-    patterns = _load_review_patterns() + _AGENT_CORE_PATTERNS
+    patterns = _load_review_patterns(cwd) + _AGENT_CORE_PATTERNS
     if not patterns:
         return VetResult(passed=True)
 
@@ -148,7 +148,7 @@ def vet_check(files: list[str]) -> VetResult:
     if not matched:
         return VetResult(passed=True)
 
-    reports = _find_reports()
+    reports = _find_reports(cwd)
     if not reports:
         return VetResult(
             passed=False,

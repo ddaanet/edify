@@ -13,6 +13,7 @@ from claudeutils.planstate.aggregation import (
     _parse_worktree_list,
     aggregate_trees,
 )
+from tests.pytest_helpers import init_repo_minimal
 
 
 def test_parse_worktree_list_porcelain() -> None:
@@ -68,24 +69,7 @@ def test_dirty_state_detection(tmp_path: Path) -> None:
     repo_path.mkdir()
     repo_str = str(repo_path)
 
-    subprocess.run(
-        ["git", "init"],
-        cwd=repo_str,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.com"],
-        cwd=repo_str,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "config", "user.name", "Test User"],
-        cwd=repo_str,
-        check=True,
-        capture_output=True,
-    )
+    init_repo_minimal(repo_path)
 
     tracked_file = repo_path / "tracked.txt"
     tracked_file.write_text("initial content\n")

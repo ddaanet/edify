@@ -58,14 +58,17 @@ def _split_sections(text: str) -> list[tuple[str, list[str]]]:
     sections: list[tuple[str, list[str]]] = []
     current_name: str | None = None
     current_lines: list[str] = []
+    in_message = False
 
     for line in text.split("\n"):
         heading = re.match(r"^## (.+)$", line)
-        if heading:
+        if heading and not in_message:
             if current_name is not None:
                 sections.append((current_name, current_lines))
             current_name = heading.group(1).strip()
             current_lines = []
+            if current_name == "Message":
+                in_message = True
         elif current_name is not None:
             current_lines.append(line)
 

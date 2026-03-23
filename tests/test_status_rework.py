@@ -109,6 +109,7 @@ def test_status_format_merged_next() -> None:
     second_line = next(ln for ln in lines if "Second" in ln)
     assert "▶" not in second_line
     assert "just fix" not in second_line
+    assert second_line.startswith("- ")
 
 
 # Cycle 3.4: old format enforcement
