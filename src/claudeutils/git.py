@@ -125,12 +125,18 @@ def _is_dirty(exclude_path: str | None = None) -> bool:
     Path(exclude_path).name + "/" (used to ignore the worktree container dir
     when it appears as an untracked entry inside the repo).
     """
-    output = _git("status", "--porcelain", check=False)
+    result = subprocess.run(
+        ["git", "status", "--porcelain"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    output = result.stdout.rstrip("\n")
     if not output:
         return False
 
     exclude_prefix = (Path(exclude_path).name + "/") if exclude_path else None
-    for line in output.strip().split("\n"):
+    for line in output.split("\n"):
         if not line:
             continue
         path = line[3:]

@@ -11,6 +11,7 @@ from click.testing import CliRunner
 from claudeutils.git import (
     _fail,
     _git_ok,
+    _is_dirty,
     _is_submodule_dirty,
     discover_submodules,
     git_status,
@@ -152,3 +153,67 @@ def test_git_status_preserves_porcelain_format(
         capture_output=True,
     )
     assert git_status() == ""
+
+
+# Cycle 4.1: _is_dirty exclude_path with unstaged modifications
+
+
+def test_is_dirty_excludes_path_with_unstaged_modifications(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Exclude path filters unstaged modifications with space prefix."""
+    _init_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    # Create a file in subdir/, add, commit, then modify without staging
+    subdir = tmp_path / "subdir"
+    subdir.mkdir()
+    f = subdir / "file.py"
+    f.write_text("original\n")
+    subprocess.run(
+        ["git", "add", "subdir/file.py"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "add file"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+    f.write_text("modified\n")
+
+    # Unstaged modification produces " M subdir/file.py" in porcelain
+    # exclude_path="subdir" should exclude it
+    assert _is_dirty(exclude_path="subdir") is False
+
+
+def test_is_dirty_includes_files_outside_excluded_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """_is_dirty(exclude_path=X) includes files not under X."""
+    _init_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    # Create files in "other" and "subdir", commit, modify "other"
+    other = tmp_path / "other"
+    other.mkdir()
+    f = other / "file.py"
+    f.write_text("original\n")
+    subprocess.run(
+        ["git", "add", "other/file.py"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", "add file"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+    f.write_text("modified\n")
+
+    # Unstaged modification to "other/file.py" should NOT be excluded
+    assert _is_dirty(exclude_path="subdir") is True
