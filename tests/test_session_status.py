@@ -62,9 +62,9 @@ def test_render_section(section: str) -> None:
         result = render_pending(tasks, plan_states)
         # Section header
         assert result.startswith("In-tree:")
-        # First task — sonnet is default, omitted
+        # First task — ▶ format always shows model
         assert "Build parser" in result
-        assert "(sonnet)" not in result
+        assert "▶ Build parser (sonnet)" in result
         # Plan status line
         assert "Plan: parser" in result
         assert "outlined" in result
@@ -115,6 +115,24 @@ def test_render_pending_excludes_completed() -> None:
     result = render_pending(tasks, {})
     assert "Done" not in result
     assert "Active" in result
+
+
+def test_render_pending_next_task_format() -> None:
+    """First pending task uses design spec two-line format."""
+    task = _task(
+        "Build widget",
+        command="/design plans/w/brief.md",
+        model="sonnet",
+        restart=True,
+    )
+    result = render_pending([task], {})
+    lines = result.split("\n")
+    # ▶ line: name, model in parens, Restart capitalized
+    arrow_line = next(ln for ln in lines if "▶" in ln)
+    assert arrow_line == "▶ Build widget (sonnet) | Restart: Yes"
+    # Command on separate indented line
+    cmd_line = next(ln for ln in lines if "/design plans/w/brief.md" in ln)
+    assert cmd_line == "  `/design plans/w/brief.md`"
 
 
 def test_render_unscheduled_sorted() -> None:
