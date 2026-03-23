@@ -1,159 +1,217 @@
-# Runbook: Fix handoff-cli round 2 (Tier 2)
+# Runbook: Fix handoff-cli round 3 (Moderate items)
 
-**Input:** `plans/handoff-cli-tool/reports/deliverable-review.md` (round 2)
-**Scope:** C#1, M#2, M#3, M#5, m-1 through m-6 (10 findings)
-**Discipline:** Integration-first TDD — tests are executable specifications of contracts
+**Tier:** 2 (Lightweight Delegation)
+**Phase type:** tdd
+**Model:** sonnet
 
-## Recall Entries (for delegation)
+## Scope
 
-- `when adding error handling to call chain` — context at failure site, display at top level
-- `when cli error messages are llm-consumed` — facts only, STOP directive for data-loss
+Three findings from deliverable-review.md RC3:
+- **M-pre-1:** Parallel detection ignores Blockers/Gotchas — `detect_parallel` receives `[]` hardcoded
+- **M-pre-2:** Stale vet output lacks file-level detail — returns time delta, not per-file info
+- **m-pre-3:** Completed parser strips blank lines between `###` groups
+
+## Recall Context
+
+Resolve at execution time: `plans/handoff-cli-tool/recall-artifact.md`
+
+Key entries for delegation:
 - `when testing CLI tools` — Click CliRunner, in-process
-- `when preferring e2e over mocked subprocess` — real git repos via tmp_path, mock only for error injection
-- `when writing red phase assertions` — verify behavior not structure
+- `when preferring e2e over mocked subprocess` — real git repos via tmp_path
+- `when writing red phase assertions` — behavioral not structural
 
-## Phase 1: Commit pipeline fixes (type: tdd)
+## Phase 1: Blocker detection wiring (type: tdd)
 
-C#1 (`_commit_submodule` returncode) + M#3 (`_error()` formatting). Same subsystem, same test file.
+### Cycle 1.1: Parser extracts blockers for status
 
-### Cycle 1.1: Submodule commit failure propagates error
+**Prerequisite:** Read `src/claudeutils/worktree/session.py:84-117` — `extract_blockers()` returns `list[list[str]]`. Read `src/claudeutils/session/parse.py` — `SessionData` dataclass, `parse_session()`.
 
-**Contract:** When a submodule's `git commit` fails (hook rejection, nothing staged), `commit_pipeline` returns `success=False` with a structured error message — not silent success.
+**RED Phase:**
 
-**RED:** Write integration test in `tests/test_commit_pipeline_errors.py`:
-- Set up real git repo with submodule structure (reuse existing pattern from `test_pipeline_validates_before_submodule_commit`)
-- Mock `_commit_submodule` to raise `CalledProcessError` with stderr containing a reason
-- Call `commit_pipeline` → assert `result.success is False`
-- Assert `result.output` contains `**Error:**` (structured markdown)
-- Assert `result.output` does NOT contain `CalledProcessError` or `Command '['git'` (no raw repr)
+**Test:** `test_parse_session_extracts_blockers` in `tests/test_session_parser.py`
+**Assertions:**
+- Session fixture with `## Blockers / Gotchas` section containing two bullet items
+- `data.blockers` is a list of length 2
+- First blocker group's first element contains the expected bullet text
 
-Currently: `_commit_submodule` uses `check=False` (line 139), returns `result.stdout.strip()` without checking returncode (line 148). The pipeline's `try/except CalledProcessError` at lines 296-306 catches this because `_commit_submodule`'s `git add` uses `check=True` (line 122) — but NOT the git commit itself. If only the commit fails (not git add), no exception raised, silent "success."
+**Expected failure:** `AttributeError` — `SessionData` has no `blockers` field
 
-**GREEN:** Change `_commit_submodule` git commit call: `check=False` → `check=True` (line 134-139). `CalledProcessError` propagates to the pipeline's existing `try/except` at line 296-306 which calls `_error(f"submodule {path} failed", e)`.
+**Why it fails:** `SessionData` doesn't include blockers; `parse_session` doesn't call `extract_blockers`
 
-**Verify:** `pytest tests/test_commit_pipeline_errors.py -x`
+**Verify RED:** `pytest tests/test_session_parser.py::test_parse_session_extracts_blockers -v`
 
-### Cycle 1.2: Error messages are structured, not raw repr
+---
 
-**Contract:** `_error()` produces structured markdown output — never raw Python exception repr.
+**GREEN Phase:**
 
-**RED:** Write test in `tests/test_commit_pipeline_errors.py`:
-- Create `CalledProcessError` with empty stderr (the problematic path)
-- Call `_error("staging failed", exc)` directly
-- Assert output contains `**Error:** staging failed`
-- Assert output does NOT contain `Command '['git'` (raw repr pattern)
-- Also test with populated stderr: assert stderr content appears in output
+**Implementation:** Add `blockers` field to `SessionData`, wire `extract_blockers` into `parse_session`.
 
-Currently: `_error()` at line 219 uses `exc.stderr or exc` — when stderr is empty string, `str(exc)` produces `Command '['git', 'commit', ...]' returned non-zero exit status 1`.
+**Behavior:**
+- `SessionData` gains `blockers: list[list[str]]` field (default `[]`)
+- `parse_session` calls `extract_blockers(content)` and passes result to `SessionData`
 
-**GREEN:** Change `_error()` fallback from `str(exc)` to meaningful info:
-- If `exc.stderr` non-empty: use it (current, good)
-- If `exc.stderr` empty: `f"exit code {exc.returncode}"`
-- Never `str(exc)` which produces Python repr
+**Changes:**
+- File: `src/claudeutils/session/parse.py`
+  Action: Add import of `extract_blockers` from `claudeutils.worktree.session`. Add `blockers` field to `SessionData`. Pass `blockers=extract_blockers(content)` in `parse_session`.
 
-**Verify:** `pytest tests/test_commit_pipeline_errors.py -x`
+**Verify GREEN:** `just green`
 
-## Phase 2: Worktree aggregation fix (type: tdd)
+### Cycle 1.2: Status CLI wires blockers to detect_parallel
 
-M#5: `aggregate_trees` deduplicates plans by name; main always wins.
+**Prerequisite:** Read `src/claudeutils/session/status/cli.py:98-99` — hardcoded `[]`. Read `src/claudeutils/session/status/render.py:134-160` — `detect_parallel` signature.
 
-### Cycle 2.1: Plans shown per-tree, not deduplicated to main
+**RED Phase:**
 
-**Contract:** When a plan exists in multiple worktrees with different lifecycle states, each tree shows its own plan state. Main does not overwrite worktree-specific state.
+**Test:** `test_status_parallel_uses_blockers` in `tests/test_status_rework.py`
+**Assertions:**
+- Session fixture with two tasks (different plan dirs) and `## Blockers / Gotchas` section mentioning both task names as dependent
+- CLI invocation via CliRunner with `_status` command
+- Output does NOT contain "Parallel" (blocker creates dependency between the two tasks)
+- Exit code 0
 
-**RED:** Write test for `aggregate_trees`:
-- Mock git worktree list to return two trees (main + worktree)
-- Create plan directories in both with different lifecycle.md states (e.g., main=`ready`, worktree=`rework`)
-- Call `aggregate_trees` → assert both plan states appear, each with correct `tree_path`
-- Assert plan count equals 2 (not deduplicated to 1)
+**Expected failure:** `AssertionError` — output contains "Parallel" because blockers are ignored (passed as `[]`)
 
-Currently: `aggregate_trees` (aggregation.py:202-219) uses `plans_dict[plan.name]` — main loop runs second and unconditionally overwrites worktree entry.
+**Why it fails:** `cli.py:99` passes `[]` instead of `data.blockers` to `detect_parallel`
 
-**GREEN:** Remove dedup. Collect all plans across all trees into a flat list (each `PlanState` already has `tree_path` set). `format_rich_ls` already groups by `plan.tree_path == tree.path` (display.py:28) — display layer unaffected.
+**Verify RED:** `pytest tests/test_status_rework.py::test_status_parallel_uses_blockers -v`
 
-Change `plans_dict: dict[str, PlanState]` to `all_plans: list[PlanState]`. Single loop over trees, append all plans. Sorting by session.md order still works (sort key uses `plan.name`).
+---
 
-**Verify:** `pytest tests/ -k "aggregate" -x` and `pytest tests/test_session_status.py -x`
+**GREEN Phase:**
 
-## Phase 3: Status CLI fixes (type: tdd)
+**Implementation:** Wire `data.blockers` from parsed session into `detect_parallel` call.
 
-m-2 (▶ skip worktree tasks), m-5 (old section name bypass).
+**Behavior:**
+- Replace `detect_parallel(data.in_tree_tasks, [])` with `detect_parallel(data.in_tree_tasks, data.blockers)`
 
-### Cycle 3.1: Old section name detected and rejected
+**Changes:**
+- File: `src/claudeutils/session/status/cli.py`
+  Action: Change line 99 from `[]` to `data.blockers`
 
-**Contract:** Session.md using `## Pending Tasks` (old name) causes `_status` to exit 2 with informative error — not silent "No in-tree tasks."
+**Verify GREEN:** `just green`
 
-**RED:** Write test in `tests/test_status_rework.py`:
-- Create session.md with `## Pending Tasks` containing valid task lines
-- Invoke `_status` via CliRunner
-- Assert `exit_code == 2`
-- Assert output references the old section name
+## Phase 2: Vet stale output file detail (type: tdd)
 
-Currently: `_count_raw_tasks("In-tree Tasks")` returns 0, `parse_session` returns 0 in-tree tasks, `0 != 0` is False → passes silently.
+### Cycle 2.1: VetResult includes per-file detail
 
-**GREEN:** In `status/cli.py`, before the count comparison, check for `## Pending Tasks` in content. If found: `_fail("**Error:** Old section name 'Pending Tasks' — rename to 'In-tree Tasks'", code=2)`.
+**Prerequisite:** Read `src/claudeutils/session/commit_gate.py:93-168` — `VetResult` dataclass and `vet_check()`. Read `plans/handoff-cli-tool/outline.md:202-207` — design spec stale output format.
 
-**Verify:** `pytest tests/test_status_rework.py -x`
+**RED Phase:**
 
-### Cycle 3.2: ▶ skips worktree-marked tasks
+**Test:** `test_vet_stale_includes_file_detail` in `tests/test_session_commit_validation.py`
+**Assertions:**
+- Set up tmp_path with pyproject.toml containing `require-review = ["src/**/*.py"]`
+- Create `plans/test/reports/review.md` with mtime in the past
+- Create `src/foo.py` with mtime newer than the report
+- Call `vet_check(["src/foo.py"])`
+- `result.passed` is False
+- `result.reason` is "stale"
+- `result.stale_info` contains `src/foo.py` (the newest source file name)
+- `result.stale_info` contains the report file name
 
-**Contract:** `render_pending` assigns ▶ to first pending task WITHOUT a worktree marker.
+**Expected failure:** `AssertionError` — `stale_info` contains only time delta string like `"Source newer than reports by 5s"`, not file names
 
-**RED:** Write test in `tests/test_status_rework.py`:
-- Task list: first task has `worktree_marker="slug"`, second has `worktree_marker=None`
-- Call `render_pending` → assert ▶ appears on second task name
-- Assert first task rendered without ▶
+**Why it fails:** Current implementation computes `_newest_mtime` but doesn't track which file is newest
 
-Currently: `render_pending` line 67 checks `task.checkbox == " "` but not `task.worktree_marker`.
+**Verify RED:** `pytest tests/test_session_commit_validation.py::test_vet_stale_includes_file_detail -v`
 
-**GREEN:** Add `and task.worktree_marker is None` to the condition at line 67.
+---
 
-**Verify:** `pytest tests/test_status_rework.py -x`
+**GREEN Phase:**
 
-## Phase 4: Git helper fix (type: tdd)
+**Implementation:** Track newest source file and newest report file, include paths in `stale_info`.
 
-m-3: `_is_dirty()` uses `_git()` which strips leading space from porcelain format.
+**Behavior:**
+- Replace `_newest_mtime` calls with a helper that returns both mtime and path
+- Format `stale_info` as `"Newest change: {path} ({timestamp})\nNewest report: {report_path} ({timestamp})"` matching design spec
 
-### Cycle 4.1: _is_dirty exclude_path works with unstaged modifications
+**Changes:**
+- File: `src/claudeutils/session/commit_gate.py`
+  Action: Add helper `_newest_file(files) -> tuple[float, Path]` returning (mtime, path). Modify `vet_check` to use it, format stale_info with file paths and human-readable timestamps.
 
-**Contract:** `_is_dirty(exclude_path=X)` correctly excludes files under path X even when porcelain output has ` M` prefix (space-M, unstaged only).
+**Verify GREEN:** `just green`
 
-**RED:** Write test:
-- Create real git repo, add and commit `subdir/file.py`, then modify it (unstaged)
-- `git status --porcelain` → ` M subdir/file.py` (leading space)
-- Call `_is_dirty(exclude_path="subdir")` → assert returns `False` (file is excluded)
-- Currently returns `True` because `_git()` strips leading space → `M subdir/file.py` → `line[3:]` = `bdir/file.py` → doesn't match exclude prefix `subdir/` → not excluded
+## Phase 3: Completed parser blank line preservation (type: tdd)
 
-**GREEN:** Change `_is_dirty` to use `subprocess.run` directly instead of `_git()`, preserving porcelain format's fixed-width XY+space prefix.
+### Cycle 3.1: parse_completed_section preserves inter-group blank lines
 
-**Verify:** `pytest tests/ -k "is_dirty" -x`
+**Prerequisite:** Read `src/claudeutils/session/parse.py:70-81` — `parse_completed_section`. Read `src/claudeutils/worktree/session.py:120-130` — `find_section_bounds`.
 
-## Phase 5: Cleanup (type: general)
+**RED Phase:**
 
-Non-behavioral changes.
+**Test:** `test_parse_completed_preserves_blank_lines` in `tests/test_session_parser.py`
+**Assertions:**
+- Content with `## Completed This Session` containing two `### ` sub-groups separated by a blank line:
+  ```
+  ### Group A
+  - Item 1
 
-### Step 5.1: Delete dead `render_next`
+  ### Group B
+  - Item 2
+  ```
+- `parse_completed_section(content)` returns a list where at least one element is `""` (blank line between groups)
+- The blank line appears between the "Item 1" line and the "### Group B" line
+- Both `### Group A` and `### Group B` are present in the result
 
-- Delete function from `src/claudeutils/session/status/render.py` (lines 24-47)
-- Remove any imports/references (grep `render_next`)
-- Verify: `just lint`
+**Expected failure:** `AssertionError` — result contains no empty strings because `if line.strip()` filters them out
 
-### Step 5.2: Delete dead `step_reached`
+**Why it fails:** Line 81 filters blank lines: `[line for line in section_lines if line.strip()]`
 
-- Remove `step_reached: str` from `HandoffState` in `src/claudeutils/session/handoff/pipeline.py:20`
-- Update `save_state` to remove `step` parameter
-- Grep for `step_reached` references and remove
-- Verify: `just lint` and `just test`
+**Verify RED:** `pytest tests/test_session_parser.py::test_parse_completed_preserves_blank_lines -v`
 
-### Step 5.3: Add `claudeutils:*` to handoff SKILL.md
+---
 
-- Edit `agent-core/skills/handoff/SKILL.md` line 4
-- `Bash(just:*,wc:*,git:*)` → `Bash(just:*,wc:*,git:*,claudeutils:*)`
+**GREEN Phase:**
 
-### Step 5.4: Fix weak test assertion
+**Implementation:** Preserve blank lines within the section, only strip trailing blank lines.
 
-- `tests/test_status_rework.py:143`: split `or` → two `assert` statements
+**Behavior:**
+- Keep all lines from the section (including blank lines between groups)
+- Strip only leading/trailing blank lines from the section
 
-### Step 5.5: Final verification
+**Changes:**
+- File: `src/claudeutils/session/parse.py`
+  Action: Replace list comprehension at line 81 with logic that preserves internal blank lines but strips leading/trailing empties. Use `.strip()` only for the overall section boundaries, not individual lines.
 
-- `just precommit`
+**Verify GREEN:** `just green`
+
+### Cycle 3.2: Handoff input parser preserves blank lines
+
+**Prerequisite:** Read `src/claudeutils/session/handoff/parse.py:47-53` — same blank-line stripping in `parse_handoff_input`.
+
+**RED Phase:**
+
+**Test:** `test_parse_handoff_preserves_blank_lines` in `tests/test_session_handoff.py`
+**Assertions:**
+- Handoff input text with `**Status:**` line and `## Completed This Session` containing two sub-groups with blank line between them
+- `parse_handoff_input(text).completed_lines` contains at least one `""` element
+- Both sub-group headings present in result
+
+**Expected failure:** `AssertionError` — blank lines stripped by `if line.strip()` filter at line 52
+
+**Why it fails:** `parse_handoff_input` only appends lines where `line.strip()` is truthy
+
+**Verify RED:** `pytest tests/test_session_handoff.py::test_parse_handoff_preserves_blank_lines -v`
+
+---
+
+**GREEN Phase:**
+
+**Implementation:** Preserve blank lines in completed section parsing.
+
+**Behavior:**
+- Append all lines from completed section (including blank)
+- Strip only trailing blank lines
+
+**Changes:**
+- File: `src/claudeutils/session/handoff/parse.py`
+  Action: Replace `if line.strip(): completed.append(line)` with unconditional append, then strip trailing empties after the loop.
+
+**Verify GREEN:** `just green`
+
+## Consolidation Self-Check
+
+- Cycles 1.1 and 1.2 are sequential (1.2 depends on 1.1's `blockers` field)
+- Cycle 2.1 is independent of Phase 1 and Phase 3
+- Cycles 3.1 and 3.2 address the same bug in two parsers — both needed, no subset overlap
+- No cycle's assertions are a subset of another's — each tests distinct behavior in distinct code paths

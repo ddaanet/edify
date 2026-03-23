@@ -1,42 +1,32 @@
-# Classification: Fix handoff-cli round 2 findings
+# Classification: Fix handoff-cli round 3 findings
 
-**Date:** 2026-03-22
-**Input:** plans/handoff-cli-tool/reports/deliverable-review.md (round 2: 1C/4M/6m)
+**Date:** 2026-03-23
+**Input:** plans/handoff-cli-tool/reports/deliverable-review.md (round 3: 0C/0M(delta), 2M+6m(pre-existing))
 **Plan status:** rework
-**Round:** 2 (prior classification was round 1: 5C/11M/12m)
+**Round:** 3 (prior: round 2 = 1C/4M/6m, round 1 = 5C/11M/12m)
 
-## Composite Decomposition
+## Prior Rounds
+
+Round 2: 10 findings fixed (integration-first TDD). Round 3 Simple batch: 5 of 6 minor pre-existing fixed, 1 dropped (m-pre-2 ▶ format — design spec outdated). Round 3 delta: 2 minor fixed (m#1 regex, m#2 dropped).
+
+## Composite Decomposition (remaining)
 
 | # | Finding | Behavioral Code? | Classification | Destination |
 |---|---------|-------------------|----------------|-------------|
-| C#1 | `_commit_submodule` returncode unchecked | Yes | Moderate | production |
-| M#2 | SKILL.md missing `claudeutils:*` | No | Simple | agentic-prose |
-| M#3 | `_error()` not informative (S-3) | Yes | Moderate | production |
-| M#5 | `_worktree ls` stale dedup | Yes | Moderate | production |
-| m-1 | Dead `render_next` | No | Simple | production |
-| m-2 | `▶` doesn't skip worktree tasks | Yes | Simple | production |
-| m-3 | `_is_dirty()` strip bug | Yes | Simple | production |
-| m-4 | Dead `step_reached` | No | Simple | production |
-| m-5 | Old section name bypass | Yes | Simple | production |
-| m-6 | Weak test `or` assertion | No | Simple | production |
-
-**Split out:** M#4 (skill-CLI integration) → `plans/skill-cli-integration/` (Complex, opus)
+| M-pre-1 | Parallel detection ignores Blockers/Gotchas | Yes | Moderate | production |
+| M-pre-2 | Stale vet output lacks file-level detail | Yes | Moderate | production |
+| m-pre-3 | Completed parser strips blank lines between `###` groups | Yes | Moderate | production |
 
 ## Overall
 
-- **Classification:** Moderate (composite)
-- **Implementation certainty:** High
-- **Requirement stability:** High
-- **Behavioral code check:** Yes (C#1, M#3, M#5, m-2, m-3, m-5)
+- **Classification:** Moderate (composite, 3 items)
+- **Implementation certainty:** High — affected functions identified, target behavior specified
+- **Requirement stability:** High — design spec (ST-1, C-1) and markdown preservation
+- **Behavioral code check:** Yes (all 3 — new parser logic, changed output format, changed parsing logic)
 - **Work type:** Production
-- **Artifact destination:** production (code), agentic-prose (M#2)
+- **Artifact destination:** production
 - **Model:** sonnet
-- **Evidence:** All findings have concrete file:line refs; patterns established in round 1 fixes
-
-## Scope
-
-**In scope:** C#1, M#2, M#3, M#5, m-1 through m-6 = 10 findings
-**Split:** M#4 → separate plan (skill-cli-integration)
+- **Evidence:** All items have concrete file:line refs; M-pre-1/M-pre-2 traced to design spec gaps; m-pre-3 observable in parser output
 
 ## Routing
 
