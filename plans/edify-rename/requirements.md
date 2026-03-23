@@ -37,6 +37,9 @@ Rename CLI command from `claudeutils` to `edify`. Update all 133 skill/agent ref
 **FR-9c: PyPI distribution name**
 Claim `edify` on PyPI via PEP 541 (current holder: abandoned since Dec 2022, 33 downloads/month). Update `pyproject.toml` `name` field and `sessionstart-health.sh` install target. Non-blocking for other rename work — PyPI claim runs in parallel. Acceptance: `pip install edify` installs this package.
 
+**FR-9d: Update .claude/rules for plugin ownership**
+Rules files in `.claude/rules/` reference `.claude/agents/**/*`, `.claude/hooks/**/*`, `.claude/skills/**/*` in their `paths:` frontmatter — these are now plugin-managed artifacts, not user-editable. Update rules to reflect that editing happens in `plugin/` source, not `.claude/` output. Acceptance: no rules reference `.claude/agents/`, `.claude/hooks/`, or `.claude/skills/` as editable paths.
+
 **FR-10: Delete delivered plans**
 Remove all plan directories with `delivered` status except `plans/retrospective/`. Before deleting each plan, read its outline or design to write an accurate archive entry in `agents/plan-archive.md`. Git history preserves full content. Acceptance: directories deleted, every deleted plan has archive entry, no active plan removed. Note: verify `remove-fuzzy-recall` planstate discrepancy before deletion.
 
