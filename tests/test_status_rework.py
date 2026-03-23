@@ -143,6 +143,41 @@ def test_status_rejects_old_format(tmp_path: Path) -> None:
     assert "old-format" in result.output.lower() or "metadata" in result.output.lower()
 
 
+# Cycle 3.2: worktree marker skips next
+
+
+def test_render_pending_skips_worktree_marked() -> None:
+    """▶ marker appears on first unassigned pending task."""
+    tasks = [
+        ParsedTask(
+            name="First",
+            checkbox=" ",
+            full_line="- [ ] **First** — `/cmd` | sonnet → wt-slug",
+            command="/cmd",
+            model="sonnet",
+            restart=False,
+            plan_dir=None,
+            worktree_marker="wt-slug",
+        ),
+        ParsedTask(
+            name="Second",
+            checkbox=" ",
+            full_line="- [ ] **Second** — `/cmd2` | sonnet",
+            command="/cmd2",
+            model="sonnet",
+            restart=False,
+            plan_dir=None,
+            worktree_marker=None,
+        ),
+    ]
+    result = render_pending(tasks, {})
+    assert "▶ Second" in result
+    lines = result.split("\n")
+    first_line = next(ln for ln in lines if "First" in ln)
+    assert "▶" not in first_line
+    assert first_line.startswith("- First")
+
+
 # Cycle 3.1: old section name detected
 
 

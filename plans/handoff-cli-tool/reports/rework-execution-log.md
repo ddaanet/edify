@@ -36,3 +36,14 @@
 - Files modified: `src/claudeutils/session/status/cli.py` (helper added, status_cmd call added), `tests/test_status_rework.py` (test added)
 - Stop condition: none
 - Decision made: Helper function extraction kept `status_cmd` complexity manageable without major refactoring of validation logic
+
+### Cycle 3.2: ▶ skips worktree-marked tasks 2026-03-23
+- Status: GREEN_VERIFIED
+- Test command: `pytest tests/test_status_rework.py::test_render_pending_skips_worktree_marked -xvs`
+- RED result: FAIL as expected — `render_pending` assigns ▶ to first pending task regardless of worktree_marker; should skip marked tasks
+- GREEN result: PASS — Added `task.worktree_marker is None` condition to line 67 of `render_pending`, ensuring ▶ only marks unassigned in-tree tasks
+- Regression check: 1773/1774 passed, 1 xfail (no regressions)
+- Refactoring: none
+- Files modified: `src/claudeutils/session/status/render.py` (line 67 condition updated), `tests/test_status_rework.py` (test added)
+- Stop condition: none
+- Decision made: Minimal one-line change; aligns with existing `render_next` logic which already had this check
