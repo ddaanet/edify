@@ -322,3 +322,29 @@ def test_state_cache_cleanup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     assert load_state() is None
     # No error on second clear
     clear_state()
+
+
+# Cycle 3.2: HandoffState step_reached field
+
+
+def test_handoff_state_includes_step_reached(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """HandoffState has step_reached field with default value."""
+    monkeypatch.setattr(
+        "claudeutils.session.handoff.pipeline._STATE_FILE",
+        tmp_path / "state.json",
+    )
+
+    save_state("sample markdown")
+    result = load_state()
+
+    assert result is not None
+    assert result.step_reached == "write_session"
+
+    # Verify JSON contains the field
+    state_file = tmp_path / "state.json"
+    assert state_file.exists()
+    data = json.loads(state_file.read_text())
+    assert "step_reached" in data
+    assert data["step_reached"] == "write_session"

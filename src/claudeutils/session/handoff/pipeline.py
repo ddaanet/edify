@@ -17,6 +17,7 @@ class HandoffState:
 
     input_markdown: str
     timestamp: str
+    step_reached: str = "write_session"
 
 
 def save_state(input_md: str) -> None:
