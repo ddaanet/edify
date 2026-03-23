@@ -166,3 +166,28 @@ def test_parse_session_old_format(tmp_path: Path) -> None:
     assert len(data.in_tree_tasks) == 1
     assert data.in_tree_tasks[0].model is None
     assert data.in_tree_tasks[0].restart is False
+
+
+def test_parse_session_extracts_blockers(tmp_path: Path) -> None:
+    """parse_session() extracts Blockers / Gotchas section."""
+    content = """\
+# Session Handoff: 2026-03-15
+
+**Status:** Testing blockers extraction.
+
+## In-tree Tasks
+
+- [ ] **Task 1** — `/design`
+
+## Blockers / Gotchas
+
+- Item depends on external API availability
+- Concurrent execution cap is 5 unblocked tasks
+"""
+    session_file = tmp_path / "session.md"
+    session_file.write_text(content)
+
+    data = parse_session(session_file)
+    assert len(data.blockers) == 2
+    assert "Item depends on external API availability" in data.blockers[0][0]
+    assert "Concurrent execution cap" in data.blockers[1][0]

@@ -13,6 +13,7 @@ from pathlib import Path
 from claudeutils.validation.task_parsing import ParsedTask, parse_task_line
 from claudeutils.worktree.session import (
     _extract_plan_from_block,
+    extract_blockers,
     extract_task_blocks,
     find_section_bounds,
 )
@@ -41,6 +42,7 @@ class SessionData:
     completed: list[str]
     in_tree_tasks: list[ParsedTask]
     worktree_tasks: list[ParsedTask] = field(default_factory=list)
+    blockers: list[list[str]] = field(default_factory=list)
 
 
 def parse_status_line(content: str) -> str | None:
@@ -144,4 +146,5 @@ def parse_session(path: Path, content: str | None = None) -> SessionData:
         completed=parse_completed_section(content),
         in_tree_tasks=parse_tasks(content, section="In-tree Tasks"),
         worktree_tasks=parse_tasks(content, section="Worktree Tasks"),
+        blockers=extract_blockers(content),
     )
