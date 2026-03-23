@@ -1,31 +1,26 @@
 # Session Handoff: 2026-03-23
 
-**Status:** Handoff-cli round 3 Simple batch complete (5/10 findings fixed). Design skill loophole fixed. Moderate items (M#1, M#2, m-pre-3) remain for /runbook.
+**Status:** Handoff-cli round 3 Moderate batch complete (3/3 findings fixed). All deliverable-review findings now resolved. Deliverable-review task pending.
 
 ## Completed This Session
 
-**Design skill fix:**
-- Fixed Simple routing loophole: "implement directly" in step 3 competed with /inline chain
-- Removed step 3 execution permission, replaced with "chain to /inline"
+**Handoff-cli round 3 Moderate batch (3 fixes via TDD):**
+- M-pre-1: Blocker detection wired e2e — `SessionData.blockers` field added, `extract_blockers` composed into `parse_session`, `detect_parallel` receives real blockers instead of `[]`
+- M-pre-2: Vet stale output includes per-file detail — `_newest_file` helper returns (mtime, path), `stale_info` formatted with relative paths and timestamps per design spec
+- m-pre-3: Completed parser blank line preservation — both `parse_completed_section` and `parse_handoff_input` preserve internal blank lines, strip only leading/trailing
+- Corrector review: 0C/1M/2m, all fixed (vet paths, handoff leading blanks, tighter test assertions)
 
-**Handoff-cli round 3 Simple batch (5 fixes):**
-- m#1: `_check_old_section_name` substring → `re.search` line-anchored regex
-- m-pre-1: `_fail` dedup — 3 copies consolidated to single in `claudeutils.git`
-- m-pre-4: double `read_text()` eliminated — `parse_session` accepts optional `content` param
-- m-pre-5: `_strip_hints` now filters `advice:` lines alongside `hint:`
-- m-pre-6: `_init_repo` dedup — 3 test files replaced with shared `init_repo_at` import
-- Corrector review clean (0C/0M), report: `plans/handoff-cli-tool/reports/review.md`
-
-**Dropped findings:**
-- m#2 (`load_state()` compat): dropped per user — near-zero impact
-- m-pre-2 (▶ format): design spec outdated — current format prototyped with user post-design
+**Prior session (already committed):**
+- Design skill loophole fixed (Simple routing "implement directly" removed)
+- Simple batch: 5 of 6 minor pre-existing fixed (m#1 regex, m-pre-1 _fail dedup, m-pre-4 double read, m-pre-5 strip_hints, m-pre-6 init_repo dedup)
 
 ## In-tree Tasks
 
 - [x] **Handoff-cli RC3** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
   - Plan: handoff-cli-tool | 0C/0M(delta), 2m(delta), 2M+6m(pre-existing)
-- [ ] **Fix handoff-cli round 3** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | sonnet
-  - Plan: handoff-cli-tool | Simple batch done (5 fixes). Remaining: M#1 (blocker detection wiring), M#2 (vet file detail), m-pre-3 (completed parser blank lines) — Moderate, need /runbook with TDD
+- [x] **Fix handoff-cli round 3** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | sonnet
+  - Plan: handoff-cli-tool | All findings resolved: Simple batch (5), Moderate batch (3), corrector fixes applied
+- [ ] **Handoff-cli RC4** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
 - [ ] **Runbook warnings** — `/design plans/runbook-warnings/brief.md` | sonnet
   - Plan: runbook-warnings | Status: briefed
 - [ ] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
@@ -66,9 +61,9 @@
 
 ## Reference Files
 
-- `plans/handoff-cli-tool/reports/review.md` — corrector review of Simple batch (clean)
-- `plans/handoff-cli-tool/reports/deliverable-review.md` — RC3 findings (source for remaining Moderate items)
+- `plans/handoff-cli-tool/reports/review.md` — corrector review of Moderate batch (0C/1M/2m, all fixed)
+- `plans/handoff-cli-tool/reports/deliverable-review.md` — RC3 findings (source document)
 
 ## Next Steps
 
-Fix handoff-cli round 3 Moderate items (M#1, M#2, m-pre-3) via /design → /runbook, then `/codify`.
+Deliverable review round 4 via `/deliverable-review plans/handoff-cli-tool` (opus, restart required).
