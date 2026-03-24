@@ -1,34 +1,39 @@
-# Classification: Fix handoff-cli RC8 findings
+# Classification: Fix handoff-cli RC9 findings
 
 **Date:** 2026-03-24
-**Input:** plans/handoff-cli-tool/reports/deliverable-review.md (RC8: 0C/0M/6m)
+**Input:** plans/handoff-cli-tool/reports/deliverable-review.md (RC9: 0C/1M/10m)
 **Plan status:** reviewed
-**Round:** 8
+**Round:** 9
 
 ## Composite Decomposition
 
 | # | Finding | Behavioral? | Classification | Action |
 |---|---------|-------------|----------------|--------|
-| m-1 | Bare pytest.raises without match (test_session_commit.py:101) | No (test param) | Simple | Add `match="no-edit contradicts"` |
-| m-2 | Heading format not verified in handoff parse test (test_session_handoff.py:45-46) | No (assertion) | Simple | Add `assert any("### " in line ...)` |
-| m-3 | Empty Files section not rejected (commit.py _validate) | Yes (new branch) | Moderate | Add `if not files: raise CommitInputError(...)` |
-| m-4 | ci.message or "" fallback masks unreachable state (commit_pipeline.py:336) | Yes (assertion) | Moderate | Replace with `assert ci.message is not None` |
-| m-5 | _strip_hints fragile continuation detection (commit_pipeline.py:204) | Yes (logic change) | Moderate | Fix continuation detection condition |
-| m-6 | ParsedTask import bypasses S-4 interface in render.py | No (import fix) | Simple | `validation.task_parsing` → `session.parse` |
+| M-1 | `vet_check` path resolution bug (commit_gate.py:159) | Yes — changes path resolution condition | Moderate | `Path(f).exists()` → `(Path(cwd or ".") / f).exists()` |
+| m-1 | Bare `pytest.raises(CleanFileError)` without match (test_session_commit.py:257) | No — tightens test assertion | Simple | Add `match=` |
+| m-2 | Bare `pytest.raises(SessionFileError)` without match (test_session_parser.py:147) | No | Simple | Add `match=` |
+| m-3 | Bare `pytest.raises(CalledProcessError)` without match (test_commit_pipeline_errors.py:26) | No | Simple | Add `match=` or returncode check |
+| m-4 | Redundant `len > 0` assertion (test_session_handoff.py:45) | No — removes assertion | Simple | Remove `assert len(result.completed_lines) > 0` |
+| m-5 | Redundant `len > 0` assertion (test_session_parser.py:57) | No | Simple | Remove `assert len(...) > 0` |
+| m-6 | Fixture uses bold-colon format not `### ` headings (test_session_handoff.py:31) | No — string change | Simple | Update fixture to canonical `### ` heading format |
+| m-7 | `step_reached` vestigial field (handoff/pipeline.py:20) | No — dead code removal | Simple | Remove field and all set sites |
+| m-8 | `_AGENT_CORE_PATTERNS` hardcoded submodule name (commit_gate.py:138) | N/A — design-level deferral per outline.md C-1 | Pending task | Track; no fix this round |
+| m-9 | `_git_output` lacks porcelain-safety docstring warning (commit_gate.py:31-43) | No — adds docstring | Simple | Add `.strip()` porcelain warning to docstring |
+| m-10 | `format_commit_output` unconditional parent append (commit_pipeline.py:234) | Yes — adds conditional branch | Moderate | Wrap `parts.append(...)` with `if parent_output:` guard |
 
 ## Overall
 
-- **Classification:** Mixed — Simple (m-1/m-2/m-6) + Moderate (m-3/m-4/m-5)
-- **Implementation certainty:** High for all except m-5 (Moderate — logic change needs care)
-- **Requirement stability:** High — RC8 findings with specific locations and expected behavior
-- **Behavioral code check:** m-3/m-4/m-5 add/change production logic paths
+- **Classification:** Mixed — Simple (m-1..m-7, m-9) + Moderate (M-1, m-10)
+- **Implementation certainty:** High (all fixes have specific file:line and expected behavior)
+- **Requirement stability:** High — RC9 findings with concrete locations and fix mechanisms
+- **Behavioral code check:** M-1 and m-10 change production logic paths
 - **Work type:** Production
 - **Artifact destination:** production (src + tests)
-- **Model:** sonnet
-- **Evidence:** RC8 review provides file:line references, expected behavior, and fix mechanisms for all items
+- **Evidence:** RC9 deliverable-review.md; recall entries: behavioral-code-as-simple, composite-task, deliverable-review-resolution
 
 ## Routing
 
 Moderate items present → `/runbook plans/handoff-cli-tool`
-- General phases: m-1, m-2, m-6 (simple test/import fixes, no behavioral code)
-- TDD phases: m-3, m-4, m-5 (behavioral code changes in production)
+- TDD phases: M-1 (path resolution fix), m-10 (conditional guard)
+- General phases: m-1..m-7, m-9 (test fixes and simple code changes)
+- m-8: pending task (C-1 design deferral for submodule config model)
