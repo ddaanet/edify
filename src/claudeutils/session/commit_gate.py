@@ -156,7 +156,8 @@ def vet_check(files: list[str], *, cwd: Path | None = None) -> VetResult:
             unreviewed_files=matched,
         )
 
-    matched_paths = [Path(f) for f in matched if Path(f).exists()]
+    root = Path(cwd or ".")
+    matched_paths = [root / f for f in matched if (root / f).exists()]
     if not matched_paths:
         return VetResult(passed=True)
 

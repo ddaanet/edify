@@ -335,3 +335,28 @@ def test_vet_check_stale(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
     assert result.passed is False
     assert result.reason == "stale"
     assert result.stale_info is not None
+
+
+def test_vet_check_stale_with_explicit_cwd(tmp_path: Path) -> None:
+    """vet_check with explicit cwd detects stale without monkeypatch.chdir."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[tool.claudeutils.commit]\nrequire-review = ["src/**/*.py"]\n'
+    )
+
+    report_dir = tmp_path / "plans" / "bar" / "reports"
+    report_dir.mkdir(parents=True)
+    report = report_dir / "vet-review.md"
+    report.write_text("reviewed")
+
+    # Pin report mtime to 10s ago so source is reliably newer
+    old_time = time.time() - 10
+    os.utime(report, (old_time, old_time))
+
+    src = tmp_path / "src" / "foo.py"
+    src.parent.mkdir(parents=True)
+    src.write_text("new code")
+
+    # Pass cwd explicitly — do NOT monkeypatch.chdir
+    result = vet_check(["src/foo.py"], cwd=tmp_path)
+    assert result.passed is False
+    assert result.reason == "stale"
