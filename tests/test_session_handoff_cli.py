@@ -87,7 +87,7 @@ def test_session_handoff_cli_fresh(
     assert "Implemented write_completed" in content
     assert "Previous task" not in content
     # Git diagnostics emitted (session.md modified relative to HEAD)
-    assert "Git status" in result.output
+    assert "**Git status:**" in result.output
     # State file cleared after successful pipeline
     assert not (tmp_path / "tmp" / ".handoff-state.json").exists()
 

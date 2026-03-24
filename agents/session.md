@@ -1,26 +1,23 @@
 # Session Handoff: 2026-03-24
 
-**Status:** RC7 review complete (0C/0M/6m). Plan at `reviewed` status.
+**Status:** Fix RC7 complete (0C/0M/6m applied). RC8 deliverable review queued.
 
 ## Completed This Session
 
-**Handoff-cli RC7 deliverable review:**
-- Three-layer review: Layer 1 (3 opus agents: code, test, prose+config) + Layer 2 (interactive cross-cutting)
-- All 6 RC6 findings verified fixed
-- 0C/0M/6m — minors are test quality only (vacuous assertion, parametrize style, import consistency, assertion specificity)
-- Lifecycle updated: `review-pending` → `reviewed` (plans/handoff-cli-tool/lifecycle.md)
-- Report: plans/handoff-cli-tool/reports/deliverable-review.md
+**Fix handoff-cli RC7 (6 test-quality minors):**
+- m-1: Vacuous disjunction in commit_format test → `output.split("\n")[0].startswith("[")`
+- m-2: 4 single-field parametrized cases → 1 combined assertion test
+- m-3: `ParsedTask` import aligned to `claudeutils.session.parse`
+- m-4: New `test_commit_just_lint_no_vet` — precommit not called, lint called once, vet not called
+- m-5: `"clean" in output.lower()` → `"Tree is clean." in result.output`
+- m-6: `"Git status"` → `"**Git status:**"` in result.output
+- Corrector review: 0C/0M/0m — all 6 fixes verified
 
 ## In-tree Tasks
 
-- [x] **Handoff-cli RC6** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
-  - Plan: handoff-cli-tool
-- [x] **Fix handoff-cli RC6** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | opus
-  - Plan: handoff-cli-tool
-- [x] **Handoff-cli RC7** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
-  - Plan: handoff-cli-tool
-- [ ] **Fix handoff-cli RC7** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | opus
+- [x] **Fix handoff-cli RC7** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | opus
   - Plan: handoff-cli-tool | 0C/0M/6m — test quality minors only
+- [ ] **Handoff-cli RC8** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
 - [ ] **Runbook warnings** — `/design plans/runbook-warnings/brief.md` | sonnet
   - Plan: runbook-warnings | Status: briefed
 - [ ] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
@@ -62,8 +59,9 @@
 ## Reference Files
 
 - `plans/handoff-cli-tool/reports/deliverable-review.md` — RC7 findings (0C/0M/6m)
+- `plans/handoff-cli-tool/reports/review.md` — RC7 corrector review (0C/0M/0m)
 - `plans/handoff-cli-tool/lifecycle.md` — Full lifecycle through RC7
 
 ## Next Steps
 
-Fix RC7 minor findings via `/design plans/handoff-cli-tool/reports/deliverable-review.md` — 6 test-quality items, all with known locations and approaches.
+Run RC8 deliverable review via `/deliverable-review plans/handoff-cli-tool` — fixes applied, precommit green.

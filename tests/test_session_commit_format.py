@@ -17,8 +17,8 @@ def test_format_success_parent() -> None:
     )
     assert "[main a7f38c2]" in output
     assert "3 files changed" in output
-    # No submodule prefix
-    assert ":" not in output.split("\n")[0] or "a7f38c2]" in output
+    # No submodule prefix: first line is raw git bracket, not "name: [..."
+    assert output.split("\n")[0].startswith("[")
 
 
 def test_format_success_submodule() -> None:

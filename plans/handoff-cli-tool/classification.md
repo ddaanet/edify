@@ -1,31 +1,31 @@
-# Classification: Fix handoff-cli RC6 findings
+# Classification: Fix handoff-cli RC7 findings
 
-**Date:** 2026-03-23
-**Input:** plans/handoff-cli-tool/reports/deliverable-review.md (RC6: 0C/1M/5m)
-**Plan status:** rework
-**Round:** 6
+**Date:** 2026-03-24
+**Input:** plans/handoff-cli-tool/reports/deliverable-review.md (RC7: 0C/0M/6m)
+**Plan status:** reviewed
+**Round:** 7
 
 ## Composite Decomposition
 
 | # | Finding | Behavioral? | Classification | Action |
 |---|---------|-------------|----------------|--------|
-| M-1 | No test for `_split_sections` `in_message` flag | Yes (new test) | Moderate | Add regression test: `## ` after `## Message` stays in body |
-| m-1 | `test_commit_cli_success` vacuous commit check | No (assertion) | Simple | Add `git log` confirmation |
-| m-2 | Imprecise submodule assertion | No (string literal) | Simple | `"## Submodule"` → `"## Submodule: agent-core"` |
-| m-3 | Multi-submodule commit order not tested | Yes (new test) | Moderate | Add ordering test (low priority — rare scenario) |
-| m-4 | Redundant checkbox check in `render_pending` | No (dead code) | Simple | Remove `task.checkbox == " "` from line 45 |
-| m-5 | `ParsedTask` imported from different modules | No (import path) | Simple | Align to canonical import path |
+| m-1 | Vacuous disjunction in commit_format test | No (assertion rewrite) | Simple | Replace `assert A or B` with direct check for no-prefix |
+| m-2 | Parametrize over shared fixture | No (restructure) | Simple | Collapse 4 cases to single combined assertion test |
+| m-3 | ParsedTask import path inconsistency | No (import literal) | Simple | `validation.task_parsing` → `session.parse` |
+| m-4 | No test for just-lint + no-vet combination | Yes (new test function) | Moderate | Add combined-options test |
+| m-5 | Imprecise "clean" assertion | No (string literal) | Simple | `"clean" in output.lower()` → `"Tree is clean."` |
+| m-6 | Imprecise "Git status" assertion | No (string literal) | Simple | `"Git status"` → `"**Git status:**"` |
 
 ## Overall
 
 - **Classification:** Conformance/coverage batch — all mechanisms specified by review
-- **Implementation certainty:** High — exact code locations and expected behavior provided
-- **Requirement stability:** High — design specs and review findings
-- **Behavioral code check:** M-1/m-3 add test functions; remaining are non-behavioral
+- **Implementation certainty:** High — exact file:line references and fix approaches provided
+- **Requirement stability:** High — RC7 findings with specific locations and expected behavior
+- **Behavioral code check:** m-4 adds a test function (Moderate); remaining non-behavioral
 - **Work type:** Production
-- **Artifact destination:** production
+- **Artifact destination:** production (tests)
 - **Model:** sonnet
-- **Evidence:** Review provides file:line references, expected behavior, and fix mechanisms for all items
+- **Evidence:** RC7 review provides file:line references, expected behavior, and fix mechanisms for all items
 
 ## Routing
 

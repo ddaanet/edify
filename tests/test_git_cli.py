@@ -80,7 +80,7 @@ def test_git_changes_clean_repo(
     result = runner.invoke(git_group, ["changes"])
 
     assert result.exit_code == 0
-    assert "clean" in result.output.lower()
+    assert "Tree is clean." in result.output
 
 
 def test_git_changes_dirty_repo(

@@ -254,3 +254,38 @@ require-review = ["src/**/*.py"]
     assert result.stale_info is not None
     assert "src/foo.py" in result.stale_info
     assert "plans/review-2026-01/reports/vet-review.md" in result.stale_info
+
+
+def test_commit_just_lint_no_vet(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Just-lint + no-vet: lint only, vet skipped."""
+    monkeypatch.chdir(tmp_path)
+    _init_repo(tmp_path)
+    (tmp_path / "f.py").write_text("x")
+
+    ci = CommitInput(files=["f.py"], message="msg", options={"just-lint", "no-vet"})
+
+    precommit = MagicMock(return_value=(True, "ok"))
+    lint = MagicMock(return_value=(True, "ok"))
+    vet = MagicMock()
+    with (
+        patch(
+            "claudeutils.session.commit_pipeline._run_precommit",
+            precommit,
+        ),
+        patch(
+            "claudeutils.session.commit_pipeline._run_lint",
+            lint,
+        ),
+        patch(
+            "claudeutils.session.commit_pipeline.vet_check",
+            vet,
+        ),
+    ):
+        result = commit_pipeline(ci, cwd=tmp_path)
+
+    precommit.assert_not_called()
+    lint.assert_called_once()
+    vet.assert_not_called()
+    assert result.success is True

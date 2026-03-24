@@ -1,12 +1,12 @@
-# Review: handoff-cli-tool RC6 fixes
+# Review: handoff-cli-tool RC7 fixes
 
-**Scope**: Changes since baseline commit 5ba43dc5 — RC6 fix implementation (M-1 + m-1..m-5)
-**Date**: 2026-03-23
+**Scope**: RC7 minor finding fixes across 6 test files (m-1..m-6)
+**Date**: 2026-03-24
 **Mode**: review + fix
 
 ## Summary
 
-Six fixes implement all RC6 findings: one major (M-1 regression test for `_split_sections` `in_message` flag) and five minor (git log confirmation, submodule assertion tightening, multi-submodule order test, redundant checkbox removal, import alignment). The submodule helper extraction to `pytest_helpers` (prerequisite for m-3) correctly factors repeated setup into reusable utilities. Implementation quality is high across all changes.
+All 6 RC7 minor findings have been correctly applied. The fixes cover: vacuous assertion replacement, parametrized test collapse, import alignment, new combination test, and two assertion string pins. Each fix matches its requirement exactly. No issues found.
 
 **Overall Assessment**: Ready
 
@@ -22,39 +22,36 @@ None.
 
 ### Minor Issues
 
-1. **Split import block for `pytest_helpers`**
-   - Location: `tests/test_session_commit_pipeline_ext.py:13-21`
-   - Note: Two separate `from tests.pytest_helpers import` blocks where one would suffice. Cosmetic only.
-   - **Status**: OUT-OF-SCOPE — linter-catchable; `just lint` handles import ordering deterministically.
+None.
 
 ## Fixes Applied
 
-No fixes required — the one identified issue is OUT-OF-SCOPE (linter-catchable).
+All 6 fixes were pre-applied before this review. No edits required.
 
-## Verification Against Findings
+- `tests/test_session_commit_format.py:21` — m-1: vacuous `assert A or B` replaced with `output.split("\n")[0].startswith("[")` (VERIFIED)
+- `tests/test_session_commit.py:50-67` — m-2: 4 single-field parametrized cases collapsed to one test asserting all fields from shared fixture (VERIFIED)
+- `tests/test_status_rework.py:11` — m-3: `from claudeutils.session.parse import ParsedTask` aligns import to S-4 public interface (VERIFIED)
+- `tests/test_session_commit_validation.py:259-291` — m-4: `test_commit_just_lint_no_vet` added; asserts precommit not called, lint called once, vet not called (VERIFIED)
+- `tests/test_git_cli.py:83` — m-5: `"Tree is clean." in result.output` pins to actual emitted string (VERIFIED)
+- `tests/test_session_handoff_cli.py:90` — m-6: `"**Git status:**" in result.output` pins to markdown-formatted string (VERIFIED)
 
-| Finding | Implementation | Match |
-|---------|---------------|-------|
-| M-1: `_split_sections` `in_message` test | `test_split_sections_in_message_preserves_headings` (test_session_commit.py:142-159); imports `_split_sections` directly; asserts section names `== ["Files", "Message"]` and `"## Not a section"` in Message body lines | Exact |
-| m-1: `git log` confirmation in `test_commit_cli_success` | subprocess `git log --oneline -1` against `tmp_path`; asserts `"foo" in log.stdout.lower()` | Exact |
-| m-2: Submodule assertion tightened | `"## Submodule: agent-core"` at test_session_handoff_cli.py:234 | Exact |
-| m-3: Multi-submodule order test | `test_commit_multi_submodule_order` with alpha/beta submodules; verifies each submodule commit message and parent commit | Exact; helper extraction also applied |
-| m-4: Redundant `task.checkbox == " "` removed | render.py:45 — condition reduced to `first_eligible and task.worktree_marker is None` | Exact |
-| m-5: `ParsedTask` import aligned | test_session_status.py imports from `claudeutils.session.parse` (re-export path) | Exact |
+## Requirements Validation
 
-## Design Conformance Notes
-
-**M-1 test scope:** Uses `_split_sections` directly (white-box), bypassing blockquote wrapping. Correct — the finding specifies defense-in-depth against raw `## ` lines (not blockquoted), so the test correctly exercises raw `## ` in message body to hit the branch.
-
-**Helper extraction:** `create_submodule_origin` and `add_submodule` in `pytest_helpers.py` cleanly generalize the single-submodule pattern. `add_submodule` correctly includes `protocol.file.allow=always` (previously inlined). Identity config set on the submodule directory post-add matches prior manual pattern.
-
-**Multi-submodule test coverage:** Verifies each submodule commit independently and the parent commit. Does not assert ordering between alpha and beta — correct, as outline.md:265-267 specifies submodules before parent, not a fixed inter-submodule order.
+| Requirement | Status | Evidence |
+|-------------|--------|----------|
+| m-1: Vacuous disjunction removed | Satisfied | test_session_commit_format.py:21 |
+| m-2: Parametrize collapsed to single combined assertion test | Satisfied | test_session_commit.py:50-67 |
+| m-3: Import aligned to claudeutils.session.parse | Satisfied | test_status_rework.py:11 |
+| m-4: test_commit_just_lint_no_vet added | Satisfied | test_session_commit_validation.py:259-291 |
+| m-5: Assertion pinned to "Tree is clean." | Satisfied | test_git_cli.py:83 |
+| m-6: Assertion pinned to "**Git status:**" | Satisfied | test_session_handoff_cli.py:90 |
 
 ---
 
 ## Positive Observations
 
-- `_split_sections` test asserts section names as an equality check (`assert names == ["Files", "Message"]`) — pinned, not substring-matched.
-- Helper extraction eliminates ~50 lines of duplicated subprocess setup across two test contexts without introducing unnecessary abstraction.
-- `git log --oneline -1` pattern used consistently across m-1, m-3, and pipeline tests — single pattern for commit confirmation.
-- render.py fix is a pure deletion (one condition term removed) — no new code, zero regression risk.
+- m-2 collapsed test is stronger than the original: asserts all fields (files, options, submodule dict key and message body, parent message and body) in one parse from the shared fixture, vs. one field per case in the parametrized form
+- m-4 test structure mirrors `test_commit_just_lint` exactly, making the combination-option coverage immediately legible by comparison
+- All docstring summaries comply with the ≤70-char content constraint (m-2: 64 chars, m-4: 43 chars)
+- m-1 replacement is more specific than a substring check: verifies the first-line prefix character (`[`), making the "no label prefix" intent explicit in the assertion itself
+- m-5 and m-6 pins surface the actual emitted strings in the assertion, removing the case-folding and substring indirection that masked the exact contract

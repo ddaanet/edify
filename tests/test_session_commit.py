@@ -47,32 +47,24 @@ COMMIT_INPUT_FIXTURE = """\
 # Cycle 5.1: parse commit markdown stdin
 
 
-@pytest.mark.parametrize(
-    "section",
-    ["files", "options", "submodule", "message"],
-)
-def test_parse_commit_input(section: str) -> None:
-    """Parametrized test for each section of commit input."""
+def test_parse_commit_input() -> None:
+    """All sections of commit input parse correctly from shared fixture."""
     result = parse_commit_input(COMMIT_INPUT_FIXTURE)
 
-    if section == "files":
-        assert result.files == [
-            "src/commit/cli.py",
-            "src/commit/gate.py",
-            "agent-core/fragments/vet-requirement.md",
-        ]
-    elif section == "options":
-        assert result.options == {"no-vet", "amend"}
-    elif section == "submodule":
-        assert "agent-core" in result.submodules
-        msg = result.submodules["agent-core"]
-        assert msg.startswith("🤖 Update vet-requirement fragment")
-        assert "- Add scripted gate classification reference" in msg
-    elif section == "message":
-        assert result.message is not None
-        assert result.message.startswith("✨ Add commit CLI")
-        assert "- Structured markdown I/O" in result.message
-        assert "- Submodule-aware commit pipeline" in result.message
+    assert result.files == [
+        "src/commit/cli.py",
+        "src/commit/gate.py",
+        "agent-core/fragments/vet-requirement.md",
+    ]
+    assert result.options == {"no-vet", "amend"}
+    assert "agent-core" in result.submodules
+    msg = result.submodules["agent-core"]
+    assert msg.startswith("🤖 Update vet-requirement fragment")
+    assert "- Add scripted gate classification reference" in msg
+    assert result.message is not None
+    assert result.message.startswith("✨ Add commit CLI")
+    assert "- Structured markdown I/O" in result.message
+    assert "- Submodule-aware commit pipeline" in result.message
 
 
 def test_parse_commit_input_edge_cases() -> None:

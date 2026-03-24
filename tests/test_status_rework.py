@@ -8,8 +8,8 @@ import pytest
 from click.testing import CliRunner
 
 from claudeutils.cli import cli
+from claudeutils.session.parse import ParsedTask
 from claudeutils.session.status.render import render_continuation, render_pending
-from claudeutils.validation.task_parsing import ParsedTask
 
 # Cycle 3.1: plan state discovery
 
