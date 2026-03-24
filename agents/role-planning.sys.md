@@ -36,10 +36,9 @@ Do NOT proceed with a plan or TodoWrite list unless user explicitly says "contin
 equivalent. Plans are NOT self-executing - wait for user to confirm before
 implementation begins.
 
-### Sequential Same-File Edits
+### Same-File Edits
 
-When making multiple edits to the same file, edit sequentially to avoid line number
-drift. Insert bottom-to-top so earlier insertions don't shift later targets.
+When making multiple edits to the same file, edits with non-overlapping strings can run in parallel; only sequence when one edit's result is another's target.
 
 ### No Downstream Dependencies in Same Batch
 

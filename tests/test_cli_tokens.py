@@ -18,18 +18,17 @@ from claudeutils.token_cache import TokenCache, create_cache_engine
 from claudeutils.tokens_cli import handle_tokens
 
 
-def test_cli_requires_model_argument(tmp_path: Path) -> None:
-    """Test that CLI requires model argument."""
+def test_cli_model_is_optional(tmp_path: Path) -> None:
+    """Test that CLI model argument is optional (defaults to sonnet)."""
     test_file = tmp_path / "test.md"
     test_file.write_text("Hello world")
 
     runner = CliRunner()
-    result = runner.invoke(cli, ["tokens", str(test_file)])
+    result = runner.invoke(cli, ["tokens", "--help"])
 
-    # Click returns exit code 2 for missing required arguments
-    assert result.exit_code == 2
-    # Click says "missing argument" instead of "required argument"
-    assert "missing" in result.output.lower() or "required" in result.output.lower()
+    # Model should appear as an option with a default, not a required argument
+    assert "--model" in result.output
+    assert "sonnet" in result.output  # default shown
 
 
 def test_cli_accepts_single_file(

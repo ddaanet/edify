@@ -3,6 +3,14 @@
 Completed plans with summaries. Loaded on demand during design research (Phase A.1)
 and diagnostic/RCA sessions.
 
+## remove-memory-index-skill
+
+Removed the vestigial `memory-index` skill (`agent-core/skills/memory-index/`) that predated removal of memory-index from initial context. The skill duplicated `agents/memory-index.md` and was incorrectly invoked via Skill tool from main session. Removed `"memory-index"` from `corrector.md` skills frontmatter — the only consumer. Corrector now reads `agents/memory-index.md` directly, consistent with outline-corrector, design-corrector, and runbook-outline-corrector.
+
+## update-tokens-cli
+
+Made `model` optional in `claudeutils tokens` CLI by converting from positional argument to `--model` option with `sonnet` default. Updated usage text to document multi-file support (`FILE...`). Updated test `test_cli_requires_model_argument` → `test_cli_model_is_optional`. Affected: `src/claudeutils/cli.py`, `tests/test_cli_tokens.py`.
+
 ## inline-execute
 
 /inline skill for lightweight execution of Tier 1/2 work within active sessions. Pre-work (recall, brief check), execute with corrector dispatch, post-work (triage feedback, deliverable-review chaining). Cross-skill review identified continuation frontmatter gaps in /design and /runbook. Affected: agent-core/skills/inline/, agent-core/skills/orchestrate/.

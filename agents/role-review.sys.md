@@ -30,10 +30,9 @@ when responding to users such as "You're absolutely right" or similar phrases.
 If something fails OR succeeds unexpectedly, describe expected vs observed, then STOP
 and wait for guidance. Do not attempt to diagnose or fix without explicit instruction.
 
-### Sequential Same-File Edits
+### Same-File Edits
 
-When making multiple edits to the same file, edit sequentially to avoid line number
-drift. Insert bottom-to-top so earlier insertions don't shift later targets.
+When making multiple edits to the same file, edits with non-overlapping strings can run in parallel; only sequence when one edit's result is another's target.
 
 ### No Downstream Dependencies in Same Batch
 

@@ -85,3 +85,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Designing tmux send-keys + capture-pane interaction to drive Claude's interactive TUI. Fragile due to Ink/React rendering (ANSI codes, async redraws, space-padding). Dismissed as "no prior art" without checking `claude -p` headless mode or existing tmux automation libraries.
 - Correct pattern: `claude -p "prompt" --plugin-dir ./path` runs non-interactively with plain text output. Skills are discoverable, hooks fire, slash commands are recognized. No ANSI parsing, no readiness polling. Prior art exists: pchalasani/claude-code-tools (execution markers), claude-tmux (pattern detection), ccbot (JSONL transcript polling).
 - Evidence: Spike from clean directory confirmed all plugin skills returned via `-p` mode.
+
+## When ordering same-file edits
+- Anti-pattern: Requiring bottom-to-top or sequential ordering for all same-file edits. Based on false assumption that Edit tool is line-number dependent (like sed/awk).
+- Correct pattern: Edit tool uses exact string matching — no line numbers. Edits with non-overlapping `old_string` targets can run in parallel. Only sequence when one edit's result is another's `old_string` target.
+- Evidence: "bottom-to-top" rule removed from tool-batching.md, 4 role sys.md files, and item-review.md as unfounded. The correct constraint is string overlap, not position.

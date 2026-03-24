@@ -159,13 +159,11 @@ When approaching 300 lines, plan to split before continuing.
 - Your responsibility: Run `just role-code` only
 - NOT your responsibility: Lint/type errors (lint role handles this)
 
-### Sequential Same-File Edits
+### Same-File Edits
 
 ⚠️ When making multiple edits to the same file:
 
-1. Edit sequentially (not parallel) to avoid line number drift
-2. When inserting content, work bottom-to-top
-3. Earlier insertions then don't shift line numbers of later targets
+1. Edits with non-overlapping strings can run in parallel; only sequence when one edit's result is another's target
 
 ### No Downstream Dependencies in Same Batch
 

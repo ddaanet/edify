@@ -107,7 +107,7 @@ Include tool rules based on enabled tools for the role.
 
 **Tier 1:**
 
-- Sequential Same-File Edits
+- Same-File Edits
 - No Downstream Dependencies in Same Batch
 
 **Tier 2:**
