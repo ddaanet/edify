@@ -1,236 +1,160 @@
-# RC4 Fix Runbook: handoff-cli-tool
+# RC8 Fix Runbook: handoff-cli-tool
 
-**Input:** plans/handoff-cli-tool/reports/deliverable-review.md (0C/2M/9m)
-**Date:** 2026-03-23
+**Input:** plans/handoff-cli-tool/reports/deliverable-review.md (0C/0M/6m)
+**Date:** 2026-03-24
 **Tier:** 2 — Lightweight Delegation
 
 ## Recall
 
-Resolve before executing: `plans/handoff-cli-tool/recall-artifact.md`
+- `when testing CLI tools` — Click CliRunner, in-process, isolated filesystem
+- `when preferring e2e over mocked subprocess` — real git repos via tmp_path, mock only for error injection
 
-Additional for this round:
-- `when preferring e2e over mocked subprocess` — real git repos for M-1 committed-state test
-- `when fixture shadowing creates dead code` — verify M-2 replacements don't create shadows
-- `when test setup steps fail` — use check=False + stderr assert in init_repo_minimal
-- `when docstring formatting conflicts` — keep docstrings under 70 chars
+## Findings Summary
 
-## Phase 1: Test Refactoring (type: general)
-
-### Step 1.1: init_repo_minimal helper — M-2
-
-**Goal:** Centralize common git init + user config to eliminate 5 duplicate `_init_repo` local functions.
-
-**Add to `tests/pytest_helpers.py`:**
-
-Function `init_repo_minimal(path: Path) -> None`:
-- Runs: `git init`, `git config user.email test@test.com`, `git config user.name Test`
-- Uses `cwd=path` (not `-C` style — matches local variant pattern)
-- Self-diagnosing failure: use `check=False` and assert `returncode == 0` with stderr in message
-- Docstring summary ≤70 chars total
-
-**Replace local `_init_repo` in 5 files.** For each, remove the function definition and update call sites:
-
-- `tests/test_session_commit.py` — full replacement: `_init_repo(path)` → `init_repo_minimal(path)`
-- `tests/test_session_handoff.py` — full replacement; function does init+config only
-- `tests/test_session_handoff_cli.py` — full replacement
-- `tests/test_session_commit_pipeline_ext.py` — partial: replace init+config block; keep `(path/"README.md").write_text("init")` inline at call site
-- `tests/test_session_integration.py` — partial: replace init+config block; keep session.md creation, git add, git commit inline at call site
-
-**Import:** Add `from tests.pytest_helpers import init_repo_minimal` where needed (check existing import style per file — some may use conftest, some direct import).
-
-**Verify:** `just test tests/test_session_commit.py tests/test_session_handoff.py tests/test_session_handoff_cli.py tests/test_session_commit_pipeline_ext.py tests/test_session_integration.py`
+| # | Finding | Type | Location |
+|---|---------|------|----------|
+| m-1 | Bare pytest.raises without match | Simple | tests/test_session_commit.py:101 |
+| m-2 | Heading format not verified | Simple | tests/test_session_handoff.py:45-46 |
+| m-3 | Empty Files section not rejected | Moderate (TDD) | src/claudeutils/session/commit.py |
+| m-4 | ci.message or "" masks unreachable state | Moderate (general) | src/claudeutils/session/commit_pipeline.py:336 |
+| m-5 | _strip_hints fragile continuation | Moderate (TDD) | src/claudeutils/session/commit_pipeline.py:204 |
+| m-6 | ParsedTask import bypasses S-4 | Simple | src/claudeutils/session/status/render.py:7 |
 
 ---
 
-## Phase 2: Test Coverage (type: general)
+## Phase 1: Simple fixes batch (type: general)
 
-### Step 2.1: write_completed committed-state test — M-1
+**Files:** tests/test_session_commit.py, tests/test_session_handoff.py, src/claudeutils/session/status/render.py
 
-**Prerequisite:** Read `tests/test_session_handoff.py:175-270` — understand existing write_completed tests and _init_repo usage.
+**m-1 fix (test_session_commit.py:101):**
+```python
+# Current:
+with pytest.raises(CommitInputError):
+# Fix:
+with pytest.raises(CommitInputError, match="no-edit contradicts"):
+```
 
-**Goal:** Verify write_completed overwrites correctly even when session.md has been committed.
+**m-2 fix (test_session_handoff.py:45-46):**
+After existing assertions, add:
+```python
+assert any("### " in line and "Handoff CLI tool design" in line for line in result.completed_lines)
+```
+The fixture has `**Handoff CLI tool design (Phase A):**` — check what H-1/H-2 actually specify before writing the assertion to ensure the fixture's heading format matches.
 
-**Add to `tests/test_session_handoff.py`:**
+**m-6 fix (render.py:7):**
+```python
+# Current:
+from claudeutils.validation.task_parsing import ParsedTask
+# Fix:
+from claudeutils.session.parse import ParsedTask
+```
 
-Function `test_write_completed_overwrites_committed_state(tmp_path)`:
-- Setup: call `init_repo_minimal(tmp_path)`, create `agents/` dir + session.md with standard format including `## Completed This Session` containing "- Committed prior work."
-- Commit: git add + git commit session.md (real subprocess, not mocked)
-- Action: call `write_completed(session_file, ["- New work done."])`
-- Assert:
-  - session.md text contains `"- New work done."`
-  - session.md text does NOT contain `"Committed prior work"`
-  - Completed section holds exactly the new lines (no accumulation)
+Verify `from claudeutils.session.parse import ParsedTask` exports ParsedTask (check session/parse.py re-exports).
 
-**Verify:** `just test tests/test_session_handoff.py`
-
----
-
-### Step 2.2: Test quality batch — m-5, m-6, m-7
-
-**Goal:** Three independent test improvements.
-
-**m-5 — Parallel cap test** in `tests/test_session_status.py`:
-
-Add `test_detect_parallel_caps_at_five(...)`:
-- Create 7 ParsedTask objects: `checkbox=" "`, distinct `name` and `plan_dir` (no shared plans)
-- Call `detect_parallel(tasks, [])`
-- Assert: result is a list of length exactly 5
-
-**m-6 — Fix or-disjunction assertions** in `tests/test_session_commit_pipeline.py` lines ~40, ~75:
-
-Replace `assert "foo" in result.output or "1 file" in result.output` with specific assertions appropriate to each test's intent. Read the surrounding test to determine which branch is actually guaranteed, then assert that.
-
-**m-7 — Extend integration test** in `tests/test_session_integration.py::test_handoff_then_status`:
-
-After existing status assertion, add:
-- Read session.md text; assert `**Status:**` line contains the status from the handoff input
-- Assert Completed section contains the completed task lines from handoff input
-
-**Verify:** `just test tests/test_session_status.py tests/test_session_commit_pipeline.py tests/test_session_integration.py`
+**Verify:** `just precommit` passes after batch.
 
 ---
 
-## Phase 3: Behavioral Fixes (type: tdd)
+## Phase 2: Empty files validation (type: tdd)
 
-### Cycle 3.1: _strip_hints continuation lines — m-4
+**Files:** tests/test_session_commit.py (RED), src/claudeutils/session/commit.py (GREEN)
 
-**Prerequisite:** Read `src/claudeutils/session/commit_pipeline.py:187-191`
+**RED — test_parse_commit_empty_files (test_session_commit.py):**
+```python
+def test_parse_commit_empty_files_raises() -> None:
+    """## Files section with no entries raises CommitInputError."""
+    with pytest.raises(CommitInputError, match="empty"):
+        parse_commit_input("## Files\n\n## Message\n> msg\n")
+```
+Run `just test tests/test_session_commit.py` — must FAIL (currently returns CommitInput with files=[]).
 
-**RED Phase:**
+**GREEN — add empty check in commit.py `_validate` (after `if files is None` guard):**
+```python
+if not files:
+    msg = "## Files section is empty"
+    raise CommitInputError(msg)
+```
+Insert after line 114 (after `raise CommitInputError("Missing required section: ## Files")`).
 
-**Test:** `test_strip_hints_filters_continuation_lines`
-**Module:** Add to `tests/test_session_commit_pipeline.py` (import `_strip_hints` from `claudeutils.session.commit_pipeline` directly)
-**Assertions:**
-- Input: `"hint: use --force\n  (helpful continuation)\nother line"` → result contains `"other line"`, does NOT contain `"helpful continuation"` or `"hint:"`
-- Input: `"advice: do this\n\tcontinuation here\nnormal line"` → result contains `"normal line"`, does NOT contain `"continuation here"`
-- Input: `"regular line\nhint: tip\n  more tip"` → result contains `"regular line"`, does NOT contain `"more tip"`
-
-**Expected failure:** `AssertionError` — continuation lines appear in output (current impl filters only hint:/advice: prefix lines)
-
-**Verify RED:** `pytest tests/test_session_commit_pipeline.py::test_strip_hints_filters_continuation_lines -v`
-
-**GREEN Phase:**
-
-**Implementation:** Replace `_strip_hints` list comprehension with stateful loop.
-
-**Behavior:**
-- Lines starting with `"hint:"` or `"advice:"` → skip, set `in_hint=True`
-- When `in_hint=True` and line starts with whitespace → skip
-- When `in_hint=True` and line does NOT start with whitespace → reset `in_hint=False`, include line
-
-**Changes:**
-- File: `src/claudeutils/session/commit_pipeline.py`
-  Action: Replace `_strip_hints` function body with loop + `in_hint` state variable
-  Location hint: `def _strip_hints` around line 187
-
-**Verify GREEN:** `just green`
+**Verify:** `just test tests/test_session_commit.py` passes. `just precommit` passes.
 
 ---
 
-### Cycle 3.2: HandoffState step_reached field — m-1
+## Phase 3: Message assertion (type: general)
 
-**Prerequisite:** Read `src/claudeutils/session/handoff/pipeline.py:14-45`
+**File:** src/claudeutils/session/commit_pipeline.py:334-337
 
-**RED Phase:**
+**Context:** `_validate_inputs` at line 262 guarantees `ci.message is not None` when `no_edit is False`. The `or ""` fallback is dead code when `no_edit is False`, and the message is unused when `no_edit is True`.
 
-**Test:** `test_handoff_state_includes_step_reached`
-**Module:** `tests/test_session_handoff.py`
-**Setup:** Monkeypatch `claudeutils.session.handoff.pipeline._STATE_FILE` to `tmp_path/"state.json"` so test is isolated
-**Assertions:**
-- Call `save_state("sample markdown")`
-- Call `load_state()` → result is not None
-- `result.step_reached == "write_session"`
-- `json.loads((tmp_path/"state.json").read_text())` contains key `"step_reached"`
+**Fix:** Replace the `or ""` fallback with an explicit assertion:
+```python
+assert ci.message is not None or no_edit
+parent_output = _git_commit(
+    ci.message or "", amend=amend, no_edit=no_edit, cwd=cwd
+)
+```
 
-**Expected failure:** `AttributeError: 'HandoffState' object has no attribute 'step_reached'`
+Note: The `or ""` in `_git_commit` call can remain since it's harmless when `no_edit=True` (message unused) and dead when `no_edit=False` (ci.message guaranteed non-None by assert).
 
-**Verify RED:** `pytest tests/test_session_handoff.py::test_handoff_state_includes_step_reached -v`
-
-**GREEN Phase:**
-
-**Implementation:** Add `step_reached` field with default to HandoffState.
-
-**Behavior:**
-- `HandoffState` gains `step_reached: str = "write_session"` (dataclass default, placed after `timestamp`)
-- `asdict(state)` serializes `step_reached` automatically
-- Backward compat: old state files without `step_reached` still load via `HandoffState(**data)` because field has a default
-
-**Changes:**
-- File: `src/claudeutils/session/handoff/pipeline.py`
-  Action: Add `step_reached: str = "write_session"` after `timestamp: str` in HandoffState
-  Location hint: line ~19
-
-**Verify GREEN:** `just green`
+**Verify:** `just test tests/test_session_commit_pipeline.py` passes. `just precommit` passes.
 
 ---
 
-### Cycle 3.3: ▶ format fix — m-3
+## Phase 4: Strip hints fix (type: tdd)
 
-**Prerequisite:** Read `src/claudeutils/session/status/render.py:38-54`; grep `tests/test_session_status.py` for existing ▶ format assertions
+**Files:** tests/test_session_commit_pipeline.py (RED), src/claudeutils/session/commit_pipeline.py (GREEN)
 
-**RED Phase:**
+**Current code (commit_pipeline.py:199-211):**
+```python
+for line in lines:
+    is_hint = line.startswith(("hint:", "advice:"))
+    if is_hint:
+        prev_was_hint = True
+    elif prev_was_hint and line and line[0] in (" ", "\t"):
+        if line[0] == "\t" or (line[0] == " " and len(line) > 1 and line[1] == " "):
+            prev_was_hint = True
+        else:
+            prev_was_hint = False
+            result.append(line)
+    else:
+        prev_was_hint = False
+        result.append(line)
+```
 
-**Test:** `test_render_pending_next_task_format` (new, or update existing ▶ format test if one exists)
-**Module:** `tests/test_session_status.py`
-**Assertions:**
-- For task: name="Build widget", command="/design plans/w/brief.md", model="sonnet", restart=True
-- `render_pending([task], {})` contains a line matching `"▶ Build widget (sonnet) | Restart: yes"` (no `" — "`, no inline backtick-cmd)
-- Output contains a line matching `"  \`/design plans/w/brief.md\`"` (2-space indent + backtick-wrapped cmd)
+**Bug:** When a single-space-indented line follows a hint, it enters the elif branch, takes the inner-else (resets `prev_was_hint = False`, appends line). Subsequent double-space continuation lines then fall to outer-else (appended — incorrectly included in output).
 
-**Expected failure:** `AssertionError` — output uses old format `▶ Build widget — \`...\` | sonnet | restart: yes`
+**RED — test in test_session_commit_pipeline.py:**
+```python
+def test_strip_hints_single_space_then_double() -> None:
+    """Lines after hint filtered even after single-space-prefixed line."""
+    text = "hint: do this\n single\n  continuation\nnormal"
+    result = _strip_hints(text)
+    assert "single" not in result
+    assert "continuation" not in result
+    assert "normal" in result
+```
+Run `just test tests/test_session_commit_pipeline.py -k strip_hints` — must FAIL (single and continuation currently appear in output).
 
-**Verify RED:** `pytest tests/test_session_status.py::test_render_pending_next_task_format -v`
+Note: Need to import `_strip_hints` from `claudeutils.session.commit_pipeline` in the test file (check if already imported; if not, add to imports).
 
-**GREEN Phase:**
+**GREEN — simplify inner condition:**
+```python
+for line in lines:
+    is_hint = line.startswith(("hint:", "advice:"))
+    if is_hint:
+        prev_was_hint = True
+    elif prev_was_hint and line and line[0] in (" ", "\t"):
+        prev_was_hint = True  # all indented lines after hint are continuation
+    else:
+        prev_was_hint = False
+        result.append(line)
+```
+Remove the inner if-else entirely. All indented lines (space or tab) after a hint are treated as continuation and filtered.
 
-**Implementation:** Update `render_pending` ▶ line to two-line design spec format.
-
-**Behavior:**
-- Line 1: `▶ {name} ({model}) | Restart: {Yes/No}` (capitalize Yes/No)
-- Line 2: `  \`{cmd}\`` (2-space indent, cmd in backticks)
-
-**Changes:**
-- File: `src/claudeutils/session/status/render.py`
-  Action: Replace single `lines.append(f"▶ ...")` with two appends
-  Location hint: lines ~43-44
-  Also: grep test suite for any other assertions checking old ▶ format and update them to new spec
-
-**Verify GREEN:** `just green`
+**Verify:** `just test tests/test_session_commit_pipeline.py` passes. `just precommit` passes.
 
 ---
 
-### Cycle 3.4: ANSI color in _status — m-2
+## Phase 5: Final verification (type: general)
 
-**Prerequisite:** Read full `src/claudeutils/session/status/render.py`; read `src/claudeutils/session/status/cli.py`
-
-**RED Phase:**
-
-**Test:** `test_render_pending_color_mode`
-**Module:** `tests/test_session_status.py`
-**Assertions:**
-- `render_pending([task], {}, color=True)` → output string contains `"\x1b["` (ANSI escape present)
-- `render_pending([task], {})` (default) → output does NOT contain `"\x1b["`
-- `render_pending([task], {}, color=False)` → output does NOT contain `"\x1b["`
-
-**Expected failure:** `TypeError: render_pending() got an unexpected keyword argument 'color'`
-
-**Verify RED:** `pytest tests/test_session_status.py::test_render_pending_color_mode -v`
-
-**GREEN Phase:**
-
-**Implementation:** Add `color: bool = False` to `render_pending`; style ▶ line with click.
-
-**Behavior:**
-- When `color=True`: wrap the ▶ header line with `click.style(line, bold=True, fg="green")` before appending
-- When `color=False` (default): no change (existing tests pass without modification)
-- CLI passes `color=sys.stdout.isatty()` to `render_pending`
-
-**Changes:**
-- File: `src/claudeutils/session/status/render.py`
-  Action: Add `import click` at top of imports; add `color: bool = False` kwarg to `render_pending`; apply style to ▶ header line when color=True
-  Location hint: imports block + render_pending signature + ▶ append (after Cycle 3.3)
-- File: `src/claudeutils/session/status/cli.py`
-  Action: Pass `color=sys.stdout.isatty()` to `render_pending` call
-  Location hint: render_pending call around line 80
-
-**Verify GREEN:** `just green`
+Run `just precommit` — all tests pass, lint clean.
