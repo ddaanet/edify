@@ -1,18 +1,15 @@
 # Session Handoff: 2026-03-24
 
-**Status:** RC6 fixes applied (6/6). Deliverable review queued.
+**Status:** RC7 review complete (0C/0M/6m). Plan at `reviewed` status.
 
 ## Completed This Session
 
-**Fix handoff-cli RC6 (0C/1M/5m):**
-- M-1: `test_split_sections_in_message_preserves_headings` — verifies `## ` after `## Message` stays in body (test_session_commit.py)
-- m-1: `git log --oneline -1` confirmation added to `test_commit_cli_success` (test_session_commit_cli.py)
-- m-2: Submodule assertion tightened to `"## Submodule: agent-core"` (test_session_handoff_cli.py)
-- m-3: `test_commit_multi_submodule_order` — alpha/beta both committed before parent (test_session_commit_pipeline_ext.py)
-- m-4: Redundant `task.checkbox == " "` removed from render.py:45 (already filtered at line 37)
-- m-5: `ParsedTask` import aligned to `session.parse` re-export (test_session_status.py)
-- Submodule helpers extracted to pytest_helpers.py (`create_submodule_origin`, `add_submodule`)
-- Corrector review: 0C/0M — ready (plans/handoff-cli-tool/reports/review.md)
+**Handoff-cli RC7 deliverable review:**
+- Three-layer review: Layer 1 (3 opus agents: code, test, prose+config) + Layer 2 (interactive cross-cutting)
+- All 6 RC6 findings verified fixed
+- 0C/0M/6m — minors are test quality only (vacuous assertion, parametrize style, import consistency, assertion specificity)
+- Lifecycle updated: `review-pending` → `reviewed` (plans/handoff-cli-tool/lifecycle.md)
+- Report: plans/handoff-cli-tool/reports/deliverable-review.md
 
 ## In-tree Tasks
 
@@ -20,8 +17,10 @@
   - Plan: handoff-cli-tool
 - [x] **Fix handoff-cli RC6** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | opus
   - Plan: handoff-cli-tool
-- [ ] **Handoff-cli RC7** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
+- [x] **Handoff-cli RC7** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
   - Plan: handoff-cli-tool
+- [ ] **Fix handoff-cli RC7** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | opus
+  - Plan: handoff-cli-tool | 0C/0M/6m — test quality minors only
 - [ ] **Runbook warnings** — `/design plans/runbook-warnings/brief.md` | sonnet
   - Plan: runbook-warnings | Status: briefed
 - [ ] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
@@ -62,9 +61,9 @@
 
 ## Reference Files
 
-- `plans/handoff-cli-tool/reports/deliverable-review.md` — RC6 findings (0C/1M/5m)
-- `plans/handoff-cli-tool/reports/review.md` — Corrector review of RC6 fixes (0C/0M)
+- `plans/handoff-cli-tool/reports/deliverable-review.md` — RC7 findings (0C/0M/6m)
+- `plans/handoff-cli-tool/lifecycle.md` — Full lifecycle through RC7
 
 ## Next Steps
 
-Deliverable review via `/deliverable-review plans/handoff-cli-tool` (opus, restart). RC7 should be clean — all RC6 findings addressed with corrector-verified fixes.
+Fix RC7 minor findings via `/design plans/handoff-cli-tool/reports/deliverable-review.md` — 6 test-quality items, all with known locations and approaches.
