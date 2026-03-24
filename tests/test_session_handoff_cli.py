@@ -259,3 +259,25 @@ def test_load_state_ignores_unknown_fields(
     assert result.input_markdown == "test markdown"
     assert result.timestamp == "2026-03-24T12:00:00+00:00"
     assert not hasattr(result, "step_reached")
+
+
+def test_handoff_missing_session_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Handoff with missing session.md exits 2 with error."""
+    monkeypatch.chdir(tmp_path)
+    init_repo_minimal(tmp_path)
+    session_file = tmp_path / "agents" / "session.md"
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["_handoff"],
+        input=HANDOFF_STDIN,
+        env={"CLAUDEUTILS_SESSION_FILE": str(session_file)},
+    )
+
+    assert result.exit_code == 2
+    assert "**Error:**" in result.output
+    assert "session" in result.output
+    assert "Traceback" not in result.output

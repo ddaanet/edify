@@ -51,8 +51,11 @@ def handoff_cmd() -> None:
             )
         handoff_input = _parse_or_fail(state.input_markdown)
 
-    overwrite_status(session_path, handoff_input.status_line)
-    write_completed(session_path, handoff_input.completed_lines)
+    try:
+        overwrite_status(session_path, handoff_input.status_line)
+        write_completed(session_path, handoff_input.completed_lines)
+    except (OSError, ValueError) as e:
+        _fail(f"**Error:** {e}", code=2)
 
     git_output = git_changes()
     click.echo(f"**Git status:**\n\n```\n{git_output}\n```")
