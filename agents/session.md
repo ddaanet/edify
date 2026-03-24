@@ -1,13 +1,11 @@
-# Session Handoff: 2026-03-23
+# Session Handoff: 2026-03-24
 
-**Status:** Fixed hook dual-registration and semgrep plugin errors. Settings.json hooks removed — plugin hooks.json is canonical source.
+**Status:** Merged anchor-proof-state worktree (minimal delta: 1 line in edify-rename/lifecycle.md).
 
 ## Completed This Session
 
-**Hook fixes:**
-- Removed stale hooks section from `.claude/settings.json` — was dual-registering all hooks (settings.json + plugin hooks.json), causing every hook to fire twice
-- Settings.json referenced `.claude/hooks/` (directory doesn't exist) and `pretooluse-symlink-redirect.sh` (file never created)
-- Disabled `semgrep@claude-plugins-official` at project level — no `semgrep` binary installed, causing SessionStart:startup and UserPromptSubmit errors on every session
+**Worktree merge:**
+- Merged `anchor-proof-state` — only change was 1 insertion in `plans/edify-rename/lifecycle.md`
 
 ## In-tree Tasks
 
@@ -119,7 +117,7 @@
 - [ ] **Discussion** — `d:` | sonnet
 - [!] **Verb form AB test** — see `plans/reports/ab-test/README.md` | sonnet | 0.5
   - Blocked on human: curate task-contexts.json, annotate ground-truth.md
-- [ ] **Anchor proof state** → `anchor-proof-state` — `/design plans/proof-state-anchor/brief.md` | opus | restart
+- [ ] **Anchor proof state** — `/design plans/proof-state-anchor/brief.md` | opus | restart
   - Plan: proof-state-anchor | Visible state + actions output at each transition. D+B anchor + user feedback.
 - [ ] **Fix brief trigger** — edit `agent-core/skills/brief/SKILL.md` description to lead with general mechanism | opus
   - Plan: none — direct edit. Brief skill description starts with "Transfer context... to a worktree task" causing mid-sentence `/brief` invocations to be missed
