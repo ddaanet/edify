@@ -42,7 +42,9 @@ def load_state() -> HandoffState | None:
     if not _STATE_FILE.exists():
         return None
     data = json.loads(_STATE_FILE.read_text())
-    return HandoffState(**data)
+    known_fields = HandoffState.__dataclass_fields__.keys()
+    filtered_data = {k: v for k, v in data.items() if k in known_fields}
+    return HandoffState(**filtered_data)
 
 
 def clear_state() -> None:

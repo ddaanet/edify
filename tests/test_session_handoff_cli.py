@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 from pathlib import Path
@@ -10,7 +11,7 @@ import pytest
 from click.testing import CliRunner
 
 from claudeutils.cli import cli
-from claudeutils.session.handoff.pipeline import save_state
+from claudeutils.session.handoff.pipeline import load_state, save_state
 from tests.pytest_helpers import init_repo_minimal
 
 
@@ -233,3 +234,28 @@ def test_handoff_shows_submodule_changes(
     # Should include submodule section with internal file changes
     assert "## Submodule: agent-core" in result.output
     assert "dirty.md" in result.output
+
+
+# Cycle 1.1: load_state() backward compat
+
+
+def test_load_state_ignores_unknown_fields(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """load_state() ignores fields removed in m-7."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "tmp").mkdir()
+
+    state_data = {
+        "input_markdown": "test markdown",
+        "timestamp": "2026-03-24T12:00:00+00:00",
+        "step_reached": 3,  # Removed field from pre-m-7
+    }
+    (tmp_path / "tmp" / ".handoff-state.json").write_text(json.dumps(state_data))
+
+    result = load_state()
+
+    assert result is not None
+    assert result.input_markdown == "test markdown"
+    assert result.timestamp == "2026-03-24T12:00:00+00:00"
+    assert not hasattr(result, "step_reached")
