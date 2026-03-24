@@ -1,57 +1,73 @@
-# Test Review: handoff-cli-tool (RC8)
+# Test Deliverable Review: handoff-cli-tool (RC9)
 
-Reviewed 21 files (~3513 lines added) against `plans/handoff-cli-tool/outline.md`.
+**Date:** 2026-03-24
+**Scope:** 20 test files, test-only review
+**Axes:** conformance, functional correctness, functional completeness, vacuity, excess, specificity, coverage, independence
 
-## RC7 Fix Verification
+## RC8 Finding Verification
 
-| RC7 Finding | Status | Evidence |
-|---|---|---|
-| m-1: Vacuous disjunction in commit_format test | **FIXED** | test_session_commit_format.py:21 — now `assert output.split("\n")[0].startswith("[")`. Direct positive assertion on first line format. |
-| m-2: Four parametrize cases parsing same fixture | **FIXED** | test_session_commit.py:50-67 — `test_parse_commit_input` is now a single test with combined assertions on all fields (files, options, submodules, message). No parametrize. |
-| m-3: `ParsedTask` import path inconsistency | **FIXED** | test_status_rework.py:11 — imports `ParsedTask` from `claudeutils.session.parse`, consistent with test_session_status.py:11. |
-| m-4: Missing `just-lint` + `no-vet` combination test | **FIXED** | test_session_commit_validation.py:259-291 — `test_commit_just_lint_no_vet` exercises `{"just-lint", "no-vet"}` options, asserts precommit not called, lint called once, vet not called. Matches C-4 table row exactly. |
-| m-5: Weak `"clean"` substring assertion | **FIXED** | test_git_cli.py:83 — now `assert "Tree is clean." in result.output`. Exact expected string match. |
-| m-6: Weak `"Git status"` substring assertion | **FIXED** | test_session_handoff_cli.py:90 — now `assert "**Git status:**" in result.output`. Matches full bold-colon format from S-3. |
+| Finding | Status | Evidence |
+|---------|--------|----------|
+| m-1: Bare pytest.raises without match (test_session_commit.py:101) | FIXED | test_session_commit.py:101 — `pytest.raises(CommitInputError, match="no-edit contradicts")` |
+| m-2: Heading not verified in parse test (test_session_handoff.py:45-46) | FIXED | test_session_handoff.py:47 — `assert any("**Handoff CLI tool design" in line for line in result.completed_lines)` verifies heading entry presence |
 
-All 6 RC7 fixes verified present and correct.
+2 of 2 test-relevant RC8 findings verified fixed.
 
-## Critical Findings
+## New Findings
 
-None.
-
-## Major Findings
+### Critical
 
 None.
 
-## Minor Findings
+### Major
 
-**m-1:** test_session_status.py:280 — Independence. `SESSION_FIXTURE` module-level constant defined at line 280, below its first reference at line 253 (`test_session_status_cli`). Python resolves module-level names at call time so this executes correctly, but reading top-to-bottom encounters a forward reference. Persists from RC7 (was m-3).
+None.
 
-**m-2:** test_session_commit.py:101 — Specificity. `test_parse_commit_input_edge_cases` line 101 uses bare `pytest.raises(CommitInputError)` without `match=` for the `no-edit` with `## Message` present case. All other raises in the same function use `match=` to verify the error reason. This case could pass on any `CommitInputError`, not specifically the contradictory-options check.
+### Minor
 
-**m-3:** test_session_handoff.py:45-46 — Specificity. `test_parse_handoff_input` asserts `len(result.completed_lines) > 0` and `any("Produced outline" in line ...)`. Does not verify the heading line `**Handoff CLI tool design (Phase A):**` is present, despite the outline (H-1/H-2) specifying `### ` headings in completed entries. The heading format is part of the input contract.
+1. **m-1: Bare `pytest.raises(CleanFileError)` without match** (test_session_commit.py:257, specificity)
+   - `test_validate_files_amend` second raises block uses `pytest.raises(CleanFileError)` without `match=`. The first CleanFileError test at line 217 correctly uses `exc_info` to verify content. This bare raises passes on any CleanFileError regardless of whether it's the "amend but not in HEAD" variant or the standard "clean file" variant.
+
+2. **m-2: Bare `pytest.raises(SessionFileError)` without match** (test_session_parser.py:147, specificity)
+   - `test_parse_session_missing_file` uses bare `pytest.raises(SessionFileError)` without `match=`. Passes on any SessionFileError, not specifically a "file not found" error.
+
+3. **m-3: Bare `pytest.raises(subprocess.CalledProcessError)` without match** (test_commit_pipeline_errors.py:26, specificity)
+   - `test_git_commit_raises_on_failure` catches any CalledProcessError. While the error source is narrow (git commit with nothing staged), a `match=` or exit code check would pin the expected failure mode.
+
+4. **m-4: Redundant `len(...) > 0` assertion** (test_session_handoff.py:45, vacuity)
+   - `assert len(result.completed_lines) > 0` is redundant — the subsequent `any(...)` assertions on lines 46-47 already imply non-empty. Should assert a specific expected count or be removed.
+
+5. **m-5: Redundant `len(...) > 0` assertion** (test_session_parser.py:57, vacuity)
+   - `assert len(lines) > 0` in `test_parse_session_sections` completed branch — same pattern as m-4. The `any("Extracted git helpers" ...)` assertion on line 58 already implies non-empty.
+
+6. **m-6: Handoff fixture uses bold-colon format, not `### ` headings** (test_session_handoff.py:31, conformance)
+   - `HANDOFF_INPUT_FIXTURE` line 31 uses `**Handoff CLI tool design (Phase A):**` (bold-colon format). Design outline.md:75 specifies "Completed entries use `### ` headings (standard markdown nesting), not bold-colon format." The `test_parse_handoff_preserves_blank_lines` test (line 70) correctly uses `### ` headings. The primary fixture should match the design-specified input format.
+
+### Carried Forward (not counted)
+
+- `SESSION_FIXTURE` defined after first usage in test_session_status.py (RC8 m-1, pre-existing style issue)
 
 ## Summary
 
-| Severity | Count |
-|----------|-------|
-| Critical | 0 |
-| Major | 0 |
-| Minor | 3 |
+| Severity | Count | Delta from RC8 |
+|----------|-------|----------------|
+| Critical | 0 | 0 (unchanged) |
+| Major | 0 | 0 (unchanged) |
+| Minor | 6 | +4 net (RC8 2m resolved, 6 new) |
 
-**Delta from RC7:** RC7 had 0C/0M/7m (of which 6 were actionable fixes, 1 was forward-reference placement). All 6 actionable fixes applied and verified. Remaining 3 minors: 1 persisting (forward-reference placement), 2 new at the specificity level. Net reduction from 7m to 3m.
+**RC8 fixes:** 2 of 2 test-relevant findings verified fixed.
+
+**New minors:** 3 bare `pytest.raises` without `match=` (m-1 through m-3, same class as RC8 m-1 fix), 2 redundant `len > 0` assertions (m-4, m-5), 1 fixture/design conformance mismatch (m-6).
 
 **Axes summary:**
 
 | Axis | Status |
 |------|--------|
-| Conformance | Pass — all design sections (S-1 through S-5, H-1 through H-4, C-1 through C-5, ST-0 through ST-2) have corresponding test coverage. |
-| Functional correctness | Pass — tests verify actual git state (log, status --porcelain), not just return values. |
-| Functional completeness | Pass — parser, validation, pipeline, CLI wiring, error paths, integration round-trip all covered. C-4 validation matrix now complete with all four rows tested. |
-| Vacuity | Pass — RC7 m-1 vacuous disjunction fixed. No remaining vacuous assertions found. |
-| Excess | Pass — helper module (pytest_helpers.py) provides shared infrastructure reused across files. Worktree test changes (3 files) are minor import/reference updates consistent with S-2 extraction. |
-| Specificity | 2 minors (m-2, m-3) — adequate but not precise on two assertions. |
-| Coverage | Pass — critical scenarios per outline all present: clean-file STOP, amend+no-edit, submodule four-cell matrix, multi-submodule ordering, state caching lifecycle, parallel detection with blockers, old-format rejection. |
-| Independence | 1 minor (m-1) — forward-reference ordering. Tests verify behavior not implementation. |
-
-**RC8 verdict:** 0C/0M/3m. Test suite is functionally complete against the design specification. All RC7 fixes verified. Remaining minors are style-level specificity items that do not affect correctness or coverage.
+| Conformance | 1 minor (m-6) — primary handoff fixture format contradicts design spec |
+| Functional correctness | Pass — tests verify actual git state, not just return values |
+| Functional completeness | Pass — all design sections covered |
+| Vacuity | 2 minors (m-4, m-5) — redundant length checks |
+| Excess | Pass — no unnecessary test code |
+| Specificity | 3 minors (m-1, m-2, m-3) — bare pytest.raises without match= |
+| Coverage | Pass — critical scenarios all present |
+| Independence | Pass — no inter-test dependencies |

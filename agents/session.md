@@ -1,22 +1,26 @@
 # Session Handoff: 2026-03-24
 
-**Status:** RC8 fix complete (0C/0M/0m from corrector). Deliverable review queued.
+**Status:** RC9 deliverable review complete — 0C/1M/10m. Fix task queued.
 
 ## Completed This Session
 
-**Fix handoff-cli RC8 (6m findings):**
-- m-1: `match="no-edit contradicts"` added to bare pytest.raises (test_session_commit.py:101)
-- m-2: heading assertion added to test_parse_handoff_input (test_session_handoff.py:47)
-- m-3: empty Files section validation + TDD cycle (commit.py `_validate` + new test)
-- m-4: `assert ci.message is not None or no_edit` replaces dead `or ""` (commit_pipeline.py:334)
-- m-5: `_strip_hints` fix via TDD — single-space passes through, `prev_was_hint` stays True so subsequent double-space lines still filtered (commit_pipeline.py:203-208 + test)
-- m-6: `ParsedTask` import fixed to `claudeutils.session.parse` in render.py:7
-- Corrector review: 0C/0M/0m — all 6 findings verified satisfied
+**Handoff-cli RC9 deliverable review:**
+- All 6 RC8 findings verified fixed (m-1 through m-6)
+- Layer 1: three opus agents (code, test, prose+config) — reports in plans/handoff-cli-tool/reports/
+- Layer 2: cross-cutting confirmed M-1 — `vet_check` at commit_gate.py:159 uses `Path(f).exists()` ignoring `cwd` param; every other call site in same function passes `cwd` correctly
+- New findings: 0C/1M/10m
+  - M-1: vet_check freshness check silently passes when cwd differs from process cwd
+  - m-1..m-6: bare pytest.raises without match, redundant len>0 assertions, fixture format mismatch
+  - m-7..m-10: vestigial step_reached, hardcoded agent-core patterns, missing docstring warning, unconditional parent output append
+- Lifecycle: reviewed (line 21); report: plans/handoff-cli-tool/reports/deliverable-review.md
 
 ## In-tree Tasks
 
 - [x] **Handoff-cli RC8** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
 - [x] **Fix handoff-cli RC8** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | opus
+- [x] **Handoff-cli RC9** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
+- [ ] **Fix handoff-cli RC9** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | opus
+  - Plan: handoff-cli-tool | Status: reviewed
 - [ ] **Runbook warnings** — `/design plans/runbook-warnings/brief.md` | sonnet
   - Plan: runbook-warnings | Status: briefed
 - [ ] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
@@ -25,7 +29,6 @@
 
 ## Worktree Tasks
 
-- [ ] **Handoff-cli RC9** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
 - [ ] **Planstate disambiguation** — `/design plans/planstate-disambiguation/brief.md` | sonnet
 - [ ] **Historical proof feedback** — `/design plans/historical-proof-feedback/brief.md` | sonnet
   - Prerequisite: updated proof skill integrated in all worktrees
@@ -58,10 +61,10 @@
 
 ## Reference Files
 
-- `plans/handoff-cli-tool/reports/deliverable-review.md` — RC8 findings (0C/0M/6m)
-- `plans/handoff-cli-tool/reports/review.md` — RC8 fix corrector review (0C/0M/0m)
-- `plans/handoff-cli-tool/lifecycle.md` — Full lifecycle through RC8
+- `plans/handoff-cli-tool/reports/deliverable-review.md` — RC9 findings (0C/1M/10m)
+- `plans/handoff-cli-tool/reports/deliverable-review-code.md` — Layer 1 code agent report
+- `plans/handoff-cli-tool/reports/deliverable-review-test.md` — Layer 1 test agent report
 
 ## Next Steps
 
-Run deliverable review for handoff-cli-tool (RC9 round) via `/deliverable-review plans/handoff-cli-tool` — verify RC8 fix is complete with 0 findings.
+Run `/design plans/handoff-cli-tool/reports/deliverable-review.md` to address RC9 findings — M-1 (vet_check cwd bug) is the priority, followed by the 10 minors.
