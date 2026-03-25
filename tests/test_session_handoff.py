@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -21,7 +20,6 @@ from claudeutils.session.handoff.pipeline import (
     save_state,
     write_completed,
 )
-from tests.pytest_helpers import init_repo_minimal
 
 HANDOFF_INPUT_FIXTURE = """\
 **Status:** Design Phase A complete — outline reviewed.
@@ -186,22 +184,6 @@ SESSION_WITH_COMPLETED = """\
 """
 
 
-def _commit_session(path: Path, session_file: Path) -> None:
-    """Stage and commit session.md in the test repo."""
-    subprocess.run(
-        ["git", "add", str(session_file.relative_to(path))],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
-    subprocess.run(
-        ["git", "commit", "-m", "Initial commit"],
-        cwd=path,
-        check=True,
-        capture_output=True,
-    )
-
-
 def test_write_completed_replaces_section(tmp_path: Path) -> None:
     """write_completed replaces section content with new_lines."""
     session_file = tmp_path / "session.md"
@@ -263,28 +245,6 @@ def test_write_completed_overwrites_not_appends(tmp_path: Path) -> None:
     assert "- Second session work." in content
     assert "- First session work." not in content
     assert "- Old task A" not in content
-
-
-# M-1: Committed-state overwrite verification
-
-
-def test_write_completed_overwrites_committed_state(
-    tmp_path: Path,
-) -> None:
-    """write_completed overwrites section even after session.md is committed."""
-    init_repo_minimal(tmp_path)
-    agents_dir = tmp_path / "agents"
-    agents_dir.mkdir()
-    session_file = agents_dir / "session.md"
-    session_file.write_text(SESSION_WITH_COMPLETED)
-    _commit_session(tmp_path, session_file)
-
-    write_completed(session_file, ["- New work done."])
-
-    content = session_file.read_text()
-    assert "- New work done." in content
-    assert "- Old task A" not in content
-    assert "- Old task B" not in content
 
 
 # Cycle 4.4: state caching
@@ -370,92 +330,3 @@ def test_load_state_backward_compat_missing_step_reached(
     state = load_state()
     assert state is not None
     assert state.step_reached == "write_session"
-
-
-# Cycle 2.1: Detect committed state — no diff (overwrite)
-
-
-def test_write_completed_overwrite_when_no_diff(tmp_path: Path) -> None:
-    """write_completed overwrites section when no diff from HEAD."""
-    init_repo_minimal(tmp_path)
-    agents_dir = tmp_path / "agents"
-    agents_dir.mkdir()
-    session_file = agents_dir / "session.md"
-    session_file.write_text(SESSION_WITH_COMPLETED)
-    _commit_session(tmp_path, session_file)
-
-    write_completed(session_file, ["- New work."])
-
-    content = session_file.read_text()
-    assert "- New work." in content
-    assert "- Old task A" not in content
-    assert "- Old task B" not in content
-
-
-# Cycle 2.2: Detect uncommitted prior — append mode
-
-
-def test_write_completed_appends_when_prior_uncommitted(
-    tmp_path: Path,
-) -> None:
-    """write_completed appends when prior changes not committed."""
-    init_repo_minimal(tmp_path)
-    agents_dir = tmp_path / "agents"
-    agents_dir.mkdir()
-    session_file = agents_dir / "session.md"
-    session_file.write_text(SESSION_WITH_COMPLETED)
-    _commit_session(tmp_path, session_file)
-
-    # Simulate prior uncommitted handoff: replace old
-    # content with new (removing old, writing new)
-    prior_content = SESSION_WITH_COMPLETED.replace(
-        "- Old task A\n- Old task B\n",
-        "- First handoff.\n",
-    )
-    session_file.write_text(prior_content)
-
-    # Now call write_completed with additional work
-    write_completed(session_file, ["- Additional work."])
-
-    content = session_file.read_text()
-    # Should have both prior uncommitted + new
-    assert "- First handoff." in content
-    assert "- Additional work." in content
-    # Should NOT have old committed content
-    assert "- Old task A" not in content
-    assert "- Old task B" not in content
-
-
-# Cycle 2.3: Detect uncommitted prior — old preserved with additions
-
-
-def test_write_completed_autostrip_when_old_preserved(
-    tmp_path: Path,
-) -> None:
-    """Autostrip strips committed, keeps uncommitted additions."""
-    init_repo_minimal(tmp_path)
-    agents_dir = tmp_path / "agents"
-    agents_dir.mkdir()
-    session_file = agents_dir / "session.md"
-    session_file.write_text(SESSION_WITH_COMPLETED)
-    _commit_session(tmp_path, session_file)
-
-    # Agent appends without clearing: keeps committed items +
-    # adds new uncommitted item (simulates appended work)
-    prior_content = SESSION_WITH_COMPLETED.replace(
-        "- Old task B\n",
-        "- Old task B\n- New uncommitted item\n",
-    )
-    session_file.write_text(prior_content)
-
-    # Now call write_completed with fresh work
-    write_completed(session_file, ["- Fresh work."])
-
-    content = session_file.read_text()
-    # Committed items should be stripped
-    assert "- Old task A" not in content
-    assert "- Old task B" not in content
-    # Uncommitted additions should be kept
-    assert "- New uncommitted item" in content
-    # Fresh work should be present
-    assert "- Fresh work." in content

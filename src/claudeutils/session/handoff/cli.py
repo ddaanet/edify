@@ -65,6 +65,7 @@ def handoff_cmd() -> None:
         # Update step_reached after writes succeed
         save_state(input_markdown, step_reached="diagnostics")
 
+    # Always emit diagnostics — tree is almost certainly dirty after writes
     git_output = git_changes()
     click.echo(f"**Git status:**\n\n```\n{git_output}\n```")
 

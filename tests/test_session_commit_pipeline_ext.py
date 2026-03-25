@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from claudeutils.session.commit import CommitInput
+from claudeutils.session.commit import CommitInput, CommitInputError
 from claudeutils.session.commit_pipeline import commit_pipeline
 from tests.pytest_helpers import (
     add_submodule,
@@ -96,14 +96,14 @@ def test_commit_submodule_no_message(
         submodules={},
     )
 
-    with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
-        return_value=(True, "ok"),
+    with (
+        patch(
+            "claudeutils.session.commit_pipeline._run_precommit",
+            return_value=(True, "ok"),
+        ),
+        pytest.raises(CommitInputError, match="no ## Submodule"),
     ):
-        result = commit_pipeline(ci, cwd=parent)
-
-    assert result.success is False
-    assert "**Error:**" in result.output
+        commit_pipeline(ci, cwd=parent)
 
 
 def test_commit_submodule_orphan_message(

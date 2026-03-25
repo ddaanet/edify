@@ -37,6 +37,8 @@ def _git_output(
     Warning: `.strip()` destroys leading spaces in porcelain XY format.
     Do not use for ``git status --porcelain`` output — use raw
     ``result.stdout.splitlines()`` instead.
+
+    TODO: Consolidate with ``git.py:_git()`` — add ``cwd`` param there.
     """
     result = subprocess.run(
         ["git", *args],

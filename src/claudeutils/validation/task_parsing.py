@@ -17,7 +17,9 @@ TASK_PATTERN = re.compile(r"^- \[(?P<checkbox>.)\] \*\*(?P<name>.+?)\*\*")
 # Valid checkbox values
 VALID_CHECKBOXES = frozenset({" ", "x", ">", "!", "\u2020", "-"})
 
-# Worktree marker: → `slug` (between name and em dash)
+# Worktree marker: → `slug` (between name and em dash).
+# Requires backtick-wrapped slug. Bare `→ wt` (ST-0) won't match —
+# those tasks belong in Worktree Tasks section (rendered separately).
 WORKTREE_MARKER_PATTERN = re.compile(r"\u2192 `(?P<slug>[a-z0-9][-a-z0-9]*)`")
 
 # Command: backtick-wrapped text after em dash

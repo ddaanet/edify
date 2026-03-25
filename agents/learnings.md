@@ -125,3 +125,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Flagging `except A, B:` as un-parenthesized in Python 3.14 reviews. PEP 758 made parentheses optional for except clauses — `except A, B:` catches both exceptions, not `A` assigned to `B`.
 - Correct pattern: In Python 3.14+, unparenthesized except is canonical. `ruff format` enforces this form and actively removes added parentheses. Do not flag as a style issue in reviews.
 - Evidence: RC10 m-12 finding; Edit tool changes reverted by PostToolUse autoformat hook (ruff format).
+
+## When review justifies removing designed features
+- Anti-pattern: Review finds CLI simplified a designed feature (H-2 committed detection). Review says "functionally safe because skill handles it." Three review rounds accept this framing. The skill's legacy logic is used to justify removing the CLI feature that was designed to replace it — circular justification.
+- Correct pattern: When a CLI feature was designed to replace skill logic, the skill's fallback presence doesn't justify removing the CLI feature. Check: does the legacy skill logic predate the CLI design? If yes, it's the thing being replaced, not a valid safety net.
+- Evidence: RC9/RC10/RC11 all carried M-1 (H-2) and M-2 (H-4) as "documented simplifications." User identified the circularity.

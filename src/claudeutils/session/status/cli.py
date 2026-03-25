@@ -64,6 +64,7 @@ def status_cmd() -> None:
             code=2,
         )
 
+    # Relative path — CLI runs from repo root (cwd assumption)
     all_plans = {p.name: p.status for p in list_plans(Path("plans"))}
     plan_states: dict[str, str] = {}
     for task in [*data.in_tree_tasks, *data.worktree_tasks]:

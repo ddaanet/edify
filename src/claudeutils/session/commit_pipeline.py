@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from claudeutils.git import discover_submodules
-from claudeutils.session.commit import CommitInput
+from claudeutils.session.commit import CommitInput, CommitInputError
 from claudeutils.session.commit_gate import validate_files, vet_check
 
 
@@ -22,7 +22,7 @@ class CommitResult:
 def _run_precommit(cwd: Path | None = None) -> tuple[bool, str]:
     """Run ``just precommit`` and return (passed, output).
 
-    Patchable in tests.
+    Module-level for ``monkeypatch.setattr`` in tests.
     """
     result = subprocess.run(
         ["just", "precommit"],
@@ -40,7 +40,7 @@ def _run_precommit(cwd: Path | None = None) -> tuple[bool, str]:
 def _run_lint(cwd: Path | None = None) -> tuple[bool, str]:
     """Run ``just lint`` and return (passed, output).
 
-    Patchable in tests.
+    Module-level for ``monkeypatch.setattr`` in tests.
     """
     result = subprocess.run(
         ["just", "lint"],
@@ -204,7 +204,9 @@ def _strip_hints(text: str) -> str:
             if line[0] == "\t" or (line[0] == " " and len(line) > 1 and line[1] == " "):
                 prev_was_hint = True  # tab/double-space = continuation, filter
             else:
-                prev_was_hint = True  # single-space: pass through but keep hint context
+                # Single-space indent: not a hint continuation, but keep
+                # hint context active (next line may be a continuation).
+                prev_was_hint = True
                 result.append(line)
         else:
             prev_was_hint = False
@@ -261,10 +263,8 @@ def _validate_inputs(
     no_edit = "no-edit" in ci.options
 
     if ci.message is None and not no_edit:
-        return CommitResult(
-            success=False,
-            output="**Error:** No commit message provided",
-        )
+        msg = "No commit message provided"
+        raise CommitInputError(msg)
 
     if parent_files:
         validate_files(parent_files, amend=amend, cwd=cwd)
@@ -274,12 +274,8 @@ def _validate_inputs(
 
     for path in submod_files:
         if path not in ci.submodules:
-            return CommitResult(
-                success=False,
-                output=(
-                    f"**Error:** Files under {path}/ but no ## Submodule {path} section"
-                ),
-            )
+            msg = f"Files under {path}/ but no ## Submodule {path} section"
+            raise CommitInputError(msg)
     return None
 
 

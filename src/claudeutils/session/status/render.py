@@ -115,6 +115,9 @@ def _build_dependency_edges(
     plan_dirs = [t.plan_dir for t in pending]
     edges: set[tuple[int, int]] = set()
 
+    # Substring matching on concatenated blocker text. Conservative: may
+    # create false dependency edges for common-word task names, which
+    # prevents parallelism but never enables unsafe parallelism.
     blocker_text = " ".join(line for group in blockers for line in group)
 
     for i in range(len(pending)):
