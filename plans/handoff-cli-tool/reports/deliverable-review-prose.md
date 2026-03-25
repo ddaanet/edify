@@ -1,47 +1,53 @@
-# Prose & Config Review: handoff-cli-tool (RC12)
+# L1 Prose+Config Review: handoff-cli-tool (RC13)
 
-**Review round:** RC12 (full-scope)
 **Design reference:** `plans/handoff-cli-tool/outline.md`
 **Files reviewed:** 4 (2 agentic prose, 2 configuration)
+**Prior review:** RC12 prose review (5 minor, 0 major, 0 critical)
+**Delta since RC12:** None. All 4 files unchanged since RC12 review.
+
+## RC12 Finding Verification
+
+| RC12 ID | Description | Status |
+|---------|-------------|--------|
+| m-18 | "STOP -- fix issues and retry" competes with communication rule 1 | OPEN |
+| m-19 | H-2 reference identifier unresolvable by agents | OPEN |
+| m-20 | design/SKILL.md changes are standalone bugfix, scope attribution | OPEN (scope note, not defect) |
+| m-21 | settings.local.json trailing newline change only | OPEN (vacuity note, not defect) |
+| m-22 | .gitignore broadening unrelated to plan scope | OPEN (scope note, not defect) |
+
+All 5 RC12 minors remain open. None were addressed because all are minor with no functional impact, and the C-1 fix (commit `b6a715fb`) was code-only.
 
 ## Findings
 
-### handoff SKILL.md
+**m-18** `agent-core/skills/handoff/SKILL.md:146` -- actionability -- "STOP -- fix issues and retry" competes with communication rule 1 ("stop on unexpected results... STOP and wait for guidance"). The instruction tells the agent to both stop and self-correct. An agent following communication rule 1 literally would stop and wait; an agent reading the skill instruction locally would attempt fixes autonomously.
+Severity: Minor
 
-**1.** handoff/SKILL.md:146 — actionability — **Minor**
-Step 7 says "On failure: output the precommit result, STOP — fix issues and retry." The compound instruction is ambiguous: "STOP" in this codebase means halt for user intervention (communication rule 1, S-3 conventions), but "fix issues and retry" implies autonomous self-correction. These compete. Suggest: "On failure: output the precommit result, STOP — wait for guidance" to align with stop-on-unexpected rule.
+**m-19** `agent-core/skills/handoff/SKILL.md:27` -- constraint precision -- "The CLI's committed detection (H-2) handles uncommitted prior handoffs" references H-2 as an outline identifier. Agents cannot resolve this to a CLI behavior. The surrounding instruction ("skill always writes full state") is self-contained and actionable without the reference.
+Severity: Minor
 
-**2.** handoff/SKILL.md:27 — constraint precision — **Minor**
-"The CLI's committed detection (H-2) handles uncommitted prior handoffs; the skill always writes full state." References H-2 by identifier only. An agent encountering this line has no path to resolve "H-2" — it's an outline identifier, not a skill/CLI reference. Low impact since the behavioral instruction ("skill always writes full state") is self-contained, but the H-2 reference is inert prose.
+**m-20** `agent-core/skills/design/SKILL.md:135-142` -- scope boundaries -- Simple routing fix (removed "implement directly," added "chain to /inline") is a standalone bugfix for the competing-execution-paths learning. Outline line 373 lists "Skill modifications" as OUT. Scope attribution note, not a defect.
+Severity: Minor
 
-### design SKILL.md
+**m-21** `.claude/settings.local.json` -- vacuity -- Change adds trailing newline to `{}`. POSIX compliance. No functional effect.
+Severity: Minor
 
-**3.** design/SKILL.md:135-142 — scope boundaries — **Minor**
-The Simple and Moderate routing changes (commit `d85e7e7`) are a standalone bugfix for the "competing execution paths" learning, not a handoff-cli-tool deliverable. Outline line 373 lists "Skill modifications" as OUT. Included in this review's file set but structurally independent. No defect — scope attribution note.
-
-### .claude/settings.local.json
-
-**4.** .claude/settings.local.json — vacuity — **Minor**
-Change adds a trailing newline to `{}`. POSIX line-ending compliance. No functional effect.
-
-### .gitignore
-
-**5.** .gitignore:17 — scope boundaries — **Minor**
-`/.vscode/` to `/.vscode` broadens from directory-only to file-or-directory match. Correctly handles the `.vscode` character device created by sandbox. Unrelated to handoff-cli-tool plan scope — incidental fix.
+**m-22** `.gitignore:17` -- scope boundaries -- `/.vscode/` to `/.vscode` broadens directory-only to file-or-directory match. Handles sandbox-created `.vscode` character device. Unrelated to plan scope.
+Severity: Minor
 
 ## Completeness Check
 
-- **Precommit gate in handoff skill:** Delivered (Step 7, line 146). `just precommit` runs after all writes, before STATUS display.
-- **CLI invocation from handoff skill:** Not present. The outline's "Coupled skill update" says "(before calling `_handoff` CLI)" but `skill-cli-integration` plan (`plans/skill-cli-integration/brief.md`) explicitly defers this: "/handoff skill — currently writes session.md directly. Should compose with `_handoff` CLI." The coupled update scope is the precommit gate only; CLI composition is future work.
-- **allowed-tools:** Correctly expanded to `Bash(just:*,wc:*,git:*,claudeutils:*)` — each glob maps to a required step.
-- **Legacy detection removal:** Lines 27-28 (old uncommitted-prior-handoff detection + merge directive) correctly removed. CLI's H-2 owns this.
-- **Handoff state file in .gitignore:** Not needed — `tmp/.handoff-state.json` is covered by existing `/tmp/` entry (line 6).
-- **settings.local.json relevance:** Trailing newline only. No plan-related content.
+| Outline Requirement | Status | Evidence |
+|--------------------|--------|----------|
+| Coupled skill update: precommit gate | Delivered | handoff/SKILL.md Step 7, line 144-146 |
+| Coupled skill update: `just precommit` runs before `_handoff` CLI | Delivered | Step 7 runs after all writes, before STATUS display |
+| allowed-tools expansion for `just`, `git`, `claudeutils` | Delivered | Frontmatter line 4 |
+| Legacy uncommitted-prior-handoff detection removed | Delivered | Lines 27-28 replaced with single bullet delegating to CLI |
+| Legacy merge directive removed | Delivered | "Multiple handoffs before commit" paragraph deleted |
 
 ## Summary
 
 - Critical: 0
 - Major: 0
-- Minor: 5 (1 actionability, 1 constraint precision, 2 scope attribution, 1 vacuity)
+- Minor: 5 (carried from RC12, all unchanged)
 
-All changes are functionally correct. The handoff SKILL.md delivers the coupled skill update specified by the outline. No missing deliverables within the scoped interpretation (precommit gate + legacy removal). The two minors on handoff SKILL.md (findings 1-2) are polish items with no functional impact.
+No new findings. All 4 files are byte-identical to the RC12 review. The 5 minors are unchanged: 2 functional (m-18 actionability, m-19 constraint precision) and 3 scope/vacuity notes (m-20, m-21, m-22). The coupled skill update specified by the outline is fully delivered.
