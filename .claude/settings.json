@@ -18,6 +18,7 @@
       "Bash(printf:*)",
       "Bash(agent-core/bin/prepare-runbook.py:*)",
       "Bash(agent-core/bin/recall-*:*)",
+      "Bash(agent-core/bin/task-context.sh:*)",
       "Skill",
       "WebSearch",
       "WebFetch",

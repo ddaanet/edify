@@ -1,13 +1,14 @@
 # Session Handoff: 2026-03-25
 
-**Status:** Completed FR-1: fixed SessionStart hook error after /clear (TMPDIR unbound variable).
+**Status:** Completed FR-2: made `--project` optional in session-scraper.py prototype.
 
 ## Completed This Session
 
-**FR-1: Fix SessionStart hook error after /clear:**
-- Root cause: `set -euo pipefail` in `sessionstart-health.sh` + `TMPDIR` unset when SessionStart fires after `/clear` → "TMPDIR: unbound variable" on `touch "$TMPDIR/health-${session_id}"`
-- Fix: added `TMPDIR="${TMPDIR:-/tmp}"` after `set -euo pipefail` — mirrors `stop-health-fallback.sh` line 4
-- Verified with `env -i` test: reproduces error without fix, clean with fix
+**FR-2: Fix session-scraper prototype `--project`:**
+- Added `_resolve_project()` and `_expand_projects()` helpers
+- All 5 commands (`parse`, `tree`, `correlate`, `excerpt`, `search`) now default to `cwd` when `--project` omitted
+- `search` supports glob expansion via `_glob.glob()` + dir filtering
+- Review: 1 minor fix (docstring "vars" removed), no UNFIXABLE issues
 
 ## In-tree Tasks
 
@@ -18,6 +19,7 @@
 ## Worktree Tasks
 
 - [ ] **Small fixes FR-1 review** — `/deliverable-review plans/small-fixes-batch` | opus | restart
+- [ ] **Small fixes FR-2 review** — `/deliverable-review plans/small-fixes-batch` | opus | restart
 - [ ] **Session CLI tool** → `session-cli-tool` — `/orchestrate handoff-cli-tool` | sonnet | restart | 3.7
   - Plan: handoff-cli-tool | Status: ready
   - Absorbs: Fix task-context bloat
@@ -106,7 +108,7 @@
   - Plan: planstate-brief-inference | Status: requirements
 - [ ] **Small fixes batch** — `/design plans/small-fixes-batch/requirements.md` | sonnet | 1.0
   - Plan: small-fixes-batch | Status: requirements
-  - FR-4, FR-1 complete. FR-2, FR-3 remain.
+  - FR-4, FR-1, FR-2 complete. FR-3 remains.
 - [ ] **Incident counting** — `/design plans/incident-counting/brief.md` | opus | 0.6
   - Plan: incident-counting | Status: briefed
 - [ ] **Recall pipeline** — `/design` | sonnet | 1.0

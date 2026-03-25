@@ -5,15 +5,16 @@ Stages: scan → parse → tree → correlate → search → excerpt
 
 Usage:
     session-scraper.py scan [--prefix PATH]
-    session-scraper.py parse <session-id> --project DIR [--expand t42]
-    session-scraper.py tree <session-id> --project DIR
-    session-scraper.py correlate <session-id> --project DIR [--git-dir DIR]
-    session-scraper.py search --project DIR --keyword TERM [--keyword TERM2]
-    session-scraper.py excerpt <session-id> --project DIR --keyword TERM [--window 5]
+    session-scraper.py parse <session-id> [--project DIR] [--expand t42]
+    session-scraper.py tree <session-id> [--project DIR]
+    session-scraper.py correlate <session-id> [--project DIR] [--git-dir DIR]
+    session-scraper.py search [--project DIR|GLOB ...] --keyword TERM [--keyword TERM2]
+    session-scraper.py excerpt <session-id> [--project DIR] --keyword TERM [--window 5]
 """
 
 from __future__ import annotations
 
+import glob as _glob
 import json
 import re
 import subprocess
@@ -32,6 +33,29 @@ from claudeutils.paths import encode_project_path, get_project_history_dir  # no
 UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 AGENT_RE = re.compile(r"^agent-")
 COMMIT_RE = re.compile(r"\[(?:[^\[\]]*?\s+)?([0-9a-f]{7,12})\]")
+
+
+def _resolve_project(project: str | None) -> str:
+    """Resolve project path: expand user home (~), default to cwd if not provided."""
+    if project is None:
+        return str(Path.cwd().resolve())
+    return str(Path(project).expanduser().resolve())
+
+
+def _expand_projects(projects: tuple[str, ...]) -> list[str]:
+    """Expand project globs; default to cwd when empty."""
+    if not projects:
+        return [str(Path.cwd().resolve())]
+    result: list[str] = []
+    for p in projects:
+        expanded = _glob.glob(str(Path(p).expanduser()))
+        if expanded:
+            result.extend(str(Path(e).resolve()) for e in expanded if Path(e).is_dir())
+        else:
+            result.append(str(Path(p).expanduser().resolve()))
+    return result
+
+
 INTERACTIVE_TOOLS = frozenset({"ExitPlanMode", "AskUserQuestion"})
 GIT_COMMIT_MARKERS = frozenset({"file changed", "files changed", "create mode"})
 
@@ -868,16 +892,21 @@ def scan(prefix: str | None, fmt: str) -> None:
 
 @cli.command()
 @click.argument("session_id")
-@click.option("--project", required=True, help="Project directory (absolute path)")
+@click.option("--project", default=None, help="Project directory (default: cwd)")
 @click.option(
     "--expand", "expand_ref", default=None, help="Show detail for ref (e.g. t42)"
 )
 @click.option("--all-detail", is_flag=True, help="Show detail for all entries")
 @click.option("--format", "fmt", default="text", type=click.Choice(["text", "json"]))
 def parse(
-    session_id: str, project: str, expand_ref: str | None, all_detail: bool, fmt: str
+    session_id: str,
+    project: str | None,
+    expand_ref: str | None,
+    all_detail: bool,
+    fmt: str,
 ) -> None:
     """Stage 2: parse a single session into a timeline."""
+    project = _resolve_project(project)
     history_dir = get_project_history_dir(project)
     path = history_dir / f"{session_id}.jsonl"
     if not path.exists():
@@ -897,10 +926,11 @@ def parse(
 
 @cli.command()
 @click.argument("session_id")
-@click.option("--project", required=True, help="Project directory (absolute path)")
+@click.option("--project", default=None, help="Project directory (default: cwd)")
 @click.option("--format", "fmt", default="text", type=click.Choice(["text", "json"]))
-def tree(session_id: str, project: str, fmt: str) -> None:
+def tree(session_id: str, project: str | None, fmt: str) -> None:
     """Stage 3: build aggregated session tree with sub-agents."""
+    project = _resolve_project(project)
     t = build_session_tree(session_id, project)
     if fmt == "json":
         d = t.model_dump()
@@ -925,11 +955,14 @@ def tree(session_id: str, project: str, fmt: str) -> None:
 
 @cli.command()
 @click.argument("session_id")
-@click.option("--project", required=True, help="Project directory (absolute path)")
+@click.option("--project", default=None, help="Project directory (default: cwd)")
 @click.option("--git-dir", default=None, help="Git repo dir (defaults to --project)")
 @click.option("--format", "fmt", default="text", type=click.Choice(["text", "json"]))
-def correlate(session_id: str, project: str, git_dir: str | None, fmt: str) -> None:
+def correlate(
+    session_id: str, project: str | None, git_dir: str | None, fmt: str
+) -> None:
     """Stage 4: correlate session commits with git history."""
+    project = _resolve_project(project)
     t = build_session_tree(session_id, project)
     if not t.commit_hashes:
         click.echo("No commits found in session tree.", err=True)
@@ -955,8 +988,7 @@ def correlate(session_id: str, project: str, git_dir: str | None, fmt: str) -> N
     "--project",
     "projects",
     multiple=True,
-    required=True,
-    help="Project directory path(s) to search (repeatable)",
+    help="Project directory path(s) or glob to search (default: cwd, repeatable)",
 )
 @click.option(
     "--keyword",
@@ -974,7 +1006,8 @@ def search(
     fmt: str,
 ) -> None:
     """Stage 5: search sessions for keyword matches across projects."""
-    hits = search_sessions(list(projects), list(keywords), case_sensitive)
+    resolved = _expand_projects(projects)
+    hits = search_sessions(resolved, list(keywords), case_sensitive)
     if fmt == "json":
         click.echo(json.dumps([h.model_dump() for h in hits], indent=2, default=str))
         return
@@ -999,7 +1032,7 @@ def search(
 
 @cli.command()
 @click.argument("session_id")
-@click.option("--project", required=True, help="Project directory (absolute path)")
+@click.option("--project", default=None, help="Project directory (default: cwd)")
 @click.option("--ref", "refs", multiple=True, help="Entry ref(s) to excerpt (e.g. t42)")
 @click.option(
     "--keyword", "keywords", multiple=True, help="Keyword(s) to find and excerpt"
@@ -1007,12 +1040,13 @@ def search(
 @click.option("--window", default=5, help="Number of entries before/after match")
 def excerpt(
     session_id: str,
-    project: str,
+    project: str | None,
     refs: tuple[str, ...],
     keywords: tuple[str, ...],
     window: int,
 ) -> None:
     """Stage 6: extract conversation excerpts around matches."""
+    project = _resolve_project(project)
     if not refs and not keywords:
         click.echo("Provide --ref or --keyword to locate excerpt targets.", err=True)
         raise SystemExit(1)
