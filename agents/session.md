@@ -1,23 +1,17 @@
 # Session Handoff: 2026-03-25
 
-**Status:** RC10 fixes complete — 2M + 9m fixed, corrector clean (0C/0M/0m new). Deliverable review queued.
+**Status:** RC11 reviewed — 0C/2M/15m. Majors are design-spec conformance (H-2, H-4), not functional defects.
 
 ## Completed This Session
 
-**Fix handoff-cli RC10 (2M + 9m):**
-- M-1: `load_state()` backward compat — filter `data` to `HandoffState.__dataclass_fields__` before unpacking (pipeline.py:45-47); TDD RED/GREEN confirmed
-- M-2: Handoff CLI error handling — try/except `(OSError, ValueError)` around pipeline calls, route through `_fail(code=2)` (cli.py:54-58); TDD RED/GREEN confirmed
-- m-2: `overwrite_status` regex backreference — string replacement → function callback (pipeline.py:77-80); TDD RED/GREEN confirmed
-- m-1: Submodule CleanFileError paths — regression test confirms paths include submodule prefix (behavior already correct)
-- m-3: `_build_repo_section` blank line after header (git_cli.py:32)
-- m-6: Redundant `len > 0` removed (test_session_parser.py:138)
-- m-7, m-8: `match=` added to bare `pytest.raises` (test_session_commit.py:217, test_worktree_merge_errors.py:83)
-- m-10: Disjunctive assertion → specific `"In-tree:"` (test_session_status.py:263)
-- m-11: Integration test plan dir added (test_session_integration.py:37-39)
-- m-13: Dead `return None` removed, `noqa: RET503` added (worktree/cli.py:264)
-- Skipped: m-9 (marginal — inline test data is stable), m-12 (false finding — PEP 758 Python 3.14 unparenthesized except is canonical)
-- Corrector review: 0C/0M/1m (fixed: added `match=` to new submodule test)
-- Report: `plans/handoff-cli-tool/reports/review.md`
+**Deliverable review RC11:**
+- 3 Layer 1 opus agents (code, test, prose+config) + Layer 2 cross-cutting
+- 0C/2M/15m — two Majors are design conformance deviations, functionally safe
+- M-1: H-2 committed detection simplified to uniform overwrite (skill handles detection)
+- M-2: H-4 step_reached omitted (writes idempotent, making it unnecessary)
+- RC10 fixes: 11/13 verified fixed, 1 carried (m-9 generic assertion strings), 1 dismissed (m-12 PEP 758)
+- Lifecycle: `reviewed` (no Critical findings)
+- Report: `plans/handoff-cli-tool/reports/deliverable-review.md`
 
 ## In-tree Tasks
 
@@ -26,7 +20,9 @@
 - [x] **Handoff-cli RC10** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
 - [x] **Fix handoff-cli RC10** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | opus
   - Plan: handoff-cli-tool | Status: rework
-- [ ] **Handoff-cli RC11** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
+- [x] **Handoff-cli RC11** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
+- [ ] **Fix handoff-cli RC11** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | opus
+  - Plan: handoff-cli-tool | Status: reviewed
 - [ ] **Runbook warnings** — `/design plans/runbook-warnings/brief.md` | sonnet
   - Plan: runbook-warnings | Status: briefed
 - [ ] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
@@ -70,10 +66,10 @@
 
 ## Reference Files
 
-- `plans/handoff-cli-tool/reports/deliverable-review.md` — RC10 findings (0C/2M/13m)
-- `plans/handoff-cli-tool/reports/review.md` — Corrector review of RC10 fixes
-- `plans/handoff-cli-tool/runbook-fix-rc10.md` — Execution runbook
+- `plans/handoff-cli-tool/reports/deliverable-review.md` — RC11 findings (0C/2M/15m)
+- `plans/handoff-cli-tool/reports/deliverable-review-code.md` — Layer 1 code review
+- `plans/handoff-cli-tool/reports/deliverable-review-test.md` — Layer 1 test review
 
 ## Next Steps
 
-Deliverable review (RC11) — `/deliverable-review plans/handoff-cli-tool` with opus restart. If clean, plan transitions to `reviewed` → `delivered`.
+Fix RC11 findings — `/design plans/handoff-cli-tool/reports/deliverable-review.md`. Majors are design-level conformance decisions (implement vs accept simplification), not code bugs.
