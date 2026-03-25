@@ -277,6 +277,31 @@ def test_session_status_missing_session(tmp_path: Path) -> None:
     assert "Error" in result.output
 
 
+def test_session_status_malformed_task_error(tmp_path: Path) -> None:
+    """Malformed task line error says 'without metadata', not 'Old-format'."""
+    agents_dir = tmp_path / "agents"
+    agents_dir.mkdir()
+    session = agents_dir / "session.md"
+    session.write_text(
+        "# Session Handoff: 2026-03-15\n\n"
+        "**Status:** S.\n\n"
+        "## Completed This Session\n\n"
+        "- Done.\n\n"
+        "## In-tree Tasks\n\n"
+        "- [ ] bare task no metadata\n"
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["_status"],
+        env={"CLAUDEUTILS_SESSION_FILE": str(session)},
+    )
+    assert result.exit_code == 2
+    assert "Old-format" not in result.output
+    assert "without required metadata" in result.output
+
+
 SESSION_FIXTURE = """\
 # Session Handoff: 2026-03-15
 

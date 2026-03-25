@@ -141,8 +141,8 @@ def test_status_rejects_old_format(tmp_path: Path) -> None:
         env={"CLAUDEUTILS_SESSION_FILE": str(agents_dir / "session.md")},
     )
     assert result.exit_code == 2
-    assert "old-format" in result.output.lower()
-    assert "metadata" in result.output.lower()
+    assert "without required metadata" in result.output.lower()
+    assert "** and —" in result.output
 
 
 # Cycle 3.2: worktree marker skips next

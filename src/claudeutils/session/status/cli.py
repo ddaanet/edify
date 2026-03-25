@@ -58,9 +58,11 @@ def status_cmd() -> None:
     _check_old_section_name(content)
     data = parse_session(session_path, content=content)
 
-    if _count_raw_tasks(content) != len(data.in_tree_tasks):
+    raw_count = _count_raw_tasks(content)
+    if raw_count != len(data.in_tree_tasks):
+        n = raw_count - len(data.in_tree_tasks)
         _fail(
-            "**Error:** Old-format tasks missing metadata (** and —)",
+            f"**Error:** {n} task lines without required metadata (** and —)",
             code=2,
         )
 
