@@ -370,3 +370,23 @@ def test_load_state_backward_compat_missing_step_reached(
     state = load_state()
     assert state is not None
     assert state.step_reached == "write_session"
+
+
+# Cycle 2.1: Detect committed state — no diff (overwrite)
+
+
+def test_write_completed_overwrite_when_no_diff(tmp_path: Path) -> None:
+    """write_completed overwrites section when no diff from HEAD."""
+    init_repo_minimal(tmp_path)
+    agents_dir = tmp_path / "agents"
+    agents_dir.mkdir()
+    session_file = agents_dir / "session.md"
+    session_file.write_text(SESSION_WITH_COMPLETED)
+    _commit_session(tmp_path, session_file)
+
+    write_completed(session_file, ["- New work."])
+
+    content = session_file.read_text()
+    assert "- New work." in content
+    assert "- Old task A" not in content
+    assert "- Old task B" not in content
