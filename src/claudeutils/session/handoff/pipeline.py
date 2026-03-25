@@ -140,16 +140,18 @@ def _extract_completed_section(text: str) -> str:
     return "".join(lines[start_idx:end_idx]).strip("\n")
 
 
-def _detect_write_mode(session_path: Path) -> str:
+def _detect_write_mode(session_path: Path) -> tuple[str, str]:
     """Detect completed section write mode from git diff.
 
     Returns:
-        "overwrite", "append", or "autostrip".
+        Tuple of (mode, committed_section). Mode is ``"overwrite"``,
+        ``"append"``, or ``"autostrip"``. committed_section is the
+        extracted text from HEAD (empty when git is unavailable).
     """
     try:
         repo_root = _find_repo_root(session_path)
     except ValueError:
-        return "overwrite"
+        return ("overwrite", "")
 
     rel_path = session_path.relative_to(repo_root)
 
@@ -163,12 +165,12 @@ def _detect_write_mode(session_path: Path) -> str:
         )
         committed_completed = _extract_completed_section(result.stdout)
     except subprocess.CalledProcessError:
-        return "overwrite"
+        return ("overwrite", "")
 
     current_completed = _extract_completed_section(session_path.read_text())
 
     if committed_completed == current_completed:
-        return "overwrite"
+        return ("overwrite", committed_completed)
 
     committed_lines = {
         line.rstrip() for line in committed_completed.splitlines() if line.strip()
@@ -178,9 +180,9 @@ def _detect_write_mode(session_path: Path) -> str:
     ]
 
     if committed_lines and committed_lines.issubset(set(current_lines)):
-        return "autostrip"
+        return ("autostrip", committed_completed)
 
-    return "append"
+    return ("append", committed_completed)
 
 
 def write_completed(session_path: Path, new_lines: list[str]) -> None:
@@ -195,7 +197,7 @@ def write_completed(session_path: Path, new_lines: list[str]) -> None:
         session_path: Path to session.md file.
         new_lines: Lines to write into the completed section.
     """
-    mode = _detect_write_mode(session_path)
+    mode, committed_section = _detect_write_mode(session_path)
     if mode == "overwrite":
         _write_completed_section(session_path, new_lines)
     elif mode == "append":
@@ -204,31 +206,15 @@ def write_completed(session_path: Path, new_lines: list[str]) -> None:
         combined = current_lines + new_lines
         _write_completed_section(session_path, combined)
     elif mode == "autostrip":
-        try:
-            repo_root = _find_repo_root(session_path)
-            rel_path = session_path.relative_to(repo_root)
-            result = subprocess.run(
-                ["git", "show", f"HEAD:{rel_path}"],
-                cwd=repo_root,
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-        except ValueError, subprocess.CalledProcessError:
-            _write_completed_section(session_path, new_lines)
-            return
-        committed_section = _extract_completed_section(result.stdout)
         committed_set = {
             line.strip() for line in committed_section.splitlines() if line.strip()
         }
-
         current_section = _extract_completed_section(session_path.read_text())
         uncommitted = [
             line
             for line in current_section.splitlines()
             if not line.strip() or line.strip() not in committed_set
         ]
-
         combined = uncommitted + new_lines
         _write_completed_section(session_path, combined)
 

@@ -175,7 +175,7 @@ def test_detect_write_mode_trailing_whitespace(tmp_path: Path) -> None:
     )
     session_file.write_text(no_trailing)
 
-    mode = _detect_write_mode(session_file)
+    mode, _ = _detect_write_mode(session_file)
     assert mode == "overwrite"
 
 
@@ -201,7 +201,7 @@ def test_detect_write_mode_indentation_not_autostrip(
     )
     session_file.write_text(modified)
 
-    mode = _detect_write_mode(session_file)
+    mode, _ = _detect_write_mode(session_file)
     assert mode != "autostrip"
 
 
