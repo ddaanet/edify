@@ -424,3 +424,38 @@ def test_write_completed_appends_when_prior_uncommitted(
     # Should NOT have old committed content
     assert "- Old task A" not in content
     assert "- Old task B" not in content
+
+
+# Cycle 2.3: Detect uncommitted prior — old preserved with additions
+
+
+def test_write_completed_autostrip_when_old_preserved(
+    tmp_path: Path,
+) -> None:
+    """Autostrip strips committed, keeps uncommitted additions."""
+    init_repo_minimal(tmp_path)
+    agents_dir = tmp_path / "agents"
+    agents_dir.mkdir()
+    session_file = agents_dir / "session.md"
+    session_file.write_text(SESSION_WITH_COMPLETED)
+    _commit_session(tmp_path, session_file)
+
+    # Agent appends without clearing: keeps committed items +
+    # adds new uncommitted item (simulates appended work)
+    prior_content = SESSION_WITH_COMPLETED.replace(
+        "- Old task B\n",
+        "- Old task B\n- New uncommitted item\n",
+    )
+    session_file.write_text(prior_content)
+
+    # Now call write_completed with fresh work
+    write_completed(session_file, ["- Fresh work."])
+
+    content = session_file.read_text()
+    # Committed items should be stripped
+    assert "- Old task A" not in content
+    assert "- Old task B" not in content
+    # Uncommitted additions should be kept
+    assert "- New uncommitted item" in content
+    # Fresh work should be present
+    assert "- Fresh work." in content

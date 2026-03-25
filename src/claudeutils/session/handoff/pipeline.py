@@ -204,7 +204,29 @@ def write_completed(session_path: Path, new_lines: list[str]) -> None:
         combined = current_lines + new_lines
         _write_completed_section(session_path, combined)
     elif mode == "autostrip":
-        _write_completed_section(session_path, new_lines)
+        repo_root = _find_repo_root(session_path)
+        rel_path = session_path.relative_to(repo_root)
+        result = subprocess.run(
+            ["git", "show", f"HEAD:{rel_path}"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        committed_section = _extract_completed_section(result.stdout)
+        committed_set = {
+            line.strip() for line in committed_section.splitlines() if line.strip()
+        }
+
+        current_section = _extract_completed_section(session_path.read_text())
+        uncommitted = [
+            line
+            for line in current_section.splitlines()
+            if line.strip() and line.strip() not in committed_set
+        ]
+
+        combined = uncommitted + new_lines
+        _write_completed_section(session_path, combined)
 
 
 def _write_completed_section(session_path: Path, new_lines: list[str]) -> None:
