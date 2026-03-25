@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-25
 
-**Status:** RC12 review complete — 1C/0M/22m. Critical: CommitInputError from _validate_inputs uncaught in commit_cmd (m-2/m-3 fix regression). One-line fix needed.
+**Status:** RC12 review complete (1C/0M/22m) + design context prerequisite briefed. Next: fix RC12 critical with outline.md in context.
 
 ## Completed This Session
 
@@ -12,10 +12,15 @@
 - Report: `plans/handoff-cli-tool/reports/deliverable-review.md` (RC12)
 - Lifecycle: `rework`
 
+**Design context prerequisite discussion:**
+- Root cause of 12-round plateau: fix agents operated without design specification. Report references requirement IDs (S-3, H-2) but definitions live in outline.md. Agent inferred spec from finding description — incomplete, causing regressions.
+- Broader principle: any agent modifying existing code needs design specification in context. If absent, reverse-engineer + user-validate. TDD step agents exempt (deliberately context-restricted, design pre-distilled into step boundaries).
+- Briefed: `plans/design-context-prerequisite/brief.md`
+
 ## In-tree Tasks
 
 - [x] **Handoff-cli RC12** — `/deliverable-review plans/handoff-cli-tool` | opus | restart
-- [ ] **Fix handoff-cli RC12** — `/design plans/handoff-cli-tool/reports/deliverable-review.md` | opus
+- [ ] **Fix handoff-cli RC12** — `/design plans/handoff-cli-tool/reports/deliverable-review.md plans/handoff-cli-tool/outline.md` | opus
 - [ ] **Runbook warnings** — `/design plans/runbook-warnings/brief.md` | sonnet
   - Plan: runbook-warnings | Status: briefed
 - [ ] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
@@ -45,10 +50,12 @@
   - Fix review-dispatch-template to enforce artifact-path-only recall pattern
 - [ ] **Worktree ls filtering** — `/design plans/worktree-ls-filtering/brief.md` | sonnet
   - _worktree ls dumps all plans across all trees; handoff only needs session.md plan dirs
+- [ ] **Design context prereq** — `/design plans/design-context-prerequisite/brief.md` | opus | restart
+  - Agents modifying code need design spec in context. Fragment change.
 
 ## Blockers / Gotchas
 
-**Learnings at soft limit (125 lines):**
+**Learnings at soft limit (138 lines):**
 - `/codify` overdue — next session should consolidate older learnings
 
 **pretooluse-recall-check hook regex:**
@@ -60,7 +67,8 @@
 ## Reference Files
 
 - `plans/handoff-cli-tool/reports/deliverable-review.md` — RC12 findings (1C/0M/22m)
+- `plans/design-context-prerequisite/brief.md` — design context prerequisite brief
 
 ## Next Steps
 
-Fix RC12 critical: add `CommitInputError` to except clause at `session/cli.py:31`. One-line fix + CLI-level test for missing-submodule-message path.
+Fix RC12 critical: add `CommitInputError` to except clause at `session/cli.py:31`. Fix task includes outline.md for full S-3 contract context.
