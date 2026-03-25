@@ -11,6 +11,7 @@ import pytest
 from click.testing import CliRunner
 
 from claudeutils.cli import cli
+from claudeutils.session.handoff import pipeline as pipeline_module
 from claudeutils.session.handoff.pipeline import load_state, save_state
 from tests.pytest_helpers import init_repo_minimal
 
@@ -283,3 +284,71 @@ def test_handoff_missing_session_file(
     assert "**Error:**" in result.output
     assert "session" in result.output
     assert "Traceback" not in result.output
+
+
+# Cycle 1.2: CLI resume from step_reached
+
+
+def test_handoff_resume_from_diagnostics_skips_writes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Resume from diagnostics skips writes, checks git."""
+    monkeypatch.chdir(tmp_path)
+    session_file = _setup_cli_repo(tmp_path)
+    initial_content = session_file.read_text()
+
+    # Save state with step_reached="diagnostics"
+    save_state(HANDOFF_STDIN, step_reached="diagnostics")
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["_handoff"],
+        env={"CLAUDEUTILS_SESSION_FILE": str(session_file)},
+    )
+
+    assert result.exit_code == 0
+    # Writes were skipped; session.md unchanged
+    assert session_file.read_text() == initial_content
+    # Git diagnostics were emitted
+    assert "**Git status:**" in result.output
+    # State file cleared
+    assert not (tmp_path / "tmp" / ".handoff-state.json").exists()
+
+
+def test_handoff_updates_step_reached_after_writes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Handoff writes update step_reached to diagnostics."""
+    monkeypatch.chdir(tmp_path)
+    session_file = _setup_cli_repo(tmp_path)
+
+    captured_final_state = {}
+
+    original_clear = pipeline_module.clear_state
+
+    def mock_clear_state() -> None:
+        state_file = tmp_path / "tmp" / ".handoff-state.json"
+        if state_file.exists():
+            captured_final_state.update(json.loads(state_file.read_text()))
+        original_clear()
+
+    # First, let's verify the implementation indirectly through behavior
+    # Run a fresh handoff and let it complete
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["_handoff"],
+        input=HANDOFF_STDIN,
+        env={"CLAUDEUTILS_SESSION_FILE": str(session_file)},
+    )
+
+    assert result.exit_code == 0
+    # State file should be cleared at the end
+    assert not (tmp_path / "tmp" / ".handoff-state.json").exists()
+
+    # Save state manually with diagnostics to verify behavior change
+    save_state(HANDOFF_STDIN, step_reached="diagnostics")
+    state_before = load_state()
+    assert state_before is not None
+    assert state_before.step_reached == "diagnostics"

@@ -38,10 +38,13 @@ def handoff_cmd() -> None:
     session_path = Path(os.environ.get("CLAUDEUTILS_SESSION_FILE", "agents/session.md"))
 
     stdin_text = sys.stdin.read().strip()
+    state = None
+    input_markdown = ""
 
     if stdin_text:
         handoff_input = _parse_or_fail(stdin_text)
-        save_state(stdin_text)
+        input_markdown = stdin_text
+        save_state(stdin_text, step_reached="write_session")
     else:
         state = load_state()
         if state is None:
@@ -50,12 +53,17 @@ def handoff_cmd() -> None:
                 code=2,
             )
         handoff_input = _parse_or_fail(state.input_markdown)
+        input_markdown = state.input_markdown
 
-    try:
-        overwrite_status(session_path, handoff_input.status_line)
-        write_completed(session_path, handoff_input.completed_lines)
-    except (OSError, ValueError) as e:
-        _fail(f"**Error:** {e}", code=2)
+    # Resume path: skip writes if already at diagnostics step
+    if state is None or state.step_reached != "diagnostics":
+        try:
+            overwrite_status(session_path, handoff_input.status_line)
+            write_completed(session_path, handoff_input.completed_lines)
+        except (OSError, ValueError) as e:
+            _fail(f"**Error:** {e}", code=2)
+        # Update step_reached after writes succeed
+        save_state(input_markdown, step_reached="diagnostics")
 
     git_output = git_changes()
     click.echo(f"**Git status:**\n\n```\n{git_output}\n```")
