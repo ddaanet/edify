@@ -74,8 +74,10 @@ def overwrite_status(session_path: Path, status_text: str) -> None:
         re.DOTALL,
     )
 
-    replacement = r"\g<1>\n**Status:** " + status_text + r"\n\g<3>"
-    new_text, count = pattern.subn(replacement, text, count=1)
+    def replacement_func(m: re.Match[str]) -> str:
+        return m.group(1) + "\n**Status:** " + status_text + "\n" + m.group(3)
+
+    new_text, count = pattern.subn(replacement_func, text, count=1)
 
     if count == 0:
         msg = f"Could not find Session Handoff heading in {session_path}"

@@ -154,6 +154,19 @@ def test_overwrite_status_line_multiline(tmp_path: Path) -> None:
     assert "Line two of status." in status_region
 
 
+def test_overwrite_status_backreference_in_text(tmp_path: Path) -> None:
+    r"""Status text with regex backrefs like \g<1> not interpreted."""
+    session_file = tmp_path / "session.md"
+    session_file.write_text(SESSION_FIXTURE)
+
+    status_with_backref = r"Contains \g<1> and \g<3> patterns"
+    overwrite_status(session_file, status_with_backref)
+
+    content = session_file.read_text()
+    assert r"\g<1>" in content
+    assert r"\g<3>" in content
+
+
 # Cycle 4.3: completed section write with committed detection
 
 
