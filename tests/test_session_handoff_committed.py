@@ -202,7 +202,7 @@ def test_detect_write_mode_indentation_not_autostrip(
     session_file.write_text(modified)
 
     mode, _ = _detect_write_mode(session_file)
-    assert mode != "autostrip"
+    assert mode == "append"
 
 
 # m-1: blank line preservation in append/autostrip

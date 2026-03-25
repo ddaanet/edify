@@ -362,7 +362,7 @@ def test_handoff_skips_empty_git_block(
     )
 
     assert result.exit_code == 0
-    assert "```\n\n```" not in result.output
+    assert "**Git status:**" not in result.output
 
 
 # m-15: resume from write_session step

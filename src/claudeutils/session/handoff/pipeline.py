@@ -207,13 +207,13 @@ def write_completed(session_path: Path, new_lines: list[str]) -> None:
         _write_completed_section(session_path, combined)
     elif mode == "autostrip":
         committed_set = {
-            line.strip() for line in committed_section.splitlines() if line.strip()
+            line.rstrip() for line in committed_section.splitlines() if line.strip()
         }
         current_section = _extract_completed_section(session_path.read_text())
         uncommitted = [
             line
             for line in current_section.splitlines()
-            if not line.strip() or line.strip() not in committed_set
+            if not line.strip() or line.rstrip() not in committed_set
         ]
         combined = uncommitted + new_lines
         _write_completed_section(session_path, combined)
