@@ -1,6 +1,6 @@
-# Session Handoff: 2026-03-25
+# Session Handoff: 2026-03-29
 
-**Status:** Completed FR-2: made `--project` optional in session-scraper.py prototype.
+**Status:** Completed FR-2 + deliverable review of small-fixes-batch (0 critical, 0 major, 2 minor).
 
 ## Completed This Session
 
@@ -10,6 +10,12 @@
 - `search` supports glob expansion via `_glob.glob()` + dir filtering
 - Review: 1 minor fix (docstring "vars" removed), no UNFIXABLE issues
 
+**Deliverable review: small-fixes-batch:**
+- FR-1 (TMPDIR fix), FR-2 (--project optional), FR-4 (bottom-to-top removal) all verified
+- 0 critical, 0 major, 2 minor: M1 (FR-4 grep matches historical docs, not prescriptive), M2 (_resolve_project docstring overstates expansion)
+- Plan marked `delivered`; FR-3 extracted to `plans/fr3-skill-context/`
+- Report: `plans/small-fixes-batch/reports/deliverable-review.md`
+
 ## In-tree Tasks
 
 - [ ] **Centralize recall** — `/design plans/centralize-recall/brief.md` | opus | restart
@@ -18,8 +24,9 @@
 
 ## Worktree Tasks
 
-- [ ] **Small fixes FR-1 review** — `/deliverable-review plans/small-fixes-batch` | opus | restart
-- [ ] **Small fixes FR-2 review** — `/deliverable-review plans/small-fixes-batch` | opus | restart
+- [ ] **Fix batch findings** — `/design plans/small-fixes-batch/reports/deliverable-review.md` | opus
+- [ ] **Skill context probe** — `/design plans/fr3-skill-context/requirements.md` | sonnet
+  - Plan: fr3-skill-context | Investigate `context:` param on Skill tool; create test skill, document behavior
 - [ ] **Session CLI tool** → `session-cli-tool` — `/orchestrate handoff-cli-tool` | sonnet | restart | 3.7
   - Plan: handoff-cli-tool | Status: ready
   - Absorbs: Fix task-context bloat
@@ -106,9 +113,7 @@
   - Plan: prototypes | Status: requirements
 - [ ] **Planstate brief inference** — `/design plans/planstate-brief-inference/requirements.md` | sonnet | 1.0
   - Plan: planstate-brief-inference | Status: requirements
-- [ ] **Small fixes batch** — `/design plans/small-fixes-batch/requirements.md` | sonnet | 1.0
-  - Plan: small-fixes-batch | Status: requirements
-  - FR-4, FR-1, FR-2 complete. FR-3 remains.
+- [x] **Small fixes batch** — plan delivered; FR-3 extracted to fr3-skill-context
 - [ ] **Incident counting** — `/design plans/incident-counting/brief.md` | opus | 0.6
   - Plan: incident-counting | Status: briefed
 - [ ] **Recall pipeline** — `/design` | sonnet | 1.0
@@ -194,4 +199,4 @@
 
 ## Next Steps
 
-Session CLI tool in worktree — highest priority. Centralize recall unblocked (remove-index-skill done).
+Session CLI tool in worktree — highest priority. Fix small-fixes-batch findings (2 minor) and Skill context investigation are low-priority new Worktree tasks.

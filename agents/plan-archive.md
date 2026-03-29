@@ -3,6 +3,7 @@
 Completed plans with summaries. Loaded on demand during design research (Phase A.1)
 and diagnostic/RCA sessions.
 
+
 ## remove-memory-index-skill
 
 Removed the vestigial `memory-index` skill (`agent-core/skills/memory-index/`) that predated removal of memory-index from initial context. The skill duplicated `agents/memory-index.md` and was incorrectly invoked via Skill tool from main session. Removed `"memory-index"` from `corrector.md` skills frontmatter — the only consumer. Corrector now reads `agents/memory-index.md` directly, consistent with outline-corrector, design-corrector, and runbook-outline-corrector.
