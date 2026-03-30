@@ -84,7 +84,10 @@ def process_hook(
         return None
 
     status_fn = status_fn or get_status
-    status_text = status_fn()
+    try:
+        status_text = status_fn()
+    except subprocess.CalledProcessError, OSError, RuntimeError:
+        status_text = "Status unavailable"
     formatted = format_ansi(status_text)
     return {"systemMessage": formatted}
 
