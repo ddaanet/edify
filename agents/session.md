@@ -21,18 +21,18 @@
 
 ## In-tree Tasks
 
+- [>] **Edify rename** — `/inline plans/edify-rename` | opus
+  - Plan: edify-rename | Status: outlined (multi-sub-problem, terminal design artifact)
+  - SP-3 (plan cleanup) → SP-1 (submodule rename) → SP-2 (package rename)
+  - SP-3: `/inline plans/edify-rename` | sonnet — enumerate delivered plans, archive, delete
+  - SP-1: `/runbook plans/edify-rename/outline.md` | sonnet — agent-core → plugin (~1679 refs)
+  - SP-2: `/runbook plans/edify-rename/outline.md` | sonnet — claudeutils → edify (~817+ refs)
 - [ ] **Centralize recall** — `/design plans/centralize-recall/brief.md` | opus | restart
   - Plan: centralize-recall | Segmented /recall skill (<1ktok core), replace inline recall across skills/agents. Prerequisite (remove-index-skill) now complete.
 - [ ] **Outline template trim** — `/design plans/outline-template-trim/brief.md` | opus | restart
 - [ ] **Review skill-CLI** — `/deliverable-review plans/skill-cli-integration` | opus | restart
 - [ ] **Skill-CLI completion** — `/design plans/skill-cli-completion/brief.md` | opus | restart
   - Commit discovery (_git changes), commit --test flag, handoff composition. Before deliverable review.
-- [ ] **Edify rename** — see sub-tasks below | opus
-  - Plan: edify-rename | Status: outlined (multi-sub-problem, terminal design artifact)
-  - SP-3 (plan cleanup) → SP-1 (submodule rename) → SP-2 (package rename)
-  - SP-3: `/inline plans/edify-rename` | sonnet — enumerate delivered plans, archive, delete
-  - SP-1: `/runbook plans/edify-rename/outline.md` | sonnet — agent-core → plugin (~1679 refs)
-  - SP-2: `/runbook plans/edify-rename/outline.md` | sonnet — claudeutils → edify (~817+ refs)
 
 ## Worktree Tasks
 
