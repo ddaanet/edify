@@ -151,6 +151,10 @@
           {
             "type": "command",
             "command": "bash $CLAUDE_PROJECT_DIR/agent-core/hooks/stop-health-fallback.sh"
+          },
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/src/claudeutils/hooks/stop_status_display.py"
           }
         ]
       }

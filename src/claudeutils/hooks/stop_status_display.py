@@ -18,7 +18,7 @@ def should_trigger(message: str) -> bool:
     required). Multiline messages and partial matches are not treated as
     triggers.
     """
-    return bool(re.fullmatch(r"^Status\.$", message))
+    return bool(re.fullmatch(r"Status\.\Z", message))
 
 
 def get_status(
@@ -89,7 +89,10 @@ def process_hook(
     except subprocess.CalledProcessError, OSError, RuntimeError:
         status_text = "Status unavailable"
     formatted = format_ansi(status_text)
-    return {"systemMessage": formatted}
+    return {
+        "systemMessage": formatted,
+        "additionalContext": "Status displayed via Stop hook.",
+    }
 
 
 def main() -> None:

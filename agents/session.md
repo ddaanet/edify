@@ -1,31 +1,21 @@
 # Session Handoff: 2026-03-30
 
-**Status:** Runbook warnings fixed (directory-aware validation). Broad pipeline discussion — questioning runbooks, behavioral guardrails, planning-first paradigm.
+**Status:** SP-H (stop hook status display) implemented and reviewed. Phases 1-2 complete. Phases 3-4 (SP-1, SP-2) pending restart for hook activation.
 
 ## Completed This Session
 
-**Runbook warnings fix:**
-- Rejected original plan (cross-step creation-verb heuristic) — "fixes upon fixes" on ambiguous format
-- Implemented approach A: directory-aware validation in `validate_file_references()`
-- Parent dir exists + file missing → warn (likely typo). Parent dir missing → silent (greenfield).
-- 2-line production change, 2 tests in new file
-- Spec: `docs/superpowers/specs/2026-03-30-runbook-warnings-directory-aware-design.md`
-
-**Pipeline comparative analysis (discussion, not implementation):**
-- Explored superpowers plugin architecture (12 skills, 1 reviewer agent, platform-native)
-- Compared with agent-core/edify (34 skills, 13 agents, 27 fragments, 3-tier pipeline)
-- Referenced `inbox/brief-invariant-guided-agent.md` (prototype → observe → formalize → verify)
-- Referenced `mac-de-anna/docs/memory-version-control-design.md` (git-backed memory)
-- Conclusions: planning pipeline is BDUF under question. Behavioral guardrails are prompt-level patches for model-level tendencies. Memory/recall and structural enforcement (hooks, gates) survive any workflow paradigm. Runbooks, plan-specific agents, corrector chains, deliverable-review ceremony are candidates for removal.
+**SP-H: Stop hook status display (Phases 1-2):**
+- Cycle 1.1: Trigger detection (`re.fullmatch(r"Status\.\Z")`) + loop guard (`stop_hook_active` check)
+- Cycle 1.2: ANSI formatting (`\033[0m` per line) + error handling ("Status unavailable" fallback)
+- Corrector review: `\Z` fix (trailing newline false positive), `additionalContext` added per D-1, test case added
+- Hook registered in `.claude/settings.json` alongside `stop-health-fallback.sh`
+- Module: `src/claudeutils/hooks/stop_status_display.py` — self-contained (stdlib only), 12 tests
+- Review: `plans/skill-cli-integration/reports/review-sp-h.md`
 
 ## In-tree Tasks
 
-- [x] **Runbook warnings** — `/inline plans/runbook-warnings` | sonnet
-  - Replaced with directory-aware validation (approach A). Original cross-step plan abandoned.
-- [x] **Stop hook spike** — `/design plans/stop-hook-status-spike/brief.md` | haiku
-  - Spike complete. Findings positive. Production integration absorbed into skill-cli-integration SP-H.
-- [ ] **Skill-CLI integration** — `/runbook plans/skill-cli-integration/outline.md` | sonnet
-  - 3 SPs: SP-H (status hook, requires restart), SP-1 (execute-rule), SP-2 (commit skill). SP-H blocks SP-1/SP-2.
+- [ ] **Skill-CLI integration** — `/inline plans/skill-cli-integration` | opus | restart
+  - SP-H complete (Phases 1-2). Phases 3-4 remaining: SP-1 (execute-rule.md simplification), SP-2 (/commit skill composition). Both inline, opus.
 - [ ] **Outline template trim** — `/design plans/outline-template-trim/brief.md` | opus | restart
 
 ## Worktree Tasks
@@ -71,11 +61,10 @@
 
 ## Reference Files
 
-- `docs/superpowers/specs/2026-03-30-runbook-warnings-directory-aware-design.md` — Spec for directory-aware validation
 - `plans/skill-cli-integration/outline.md` — Design outline with SPs, composition boundary, dependency order
-- External: `~/code/inbox/brief-invariant-guided-agent.md` — prototype-first + invariant verification paradigm
-- External: `~/code/mac-de-anna/docs/memory-version-control-design.md` — git-backed version-controlled memory
+- `plans/skill-cli-integration/runbook.md` — Tier 2 runbook (4 phases, restart boundary after Phase 2)
+- `plans/skill-cli-integration/reports/review-sp-h.md` — Corrector review for SP-H
 
 ## Next Steps
 
-Skill-CLI integration next (`/runbook` on outlined plan) — but pipeline direction is unsettled. User may want to reprioritize or restructure before continuing pipeline-dependent work.
+Restart session for Stop hook activation. Then `/inline plans/skill-cli-integration` for Phases 3-4 (opus, inline edits to execute-rule.md and /commit SKILL.md).

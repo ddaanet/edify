@@ -19,6 +19,7 @@ class TestShouldTrigger:
             ("Check the Status.", False),
             ("Status", False),
             ("Status.\nMore text", False),
+            ("Status.\n", False),
             ("", False),
         ],
     )
