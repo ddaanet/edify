@@ -1,32 +1,33 @@
 # Session Handoff: 2026-03-30
 
-**Status:** Edify rename outlined and proofed. Design skill triage recall pointed at /recall.
+**Status:** Edify rename SP-3 complete, SP-1 runbook outlined and proofed. Ready for SP-1 orchestration.
 
 ## Completed This Session
 
-**Edify rename outline:**
-- Classified as Complex (multi-sub-problem, ~2500 total references across tree)
-- Wrote `plans/edify-rename/outline.md` — 3 sub-problems: SP-3 (plan cleanup) → SP-1 (submodule rename) → SP-2 (package rename)
-- Proofed with /proof: 5 revisions (FR-9b dual coverage, .gitmodules name field, reinstall step, SP-3 prerequisite ordering, tables→lists)
-- Moved task from Worktree Tasks to In-tree Tasks (user preference)
+**SP-3 (plan cleanup):**
+- Archived 8 delivered plans to `agents/plan-archive.md`: discuss-redesign, fix-migration-findings, handoff-cli-tool, inline-lifecycle-gate, prose-infra-batch, recall-gate, remove-fuzzy-recall, runbook-quality-directives (~138 files deleted)
+- Verified Q-4: remove-fuzzy-recall confirmed delivered 2026-03-16
+- Preserved exceptions: edify-rename (active), retrospective (outline exception)
 
-**Design skill triage recall fix:**
-- Identified: triage recall blind-fires trigger phrases without reading memory-index
-- Initial fix (inline memory-index reading) reverted — duplicates recall logic
-- Pointed at `/recall triage` (strategy parameter pending centralize-recall plan)
+**SP-1 runbook outline:**
+- Tier 3 assessment: 200+ files, parallel dispatch benefit
+- Two general phases: submodule internal commit (Phase 1), parent repo commit (Phase 2)
+- Corrector review: 6 fixes (requirements mapping, .gitmodules name field, .envrc verification, expansion guidance)
+- /proof: 3 revisions (all steps delegated for context churn reduction, sliding window max 4 agents, orchestrator as pure sequencer)
+- Lightweight orchestration exit (Execution Model section present)
 
-**Exploration:**
-- Scout agent mapped full blast radius: `plans/edify-rename/reports/explore-rename-scope.md`
-- Measured counts exceed requirements estimates (tests/agent-core: 172 vs FR-6's 106)
+**Fixes:**
+- `.claude/.gitignore`: dropped trailing slashes (patterns now match non-directory entries)
+- Removed obsolete sync-to-parent and symlink references from CLAUDE.md, session.md, project-config.md, memory-index.md
+- Removed stale recall artifact entry (symlink decision deleted)
 
 ## In-tree Tasks
 
-- [>] **Edify rename** — `/inline plans/edify-rename` | opus
-  - Plan: edify-rename | Status: outlined (multi-sub-problem, terminal design artifact)
-  - SP-3 (plan cleanup) → SP-1 (submodule rename) → SP-2 (package rename)
-  - SP-3: `/inline plans/edify-rename` | sonnet — enumerate delivered plans, archive, delete
-  - SP-1: `/runbook plans/edify-rename/outline.md` | sonnet — agent-core → plugin (~1679 refs)
-  - SP-2: `/runbook plans/edify-rename/outline.md` | sonnet — claudeutils → edify (~817+ refs)
+- [>] **Edify rename** — `/orchestrate edify-rename` | sonnet
+  - Plan: edify-rename | Status: reviewed (SP-1 runbook outline proofed, Execution Model present)
+  - SP-3 (plan cleanup): complete
+  - SP-1 (submodule rename): execute from `plans/edify-rename/runbook-outline.md` — orchestrator is pure sequencer, sliding window max 4 agents
+  - SP-2 (package rename): pending SP-1 — needs own /runbook pass after SP-1 lands
 - [ ] **Centralize recall** — `/design plans/centralize-recall/brief.md` | opus | restart
   - Plan: centralize-recall | Segmented /recall skill (<1ktok core), replace inline recall across skills/agents. Prerequisite (remove-index-skill) now complete.
 - [ ] **Outline template trim** — `/design plans/outline-template-trim/brief.md` | opus | restart
@@ -178,6 +179,8 @@
   - _worktree ls dumps all plans across all trees; handoff only needs session.md plan dirs
 - [ ] **Stop hook plugin wire** — `/design plans/hook-batch-2/requirements.md` | sonnet
   - Wire `src/claudeutils/hooks/stop_status_display.py` into plugin Stop hook. Merged from session-cli-tool but not yet in plugin.json.
+- [ ] **Runbook parallel cap** — `/design plans/runbook-parallel-cap/brief.md` | sonnet
+  - /runbook asks user for max concurrent agents (default 3), Execution Model uses sliding window dispatch
 
 ## Blockers / Gotchas
 
@@ -210,7 +213,7 @@
 - SessionStart doesn't fire for new interactive sessions (#10373). Setup (env export, CLI install, staleness nag) only runs at session end via Stop fallback. [from: plugin-migration]
 - Existing plan on main: `health-check-ups-fallback [requirements]` [from: plugin-migration]
 - Contains 5 documented errors (see outline Design Corrections section). Outline supersedes design.md for all decisions. [from: plugin-migration]
-- `remove-fuzzy-recall` planstate shows `[delivered]` but was pending in prior session — verify before deleting plan directory in FR-10
+- `remove-fuzzy-recall` planstate discrepancy resolved: confirmed delivered 2026-03-16 via worktree merge
 - pre-existing test failures: `tests/test_pretooluse_recipe_redirect.py` (3 tests) — not regressions
 
 - `/codify` overdue — next session should consolidate older learnings [from: session-cli-tool]
@@ -231,4 +234,4 @@
 
 ## Next Steps
 
-Edify rename ready for execution: SP-3 (plan cleanup) first, then SP-1 (submodule), then SP-2 (package). Design skill triage recall now points at `/recall triage` — centralize-recall plan owns the implementation. User feedback: tables → lists, stop hook should explain FR/SP/C jargon.
+SP-1 ready for orchestration: execute from `plans/edify-rename/runbook-outline.md` per Execution Model. Orchestrator is pure sequencer — all steps delegated, sliding window max 4 agents. After SP-1 lands, SP-2 needs its own /runbook pass.
