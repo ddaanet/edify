@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-29
 
-**Status:** small-fixes-batch fully complete — FR-2 done, review done, findings fixed, plan archived.
+**Status:** Merged session-cli-tool (133 commits). FR-2 done, small-fixes-batch archived.
 
 ## Completed This Session
 
@@ -18,12 +18,17 @@
 - M2: docstring already fixed by corrector (no change needed)
 - Plan archived; directory deleted
 
+**Merge session-cli-tool:**
+- 133 commits, 1 conflict in `.claude/settings.json` (OURS removed hooks section via plugin conversion; THEIRS still had it)
+- Submodule conflict in `skills/design/SKILL.md` — took OURS (developed Moderate routing)
+- `cli.py` trimmed from 406→400 lines (removed 6 redundant comments) for precommit
+- `stop_status_display.py` from branch not wired into plugin hooks yet — needs conversion
+- `handoff-cli-tool` plan now `delivered`
+
 ## In-tree Tasks
 
 - [ ] **Centralize recall** — `/design plans/centralize-recall/brief.md` | opus | restart
   - Plan: centralize-recall | Segmented /recall skill (<1ktok core), replace inline recall across skills/agents. Prerequisite (remove-index-skill) now complete.
-- [x] **Remove index skill** — completed prior session
-
 - [ ] **Outline template trim** — `/design plans/outline-template-trim/brief.md` | opus | restart
 - [ ] **Review skill-CLI** — `/deliverable-review plans/skill-cli-integration` | opus | restart
 - [ ] **Skill-CLI completion** — `/design plans/skill-cli-completion/brief.md` | opus | restart
@@ -34,13 +39,10 @@
 - [x] **Fix batch findings** — plan archived
 - [ ] **Skill context probe** — `/design plans/fr3-skill-context/requirements.md` | sonnet
   - Plan: fr3-skill-context | Investigate `context:` param on Skill tool; create test skill, document behavior
-- [ ] **Session CLI tool** → `session-cli-tool` — `/orchestrate handoff-cli-tool` | sonnet | restart | 3.7
-  - Plan: handoff-cli-tool | Status: ready
-  - Absorbs: Fix task-context bloat
-  - Note: Blocker resolved (Bootstrap tag support). Step files generated. `/orchestrate handoff-cli-tool`
+- [x] **Session CLI tool** → `session-cli-tool` — merged this session
 - [ ] **Edify rename** — `/design plans/edify-rename/` | opus
   - Plan: edify-rename | Status: reviewed (requirements proofed)
-  - Blocked on: session-cli-tool merge (C-1). Design after merge — new content will change file counts.
+  - Blocker resolved: session-cli-tool merged. Design now unblocked.
   - FR-13: File PEP 541 claim on pypi/support for `edify` name (parallel, non-blocking for rename)
 - [ ] **Worktree merge lifecycle** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.8
   - Plan: worktree-merge-resilience | Status: outlined
@@ -104,7 +106,6 @@
   - Plan: design-context-gate | Status: briefed
 - [ ] **Design JIT expansion** — `/design plans/design-jit-expansion/brief.md` | sonnet | 1.4
   - Plan: design-jit-expansion | Status: briefed
-- [x] **Update tokens CLI** — completed prior session
 - [ ] **Threshold token migration** — `/design plans/threshold-token-migration/brief.md` | sonnet | 1.3
   - Plan: threshold-token-migration | Status: briefed
   - Migrate line-based thresholds to token-based. Large blast radius expected.
@@ -133,7 +134,6 @@
   - Blocked on human: curate task-contexts.json, annotate ground-truth.md
 - [ ] **Anchor proof state** — `/design plans/proof-state-anchor/brief.md` | opus | restart
   - Plan: proof-state-anchor | Visible state + actions output at each transition. D+B anchor + user feedback.
-- [x] **Fix brief trigger** — completed prior session
 - [ ] **Outline density gate** — `/design plans/outline-downgrade-density/brief.md` | opus
   - Plan: outline-downgrade-density | Content density check in write-outline.md downgrade criteria
 - [ ] **Review blog series** — `/deliverable-review plans/blog-series` | opus | restart
@@ -179,6 +179,8 @@
 - [ ] **Submodule vet config** — `/design plans/submodule-vet-config/brief.md` | sonnet
 - [ ] **Worktree ls filtering** — `/design plans/worktree-ls-filtering/brief.md` | sonnet
   - _worktree ls dumps all plans across all trees; handoff only needs session.md plan dirs
+- [ ] **Stop hook plugin wire** — `/design plans/hook-batch-2/requirements.md` | sonnet
+  - Wire `src/claudeutils/hooks/stop_status_display.py` into plugin Stop hook. Merged from session-cli-tool but not yet in plugin.json.
 
 ## Blockers / Gotchas
 
@@ -235,4 +237,4 @@
 
 ## Next Steps
 
-Session CLI tool in worktree — highest priority. Fix small-fixes-batch findings (2 minor) and Skill context investigation are low-priority new Worktree tasks.
+Edify rename unblocked (session-cli-tool merged). In-tree tasks from branch: outline template trim, review skill-CLI, skill-CLI completion. `stop_status_display.py` needs plugin wiring.
