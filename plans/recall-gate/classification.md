@@ -1,7 +1,0 @@
-- **Classification:** Simple
-- **Implementation certainty:** High — gate text in 3 skill files is known, replacement structure defined in brief
-- **Requirement stability:** High — RCA identified exact problem, brief specifies fix approach
-- **Behavioral code check:** No — edits skill prose (gate instructions), not source code
-- **Work type:** Production — delivers improved recall gate behavior
-- **Artifact destination:** agentic-prose (`agent-core/skills/`)
-- **Evidence:** "When editing skill files" — skill edits are prose. "When anchoring gates with tool calls" — D+B anchor must fire as tool call regardless of context. No code changes, only skill SKILL.md text rewording.

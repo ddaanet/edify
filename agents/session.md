@@ -191,8 +191,6 @@
 **Worktree merge drops session.md Worktree Tasks entries:**
 - Focused session in branch lacks main's full Worktree Tasks section. Manual post-merge validation required.
 
-**`just sync-to-parent` requires sandbox bypass**
-
 **Main is worktree-tasks-only**
 
 **Planstate CLI bug for briefed plans:**
@@ -224,7 +222,6 @@
 
 - `plans/reports/prioritization-2026-03-12.md` — WSJF scoring, 42 tasks ranked
 - `plans/reports/workflow-grounding-audit.md` — Grounding provenance for workflow skills
-- `plans/handoff-cli-tool/outline.md` — Session CLI combined outline
 - `plans/active-recall/brief.md` — Active recall system
 - `plans/system-property-tracing/brief.md` — System invariants + pipeline traceability
 - `plans/decision-drift-audit/brief.md` — Decision file consistency audit (split from quality-grounding)

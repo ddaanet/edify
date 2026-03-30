@@ -552,3 +552,35 @@ Extended retrospective evidence base beyond claudeutils to 15+ repos spanning Oc
 ## outline-proofing
 
 Added /proof gates to all planning artifact generation points in /design and /runbook. /design Moderate path gets /proof on inline-plan.md (agentic-prose) or outline.md (non-prose). /runbook Tier 2 gets /proof on runbook-outline.md. /runbook Tier 3 gets /proof at Phase 0.87 (unconditional, post-simplification). Eliminated Tier 1 from /runbook (absorbed into /design Moderate). Deliverable review found 2 minor issues, both fixed. Affected: agent-core/skills/design/SKILL.md, agent-core/skills/runbook/SKILL.md, agent-core/skills/runbook/references/tier3-planning-process.md.
+
+## discuss-redesign
+
+Redesigned `d:` discussion protocol from 5-step (ground → diverge → assess → research → verdict) to 3-step core (ground → state position → validate claims). Removed stress-test (0 perspective changes across ~80+ sessions). Made brainstorm opt-in via `bd:` prefix. Claim validation reframed as text operation (claim → source lookup) rather than metacognitive introspection. Affected: agent-core/fragments/pushback.md.
+
+## fix-migration-findings
+
+Fixed 9 deliverable review findings from plugin-migration. Two criticals (staleness nag vacuous due to write-before-compare ordering in sessionstart-health.sh, portable.just path wrong in update/SKILL.md) and 7 minors (hardcoded EDIFY_VERSION, excess allowed-tools, inconsistent bash prefix, pip fallback structure, error message inaccuracy, template coverage gaps, SHA-256 determinism). Major #3 (UPS fallback) extracted to separate plan. Three minors deferred to post-rename. Affected: agent-core submodule (hooks, skills, scripts).
+
+## handoff-cli-tool
+
+Session CLI tool: `claudeutils _handoff`, `_commit`, `_status` — mechanical CLI commands replacing direct session.md manipulation. Skills remain user interface; CLI handles writes, validation, subprocess orchestration. 7-phase TDD runbook (shared infra, handoff pipeline, commit pipeline, commit gate, status renderer, git changes utility, CLI integration). 15 deliverable review rounds to convergence. Affected: src/claudeutils/session/, src/claudeutils/git.py, src/claudeutils/git_cli.py, src/claudeutils/validation/task_parsing.py, tests/.
+
+## inline-lifecycle-gate
+
+Added D+B anchor to /inline Phase 4a corrector dispatch. Two paths: corrector dispatched → `Read(reports/review.md)` proves output; corrector skipped → `Write(reports/review-skip.md)` with auditable justification. Added review artifact existence check to triage-feedback.sh as defense-in-depth. Prevented corrector-skip rationalization observed in bootstrap-tag-support execution. Affected: agent-core/skills/inline/SKILL.md, agent-core/bin/triage-feedback.sh.
+
+## prose-infra-batch
+
+Four agentic-prose items: FR-1 removed opus-design-question skill and rewrote design-decisions.md, FR-2 created magic-query decoy skill (logs agent search queries to ~/.claude/magic-query-log.jsonl), FR-3 updated skill-development guide conventions, FR-4 consolidated skill agent definitions. Two-phase runbook (prose edits + TDD integration). Affected: agent-core/skills/, agent-core/fragments/design-decisions.md, .claude/settings.json.
+
+## recall-gate
+
+Fixed recall gate skip rationalization in /runbook and /inline. Reframed gate so memory-index scan is the constant action (not fallback), recall-artifact is an optimization (pre-curated list). Added implementation-scope signal to prevent conflation of triage-scoped recall with execution-scoped recall. Preserved D+B anchor requirement. Affected: agent-core/skills/runbook/SKILL.md, agent-core/skills/inline/SKILL.md.
+
+## remove-fuzzy-recall
+
+Removed all fuzzy matching from recall resolve. Replaced with exact case-insensitive matching in resolver.py and validator modules. Differentiated error messages by call context: keyword-form (recovery guidance) vs artifact-form (STOP with rationale). Simplified check_collisions() to exact-only lookup. Fixed data mismatches in memory-index.md surfaced by exact validation. Affected: src/claudeutils/when/resolver.py, src/claudeutils/validation/memory_index*.py, src/claudeutils/recall_cli/cli.py, tests/.
+
+## runbook-quality-directives
+
+Added quality directives to runbook planning: collapsed Verify GREEN into universal `just green`, added Bootstrap section omission directive, added cycle consolidation self-check for Tier 2, added output-channel directive (write to file, not conversation). Created `just green` recipe. Updated /review-plan corrector to flag over-specific pytest paths, vacuous absence statements, and redundant cycle coverage. Added unresolved mechanism dependency check. Affected: agent-core/skills/runbook/, agent-core/references/tdd-cycle-planning.md, justfile.

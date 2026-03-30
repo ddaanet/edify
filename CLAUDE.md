@@ -76,6 +76,5 @@ When user says "pending: task description":
 - `just test *ARGS` — Run test suite
 - `just dev` — Format and run all checks
 - `just format` / `just lint` / `just check` — Code formatting and style
-- `just sync-to-parent` (agent-core) — Sync skills/agents to `.claude/` via symlinks (requires `dangerouslyDisableSandbox: true`)
 
 @agent-core/fragments/tool-batching.md

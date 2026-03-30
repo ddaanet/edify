@@ -136,24 +136,6 @@ description: |
 
 **Impact:** Prevents agent registration failures due to invalid YAML.
 
-## .Symlink Management
-
-### When Verifying Symlinks After Operations
-
-**Symlinks after formatters:**
-
-**Decision Date:** 2026-02-01
-
-**Decision:** Verify symlinks after operations that reformat files.
-
-**Anti-pattern:** Assume symlinks in `.claude/hooks/` persist across tool operations
-
-**Correct pattern:** Verify symlinks after `just dev`, `ruff format`, or similar formatters
-
-**Rationale:** Formatters follow symlinks and may replace them with reformatted copies. `just dev` did this to both hook .py files.
-
-**Impact:** Use `just sync-to-parent` to restore symlinks after formatting operations.
-
 ## .Shell Environment
 
 ### When Using Heredocs In Sandbox

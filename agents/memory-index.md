@@ -314,7 +314,6 @@ Active knowledge retrieval. Invoke `/when` or `/how` to recall decisions.
 /when naming model capability tiers
 /how make skills discoverable | surface discovery layers agents miss
 /when writing agent yaml frontmatter
-/when verifying symlinks after operations
 /when using heredocs in sandbox
 /when parsing cli flags as tokens
 /when finding project root in scripts
