@@ -1,29 +1,23 @@
-# Session Handoff: 2026-03-29
+# Session Handoff: 2026-03-30
 
-**Status:** Merged session-cli-tool (133 commits). FR-2 done, small-fixes-batch archived.
+**Status:** Edify rename outlined and proofed. Design skill triage recall pointed at /recall.
 
 ## Completed This Session
 
-**FR-2: Fix session-scraper prototype `--project`:**
-- Added `_resolve_project()` and `_expand_projects()` helpers
-- All 5 commands (`parse`, `tree`, `correlate`, `excerpt`, `search`) now default to `cwd` when `--project` omitted
-- `search` supports glob expansion via `_glob.glob()` + dir filtering
+**Edify rename outline:**
+- Classified as Complex (multi-sub-problem, ~2500 total references across tree)
+- Wrote `plans/edify-rename/outline.md` — 3 sub-problems: SP-3 (plan cleanup) → SP-1 (submodule rename) → SP-2 (package rename)
+- Proofed with /proof: 5 revisions (FR-9b dual coverage, .gitmodules name field, reinstall step, SP-3 prerequisite ordering, tables→lists)
+- Moved task from Worktree Tasks to In-tree Tasks (user preference)
 
-**Deliverable review: small-fixes-batch:**
-- FR-1/FR-2/FR-4 verified; 0 critical, 0 major, 2 minor
-- FR-3 extracted to `plans/fr3-skill-context/`
+**Design skill triage recall fix:**
+- Identified: triage recall blind-fires trigger phrases without reading memory-index
+- Initial fix (inline memory-index reading) reverted — duplicates recall logic
+- Pointed at `/recall triage` (strategy parameter pending centralize-recall plan)
 
-**Fix batch findings:**
-- M1: FR-4 acceptance criterion updated from grep-command to functional statement (historical doc refs acceptable)
-- M2: docstring already fixed by corrector (no change needed)
-- Plan archived; directory deleted
-
-**Merge session-cli-tool:**
-- 133 commits, 1 conflict in `.claude/settings.json` (OURS removed hooks section via plugin conversion; THEIRS still had it)
-- Submodule conflict in `skills/design/SKILL.md` — took OURS (developed Moderate routing)
-- `cli.py` trimmed from 406→400 lines (removed 6 redundant comments) for precommit
-- `stop_status_display.py` from branch not wired into plugin hooks yet — needs conversion
-- `handoff-cli-tool` plan now `delivered`
+**Exploration:**
+- Scout agent mapped full blast radius: `plans/edify-rename/reports/explore-rename-scope.md`
+- Measured counts exceed requirements estimates (tests/agent-core: 172 vs FR-6's 106)
 
 ## In-tree Tasks
 
@@ -33,6 +27,12 @@
 - [ ] **Review skill-CLI** — `/deliverable-review plans/skill-cli-integration` | opus | restart
 - [ ] **Skill-CLI completion** — `/design plans/skill-cli-completion/brief.md` | opus | restart
   - Commit discovery (_git changes), commit --test flag, handoff composition. Before deliverable review.
+- [ ] **Edify rename** — see sub-tasks below | opus
+  - Plan: edify-rename | Status: outlined (multi-sub-problem, terminal design artifact)
+  - SP-3 (plan cleanup) → SP-1 (submodule rename) → SP-2 (package rename)
+  - SP-3: `/inline plans/edify-rename` | sonnet — enumerate delivered plans, archive, delete
+  - SP-1: `/runbook plans/edify-rename/outline.md` | sonnet — agent-core → plugin (~1679 refs)
+  - SP-2: `/runbook plans/edify-rename/outline.md` | sonnet — claudeutils → edify (~817+ refs)
 
 ## Worktree Tasks
 
@@ -40,9 +40,6 @@
 - [ ] **Skill context probe** — `/design plans/fr3-skill-context/requirements.md` | sonnet
   - Plan: fr3-skill-context | Investigate `context:` param on Skill tool; create test skill, document behavior
 - [x] **Session CLI tool** → `session-cli-tool` — merged this session
-- [ ] **Edify rename** — `/design plans/edify-rename/` | opus
-  - Plan: edify-rename | Status: reviewed (requirements proofed)
-  - Blocker resolved: session-cli-tool merged. Design now unblocked.
   - FR-13: File PEP 541 claim on pypi/support for `edify` name (parallel, non-blocking for rename)
 - [ ] **Worktree merge lifecycle** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.8
   - Plan: worktree-merge-resilience | Status: outlined
@@ -237,4 +234,4 @@
 
 ## Next Steps
 
-Edify rename unblocked (session-cli-tool merged). In-tree tasks from branch: outline template trim, review skill-CLI, skill-CLI completion. `stop_status_display.py` needs plugin wiring.
+Edify rename ready for execution: SP-3 (plan cleanup) first, then SP-1 (submodule), then SP-2 (package). Design skill triage recall now points at `/recall triage` — centralize-recall plan owns the implementation. User feedback: tables → lists, stop hook should explain FR/SP/C jargon.
