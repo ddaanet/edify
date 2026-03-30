@@ -1,6 +1,6 @@
 # Session Handoff: 2026-03-29
 
-**Status:** Completed FR-2 + deliverable review of small-fixes-batch (0 critical, 0 major, 2 minor).
+**Status:** small-fixes-batch fully complete — FR-2 done, review done, findings fixed, plan archived.
 
 ## Completed This Session
 
@@ -8,13 +8,15 @@
 - Added `_resolve_project()` and `_expand_projects()` helpers
 - All 5 commands (`parse`, `tree`, `correlate`, `excerpt`, `search`) now default to `cwd` when `--project` omitted
 - `search` supports glob expansion via `_glob.glob()` + dir filtering
-- Review: 1 minor fix (docstring "vars" removed), no UNFIXABLE issues
 
 **Deliverable review: small-fixes-batch:**
-- FR-1 (TMPDIR fix), FR-2 (--project optional), FR-4 (bottom-to-top removal) all verified
-- 0 critical, 0 major, 2 minor: M1 (FR-4 grep matches historical docs, not prescriptive), M2 (_resolve_project docstring overstates expansion)
-- Plan marked `delivered`; FR-3 extracted to `plans/fr3-skill-context/`
-- Report: `plans/small-fixes-batch/reports/deliverable-review.md`
+- FR-1/FR-2/FR-4 verified; 0 critical, 0 major, 2 minor
+- FR-3 extracted to `plans/fr3-skill-context/`
+
+**Fix batch findings:**
+- M1: FR-4 acceptance criterion updated from grep-command to functional statement (historical doc refs acceptable)
+- M2: docstring already fixed by corrector (no change needed)
+- Plan archived; directory deleted
 
 ## In-tree Tasks
 
@@ -24,7 +26,7 @@
 
 ## Worktree Tasks
 
-- [ ] **Fix batch findings** — `/design plans/small-fixes-batch/reports/deliverable-review.md` | opus
+- [x] **Fix batch findings** — plan archived
 - [ ] **Skill context probe** — `/design plans/fr3-skill-context/requirements.md` | sonnet
   - Plan: fr3-skill-context | Investigate `context:` param on Skill tool; create test skill, document behavior
 - [ ] **Session CLI tool** → `session-cli-tool` — `/orchestrate handoff-cli-tool` | sonnet | restart | 3.7

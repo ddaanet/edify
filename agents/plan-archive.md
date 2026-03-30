@@ -4,6 +4,10 @@ Completed plans with summaries. Loaded on demand during design research (Phase A
 and diagnostic/RCA sessions.
 
 
+## small-fixes-batch
+
+Batched four independent small fixes: FR-1 (TMPDIR unbound variable in sessionstart-health.sh after /clear), FR-2 (made --project optional with cwd default and glob support in session-scraper prototype), FR-4 (removed all prescriptive bottom-to-top edit ordering references from operational documents). FR-3 (Skill tool context parameter investigation) deferred to plans/fr3-skill-context. Deliverable review found 0 critical, 0 major, 2 minor issues; both minor findings resolved (acceptance criterion wording updated, docstring already fixed by corrector).
+
 ## remove-memory-index-skill
 
 Removed the vestigial `memory-index` skill (`agent-core/skills/memory-index/`) that predated removal of memory-index from initial context. The skill duplicated `agents/memory-index.md` and was incorrectly invoked via Skill tool from main session. Removed `"memory-index"` from `corrector.md` skills frontmatter — the only consumer. Corrector now reads `agents/memory-index.md` directly, consistent with outline-corrector, design-corrector, and runbook-outline-corrector.
