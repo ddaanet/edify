@@ -1,21 +1,27 @@
 # Session Handoff: 2026-03-30
 
-**Status:** SP-H (stop hook status display) implemented and reviewed. Phases 1-2 complete. Phases 3-4 (SP-1, SP-2) pending restart for hook activation.
+**Status:** Skill-CLI integration Phases 3-4 complete. Integration gaps identified — skill-cli-completion briefed, ordered before deliverable review.
 
 ## Completed This Session
 
-**SP-H: Stop hook status display (Phases 1-2):**
-- Cycle 1.1: Trigger detection (`re.fullmatch(r"Status\.\Z")`) + loop guard (`stop_hook_active` check)
-- Cycle 1.2: ANSI formatting (`\033[0m` per line) + error handling ("Status unavailable" fallback)
-- Corrector review: `\Z` fix (trailing newline false positive), `additionalContext` added per D-1, test case added
-- Hook registered in `.claude/settings.json` alongside `stop-health-fallback.sh`
-- Module: `src/claudeutils/hooks/stop_status_display.py` — self-contained (stdlib only), 12 tests
-- Review: `plans/skill-cli-integration/reports/review-sp-h.md`
+**Skill-CLI integration Phases 3-4 (SP-1, SP-2):**
+- SP-1: execute-rule.md MODE 1 simplified — removed ~55-line rendering template, added `**Rendering:** Output Status.` delegation to Stop hook, updated MODE 3 reference, updated handoff skill reference
+- SP-2: /commit SKILL.md composed with `_commit` CLI — Step 4 replaced (heredoc → `claudeutils _commit`), Step 1b simplified to info-gathering, Post-Commit updated to `Status.` trigger, allowed-tools updated
+- Corrector review SP-1: 0C/0M/1m(OUT-OF-SCOPE) — `plans/skill-cli-integration/reports/review-sp1.md`
+- Skill-reviewer SP-2: 0C/3M(DEFERRED)/1m(FIXED)/3m(DEFERRED) — `plans/skill-cli-integration/reports/review-sp2.md`
+- SP-2 deferred Majors reclassified as integration scope gaps (not "pre-existing") → tracked in skill-cli-completion
+
+**Integration gap analysis:**
+- D-4 handoff deferral premise invalidated — skill uses targeted Edit, not monolithic rewrite
+- Commit discovery uses 3+ manual git calls; `_git changes` CLI exists and was in original brief
+- Brief: `plans/skill-cli-completion/brief.md`
 
 ## In-tree Tasks
 
-- [ ] **Skill-CLI integration** — `/inline plans/skill-cli-integration` | opus | restart
-  - SP-H complete (Phases 1-2). Phases 3-4 remaining: SP-1 (execute-rule.md simplification), SP-2 (/commit skill composition). Both inline, opus.
+- [x] **Skill-CLI integration** — `/inline plans/skill-cli-integration` | opus | restart
+- [ ] **Skill-CLI completion** — `/design plans/skill-cli-completion/brief.md` | opus | restart
+  - Commit discovery (_git changes), commit --test flag, handoff composition. Before deliverable review.
+- [ ] **Review skill-CLI** — `/deliverable-review plans/skill-cli-integration` | opus | restart
 - [ ] **Outline template trim** — `/design plans/outline-template-trim/brief.md` | opus | restart
 
 ## Worktree Tasks
@@ -62,9 +68,10 @@
 ## Reference Files
 
 - `plans/skill-cli-integration/outline.md` — Design outline with SPs, composition boundary, dependency order
-- `plans/skill-cli-integration/runbook.md` — Tier 2 runbook (4 phases, restart boundary after Phase 2)
-- `plans/skill-cli-integration/reports/review-sp-h.md` — Corrector review for SP-H
+- `plans/skill-cli-integration/reports/review-sp1.md` — SP-1 corrector review (execute-rule.md)
+- `plans/skill-cli-integration/reports/review-sp2.md` — SP-2 skill review (/commit SKILL.md, 3 integration gaps → skill-cli-completion)
+- `plans/skill-cli-completion/brief.md` — Remaining integration: commit discovery, --test flag, handoff composition
 
 ## Next Steps
 
-Restart session for Stop hook activation. Then `/inline plans/skill-cli-integration` for Phases 3-4 (opus, inline edits to execute-rule.md and /commit SKILL.md).
+Skill-CLI completion (opus, restart) — address integration gaps before deliverable review.
