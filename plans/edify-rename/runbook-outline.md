@@ -6,21 +6,21 @@ SP-1 only: submodule directory rename `agent-core` → `plugin`. Two atomic comm
 Also updates `claudeutils` → `edify` inside submodule (per outline: "do both identities in submodule at once to avoid re-traversal").
 
 Post-SP-3 measured counts:
-- Submodule: 55 files with `agent-core` refs, 54 files with `claudeutils` refs
+- Submodule: 55 files with `agent-core` refs, 54 files with `claudeutils` refs (design says 49/53 — use Step 1.1 discovery as source of truth)
 - Parent repo: 232 files with `agent-core` refs (excluding submodule, edify-rename plan, plugin-migration plan, retrospective)
 
 ## Requirements Mapping
 
-| Requirement | Phase |
-|------------|-------|
-| FR-2 (URL update) | Phase 2 (.gitmodules) |
-| FR-3 (directory rename) | Phase 2 (git mv) |
-| FR-4 (config path propagation) | Phase 2 |
-| FR-5 (source code paths) | Phase 2 |
-| FR-6 (test paths) | Phase 2 |
-| FR-7 (agentic prose paths) | Phase 1 (submodule) + Phase 2 (parent) |
-| FR-8 (active plan paths) | Phase 2 |
-| FR-9b (CLI command in submodule) | Phase 1 |
+| Requirement | Phase | Steps | Notes |
+|------------|-------|-------|-------|
+| FR-2 (URL update) | 2 | 2.1 | .gitmodules URL change |
+| FR-3 (directory rename) | 2 | 2.1 | git mv agent-core plugin |
+| FR-4 (config path propagation) | 2 | 2.1, 2.2 | .gitmodules in 2.1, remaining config in 2.2 |
+| FR-5 (source code paths) | 2 | 2.2 | src/claudeutils/*.py agent-core refs |
+| FR-6 (test paths) | 2 | 2.2 | tests/*.py agent-core refs |
+| FR-7 (agentic prose paths) | 1, 2 | 1.2, 2.2 | Submodule prose in 1.2, parent prose in 2.2 |
+| FR-8 (active plan paths) | 2 | 2.2 | plans/*/ agent-core refs |
+| FR-9b (CLI command in submodule) | 1 | 1.2 | claudeutils → edify inside submodule only; rest of tree handled by SP-2 |
 
 ## Key Decisions
 
@@ -67,9 +67,10 @@ Git mv, .gitmodules update, then parallel reference updates across parent repo. 
 
 ### Step 2.1: Structural rename
 - `git mv agent-core plugin`
-- Edit `.gitmodules`: `[submodule "agent-core"]` → `[submodule "plugin"]`, path → `plugin`, URL → `git@github.com:ddaanet/edify-plugin.git`
+- Edit `.gitmodules`: `[submodule "agent-core"]` → `[submodule "plugin"]`, path → `plugin`, URL → `git@github.com:ddaanet/edify-plugin.git`; also update the `[submodule "..."]` section header name field
 - `git submodule sync`
 - Fix `.envrc` symlink: `agent-core/templates/dotenvrc` → `plugin/templates/dotenvrc`
+- Depends on: Phase 1 complete (submodule committed with internal refs updated)
 
 ### Step 2.2: Parallel batch — update parent repo references
 Dispatch parallel file-scoped agents, one per directory/file scope:
@@ -88,6 +89,7 @@ Each agent: read files in scope, apply replacements, report changed file count.
 
 ### Step 2.3: Verification + test + commit
 - `grep -r 'agent-core' . --exclude-dir=.git --exclude-dir=plugin --exclude-dir=plans/edify-rename` — must return zero (only edify-rename plan and submodule internal refs may remain)
+- Verify `.envrc` symlink resolves: `readlink .envrc` should reference `plugin/templates/dotenvrc`
 - `just test` — full test suite pass
 - `just precommit` — full validation
 - Stage all changes + updated submodule pointer, atomic commit
@@ -125,3 +127,33 @@ Each agent: read files in scope, apply replacements, report changed file count.
 **Report Locations:** `plans/edify-rename/reports/`
 **Success Criteria:** Zero `agent-core` matches in parent tree (excluding edify-rename plan), zero `agent-core`/`claudeutils` matches in submodule, full test suite green
 **Prerequisites:** SP-3 complete (verified), clean git tree
+
+## Expansion Guidance
+
+The following recommendations should be incorporated during full runbook expansion:
+
+**Agent prompt template:**
+- Each parallel agent in Steps 1.2/2.2 needs: scope glob, replacement pairs, instruction to grep-then-edit (not blind replace_all), and report format (files changed, occurrences replaced)
+- Include recall entries by reference: `plans/edify-rename/recall-artifact.md` — agents resolve themselves
+- Emphasize C-3: grep discovery within scope, not hardcoded file lists
+
+**Consolidation candidates:**
+- None — 6 steps across 2 phases is already minimal for this scope
+
+**Verification specifics:**
+- Step 1.3 grep exclusions: exclude `plans/edify-rename/` if any refs exist inside submodule plan artifacts
+- Step 2.3 grep exclusions: `.git/`, `plugin/` (submodule — already committed), `plans/edify-rename/`
+- `.envrc` symlink verification in Step 2.3 (added during review)
+- `.gitmodules` section header name field (not just path/URL) — noted in Step 2.1
+
+**Parallel dispatch scoping:**
+- Step 1.2 agents operate inside `agent-core/` (pre-rename path); Step 2.2 agents operate on parent tree
+- Step 2.2 `plans/*/` scope: exclude `plans/edify-rename/` and any delivered plans (SP-3 should have removed these)
+- Agent count for Step 2.2: ~10 scopes listed; if any scope has <3 files, consider merging with adjacent scope to reduce dispatch overhead
+
+**Checkpoint guidance:**
+- After Phase 1: verify submodule commit exists (`git -C agent-core log -1`), verify zero matches
+- After Phase 2: full `just precommit` is the checkpoint — includes test suite + linting
+
+**Count discrepancy:**
+- Scope section says 55/54 submodule files; design says 49/53. Step 1.1 discovery produces the authoritative count. Expansion should not hardcode either number — use discovery output
