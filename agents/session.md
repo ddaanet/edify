@@ -14,6 +14,8 @@
 **Integration gap analysis:**
 - D-4 handoff deferral premise invalidated — skill uses targeted Edit, not monolithic rewrite
 - Commit discovery uses 3+ manual git calls; `_git changes` CLI exists and was in original brief
+- `_status` unscheduled plans floods output — should show scheduled-here + count of nowhere-scheduled (cross-tree via `aggregate_trees`)
+- `_commit` submodule handling bug: `## Submodule` section ignored when submodule not yet committed internally
 - Brief: `plans/skill-cli-completion/brief.md`
 
 ## In-tree Tasks
@@ -74,4 +76,4 @@
 
 ## Next Steps
 
-Skill-CLI completion (opus, restart) — address integration gaps before deliverable review.
+Branch ready to merge. Skill-CLI completion and deliverable review deferred to post-plugin-conversion.

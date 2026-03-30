@@ -29,11 +29,12 @@ Design must address both the reviewer's findings (M-1, M-2, M-3) and the user-id
 
 ## Scope
 
-Three integration points remaining:
+Four integration points remaining:
 
 1. **Commit discovery** — Replace Step 1 manual git calls with `claudeutils _git changes`. Remove skill-side `just precommit` (CLI handles validation per D-2). Remove Step 1c `git add` (CLI handles staging).
 2. **Commit `--test` flag** — Add `just-test` to CLI's `_VALID_OPTIONS` and pipeline path, or reconcile the flag semantics.
 3. **Handoff composition** — Revisit D-4 with corrected premise. Identify which sections benefit from CLI handling vs skill synthesis.
+4. **Status unscheduled plans** — Current `_status` lists all local unscheduled plans (floods output). Fix: show plans scheduled HERE (local session.md tasks), plus a count of plans HERE scheduled NOWHERE (cross-tree check via `aggregate_trees`). Full list available via `_worktree ls`.
 
 ## Constraints
 
@@ -48,6 +49,8 @@ Three integration points remaining:
 - D-4 deferral: `plans/skill-cli-integration/outline.md` (D-4 section)
 - `_git changes` CLI: `claudeutils _git changes --help`
 - `_commit` parser: `src/claudeutils/session/commit.py` (`_VALID_OPTIONS`)
+- `_status` unscheduled: `src/claudeutils/session/status/cli.py:70,97-100` — local-only `list_plans` + local-only `task_plan_dirs`
+- Cross-tree aggregation: `src/claudeutils/planstate/aggregation.py` — `aggregate_trees` already iterates all worktrees
 
 ## References
 
