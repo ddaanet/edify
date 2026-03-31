@@ -9,7 +9,7 @@ from unittest.mock import Mock
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree as worktree_cli
+from edify.worktree.cli import worktree as worktree_cli
 
 # ── Shared helpers (not fixtures, import directly) ──────────────────────
 

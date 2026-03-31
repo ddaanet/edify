@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
-from claudeutils.when.cli import when_cmd
-from claudeutils.when.resolver import ResolveError
+from edify.cli import cli
+from edify.when.cli import when_cmd
+from edify.when.resolver import ResolveError
 
 
 def test_when_command_exists() -> None:
@@ -25,7 +25,7 @@ def test_operator_prefix_stripped() -> None:
     """Operator prefix (when/how) stripped, bare trigger passed to resolver."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.return_value = "# Test Result\n\nMocked content"
 
         # "when X" → strips prefix, passes bare trigger
@@ -55,7 +55,7 @@ def test_bare_query_accepted() -> None:
     """Bare trigger (no operator prefix) passed directly to resolver."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.return_value = "# Test Result\n\nMocked content"
 
         result = runner.invoke(cli, ["when", "writing mock tests"])
@@ -67,7 +67,7 @@ def test_dot_prefix_preserved() -> None:
     """Dot prefix (section/file mode) preserved through operator stripping."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.return_value = "# Mock Result\n\nMocked content"
 
         # "when .Section" → strips "when", preserves ".Section"
@@ -119,7 +119,7 @@ def test_batched_recall_multiple_queries() -> None:
     """Multiple queries produce batched output separated by ---."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.side_effect = [
             "# Result 1\n\nFirst content",
             "# Result 2\n\nSecond content",
@@ -140,7 +140,7 @@ def test_batched_recall_multiple_queries() -> None:
         assert "# Result 2" in result.output
 
     # Single query: no separator
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.return_value = "# Single Result\n\nContent"
         result = runner.invoke(cli, ["when", "writing mock tests"])
         assert result.exit_code == 0
@@ -184,7 +184,7 @@ def test_batch_accumulates_errors() -> None:
     """Batch prints successes first, then errors to stdout, exit 1."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.side_effect = [
             "# Result 1\n\nFirst content",
             ResolveError("No match for 'nonexistent'"),
@@ -204,7 +204,7 @@ def test_batch_all_succeed_exit_zero() -> None:
     """Batch with all successes exits 0."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.side_effect = [
             "# Result 1\n\nFirst",
             "# Result 2\n\nSecond",
@@ -220,7 +220,7 @@ def test_dedup_identical_results() -> None:
     """Duplicate resolved results are emitted once."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         # Two different queries resolve to the same content
         mock_resolve.side_effect = [
             "# Same Entry\n\nContent here",
@@ -237,7 +237,7 @@ def test_dedup_preserves_distinct() -> None:
     """Distinct resolved results are all emitted."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.side_effect = [
             "# Entry A\n\nFirst",
             "# Entry A\n\nFirst",
@@ -255,7 +255,7 @@ def test_stdin_queries() -> None:
     """Queries read from stdin (one per line)."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.return_value = "# Result\n\nContent"
 
         result = runner.invoke(cli, ["when"], input="writing mock tests\n")
@@ -269,7 +269,7 @@ def test_stdin_multiple_lines() -> None:
     """Multiple stdin lines produce multiple queries."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.side_effect = [
             "# Result 1\n\nFirst",
             "# Result 2\n\nSecond",
@@ -285,7 +285,7 @@ def test_stdin_skips_blank_lines() -> None:
     """Blank lines in stdin are ignored."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.return_value = "# Result\n\nContent"
 
         result = runner.invoke(cli, ["when"], input="\n  \nactual query\n\n")
@@ -297,7 +297,7 @@ def test_stdin_combined_with_args() -> None:
     """Stdin queries combined with CLI arg queries."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.side_effect = [
             "# From Args\n\nArg content",
             "# From Stdin\n\nStdin content",
@@ -314,7 +314,7 @@ def test_stdin_strips_operator_prefix() -> None:
     """Operator prefix stripped from stdin queries too."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.return_value = "# Result\n\nContent"
 
         result = runner.invoke(cli, ["when"], input="when writing tests\n")
@@ -326,7 +326,7 @@ def test_dedup_with_error() -> None:
     """Dedup removes duplicate, error still surfaces, exit 1."""
     runner = CliRunner()
 
-    with patch("claudeutils.when.cli.resolve") as mock_resolve:
+    with patch("edify.when.cli.resolve") as mock_resolve:
         mock_resolve.side_effect = [
             "# Same\n\nContent",
             "# Same\n\nContent",

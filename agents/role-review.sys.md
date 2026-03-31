@@ -336,7 +336,7 @@ implemented.
 
 ## Project Context
 
-**Project:** Claude Code Feedback Extractor (claudeutils)
+**Project:** Claude Code Feedback Extractor (edify)
 
 **Goal:** Extract user feedback from Claude Code conversation history for retrospective
 analysis.
@@ -387,9 +387,9 @@ just check            # Run ruff + mypy only
 just format           # Auto-format code
 
 # Tool usage
-claudeutils list
-claudeutils extract <prefix>
-claudeutils tokens <model> <file>
+edify list
+edify extract <prefix>
+edify tokens <model> <file>
 ```
 
 **File Reference:**

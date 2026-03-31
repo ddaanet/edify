@@ -6,7 +6,7 @@
 
 ## Summary
 
-Phase 5 wires version consistency between `plugin.json` and `pyproject.toml`. The implementation creates `.edify.yaml`, adds `check-version-consistency.py` to precommit, and modifies the `release` recipe to bump `plugin.json` alongside `pyproject.toml`. The precommit check is correct and passes. One critical bug exists in the `release` recipe: `version=$(uv version)` returns `"claudeutils 0.0.2"` (name + version) in uv 0.10.8, but `bump-plugin-version.py` uses that string directly as the JSON value, corrupting `plugin.json` with `"claudeutils 0.0.2"` instead of `"0.0.2"`. The precommit check then fails on the next run.
+Phase 5 wires version consistency between `plugin.json` and `pyproject.toml`. The implementation creates `.edify.yaml`, adds `check-version-consistency.py` to precommit, and modifies the `release` recipe to bump `plugin.json` alongside `pyproject.toml`. The precommit check is correct and passes. One critical bug exists in the `release` recipe: `version=$(uv version)` returns `"edify 0.0.2"` (name + version) in uv 0.10.8, but `bump-plugin-version.py` uses that string directly as the JSON value, corrupting `plugin.json` with `"edify 0.0.2"` instead of `"0.0.2"`. The precommit check then fails on the next run.
 
 **Overall Assessment**: Needs Minor Changes (one fix applied)
 
@@ -16,7 +16,7 @@ Phase 5 wires version consistency between `plugin.json` and `pyproject.toml`. Th
 
 1. **`version=$(uv version)` passes "name version" string to bump-plugin-version.py**
    - Location: `justfile:140-141`
-   - Problem: `uv version` (without `--short`) returns `"claudeutils 0.0.2"` in uv 0.6+. The release recipe captures this into `$version` and passes it to `bump-plugin-version.py "$version"`. The script assigns it directly: `data["version"] = version`, so `plugin.json` gets `"claudeutils 0.0.2"` as its version field. The subsequent `check-version-consistency.py` call then catches the mismatch and aborts — but by then `plugin.json` has already been written with a corrupt value and must be reset manually.
+   - Problem: `uv version` (without `--short`) returns `"edify 0.0.2"` in uv 0.6+. The release recipe captures this into `$version` and passes it to `bump-plugin-version.py "$version"`. The script assigns it directly: `data["version"] = version`, so `plugin.json` gets `"edify 0.0.2"` as its version field. The subsequent `check-version-consistency.py` call then catches the mismatch and aborts — but by then `plugin.json` has already been written with a corrupt value and must be reset manually.
    - Fix: Change `version=$(uv version)` to `version=$(uv version --short)`
    - **Status**: FIXED
 
@@ -33,7 +33,7 @@ None.
 
 ## Fixes Applied
 
-- `justfile:140` — Changed `version=$(uv version)` to `version=$(uv version --short)` to get bare version number `"0.0.2"` instead of `"claudeutils 0.0.2"`
+- `justfile:140` — Changed `version=$(uv version)` to `version=$(uv version --short)` to get bare version number `"0.0.2"` instead of `"edify 0.0.2"`
 - `plans/prototypes/validate-edify-yaml.py:7` — Removed `sync_policy` assertion; prototype now only validates version match (sync_policy is user-configurable)
 
 ## Requirements Validation

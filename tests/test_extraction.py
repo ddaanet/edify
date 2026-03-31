@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.extraction import extract_feedback_recursively
+from edify.extraction import extract_feedback_recursively
 
 # temp_history_dir fixture is provided by conftest.py
 

@@ -29,7 +29,7 @@ Evidence from 8 parallel agentic projects showing pattern propagation and plugin
 
 204 commits (2026-01-15 to 2026-02-06). First: "Initialize plugin repository structure". Last: "Add memory-refactor agent for documentation splitting."
 
-This is plugin's birthplace before extraction as a submodule to claudeutils. Contains the full early history of fragments, skills, agents, and workflow patterns.
+This is plugin's birthplace before extraction as a submodule to edify. Contains the full early history of fragments, skills, agents, and workflow patterns.
 
 First 5 commits:
 - `5783aef` Initialize plugin repository structure
@@ -51,7 +51,7 @@ Last 5 commits:
 - **Agent instruction files:** AGENTS.md → CLAUDE.md (migrated 2026-01-18)
 - **Migration:** `091073f` 2026-01-18 "Rename AGENTS.md→CLAUDE.md, add load rule for session context"
 - **Agent-core adoption:** `83cef17` 2026-01-22 "Add plugin submodule and symlink skills/agents"
-- **Pattern usage:** Full claudeutils workflow adoption, statusline context bar, memory infrastructure
+- **Pattern usage:** Full edify workflow adoption, statusline context bar, memory infrastructure
 
 ### Key commits
 
@@ -149,7 +149,7 @@ Last 5 commits:
 ## emojipack (standalone)
 
 - **Date range:** 2025-10-12 to 2026-01-08
-- **Notes:** Identical history to emojipack under `~/code/claudeutils/scratch/emojipack`. Same repo. Not an independent data point.
+- **Notes:** Identical history to emojipack under `~/code/edify/scratch/emojipack`. Same repo. Not an independent data point.
 
 ## ddaanet
 
@@ -170,4 +170,4 @@ Last 5 commits:
 | 2026-01-08 | `0f21638` | Add git lock file retry guideline |
 | 2026-01-08 | `b84d70b` | Add commit workflow guideline |
 
-**Notes:** Late-stage adoption. 203 pre-agentic commits, then 11 agentic commits in one day (Jan 8). Shows: auto-generated CLAUDE.md (Jul 2025, likely Claude Code scaffold) replaced by sophisticated AGENTS.md with session tracking, design decisions, commit workflow — all claudeutils patterns.
+**Notes:** Late-stage adoption. 203 pre-agentic commits, then 11 agentic commits in one day (Jan 8). Shows: auto-generated CLAUDE.md (Jul 2025, likely Claude Code scaffold) replaced by sophisticated AGENTS.md with session tracking, design decisions, commit workflow — all edify patterns.

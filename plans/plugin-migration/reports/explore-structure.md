@@ -33,7 +33,7 @@ plugin/
 
 ## Skills Directory
 
-All 16 skills in `/Users/david/code/claudeutils-plugin-migration/plugin/skills/`:
+All 16 skills in `/Users/david/code/edify-plugin-migration/plugin/skills/`:
 
 | Skill | Type | Location | Purpose |
 |-------|------|----------|---------|
@@ -67,7 +67,7 @@ All 16 skills in `/Users/david/code/claudeutils-plugin-migration/plugin/skills/`
 
 ## Agents Directory
 
-All 14 agents in `/Users/david/code/claudeutils-plugin-migration/plugin/agents/`:
+All 14 agents in `/Users/david/code/edify-plugin-migration/plugin/agents/`:
 
 | Agent | File Size | Purpose |
 |-------|-----------|---------|
@@ -95,7 +95,7 @@ All 14 agents in `/Users/david/code/claudeutils-plugin-migration/plugin/agents/`
 
 ## Hooks Directory
 
-Four hook scripts in `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/`:
+Four hook scripts in `/Users/david/code/edify-plugin-migration/plugin/hooks/`:
 
 ### Hook Scripts
 
@@ -151,7 +151,7 @@ userpromptsubmit-shortcuts.py → ../../plugin/hooks/userpromptsubmit-shortcuts.
 
 ## Bin Directory
 
-Eleven utility scripts in `/Users/david/code/claudeutils-plugin-migration/plugin/bin/`:
+Eleven utility scripts in `/Users/david/code/edify-plugin-migration/plugin/bin/`:
 
 | Script | Language | Purpose |
 |--------|----------|---------|
@@ -176,7 +176,7 @@ Eleven utility scripts in `/Users/david/code/claudeutils-plugin-migration/plugin
 
 ## Fragments Directory
 
-Nineteen instruction fragments in `/Users/david/code/claudeutils-plugin-migration/plugin/fragments/`:
+Nineteen instruction fragments in `/Users/david/code/edify-plugin-migration/plugin/fragments/`:
 
 | Fragment | Purpose |
 |----------|---------|
@@ -205,7 +205,7 @@ Nineteen instruction fragments in `/Users/david/code/claudeutils-plugin-migratio
 
 ## Templates Directory
 
-Three files in `/Users/david/code/claudeutils-plugin-migration/plugin/templates/`:
+Three files in `/Users/david/code/edify-plugin-migration/plugin/templates/`:
 
 | File | Purpose |
 |------|---------|
@@ -217,7 +217,7 @@ Three files in `/Users/david/code/claudeutils-plugin-migration/plugin/templates/
 
 ## Documentation (docs) Directory
 
-Six workflow and pattern guides in `/Users/david/code/claudeutils-plugin-migration/plugin/docs/`:
+Six workflow and pattern guides in `/Users/david/code/edify-plugin-migration/plugin/docs/`:
 
 | Document | Lines | Purpose |
 |----------|-------|---------|
@@ -232,7 +232,7 @@ Six workflow and pattern guides in `/Users/david/code/claudeutils-plugin-migrati
 
 ## Configs Directory
 
-Configuration templates in `/Users/david/code/claudeutils-plugin-migration/plugin/configs/`:
+Configuration templates in `/Users/david/code/edify-plugin-migration/plugin/configs/`:
 
 | Config | Purpose |
 |--------|---------|
@@ -331,7 +331,7 @@ Current hook configuration in `.claude/settings.json`:
 
 ## Justfile
 
-Single justfile at `/Users/david/code/claudeutils-plugin-migration/plugin/justfile`:
+Single justfile at `/Users/david/code/edify-plugin-migration/plugin/justfile`:
 
 | Recipe | Purpose |
 |--------|---------|
@@ -410,9 +410,9 @@ Single justfile at `/Users/david/code/claudeutils-plugin-migration/plugin/justfi
 
 ## Files Referenced
 
-- **Justfile:** `/Users/david/code/claudeutils-plugin-migration/plugin/justfile`
-- **Hooks:** `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/*.sh`, `*.py`
-- **Hook config:** `/Users/david/code/claudeutils-plugin-migration/.claude/settings.json`
-- **Skills:** `/Users/david/code/claudeutils-plugin-migration/plugin/skills/*/SKILL.md`
-- **Agents:** `/Users/david/code/claudeutils-plugin-migration/plugin/agents/*.md`
+- **Justfile:** `/Users/david/code/edify-plugin-migration/plugin/justfile`
+- **Hooks:** `/Users/david/code/edify-plugin-migration/plugin/hooks/*.sh`, `*.py`
+- **Hook config:** `/Users/david/code/edify-plugin-migration/.claude/settings.json`
+- **Skills:** `/Users/david/code/edify-plugin-migration/plugin/skills/*/SKILL.md`
+- **Agents:** `/Users/david/code/edify-plugin-migration/plugin/agents/*.md`
 - **Symlinks:** `.claude/skills/`, `.claude/agents/`, `.claude/hooks/` (all relative to project root)

@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.session.cli import handoff_cmd, status_cmd
+from edify.session.cli import handoff_cmd, status_cmd
 from tests.pytest_helpers import init_repo_minimal
 
 # Cycle 7.1: handoff then status round-trip

@@ -53,7 +53,7 @@ Topic 1 and 5 use full UUIDs (e.g., `f9e199ea-312e-4fa8-aec0-3316312f5c1b`). Top
 T2: "Artifact Inventory", T3: "Source Index", T5: "Meta-Pattern: Connecting the Other Four Topics". T1/T4 lack a fourth section. The content differs meaningfully, but the structural inconsistency makes the reports feel less like a unified set.
 
 **m-3: Source Index paths in Topic 3 use mixed formats.**
-`plans/retrospective/reports/topic-3-deliverable-review.md:178-186` — Source Index mixes relative git paths (`plans/reflect-rca-parity-iterations/rca.md @ bccf08a1`) with absolute filesystem paths (`Session 90557acc in /Users/david/code/claudeutils/wt/worktree`). Other topics use project directory shortnames for sessions.
+`plans/retrospective/reports/topic-3-deliverable-review.md:178-186` — Source Index mixes relative git paths (`plans/reflect-rca-parity-iterations/rca.md @ bccf08a1`) with absolute filesystem paths (`Session 90557acc in /Users/david/code/edify/wt/worktree`). Other topics use project directory shortnames for sessions.
 
 ### Completeness
 

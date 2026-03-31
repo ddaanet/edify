@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from claudeutils.session.commit_pipeline import format_commit_output
+from edify.session.commit_pipeline import format_commit_output
 
 # Cycle 6.5: output formatting
 

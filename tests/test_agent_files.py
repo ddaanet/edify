@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.discovery import find_related_agent_files
+from edify.discovery import find_related_agent_files
 
 # temp_project_dir fixture is provided by conftest.py
 

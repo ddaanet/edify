@@ -5,7 +5,7 @@ from pathlib import Path
 
 from _pytest.monkeypatch import MonkeyPatch
 
-from claudeutils.worktree.resolve import resolve_session_md
+from edify.worktree.resolve import resolve_session_md
 
 
 def test_merge_conflict_preserves_branch_session_tasks(

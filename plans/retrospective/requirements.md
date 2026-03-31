@@ -82,7 +82,7 @@ All raw materials written to the plan's reports directory as markdown files.
 
 ### Data Landscape
 
-Session logs span ~130 project directories under `~/.claude/projects/`. Each worktree gets its own project directory (e.g., `-Users-david-code-claudeutils-wt-pushback`). The project directory names encode the evolution timeline — worktree names reflect the feature being built. Key topic-relevant project directories:
+Session logs span ~130 project directories under `~/.claude/projects/`. Each worktree gets its own project directory (e.g., `-Users-david-code-edify-wt-pushback`). The project directory names encode the evolution timeline — worktree names reflect the feature being built. Key topic-relevant project directories:
 
 - `memory-index-recall` (16 sessions, Feb 10) — memory system design
 - `when-recall` (24 sessions, Feb 13) — /when + /how implementation

@@ -22,7 +22,7 @@ Normal update path is marketplace (`claude plugin update edify`) for both modes.
 
 ## Key Decisions
 
-- **D-1 Naming:** Plugin = `edify` (marketplace), repo = `edify-plugin` (was `plugin`), Python package = `edify` (was `claudeutils`)
+- **D-1 Naming:** Plugin = `edify` (marketplace), repo = `edify-plugin` (was `plugin`), Python package = `edify` (was `edify`)
 - **D-2 Hook scripts unchanged:** Scripts use `$CLAUDE_PROJECT_DIR` correctly; hooks.json commands use `$CLAUDE_PLUGIN_ROOT` to locate scripts. Moving hooks from settings.json to plugin hooks.json does not change env var availability (grounded: both vars available in all hook types)
 - **D-3 Fragment distribution via skill:** `/edify:init` is a skill (needs reasoning + conditional logic), not a standalone script
 - **D-4 hooks.json format:** Wrapper format `{"hooks": {"PreToolUse": [...]}}` per official Claude Code docs (grounded: code.claude.com/docs/en/plugins migration guide)
@@ -33,7 +33,7 @@ Normal update path is marketplace (`claude plugin update edify`) for both modes.
   - `precommit` — full lint WITH ruff complexity, line/token limits, session/plan file validation
   - `test` — pytest with framework-standard flags
   - `precommit-base` — edify-plugin validators only (subset of precommit)
-  - `wt-*` — manual fallbacks for `claudeutils _worktree`, used when `_worktree` is buggy and you're willing to forego auto-resolution (session.md updates, conflict resolution, validation)
+  - `wt-*` — manual fallbacks for `edify _worktree`, used when `_worktree` is buggy and you're willing to forego auto-resolution (session.md updates, conflict resolution, validation)
   - Delivered via sync mechanism with SessionStart + UPS fallback. Default: nag. Auto-with-report is future work
   - Variables merge across import boundaries (grounded: Context7, Just docs). Projects override via `set allow-duplicate-recipes`
 - **D-6 Version marker:** `.edify.yaml` in project root. YAML format (supports comments, fewer tokens than JSON). Holds plugin version + sync policy
@@ -161,7 +161,7 @@ Complete hook inventory (audited from settings.json + hooks/ directory):
 ### 5. Justfile Modularization
 
 - `portable.just` contains the full opinionated recipe stack (see D-5 for full list)
-- `wt-*` recipes are manual fallbacks for `claudeutils _worktree` — used when `_worktree` is buggy and you're willing to forego auto-resolution
+- `wt-*` recipes are manual fallbacks for `edify _worktree` — used when `_worktree` is buggy and you're willing to forego auto-resolution
 - Delivered to consuming projects via `/edify:update` (synced alongside fragments)
 - Variables merge across import boundaries (grounded via Context7)
 - Projects override individual recipes via `set allow-duplicate-recipes` — shallower definitions win

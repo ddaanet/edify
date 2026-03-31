@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.account import AccountState
-from claudeutils.account.state import get_account_state
+from edify.account import AccountState
+from edify.account.state import get_account_state
 
 
 def test_account_state_creation() -> None:
@@ -99,7 +99,7 @@ def test_get_account_state_missing_files(
     for mode and provider.
     """
     # Mock Path.home() to return empty tmp_path (no .claude directory)
-    monkeypatch.setattr("claudeutils.account.state.Path.home", lambda: tmp_path)
+    monkeypatch.setattr("edify.account.state.Path.home", lambda: tmp_path)
 
     # Call get_account_state() with missing files
     state = get_account_state()

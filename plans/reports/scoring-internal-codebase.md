@@ -22,7 +22,7 @@ Each system has different performance characteristics, data structures, and use 
 
 ### 1. Recall Module: Keyword-Based Relevance Scoring
 
-**File:** `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/src/claudeutils/recall/relevance.py`
+**File:** `/Users/david/code/edify-wt/userpromptsubmit-topic/src/edify/recall/relevance.py`
 
 **Approach:** Normalized keyword set intersection
 **Scoring Formula:** `score = |intersection| / |entry_keywords|` (0.0 to 1.0 range)
@@ -67,7 +67,7 @@ relevant.sort(key=lambda r: r.score, reverse=True)
 return relevant
 ```
 
-**Keyword Extraction:** `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/src/claudeutils/recall/index_parser.py`
+**Keyword Extraction:** `/Users/david/code/edify-wt/userpromptsubmit-topic/src/edify/recall/index_parser.py`
 
 **Function:** `_extract_keywords()`
 ```python
@@ -90,7 +90,7 @@ def _extract_keywords(text: str) -> set[str]:
 
 ### 2. When Module: Fuzzy Subsequence Matching
 
-**File:** `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/src/claudeutils/when/fuzzy.py`
+**File:** `/Users/david/code/edify-wt/userpromptsubmit-topic/src/edify/when/fuzzy.py`
 
 **Approach:** Modified fzf V2 algorithm with dynamic programming + gap penalties + boundary bonuses
 
@@ -159,7 +159,7 @@ query="design", candidate="design decisions"
 
 ### 3. When Module: Index Parsing and Trigger Routing
 
-**File:** `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/src/claudeutils/when/resolver.py`
+**File:** `/Users/david/code/edify-wt/userpromptsubmit-topic/src/edify/when/resolver.py`
 
 **Approach:** Multi-level prefix-based routing + fuzzy fallback
 
@@ -206,7 +206,7 @@ def _get_suggestions(query: str, candidates: list[str], limit: int = 3) -> list[
 
 ### 4. UserPromptSubmit Hook: Pattern Guards and Continuation Parsing
 
-**File:** `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/plugin/hooks/userpromptsubmit-shortcuts.py`
+**File:** `/Users/david/code/edify-wt/userpromptsubmit-topic/plugin/hooks/userpromptsubmit-shortcuts.py`
 
 **Approach:** Tiered regex pattern matching with false-positive filtering
 
@@ -302,7 +302,7 @@ Mode 2: Inline prose with delimiters
 
 ### 5. PreToolUse Hook: Command Routing
 
-**File:** `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/plugin/hooks/pretooluse-recipe-redirect.py`
+**File:** `/Users/david/code/edify-wt/userpromptsubmit-topic/plugin/hooks/pretooluse-recipe-redirect.py`
 
 **Approach:** Regex-based command routing with three matching functions
 
@@ -335,10 +335,10 @@ if command == "ln" or command.startswith("ln "):
     # Suggest: just sync-to-parent
 
 if command.startswith("git worktree "):
-    # Suggest: claudeutils _worktree
+    # Suggest: edify _worktree
 
 if command.startswith("git merge ") or command == "git merge":
-    # Suggest: claudeutils _worktree merge
+    # Suggest: edify _worktree merge
 ```
 
 **Main routing:** `_match()`
@@ -385,8 +385,8 @@ def _match(command: str) -> dict | None:
 Flow: Raw text → `_extract_keywords()` → Tokenization → Stopword removal → `set[str]`
 
 **Files:**
-- Entry keywords: `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/src/claudeutils/recall/index_parser.py` lines 72-87
-- Relevance scoring: `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/src/claudeutils/recall/relevance.py` lines 18-86
+- Entry keywords: `/Users/david/code/edify-wt/userpromptsubmit-topic/src/edify/recall/index_parser.py` lines 72-87
+- Relevance scoring: `/Users/david/code/edify-wt/userpromptsubmit-topic/src/edify/recall/relevance.py` lines 18-86
 
 **Reuse:** Keyword extraction used in both old-format and new-format entry parsing.
 
@@ -601,6 +601,6 @@ Based on this analysis, the following patterns are relevant for implementing tri
 2. **Fuzzy trigger matching:** Leverage `when/fuzzy.py` to match user text against known triggers with tolerance
 3. **False-positive filtering:** Follow UserPromptSubmit hook pattern (context-aware filtering in `_should_exclude_reference()`) to avoid matching in irrelevant contexts
 4. **Regex guard patterns:** Use compiled regex with `re.IGNORECASE` for efficient pattern detection (low overhead)
-5. **Tokenization:** For keyword extraction, reuse `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/src/claudeutils/recall/index_parser.py:_extract_keywords()` to ensure consistency with recall system
+5. **Tokenization:** For keyword extraction, reuse `/Users/david/code/edify-wt/userpromptsubmit-topic/src/edify/recall/index_parser.py:_extract_keywords()` to ensure consistency with recall system
 6. **Caching:** Follow UserPromptSubmit hook cache pattern (hash-based path, timestamp validation) to avoid redundant computation
 7. **Ranking:** Multi-stage scoring (fuzzy score primary, word overlap secondary tiebreaker) provides both precision and recall

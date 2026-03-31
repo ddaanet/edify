@@ -6,7 +6,7 @@ This project uses a three-tier justfile architecture: a root justfile with proje
 
 ## Key Findings
 
-### 1. Root Justfile — `/Users/david/code/claudeutils-plugin-migration/justfile`
+### 1. Root Justfile — `/Users/david/code/edify-plugin-migration/justfile`
 
 **File type:** Main justfile (390 lines)
 
@@ -74,7 +74,7 @@ Detects Claude Code sandbox by checking `/tmp` writability. Skips `uv sync` in s
 
 ---
 
-### 2. Agent-Core Justfile — `/Users/david/code/claudeutils-plugin-migration/plugin/justfile`
+### 2. Agent-Core Justfile — `/Users/david/code/edify-plugin-migration/plugin/justfile`
 
 **File type:** Justfile for plugin submodule (98 lines)
 
@@ -117,7 +117,7 @@ parent-project/.claude/
 
 ---
 
-### 3. Makefile — `/Users/david/code/claudeutils-plugin-migration/plugin/Makefile`
+### 3. Makefile — `/Users/david/code/edify-plugin-migration/plugin/Makefile`
 
 **File type:** GNU Make configuration (35 lines)
 
@@ -238,8 +238,8 @@ git worktree add "$wt_dir" -b "$branch" "{{base}}"
 
 **Output format:**
 ```
-✓ Worktree ready: ../claudeutils-plugin-migration-<name>
-  Launch: cd ../claudeutils-plugin-migration-<name> && claude
+✓ Worktree ready: ../edify-plugin-migration-<name>
+  Launch: cd ../edify-plugin-migration-<name> && claude
 ```
 
 **Sandbox requirement:** Requires `dangerouslyDisableSandbox: true` (writes outside project directory)
@@ -506,10 +506,10 @@ fi
 
 ## File Locations (Absolute Paths)
 
-- **Root justfile:** `/Users/david/code/claudeutils-plugin-migration/justfile` (390 lines)
-- **Agent-core justfile:** `/Users/david/code/claudeutils-plugin-migration/plugin/justfile` (98 lines)
-- **Agent-core Makefile:** `/Users/david/code/claudeutils-plugin-migration/plugin/Makefile` (35 lines)
-- **Base config template:** `/Users/david/code/claudeutils-plugin-migration/plugin/configs/justfile-base.just` (152 lines)
+- **Root justfile:** `/Users/david/code/edify-plugin-migration/justfile` (390 lines)
+- **Agent-core justfile:** `/Users/david/code/edify-plugin-migration/plugin/justfile` (98 lines)
+- **Agent-core Makefile:** `/Users/david/code/edify-plugin-migration/plugin/Makefile` (35 lines)
+- **Base config template:** `/Users/david/code/edify-plugin-migration/plugin/configs/justfile-base.just` (152 lines)
 
 ---
 

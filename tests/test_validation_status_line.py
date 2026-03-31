@@ -1,6 +1,6 @@
 """Tests for check_status_line validation."""
 
-from claudeutils.validation.session_structure import check_status_line
+from edify.validation.session_structure import check_status_line
 
 
 class TestCheckStatusLine:

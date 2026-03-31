@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
-from claudeutils.paths import encode_project_path
+from edify.paths import encode_project_path
 
 RECALL_HOW_RE = re.compile(r'_recall\s+resolve\b[^"]*"how\s+([^"]+)"')
 

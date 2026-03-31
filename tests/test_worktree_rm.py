@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
-from claudeutils.worktree.git_ops import _is_merge_commit
+from edify.worktree.cli import worktree
+from edify.worktree.git_ops import _is_merge_commit
 from tests.fixtures_worktree import _branch_exists, _create_worktree
 
 
@@ -177,7 +177,7 @@ def test_rm_git_error_shows_message(
     def _raise(*_args: object, **_kwargs: object) -> None:
         raise err
 
-    monkeypatch.setattr("claudeutils.worktree.cli._remove_worktrees", _raise)
+    monkeypatch.setattr("edify.worktree.cli._remove_worktrees", _raise)
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["rm", "test-feature"])

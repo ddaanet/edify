@@ -7,9 +7,9 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.git import _is_dirty as _is_parent_dirty
-from claudeutils.git import _is_submodule_dirty
-from claudeutils.worktree.cli import worktree
+from edify.git import _is_dirty as _is_parent_dirty
+from edify.git import _is_submodule_dirty
+from edify.worktree.cli import worktree
 from tests.fixtures_worktree import _branch_exists, _create_worktree
 
 
@@ -126,7 +126,7 @@ def test_rm_blocks_on_dirty_submodule(
     assert worktree_path.exists()
 
     monkeypatch.setattr(
-        "claudeutils.worktree.cli._is_submodule_dirty",
+        "edify.worktree.cli._is_submodule_dirty",
         lambda path: True,
     )
 

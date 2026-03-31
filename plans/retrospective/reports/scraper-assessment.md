@@ -28,7 +28,7 @@ Parse produces full timeline. No way to extract a window of N entries around a s
 
 ### Gap 3: Path mapping ambiguity (usability issue, not blocker)
 
-`scan` decodes `-Users-david-code-claudeutils-wt-pushback` as `/Users/david/code/claudeutils/wt/pushback` (lossy). `parse`/`tree`/`correlate` need the real filesystem path `/Users/david/code/claudeutils-wt/pushback`. Workaround: use `encode_project_path()` with the real path. Not blocking but complicates scripting.
+`scan` decodes `-Users-david-code-edify-wt-pushback` as `/Users/david/code/edify/wt/pushback` (lossy). `parse`/`tree`/`correlate` need the real filesystem path `/Users/david/code/edify-wt/pushback`. Workaround: use `encode_project_path()` with the real path. Not blocking but complicates scripting.
 
 **Mitigation for search command:** Accept encoded dir names or real paths; use `encode_project_path()` internally.
 

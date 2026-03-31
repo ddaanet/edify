@@ -22,7 +22,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.1 `/requirements` Skill
 
-**File:** `/Users/david/code/claudeutils/plugin/skills/requirements/SKILL.md`
+**File:** `/Users/david/code/edify/plugin/skills/requirements/SKILL.md`
 
 **Artifact Role:** CREATES initial `recall-artifact.md`
 
@@ -47,7 +47,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.2 `/design` Skill
 
-**File:** `/Users/david/code/claudeutils/plugin/skills/design/SKILL.md`
+**File:** `/Users/david/code/edify/plugin/skills/design/SKILL.md`
 
 **Artifact Role:** CREATES, AUGMENTS, and CONSUMES `recall-artifact.md`
 
@@ -98,7 +98,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.3 `/runbook` Skill
 
-**File:** `/Users/david/code/claudeutils/plugin/skills/runbook/SKILL.md`
+**File:** `/Users/david/code/edify/plugin/skills/runbook/SKILL.md`
 
 **Artifact Role:** CONSUMES (reads), AUGMENTS, and PASSES DOWNSTREAM
 
@@ -148,7 +148,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.4 `/inline` Skill
 
-**File:** `/Users/david/code/claudeutils/plugin/skills/inline/SKILL.md`
+**File:** `/Users/david/code/edify/plugin/skills/inline/SKILL.md`
 
 **Artifact Role:** CONSUMES, CURATES consumer-specific variants, PASSES to sub-agents
 
@@ -195,7 +195,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.5 `/orchestrate` Skill
 
-**File:** `/Users/david/code/claudeutils/plugin/skills/orchestrate/SKILL.md`
+**File:** `/Users/david/code/edify/plugin/skills/orchestrate/SKILL.md`
 
 **Artifact Role:** READS (indirect, via checkpoints and inline execution), PASSES to sub-agents
 
@@ -228,7 +228,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.6 `/deliverable-review` Skill
 
-**File:** `/Users/david/code/claudeutils/plugin/skills/deliverable-review/SKILL.md`
+**File:** `/Users/david/code/edify/plugin/skills/deliverable-review/SKILL.md`
 
 **Artifact Role:** OPTIONALLY CONSUMES via lightweight recall fallback
 
@@ -326,7 +326,7 @@ Optional — corrector may suffice for standardized pattern propagation. Invoke 
 
 ### 3.1 Script Specification
 
-**File:** `/Users/david/code/claudeutils/plugin/bin/recall-diff.sh` (lines 1-28)
+**File:** `/Users/david/code/edify/plugin/bin/recall-diff.sh` (lines 1-28)
 
 **Purpose:** Detect files changed since recall-artifact was written, determine if relevance has shifted
 
@@ -634,31 +634,31 @@ plugin/bin/when-resolve.py \
 ## 7. File Locations and References
 
 ### Core Skill Files
-- `/Users/david/code/claudeutils/plugin/skills/requirements/SKILL.md` — recall-artifact creation (lines 32-64)
-- `/Users/david/code/claudeutils/plugin/skills/design/SKILL.md` — recall-artifact lifecycle A.1/A.2.5/C.1 (lines 46-57, 190-211, 219-225, 349-351)
-- `/Users/david/code/claudeutils/plugin/skills/runbook/SKILL.md` — recall-artifact consumption/augmentation (lines 116-136)
-- `/Users/david/code/claudeutils/plugin/skills/inline/SKILL.md` — consumer-specific curation (lines 96-102)
-- `/Users/david/code/claudeutils/plugin/skills/orchestrate/SKILL.md` — checkpoint delegation (line 161)
-- `/Users/david/code/claudeutils/plugin/skills/deliverable-review/SKILL.md` — optional recall consumption (line 95)
+- `/Users/david/code/edify/plugin/skills/requirements/SKILL.md` — recall-artifact creation (lines 32-64)
+- `/Users/david/code/edify/plugin/skills/design/SKILL.md` — recall-artifact lifecycle A.1/A.2.5/C.1 (lines 46-57, 190-211, 219-225, 349-351)
+- `/Users/david/code/edify/plugin/skills/runbook/SKILL.md` — recall-artifact consumption/augmentation (lines 116-136)
+- `/Users/david/code/edify/plugin/skills/inline/SKILL.md` — consumer-specific curation (lines 96-102)
+- `/Users/david/code/edify/plugin/skills/orchestrate/SKILL.md` — checkpoint delegation (line 161)
+- `/Users/david/code/edify/plugin/skills/deliverable-review/SKILL.md` — optional recall consumption (line 95)
 
 ### Reference Files
-- `/Users/david/code/claudeutils/plugin/skills/design/references/research-protocol.md` — recall diff application (lines 15-17)
-- `/Users/david/code/claudeutils/plugin/skills/runbook/references/tier3-planning-process.md` — Phase 0.5 augmentation (lines 26-33), Phase 0.75 recall-diff (lines 47-49)
-- `/Users/david/code/claudeutils/plugin/skills/inline/references/corrector-template.md` — corrector recall context, lightweight fallback (lines 25-65)
+- `/Users/david/code/edify/plugin/skills/design/references/research-protocol.md` — recall diff application (lines 15-17)
+- `/Users/david/code/edify/plugin/skills/runbook/references/tier3-planning-process.md` — Phase 0.5 augmentation (lines 26-33), Phase 0.75 recall-diff (lines 47-49)
+- `/Users/david/code/edify/plugin/skills/inline/references/corrector-template.md` — corrector recall context, lightweight fallback (lines 25-65)
 
 ### Helper Scripts
-- `/Users/david/code/claudeutils/plugin/bin/recall-diff.sh` — detect changed files since artifact mtime (lines 1-28)
-- `/Users/david/code/claudeutils/plugin/bin/recall-check.sh` — verify artifact exists and non-empty (lines 1-20)
-- `/Users/david/code/claudeutils/plugin/bin/when-resolve.py` — resolve entry keys to current content (referenced throughout)
+- `/Users/david/code/edify/plugin/bin/recall-diff.sh` — detect changed files since artifact mtime (lines 1-28)
+- `/Users/david/code/edify/plugin/bin/recall-check.sh` — verify artifact exists and non-empty (lines 1-20)
+- `/Users/david/code/edify/plugin/bin/when-resolve.py` — resolve entry keys to current content (referenced throughout)
 
 ### Plan Examples
-- `/Users/david/code/claudeutils/plans/recall-null/outline.md` — consumer-artifact execution model (lines 88-101)
-- `/Users/david/code/claudeutils/plans/recall-null/recall-artifact.md` — example primary artifact
-- `/Users/david/code/claudeutils/plans/inline-execute/reports/execution-feedback.md` — sub-agent context isolation pattern failure (lines 20-40)
+- `/Users/david/code/edify/plans/recall-null/outline.md` — consumer-artifact execution model (lines 88-101)
+- `/Users/david/code/edify/plans/recall-null/recall-artifact.md` — example primary artifact
+- `/Users/david/code/edify/plans/inline-execute/reports/execution-feedback.md` — sub-agent context isolation pattern failure (lines 20-40)
 
 ### Decision Files
-- `/Users/david/code/claudeutils/agents/decisions/pipeline-contracts.md` — transformation table with artifact flow (lines 1-17)
-- `/Users/david/code/claudeutils/agents/session.md` — per-consumer artifacts and staleness gap (lines 13-16, 40-44)
+- `/Users/david/code/edify/agents/decisions/pipeline-contracts.md` — transformation table with artifact flow (lines 1-17)
+- `/Users/david/code/edify/agents/session.md` — per-consumer artifacts and staleness gap (lines 13-16, 40-44)
 
 ---
 

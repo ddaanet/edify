@@ -6,8 +6,8 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
-from claudeutils.when.resolver import ResolveError
+from edify.cli import cli
+from edify.when.resolver import ResolveError
 
 
 def test_resolve_artifact_mode_happy_path() -> None:
@@ -28,7 +28,7 @@ def test_resolve_artifact_mode_happy_path() -> None:
         artifact_path.write_text(artifact_content)
 
         # Mock resolver to return distinct content for each trigger
-        with patch("claudeutils.recall_cli.cli.resolver_resolve") as mock_resolve:
+        with patch("edify.recall_cli.cli.resolver_resolve") as mock_resolve:
             mock_resolve.side_effect = [
                 "# First Entry Resolved\nContent 1",
                 "# Second Entry Resolved\nContent 2",
@@ -58,7 +58,7 @@ def test_resolve_argument_mode_happy_path() -> None:
     runner = CliRunner()
     with (
         runner.isolated_filesystem(),
-        patch("claudeutils.recall_cli.cli.resolver_resolve") as mock_resolve,
+        patch("edify.recall_cli.cli.resolver_resolve") as mock_resolve,
     ):
         mock_resolve.side_effect = [
             "Content for mock tests",
@@ -104,7 +104,7 @@ def test_resolve_artifact_mode_any_failure_exits_1() -> None:
         artifact_path = artifact_dir / "recall-artifact.md"
         artifact_path.write_text(artifact_content)
 
-        with patch("claudeutils.recall_cli.cli.resolver_resolve") as mock_resolve:
+        with patch("edify.recall_cli.cli.resolver_resolve") as mock_resolve:
             # First resolves successfully, second raises error, third resolves
             mock_resolve.side_effect = [
                 "Content 1",
@@ -134,7 +134,7 @@ def test_resolve_argument_mode_partial_success_exits_0() -> None:
     runner = CliRunner()
     with (
         runner.isolated_filesystem(),
-        patch("claudeutils.recall_cli.cli.resolver_resolve") as mock_resolve,
+        patch("edify.recall_cli.cli.resolver_resolve") as mock_resolve,
     ):
         # First succeeds, second fails, third succeeds
         mock_resolve.side_effect = [
@@ -173,7 +173,7 @@ def test_resolve_argument_mode_total_failure_exits_1() -> None:
     runner = CliRunner()
     with (
         runner.isolated_filesystem(),
-        patch("claudeutils.recall_cli.cli.resolver_resolve") as mock_resolve,
+        patch("edify.recall_cli.cli.resolver_resolve") as mock_resolve,
     ):
         # All three fail
         mock_resolve.side_effect = [
@@ -222,7 +222,7 @@ def test_resolve_null_entries_silent() -> None:
         artifact_path = artifact_dir / "recall-artifact.md"
         artifact_path.write_text(artifact_content)
 
-        with patch("claudeutils.recall_cli.cli.resolver_resolve") as mock_resolve:
+        with patch("edify.recall_cli.cli.resolver_resolve") as mock_resolve:
             # Only the real entry should be resolved
             mock_resolve.side_effect = [
                 "Content for real entry",
@@ -257,7 +257,7 @@ def test_resolve_dedup_content() -> None:
         artifact_path = artifact_dir / "recall-artifact.md"
         artifact_path.write_text(artifact_content)
 
-        with patch("claudeutils.recall_cli.cli.resolver_resolve") as mock_resolve:
+        with patch("edify.recall_cli.cli.resolver_resolve") as mock_resolve:
             # Both resolve to the same content
             mock_resolve.side_effect = [
                 "Shared content for both",

@@ -11,7 +11,7 @@ The codebase has well-established review infrastructure spanning three architect
 
 ### 1. `/proof` Skill — Interactive Artifact Validation
 
-**Location:** `/Users/david/code/claudeutils/plugin/skills/proof/SKILL.md`
+**Location:** `/Users/david/code/edify/plugin/skills/proof/SKILL.md`
 
 **Purpose:** Structured review loop for planning artifacts (outline.md, design.md, requirements.md, runbook phases). Replaces single-turn "does this look right?" with iterative protocol.
 
@@ -45,10 +45,10 @@ The codebase has well-established review infrastructure spanning three architect
 ### 2. Severity-Based Verdict Vocabulary
 
 **Sources:**
-- `/Users/david/code/claudeutils/plugin/agents/corrector.md` (Status Taxonomy, lines 18-78)
-- `/Users/david/code/claudeutils/plugin/agents/outline-corrector.md`
-- `/Users/david/code/claudeutils/plugin/agents/design-corrector.md`
-- `/Users/david/code/claudeutils/plugin/skills/deliverable-review/SKILL.md` (lines 138-142)
+- `/Users/david/code/edify/plugin/agents/corrector.md` (Status Taxonomy, lines 18-78)
+- `/Users/david/code/edify/plugin/agents/outline-corrector.md`
+- `/Users/david/code/edify/plugin/agents/design-corrector.md`
+- `/Users/david/code/edify/plugin/skills/deliverable-review/SKILL.md` (lines 138-142)
 
 **Severity Levels (All Artifacts):**
 
@@ -90,10 +90,10 @@ The codebase has well-established review infrastructure spanning three architect
 ### 3. Corrector Agents — Fix-All Policy
 
 **Locations:**
-- `/Users/david/code/claudeutils/plugin/agents/corrector.md` (implementation review)
-- `/Users/david/code/claudeutils/plugin/agents/outline-corrector.md` (design outline review)
-- `/Users/david/code/claudeutils/plugin/agents/design-corrector.md` (design document review)
-- `/Users/david/code/claudeutils/plugin/agents/runbook-corrector.md` (runbook/phase review)
+- `/Users/david/code/edify/plugin/agents/corrector.md` (implementation review)
+- `/Users/david/code/edify/plugin/agents/outline-corrector.md` (design outline review)
+- `/Users/david/code/edify/plugin/agents/design-corrector.md` (design document review)
+- `/Users/david/code/edify/plugin/agents/runbook-corrector.md` (runbook/phase review)
 
 **Core Directive:** Write review (audit trail) → Fix ALL issues → Escalate unfixable → Return filepath
 
@@ -147,7 +147,7 @@ The codebase has well-established review infrastructure spanning three architect
 
 ### 4. Deliverable Review Skill — Two-Layer Review
 
-**Location:** `/Users/david/code/claudeutils/plugin/skills/deliverable-review/SKILL.md`
+**Location:** `/Users/david/code/edify/plugin/skills/deliverable-review/SKILL.md`
 
 **Purpose:** Review production artifacts after plan execution (code, tests, docs, config).
 
@@ -165,7 +165,7 @@ The codebase has well-established review infrastructure spanning three architect
   - Path consistency, API contract alignment, naming convention uniformity
   - Fragment convention compliance, memory index pattern verification
   - Other skills' allowed-tools and frontmatter validation
-  - Recall context: `claudeutils _recall resolve plans/<plan>/recall-artifact.md` (or lightweight recall via memory-index.md)
+  - Recall context: `edify _recall resolve plans/<plan>/recall-artifact.md` (or lightweight recall via memory-index.md)
 
 **Severity Classification:**
 - **Critical** — incorrect behavior, data loss, security, unimplemented design requirement
@@ -205,7 +205,7 @@ The codebase has well-established review infrastructure spanning three architect
 
 ### 5. Review-Plan Skill — Runbook Quality Validation
 
-**Location:** `/Users/david/code/claudeutils/plugin/skills/review-plan/SKILL.md`
+**Location:** `/Users/david/code/edify/plugin/skills/review-plan/SKILL.md`
 
 **Purpose:** Validate runbook phase quality for TDD discipline, step clarity, and LLM failure modes.
 
@@ -230,7 +230,7 @@ The codebase has well-established review infrastructure spanning three architect
 - Metadata accuracy: Total steps count matches actual cycle/step count
 
 **Recall Context:**
-- Bash: `claudeutils _recall resolve plans/<job>/recall-artifact.md`
+- Bash: `edify _recall resolve plans/<job>/recall-artifact.md`
 - If absent/fails: lightweight recall via memory-index.md
 
 ---
@@ -238,9 +238,9 @@ The codebase has well-established review infrastructure spanning three architect
 ### 6. AskUserQuestion Usage Patterns
 
 **Sources:**
-- `/Users/david/code/claudeutils/plugin/agents/corrector.md` (lines 174-182)
-- `/Users/david/code/claudeutils/plugin/skills/requirements/SKILL.md`
-- `/Users/david/code/claudeutils/plugin/skills/review/SKILL.md`
+- `/Users/david/code/edify/plugin/agents/corrector.md` (lines 174-182)
+- `/Users/david/code/edify/plugin/skills/requirements/SKILL.md`
+- `/Users/david/code/edify/plugin/skills/review/SKILL.md`
 
 **Pattern 1: Scope Disambiguation (corrector agent)**
 ```
@@ -395,7 +395,7 @@ Correctors use fix-all for documents (low-risk — wording changes only) but NOT
 ### Pattern 3: Recall Context Integration
 
 All review agents load recall context for project-specific patterns:
-- Bash: `claudeutils _recall resolve plans/<job>/recall-artifact.md`
+- Bash: `edify _recall resolve plans/<job>/recall-artifact.md`
 - Fallback: lightweight recall via memory-index.md + batch resolve
 - Purpose: Failure modes and quality anti-patterns supplement standard review criteria
 
@@ -549,23 +549,23 @@ Items: 18 total
 
 ### Skill/Agent Files
 
-- `/Users/david/code/claudeutils/plugin/skills/proof/SKILL.md` — Interactive artifact validation
-- `/Users/david/code/claudeutils/plugin/skills/deliverable-review/SKILL.md` — Two-layer production review
-- `/Users/david/code/claudeutils/plugin/skills/review-plan/SKILL.md` — Runbook quality validation
-- `/Users/david/code/claudeutils/plugin/agents/corrector.md` — Implementation review + fix-all
-- `/Users/david/code/claudeutils/plugin/agents/outline-corrector.md` — Outline review + fix-all
-- `/Users/david/code/claudeutils/plugin/agents/design-corrector.md` — Design review + fix-all
-- `/Users/david/code/claudeutils/plugin/agents/runbook-corrector.md` — Runbook review + fix-all
+- `/Users/david/code/edify/plugin/skills/proof/SKILL.md` — Interactive artifact validation
+- `/Users/david/code/edify/plugin/skills/deliverable-review/SKILL.md` — Two-layer production review
+- `/Users/david/code/edify/plugin/skills/review-plan/SKILL.md` — Runbook quality validation
+- `/Users/david/code/edify/plugin/agents/corrector.md` — Implementation review + fix-all
+- `/Users/david/code/edify/plugin/agents/outline-corrector.md` — Outline review + fix-all
+- `/Users/david/code/edify/plugin/agents/design-corrector.md` — Design review + fix-all
+- `/Users/david/code/edify/plugin/agents/runbook-corrector.md` — Runbook review + fix-all
 
 ### Decision/Pattern Files
 
-- `/Users/david/code/claudeutils/agents/decisions/pipeline-review.md` — Review model selection, routing decisions
-- `/Users/david/code/claudeutils/agents/decisions/validation-quality.md` — Quality criteria definitions
-- `/Users/david/code/claudeutils/agents/session.md` — Workflow integration patterns, review scope markers
+- `/Users/david/code/edify/agents/decisions/pipeline-review.md` — Review model selection, routing decisions
+- `/Users/david/code/edify/agents/decisions/validation-quality.md` — Quality criteria definitions
+- `/Users/david/code/edify/agents/session.md` — Workflow integration patterns, review scope markers
 
 ### Configuration
 
-- `/Users/david/code/claudeutils/.claude/tools.md` — Tool availability per context (AskUserQuestion listed)
+- `/Users/david/code/edify/.claude/tools.md` — Tool availability per context (AskUserQuestion listed)
 
 ---
 

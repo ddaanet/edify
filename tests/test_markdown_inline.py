@@ -1,6 +1,6 @@
 """Tests for markdown module."""
 
-from claudeutils.markdown import (
+from edify.markdown import (
     escape_inline_backticks,
     fix_backtick_spaces,
     process_lines,

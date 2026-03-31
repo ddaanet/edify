@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock
 
-from claudeutils.account import (
+from edify.account import (
     AnthropicProvider,
     LiteLLMProvider,
     OpenRouterProvider,

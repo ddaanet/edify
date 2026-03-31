@@ -13,7 +13,7 @@
 
 ## 1. Current Classification and Routing Logic
 
-### Location: `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/skills/design/SKILL.md`
+### Location: `/Users/david/code/edify-wt/session-scraping-prototype/plugin/skills/design/SKILL.md`
 
 #### Phase 0: Complexity Triage (Lines 24-103)
 
@@ -66,7 +66,7 @@ Uses Stacey Matrix framework (named axes):
 - Routes incomplete design to `/runbook` for phase-by-phase planning
 - → Commit design, `/handoff [CONTINUATION: /commit]`
 
-### Location: `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/skills/runbook/SKILL.md`
+### Location: `/Users/david/code/edify-wt/session-scraping-prototype/plugin/skills/runbook/SKILL.md`
 
 #### Tier Assessment (Lines 72-175)
 
@@ -233,7 +233,7 @@ Phase 0: Complexity Triage
 
 ## 4. Learnings and RCA Evidence
 
-### From `/Users/david/code/claudeutils-wt/session-scraping-prototype/agents/learnings.md`
+### From `/Users/david/code/edify-wt/session-scraping-prototype/agents/learnings.md`
 
 **Line 59-63: "When routing prototype/exploration work through pipeline"**
 
@@ -257,7 +257,7 @@ Related learning:
   - Correct pattern: ground against external frameworks first
   - By grounded skill's own classification criteria, the redesign has clear requirements, no architectural uncertainty → Moderate, routes to direct execution or /runbook, not full /design
 
-### From `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/complexity-routing/problem.md`
+### From `/Users/david/code/edify-wt/session-scraping-prototype/plans/complexity-routing/problem.md`
 
 **Current Model (Line 11-17):**
 - Classification (design skill Phase 0): Stacey Matrix — implementation certainty × requirement stability → Simple/Moderate/Complex/Defect
@@ -299,8 +299,8 @@ From requirement definitions:
 - `plans/<job>/` — plan artifacts (prose design, runbooks, reports)
 
 **Evidence:**
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/skills/requirements/SKILL.md` line 96 states: "Save exploration prototypes to `plans/prototypes/` (not `tmp/`) — they are referenced artifacts, not ephemera"
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/session-scraping/requirements.md` line 61 states: "Start as scripts in `plans/prototypes/` or `plugin/bin/`. Integration into `src/claudeutils/` happens later"
+- `/Users/david/code/edify-wt/session-scraping-prototype/plugin/skills/requirements/SKILL.md` line 96 states: "Save exploration prototypes to `plans/prototypes/` (not `tmp/`) — they are referenced artifacts, not ephemera"
+- `/Users/david/code/edify-wt/session-scraping-prototype/plans/session-scraping/requirements.md` line 61 states: "Start as scripts in `plans/prototypes/` or `plugin/bin/`. Integration into `src/edify/` happens later"
 
 **3. Behavior-type classification (current, lines 340-343 in workflow-planning.md):**
 - Behavioral code: new functions, changed logic paths, conditional branches (routes Moderate minimum)
@@ -308,10 +308,10 @@ From requirement definitions:
 
 **4. Work-type in execution roles (implicit):**
 
-From `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/docs/general-workflow.md` line 3:
+From `/Users/david/code/edify-wt/session-scraping-prototype/plugin/docs/general-workflow.md` line 3:
 - Purpose: Execute one-off, ad-hoc tasks that don't repeat
 
-From `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/docs/tdd-workflow.md` lines 20, 41:
+From `/Users/david/code/edify-wt/session-scraping-prototype/plugin/docs/tdd-workflow.md` lines 20, 41:
 - Prototype/exploration → opposite of "feature requires behavioral verification"
 
 ---
@@ -320,7 +320,7 @@ From `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/docs/td
 
 **Timeline and Classification:**
 
-1. **Requirements:** `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/session-scraping/requirements.md`
+1. **Requirements:** `/Users/david/code/edify-wt/session-scraping-prototype/plans/session-scraping/requirements.md`
    - 4 FRs (scanner, parser, aggregator, correlator)
    - 3 constraints (C-1: targeted expansion, C-2: optional detail, C-3: standalone prototype first)
    - 5 out-of-scope items
@@ -384,7 +384,7 @@ Or, at /runbook entry:
 
 ## 7. Grounding Report: Design Skill (2026-02-25)
 
-**Location:** `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/reports/design-skill-grounding.md`
+**Location:** `/Users/david/code/edify-wt/session-scraping-prototype/plans/reports/design-skill-grounding.md`
 
 **Key grounding principles applied to complexity routing:**
 
@@ -510,22 +510,22 @@ Tier 3: >15 files
 ## 10. Key File Locations (Absolute Paths)
 
 ### Classification and Routing Logic
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/skills/design/SKILL.md` — Phase 0 (triage), Phase B (sufficiency), Phase C.5 (execution readiness)
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/skills/runbook/SKILL.md` — Tier 1/2/3 assessment criteria
+- `/Users/david/code/edify-wt/session-scraping-prototype/plugin/skills/design/SKILL.md` — Phase 0 (triage), Phase B (sufficiency), Phase C.5 (execution readiness)
+- `/Users/david/code/edify-wt/session-scraping-prototype/plugin/skills/runbook/SKILL.md` — Tier 1/2/3 assessment criteria
 
 ### Grounding and Evidence
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/complexity-routing/problem.md` — Problem statement, gaps, grounding questions
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/reports/design-skill-grounding.md` — Design skill grounded against 6 frameworks, 8 principles, gap analysis
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/reports/design-skill-internal-codebase.md` — Internal codebase exploration (part of grounding research)
+- `/Users/david/code/edify-wt/session-scraping-prototype/plans/complexity-routing/problem.md` — Problem statement, gaps, grounding questions
+- `/Users/david/code/edify-wt/session-scraping-prototype/plans/reports/design-skill-grounding.md` — Design skill grounded against 6 frameworks, 8 principles, gap analysis
+- `/Users/david/code/edify-wt/session-scraping-prototype/plans/reports/design-skill-internal-codebase.md` — Internal codebase exploration (part of grounding research)
 
 ### Learning and RCA
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/agents/learnings.md` — Line 59-63 "When routing prototype/exploration work"; Line 46-50 "When redesigning a process skill"
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/agents/session.md` — Line 16-21 RCA from session-scraping interruption
+- `/Users/david/code/edify-wt/session-scraping-prototype/agents/learnings.md` — Line 59-63 "When routing prototype/exploration work"; Line 46-50 "When redesigning a process skill"
+- `/Users/david/code/edify-wt/session-scraping-prototype/agents/session.md` — Line 16-21 RCA from session-scraping interruption
 
 ### Work-Type References
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/session-scraping/requirements.md` — Constraint C-3 "standalone prototype first"; line 61 "Start as scripts in plans/prototypes/"
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/session-scraping/outline.md` — Design outline for prototype (4-stage pipeline approach)
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/prototypes/session-scraper.py` — Actual implemented prototype (single file, no tests, direct implementation)
+- `/Users/david/code/edify-wt/session-scraping-prototype/plans/session-scraping/requirements.md` — Constraint C-3 "standalone prototype first"; line 61 "Start as scripts in plans/prototypes/"
+- `/Users/david/code/edify-wt/session-scraping-prototype/plans/session-scraping/outline.md` — Design outline for prototype (4-stage pipeline approach)
+- `/Users/david/code/edify-wt/session-scraping-prototype/plans/prototypes/session-scraper.py` — Actual implemented prototype (single file, no tests, direct implementation)
 
 ### External Framework Grounding (in design skill grounding report)
 - Cynefin (Snowden, IBM, 1999) — Domain-based complexity classification
@@ -536,9 +536,9 @@ Tier 3: >15 files
 - NASA PDR/CDR — Staged design review gates
 
 ### Decision File References
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/agents/decisions/workflow-planning.md` — Line 341-343 behavioral code classification rule
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/agents/decisions/workflow-execution.md` — Model selection, design review patterns
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/agents/decisions/orchestration-execution.md` — Tier assessment and routing
+- `/Users/david/code/edify-wt/session-scraping-prototype/agents/decisions/workflow-planning.md` — Line 341-343 behavioral code classification rule
+- `/Users/david/code/edify-wt/session-scraping-prototype/agents/decisions/workflow-execution.md` — Model selection, design review patterns
+- `/Users/david/code/edify-wt/session-scraping-prototype/agents/decisions/orchestration-execution.md` — Tier assessment and routing
 
 ---
 

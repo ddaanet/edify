@@ -34,8 +34,8 @@ RED_VERIFIED, GREEN_VERIFIED
 
 ## Files Modified
 
-- `src/claudeutils/hooks/__init__.py` (created)
-- `src/claudeutils/hooks/stop_status_display.py` (created)
+- `src/edify/hooks/__init__.py` (created)
+- `src/edify/hooks/stop_status_display.py` (created)
 - `tests/test_stop_hook_status.py` (created)
 
 ## Stop Condition

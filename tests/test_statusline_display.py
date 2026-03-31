@@ -2,8 +2,8 @@
 
 import pytest
 
-from claudeutils.statusline import StatuslineFormatter
-from claudeutils.statusline.models import GitStatus, PlanUsageData, PythonEnv
+from edify.statusline import StatuslineFormatter
+from edify.statusline.models import GitStatus, PlanUsageData, PythonEnv
 
 
 def test_colored_text() -> None:
@@ -245,9 +245,9 @@ def test_format_directory() -> None:
     formatter = StatuslineFormatter()
 
     # Test basic directory formatting
-    result = formatter.format_directory("claudeutils")
+    result = formatter.format_directory("edify")
     assert "📁" in result  # Directory emoji
-    assert "claudeutils" in result  # Directory name
+    assert "edify" in result  # Directory name
     assert "\033[36m" in result  # Cyan ANSI code
     assert "\033[0m" in result  # Reset code
 
@@ -260,18 +260,18 @@ def test_format_directory_basename_extraction() -> None:
     formatter = StatuslineFormatter()
 
     # Full path → basename
-    result = formatter.format_directory("/Users/david/code/claudeutils")
-    assert "claudeutils" in result
+    result = formatter.format_directory("/Users/david/code/edify")
+    assert "edify" in result
     assert "/Users" not in result
 
     # Trailing slash → basename
-    result = formatter.format_directory("/Users/david/code/claudeutils/")
-    assert "claudeutils" in result
+    result = formatter.format_directory("/Users/david/code/edify/")
+    assert "edify" in result
     assert "/Users" not in result
 
     # Single segment (no slash) → unchanged
-    result = formatter.format_directory("claudeutils")
-    assert "claudeutils" in result
+    result = formatter.format_directory("edify")
+    assert "edify" in result
 
     # Root edge case
     result = formatter.format_directory("/")

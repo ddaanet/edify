@@ -5,9 +5,9 @@
 ## Completed This Session
 
 **SP-1 (submodule directory rename `agent-core` → `plugin`):**
-- Phase 1: 81 files in submodule — `agent-core` → `plugin` (192 refs), `claudeutils` → `edify` (117 refs)
+- Phase 1: 81 files in submodule — `agent-core` → `plugin` (192 refs), `edify` → `edify` (117 refs)
 - Phase 2: 224 files in parent — git mv, .gitmodules, all path references
-- Runtime CLI revert: submodule files that invoke parent's installed CLI (`subprocess.run(["claudeutils",...])`, pip install, error messages) kept as `claudeutils` — breaks if renamed before SP-2
+- Runtime CLI revert: submodule files that invoke parent's installed CLI (`subprocess.run(["edify",...])`, pip install, error messages) kept as `edify` — breaks if renamed before SP-2
 - Stragglers: 3 in Phase 1 verification, 3 in Phase 2, plus `portable.just` (.just extension missed by discovery grep)
 - Sandbox-protected files (.claude/settings.json, .envrc symlink) patched via `tmp/patch-protected.sh`
 - Test suite: 1820/1821 pass, 1 xfail. Pre-existing `test_x_uses_planstate_command_over_session` surfaced and fixed (import path regression from CLI name change in hook)
@@ -25,7 +25,7 @@
   - SP-3 (plan cleanup): complete
   - SP-1 (submodule rename): complete — 2 submodule commits + 1 parent commit
   - SP-2 (package rename): pending SP-1 — needs own /runbook pass after SP-1 lands
-  - Key constraint for SP-2: submodule runtime refs to `claudeutils` (3 Python imports, prepare-runbook subprocess, pretooluse error msgs, portable.just validators, sessionstart pip install) change only when parent package renames
+  - Key constraint for SP-2: submodule runtime refs to `edify` (3 Python imports, prepare-runbook subprocess, pretooluse error msgs, portable.just validators, sessionstart pip install) change only when parent package renames
 - [ ] **Centralize recall** — `/design plans/centralize-recall/brief.md` | opus | restart
   - Plan: centralize-recall | Segmented /recall skill (<1ktok core), replace inline recall across skills/agents. Prerequisite (remove-index-skill) now complete.
 - [ ] **Outline template trim** — `/design plans/outline-template-trim/brief.md` | opus | restart
@@ -172,7 +172,7 @@
 - [ ] **Worktree ls filtering** — `/design plans/worktree-ls-filtering/brief.md` | sonnet
   - _worktree ls dumps all plans across all trees; handoff only needs session.md plan dirs
 - [ ] **Stop hook plugin wire** — `/design plans/hook-batch-2/requirements.md` | sonnet
-  - Wire `src/claudeutils/hooks/stop_status_display.py` into plugin Stop hook. Merged from session-cli-tool but not yet in plugin.json.
+  - Wire `src/edify/hooks/stop_status_display.py` into plugin Stop hook. Merged from session-cli-tool but not yet in plugin.json.
 - [ ] **Runbook parallel cap** — `/design plans/runbook-parallel-cap/brief.md` | sonnet
   - /runbook asks user for max concurrent agents (default 3), Execution Model uses sliding window dispatch
 
@@ -234,4 +234,4 @@
 
 ## Next Steps
 
-SP-2 (package rename `claudeutils` → `edify`) needs its own /runbook pass. Scope: pyproject.toml entry point, src/ directory rename, all remaining `claudeutils` CLI/import refs across parent and submodule. The submodule runtime refs deferred from SP-1 are part of SP-2 scope.
+SP-2 (package rename `edify` → `edify`) needs its own /runbook pass. Scope: pyproject.toml entry point, src/ directory rename, all remaining `edify` CLI/import refs across parent and submodule. The submodule runtime refs deferred from SP-1 are part of SP-2 scope.

@@ -126,7 +126,7 @@ User directive applied: recall/when-resolve → workflow prose → workflow non-
 
 **Batch A — sonnet, recall, no restart:**
 - Fix when-resolve.py (4.8) — target: `when-resolve.py`
-- Recall CLI integration (2.6) — target: `src/claudeutils/`, Click CLI
+- Recall CLI integration (2.6) — target: `src/edify/`, Click CLI
 - UserPromptSubmit topic (2.4) — target: hooks/settings, new system
 
 **Batch B — sonnet, workflow, no restart:**

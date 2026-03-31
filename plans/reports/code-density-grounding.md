@@ -4,11 +4,11 @@ Date: 2026-02-18
 
 ## Research Foundation
 
-**Internal branch:** Opus analysis of `src/claudeutils/worktree/` module — 19 raw subprocess calls, 18 SystemExit raises, 6 exception-as-control-flow sites. Full applicability audit across cli.py, merge.py, utils.py.
+**Internal branch:** Opus analysis of `src/edify/worktree/` module — 19 raw subprocess calls, 18 SystemExit raises, 6 exception-as-control-flow sites. Full applicability audit across cli.py, merge.py, utils.py.
 
 **External branch:** EAFP/LBYL principles (Real Python, Python glossary, mathspp), subprocess best practices (Python docs, sqlpey), Click exception hierarchy (Click docs), Black formatting mechanics (Black docs, trailing comma spec).
 
-**User feedback:** Annotated `src/claudeutils/cli.py` with 12 anti-pattern markers across exception handling, Black density, and architecture.
+**User feedback:** Annotated `src/edify/cli.py` with 12 anti-pattern markers across exception handling, Black density, and architecture.
 
 ## Adapted Methodology
 

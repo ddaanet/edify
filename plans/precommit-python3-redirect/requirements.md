@@ -35,5 +35,5 @@
 
 **OUT:**
 - submodule-safety.py (different pattern class — cwd validation, dual-mode)
-- New CLI commands in claudeutils
+- New CLI commands in edify
 - Test infrastructure for hooks

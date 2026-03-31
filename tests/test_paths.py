@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.paths import encode_project_path, get_project_history_dir
+from edify.paths import encode_project_path, get_project_history_dir
 
 
 def test_encode_project_path_basic() -> None:

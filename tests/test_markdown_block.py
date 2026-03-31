@@ -1,6 +1,6 @@
 """Tests for markdown module."""
 
-from claudeutils.markdown import fix_markdown_code_blocks
+from edify.markdown import fix_markdown_code_blocks
 
 
 def test_fix_markdown_code_blocks_nests_when_inner_fence_detected() -> None:

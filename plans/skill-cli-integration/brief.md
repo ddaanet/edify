@@ -8,7 +8,7 @@ Deliverable review round 2 finding M#4 (`plans/handoff-cli-tool/reports/delivera
 
 CLI tools (`_commit`, `_handoff`, `_status`) exist and work. Skills (`/commit`, `/handoff`) reimplement what the CLIs do instead of composing with them. Execute-rule.md MODE 1 contains inline STATUS template instead of delegating to `_status`.
 
-Original design specified: "Skill integration (future): After CLI exists, `/commit` skill simplifies to: Gate A -> discovery (`claudeutils _git changes`) -> draft message + gitmoji -> pipe to `claudeutils _commit`."
+Original design specified: "Skill integration (future): After CLI exists, `/commit` skill simplifies to: Gate A -> discovery (`edify _git changes`) -> draft message + gitmoji -> pipe to `edify _commit`."
 
 The "(future)" qualifier created permanent deferral -- three review rounds passed without catching the gap.
 

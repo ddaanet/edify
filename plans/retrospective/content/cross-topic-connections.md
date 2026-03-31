@@ -48,7 +48,7 @@ The single most pervasive failure mode, appearing in four of five topics:
 
 **Absent from T3:** Deliverable-review is the *response* to this pattern, not an instance of it. The 385-test parity failure (T3's origin) is a different failure class — passing tests that don't validate what matters, not prose instructions being skipped.
 
-**Pre-history precedent:** The pattern has antecedents before claudeutils. tuick's cognitive protocols (`a3e15a1`, Dec 12) were the overengineered response to the same problem — add more prose instructions about metacognition — and were removed three days later (`26c3b5d`). "More words" was tried and discarded before structural enforcement was discovered.
+**Pre-history precedent:** The pattern has antecedents before edify. tuick's cognitive protocols (`a3e15a1`, Dec 12) were the overengineered response to the same problem — add more prose instructions about metacognition — and were removed three days later (`26c3b5d`). "More words" was tried and discarded before structural enforcement was discovered.
 
 ### Pattern 2: Reasoning drives conclusion (direction-dependent)
 
@@ -155,7 +155,7 @@ T1 pivots to architectural redesign (active recall). T5 learns that semantic mat
 |------|-----------|
 | Mar 10 | devddaanet: deliverable review finds 1 critical + 3 minor (`265c8c7`) → fixed (`cae9155`) → re-reviewed (`4ffb1ea`) |
 
-The full review→fix→re-review cycle running in production outside claudeutils confirms T3's structural gate works as designed.
+The full review→fix→re-review cycle running in production outside edify confirms T3's structural gate works as designed.
 
 ### Post-measurement: 0% spontaneous recall (Mar 2026)
 
@@ -189,7 +189,7 @@ The pre-history provides earlier instances of the same principle at a coarser gr
 
 ### Verdict on the meta-pattern claim
 
-**Validated, with deeper roots than originally documented.** The structural enforcement principle appears not just in the claudeutils era (Feb–Mar 2026) but in the pre-history (Oct 2025–Jan 2026), applied at progressively finer granularity. The connecting thread across all topics and eras is: replace advisory instructions with verifiable structural mechanisms. Each topic arrived at this principle through its own failure cascade, and the solutions converge on tool-call anchoring (in-skill D+B), platform enforcement (hooks, config), and workflow gates (commit recipes, planstate) as the common enforcement patterns.
+**Validated, with deeper roots than originally documented.** The structural enforcement principle appears not just in the edify era (Feb–Mar 2026) but in the pre-history (Oct 2025–Jan 2026), applied at progressively finer granularity. The connecting thread across all topics and eras is: replace advisory instructions with verifiable structural mechanisms. Each topic arrived at this principle through its own failure cascade, and the solutions converge on tool-call anchoring (in-skill D+B), platform enforcement (hooks, config), and workflow gates (commit recipes, planstate) as the common enforcement patterns.
 
 ---
 
@@ -228,7 +228,7 @@ T4's reflexive bootstrapping insight (`14eeed90`): when improving the tools that
 
 ### Arc 5: The anti-pushback reversal (new, from pre-history)
 
-The earliest agent instructions said "proceed autonomously without asking." The final state includes a grounded pushback protocol with structural verification gates. The reversal happened across four repos over three months (Oct 2025–Jan 2026) before being formalized in claudeutils (Feb 2026). This arc is not in the original reports and is entirely sourced from the expansion. It shows that the pushback problem was not discovered in a vacuum — it was the correction of an initial design choice that optimized for throughput over quality.
+The earliest agent instructions said "proceed autonomously without asking." The final state includes a grounded pushback protocol with structural verification gates. The reversal happened across four repos over three months (Oct 2025–Jan 2026) before being formalized in edify (Feb 2026). This arc is not in the original reports and is entirely sourced from the expansion. It shows that the pushback problem was not discovered in a vacuum — it was the correction of an initial design choice that optimized for throughput over quality.
 
 ### Suggested primary narrative (updated)
 

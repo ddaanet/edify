@@ -2,8 +2,8 @@
 
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
-from claudeutils.statusline.models import (
+from edify.cli import cli
+from edify.statusline.models import (
     ContextUsage,
     ContextWindowInfo,
     CostInfo,

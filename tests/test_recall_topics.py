@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.recall.topics import extract_session_topics
+from edify.recall.topics import extract_session_topics
 
 
 def test_extract_topics_empty_session(tmp_path: Path) -> None:

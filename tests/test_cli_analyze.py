@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
-from claudeutils.models import FeedbackItem, FeedbackType
+from edify.cli import cli
+from edify.models import FeedbackItem, FeedbackType
 
 
 def test_analyze_counts_and_categorizes(

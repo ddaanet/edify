@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.session.cli import commit_cmd
+from edify.session.cli import commit_cmd
 from tests.pytest_helpers import (
     add_submodule,
     create_submodule_origin,
@@ -33,7 +33,7 @@ def test_commit_cli_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
 
     runner = CliRunner()
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(True, "ok"),
     ):
         result = runner.invoke(commit_cmd, input=stdin)
@@ -75,7 +75,7 @@ def test_commit_cli_vet_failure(
 
     # Create pyproject.toml with require-review patterns
     (tmp_path / "pyproject.toml").write_text(
-        '[tool.claudeutils.commit]\nrequire-review = ["src/**/*.py"]\n'
+        '[tool.edify.commit]\nrequire-review = ["src/**/*.py"]\n'
     )
 
     (tmp_path / "src").mkdir()
@@ -85,7 +85,7 @@ def test_commit_cli_vet_failure(
 
     runner = CliRunner()
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(True, "ok"),
     ):
         result = runner.invoke(commit_cmd, input=stdin)

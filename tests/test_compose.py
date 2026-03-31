@@ -6,7 +6,7 @@ import pytest
 import yaml
 from _pytest.capture import CaptureFixture
 
-from claudeutils.compose import (
+from edify.compose import (
     compose,
     format_separator,
     get_header_level,

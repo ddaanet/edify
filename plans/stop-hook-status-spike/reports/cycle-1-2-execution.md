@@ -42,7 +42,7 @@ Executed complete RED/GREEN/REFACTOR cycle for ANSI formatting and exception han
 
 ## Files Modified
 
-- `src/claudeutils/hooks/stop_status_display.py`
+- `src/edify/hooks/stop_status_display.py`
   - Added exception handling to `process_hook()` (lines 87-90)
   - Specification: catch `subprocess.CalledProcessError`, `OSError`, `RuntimeError`
 

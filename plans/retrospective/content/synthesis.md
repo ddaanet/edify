@@ -19,7 +19,7 @@ The repos fall into four eras:
 
 Two repos produced no agentic evidence: `deepface` (OSS contribution, Claude-assisted but no instructions committed) and `emojipack` standalone (identical to scratch copy). `celebtwin` and `calendar-cli` serve as pre-agentic contrast.
 
-**Note on `scratch/` paths:** Several repos appear in git history under `~/code/claudeutils/scratch/` (box-api, home, pytest-md, emojipack). These are the same projects that live in `~/code/` — the scratch/ copies were a workaround to access multiple repos from within the claudeutils Claude Code session (predating `/add-dir` or as an alternative to it). The scratch/ path is a tooling artifact, not an architectural decision or distinct era.
+**Note on `scratch/` paths:** Several repos appear in git history under `~/code/edify/scratch/` (box-api, home, pytest-md, emojipack). These are the same projects that live in `~/code/` — the scratch/ copies were a workaround to access multiple repos from within the edify Claude Code session (predating `/add-dir` or as an alternative to it). The scratch/ path is a tooling artifact, not an architectural decision or distinct era.
 
 ---
 
@@ -54,7 +54,7 @@ Two days later (`eacf188`, 2025-10-02): renamed to `AGENTS.md`. The naming conve
 
 ### emojipack — TDD Takes Shape
 
-`~/code/emojipack` (also `~/code/claudeutils/scratch/emojipack`), 70 commits, Oct 2025–Jan 2026.
+`~/code/emojipack` (also `~/code/edify/scratch/emojipack`), 70 commits, Oct 2025–Jan 2026.
 
 Takes the rules template and adds structured TDD:
 
@@ -112,7 +112,7 @@ Same commit adds: "Opus runs as orchestrator. Write design to `plans/` before va
 
 ### box-api — Infrastructure Rules
 
-`~/code/box-api` (also `~/code/claudeutils/scratch/box-api`), 46 commits, Nov–Dec 2025. 23 agentic commits.
+`~/code/box-api` (also `~/code/edify/scratch/box-api`), 46 commits, Nov–Dec 2025. 23 agentic commits.
 
 Introduces agent-vs-human command separation:
 ```
@@ -126,9 +126,9 @@ Cross-pollination visible: `791a962` (Nov 23) — "Flesh out AGENTS.md (incorpor
 
 ### home — The Architectural Leap
 
-`~/code/home` (also `~/code/claudeutils/scratch/home`), 76 commits, Nov 2025–Jan 2026. **Most architecturally significant pre-claudeutils repo.**
+`~/code/home` (also `~/code/edify/scratch/home`), 76 commits, Nov 2025–Jan 2026. **Most architecturally significant pre-edify repo.**
 
-In two days (Jan 12–13), introduces everything that becomes claudeutils architecture:
+In two days (Jan 12–13), introduces everything that becomes edify architecture:
 
 **File organization table:**
 ```
@@ -162,13 +162,13 @@ The rapid iteration (7 commits on commit delegation alone) shows active refineme
 
 ### pytest-md — Token Economy and Skills
 
-`~/code/pytest-md` (also `~/code/claudeutils/scratch/pytest-md`), 55 commits, Jan 2026. Bridge between Claude Desktop and Claude Code eras.
+`~/code/pytest-md` (also `~/code/edify/scratch/pytest-md`), 55 commits, Jan 2026. Bridge between Claude Desktop and Claude Code eras.
 
 Introduces:
 - First `.claude/settings.json` (`fd939eb`, Jan 3)
 - First skills: commit, handoff (`aa8ee90`, Jan 12)
 - Session log design (`69bf88b`, Jan 12)
-- Token economy as measurable requirement: "Do not guess token counts. Always use `claudeutils tokens sonnet <file>` to verify."
+- Token economy as measurable requirement: "Do not guess token counts. Always use `edify tokens sonnet <file>` to verify."
 - Session.md size discipline: 100-line max
 
 ---
@@ -206,7 +206,7 @@ Four different migration patterns across repos:
 | **Reverse merge** | jobsearch | CLAUDE.md merged INTO AGENTS.md (Oct 2025) |
 | **Replacement** | ddaanet | Auto-generated CLAUDE.md replaced by AGENTS.md (Jan 2026) |
 
-ddaanet's story is the most dramatic: 203 pre-agentic commits (2020–2025), an auto-generated CLAUDE.md in July 2025 (likely Claude Code scaffold), then a single-day burst in January 2026 replacing it with sophisticated AGENTS.md containing session tracking, design decisions, and commit workflow — all claudeutils patterns transplanted in one session.
+ddaanet's story is the most dramatic: 203 pre-agentic commits (2020–2025), an auto-generated CLAUDE.md in July 2025 (likely Claude Code scaffold), then a single-day burst in January 2026 replacing it with sophisticated AGENTS.md containing session tracking, design decisions, and commit workflow — all edify patterns transplanted in one session.
 
 ### home — Longest Evolution
 
@@ -222,13 +222,13 @@ Shows the complete lifecycle:
 7. Memory infrastructure (Feb 27)
 8. Context bar statusline (Mar 2026)
 
-Every major claudeutils pattern propagated here within days to weeks of its introduction.
+Every major edify pattern propagated here within days to weeks of its introduction.
 
 ### devddaanet — Full Pipeline in Production
 
 `~/code/devddaanet`, 63 commits, Mar 5–11, 2026. **Every commit is agentic.** Born with plugin from initial commit.
 
-Shows the full claudeutils pipeline working on a real project:
+Shows the full edify pipeline working on a real project:
 - Requirements → design → runbook → orchestrate → deliverable-review → fix → re-review → delivered
 
 The deliverable-review cycle (`265c8c7` → `cae9155` → `4ffb1ea`) completed cleanly. However, post-delivery commits tell a different story: 3 of the next 5 commits are bug fixes — sync crash, worktree deletion bug, unison crashes — followed by a discovery mechanism overhaul. The review caught some issues but not all; the delivered result needed continued debugging.
@@ -237,7 +237,7 @@ The deliverable-review cycle (`265c8c7` → `cae9155` → `4ffb1ea`) completed c
 
 ## Five Topics: New Evidence
 
-The existing retrospective covered five topics from claudeutils' own history. The expanded repos add pre-history and external validation.
+The existing retrospective covered five topics from edify' own history. The expanded repos add pre-history and external validation.
 
 ### 1. Memory System
 
@@ -263,7 +263,7 @@ This is a stronger finding than the previously cited 4.1% statistic, which measu
 
 ### 4. Ground Skill
 
-**Pre-history:** Limited. rules (Sep 2025) shows human-mediated knowledge import: "Incorporate zed rules, adjusted by hand." box-api (Nov 2025) shows cross-project import: "incorporate relevant rules for tuick." These are precursors to grounding-as-methodology, but ground skill origins are mostly internal to claudeutils.
+**Pre-history:** Limited. rules (Sep 2025) shows human-mediated knowledge import: "Incorporate zed rules, adjusted by hand." box-api (Nov 2025) shows cross-project import: "incorporate relevant rules for tuick." These are precursors to grounding-as-methodology, but ground skill origins are mostly internal to edify.
 
 ### 5. Structural Enforcement
 
@@ -295,9 +295,9 @@ Not a linear progression. tuick's cognitive protocols were added and removed the
 
 Patterns propagated at different speeds:
 
-- **Immediate** (days): home's AGENTS.md iterations propagated to claudeutils within days. The orchestrator protocol appears in both repos on the same dates.
+- **Immediate** (days): home's AGENTS.md iterations propagated to edify within days. The orchestrator protocol appears in both repos on the same dates.
 - **Template copy** (weeks): emojipack → tuick → box-api. Core TDD and `just agent` rules copied with project-specific adaptations. Content similarity visible in AGENTS.md text.
-- **Infrastructure adoption** (months): claudeutils patterns → devddaanet. Full pipeline adoption requires plugin maturity. devddaanet in March 2026 uses patterns that took months to develop in claudeutils.
+- **Infrastructure adoption** (months): edify patterns → devddaanet. Full pipeline adoption requires plugin maturity. devddaanet in March 2026 uses patterns that took months to develop in edify.
 
 ### Agent-core as Extraction
 
@@ -316,5 +316,5 @@ The move from per-project AGENTS.md to shared plugin follows a classic library e
 - All claims grounded in specific commit hashes, verifiable via `git -C <path> show <hash>`
 - Content excerpts from `git show` at key commits, not reconstructed from memory
 - deepface (2024 commits) excluded — no agentic evidence in repo despite Claude-assisted contributions
-- emojipack exists at both `~/code/emojipack` and `~/code/claudeutils/scratch/emojipack` (identical history) — counted once. scratch/ copies are a tooling workaround (see note above)
+- emojipack exists at both `~/code/emojipack` and `~/code/edify/scratch/emojipack` (identical history) — counted once. scratch/ copies are a tooling workaround (see note above)
 - oklch-theme started with Gemini, later iterated in Claude Desktop — AGENTS.md references "Gemini agent" but final commit is Claude Desktop work

@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
+from edify.worktree.cli import worktree
 
 
 def _git(*args: str, cwd: Path | None = None) -> str:
@@ -113,7 +113,7 @@ def test_merge_submodule_fetch(
         f"should differ from local ({local_commit})"
     )
 
-    with patch("claudeutils.worktree.merge.subprocess.run", side_effect=fake_run):
+    with patch("edify.worktree.merge.subprocess.run", side_effect=fake_run):
         result = CliRunner().invoke(worktree, ["merge", "fetch-test"])
         assert result.exit_code == 0, f"merge failed: {result.output}"
 

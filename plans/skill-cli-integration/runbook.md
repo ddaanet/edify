@@ -16,26 +16,26 @@
 - Hook output: JSON with `systemMessage` (and optionally `additionalContext`)
 - Existing Stop hook: `stop-health-fallback.sh` (bash, runs on sessions without SessionStart)
 
-**Hook implementation: Python module** (not bash — bash test suites are ugly). Core logic is a pure function `process_hook(dict) -> dict | None`. Tests import and call directly. CLI entry point reads stdin/writes stdout in `if __name__ == "__main__"`. Self-contained (stdlib only: `json`, `re`, `subprocess`) — no claudeutils imports, runnable via `python3 path/to/module.py`.
+**Hook implementation: Python module** (not bash — bash test suites are ugly). Core logic is a pure function `process_hook(dict) -> dict | None`. Tests import and call directly. CLI entry point reads stdin/writes stdout in `if __name__ == "__main__"`. Self-contained (stdlib only: `json`, `re`, `subprocess`) — no edify imports, runnable via `python3 path/to/module.py`.
 
 ---
 
 ### Phase 1: Hook core behavior (type: tdd)
 
-**Artifact:** `src/claudeutils/hooks/stop_status_display.py`
+**Artifact:** `src/edify/hooks/stop_status_display.py`
 **Test file:** `tests/test_stop_hook_status.py`
 **Model:** sonnet
 
 **Module structure:**
 - `should_trigger(message: str) -> bool` — regex match `^Status\.$`
 - `format_ansi(text: str) -> str` — prepend `\033[0m` reset to each line
-- `get_status(cmd: tuple[str, ...] = ("claudeutils", "_status")) -> str` — run CLI, return output
+- `get_status(cmd: tuple[str, ...] = ("edify", "_status")) -> str` — run CLI, return output
 - `process_hook(data: dict, status_fn: Callable[[], str] | None = None) -> dict | None` — orchestrate: guard → trigger → status → format → response
 - `main()` — stdin JSON → `process_hook()` → stdout JSON
 
 #### Cycle 1.1: Trigger detection + loop guard
 
-**Bootstrap:** Create `src/claudeutils/hooks/__init__.py` (empty) and `src/claudeutils/hooks/stop_status_display.py` with stubs: `should_trigger` returns `False`, `process_hook` returns `None`. Do not commit.
+**Bootstrap:** Create `src/edify/hooks/__init__.py` (empty) and `src/edify/hooks/stop_status_display.py` with stubs: `should_trigger` returns `False`, `process_hook` returns `None`. Do not commit.
 
 ---
 
@@ -73,7 +73,7 @@
 - `process_hook`: check `stop_hook_active` first (return None if true), then call `should_trigger` on `last_assistant_message`, on match call `status_fn` (or default `get_status`), return `{"systemMessage": result}`
 
 **Changes:**
-- File: `src/claudeutils/hooks/stop_status_display.py`
+- File: `src/edify/hooks/stop_status_display.py`
   Action: Implement `should_trigger` and `process_hook` core flow
   Location hint: Replace stubs
 
@@ -83,7 +83,7 @@
 
 #### Cycle 1.2: ANSI formatting + CLI integration
 
-**Prerequisite:** Read `src/claudeutils/hooks/stop_status_display.py` — understand trigger detection from cycle 1.1
+**Prerequisite:** Read `src/edify/hooks/stop_status_display.py` — understand trigger detection from cycle 1.1
 
 ---
 
@@ -122,7 +122,7 @@
 - `main`: read stdin as JSON, call `process_hook`, print result as JSON if not None
 
 **Changes:**
-- File: `src/claudeutils/hooks/stop_status_display.py`
+- File: `src/edify/hooks/stop_status_display.py`
   Action: Implement `format_ansi`, `get_status`, `main`, wire formatting into `process_hook`
   Location hint: Add functions, update `process_hook` to call `format_ansi`
 
@@ -140,7 +140,7 @@ Register Python hook in `.claude/settings.json` alongside existing `stop-health-
 ```json
 {
   "type": "command",
-  "command": "python3 $CLAUDE_PROJECT_DIR/src/claudeutils/hooks/stop_status_display.py"
+  "command": "python3 $CLAUDE_PROJECT_DIR/src/edify/hooks/stop_status_display.py"
 }
 ```
 
@@ -163,7 +163,7 @@ Register Python hook in `.claude/settings.json` alongside existing `stop-health-
 - Worktree section rendering rules
 - Unscheduled Plans rendering rules
 - Parallel task detection rendering
-- "Status source" line referencing `claudeutils _worktree ls`
+- "Status source" line referencing `edify _worktree ls`
 
 **Keep:**
 - MODE 1 trigger definitions (what makes something MODE 1)
@@ -216,7 +216,7 @@ Build structured markdown input per CLI format:
 
 Pipe to CLI:
 ```
-echo "$INPUT" | claudeutils _commit
+echo "$INPUT" | edify _commit
 ```
 
 On CLI exit 0: success. On exit 1: validation failure (surface CLI output). On exit 2: parse error (surface and fix input).

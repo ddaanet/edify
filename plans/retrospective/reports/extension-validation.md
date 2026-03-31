@@ -2,7 +2,7 @@
 
 ## Search Command
 
-**Test:** `search --project "/Users/david/code/claudeutils-wt/pushback" --keyword "pushback" --keyword "sycophancy" --keyword "agreement momentum"`
+**Test:** `search --project "/Users/david/code/edify-wt/pushback" --keyword "pushback" --keyword "sycophancy" --keyword "agreement momentum"`
 
 **Result:** 780 entries across 24 sessions. All three keywords matched. Sessions span Feb 13-15, 2026. Output includes session_id (truncated), timestamp, matched keywords, hit count, and entry refs.
 
@@ -19,7 +19,7 @@
 - Match markers (`**>>**`) on target entries
 - Overlapping windows merged correctly
 
-**Path compatibility:** Both real paths (`claudeutils-wt/pushback`) and decoded paths (`claudeutils/wt/pushback`) resolve to the same encoded directory and work.
+**Path compatibility:** Both real paths (`edify-wt/pushback`) and decoded paths (`edify/wt/pushback`) resolve to the same encoded directory and work.
 
 ## Acceptance Criteria (FR-2)
 

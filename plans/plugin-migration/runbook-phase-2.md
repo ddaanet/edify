@@ -79,9 +79,9 @@ Phase 5 must complete first (`.edify.yaml` exists for setup hook to read/update)
       ```
    b. **Install edify CLI** into plugin-local venv (failure → append warning to message):
       - Check for `uv` availability: `command -v uv`
-      - If available: create plugin-local venv (`uv venv "$CLAUDE_PLUGIN_ROOT/.venv"` if not present), install (`uv pip install --python "$CLAUDE_PLUGIN_ROOT/.venv/bin/python" claudeutils==X.Y.Z`)
+      - If available: create plugin-local venv (`uv venv "$CLAUDE_PLUGIN_ROOT/.venv"` if not present), install (`uv pip install --python "$CLAUDE_PLUGIN_ROOT/.venv/bin/python" edify==X.Y.Z`)
       - If not: fall back to `pip install --target "$CLAUDE_PLUGIN_ROOT/.venv/lib"` or append `⚠️ CLI install failed: uv not found` to message
-      - Package name is `claudeutils` (current PyPI name; rename to `edify` is separate work)
+      - Package name is `edify` (current PyPI name; rename to `edify` is separate work)
       - Version pinned in script, updated with each plugin release
    c. **Write version provenance** to `.edify.yaml` (FR-10):
       - Read plugin version from `$CLAUDE_PLUGIN_ROOT/.claude-plugin/plugin.json`

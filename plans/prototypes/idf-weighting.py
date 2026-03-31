@@ -17,7 +17,7 @@ from pathlib import Path
 # Add src/ to path for project imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from claudeutils.recall.index_parser import IndexEntry, parse_memory_index
+from edify.recall.index_parser import IndexEntry, parse_memory_index
 
 
 def compute_idf(entries: list[IndexEntry]) -> dict[str, float]:

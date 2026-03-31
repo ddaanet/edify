@@ -5,7 +5,7 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from claudeutils.session.handoff.pipeline import (
+from edify.session.handoff.pipeline import (
     _detect_write_mode,
     write_completed,
 )

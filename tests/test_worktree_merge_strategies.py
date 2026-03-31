@@ -2,8 +2,8 @@
 
 import pytest
 
-from claudeutils.worktree.resolve import _merge_session_contents
-from claudeutils.worktree.session import extract_blockers
+from edify.worktree.resolve import _merge_session_contents
+from edify.worktree.session import extract_blockers
 
 
 class TestStatusLineSquashStrategy:

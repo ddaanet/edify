@@ -12,7 +12,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
-from claudeutils.paths import encode_project_path
+from edify.paths import encode_project_path
 
 # Match /how invocations — skill tool calls and direct text
 HOW_PATTERN = re.compile(r'/how\s+(.+?)(?:\n|$|")', re.IGNORECASE)
@@ -163,7 +163,7 @@ def extract_how_queries(project_path: str) -> list[dict]:
 
 
 def main() -> None:
-    project = "/Users/david/code/claudeutils"
+    project = "/Users/david/code/edify"
     queries = extract_how_queries(project)
 
     # Deduplicate by (query, session)

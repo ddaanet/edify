@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
-from claudeutils.worktree.git_ops import wt_path
+from edify.worktree.cli import worktree
+from edify.worktree.git_ops import wt_path
 
 
 def test_new_task_mode_adds_slug_marker(

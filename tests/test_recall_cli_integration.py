@@ -2,7 +2,7 @@
 
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
+from edify.cli import cli
 
 
 def test_recall_group_hidden_from_help() -> None:

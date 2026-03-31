@@ -20,7 +20,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.markdown import process_lines
+from edify.markdown import process_lines
 
 
 def load_fixture_pair(

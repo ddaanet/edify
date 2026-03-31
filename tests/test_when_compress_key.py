@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.when.compress import (
+from edify.when.compress import (
     compress_key,
     generate_candidates,
     load_heading_corpus,

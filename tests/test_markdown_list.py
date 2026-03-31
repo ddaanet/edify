@@ -1,6 +1,6 @@
 """Tests for markdown module."""
 
-from claudeutils.markdown import (
+from edify.markdown import (
     fix_metadata_blocks,
     fix_metadata_list_indentation,
     fix_warning_lines,

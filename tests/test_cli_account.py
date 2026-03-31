@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
+from edify.cli import cli
 
 
 def test_account_status(tmp_path: Path) -> None:
@@ -16,7 +16,7 @@ def test_account_status(tmp_path: Path) -> None:
     account_mode_file.write_text("api")
 
     runner = CliRunner()
-    with patch("claudeutils.account.cli.Path.home", return_value=tmp_path):
+    with patch("edify.account.cli.Path.home", return_value=tmp_path):
         result = runner.invoke(cli, ["account", "status"])
 
     # Verify the command reads the file and outputs actual mode
@@ -35,8 +35,8 @@ def test_account_plan(tmp_path: Path) -> None:
     mock_keychain = MagicMock()
     mock_keychain.find.return_value = "test-anthropic-key"
     with (
-        patch("claudeutils.account.cli.Path.home", return_value=tmp_path),
-        patch("claudeutils.account.cli.Keychain", return_value=mock_keychain),
+        patch("edify.account.cli.Path.home", return_value=tmp_path),
+        patch("edify.account.cli.Keychain", return_value=mock_keychain),
     ):
         result = runner.invoke(cli, ["account", "plan"])
     assert result.exit_code == 0
@@ -62,8 +62,8 @@ def test_account_api(tmp_path: Path) -> None:
     mock_keychain = MagicMock()
     mock_keychain.find.return_value = "test-openrouter-key"
     with (
-        patch("claudeutils.account.cli.Path.home", return_value=tmp_path),
-        patch("claudeutils.account.cli.Keychain", return_value=mock_keychain),
+        patch("edify.account.cli.Path.home", return_value=tmp_path),
+        patch("edify.account.cli.Keychain", return_value=mock_keychain),
     ):
         result = runner.invoke(cli, ["account", "api", "--provider", "openrouter"])
     assert result.exit_code == 0
@@ -90,11 +90,11 @@ def test_account_status_with_issues(tmp_path: Path) -> None:
 
     runner = CliRunner()
     # Mock Path.home to use tmp_path
-    with patch("claudeutils.account.cli.Path.home", return_value=tmp_path):
+    with patch("edify.account.cli.Path.home", return_value=tmp_path):
         # Mock Keychain instance and its find method to return None
         mock_keychain = MagicMock()
         mock_keychain.find.return_value = None
-        with patch("claudeutils.account.state.Keychain", return_value=mock_keychain):
+        with patch("edify.account.state.Keychain", return_value=mock_keychain):
             result = runner.invoke(cli, ["account", "status"])
 
     assert result.exit_code == 0
@@ -115,16 +115,16 @@ def test_account_mode_round_trip(tmp_path: Path) -> None:
     mock_keychain = MagicMock()
     mock_keychain.find.return_value = "test-api-key"
 
-    with patch("claudeutils.account.cli.Path.home", return_value=tmp_path):
+    with patch("edify.account.cli.Path.home", return_value=tmp_path):
         # Step 1: Invoke plan mode
-        with patch("claudeutils.account.cli.Keychain", return_value=mock_keychain):
+        with patch("edify.account.cli.Keychain", return_value=mock_keychain):
             result = runner.invoke(cli, ["account", "plan"])
         assert result.exit_code == 0
         mode_file = tmp_path / ".claude" / "account-mode"
         assert mode_file.read_text() == "plan"
 
         # Step 2: Invoke api mode with openrouter
-        with patch("claudeutils.account.cli.Keychain", return_value=mock_keychain):
+        with patch("edify.account.cli.Keychain", return_value=mock_keychain):
             result = runner.invoke(cli, ["account", "api", "--provider", "openrouter"])
         assert result.exit_code == 0
         assert mode_file.read_text() == "api"
@@ -132,7 +132,7 @@ def test_account_mode_round_trip(tmp_path: Path) -> None:
         assert provider_file.read_text() == "openrouter"
 
         # Step 3: Invoke plan mode again
-        with patch("claudeutils.account.cli.Keychain", return_value=mock_keychain):
+        with patch("edify.account.cli.Keychain", return_value=mock_keychain):
             result = runner.invoke(cli, ["account", "plan"])
         assert result.exit_code == 0
         # Verify mode switched back to plan

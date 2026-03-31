@@ -2,7 +2,7 @@
 
 ## 2026-03-13: Warning fatigue in prepare-runbook.py file validation
 
-`prepare-runbook.py` emits ~95 "references non-existent file" warnings for greenfield plans where steps create new files. Legitimate path typos (e.g., `validation/task_parsing.py` when the design says `src/claudeutils/session/validate.py`) are buried in noise from files that prior steps will create.
+`prepare-runbook.py` emits ~95 "references non-existent file" warnings for greenfield plans where steps create new files. Legitimate path typos (e.g., `validation/task_parsing.py` when the design says `src/edify/session/validate.py`) are buried in noise from files that prior steps will create.
 
 **Root cause:** Validator checks paths against current filesystem. No awareness of step ordering — a file created by step 2.1 is "non-existent" when validating step 3.1's references.
 

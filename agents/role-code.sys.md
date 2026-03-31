@@ -433,7 +433,7 @@ uv add <package>          # Add dependency
 
 ### File Organization
 
-- Implementation: `src/claudeutils/`
+- Implementation: `src/edify/`
 - Tests: `tests/`
 - Configuration: `pyproject.toml`
 

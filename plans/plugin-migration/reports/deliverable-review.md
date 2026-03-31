@@ -67,7 +67,7 @@ Impact: In the most common session type (new interactive), `EDIFY_PLUGIN_ROOT` i
 - sessionstart-health.sh:22 — `EDIFY_VERSION="0.0.2"` hardcoded. `just release` bumps plugin.json and pyproject.toml but not this value. Manual step required each release.
 
 **Pre-rename state (5, 6, 7):**
-- sessionstart-health.sh:30 — Package name `claudeutils` vs D-1 decision `edify`. Correct for current state (pyproject.toml is `claudeutils`). Rename deferred with directory rename.
+- sessionstart-health.sh:30 — Package name `edify` vs D-1 decision `edify`. Correct for current state (pyproject.toml is `edify`). Rename deferred with directory rename.
 - check-version-consistency.py:11 — Hardcoded `plugin` path. Correct pre-rename; needs update with rename.
 - portable.just:84,102,136 — Hardcoded `plugin/` and `./scripts/check_line_limits.sh` paths. Consumer projects post-rename need these updated.
 

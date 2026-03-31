@@ -5,7 +5,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from claudeutils.planstate import PlanState, infer_state, list_plans
+from edify.planstate import PlanState, infer_state, list_plans
 
 
 def test_empty_directory_not_a_plan(tmp_path: Path) -> None:

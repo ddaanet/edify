@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.recall.tool_calls import ToolCall, extract_tool_calls_from_session
+from edify.recall.tool_calls import ToolCall, extract_tool_calls_from_session
 
 
 def test_extract_tool_calls_empty_file(tmp_path: Path) -> None:

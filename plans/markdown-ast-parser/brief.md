@@ -5,7 +5,7 @@
 Multiple markdown consumers in the codebase use regex-based line-by-line parsing with ad-hoc fence tracking. Each consumer reimplements structure detection (headings, lists, code blocks, thematic breaks) with different edge-case handling:
 
 - **prepare-runbook.py:** `extract_cycles` (regex for `## Cycle X.Y:` + `_fence_tracker`), `split_cycle_content` (`---` splitting + `**Bootstrap:**` marker detection), `extract_sections` (line-by-line H2 detection)
-- **session validation** (`src/claudeutils/validation/session_structure.py`): `parse_sections` (heading detection), `check_task_section_lines` (list item regex for task metadata)
+- **session validation** (`src/edify/validation/session_structure.py`): `parse_sections` (heading detection), `check_task_section_lines` (list item regex for task metadata)
 - **task_parsing.py:** Regex for `- [ ] **Name** — command | model | restart` with sub-item detection
 - **handoff-cli-tool S-4 parser** (planned): new session.md parser for read/write operations
 

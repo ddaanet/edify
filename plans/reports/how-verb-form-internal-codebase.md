@@ -13,7 +13,7 @@ The fuzzy matcher uses a modified fzf V2 scoring algorithm (DP matrix with gap p
 
 This is a real deficiency. The matcher exists to recover from imperfect recall, but it fails entirely when the agent happens to prepend "to" (natural in English phrasing).
 
-**Root cause:** The DP matrix in `_compute_dp_matrix()` at `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/fuzzy.py:50-87` requires all query characters to appear in the candidate in order. When the first character of the query is "t" (from "to") and the entry starts with "w" (from "write"), the DP initialization fails and returns 0.0 at line 172 of fuzzy.py:
+**Root cause:** The DP matrix in `_compute_dp_matrix()` at `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/fuzzy.py:50-87` requires all query characters to appear in the candidate in order. When the first character of the query is "t" (from "to") and the entry starts with "w" (from "write"), the DP initialization fails and returns 0.0 at line 172 of fuzzy.py:
 
 ```python
 if base_score <= 0:
@@ -24,7 +24,7 @@ The matcher has no tolerance for prefix noise — it requires a subsequence matc
 
 ### The `removeprefix("to ")` Band-Aid
 
-**Location:** `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/resolver.py:196`
+**Location:** `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/resolver.py:196`
 
 ```python
 # Strip leading "to " — cli.py splits "how to X" → query="to X".
@@ -36,12 +36,12 @@ query = query.removeprefix("to ")
 
 **What it does:** The resolver removes the "to " prefix from the query BEFORE fuzzy matching. This transforms "to write init files" → "write init files", which then matches the stored entry.
 
-**Why it exists:** The CLI parser at `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/cli.py:14-19` splits incoming commands like "how to X" into operator="how" and query="to X". The resolver receives "to X" and must strip it to match entries stored as bare imperatives ("X").
+**Why it exists:** The CLI parser at `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/cli.py:14-19` splits incoming commands like "how to X" into operator="how" and query="to X". The resolver receives "to X" and must strip it to match entries stored as bare imperatives ("X").
 
 **Evidence the band-aid works:**
 - With "to " prefix: `score_match("to write init files", "write init files") = 0.0`
 - After removeprefix: `score_match("write init files", "write init files") = 353.5`
-- Test coverage: `test_how_to_prefix_not_doubled()` in `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_when_resolver.py:230-262` verifies the band-aid handles "how to X" invocations correctly.
+- Test coverage: `test_how_to_prefix_not_doubled()` in `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_when_resolver.py:230-262` verifies the band-aid handles "how to X" invocations correctly.
 
 **The vulnerability:** This is a **fragile band-aid, not a robust solution**. It only handles the specific case of "to " prefix. If:
 - An agent queries "how write" (omitting "to"), the band-aid doesn't apply, but the fuzzy matcher still works (no prefix).
@@ -54,7 +54,7 @@ query = query.removeprefix("to ")
 
 **Input:** Query and candidate strings (both lowercased). Candidate must contain all query characters in order (contiguous or sparse).
 
-**Scoring components** (`/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/fuzzy.py:5-13`):
+**Scoring components** (`/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/fuzzy.py:5-13`):
 - `MATCH_SCORE = 16` — per matched character
 - `CONSECUTIVE_BONUS = 4` — per consecutive matched character (after first)
 - `FIRST_CHAR_MULTIPLIER = 2` — first query char bonus
@@ -65,7 +65,7 @@ query = query.removeprefix("to ")
 - `GAP_EXTENSION_PENALTY = -1` — per additional gap character
 - `WORD_OVERLAP_BONUS = 0.5` — per shared word between query and candidate
 
-**Test coverage:** `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_when_fuzzy.py` documents the algorithm with 11 tests including:
+**Test coverage:** `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_when_fuzzy.py` documents the algorithm with 11 tests including:
 - `test_subsequence_match_scores_positive()` — verifies 0.0 for non-matches
 - `test_boundary_bonuses_applied()` — whitespace > delimiter bonus
 - `test_consecutive_match_bonus()` — consecutive matches score higher
@@ -86,7 +86,7 @@ All 63 `/how` entries are stored in bare imperative form (no "to" prefix):
 /how <verb> <object...>
 ```
 
-**Examples from memory-index.md** (`/Users/david/code/claudeutils-wt/ar-how-verb-form/agents/memory-index.md:26-451`):
+**Examples from memory-index.md** (`/Users/david/code/edify-wt/ar-how-verb-form/agents/memory-index.md:26-451`):
 - `/how output errors to stderr`
 - `/how configure script entry points`
 - `/how format token count output`
@@ -164,11 +164,11 @@ All 63 `/how` entries are stored in bare imperative form (no "to" prefix):
 
 ### Entry Format Decision: Bare Imperatives (Not "How to X")
 
-**Design decision location:** `/Users/david/code/claudeutils-wt/ar-how-verb-form/agents/decisions/workflow-advanced.md` references entry format at line 357-362, but the specific decision about "how X" vs "how to X" is not documented in the decisions directory.
+**Design decision location:** `/Users/david/code/edify-wt/ar-how-verb-form/agents/decisions/workflow-advanced.md` references entry format at line 357-362, but the specific decision about "how X" vs "how to X" is not documented in the decisions directory.
 
 **Evidence from behavior:**
-- Index parser expects bare triggers: `trigger = rest.strip()` at `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/index_parser.py:60`
-- Resolver reconstructs heading with "to": `"How to {capitalized}"` at `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/resolver.py:302-303`
+- Index parser expects bare triggers: `trigger = rest.strip()` at `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/index_parser.py:60`
+- Resolver reconstructs heading with "to": `"How to {capitalized}"` at `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/resolver.py:302-303`
 - Test case explicitly verifies bare trigger + "to" heading reconstruction at `test_trigger_fuzzy_heading_match_how_operator()` (test_when_resolver.py:157-185)
 
 **Heading reconstruction behavior:**
@@ -178,8 +178,8 @@ When resolving, the bare trigger "configure script entry points" is reconstructe
 
 There is NO test or documented analysis of how agents recognize "how" entries during index scanning vs. "how to" recognition. The prototype scripts focus on parsing agent output, not agent input behavior:
 
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/plans/prototypes/how-verb-form-extract.py` — extracts queries agents PRODUCE
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/plans/prototypes/how-verb-form-scores.py` — measures fuzzy match scores for different query forms
+- `/Users/david/code/edify-wt/ar-how-verb-form/plans/prototypes/how-verb-form-extract.py` — extracts queries agents PRODUCE
+- `/Users/david/code/edify-wt/ar-how-verb-form/plans/prototypes/how-verb-form-scores.py` — measures fuzzy match scores for different query forms
 
 Neither script tests whether agents more readily recognize and query "how to X" vs "how X" entries when scanning the index for relevant triggers.
 
@@ -187,7 +187,7 @@ Neither script tests whether agents more readily recognize and query "how to X" 
 
 ### Total /how Entries: 63
 
-**Count:** 63 `/how` entries in `/Users/david/code/claudeutils-wt/ar-how-verb-form/agents/memory-index.md`
+**Count:** 63 `/how` entries in `/Users/david/code/edify-wt/ar-how-verb-form/agents/memory-index.md`
 
 **Token cost estimate:**
 The claim "~1 token per entry" is approximate. At average trigger length of ~6 words per entry:
@@ -236,29 +236,29 @@ The index is loaded via CLAUDE.md `@`-reference, making it persistent in all age
 ## File References
 
 ### Fuzzy Matcher
-- Algorithm: `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/fuzzy.py:1-220`
-- DP matrix: `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/fuzzy.py:50-87`
-- Scoring: `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/fuzzy.py:141-196`
-- Tests: `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_when_fuzzy.py:1-172`
+- Algorithm: `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/fuzzy.py:1-220`
+- DP matrix: `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/fuzzy.py:50-87`
+- Scoring: `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/fuzzy.py:141-196`
+- Tests: `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_when_fuzzy.py:1-172`
 
 ### Resolver and removeprefix Band-Aid
-- Resolver: `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/resolver.py:1-340`
-- removeprefix: `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/resolver.py:177-236` (called at line 196)
-- Heading reconstruction: `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/resolver.py:297-304`
-- Tests: `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_when_resolver.py:230-262`
+- Resolver: `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/resolver.py:1-340`
+- removeprefix: `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/resolver.py:177-236` (called at line 196)
+- Heading reconstruction: `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/resolver.py:297-304`
+- Tests: `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_when_resolver.py:230-262`
 
 ### CLI Entry Point
-- CLI split behavior: `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/cli.py:14-19`
-- Operator stripping: `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/cli.py:14-19`
+- CLI split behavior: `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/cli.py:14-19`
+- Operator stripping: `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/cli.py:14-19`
 
 ### Index and Entries
-- Index file: `/Users/david/code/claudeutils-wt/ar-how-verb-form/agents/memory-index.md:1-451`
-- /how entries: `/Users/david/code/claudeutils-wt/ar-how-verb-form/agents/memory-index.md:26-451` (63 entries)
-- Index parser: `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/index_parser.py:1-90`
+- Index file: `/Users/david/code/edify-wt/ar-how-verb-form/agents/memory-index.md:1-451`
+- /how entries: `/Users/david/code/edify-wt/ar-how-verb-form/agents/memory-index.md:26-451` (63 entries)
+- Index parser: `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/index_parser.py:1-90`
 
 ### Prototype Analysis Scripts
-- Query extraction: `/Users/david/code/claudeutils-wt/ar-how-verb-form/plans/prototypes/how-verb-form-extract.py:1-222` (analyzes verb forms in agent output)
-- Score analysis: `/Users/david/code/claudeutils-wt/ar-how-verb-form/plans/prototypes/how-verb-form-scores.py:1-117` (measures fuzzy scores for different query forms)
+- Query extraction: `/Users/david/code/edify-wt/ar-how-verb-form/plans/prototypes/how-verb-form-extract.py:1-222` (analyzes verb forms in agent output)
+- Score analysis: `/Users/david/code/edify-wt/ar-how-verb-form/plans/prototypes/how-verb-form-scores.py:1-117` (measures fuzzy scores for different query forms)
 
 ## Design Notes
 

@@ -5,7 +5,7 @@
 **Size** = Marginal Effort + Context Recovery Cost
 Fibonacci scale (1,2,3,5,8). Tiebreak: higher CRR → lower Size → higher WF.
 
-**Plan states (from `claudeutils _worktree ls`):**
+**Plan states (from `edify _worktree ls`):**
 - plugin-migration: ready | runbook-quality-gates: ready | when-recall: ready
 - worktree-merge-data-loss: ready | worktree-update: ready | workwoods: ready
 - orchestrate-evolution: designed | worktree-skill: designed
@@ -98,7 +98,7 @@ No overlap. Restart tasks batch adjacently.
 
 No overlap.
 
-**Note:** Fix worktree rm dirty check (rank 9) and Pre-merge untracked file fix (rank 10) both target `src/claudeutils/worktree/` — cannot parallelize safely.
+**Note:** Fix worktree rm dirty check (rank 9) and Pre-merge untracked file fix (rank 10) both target `src/edify/worktree/` — cannot parallelize safely.
 
 ---
 
@@ -123,4 +123,4 @@ No overlap.
 - **Orchestrate evolution:** Scores 3.0 but blocked; would rank #2 once Design runbook evolution confirmed complete.
 - **Fix worktree rm dirty check:** Plan worktree-rm-safety [requirements]. ME=5 (no runbook yet).
 - **Runbook model assignment:** "Partially landed" — directive in design-decisions.md + remaining runbooks known. ME=3 (designed-equivalent).
-- **Worktree module conflicts:** Fix worktree rm dirty check + Pre-merge untracked file fix both modify `src/claudeutils/worktree/`. Sequential required.
+- **Worktree module conflicts:** Fix worktree rm dirty check + Pre-merge untracked file fix both modify `src/edify/worktree/`. Sequential required.

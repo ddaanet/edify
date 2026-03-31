@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.planstate import infer_state
+from edify.planstate import infer_state
 
 
 def test_lifecycle_status_detection(tmp_path: Path) -> None:

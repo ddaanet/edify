@@ -28,7 +28,7 @@ import click
 from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
-from claudeutils.paths import encode_project_path, get_project_history_dir  # noqa: E402
+from edify.paths import encode_project_path, get_project_history_dir  # noqa: E402
 
 UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 AGENT_RE = re.compile(r"^agent-")
@@ -180,7 +180,7 @@ def scan_projects(prefix: str | None = None) -> list[SessionFile]:
 def _text_from(content: Any) -> str:
     """Extract text from string or list content, joining all text blocks.
 
-    Differs from claudeutils.parsing.extract_content_text which returns only the
+    Differs from edify.parsing.extract_content_text which returns only the
     first text block — here we join all blocks for multi-block prompts.
     """
     if isinstance(content, str):

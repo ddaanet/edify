@@ -1,6 +1,6 @@
 """Tests for section-aware task line validation."""
 
-from claudeutils.validation.session_structure import check_task_section_lines
+from edify.validation.session_structure import check_task_section_lines
 
 
 class TestCheckTaskSectionLines:

@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from claudeutils.statusline.models import ContextUsage, StatuslineInput
+from edify.statusline.models import ContextUsage, StatuslineInput
 
 
 def test_parse_valid_json() -> None:
@@ -15,7 +15,7 @@ def test_parse_valid_json() -> None:
     """
     json_data: dict[str, Any] = {
         "model": {"display_name": "Claude 3.5 Sonnet"},
-        "workspace": {"current_dir": "/Users/david/code/claudeutils"},
+        "workspace": {"current_dir": "/Users/david/code/edify"},
         "transcript_path": "/Users/david/.claude/sessions/session-123/transcript.json",
         "context_window": {
             "current_usage": {
@@ -36,7 +36,7 @@ def test_parse_valid_json() -> None:
 
     # Verify all 8 fields are present and correct
     assert input_model.model.display_name == "Claude 3.5 Sonnet"
-    assert input_model.workspace.current_dir == "/Users/david/code/claudeutils"
+    assert input_model.workspace.current_dir == "/Users/david/code/edify"
     assert (
         input_model.transcript_path
         == "/Users/david/.claude/sessions/session-123/transcript.json"
@@ -61,7 +61,7 @@ def test_parse_null_current_usage() -> None:
     """
     json_data: dict[str, Any] = {
         "model": {"display_name": "Claude 3.5 Sonnet"},
-        "workspace": {"current_dir": "/Users/david/code/claudeutils"},
+        "workspace": {"current_dir": "/Users/david/code/edify"},
         "transcript_path": "/Users/david/.claude/sessions/session-123/transcript.json",
         "context_window": {
             "current_usage": None,

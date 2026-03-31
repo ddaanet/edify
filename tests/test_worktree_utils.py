@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.git import _fail
-from claudeutils.worktree.cli import add_sandbox_dir, derive_slug, focus_session
-from claudeutils.worktree.git_ops import wt_path
+from edify.git import _fail
+from edify.worktree.cli import add_sandbox_dir, derive_slug, focus_session
+from edify.worktree.git_ops import wt_path
 
 
 def test_derive_slug() -> None:

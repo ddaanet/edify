@@ -4,7 +4,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from claudeutils.planstate.aggregation import (
+from edify.planstate.aggregation import (
     AggregatedStatus,
     _task_summary,
     aggregate_trees,

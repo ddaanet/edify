@@ -10,9 +10,9 @@
 
 | Type | File | +lines | -lines |
 |------|------|--------|--------|
-| Code | `src/claudeutils/validation/learnings.py` | +55 | -2 |
-| Code | `src/claudeutils/worktree/merge.py` | +3 | -0 |
-| Code | `src/claudeutils/worktree/resolve.py` | +241 | -10 |
+| Code | `src/edify/validation/learnings.py` | +55 | -2 |
+| Code | `src/edify/worktree/merge.py` | +3 | -0 |
+| Code | `src/edify/worktree/resolve.py` | +241 | -10 |
 | Test | `tests/test_learnings_diff3.py` | +322 | -0 |
 | Test | `tests/test_validation_learnings.py` | +158 | -7 |
 | Test | `tests/test_worktree_merge_learnings.py` | +153 | -0 |
@@ -51,7 +51,7 @@ None.
 
 ### M3. Preamble key uses `""` vs outline's `None`
 
-- **File:** `src/claudeutils/validation/learnings.py:51`, `src/claudeutils/worktree/resolve.py:169,244,344`
+- **File:** `src/edify/validation/learnings.py:51`, `src/edify/worktree/resolve.py:169,244,344`
 - **Axis:** Conformance
 - **Detail:** Outline says "keyed by `None` or sentinel." Implementation uses empty string `""`. Valid choice (outline permits "sentinel"), and empty string is more ergonomic as a dict key than `None`. Consistently applied across all 4 usage sites.
 

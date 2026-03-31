@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.validation.decision_files import validate
+from edify.validation.decision_files import validate
 
 
 def test_section_with_content_before_subheadings_no_violation(

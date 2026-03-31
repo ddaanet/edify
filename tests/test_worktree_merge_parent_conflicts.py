@@ -7,7 +7,7 @@ from unittest.mock import Mock
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
+from edify.worktree.cli import worktree
 
 
 def _run(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:

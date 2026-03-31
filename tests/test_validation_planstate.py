@@ -4,8 +4,8 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from claudeutils.validation.cli import validate
-from claudeutils.validation.planstate import validate as validate_planstate
+from edify.validation.cli import validate
+from edify.validation.planstate import validate as validate_planstate
 
 
 def test_validator_detects_missing_artifacts(tmp_path: Path) -> None:

@@ -2,9 +2,9 @@
 
 from unittest import mock
 
-from claudeutils.planstate.aggregation import AggregatedStatus, TreeInfo
-from claudeutils.planstate.models import PlanState
-from claudeutils.worktree.display import format_rich_ls
+from edify.planstate.aggregation import AggregatedStatus, TreeInfo
+from edify.planstate.models import PlanState
+from edify.worktree.display import format_rich_ls
 
 
 def test_format_rich_ls_renders_gate_lines() -> None:
@@ -57,7 +57,7 @@ def test_format_rich_ls_renders_gate_lines() -> None:
         trees=[wt_tree, main_tree],
     )
     with mock.patch(
-        "claudeutils.worktree.display.aggregate_trees",
+        "edify.worktree.display.aggregate_trees",
         return_value=mock_aggregated,
     ):
         output = format_rich_ls(repo_path, "")

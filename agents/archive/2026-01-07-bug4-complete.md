@@ -27,7 +27,7 @@
 - Algorithm: `find_inline_code_spans()` parses CommonMark-compliant backtick matching
 
 **Files Modified:**
-- `src/claudeutils/markdown.py`: lines 311-374 (CommonMark parser)
+- `src/edify/markdown.py`: lines 311-374 (CommonMark parser)
 - `tests/test_markdown.py`: removed 2 invalid tests, kept 13 valid integration tests
 
 ---

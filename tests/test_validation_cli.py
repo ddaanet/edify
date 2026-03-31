@@ -5,21 +5,21 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
+from edify.cli import cli
 
 
 def test_validate_all_validators(tmp_path: Path) -> None:
-    """Test that 'claudeutils validate' runs all validators."""
+    """Test that 'edify validate' runs all validators."""
     runner = CliRunner()
 
     # Mock all validator functions to return no errors
     with (
-        patch("claudeutils.validation.cli.validate_learnings", return_value=[]),
-        patch("claudeutils.validation.cli.validate_memory_index", return_value=[]),
-        patch("claudeutils.validation.cli.validate_tasks", return_value=[]),
-        patch("claudeutils.validation.cli.validate_decision_files", return_value=[]),
-        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.validate_learnings", return_value=[]),
+        patch("edify.validation.cli.validate_memory_index", return_value=[]),
+        patch("edify.validation.cli.validate_tasks", return_value=[]),
+        patch("edify.validation.cli.validate_decision_files", return_value=[]),
+        patch("edify.validation.cli.validate_planstate", return_value=[]),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate"])
 
@@ -27,15 +27,15 @@ def test_validate_all_validators(tmp_path: Path) -> None:
 
 
 def test_validate_learnings_subcommand(tmp_path: Path) -> None:
-    """Test that 'claudeutils validate learnings' runs only learnings validator.
+    """Test that 'edify validate learnings' runs only learnings validator.
 
     Verifies individual subcommand execution.
     """
     runner = CliRunner()
 
     with (
-        patch("claudeutils.validation.cli.validate_learnings", return_value=[]),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.validate_learnings", return_value=[]),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate", "learnings"])
 
@@ -45,14 +45,13 @@ def test_validate_learnings_subcommand(tmp_path: Path) -> None:
 def test_validate_memory_index_subcommand(tmp_path: Path) -> None:
     """Test memory-index validator subcommand.
 
-    Verifies 'claudeutils validate memory-index' runs only the memory-index
-    validator.
+    Verifies 'edify validate memory-index' runs only the memory-index validator.
     """
     runner = CliRunner()
 
     with (
-        patch("claudeutils.validation.cli.validate_memory_index", return_value=[]),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.validate_memory_index", return_value=[]),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate", "memory-index"])
 
@@ -60,12 +59,12 @@ def test_validate_memory_index_subcommand(tmp_path: Path) -> None:
 
 
 def test_validate_tasks_subcommand(tmp_path: Path) -> None:
-    """Test that 'claudeutils validate tasks' runs only tasks validator."""
+    """Test that 'edify validate tasks' runs only tasks validator."""
     runner = CliRunner()
 
     with (
-        patch("claudeutils.validation.cli.validate_tasks", return_value=[]),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.validate_tasks", return_value=[]),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate", "tasks"])
 
@@ -73,15 +72,15 @@ def test_validate_tasks_subcommand(tmp_path: Path) -> None:
 
 
 def test_validate_decisions_subcommand(tmp_path: Path) -> None:
-    """Test that 'claudeutils validate decisions' runs only decisions validator.
+    """Test that 'edify validate decisions' runs only decisions validator.
 
     Verifies individual subcommand execution.
     """
     runner = CliRunner()
 
     with (
-        patch("claudeutils.validation.cli.validate_decision_files", return_value=[]),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.validate_decision_files", return_value=[]),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate", "decisions"])
 
@@ -89,12 +88,12 @@ def test_validate_decisions_subcommand(tmp_path: Path) -> None:
 
 
 def test_validate_planstate_subcommand(tmp_path: Path) -> None:
-    """Test 'claudeutils validate planstate' subcommand."""
+    """Test 'edify validate planstate' subcommand."""
     runner = CliRunner()
 
     with (
-        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.validate_planstate", return_value=[]),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate", "planstate"])
 
@@ -107,14 +106,14 @@ def test_validate_exit_code_1_on_failure(tmp_path: Path) -> None:
 
     with (
         patch(
-            "claudeutils.validation.cli.validate_learnings",
+            "edify.validation.cli.validate_learnings",
             return_value=["Error: title too long"],
         ),
-        patch("claudeutils.validation.cli.validate_memory_index", return_value=[]),
-        patch("claudeutils.validation.cli.validate_tasks", return_value=[]),
-        patch("claudeutils.validation.cli.validate_decision_files", return_value=[]),
-        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.validate_memory_index", return_value=[]),
+        patch("edify.validation.cli.validate_tasks", return_value=[]),
+        patch("edify.validation.cli.validate_decision_files", return_value=[]),
+        patch("edify.validation.cli.validate_planstate", return_value=[]),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate"])
 
@@ -127,14 +126,14 @@ def test_validate_error_output_to_stderr(tmp_path: Path) -> None:
 
     with (
         patch(
-            "claudeutils.validation.cli.validate_learnings",
+            "edify.validation.cli.validate_learnings",
             return_value=["agents/learnings.md:5: title too long"],
         ),
-        patch("claudeutils.validation.cli.validate_memory_index", return_value=[]),
-        patch("claudeutils.validation.cli.validate_tasks", return_value=[]),
-        patch("claudeutils.validation.cli.validate_decision_files", return_value=[]),
-        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.validate_memory_index", return_value=[]),
+        patch("edify.validation.cli.validate_tasks", return_value=[]),
+        patch("edify.validation.cli.validate_decision_files", return_value=[]),
+        patch("edify.validation.cli.validate_planstate", return_value=[]),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate"])
 
@@ -149,10 +148,10 @@ def test_validate_subcommand_exit_code_1_on_failure(tmp_path: Path) -> None:
 
     with (
         patch(
-            "claudeutils.validation.cli.validate_learnings",
+            "edify.validation.cli.validate_learnings",
             return_value=["agents/learnings.md:5: title too long"],
         ),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate", "learnings"])
 
@@ -165,8 +164,8 @@ def test_validate_subcommand_exit_code_0_on_success(tmp_path: Path) -> None:
     runner = CliRunner()
 
     with (
-        patch("claudeutils.validation.cli.validate_learnings", return_value=[]),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.validate_learnings", return_value=[]),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate", "learnings"])
 
@@ -182,17 +181,17 @@ def test_validate_all_mode_multiple_errors(tmp_path: Path) -> None:
 
     with (
         patch(
-            "claudeutils.validation.cli.validate_learnings",
+            "edify.validation.cli.validate_learnings",
             return_value=["agents/learnings.md:5: title too long"],
         ),
         patch(
-            "claudeutils.validation.cli.validate_memory_index",
+            "edify.validation.cli.validate_memory_index",
             return_value=["agents/memory-index.md:10: orphan entry"],
         ),
-        patch("claudeutils.validation.cli.validate_tasks", return_value=[]),
-        patch("claudeutils.validation.cli.validate_decision_files", return_value=[]),
-        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.validate_tasks", return_value=[]),
+        patch("edify.validation.cli.validate_decision_files", return_value=[]),
+        patch("edify.validation.cli.validate_planstate", return_value=[]),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate"])
 
@@ -221,17 +220,17 @@ def test_validate_all_mode_no_short_circuit(tmp_path: Path) -> None:
 
     with (
         patch(
-            "claudeutils.validation.cli.validate_learnings",
+            "edify.validation.cli.validate_learnings",
             side_effect=mock_learnings_validator,
         ),
         patch(
-            "claudeutils.validation.cli.validate_memory_index",
+            "edify.validation.cli.validate_memory_index",
             side_effect=mock_memory_index_validator,
         ),
-        patch("claudeutils.validation.cli.validate_tasks", return_value=[]),
-        patch("claudeutils.validation.cli.validate_decision_files", return_value=[]),
-        patch("claudeutils.validation.cli.validate_planstate", return_value=[]),
-        patch("claudeutils.validation.cli.find_project_root", return_value=tmp_path),
+        patch("edify.validation.cli.validate_tasks", return_value=[]),
+        patch("edify.validation.cli.validate_decision_files", return_value=[]),
+        patch("edify.validation.cli.validate_planstate", return_value=[]),
+        patch("edify.validation.cli.find_project_root", return_value=tmp_path),
     ):
         result = runner.invoke(cli, ["validate"])
 

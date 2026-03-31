@@ -12,10 +12,10 @@ from anthropic import AuthenticationError
 from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
-from claudeutils.cli import cli
-from claudeutils.exceptions import ApiRateLimitError
-from claudeutils.token_cache import TokenCache, create_cache_engine
-from claudeutils.tokens_cli import handle_tokens
+from edify.cli import cli
+from edify.exceptions import ApiRateLimitError
+from edify.token_cache import TokenCache, create_cache_engine
+from edify.tokens_cli import handle_tokens
 
 
 def test_cli_model_is_optional(tmp_path: Path) -> None:
@@ -193,7 +193,7 @@ def test_cli_auth_error_shows_helpful_message(
 
     # Mock Anthropic() to raise AuthenticationError
     mock_anthropic_class = mocker.patch(
-        "claudeutils.tokens_cli.Anthropic", autospec=True
+        "edify.tokens_cli.Anthropic", autospec=True
     )
     mock_anthropic_class.side_effect = AuthenticationError(
         "Invalid API key", response=Mock(), body={}
@@ -227,19 +227,19 @@ def test_cli_rate_limit_error_shows_message(
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-key")
 
     # Mock Anthropic client to avoid instantiation with SOCKS proxy
-    mocker.patch("claudeutils.tokens_cli.Anthropic", autospec=True)
+    mocker.patch("edify.tokens_cli.Anthropic", autospec=True)
 
     # Setup mocks with resolve returning model and count_tokens raising error
     mock_resolve = mocker.patch(
-        "claudeutils.tokens_cli.resolve_model_alias", autospec=True
+        "edify.tokens_cli.resolve_model_alias", autospec=True
     )
     mock_resolve.return_value = "claude-sonnet-4-5-20250929"
     mocker.patch(
-        "claudeutils.token_cache.get_default_cache",
+        "edify.token_cache.get_default_cache",
         return_value=TokenCache(create_cache_engine(":memory:")),
     )
     mock_count = mocker.patch(
-        "claudeutils.token_cache._count_tokens_for_content", autospec=True
+        "edify.token_cache._count_tokens_for_content", autospec=True
     )
     mock_count.side_effect = ApiRateLimitError()
     with pytest.raises(SystemExit) as exc_info:
@@ -327,11 +327,11 @@ def test_cli_detects_empty_api_key_before_sdk(
     test_file.write_text("Hello")
 
     # Mock config file fallback - should also return no key
-    mocker.patch("claudeutils.tokens_cli.get_api_key", return_value=None)
+    mocker.patch("edify.tokens_cli.get_api_key", return_value=None)
     # Mock SDK components - should NOT be called
-    mock_anthropic = mocker.patch("claudeutils.tokens_cli.Anthropic", autospec=True)
+    mock_anthropic = mocker.patch("edify.tokens_cli.Anthropic", autospec=True)
     mock_resolve = mocker.patch(
-        "claudeutils.tokens_cli.resolve_model_alias", autospec=True
+        "edify.tokens_cli.resolve_model_alias", autospec=True
     )
 
     with pytest.raises(SystemExit) as exc_info:
@@ -365,11 +365,11 @@ def test_cli_detects_missing_api_key_before_sdk(
     test_file.write_text("Hello")
 
     # Mock config file fallback - should also return no key
-    mocker.patch("claudeutils.tokens_cli.get_api_key", return_value=None)
+    mocker.patch("edify.tokens_cli.get_api_key", return_value=None)
     # Mock SDK components - should NOT be called
-    mock_anthropic = mocker.patch("claudeutils.tokens_cli.Anthropic", autospec=True)
+    mock_anthropic = mocker.patch("edify.tokens_cli.Anthropic", autospec=True)
     mock_resolve = mocker.patch(
-        "claudeutils.tokens_cli.resolve_model_alias", autospec=True
+        "edify.tokens_cli.resolve_model_alias", autospec=True
     )
 
     with pytest.raises(SystemExit) as exc_info:

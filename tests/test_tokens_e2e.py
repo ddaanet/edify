@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.cli import main
+from edify.cli import main
 
 
 @pytest.mark.e2e
@@ -19,7 +19,7 @@ def test_end_to_end_token_counting_with_alias_resolution(
 
     Given: Environment has valid ANTHROPIC_API_KEY, no models cache exists, real
       file "fixture.md" with known content, model="sonnet" (unversioned alias)
-    When: `claudeutils tokens sonnet fixture.md` executed
+    When: `edify tokens sonnet fixture.md` executed
     Then:
       - Exits 0
       - First line shows resolved model ID
@@ -40,7 +40,7 @@ def test_end_to_end_token_counting_with_alias_resolution(
 
     # Patch argv and call main
     monkeypatch.setattr(
-        sys, "argv", ["claudeutils", "tokens", "sonnet", str(fixture_file)]
+        sys, "argv", ["edify", "tokens", "sonnet", str(fixture_file)]
     )
 
     # Call main function

@@ -22,10 +22,10 @@ The resolver (`resolver.py:196`) strips "to " prefix: `query.removeprefix("to ")
 
 ## Tools
 
-- `src/claudeutils/when/fuzzy.py` — `score_match()`, `rank_matches()`
+- `src/edify/when/fuzzy.py` — `score_match()`, `rank_matches()`
 - `plans/prototypes/session-scraper.py` — `search` and `excerpt` commands for session data
 - `agents/memory-index.md` — 366 entries, ~70 `/how` entries
-- `src/claudeutils/when/resolver.py` — resolution chain with `removeprefix("to ")`
+- `src/edify/when/resolver.py` — resolution chain with `removeprefix("to ")`
 
 ## Success Criteria
 

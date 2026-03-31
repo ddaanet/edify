@@ -4,12 +4,12 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.validation.memory_index import (
+from edify.validation.memory_index import (
     _extract_entry_key,
     extract_index_entries,
     validate,
 )
-from claudeutils.validation.memory_index_helpers import EXEMPT_SECTIONS
+from edify.validation.memory_index_helpers import EXEMPT_SECTIONS
 
 
 @pytest.fixture

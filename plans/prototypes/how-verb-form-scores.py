@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
-from claudeutils.when.fuzzy import score_match
+from edify.when.fuzzy import score_match
 
 
 HOW_ENTRIES = [

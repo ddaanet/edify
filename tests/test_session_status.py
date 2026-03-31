@@ -7,9 +7,9 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
-from claudeutils.session.parse import ParsedTask
-from claudeutils.session.status.render import (
+from edify.cli import cli
+from edify.session.parse import ParsedTask
+from edify.session.status.render import (
     detect_parallel,
     render_pending,
     render_unscheduled,

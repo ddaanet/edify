@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measure Task delegation token overhead across all claudeutils sessions.
+"""Measure Task delegation token overhead across all edify sessions.
 
 Extracts per-Task-call data: total_tokens, prompt_chars, tool_uses, duration_ms,
 agent_type, model. Aggregates to show the fixed cost of spinning up any sub-agent
@@ -7,10 +7,11 @@ agent_type, model. Aggregates to show the fixed cost of spinning up any sub-agen
 (prompt content + tool calls).
 
 Data source: ~/.claude/projects/ JSONL session files.
-Filters: claudeutils projects only, excludes sidechain entries.
+Filters: edify projects only, excludes sidechain entries.
 
 Output: TSV to stdout (for analysis), summary stats to stderr.
 """
+
 import json
 import os
 import re
@@ -69,12 +70,14 @@ def extract_task_pairs(entries):
                 if not tok_m:
                     continue
 
-                pairs.append({
-                    **call,
-                    "total_tokens": int(tok_m.group(1)),
-                    "tool_uses": int(tu_m.group(1)) if tu_m else None,
-                    "duration_ms": int(dur_m.group(1)) if dur_m else None,
-                })
+                pairs.append(
+                    {
+                        **call,
+                        "total_tokens": int(tok_m.group(1)),
+                        "tool_uses": int(tu_m.group(1)) if tu_m else None,
+                        "duration_ms": int(dur_m.group(1)) if dur_m else None,
+                    }
+                )
 
     return pairs
 
@@ -100,7 +103,10 @@ def print_dist(label, values, unit=""):
     p75 = percentile(values, 75)
     p90 = percentile(values, 90)
     p95 = percentile(values, 95)
-    print(f"  {label} (n={n}): p25={p25:.0f}{unit} p50={p50:.0f}{unit} p75={p75:.0f}{unit} p90={p90:.0f}{unit} p95={p95:.0f}{unit} max={values[-1]:.0f}{unit}", file=sys.stderr)
+    print(
+        f"  {label} (n={n}): p25={p25:.0f}{unit} p50={p50:.0f}{unit} p75={p75:.0f}{unit} p90={p90:.0f}{unit} p95={p95:.0f}{unit} max={values[-1]:.0f}{unit}",
+        file=sys.stderr,
+    )
 
 
 def main():
@@ -108,7 +114,7 @@ def main():
     sessions_scanned = 0
 
     for proj_name in sorted(os.listdir(CLAUDE_PROJECTS_DIR)):
-        if "claudeutils" not in proj_name:
+        if "edify" not in proj_name:
             continue
         proj_path = CLAUDE_PROJECTS_DIR / proj_name
         if not proj_path.is_dir():
@@ -142,8 +148,18 @@ def main():
     print(f"Task pairs with token data: {len(all_pairs)}", file=sys.stderr)
 
     # --- TSV output ---
-    header = ["agent_type", "model", "prompt_chars", "total_tokens", "tool_uses",
-              "duration_ms", "background", "session", "project", "description"]
+    header = [
+        "agent_type",
+        "model",
+        "prompt_chars",
+        "total_tokens",
+        "tool_uses",
+        "duration_ms",
+        "background",
+        "session",
+        "project",
+        "description",
+    ]
     print("\t".join(header))
     for p in all_pairs:
         row = [
@@ -161,9 +177,9 @@ def main():
         print("\t".join(row))
 
     # --- Summary stats to stderr ---
-    print(f"\n{'='*70}", file=sys.stderr)
+    print(f"\n{'=' * 70}", file=sys.stderr)
     print("DELEGATION OVERHEAD SUMMARY", file=sys.stderr)
-    print(f"{'='*70}", file=sys.stderr)
+    print(f"{'=' * 70}", file=sys.stderr)
 
     # Overall token distribution
     all_tokens = [p["total_tokens"] for p in all_pairs]
@@ -178,16 +194,21 @@ def main():
 
     # Minimum-work agents: tool_uses <= 3 (baseline overhead)
     # These are the closest proxy for "fixed cost of delegation"
-    minimal = [p for p in all_pairs if p["tool_uses"] is not None and p["tool_uses"] <= 3]
+    minimal = [
+        p for p in all_pairs if p["tool_uses"] is not None and p["tool_uses"] <= 3
+    ]
     if minimal:
-        print(f"\n  Minimal-work agents (tool_uses <= 3, n={len(minimal)}):", file=sys.stderr)
+        print(
+            f"\n  Minimal-work agents (tool_uses <= 3, n={len(minimal)}):",
+            file=sys.stderr,
+        )
         print_dist("    total_tokens", [p["total_tokens"] for p in minimal])
         print_dist("    prompt_chars", [p["prompt_chars"] for p in minimal])
 
     # By agent type (n >= 3)
-    print(f"\n{'='*70}", file=sys.stderr)
+    print(f"\n{'=' * 70}", file=sys.stderr)
     print("BY AGENT TYPE (n >= 3)", file=sys.stderr)
-    print(f"{'='*70}", file=sys.stderr)
+    print(f"{'=' * 70}", file=sys.stderr)
     by_type = defaultdict(list)
     for p in all_pairs:
         by_type[p["agent_type"]].append(p)
@@ -205,22 +226,37 @@ def main():
             print_dist("    tool_uses", tools)
 
     # Token-per-tool-use (marginal cost per tool call)
-    print(f"\n{'='*70}", file=sys.stderr)
+    print(f"\n{'=' * 70}", file=sys.stderr)
     print("MARGINAL COST (tokens per tool use)", file=sys.stderr)
-    print(f"{'='*70}", file=sys.stderr)
-    with_both = [(p["total_tokens"], p["tool_uses"])
-                 for p in all_pairs
-                 if p["tool_uses"] is not None and p["tool_uses"] > 0]
+    print(f"{'=' * 70}", file=sys.stderr)
+    with_both = [
+        (p["total_tokens"], p["tool_uses"])
+        for p in all_pairs
+        if p["tool_uses"] is not None and p["tool_uses"] > 0
+    ]
     if with_both:
         per_tool = [t / u for t, u in with_both]
         print_dist("tokens_per_tool_use", per_tool)
 
     # Explore vs execution agents (baseline comparison)
-    explore = [p["total_tokens"] for p in all_pairs if p["agent_type"] in ("Explore", "quiet-explore")]
-    execution = [p["total_tokens"] for p in all_pairs
-                 if p["agent_type"].endswith("-task") or p["agent_type"] in ("tdd-task", "quiet-task", "refactor")]
-    review = [p["total_tokens"] for p in all_pairs
-              if "vet" in p["agent_type"] or "review" in p["agent_type"] or "reviewer" in p["agent_type"]]
+    explore = [
+        p["total_tokens"]
+        for p in all_pairs
+        if p["agent_type"] in ("Explore", "quiet-explore")
+    ]
+    execution = [
+        p["total_tokens"]
+        for p in all_pairs
+        if p["agent_type"].endswith("-task")
+        or p["agent_type"] in ("tdd-task", "quiet-task", "refactor")
+    ]
+    review = [
+        p["total_tokens"]
+        for p in all_pairs
+        if "vet" in p["agent_type"]
+        or "review" in p["agent_type"]
+        or "reviewer" in p["agent_type"]
+    ]
     if explore:
         print_dist("  explore agents: total_tokens", explore)
     if execution:

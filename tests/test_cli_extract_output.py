@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
-from claudeutils.models import FeedbackItem, FeedbackType
+from edify.cli import cli
+from edify.models import FeedbackItem, FeedbackType
 
 from . import pytest_helpers
 
@@ -44,10 +44,10 @@ def test_extract_json_format_valid(
         return feedback_items
 
     monkeypatch.setattr(
-        "claudeutils.cli.get_project_history_dir",
+        "edify.cli.get_project_history_dir",
         pytest_helpers.make_mock_history_dir(history_dir),
     )
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
     monkeypatch.chdir(project_dir)
 
     runner = CliRunner()
@@ -85,10 +85,10 @@ def test_extract_json_includes_all_fields(
         return [feedback_item]
 
     monkeypatch.setattr(
-        "claudeutils.cli.get_project_history_dir",
+        "edify.cli.get_project_history_dir",
         pytest_helpers.make_mock_history_dir(history_dir),
     )
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
     monkeypatch.chdir(project_dir)
 
     runner = CliRunner()
@@ -146,10 +146,10 @@ def test_extract_recursive_integration(
         return feedback_items
 
     monkeypatch.setattr(
-        "claudeutils.cli.get_project_history_dir",
+        "edify.cli.get_project_history_dir",
         pytest_helpers.make_mock_history_dir(history_dir),
     )
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
     monkeypatch.chdir(project_dir)
 
     runner = CliRunner()

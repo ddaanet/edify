@@ -43,7 +43,7 @@ Prerequisite before bulk conversion. Needs `/ground` on: naming conventions, tri
 
 Memory content (decisions, index, triggers) delivered via git orphan branch, decoupled from feature branch lineage. Resolver reads from shared ref — all worktrees see updates immediately without merge-from-main.
 
-- **Write path:** `/codify` or capture-time writes commit to orphan branch via git plumbing (`hash-object` → `mktree` → `commit-tree` → `update-ref`), wrapped in `claudeutils` helper
+- **Write path:** `/codify` or capture-time writes commit to orphan branch via git plumbing (`hash-object` → `mktree` → `commit-tree` → `update-ref`), wrapped in `edify` helper
 - **Read path:** `_recall resolve` reads from orphan ref instead of working tree. Transparent to callers.
 - **Propagation:** SessionStart or first-access checks `git log -1 --format=%H memory` against cached hash, pulls latest snapshot if stale
 - **Prerequisite:** @-reference migration — recall resolution must fully replace @-reference-based loading for decisions before content moves off working tree

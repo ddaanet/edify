@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from claudeutils.statusline.cli import statusline
-from claudeutils.statusline.models import (
+from edify.statusline.cli import statusline
+from edify.statusline.models import (
     ContextUsage,
     ContextWindowInfo,
     CostInfo,
@@ -74,9 +74,9 @@ def test_statusline_calls_context_functions() -> None:
 
     runner = CliRunner()
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
     ):
         result = runner.invoke(statusline, input=json_str)
 
@@ -117,12 +117,12 @@ def test_statusline_routes_to_plan_usage() -> None:
 
     runner = CliRunner()
     with (
-        patch("claudeutils.statusline.cli.get_git_status"),
-        patch("claudeutils.statusline.cli.get_thinking_state"),
-        patch("claudeutils.statusline.cli.calculate_context_tokens"),
-        patch("claudeutils.statusline.cli.get_account_state") as mock_state,
-        patch("claudeutils.statusline.cli.get_plan_usage") as mock_plan,
-        patch("claudeutils.statusline.cli.get_api_usage") as mock_api,
+        patch("edify.statusline.cli.get_git_status"),
+        patch("edify.statusline.cli.get_thinking_state"),
+        patch("edify.statusline.cli.calculate_context_tokens"),
+        patch("edify.statusline.cli.get_account_state") as mock_state,
+        patch("edify.statusline.cli.get_plan_usage") as mock_plan,
+        patch("edify.statusline.cli.get_api_usage") as mock_api,
     ):
         # Mock get_account_state to return mode="plan"
         mock_state.return_value.mode = "plan"
@@ -164,11 +164,11 @@ def test_statusline_outputs_two_lines() -> None:
 
     runner = CliRunner()
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
-        patch("claudeutils.statusline.cli.get_account_state") as mock_account,
-        patch("claudeutils.statusline.cli.get_plan_usage") as mock_plan,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_account_state") as mock_account,
+        patch("edify.statusline.cli.get_plan_usage") as mock_plan,
     ):
         # Provide proper mock return values
         mock_git.return_value = GitStatus(branch="main", dirty=False)
@@ -219,11 +219,11 @@ def test_statusline_exits_zero_on_error() -> None:
 
     runner = CliRunner()
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_thinking_state"),
-        patch("claudeutils.statusline.cli.calculate_context_tokens"),
-        patch("claudeutils.statusline.cli.get_account_state"),
-        patch("claudeutils.statusline.cli.get_plan_usage"),
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_thinking_state"),
+        patch("edify.statusline.cli.calculate_context_tokens"),
+        patch("edify.statusline.cli.get_account_state"),
+        patch("edify.statusline.cli.get_plan_usage"),
     ):
         # Mock get_git_status to raise an exception
         mock_git.side_effect = Exception("Test error: git command failed")

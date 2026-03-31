@@ -1,6 +1,6 @@
 # Implementation Notes
 
-Detailed implementation decisions for claudeutils codebase. Consult this document when implementing similar features or patterns.
+Detailed implementation decisions for edify codebase. Consult this document when implementing similar features or patterns.
 
 ## When Using At-sign References
 
@@ -259,7 +259,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 
 **Decision Date:** 2026-02-18
 
-**Anti-pattern:** Rationalizing past precommit failure ("lint issues are pre-existing", "my changes are clean"). Deeper: `just precommit` was broken for 9 days (~845 commits) due to non-existent `claudeutils validate` command. No agent noticed because failure was rationalized or bypassed each time.
+**Anti-pattern:** Rationalizing past precommit failure ("lint issues are pre-existing", "my changes are clean"). Deeper: `just precommit` was broken for 9 days (~845 commits) due to non-existent `edify validate` command. No agent noticed because failure was rationalized or bypassed each time.
 
 **Correct pattern:** Precommit is a gate. If it fails, fix before committing. A broken gate is worse than no gate — creates false confidence across all subsequent commits.
 

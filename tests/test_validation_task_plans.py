@@ -4,8 +4,8 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from claudeutils.validation.cli import validate
-from claudeutils.validation.task_plans import validate as validate_task_plans
+from edify.validation.cli import validate
+from edify.validation.task_plans import validate as validate_task_plans
 
 
 def test_valid_plan_passes_invalid_fails(tmp_path: Path) -> None:

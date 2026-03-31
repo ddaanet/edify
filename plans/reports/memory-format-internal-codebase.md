@@ -37,7 +37,7 @@ Memory index entries use two primary trigger formats:
 
 ### Trigger Pattern Taxonomy
 
-From comprehensive scan of `/Users/david/code/claudeutils-wt/ar-format-grounding/agents/memory-index.md` (366 entries across ~25 decision files):
+From comprehensive scan of `/Users/david/code/edify-wt/ar-format-grounding/agents/memory-index.md` (366 entries across ~25 decision files):
 
 #### Verb Patterns (When-class entries)
 
@@ -129,7 +129,7 @@ Domain: 30+ work types could invoke this
 
 ### Resolver Distinction Implementation
 
-From `/Users/david/code/claudeutils-wt/ar-format-grounding/src/claudeutils/when/resolver.py`:
+From `/Users/david/code/edify-wt/ar-format-grounding/src/edify/when/resolver.py`:
 
 ```python
 def _build_heading(operator: str, trigger: str) -> str:
@@ -148,7 +148,7 @@ The resolver transforms triggers into section headings:
 
 ### When/How Distinction in Index Files
 
-From parsing code (`/Users/david/code/claudeutils-wt/ar-format-grounding/src/claudeutils/when/index_parser.py`):
+From parsing code (`/Users/david/code/edify-wt/ar-format-grounding/src/edify/when/index_parser.py`):
 
 **WhenEntry model stores:**
 - `operator`: "when" or "how" (prefix indicator)
@@ -231,7 +231,7 @@ Structure:
 
 ### Parser Behavior
 
-From `/Users/david/code/claudeutils-wt/ar-format-grounding/src/claudeutils/recall/index_parser.py`:
+From `/Users/david/code/edify-wt/ar-format-grounding/src/edify/recall/index_parser.py`:
 
 **Parsing rules:**
 1. H2 headings become section identifiers (file path)
@@ -277,7 +277,7 @@ From `plans/active-recall/brief.md` (brief from 2026-03-02):
 
 ### Keyword Extraction Strategy
 
-From `/Users/david/code/claudeutils-wt/ar-format-grounding/src/claudeutils/recall/index_parser.py`:
+From `/Users/david/code/edify-wt/ar-format-grounding/src/edify/recall/index_parser.py`:
 
 **Automatic extraction from trigger + description:**
 ```python

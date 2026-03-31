@@ -139,7 +139,7 @@ Migrate all hooks to plugin, create consolidated setup hook, audit scripts for e
   - New file: `plugin/hooks/edify-setup.sh`
   - Handles (per outline Component 2):
     - Export `EDIFY_PLUGIN_ROOT` via `$CLAUDE_ENV_FILE` (grounded: official mechanism)
-    - `uv pip install claudeutils==X.Y.Z` into `$CLAUDE_PLUGIN_ROOT/.venv` (FR-11) — with `uv` availability check, pip fallback (R-3). Note: package is currently `claudeutils` on PyPI; rename to `edify` is separate work
+    - `uv pip install edify==X.Y.Z` into `$CLAUDE_PLUGIN_ROOT/.venv` (FR-11) — with `uv` availability check, pip fallback (R-3). Note: package is currently `edify` on PyPI; rename to `edify` is separate work
     - Write current plugin version to `.edify.yaml` (FR-10)
     - Compare `.edify.yaml` version against plugin version, nag if stale (FR-5)
   - UPS fallback: transcript scraping for setup marker (if SessionStart discarded — recall: #10373)

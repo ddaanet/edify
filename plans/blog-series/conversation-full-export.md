@@ -1,7 +1,7 @@
 # Conversation Export — Blog Series Planning (plugin)
 
 **Date:** 2026-03-13
-**Projet:** claudeutils / plugin
+**Projet:** edify / plugin
 
 ---
 
@@ -9,11 +9,11 @@
 
 ### User
 
-Récupère le contexte du projet sur mon GitHub. Actuellement ça s'appelle claudeutils il y a un sous module qui s'appelle plugin.
+Récupère le contexte du projet sur mon GitHub. Actuellement ça s'appelle edify il y a un sous module qui s'appelle plugin.
 
 ### Claude
 
-*(Recherche web "claudeutils plugin GitHub" — pas de résultat pertinent)*
+*(Recherche web "edify plugin GitHub" — pas de résultat pertinent)*
 
 La recherche générique ne trouve pas ton repo spécifique. J'ai besoin d'un peu plus d'info pour le localiser.
 
@@ -31,11 +31,11 @@ ddaanet, mais il faudrait que je push d'abord
 
 Pas de souci, vérifions quand même ce qui est déjà en ligne :
 
-*(Recherche web "github ddaanet claudeutils" → trouve le profil avec le repo claudeutils listé)*
+*(Recherche web "github ddaanet edify" → trouve le profil avec le repo edify listé)*
 
-Le repo `claudeutils` existe bien sur ton profil. Voyons ce qu'il contient :
+Le repo `edify` existe bien sur ton profil. Voyons ce qu'il contient :
 
-*(Clone https://github.com/ddaanet/claudeutils.git)*
+*(Clone https://github.com/ddaanet/edify.git)*
 
 *(Explore la structure du repo — 12M, src/, tests/, agents/, plans/, etc.)*
 
@@ -49,17 +49,17 @@ Le repo `claudeutils` existe bien sur ton profil. Voyons ce qu'il contient :
 
 *(Lit plugin/README.md — 18 skills, 14 sub-agents, 23 fragments, 4 hooks, pipeline design→handoff)*
 
-*(Lit claudeutils/README.md — CLI commands, agent framework, memory management, development setup)*
+*(Lit edify/README.md — CLI commands, agent framework, memory management, development setup)*
 
 *(Lit pyproject.toml — Python 3.14+, dependencies, ruff ALL, mypy strict)*
 
-*(Explore src/claudeutils/ — account/, cli.py, compose.py, discovery.py, extraction.py, filtering.py, markdown*.py, model/, parsing.py, paths.py, recall/, statusline/, tokens.py, validation/, when/, worktree/)*
+*(Explore src/edify/ — account/, cli.py, compose.py, discovery.py, extraction.py, filtering.py, markdown*.py, model/, parsing.py, paths.py, recall/, statusline/, tokens.py, validation/, when/, worktree/)*
 
 OK, j'ai tout récupéré et parcouru. Voici le contexte du projet :
 
-**claudeutils** — c'est un outil en deux parties pour travailler avec Claude Code :
+**edify** — c'est un outil en deux parties pour travailler avec Claude Code :
 
-**1. CLI Python** (`src/claudeutils/`) — installable via `uv tool install .`, Python 3.14+, avec ces sous-commandes :
+**1. CLI Python** (`src/edify/`) — installable via `uv tool install .`, Python 3.14+, avec ces sous-commandes :
 
 - **Feedback pipeline** : `list`, `extract`, `collect`, `analyze`, `rules` — parse les sessions JSONL de Claude Code pour extraire tes retours
 - **Markdown cleanup** — corrige les problèmes structurels du markdown généré par Claude (listes emoji, blocs imbriqués, etc.)
@@ -100,11 +100,11 @@ C'est le contexte du projet initialise la mémoire du projet avec ça
 
 *(Ajoute 5 entrées mémoire :)*
 
-1. User is David Allouche (ddaanet on GitHub). Main project: claudeutils — Python CLI + agent framework for Claude Code.
-2. claudeutils CLI: click-based, Python 3.14+, uv, pydantic, mypy strict, ruff ALL. Cmds: extract/collect/analyze, markdown, tokens, account, compose, validate, recall, statusline, when, worktree.
-3. plugin: git submodule in claudeutils. 18 skills, 14 sub-agents, 23 fragments, 4 hooks. Pipeline: design→runbook→orchestrate→vet→handoff. Migrating to plugin (edify-plugin).
+1. User is David Allouche (ddaanet on GitHub). Main project: edify — Python CLI + agent framework for Claude Code.
+2. edify CLI: click-based, Python 3.14+, uv, pydantic, mypy strict, ruff ALL. Cmds: extract/collect/analyze, markdown, tokens, account, compose, validate, recall, statusline, when, worktree.
+3. plugin: git submodule in edify. 18 skills, 14 sub-agents, 23 fragments, 4 hooks. Pipeline: design→runbook→orchestrate→vet→handoff. Migrating to plugin (edify-plugin).
 4. plugin memory system: session.md (handoff), learnings.md (append-only), memory-index.md (keyword catalog), decisions/ (permanent), jobs.md (plan lifecycle). Session modes: s/x/xc/r/wt.
-5. Repos: github.com/ddaanet/claudeutils (public, Python) and github.com/ddaanet/plugin (public, submodule). Build: hatchling. Tasks: justfile. Tests: pytest (~100+ test files).
+5. Repos: github.com/ddaanet/edify (public, Python) and github.com/ddaanet/plugin (public, submodule). Build: hatchling. Tasks: justfile. Tests: pytest (~100+ test files).
 
 C'est fait. 5 entrées mémoire initialisées couvrant l'essentiel : ton identité GitHub, la stack et les commandes du CLI, la structure d'plugin (pipeline, skills, agents, fragments), le système mémoire, et les infos repo/build. Ça sera disponible dans toutes les conversations de ce projet.
 

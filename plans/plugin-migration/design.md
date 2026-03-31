@@ -346,7 +346,7 @@ Scripts are referenced from three contexts:
 
 | Concept | Name | Git repo | Notes |
 |---------|------|----------|-------|
-| Product | edify | `edify` (was claudeutils) | Latin *aedificare* = "to build" + "to instruct" |
+| Product | edify | `edify` (was edify) | Latin *aedificare* = "to build" + "to instruct" |
 | Plugin | edify (marketplace) | `edify-plugin` (was plugin) | Submodule directory = `edify-plugin/` |
 | Python package | edify | `edify` (same repo) | Statusline, session extraction, TDD tooling |
 

@@ -5,8 +5,8 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
-from claudeutils.models import FeedbackItem, FeedbackType
+from edify.cli import cli
+from edify.models import FeedbackItem, FeedbackType
 
 
 def test_rules_extracts_sorted_items(

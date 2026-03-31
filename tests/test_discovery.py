@@ -4,7 +4,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from claudeutils.discovery import find_sub_agent_ids, list_top_level_sessions
+from edify.discovery import find_sub_agent_ids, list_top_level_sessions
 
 # temp_project_dir fixture is provided by conftest.py
 

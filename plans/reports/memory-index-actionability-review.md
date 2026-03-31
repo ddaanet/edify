@@ -25,7 +25,7 @@ Entries not mentioned are considered acceptable.
 - `/how detect trivial messages` — An agent working on message filtering might think "skip noise" or "filter short messages" rather than "detect trivial messages." Consider alias: `/how filter trivial prompts`.
 - `/how layer feedback extraction` — "Layer" is unusual phrasing. An agent encountering feedback extraction ordering would more likely think "feedback extraction priority" or "feedback filter ordering."
 
-**Assessment:** Most entries are implementation-specific to the claudeutils data processing pipeline. They serve well for maintenance work on those exact modules but have narrow trigger surfaces outside that context.
+**Assessment:** Most entries are implementation-specific to the edify data processing pipeline. They serve well for maintenance work on those exact modules but have narrow trigger surfaces outside that context.
 
 ---
 

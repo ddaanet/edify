@@ -1,6 +1,6 @@
 """Tests for find_section_bounds() section identification."""
 
-from claudeutils.worktree.session import find_section_bounds
+from edify.worktree.session import find_section_bounds
 
 
 class TestSectionIdentification:

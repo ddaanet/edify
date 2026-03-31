@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.worktree.cli import focus_session
-from claudeutils.worktree.session import (
+from edify.worktree.cli import focus_session
+from edify.worktree.session import (
     extract_task_blocks,
     find_section_bounds,
 )

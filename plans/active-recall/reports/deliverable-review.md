@@ -7,9 +7,9 @@
 
 | Type | File | Lines |
 |------|------|-------|
-| Code | src/claudeutils/token_cache.py | +111 |
-| Code | src/claudeutils/tokens.py | +14/-2 |
-| Code | src/claudeutils/tokens_cli.py | +2/-7 |
+| Code | src/edify/token_cache.py | +111 |
+| Code | src/edify/tokens.py | +14/-2 |
+| Code | src/edify/tokens_cli.py | +2/-7 |
 | Code | tests/conftest.py | +14/-2 |
 | Test | tests/test_token_cache.py | +320 |
 | Test | tests/test_cli_tokens.py | +9/-4 |

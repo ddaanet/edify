@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
-from claudeutils.worktree.merge import merge
+from edify.worktree.cli import worktree
+from edify.worktree.merge import merge
 from tests.fixtures_worktree import _git_setup, make_repo_with_branch
 
 

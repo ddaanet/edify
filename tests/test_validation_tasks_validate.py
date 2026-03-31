@@ -3,7 +3,7 @@
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from claudeutils.validation.tasks import validate
+from edify.validation.tasks import validate
 
 
 class TestValidate:
@@ -99,8 +99,8 @@ Content here.
         assert len(errors) == 1
         assert "conflicts" in errors[0]
 
-    @patch("claudeutils.validation.tasks.check_history")
-    @patch("claudeutils.validation.tasks.get_new_tasks")
+    @patch("edify.validation.tasks.check_history")
+    @patch("edify.validation.tasks.get_new_tasks")
     def test_new_task_in_git_history_error(
         self,
         mock_get_new: MagicMock,

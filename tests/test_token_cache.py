@@ -9,14 +9,14 @@ from pytest_mock import MockerFixture
 from sqlalchemy import inspect
 from sqlalchemy.orm import sessionmaker
 
-from claudeutils.token_cache import (
+from edify.token_cache import (
     TokenCache,
     TokenCacheEntry,
     cached_count_tokens_for_file,
     create_cache_engine,
     get_default_cache,
 )
-from claudeutils.tokens import ModelId, count_tokens_for_files
+from edify.tokens import ModelId, count_tokens_for_files
 
 
 class TestTokenCacheModel:
@@ -188,12 +188,12 @@ class TestCacheIntegration:
 
         # Mock count_tokens_for_file in token_cache module to return 10
         mock_count = mocker.patch(
-            "claudeutils.token_cache._count_tokens_for_content", return_value=10
+            "edify.token_cache._count_tokens_for_content", return_value=10
         )
         # Mock get_default_cache to return in-memory cache
         real_cache = TokenCache(create_cache_engine(":memory:"))
         mocker.patch(
-            "claudeutils.token_cache.get_default_cache", return_value=real_cache
+            "edify.token_cache.get_default_cache", return_value=real_cache
         )
 
         results = count_tokens_for_files([file1, file2], ModelId("test-model"))
@@ -215,7 +215,7 @@ class TestCacheIntegration:
         Then: Database file is created at <tmp_path>/token_cache.db.
         """
         mocker.patch(
-            "claudeutils.token_cache.platformdirs.user_cache_dir",
+            "edify.token_cache.platformdirs.user_cache_dir",
             return_value=str(tmp_path),
         )
 
@@ -241,11 +241,11 @@ class TestCacheIntegration:
         test_file.write_text("hello world")
 
         mocker.patch(
-            "claudeutils.token_cache.get_default_cache",
+            "edify.token_cache.get_default_cache",
             side_effect=RuntimeError("DB schema mismatch"),
         )
         mock_count = mocker.patch(
-            "claudeutils.tokens.count_tokens_for_file", return_value=10
+            "edify.tokens.count_tokens_for_file", return_value=10
         )
 
         results = count_tokens_for_files([test_file], ModelId("test-model"))
@@ -275,7 +275,7 @@ class TestCachedCountTokens:
         cache = TokenCache(engine)
 
         mock_count = Mock(return_value=42)
-        mocker.patch("claudeutils.token_cache._count_tokens_for_content", mock_count)
+        mocker.patch("edify.token_cache._count_tokens_for_content", mock_count)
         mock_client = Mock()
 
         result = cached_count_tokens_for_file(
@@ -302,7 +302,7 @@ class TestCachedCountTokens:
         cache.put(content_md5, "test-model", 42)
 
         mock_count = Mock()
-        mocker.patch("claudeutils.token_cache._count_tokens_for_content", mock_count)
+        mocker.patch("edify.token_cache._count_tokens_for_content", mock_count)
         mock_client = Mock()
 
         result = cached_count_tokens_for_file(
@@ -331,7 +331,7 @@ class TestCachedCountTokens:
         cache = TokenCache(engine)
 
         mock_count = Mock(return_value=42)
-        mocker.patch("claudeutils.token_cache._count_tokens_for_content", mock_count)
+        mocker.patch("edify.token_cache._count_tokens_for_content", mock_count)
         mock_client = Mock()
 
         result1 = cached_count_tokens_for_file(
@@ -362,7 +362,7 @@ class TestCachedCountTokens:
         mocker.patch.object(cache, "get", side_effect=Exception("DB corrupted"))
 
         mock_count = Mock(return_value=42)
-        mocker.patch("claudeutils.token_cache._count_tokens_for_content", mock_count)
+        mocker.patch("edify.token_cache._count_tokens_for_content", mock_count)
         mock_client = Mock()
 
         result = cached_count_tokens_for_file(
@@ -389,7 +389,7 @@ class TestCachedCountTokens:
         mocker.patch.object(cache, "put", side_effect=Exception("disk full"))
 
         mock_count = Mock(return_value=42)
-        mocker.patch("claudeutils.token_cache._count_tokens_for_content", mock_count)
+        mocker.patch("edify.token_cache._count_tokens_for_content", mock_count)
         mock_client = Mock()
 
         result = cached_count_tokens_for_file(

@@ -1,6 +1,6 @@
 # CLI Design
 
-CLI-specific patterns and conventions for claudeutils command-line interface.
+CLI-specific patterns and conventions for edify command-line interface.
 
 ## .CLI Conventions
 
@@ -36,9 +36,9 @@ CLI-specific patterns and conventions for claudeutils command-line interface.
 
 ### How to Configure Script Entry Points
 
-**Decision:** Add `[project.scripts]` in pyproject.toml: `claudeutils = "claudeutils.cli:main"`
+**Decision:** Add `[project.scripts]` in pyproject.toml: `edify = "edify.cli:main"`
 
-**Rationale:** Simpler invocation (`claudeutils list` vs `uv run python -m claudeutils.cli list`)
+**Rationale:** Simpler invocation (`edify list` vs `uv run python -m edify.cli list`)
 
 **Impact:** Direct command usage after install
 

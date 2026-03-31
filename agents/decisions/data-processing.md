@@ -8,16 +8,16 @@ Module structure, path handling, data models, and general architectural decision
 
 **Minimal init:**
 
-**Decision:** Keep `src/claudeutils/__init__.py` empty (1 line)
+**Decision:** Keep `src/edify/__init__.py` empty (1 line)
 
 **Rationale:** Prefer explicit imports from specific modules over package-level re-exports for clarity
 
 **Impact:** Users must import from specific modules:
 
 ```python
-from claudeutils.models import FeedbackItem
-from claudeutils.discovery import list_top_level_sessions
-from claudeutils.extraction import extract_feedback_recursively
+from edify.models import FeedbackItem
+from edify.discovery import list_top_level_sessions
+from edify.extraction import extract_feedback_recursively
 ```
 
 ### When Placing Helper Functions

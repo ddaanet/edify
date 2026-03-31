@@ -38,7 +38,7 @@
 
 ## Files Modified
 
-- `src/claudeutils/session/handoff/pipeline.py`
+- `src/edify/session/handoff/pipeline.py`
   - Added `step_reached: str = "write_session"` field to `HandoffState` dataclass
   - Added `step_reached: str = "write_session"` parameter to `save_state()` function
   - Updated docstring to document parameter

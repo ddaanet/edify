@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.when.index_parser import parse_index
+from edify.when.index_parser import parse_index
 
 
 def test_parse_when_entry_basic(tmp_path: Path) -> None:

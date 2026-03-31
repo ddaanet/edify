@@ -157,7 +157,7 @@ Git workflow, platform constraints, code patterns, and naming conventions.
 
 **Correct pattern:** After CLI failure, retry with escalated flags (`--force`) before attempting raw commands. If `--force` isn't available, check `--help` for diagnostic subcommands. The deny list is a routing signal — it means "use the wrapper."
 
-**Evidence:** 7 denied `git worktree`/`git branch` commands before using `claudeutils _worktree rm --force`, which succeeded immediately.
+**Evidence:** 7 denied `git worktree`/`git branch` commands before using `edify _worktree rm --force`, which succeeded immediately.
 
 ### When ClassifyHandoffIfNeeded Bug Occurs
 

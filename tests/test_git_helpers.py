@@ -1,4 +1,4 @@
-"""Tests for claudeutils.git shared helpers."""
+"""Tests for edify.git shared helpers."""
 
 import os
 import subprocess
@@ -8,7 +8,7 @@ import click
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.git import (
+from edify.git import (
     _fail,
     _git_ok,
     _is_dirty,

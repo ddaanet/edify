@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.validation.learnings import parse_segments, validate
+from edify.validation.learnings import parse_segments, validate
 
 
 def test_parse_segments_basic() -> None:

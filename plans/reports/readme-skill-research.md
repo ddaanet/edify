@@ -1,6 +1,6 @@
 # README / Documentation Skill Research
 
-Research conducted during claudeutils README rewrite session.
+Research conducted during edify README rewrite session.
 
 ## Sources Evaluated
 
@@ -63,7 +63,7 @@ no tools" beats "toolset for X that does A, B, C."
 
 ## Session Application
 
-Applied to claudeutils README rewrite:
+Applied to edify README rewrite:
 - Reader-tested with 9 questions, fixed 6 gaps
 - Style-matched to `tmp/STYLE_CORPUS.md` corpus
 - Motivation opener: "Claude Code stores conversations as JSONL, but gives you

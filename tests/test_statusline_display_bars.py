@@ -2,7 +2,7 @@
 
 import pytest
 
-from claudeutils.statusline import StatuslineFormatter
+from edify.statusline import StatuslineFormatter
 
 
 @pytest.mark.parametrize(

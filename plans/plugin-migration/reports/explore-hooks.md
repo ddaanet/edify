@@ -6,7 +6,7 @@
 
 ## Settings Hook Configuration
 
-**File:** `/Users/david/code/claudeutils-plugin-migration/.claude/settings.json`
+**File:** `/Users/david/code/edify-plugin-migration/.claude/settings.json`
 
 ### Hook Registry
 
@@ -22,7 +22,7 @@ Hooks are configured via `settings.json` hooks section. All 4 hooks are currentl
 
 ## Hook Scripts Inventory
 
-All hooks are stored in `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/` and must be symlinked to `.claude/hooks/` or migrated to plugin.
+All hooks are stored in `/Users/david/code/edify-plugin-migration/plugin/hooks/` and must be symlinked to `.claude/hooks/` or migrated to plugin.
 
 ### 1. pretooluse-block-tmp.sh
 
@@ -292,7 +292,7 @@ Expand workflow shortcuts (Tier 1 commands and Tier 2 directives) into full inst
 ```
 
 **Path Resolution Difference:**
-- Symlinked: `$CLAUDE_PROJECT_DIR` = project root (e.g., `/Users/david/code/claudeutils-plugin-migration`)
+- Symlinked: `$CLAUDE_PROJECT_DIR` = project root (e.g., `/Users/david/code/edify-plugin-migration`)
 - Plugin: `$CLAUDE_PLUGIN_ROOT` = plugin directory (e.g., `~/.claude/plugins/edify`)
 - Relative path computation affected: plugin scripts cannot use `../../plugin/` relative links
 
@@ -351,13 +351,13 @@ Expand workflow shortcuts (Tier 1 commands and Tier 2 directives) into full inst
 ## File Locations
 
 **Agent-core hooks (current):**
-- `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/pretooluse-block-tmp.sh`
-- `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/pretooluse-symlink-redirect.sh`
-- `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/submodule-safety.py`
-- `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/userpromptsubmit-shortcuts.py`
+- `/Users/david/code/edify-plugin-migration/plugin/hooks/pretooluse-block-tmp.sh`
+- `/Users/david/code/edify-plugin-migration/plugin/hooks/pretooluse-symlink-redirect.sh`
+- `/Users/david/code/edify-plugin-migration/plugin/hooks/submodule-safety.py`
+- `/Users/david/code/edify-plugin-migration/plugin/hooks/userpromptsubmit-shortcuts.py`
 
 **Settings configuration:**
-- `/Users/david/code/claudeutils-plugin-migration/.claude/settings.json` (lines 34–81)
+- `/Users/david/code/edify-plugin-migration/.claude/settings.json` (lines 34–81)
 
 **Expected plugin locations (post-migration):**
 - `$CLAUDE_PLUGIN_ROOT/hooks/pretooluse-block-tmp.sh`

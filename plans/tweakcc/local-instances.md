@@ -309,11 +309,11 @@ echo "Claude Code patched and ready"
 
 ---
 
-## 4. Integration with claudeutils (Edify Wrapper)
+## 4. Integration with edify (Edify Wrapper)
 
 ### Current Project Structure
 
-The `claudeutils` project has:
+The `edify` project has:
 - **justfile recipes** for project tasks
 - **No existing Claude wrapper** (grep found no "edify" mentions in code)
 - **Session.md mentions** "Edify just wrapper" as a pending task
@@ -335,7 +335,7 @@ From session.md:
 **Approach 1: Just recipe wrapper**
 
 ```just
-# claudeutils/justfile
+# edify/justfile
 
 # Run Claude Code with project-specific patches applied
 claude *ARGS:
@@ -538,7 +538,7 @@ node_modules/
 | **Complexity** | High (binary manipulation) | Low (text replacement) |
 | **Recommended for** | Individual customization | Team/project standards |
 
-**Verdict for claudeutils/Edify:**
+**Verdict for edify/Edify:**
 - **Use npm installation** for project-local control
 - **Use postinstall hook** to reapply patches automatically
 - **Store patch scripts** in repo for version control
@@ -676,7 +676,7 @@ tweakcc.clearCaches();
 
 ---
 
-## 7. Recommendations for claudeutils
+## 7. Recommendations for edify
 
 ### Short-term (Immediate Implementation)
 
@@ -902,7 +902,7 @@ CLAUDE_TOOL_BASH_OVERRIDE="Use specialized tools instead of Bash" \
 - **cc-mirror:** Demonstrates using tweakcc API for multiple Claude variants (mentioned in tweakcc docs)
 - **Piebald AI system prompts:** https://github.com/Piebald-AI/claude-code-system-prompts
 
-### Key Files in claudeutils
+### Key Files in edify
 
 - **session.md:** Pending tasks for Edify wrapper integration
 - **justfile:** Existing project recipes (no Claude wrapper yet)
@@ -932,7 +932,7 @@ CLAUDE_TOOL_BASH_OVERRIDE="Use specialized tools instead of Bash" \
 1. Add dry-run mode for patch preview
 2. Create patch library for common overrides
 3. Add error handling and rollback
-4. Integrate with existing claudeutils workflows
+4. Integrate with existing edify workflows
 
 ### Phase 4: Maintenance (Ongoing)
 
@@ -963,7 +963,7 @@ CLAUDE_TOOL_BASH_OVERRIDE="Use specialized tools instead of Bash" \
 5. Launch via: npx claude, npm run claude, or just claude
 ```
 
-**For Edify/claudeutils specifically:**
+**For Edify/edify specifically:**
 
 The pending session.md tasks are achievable:
 - **"Integrate tweakcc with Edify just wrapper"** → Use npm + postinstall pattern

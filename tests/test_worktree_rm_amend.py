@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
-from claudeutils.worktree.git_ops import _is_merge_commit
+from edify.worktree.cli import worktree
+from edify.worktree.git_ops import _is_merge_commit
 from tests.fixtures_worktree import _create_worktree, _git_setup
 
 

@@ -3,8 +3,8 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from claudeutils.exceptions import ApiAuthenticationError
-from claudeutils.tokens_cli import _resolve_api_key
+from edify.exceptions import ApiAuthenticationError
+from edify.tokens_cli import _resolve_api_key
 
 
 class TestResolveApiKeyFallback:
@@ -15,7 +15,7 @@ class TestResolveApiKeyFallback:
     ) -> None:
         """Env var present → returned directly, get_api_key never called."""
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-from-env")
-        mock_config = mocker.patch("claudeutils.tokens_cli.get_api_key")
+        mock_config = mocker.patch("edify.tokens_cli.get_api_key")
 
         result = _resolve_api_key()
         assert result == "sk-ant-from-env"
@@ -27,7 +27,7 @@ class TestResolveApiKeyFallback:
         """Empty env var → config file consulted, config key returned."""
         monkeypatch.setenv("ANTHROPIC_API_KEY", "")
         mocker.patch(
-            "claudeutils.tokens_cli.get_api_key", return_value="sk-ant-from-config"
+            "edify.tokens_cli.get_api_key", return_value="sk-ant-from-config"
         )
 
         result = _resolve_api_key()
@@ -39,7 +39,7 @@ class TestResolveApiKeyFallback:
         """Env var absent → config file consulted, config key returned."""
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
         mocker.patch(
-            "claudeutils.tokens_cli.get_api_key", return_value="sk-ant-from-config"
+            "edify.tokens_cli.get_api_key", return_value="sk-ant-from-config"
         )
 
         result = _resolve_api_key()
@@ -50,7 +50,7 @@ class TestResolveApiKeyFallback:
     ) -> None:
         """No env var, no config key → ApiAuthenticationError."""
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-        mocker.patch("claudeutils.tokens_cli.get_api_key", return_value=None)
+        mocker.patch("edify.tokens_cli.get_api_key", return_value=None)
 
         with pytest.raises(ApiAuthenticationError):
             _resolve_api_key()
@@ -61,7 +61,7 @@ class TestResolveApiKeyFallback:
         """Whitespace-only env var → config file consulted."""
         monkeypatch.setenv("ANTHROPIC_API_KEY", "   ")
         mocker.patch(
-            "claudeutils.tokens_cli.get_api_key", return_value="sk-ant-from-config"
+            "edify.tokens_cli.get_api_key", return_value="sk-ant-from-config"
         )
 
         result = _resolve_api_key()

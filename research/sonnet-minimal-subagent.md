@@ -13,7 +13,7 @@ identity is:
 ### Operating Environment
 
 ```
-Working directory: /Users/david/code/claudeutils
+Working directory: /Users/david/code/edify
 Git repository: Yes
 Current branch: pipeline
 Platform: darwin

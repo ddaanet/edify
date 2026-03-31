@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.validation.learnings import parse_segments
-from claudeutils.worktree.remerge import remerge_learnings_md
-from claudeutils.worktree.resolve import diff3_merge_segments
+from edify.validation.learnings import parse_segments
+from edify.worktree.remerge import remerge_learnings_md
+from edify.worktree.resolve import diff3_merge_segments
 
 PREAMBLE_STR = "# Learnings\n\n---\n"
 ENTRY_A = "## When A\n- body A\n"

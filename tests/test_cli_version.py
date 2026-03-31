@@ -2,14 +2,14 @@
 
 from click.testing import CliRunner
 
-from claudeutils import __version__
-from claudeutils.cli import cli
+from edify import __version__
+from edify.cli import cli
 
 
 def test_version_flag_displays_version() -> None:
     """Test that --version displays the correct version.
 
-    When: claudeutils --version is called
+    When: edify --version is called
     Then: Output contains version number and program name, exit code is 0
     """
     runner = CliRunner()
@@ -17,4 +17,4 @@ def test_version_flag_displays_version() -> None:
 
     assert result.exit_code == 0
     assert __version__ in result.output
-    assert "claudeutils" in result.output.lower()
+    assert "edify" in result.output.lower()

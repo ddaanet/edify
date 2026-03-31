@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.validation.session_paths import (
+from edify.validation.session_paths import (
     check_task_paths,
     extract_paths_from_line,
 )

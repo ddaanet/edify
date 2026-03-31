@@ -1,6 +1,6 @@
 # Test Strategy
 
-Testing conventions and patterns for claudeutils codebase.
+Testing conventions and patterns for edify codebase.
 
 ## .Test Organization
 
@@ -40,7 +40,7 @@ monkeypatch.setattr("pkg.a.foo", mock)  # ❌ Won't work
 
 **Rationale:** Python imports create references in the importing module's namespace
 
-**Applied:** Mock patches target `claudeutils.discovery.*` and `claudeutils.extraction.*` for functions used in those modules
+**Applied:** Mock patches target `edify.discovery.*` and `edify.extraction.*` for functions used in those modules
 
 ## .TDD Approach
 

@@ -6,7 +6,7 @@ Claude Code loads ~3720 tokens of builtin system/tool prompts that overlap with 
 
 ## Goal
 
-Drive tweakcc from claudeutils to customize project-local Claude Code instances. Two phases:
+Drive tweakcc from edify to customize project-local Claude Code instances. Two phases:
 
 **Phase 1 (stopgap):** Remove redundant builtin system prompts via tweakcc patches. Fragments stay in CLAUDE.md for clean environment compatibility.
 
@@ -18,7 +18,7 @@ Drive tweakcc from claudeutils to customize project-local Claude Code instances.
 - Claude Code installed as npm local dependency (not native binary) for direct JS patching
 - Patch scripts version-controlled in repo, patched output is not
 - Patches reapplied automatically after `npm install` (postinstall hook)
-- claudeutils drives the workflow (just recipes, not manual tweakcc CLI)
+- edify drives the workflow (just recipes, not manual tweakcc CLI)
 
 ## Functional Requirements
 
@@ -41,7 +41,7 @@ Override these builtin prompts with empty/minimal replacements:
 | `system-prompt-scratchpad-directory.md` | 230 | Empty — contradicts project `tmp/` rule |
 | `tool-description-bash.md` "Avoid using Bash with..." section | ~150 | Remove section — hook enforcement replaces this |
 
-Token counts measured via `claudeutils tokens sonnet` against `~/.tweakcc/system-prompts/` files.
+Token counts measured via `edify tokens sonnet` against `~/.tweakcc/system-prompts/` files.
 
 ### FR-4: Automatic patch application
 

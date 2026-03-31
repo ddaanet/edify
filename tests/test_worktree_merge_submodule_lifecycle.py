@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
+from edify.worktree.cli import worktree
 from tests.test_worktree_merge_submodule import _setup_submodule_conflict
 
 

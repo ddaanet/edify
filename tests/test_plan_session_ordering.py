@@ -2,10 +2,10 @@
 
 from unittest import mock
 
-from claudeutils.planstate.aggregation import AggregatedStatus, TreeInfo
-from claudeutils.planstate.models import PlanState
-from claudeutils.worktree.display import format_rich_ls
-from claudeutils.worktree.session import (
+from edify.planstate.aggregation import AggregatedStatus, TreeInfo
+from edify.planstate.models import PlanState
+from edify.worktree.display import format_rich_ls
+from edify.worktree.session import (
     TaskBlock,
     _extract_plan_from_block,
     extract_plan_order,
@@ -216,7 +216,7 @@ def test_plans_ordered_by_session_position() -> None:
     )
 
     with mock.patch(
-        "claudeutils.worktree.display.aggregate_trees",
+        "edify.worktree.display.aggregate_trees",
         return_value=mock_aggregated,
     ):
         output = format_rich_ls(repo_path, "")
@@ -279,7 +279,7 @@ def test_unmatched_plans_sort_alphabetically_after_matched() -> None:
     )
 
     with mock.patch(
-        "claudeutils.worktree.display.aggregate_trees",
+        "edify.worktree.display.aggregate_trees",
         return_value=mock_aggregated,
     ):
         output = format_rich_ls(repo_path, "")

@@ -2,7 +2,7 @@
 
 from textwrap import dedent
 
-from claudeutils.validation.session_worktrees import (
+from edify.validation.session_worktrees import (
     check_worktree_markers,
     get_worktree_slugs,
     parse_porcelain_slugs,
@@ -196,7 +196,7 @@ class TestCheckWorktreeMarkers:
     def test_arrow_in_description_not_worktree_marker(self) -> None:
         """Arrow → in task description with non-slug content is ignored."""
         lines = [
-            "- [ ] **Task** — rename `foo.py` → `claudeutils _recall` | sonnet",
+            "- [ ] **Task** — rename `foo.py` → `edify _recall` | sonnet",
             "- [ ] **Other** — replace `[✗]` → `[†]` across codebase | sonnet",
         ]
         errors, warnings = check_worktree_markers(lines, worktree_slugs=set())

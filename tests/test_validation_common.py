@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.validation.common import find_project_root
+from edify.validation.common import find_project_root
 
 
 def test_find_project_root_in_current_dir(tmp_path: Path) -> None:

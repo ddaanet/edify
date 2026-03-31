@@ -5,10 +5,10 @@
 ### Functional Requirements
 
 **FR-1: Replace `list_plans()` ad-hoc Python with CLI**
-The prioritize skill (SKILL.md Step 1) currently instructs agents to call `list_plans(Path('plans'))` — an ad-hoc Python import. Replace with `claudeutils _worktree ls` which already provides plan names, statuses, and next actions. The skill needs plan status to score Marginal Effort; `_worktree ls` rich output includes `[status]` per plan.
+The prioritize skill (SKILL.md Step 1) currently instructs agents to call `list_plans(Path('plans'))` — an ad-hoc Python import. Replace with `edify _worktree ls` which already provides plan names, statuses, and next actions. The skill needs plan status to score Marginal Effort; `_worktree ls` rich output includes `[status]` per plan.
 
 Acceptance criteria:
-- SKILL.md Step 1 references `claudeutils _worktree ls` (or `--porcelain`) instead of `list_plans()`
+- SKILL.md Step 1 references `edify _worktree ls` (or `--porcelain`) instead of `list_plans()`
 - Agent no longer needs to write ad-hoc Python to get plan statuses
 - All plan statuses currently available from `list_plans()` remain accessible
 
@@ -45,7 +45,7 @@ CLI output is markdown — consumed by both agents (for report writing) and huma
 The `_prioritize` command is internal/hidden (underscore prefix). All output to stdout as markdown. Exit code carries success/failure. Error messages are facts-only, no suggestions (per `when cli error messages are llm-consumed`).
 
 **C-2: Two-phase delivery**
-Phase 1 (this scope): Create `plans/prototypes/score.py` and update SKILL.md to use it. Prototype scripts don't need runbooks, TDD, or test files per `when routing prototype work through pipeline`. Phase 2 (future scope): Promote to `claudeutils _prioritize score` CLI command with Click group, tests, and pyproject.toml wiring.
+Phase 1 (this scope): Create `plans/prototypes/score.py` and update SKILL.md to use it. Prototype scripts don't need runbooks, TDD, or test files per `when routing prototype work through pipeline`. Phase 2 (future scope): Promote to `edify _prioritize score` CLI command with Click group, tests, and pyproject.toml wiring.
 
 ### Out of Scope
 
@@ -57,8 +57,8 @@ Phase 1 (this scope): Create `plans/prototypes/score.py` and update SKILL.md to 
 
 ### Dependencies
 
-- `claudeutils _worktree ls` — must provide plan status in parseable form (already does via rich output `[status]`)
-- `PlanState` model in `src/claudeutils/planstate/models.py` — may be useful for type definitions but CLI can be independent
+- `edify _worktree ls` — must provide plan status in parseable form (already does via rich output `[status]`)
+- `PlanState` model in `src/edify/planstate/models.py` — may be useful for type definitions but CLI can be independent
 
 ### References
 

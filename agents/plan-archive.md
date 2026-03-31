@@ -14,7 +14,7 @@ Removed the vestigial `memory-index` skill (`plugin/skills/memory-index/`) that 
 
 ## update-tokens-cli
 
-Made `model` optional in `claudeutils tokens` CLI by converting from positional argument to `--model` option with `sonnet` default. Updated usage text to document multi-file support (`FILE...`). Updated test `test_cli_requires_model_argument` → `test_cli_model_is_optional`. Affected: `src/claudeutils/cli.py`, `tests/test_cli_tokens.py`.
+Made `model` optional in `edify tokens` CLI by converting from positional argument to `--model` option with `sonnet` default. Updated usage text to document multi-file support (`FILE...`). Updated test `test_cli_requires_model_argument` → `test_cli_model_is_optional`. Affected: `src/edify/cli.py`, `tests/test_cli_tokens.py`.
 
 ## inline-execute
 
@@ -54,7 +54,7 @@ Tier 1 direct implementation from pushback worktree. Incremental improvements to
 
 ## worktree-fixes
 
-4 phases, 5 FRs satisfied, 25 TDD cycles + 4 prose edits. Fixes to worktree skill and CLI based on field usage. Affected: plugin/skills/worktree/, src/claudeutils/worktree/.
+4 phases, 5 FRs satisfied, 25 TDD cycles + 4 prose edits. Fixes to worktree skill and CLI based on field usage. Affected: plugin/skills/worktree/, src/edify/worktree/.
 
 ## workflow-fixes
 
@@ -66,7 +66,7 @@ Root cause analysis of 5 plans. Identified root cause in planning skill (insuffi
 
 ## memory-index-recall
 
-Bug fixes + reanalysis of memory index recall system. M-1, M-2 fixed, confirmed 0.2% recall rate. 7 modules, 50 tests. Affected: src/claudeutils/when/.
+Bug fixes + reanalysis of memory index recall system. M-1, M-2 fixed, confirmed 0.2% recall rate. 7 modules, 50 tests. Affected: src/edify/when/.
 
 ## workflow-skills-audit
 
@@ -106,11 +106,11 @@ Parity test quality gap fixes. 11 steps, 8 design decisions. Improved test cover
 
 ## domain-validation
 
-Domain-specific validation infrastructure. Validation skill, rules file, plan skill updates. Foundation for automated artifact validation. Affected: src/claudeutils/validation/.
+Domain-specific validation infrastructure. Validation skill, rules file, plan skill updates. Foundation for automated artifact validation. Affected: src/edify/validation/.
 
 ## validator-consolidation
 
-Consolidated validators from scattered locations into claudeutils package. Unified validation interface. Affected: src/claudeutils/validation/.
+Consolidated validators from scattered locations into edify package. Unified validation interface. Affected: src/edify/validation/.
 
 ## commit-unification
 
@@ -130,7 +130,7 @@ D+B hybrid fix for prose gates. Ensures skill steps with prose instructions aren
 
 ## statusline-wiring
 
-Statusline CLI with TDD. 28 cycles, 6 phases. Wired status display into CLI infrastructure. Affected: src/claudeutils/statusline/.
+Statusline CLI with TDD. 28 cycles, 6 phases. Wired status display into CLI infrastructure. Affected: src/edify/statusline/.
 
 ## statusline-parity
 
@@ -146,7 +146,7 @@ Feedback loop infrastructure. 12 steps, 4 phases. Structured feedback collection
 
 ## claude-tools-rewrite
 
-Infrastructure rewrite of Claude tools CLI. Recovery and parity followups planned. Affected: src/claudeutils/.
+Infrastructure rewrite of Claude tools CLI. Recovery and parity followups planned. Affected: src/edify/.
 
 ## claude-tools-recovery
 
@@ -174,19 +174,19 @@ RCA transcript for handoff-lite misuse. Documented failure mode where lite hando
 
 ## when-recall
 
-Memory recall system using /when and /how triggers. 12 phases, merged to main. Affected: src/claudeutils/when/, plugin/skills/when/. Key decision: bash transport for sub-agent consumption.
+Memory recall system using /when and /how triggers. 12 phases, merged to main. Affected: src/edify/when/, plugin/skills/when/. Key decision: bash transport for sub-agent consumption.
 
 ## worktree-update
 
-40 TDD cycles, recovery (C2-C5), merged to main. Major update to worktree CLI and merge operations. Affected: src/claudeutils/worktree/.
+40 TDD cycles, recovery (C2-C5), merged to main. Major update to worktree CLI and merge operations. Affected: src/edify/worktree/.
 
 ## worktree-merge-data-loss
 
-Removal guard + merge correctness. 13 TDD cycles, deliverable review. Prevented data loss during worktree removal when merge commits are amended. Affected: src/claudeutils/worktree/cli.py.
+Removal guard + merge correctness. 13 TDD cycles, deliverable review. Prevented data loss during worktree removal when merge commits are amended. Affected: src/edify/worktree/cli.py.
 
 ## worktree-rm-safety
 
-5 FRs: dirty check, exit code 2, --force, --confirm. Tier 2 TDD, 6 cycles + 1 general step. Safety improvements for worktree removal. Affected: src/claudeutils/worktree/cli.py.
+5 FRs: dirty check, exit code 2, --force, --confirm. Tier 2 TDD, 6 cycles + 1 general step. Safety improvements for worktree removal. Affected: src/edify/worktree/cli.py.
 
 ## remaining-workflow-items
 
@@ -194,7 +194,7 @@ Removal guard + merge correctness. 13 TDD cycles, deliverable review. Prevented 
 
 ## workwoods
 
-Cross-tree worktree awareness with planstate inference, aggregation, rich ls display, section-based merge strategies, and vet tracking. 33 TDD + 10 general steps. Eliminated jobs.md in favor of filesystem-based plan state inference. Affected: src/claudeutils/planstate/, src/claudeutils/worktree/display.py, src/claudeutils/worktree/resolve.py.
+Cross-tree worktree awareness with planstate inference, aggregation, rich ls display, section-based merge strategies, and vet tracking. 33 TDD + 10 general steps. Eliminated jobs.md in favor of filesystem-based plan state inference. Affected: src/edify/planstate/, src/edify/worktree/display.py, src/edify/worktree/resolve.py.
 
 ## inline-phase-type
 
@@ -230,19 +230,19 @@ Cross-tree async context transfer skill. `/brief <slug>` writes timestamped entr
 
 ## worktree-rm-safety
 
-Safety gates for `_worktree rm`: dirty tree check (parent + submodule), exit code 2 for guard refusal, `--force` bypass flag, no destructive suggestions in CLI output. Affected: src/claudeutils/worktree/cli.py, tests/test_worktree_rm_dirty.py, tests/test_worktree_rm.py.
+Safety gates for `_worktree rm`: dirty tree check (parent + submodule), exit code 2 for guard refusal, `--force` bypass flag, no destructive suggestions in CLI output. Affected: src/edify/worktree/cli.py, tests/test_worktree_rm_dirty.py, tests/test_worktree_rm.py.
 
 ## worktree-cli-default
 
-CLI interface redesign: task name as positional argument (was `--task` flag), `--branch` for bare slug override, sandbox removal from `_worktree new` (no more `additionalDirectories` in settings.local.json). Absorbed: pre-merge untracked file fix, worktree skill adhoc mode, `--slug` override, `rm --confirm` gate fix (separated as orthogonal). Affected: src/claudeutils/worktree/cli.py, plugin/skills/worktree/SKILL.md.
+CLI interface redesign: task name as positional argument (was `--task` flag), `--branch` for bare slug override, sandbox removal from `_worktree new` (no more `additionalDirectories` in settings.local.json). Absorbed: pre-merge untracked file fix, worktree skill adhoc mode, `--slug` override, `rm --confirm` gate fix (separated as orthogonal). Affected: src/edify/worktree/cli.py, plugin/skills/worktree/SKILL.md.
 
 ## remember-skill-update
 
-13 FRs: learnings.py prefix + content word validation (TDD, 12 tests), CLI rewrite to one-arg syntax + batched recall (TDD, 8 tests), skill docs updated (title guidance, mechanical trigger derivation, inline execution, agent routing for 13 agents), pipeline simplification (deleted remember-task + memory-refactor agents, inline execution), renamed /remember → /codify (~30 files), removed memory-index from always-loaded context (~5000 tokens), frozen-domain analysis recommends UserPromptSubmit hook. Affected: src/claudeutils/validation/learnings.py, src/claudeutils/when/cli.py, plugin/skills/codify/, plugin/skills/handoff/, plugin/skills/when/, plugin/skills/how/, plugin/skills/memory-index/, agents/decisions/project-config.md.
+13 FRs: learnings.py prefix + content word validation (TDD, 12 tests), CLI rewrite to one-arg syntax + batched recall (TDD, 8 tests), skill docs updated (title guidance, mechanical trigger derivation, inline execution, agent routing for 13 agents), pipeline simplification (deleted remember-task + memory-refactor agents, inline execution), renamed /remember → /codify (~30 files), removed memory-index from always-loaded context (~5000 tokens), frozen-domain analysis recommends UserPromptSubmit hook. Affected: src/edify/validation/learnings.py, src/edify/when/cli.py, plugin/skills/codify/, plugin/skills/handoff/, plugin/skills/when/, plugin/skills/how/, plugin/skills/memory-index/, agents/decisions/project-config.md.
 
 ## worktree-error-output
 
-Migrated all `_worktree` CLI error output from stderr to stdout per LLM-native CLI convention. Added `_fail(msg, code) -> Never` helper consolidating `click.echo + raise SystemExit` pairs, caught `derive_slug` ValueError in `new()` with clean exit 2, removed `err=True` from 12 sites (8 error+exit converted to `_fail()`, 4 warning-only stripped). 5 steps across 3 phases (TDD × 2, general × 1), 13 commits. TDD audit: 50% compliance — Cycle 1.1 broken GREEN (lint not run before commit). Affected: `src/claudeutils/worktree/cli.py`, `tests/test_worktree_utils.py`, `tests/test_worktree_new_creation.py`.
+Migrated all `_worktree` CLI error output from stderr to stdout per LLM-native CLI convention. Added `_fail(msg, code) -> Never` helper consolidating `click.echo + raise SystemExit` pairs, caught `derive_slug` ValueError in `new()` with clean exit 2, removed `err=True` from 12 sites (8 error+exit converted to `_fail()`, 4 warning-only stripped). 5 steps across 3 phases (TDD × 2, general × 1), 13 commits. TDD audit: 50% compliance — Cycle 1.1 broken GREEN (lint not run before commit). Affected: `src/edify/worktree/cli.py`, `tests/test_worktree_utils.py`, `tests/test_worktree_new_creation.py`.
 
 ## recall-pass
 
@@ -250,15 +250,15 @@ Migrated all `_worktree` CLI error output from stderr to stdout per LLM-native C
 
 ## merge-learnings-delta
 
-Segment-level diff3 merge for learnings.md during worktree merges. Prevents consolidation reversion when branch diverges before a `/codify` on main. 7 TDD cycles, test fixtures refactored, justfile recipes added. Affected: src/claudeutils/worktree/merge.py, tests/.
+Segment-level diff3 merge for learnings.md during worktree merges. Prevents consolidation reversion when branch diverges before a `/codify` on main. 7 TDD cycles, test fixtures refactored, justfile recipes added. Affected: src/edify/worktree/merge.py, tests/.
 
 ## parsing-fixes-batch
 
-7 bug fixes across prepare-runbook.py and validate-runbook.py: model-tags false positive, lifecycle false positive, model propagation, phase numbering, phase context extraction, 2 dead code removals. Tier 2 plan. Affected: plugin/bin/prepare-runbook.py, plugin/bin/validate-runbook.py, src/claudeutils/validation/memory_index_checks.py.
+7 bug fixes across prepare-runbook.py and validate-runbook.py: model-tags false positive, lifecycle false positive, model propagation, phase numbering, phase context extraction, 2 dead code removals. Tier 2 plan. Affected: plugin/bin/prepare-runbook.py, plugin/bin/validate-runbook.py, src/edify/validation/memory_index_checks.py.
 
 ## planstate-delivered
 
-Extended plan state machine with 4 post-execution states (review-pending, rework, reviewed, delivered). Single lifecycle.md file per plan, append-only. Two delivery paths: worktree (via merge) and in-main (via deliverable-review). Pre-ready states use functional artifact detection; post-ready use lifecycle.md. Affected: src/claudeutils/planstate/, plugin/skills/orchestrate/, plugin/skills/deliverable-review/.
+Extended plan state machine with 4 post-execution states (review-pending, rework, reviewed, delivered). Single lifecycle.md file per plan, append-only. Two delivery paths: worktree (via merge) and in-main (via deliverable-review). Pre-ready states use functional artifact detection; post-ready use lifecycle.md. Affected: src/edify/planstate/, plugin/skills/orchestrate/, plugin/skills/deliverable-review/.
 
 ## skills-quality-pass
 
@@ -279,7 +279,7 @@ Fix inline phase detection in prepare-runbook.py for compound type tags (e.g., `
 
 ## worktree-session-merge
 
-RCA and fix for _worktree merge autostrategy dropping session.md content. Two manifestations: Worktree Tasks entries dropped (branch lacks main's section), branch-only content appended to wrong section (Blockers). Affected: src/claudeutils/worktree/merge.py.
+RCA and fix for _worktree merge autostrategy dropping session.md content. Two manifestations: Worktree Tasks entries dropped (branch lacks main's section), branch-only content appended to wrong section (Blockers). Affected: src/edify/worktree/merge.py.
 
 ## quality-infrastructure
 
@@ -287,7 +287,7 @@ RCA and fix for _worktree merge autostrategy dropping session.md content. Two ma
 
 ## unification
 
-Original claudeutils consolidation project. Unified justfile recipes, pyproject.toml settings, and bash helpers across multiple projects (box-api, emojipack, pytest-md, home) into the claudeutils package. 7 phases, 3 sub-plans (consolidation, phase3-steps), 10+ step files per phase. Foundation of the current CLI and module structure. Affected: src/claudeutils/, justfile, pyproject.toml.
+Original edify consolidation project. Unified justfile recipes, pyproject.toml settings, and bash helpers across multiple projects (box-api, emojipack, pytest-md, home) into the edify package. 7 phases, 3 sub-plans (consolidation, phase3-steps), 10+ step files per phase. Foundation of the current CLI and module structure. Affected: src/edify/, justfile, pyproject.toml.
 
 ## runbook-quality-gates
 
@@ -295,7 +295,7 @@ Original claudeutils consolidation project. Unified justfile recipes, pyproject.
 
 ## worktree-rm-fixes
 
-Worktree rm edge case fixes discovered during field usage. Deliverable review completed Feb 20. Bug fixes for rm failure modes including submodule removal and merge commit interactions. Affected: src/claudeutils/worktree/cli.py, tests/test_worktree_rm.py.
+Worktree rm edge case fixes discovered during field usage. Deliverable review completed Feb 20. Bug fixes for rm failure modes including submodule removal and merge commit interactions. Affected: src/edify/worktree/cli.py, tests/test_worktree_rm.py.
 
 ## pretool-hook-cd-pattern
 
@@ -311,7 +311,7 @@ Fix handoff-lite skill misuse where Sonnet agent invoked Haiku-only skill, inter
 
 ## handoff-haiku-import
 
-Import handoff-haiku fix design documents and learnings from home repo into claudeutils. 3 commits imported, plugin submodule synced. Provided context for commit-unification vet review (skill composition decisions). Affected: plans/, agents/session.md.
+Import handoff-haiku fix design documents and learnings from home repo into edify. 3 commits imported, plugin submodule synced. Provided context for commit-unification vet review (skill composition decisions). Affected: plans/, agents/session.md.
 
 ## feedback-fixes
 
@@ -407,7 +407,7 @@ TDD delegation for inline tasks. When inline execution encounters TDD work, dele
 
 ## recall-cli-integration
 
-CLI integration for recall system. 30 tests, recall resolver wired into `claudeutils _recall` CLI. Outline, runbook, full execution. Affected: src/claudeutils/when/, tests/.
+CLI integration for recall system. 30 tests, recall resolver wired into `edify _recall` CLI. Outline, runbook, full execution. Affected: src/edify/when/, tests/.
 
 ## recall-null
 
@@ -431,11 +431,11 @@ UPS topic injection for contextual hook responses. Topic detection from user pro
 
 ## when-resolve-fix
 
-Fix for when-resolve.py behavior. Brief-scoped bugfix. Affected: src/claudeutils/when/.
+Fix for when-resolve.py behavior. Brief-scoped bugfix. Affected: src/edify/when/.
 
 ## wt-rm-dirty
 
-Dirty tree handling during worktree rm. Restored `_update_session_and_amend` after task-classification regression, fixed lifecycle.md dirty-state bug (merge.py stages lifecycle before commit). Affected: src/claudeutils/worktree/cli.py, src/claudeutils/worktree/merge.py.
+Dirty tree handling during worktree rm. Restored `_update_session_and_amend` after task-classification regression, fixed lifecycle.md dirty-state bug (merge.py stages lifecycle before commit). Affected: src/edify/worktree/cli.py, src/edify/worktree/merge.py.
 
 ## merge-submodule-ordering
 
@@ -443,7 +443,7 @@ Submodule conflict check ordering bug in merge.py. Absorbed by merge-lifecycle-a
 
 ## fix-planstate-detector
 
-Added `outlined` status to planstate inference. FR-1: outline.md without design.md → `outlined`. FR-2: next action `/runbook plans/{name}/outline.md`. FR-3: downstream enumeration sites updated. Affected: src/claudeutils/planstate/inference.py, plugin/fragments/execute-rule.md.
+Added `outlined` status to planstate inference. FR-1: outline.md without design.md → `outlined`. FR-2: next action `/runbook plans/{name}/outline.md`. FR-3: downstream enumeration sites updated. Affected: src/edify/planstate/inference.py, plugin/fragments/execute-rule.md.
 
 ## pushback-grounding
 
@@ -479,7 +479,7 @@ Ground skill redesign: unified brainstorm/explore modes, parallelize branch agen
 
 ## worktree-rm-error-ux
 
-Remove --confirm gate from worktree rm, improve git error messaging. Two phases (TDD + general). Affected: src/claudeutils/worktree/cli.py.
+Remove --confirm gate from worktree rm, improve git error messaging. Two phases (TDD + general). Affected: src/edify/worktree/cli.py.
 
 ## discuss-divergent-thinking
 
@@ -491,7 +491,7 @@ Settings triage classification table added to commit skill. Three categories: Pe
 
 ## command-lint-gate
 
-Session.md command-lint validator: precommit gate scanning task entries for missing backtick commands. Implemented as `session_commands.py` in validation module. Delivered via workflow-quick-wins worktree with outline. Affected: src/claudeutils/validation/session_commands.py.
+Session.md command-lint validator: precommit gate scanning task entries for missing backtick commands. Implemented as `session_commands.py` in validation module. Delivered via workflow-quick-wins worktree with outline. Affected: src/edify/validation/session_commands.py.
 
 ## standardize-task-creation
 
@@ -503,7 +503,7 @@ Removed UPS topic injection hook. Topic detection and contextual recall injectio
 
 ## session-validator
 
-Session.md structural validator with precommit integration. Validates section ordering, task format, worktree markers, absolute path detection, command presence. Includes autofix for memory-index placement/ordering. Affected: src/claudeutils/validation/session_structure.py, src/claudeutils/validation/session_commands.py, src/claudeutils/validation/session_paths.py.
+Session.md structural validator with precommit integration. Validates section ordering, task format, worktree markers, absolute path detection, command presence. Includes autofix for memory-index placement/ordering. Affected: src/edify/validation/session_structure.py, src/edify/validation/session_commands.py, src/edify/validation/session_paths.py.
 
 ## skill-progressive-disclosure
 
@@ -547,7 +547,7 @@ Five deferred research tasks consolidated from backlog prioritization. SP-1, SP-
 
 ## retrospective-repo-expansion
 
-Extended retrospective evidence base beyond claudeutils to 15+ repos spanning Oct 2025–Mar 2026. Pre-claudeutils agentic evolution (rules, oklch-theme, scratch repos), parallel agentic projects (pytest-md, home, tuick, jobsearch, devddaanet), and pre-agentic Claude-assisted projects. Produced cross-repo pattern analysis and pre-history timeline. Affected: plans/retrospective/content/.
+Extended retrospective evidence base beyond edify to 15+ repos spanning Oct 2025–Mar 2026. Pre-edify agentic evolution (rules, oklch-theme, scratch repos), parallel agentic projects (pytest-md, home, tuick, jobsearch, devddaanet), and pre-agentic Claude-assisted projects. Produced cross-repo pattern analysis and pre-history timeline. Affected: plans/retrospective/content/.
 
 ## outline-proofing
 
@@ -563,7 +563,7 @@ Fixed 9 deliverable review findings from plugin-migration. Two criticals (stalen
 
 ## handoff-cli-tool
 
-Session CLI tool: `claudeutils _handoff`, `_commit`, `_status` — mechanical CLI commands replacing direct session.md manipulation. Skills remain user interface; CLI handles writes, validation, subprocess orchestration. 7-phase TDD runbook (shared infra, handoff pipeline, commit pipeline, commit gate, status renderer, git changes utility, CLI integration). 15 deliverable review rounds to convergence. Affected: src/claudeutils/session/, src/claudeutils/git.py, src/claudeutils/git_cli.py, src/claudeutils/validation/task_parsing.py, tests/.
+Session CLI tool: `edify _handoff`, `_commit`, `_status` — mechanical CLI commands replacing direct session.md manipulation. Skills remain user interface; CLI handles writes, validation, subprocess orchestration. 7-phase TDD runbook (shared infra, handoff pipeline, commit pipeline, commit gate, status renderer, git changes utility, CLI integration). 15 deliverable review rounds to convergence. Affected: src/edify/session/, src/edify/git.py, src/edify/git_cli.py, src/edify/validation/task_parsing.py, tests/.
 
 ## inline-lifecycle-gate
 
@@ -579,7 +579,7 @@ Fixed recall gate skip rationalization in /runbook and /inline. Reframed gate so
 
 ## remove-fuzzy-recall
 
-Removed all fuzzy matching from recall resolve. Replaced with exact case-insensitive matching in resolver.py and validator modules. Differentiated error messages by call context: keyword-form (recovery guidance) vs artifact-form (STOP with rationale). Simplified check_collisions() to exact-only lookup. Fixed data mismatches in memory-index.md surfaced by exact validation. Affected: src/claudeutils/when/resolver.py, src/claudeutils/validation/memory_index*.py, src/claudeutils/recall_cli/cli.py, tests/.
+Removed all fuzzy matching from recall resolve. Replaced with exact case-insensitive matching in resolver.py and validator modules. Differentiated error messages by call context: keyword-form (recovery guidance) vs artifact-form (STOP with rationale). Simplified check_collisions() to exact-only lookup. Fixed data mismatches in memory-index.md surfaced by exact validation. Affected: src/edify/when/resolver.py, src/edify/validation/memory_index*.py, src/edify/recall_cli/cli.py, tests/.
 
 ## runbook-quality-directives
 

@@ -159,7 +159,7 @@ Sub-problem B modifies code that sub-problem A introduces. This is stronger than
 - Unified `IndexEntry` model (from consolidation) → trigger class field addition (in metadata)
 - Hierarchical parser (from Phase 3) → recall mode simplification (uses new traversal)
 
-**Interface contract:** Module path + API surface (e.g., "`IndexEntry` in `src/claudeutils/recall/models.py` with fields `trigger`, `extras`, `source_file`").
+**Interface contract:** Module path + API surface (e.g., "`IndexEntry` in `src/edify/recall/models.py` with fields `trigger`, `extras`, `source_file`").
 
 ### 5.3 Knowledge Dependency (Design Input)
 

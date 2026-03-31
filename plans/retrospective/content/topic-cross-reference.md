@@ -4,7 +4,7 @@ Maps evidence from expanded repos to the 5 existing retrospective topics.
 
 ## Topic 1: Memory System Evolution
 
-**Pre-claudeutils origins of agent memory:**
+**Pre-edify origins of agent memory:**
 
 | Date | Repo | Hash | Evidence |
 |------|------|------|----------|
@@ -17,7 +17,7 @@ Maps evidence from expanded repos to the 5 existing retrospective topics.
 | 2026-01-15 | pytest-md/plugin | `5783aef` | Agent-core initialized — memory patterns extracted into shared infrastructure. |
 | 2026-02-27 | home | `ebcabc1` | Memory infrastructure setup — decision files consolidated. |
 
-**Arc:** Human-written rules (rules) → agent retrospective self-update (oklch-theme) → structured file taxonomy (home) → shared infrastructure (plugin) → memory-index + recall system (claudeutils).
+**Arc:** Human-written rules (rules) → agent retrospective self-update (oklch-theme) → structured file taxonomy (home) → shared infrastructure (plugin) → memory-index + recall system (edify).
 
 ## Topic 2: Pushback Protocol
 
@@ -33,7 +33,7 @@ Maps evidence from expanded repos to the 5 existing retrospective topics.
 | 2025-12-15 | tuick | `26c3b5d` | "Remove epistemic standards" — pullback from cognitive protocol experiment. Too heavy-handed. |
 | 2026-01-13 | home | `37b08e7` | "Require protocol read before execution" — structural enforcement replacing trust-based compliance. |
 
-**Arc:** "Proceed autonomously" (no pushback) → metacognitive wishful thinking (oklch-theme "flag uncertainty", tuick cognitive protocols — both dead ends) → structural enforcement (home) → formalized pushback protocol (claudeutils).
+**Arc:** "Proceed autonomously" (no pushback) → metacognitive wishful thinking (oklch-theme "flag uncertainty", tuick cognitive protocols — both dead ends) → structural enforcement (home) → formalized pushback protocol (edify).
 
 ## Topic 3: Deliverable-Review Origins
 
@@ -46,7 +46,7 @@ Maps evidence from expanded repos to the 5 existing retrospective topics.
 | 2026-03-10 | devddaanet | `cae9155` | "Fix worktree-sync deliverable-review findings" — review→fix cycle working as designed. |
 | 2026-03-10 | devddaanet | `4ffb1ea` | "Re-review: all findings resolved, delivered" — review loop completed, but 3 of next 5 commits are bug fixes the review missed. |
 
-**Arc:** Ad-hoc quality rules → structured process review → deliverable-review skill in production. devddaanet shows the pipeline runs outside claudeutils but also its limits — post-delivery bug fixes show the review gate ensures a review happens, not that it catches everything.
+**Arc:** Ad-hoc quality rules → structured process review → deliverable-review skill in production. devddaanet shows the pipeline runs outside edify but also its limits — post-delivery bug fixes show the review gate ensures a review happens, not that it catches everything.
 
 ## Topic 4: Ground Skill Origins
 
@@ -57,7 +57,7 @@ Maps evidence from expanded repos to the 5 existing retrospective topics.
 | 2025-12-15 | tuick | `7a97ef3` | "Restructure agent rules into multi-agent system" — methodology-level restructuring. |
 | 2026-01-08 | ddaanet | `bacd587` | "Document template-based design refactoring in design decisions" — methodology documentation. |
 
-**Notes:** Ground skill origins are mostly internal to claudeutils (confabulated scoring → diverge-converge research). External repos show the precursor pattern: manual knowledge curation from external sources, but no grounding-as-methodology.
+**Notes:** Ground skill origins are mostly internal to edify (confabulated scoring → diverge-converge research). External repos show the precursor pattern: manual knowledge curation from external sources, but no grounding-as-methodology.
 
 ## Topic 5: Structural Enforcement / Gating
 
@@ -72,4 +72,4 @@ Maps evidence from expanded repos to the 5 existing retrospective topics.
 | 2026-01-13 | home | `37b08e7` | "Require protocol read before execution" — read-before-act gate. |
 | 2026-01-22 | home | `83cef17` | Agent-core submodule — enforcement via shared infrastructure. Rules can't drift per-project. |
 
-**Arc:** `just agent` gate (emojipack) → agent-specific recipes (box-api) → platform config (pytest-md) → orchestrator constraints (home) → shared infrastructure (plugin) → D+B tool-call anchoring → PreToolUse hooks (claudeutils).
+**Arc:** `just agent` gate (emojipack) → agent-specific recipes (box-api) → platform config (pytest-md) → orchestrator constraints (home) → shared infrastructure (plugin) → D+B tool-call anchoring → PreToolUse hooks (edify).

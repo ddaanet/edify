@@ -1,6 +1,6 @@
 """Tests for shared task-line parsing module."""
 
-from claudeutils.validation.task_parsing import VALID_CHECKBOXES, parse_task_line
+from edify.validation.task_parsing import VALID_CHECKBOXES, parse_task_line
 
 
 class TestParseTaskLine:

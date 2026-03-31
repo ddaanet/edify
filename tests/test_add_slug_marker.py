@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.worktree.session import add_slug_marker
+from edify.worktree.session import add_slug_marker
 
 
 def test_add_slug_marker_basic(tmp_path: Path) -> None:

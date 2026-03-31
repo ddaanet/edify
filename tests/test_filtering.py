@@ -1,7 +1,7 @@
 """Tests for the filtering module."""
 
-from claudeutils.filtering import categorize_feedback, filter_feedback, is_noise
-from claudeutils.models import FeedbackItem, FeedbackType
+from edify.filtering import categorize_feedback, filter_feedback, is_noise
+from edify.models import FeedbackItem, FeedbackType
 
 
 def test_is_noise_command_output_detected() -> None:

@@ -1,6 +1,6 @@
 """Tests for fuzzy matching engine."""
 
-from claudeutils.when.fuzzy import rank_matches, score_match
+from edify.when.fuzzy import rank_matches, score_match
 
 
 def test_subsequence_match_scores_positive() -> None:

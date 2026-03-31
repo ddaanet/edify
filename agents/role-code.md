@@ -148,6 +148,6 @@ Always use `uv` for package operations: `uv add package`.
 
 ### File Organization
 
-- Implementation: `src/claudeutils/`
+- Implementation: `src/edify/`
 - Tests: `tests/`
 - Configuration: `pyproject.toml`

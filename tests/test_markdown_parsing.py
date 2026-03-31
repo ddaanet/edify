@@ -1,6 +1,6 @@
 """Tests for markdown module."""
 
-from claudeutils.markdown import (
+from edify.markdown import (
     fix_warning_lines,
     process_lines,
 )

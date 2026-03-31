@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.validation.session_structure import (
+from edify.validation.session_structure import (
     check_cross_section_uniqueness,
     check_reference_files,
     check_section_schema,

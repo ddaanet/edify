@@ -240,7 +240,7 @@ Important PR notes:
 ### Environment Context
 
 - Agent threads always have cwd reset between bash calls - use absolute file paths only
-- Working directory: /Users/david/code/claudeutils
+- Working directory: /Users/david/code/edify
 - Additional working directories: /Users/kcgrubb/code/pipeline/agents
 - Platform: darwin
 - OS Version: Darwin 24.6.0

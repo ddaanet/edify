@@ -5,12 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.recall.index_parser import parse_memory_index
-from claudeutils.recall.recall import calculate_recall
-from claudeutils.recall.relevance import find_relevant_entries
-from claudeutils.recall.report import generate_json_report, generate_markdown_report
-from claudeutils.recall.tool_calls import extract_tool_calls_from_session
-from claudeutils.recall.topics import extract_session_topics
+from edify.recall.index_parser import parse_memory_index
+from edify.recall.recall import calculate_recall
+from edify.recall.relevance import find_relevant_entries
+from edify.recall.report import generate_json_report, generate_markdown_report
+from edify.recall.tool_calls import extract_tool_calls_from_session
+from edify.recall.topics import extract_session_topics
 
 
 @pytest.mark.e2e
@@ -114,7 +114,7 @@ def test_recall_report_formatting(tmp_path: Path) -> None:
 
     entries = parse_memory_index(index_file)
     tool_calls = [
-        __import__("claudeutils.recall.tool_calls", fromlist=["ToolCall"]).ToolCall(
+        __import__("edify.recall.tool_calls", fromlist=["ToolCall"]).ToolCall(
             tool_name="Read",
             tool_id="read_1",
             input={"file_path": "test.md"},
@@ -125,7 +125,7 @@ def test_recall_report_formatting(tmp_path: Path) -> None:
 
     relevant_scores = [
         __import__(
-            "claudeutils.recall.relevance", fromlist=["RelevanceScore"]
+            "edify.recall.relevance", fromlist=["RelevanceScore"]
         ).RelevanceScore(
             session_id="session1",
             entry_key="Entry",

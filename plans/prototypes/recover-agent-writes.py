@@ -20,7 +20,7 @@ from pathlib import Path
 
 TASK_DIR = Path(
     "tmp/claude/claude-501/"
-    "-Users-david-code-claudeutils-wt-design-runbook-evolution/tasks"
+    "-Users-david-code-edify-wt-design-runbook-evolution/tasks"
 )
 
 

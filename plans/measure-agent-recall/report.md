@@ -4,7 +4,7 @@
 
 ## Method
 
-Scanned all Claude Code session JSONL logs for the claudeutils project (~265 session files) for Bash tool calls containing `when-resolve.py` or `_recall resolve`. Classified each invocation by examining preceding context (10 entries before each hit) to determine trigger source.
+Scanned all Claude Code session JSONL logs for the edify project (~265 session files) for Bash tool calls containing `when-resolve.py` or `_recall resolve`. Classified each invocation by examining preceding context (10 entries before each hit) to determine trigger source.
 
 ### Classification criteria
 
@@ -42,7 +42,7 @@ The 113 skill-procedural invocations include:
 
 ### Discussion-grounding subcategory
 
-11 invocations occurred during `d:` discussion mode. The pushback fragment explicitly mandates: "resolve topic-relevant recall entries: `claudeutils _recall resolve 'when <topic>' ...`". These are procedural — the agent follows a documented instruction, not independent judgment.
+11 invocations occurred during `d:` discussion mode. The pushback fragment explicitly mandates: "resolve topic-relevant recall entries: `edify _recall resolve 'when <topic>' ...`". These are procedural — the agent follows a documented instruction, not independent judgment.
 
 ## Interpretation
 

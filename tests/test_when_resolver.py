@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.when.resolver import ResolveError, resolve
+from edify.when.resolver import ResolveError, resolve
 
 
 def test_mode_detection(tmp_path: Path) -> None:

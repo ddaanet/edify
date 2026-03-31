@@ -21,7 +21,7 @@ None.
 ### Major Issues
 
 1. **Missing `additionalContext` in hook response**
-   - Location: `src/claudeutils/hooks/stop_status_display.py:92`
+   - Location: `src/edify/hooks/stop_status_display.py:92`
    - Problem: D-1 specifies "`additionalContext` tells agent status was displayed (prevents re-render)". The `process_hook` return value is `{"systemMessage": formatted}` — no `additionalContext` key. Without it the agent has no signal that status was displayed and may re-render by calling `_status` directly or re-emitting the trigger.
    - Fix: Add `"additionalContext": "Status displayed via Stop hook."` to the return dict.
    - **Status**: FIXED
@@ -29,7 +29,7 @@ None.
 ### Minor Issues
 
 1. **Trigger regex permits trailing newline**
-   - Location: `src/claudeutils/hooks/stop_status_display.py:21`
+   - Location: `src/edify/hooks/stop_status_display.py:21`
    - Note: `re.fullmatch(r"^Status\.$", message)` — Python's `$` matches before a trailing `\n` even in `fullmatch` mode. So `"Status.\n"` is a false positive trigger. The `^` and `$` anchors are also redundant with `fullmatch` (which already anchors to the full string). Using `\Z` instead of `$` matches only at the true end of string.
    - **Status**: FIXED
 
@@ -42,8 +42,8 @@ None.
 
 ## Fixes Applied
 
-- `src/claudeutils/hooks/stop_status_display.py:21` — Replace `r"^Status\.$"` with `r"Status\.\Z"` (drop redundant anchors, use `\Z` for true end-of-string)
-- `src/claudeutils/hooks/stop_status_display.py:92` — Add `additionalContext` key to hook response per D-1 contract
+- `src/edify/hooks/stop_status_display.py:21` — Replace `r"^Status\.$"` with `r"Status\.\Z"` (drop redundant anchors, use `\Z` for true end-of-string)
+- `src/edify/hooks/stop_status_display.py:92` — Add `additionalContext` key to hook response per D-1 contract
 - `tests/test_stop_hook_status.py:21` — Add `("Status.\n", False)` parametrize case
 
 ---

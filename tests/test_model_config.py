@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from claudeutils.model import LiteLLMModel
-from claudeutils.model.config import (
+from edify.model import LiteLLMModel
+from edify.model.config import (
     filter_by_tier,
     load_litellm_config,
     parse_model_entry,

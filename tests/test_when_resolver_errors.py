@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.when.resolver import ResolveError, _extract_section_content, resolve
+from edify.when.resolver import ResolveError, _extract_section_content, resolve
 
 
 def test_trigger_not_found_suggests_matches(tmp_path: Path) -> None:

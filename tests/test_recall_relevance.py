@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.recall.index_parser import IndexEntry
-from claudeutils.recall.relevance import find_relevant_entries, score_relevance
+from edify.recall.index_parser import IndexEntry
+from edify.recall.relevance import find_relevant_entries, score_relevance
 
 
 def test_score_relevance_exact_match() -> None:

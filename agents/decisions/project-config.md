@@ -227,7 +227,7 @@ description: |
 
 **Decision Date:** 2026-02-15
 
-**Decision:** Inject memory index via `skills:` (discovery), recall via Bash transport (`claudeutils _recall resolve "when <trigger>"`).
+**Decision:** Inject memory index via `skills:` (discovery), recall via Bash transport (`edify _recall resolve "when <trigger>"`).
 
 **Anti-pattern:** Expecting sub-agents to use Skill tool for `/when` or `/how`.
 

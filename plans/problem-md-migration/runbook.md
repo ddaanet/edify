@@ -22,11 +22,11 @@ Verify: all 12 renames staged, no `problem.md` files remain under `plans/`.
 
 ### Step 2: Production code — remove problem.md recognition
 
-**inference.py** (`src/claudeutils/planstate/inference.py`):
+**inference.py** (`src/edify/planstate/inference.py`):
 - `_collect_artifacts`: remove `"problem.md"` from the filename list (line 20)
 - `_determine_status`: remove `(plan_dir / "problem.md").exists()` from the briefed-status check (line 87). After migration, only `requirements.md` needs checking alongside `brief.md`
 
-**task_plans.py** (`src/claudeutils/validation/task_plans.py`):
+**task_plans.py** (`src/edify/validation/task_plans.py`):
 - `_RECOGNIZED_ARTIFACTS`: remove `"problem.md"` from the set (line 8)
 
 **focus-session.py** (`plugin/bin/focus-session.py`):

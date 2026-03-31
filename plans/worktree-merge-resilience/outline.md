@@ -70,7 +70,7 @@ For non-conflict paths (phase 4): the segment diff3 is the primary merge for lea
 
 Preamble (content before first `## ` heading) is a single segment keyed by `None` or sentinel. Same diff3 rules apply — if both sides modified preamble differently, conflict.
 
-**Affected file:** `src/claudeutils/worktree/resolve.py` — rewrite `resolve_learnings_md()` body (lines 148-167), add `remerge_learnings_md()`, extract shared diff3 core
+**Affected file:** `src/edify/worktree/resolve.py` — rewrite `resolve_learnings_md()` body (lines 148-167), add `remerge_learnings_md()`, extract shared diff3 core
 
 ### Segment parsing
 
@@ -91,7 +91,7 @@ Checks:
 1. **Orphaned content** — non-blank, non-heading lines after preamble but before the first `## ` heading
 2. **Duplicate headings** — already exists in `validate()` via `extract_titles()`. No new implementation needed.
 
-**Affected file:** `src/claudeutils/validation/learnings.py` — extend `validate()` with orphan detection
+**Affected file:** `src/edify/validation/learnings.py` — extend `validate()` with orphan detection
 
 ### False positive prevention (NFR-2)
 
@@ -105,7 +105,7 @@ Checks:
 - **Merge base involvement:** Three-way comparison distinguishes "created since merge-base" from "deleted since merge-base." Deletion + modification on opposite sides = conflict.
 - **Every merge, not just conflicts:** Segment diff3 runs on all merge paths. Eliminates the clean-merge orphan gap entirely. No separate detection layer needed in the merge pipeline.
 - **Block, not warn:** Conflicts and structural violations block the merge. Manual fix is cheap. Silent corruption is expensive.
-- **Segment parser reuse:** Single parser serves both resolver (diff3 merge) and precommit validator (structural check). Candidate location: `src/claudeutils/validation/learnings.py` (already defines `extract_titles()` with the same heading pattern).
+- **Segment parser reuse:** Single parser serves both resolver (diff3 merge) and precommit validator (structural check). Candidate location: `src/edify/validation/learnings.py` (already defines `extract_titles()` with the same heading pattern).
 - **Misplaced content deferred:** Heuristic detection of "content under wrong heading" deferred — segment diff3 prevents the known failure modes by never letting git's line-level merge operate on learnings.md.
 
 ## Scope
@@ -130,9 +130,9 @@ Integration-first. Prove the merge pipeline behavior end-to-end before decomposi
 **Required reading (planner must load before starting):**
 
 Implementation context:
-- `src/claudeutils/worktree/resolve.py` — current resolver (rewrite target)
-- `src/claudeutils/worktree/merge.py` — merge pipeline state machine (integration point)
-- `src/claudeutils/validation/learnings.py` — existing validator (extend with orphan check)
+- `src/edify/worktree/resolve.py` — current resolver (rewrite target)
+- `src/edify/worktree/merge.py` — merge pipeline state machine (integration point)
+- `src/edify/validation/learnings.py` — existing validator (extend with orphan check)
 - `tests/test_worktree_merge_conflicts.py` — existing merge tests (extend with integration tests)
 - `tests/test_validation_learnings.py` — existing validator tests (extend with orphan tests)
 
@@ -181,9 +181,9 @@ Source: `plans/merge-lifecycle-audit/brief.md` (2026-03-02)
 
 ### Key files
 
-- `src/claudeutils/worktree/merge.py` — merge phases, `_phase4_merge_commit_and_precommit`
-- `src/claudeutils/worktree/cli.py` — `_update_session_and_amend`, `rm()`
-- `src/claudeutils/worktree/remerge.py` — session.md/learnings.md structural merge
+- `src/edify/worktree/merge.py` — merge phases, `_phase4_merge_commit_and_precommit`
+- `src/edify/worktree/cli.py` — `_update_session_and_amend`, `rm()`
+- `src/edify/worktree/remerge.py` — session.md/learnings.md structural merge
 - `tests/test_worktree_rm_after_merge.py` — existing integration tests (from wt-rm-dirty)
 
 ---
@@ -210,7 +210,7 @@ The delivery workflow (`/handoff` → `/commit` → plan-archive → trim) has n
 
 Memory-index supercession pass at plan delivery. After writing/updating the primary decision entry:
 1. Scan `agents/memory-index.md` for entries whose trigger phrases overlap with the new entry's domain
-2. Resolve candidates via `claudeutils _recall resolve`
+2. Resolve candidates via `edify _recall resolve`
 3. Compare against new entry — contradictory entries get deleted, partially overlapping entries get updated
 4. Remove stale memory-index triggers pointing to deleted entries
 

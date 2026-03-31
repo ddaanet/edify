@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.when.resolver import resolve
+from edify.when.resolver import resolve
 
 
 def test_hyphenated_trigger_matches_title_case_heading(tmp_path: Path) -> None:

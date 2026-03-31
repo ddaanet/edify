@@ -4,7 +4,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
+from edify.cli import cli
 
 
 def test_null_query_exits_silently() -> None:

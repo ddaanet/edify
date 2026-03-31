@@ -4,13 +4,13 @@ import json
 import subprocess
 from unittest.mock import MagicMock, patch
 
-from claudeutils.statusline.context import (
+from edify.statusline.context import (
     calculate_context_tokens,
     get_git_status,
     get_python_env,
     get_thinking_state,
 )
-from claudeutils.statusline.models import (
+from edify.statusline.models import (
     ContextUsage,
     ContextWindowInfo,
     CostInfo,
@@ -250,7 +250,7 @@ def test_calculate_context_tokens_from_transcript() -> None:
     )
 
     # Mock Path.stat() and Path.open() to return transcript JSONL
-    with patch("claudeutils.statusline.context.Path") as mock_path_class:
+    with patch("edify.statusline.context.Path") as mock_path_class:
         # Mock the Path instance
         mock_path_instance = MagicMock()
 
@@ -294,7 +294,7 @@ def test_calculate_context_tokens_missing_transcript() -> None:
     )
 
     # Mock Path to raise FileNotFoundError when opening missing file
-    with patch("claudeutils.statusline.context.Path") as mock_path_class:
+    with patch("edify.statusline.context.Path") as mock_path_class:
         # Mock the Path instance
         mock_path_instance = MagicMock()
 

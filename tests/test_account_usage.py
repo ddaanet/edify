@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from claudeutils.account import UsageCache
+from edify.account import UsageCache
 
 
 def test_usage_cache_get_stale() -> None:

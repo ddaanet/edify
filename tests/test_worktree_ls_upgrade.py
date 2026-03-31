@@ -6,8 +6,8 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
-from claudeutils.worktree.git_ops import _parse_worktree_list
+from edify.worktree.cli import worktree
+from edify.worktree.git_ops import _parse_worktree_list
 
 
 def test_porcelain_flag_exists() -> None:

@@ -4,7 +4,7 @@
 
 ### Phase 0: Pre-history — Agent Instructions as Proto-Memory (Sep 2025–Jan 2026)
 
-Before memory-index.md existed, agent instructions *were* the memory system. The evolution from flat rules to structured memory predates claudeutils by five months.
+Before memory-index.md existed, agent instructions *were* the memory system. The evolution from flat rules to structured memory predates edify by five months.
 
 | Date | Repo | Hash | Event |
 |------|------|------|-------|
@@ -249,14 +249,14 @@ Design discussion that refined how external knowledge enters the system.
 **When:** Sep 30, 2025 (rules.md) → Nov 28, 2025 (oklch-theme "Agent Memory")
 **What changed:** Agent instructions evolved from human-curated static rules (rules.md, `7b0a4b4`) to an agent→file write loop (oklch-theme, `b0c0d64`). The oklch-theme AGENTS.md was titled "Agent Memory" and instructed: "At the end of each session, perform a retrospective and update this file with reusable feedback."
 **Evidence:** rules `7b0a4b4`, oklch-theme `b0c0d64`.
-**Significance:** The memory problem was identified before claudeutils existed. Each agent session started blank; the file was the persistence mechanism. The oklch-theme approach — agent writes to the same file it reads — is the simplest memory architecture. Its limitation: unbounded growth, no structure, no cross-project sharing.
+**Significance:** The memory problem was identified before edify existed. Each agent session started blank; the file was the persistence mechanism. The oklch-theme approach — agent writes to the same file it reads — is the simplest memory architecture. Its limitation: unbounded growth, no structure, no cross-project sharing.
 
 ### Inflection 0.5: Structured File Taxonomy (Jan 2026)
 
 **When:** Jan 12, 2026
 **What changed:** home introduced a file organization table separating behavioral direction (AGENTS.md), session context (session.md), design rationale (design-decisions.md), and artifacts (plans/). Memory was distributed across files by content type rather than dumped into a single file.
 **Evidence:** home `e31a4c0`.
-**Significance:** This is the architectural predecessor of the memory-index. The problem it solved: a single AGENTS.md containing rules, session state, decisions, and plans grows unwieldy. The solution: separate files with defined roles. This taxonomy transferred directly to claudeutils.
+**Significance:** This is the architectural predecessor of the memory-index. The problem it solved: a single AGENTS.md containing rules, session state, decisions, and plans grows unwieldy. The solution: separate files with defined roles. This taxonomy transferred directly to edify.
 
 ### Inflection 1: Always-Loaded to Active Lookup
 
@@ -329,4 +329,4 @@ Human-written flat rules (rules, Sep 2025)
                         → 0% spontaneous recall confirmed (Mar 2026)
 ```
 
-The pre-claudeutils history (Sep 2025–Jan 2026) adds five months of evidence showing the memory problem was identified and iterated on before the formal memory-index existed. The post-measurement history (Feb 20 onward) shows the shift from "give agents better tools" to "make infrastructure do the recalling."
+The pre-edify history (Sep 2025–Jan 2026) adds five months of evidence showing the memory problem was identified and iterated on before the formal memory-index existed. The post-measurement history (Feb 20 onward) shows the shift from "give agents better tools" to "make infrastructure do the recalling."

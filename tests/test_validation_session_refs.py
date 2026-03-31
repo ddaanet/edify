@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.validation.session_refs import check_tmp_references, validate
+from edify.validation.session_refs import check_tmp_references, validate
 
 
 class TestCheckTmpReferences:

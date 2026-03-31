@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
-from claudeutils.models import FeedbackItem, FeedbackType, SessionInfo
+from edify.cli import cli
+from edify.models import FeedbackItem, FeedbackType, SessionInfo
 
 
 def test_collect_single_session_with_feedback(
@@ -33,8 +33,8 @@ def test_collect_single_session_with_feedback(
     def mock_extract(session_id: str, project_dir: str) -> list[FeedbackItem]:
         return [feedback_item]
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["collect"])
@@ -96,8 +96,8 @@ def test_collect_multiple_sessions(
     def mock_extract(session_id: str, project_dir: str) -> list[FeedbackItem]:
         return feedback_by_session.get(session_id, [])
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["collect"])
@@ -156,8 +156,8 @@ def test_collect_with_subagents(
         # extract_feedback_recursively returns main + subagent feedback
         return [main_1, main_2, sub_1, sub_2]
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["collect"])
@@ -202,8 +202,8 @@ def test_collect_skips_malformed_session(
         # Simulate extraction error for malformed session
         raise ValueError("Malformed data")
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["collect"])
@@ -254,8 +254,8 @@ def test_collect_output_to_file(
     def mock_extract(session_id: str, project_dir: str) -> list[FeedbackItem]:
         return [feedback_item]
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["collect", "--output", str(output_file)])

@@ -2,7 +2,7 @@
 
 ## Context
 
-The claudeutils feedback pipeline (`discovery.py`, `parsing.py`, `extraction.py`, `filtering.py`) operates on a single project directory. It extracts feedback types (tool denials, interruptions, messages) but cannot:
+The edify feedback pipeline (`discovery.py`, `parsing.py`, `extraction.py`, `filtering.py`) operates on a single project directory. It extracts feedback types (tool denials, interruptions, messages) but cannot:
 
 - Scan across multiple project directories (worktrees)
 - Extract specific directive types (`p:`, `d:`) from session transcripts
@@ -21,7 +21,7 @@ The claudeutils feedback pipeline (`discovery.py`, `parsing.py`, `extraction.py`
 ## Feature Gap
 
 **FR-1: Multi-project session scanning**
-Scan sessions across `~/code/claudeutils`, `~/code/claudeutils-wt/*`, and `~/code/claudeutils-*`. The existing pipeline's `--project` flag accepts one directory. Three worktree location conventions exist.
+Scan sessions across `~/code/edify`, `~/code/edify-wt/*`, and `~/code/edify-*`. The existing pipeline's `--project` flag accepts one directory. Three worktree location conventions exist.
 
 **FR-2: Directive extraction**
 Extract hook-processed directive types (`p:`, `d:`) from user messages. Current `parsing.py` only classifies tool denials, interruptions, and generic messages — no directive-type awareness.
@@ -38,7 +38,7 @@ Analysis of 30 `p:` directives across 337 sessions showed `p:`-originated tasks 
 
 ## Integration Path
 
-The prototypes use `claudeutils.paths.encode_project_path` already. Natural integration points:
+The prototypes use `edify.paths.encode_project_path` already. Natural integration points:
 - `discovery.py` — add multi-project session listing
 - `parsing.py` — add directive type detection
 - `cli.py` — add `--projects` flag or auto-detect worktrees

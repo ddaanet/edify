@@ -9,12 +9,12 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.session.commit import (
+from edify.session.commit import (
     CommitInputError,
     _split_sections,
     parse_commit_input,
 )
-from claudeutils.session.commit_gate import (
+from edify.session.commit_gate import (
     CleanFileError,
     validate_files,
     vet_check,
@@ -261,7 +261,7 @@ def test_validate_files_amend(tmp_path: Path) -> None:
 
 
 def test_vet_check_no_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """No [tool.claudeutils.commit] section → passes."""
+    """No [tool.edify.commit] section → passes."""
     monkeypatch.chdir(tmp_path)
     (tmp_path / "pyproject.toml").write_text("[tool.ruff]\n")
 
@@ -273,7 +273,7 @@ def test_vet_check_pass(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None
     """File matches pattern with fresh report → passes."""
     monkeypatch.chdir(tmp_path)
     (tmp_path / "pyproject.toml").write_text(
-        '[tool.claudeutils.commit]\nrequire-review = ["src/**/*.py"]\n'
+        '[tool.edify.commit]\nrequire-review = ["src/**/*.py"]\n'
     )
     src = tmp_path / "src" / "foo.py"
     src.parent.mkdir(parents=True)
@@ -296,7 +296,7 @@ def test_vet_check_unreviewed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     """File matches pattern with no report → unreviewed."""
     monkeypatch.chdir(tmp_path)
     (tmp_path / "pyproject.toml").write_text(
-        '[tool.claudeutils.commit]\nrequire-review = ["src/**/*.py"]\n'
+        '[tool.edify.commit]\nrequire-review = ["src/**/*.py"]\n'
     )
     src = tmp_path / "src" / "foo.py"
     src.parent.mkdir(parents=True)
@@ -313,7 +313,7 @@ def test_vet_check_stale(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
     """Report older than source file → stale."""
     monkeypatch.chdir(tmp_path)
     (tmp_path / "pyproject.toml").write_text(
-        '[tool.claudeutils.commit]\nrequire-review = ["src/**/*.py"]\n'
+        '[tool.edify.commit]\nrequire-review = ["src/**/*.py"]\n'
     )
     # Create report first (older mtime)
     report_dir = tmp_path / "plans" / "bar" / "reports"
@@ -339,7 +339,7 @@ def test_vet_check_stale(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
 def test_vet_check_stale_with_explicit_cwd(tmp_path: Path) -> None:
     """vet_check with explicit cwd detects stale without monkeypatch.chdir."""
     (tmp_path / "pyproject.toml").write_text(
-        '[tool.claudeutils.commit]\nrequire-review = ["src/**/*.py"]\n'
+        '[tool.edify.commit]\nrequire-review = ["src/**/*.py"]\n'
     )
 
     report_dir = tmp_path / "plans" / "bar" / "reports"

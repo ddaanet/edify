@@ -223,7 +223,7 @@ Agreement momentum detection (S3) failed across two improvement cycles. The prag
   → LLM Limitation Awareness — metacognitive dead end (oklch-theme, Dec 2025)
     → Cognitive protocols — overengineered, removed in 3 days (tuick, Dec 2025)
       → Structural enforcement — "require protocol read" (home, Jan 2026)
-        → Formalized pushback fragment (claudeutils, Feb 13)
+        → Formalized pushback fragment (edify, Feb 13)
           → S3/S4 fail — rules rationalized past (Feb 13)
             → Research: sycophancy ≠ reasoning engagement (Feb 13-14)
               → Disagree-first overcorrects to contrarianism (Feb 15)
@@ -232,7 +232,7 @@ Agreement momentum detection (S3) failed across two improvement cycles. The prag
                     → Grounding gates — tool-call verification (Feb 28)
 ```
 
-The pre-claudeutils history adds context: pushback wasn't a natural starting point — agents were initially told not to push back. The evolution required overcoming an established anti-pushback convention, testing and rejecting overengineered metacognition (tuick's cognitive protocols), and arriving at the same structural enforcement principle that would later govern the entire system.
+The pre-edify history adds context: pushback wasn't a natural starting point — agents were initially told not to push back. The evolution required overcoming an established anti-pushback convention, testing and rejecting overengineered metacognition (tuick's cognitive protocols), and arriving at the same structural enforcement principle that would later govern the entire system.
 
 ---
 

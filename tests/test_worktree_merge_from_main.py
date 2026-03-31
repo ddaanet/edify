@@ -8,15 +8,15 @@ from unittest.mock import patch
 
 import pytest
 
-from claudeutils.worktree.merge import (
+from edify.worktree.merge import (
     _format_conflict_report,
     _phase1_validate_clean_trees,
     _phase3_merge_parent,
     _phase4_merge_commit_and_precommit,
     merge,
 )
-from claudeutils.worktree.remerge import remerge_session_md
-from claudeutils.worktree.resolve import resolve_session_md
+from edify.worktree.remerge import remerge_session_md
+from edify.worktree.resolve import resolve_session_md
 from tests.fixtures_worktree import _run_git
 
 
@@ -125,7 +125,7 @@ def test_phase4_skips_lifecycle_when_from_main(
     monkeypatch.chdir(repo)
 
     with patch(
-        "claudeutils.planstate.inference._parse_lifecycle_status",
+        "edify.planstate.inference._parse_lifecycle_status",
         return_value="reviewed",
     ):
         _phase4_merge_commit_and_precommit("feature", from_main=True)
@@ -347,7 +347,7 @@ def test_phase3_passes_from_main_to_auto_resolve(
 
     with (
         patch(
-            "claudeutils.worktree.merge._auto_resolve_known_conflicts",
+            "edify.worktree.merge._auto_resolve_known_conflicts",
             return_value=[],
         ) as mock_resolve,
         contextlib.suppress(SystemExit),

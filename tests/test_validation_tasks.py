@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from claudeutils.validation.tasks import (
+from edify.validation.tasks import (
     check_history,
     extract_learning_keys,
     extract_task_names,
@@ -117,14 +117,14 @@ class TestExtractLearningKeys:
 class TestGetSessionFromCommit:
     """Tests for get_session_from_commit function."""
 
-    @patch("claudeutils.validation.tasks.subprocess.run")
+    @patch("edify.validation.tasks.subprocess.run")
     def test_success(self, mock_run: MagicMock) -> None:
         """Successful retrieval of session from commit."""
         mock_run.return_value = MagicMock(stdout="line 1\nline 2\nline 3", returncode=0)
         result = get_session_from_commit("HEAD", Path("agents/session.md"))
         assert result == ["line 1", "line 2", "line 3"]
 
-    @patch("claudeutils.validation.tasks.subprocess.run")
+    @patch("edify.validation.tasks.subprocess.run")
     def test_not_found(self, mock_run: MagicMock) -> None:
         """Graceful handling when commit file not found."""
         mock_run.side_effect = subprocess.CalledProcessError(1, "git")
@@ -134,7 +134,7 @@ class TestGetSessionFromCommit:
 class TestGetMergeParents:
     """Tests for get_merge_parents function."""
 
-    @patch("claudeutils.validation.tasks.subprocess.run")
+    @patch("edify.validation.tasks.subprocess.run")
     def test_in_merge(self, mock_run: MagicMock) -> None:
         """Detect merge in progress."""
         mock_run.side_effect = [
@@ -143,7 +143,7 @@ class TestGetMergeParents:
         ]
         assert get_merge_parents() == ("head_hash", "merge_head_hash")
 
-    @patch("claudeutils.validation.tasks.subprocess.run")
+    @patch("edify.validation.tasks.subprocess.run")
     def test_not_in_merge(self, mock_run: MagicMock) -> None:
         """Not in a merge returns None."""
         mock_run.return_value = MagicMock(returncode=1)
@@ -153,7 +153,7 @@ class TestGetMergeParents:
 class TestGetStagedSession:
     """Tests for get_staged_session function."""
 
-    @patch("claudeutils.validation.tasks.subprocess.run")
+    @patch("edify.validation.tasks.subprocess.run")
     def test_success(self, mock_run: MagicMock) -> None:
         """Successful retrieval of staged session."""
         mock_run.return_value = MagicMock(
@@ -164,7 +164,7 @@ class TestGetStagedSession:
             "staged line 2",
         ]
 
-    @patch("claudeutils.validation.tasks.subprocess.run")
+    @patch("edify.validation.tasks.subprocess.run")
     def test_not_staged(self, mock_run: MagicMock) -> None:
         """Graceful handling when file not staged."""
         mock_run.side_effect = subprocess.CalledProcessError(1, "git")
@@ -174,9 +174,9 @@ class TestGetStagedSession:
 class TestGetNewTasks:
     """Tests for get_new_tasks function."""
 
-    @patch("claudeutils.validation.tasks.get_staged_session")
-    @patch("claudeutils.validation.tasks.get_merge_parents")
-    @patch("claudeutils.validation.tasks.get_session_from_commit")
+    @patch("edify.validation.tasks.get_staged_session")
+    @patch("edify.validation.tasks.get_merge_parents")
+    @patch("edify.validation.tasks.get_session_from_commit")
     def test_regular_commit(
         self,
         mock_session: MagicMock,
@@ -193,10 +193,10 @@ class TestGetNewTasks:
         result = get_new_tasks(Path("agents/session.md"))
         assert "Task Two" in result
 
-    @patch("claudeutils.validation.tasks.subprocess.run")
-    @patch("claudeutils.validation.tasks.get_staged_session")
-    @patch("claudeutils.validation.tasks.get_merge_parents")
-    @patch("claudeutils.validation.tasks.get_session_from_commit")
+    @patch("edify.validation.tasks.subprocess.run")
+    @patch("edify.validation.tasks.get_staged_session")
+    @patch("edify.validation.tasks.get_merge_parents")
+    @patch("edify.validation.tasks.get_session_from_commit")
     def test_merge_commit(
         self,
         mock_session: MagicMock,
@@ -223,12 +223,12 @@ class TestGetNewTasks:
         assert "Task One" not in result
         assert "Task Two" not in result
 
-    @patch("claudeutils.validation.tasks.subprocess.run")
+    @patch("edify.validation.tasks.subprocess.run")
     def test_octopus_merge_error(self, mock_run: MagicMock) -> None:
         """Octopus merge detection raises error."""
         with (
-            patch("claudeutils.validation.tasks.get_merge_parents") as mock_merge,
-            patch("claudeutils.validation.tasks.get_staged_session") as mock_staged,
+            patch("edify.validation.tasks.get_merge_parents") as mock_merge,
+            patch("edify.validation.tasks.get_staged_session") as mock_staged,
         ):
             mock_merge.return_value = ("p1", "p2")
             mock_staged.return_value = []
@@ -240,19 +240,19 @@ class TestGetNewTasks:
 class TestCheckHistory:
     """Tests for check_history function."""
 
-    @patch("claudeutils.validation.tasks.subprocess.run")
+    @patch("edify.validation.tasks.subprocess.run")
     def test_found(self, mock_run: MagicMock) -> None:
         """Task name found in history."""
         mock_run.return_value = MagicMock(stdout="hash1\nhash2", returncode=0)
         assert check_history("Task Name") is True
 
-    @patch("claudeutils.validation.tasks.subprocess.run")
+    @patch("edify.validation.tasks.subprocess.run")
     def test_not_found(self, mock_run: MagicMock) -> None:
         """Task name not found in history."""
         mock_run.return_value = MagicMock(stdout="", returncode=0)
         assert check_history("Task Name") is False
 
-    @patch("claudeutils.validation.tasks.subprocess.run")
+    @patch("edify.validation.tasks.subprocess.run")
     def test_case_insensitive(self, mock_run: MagicMock) -> None:
         """History search is case-insensitive."""
         mock_run.return_value = MagicMock(stdout="hash1", returncode=0)
@@ -319,8 +319,8 @@ class TestValidate:
         assert len(errors) == 1
         assert "conflicts" in errors[0]
 
-    @patch("claudeutils.validation.tasks.check_history")
-    @patch("claudeutils.validation.tasks.get_new_tasks")
+    @patch("edify.validation.tasks.check_history")
+    @patch("edify.validation.tasks.get_new_tasks")
     def test_new_task_in_git_history(
         self,
         mock_new: MagicMock,

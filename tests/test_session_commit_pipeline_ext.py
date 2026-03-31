@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 import pytest
 
-from claudeutils.session.commit import CommitInput, CommitInputError
-from claudeutils.session.commit_pipeline import commit_pipeline
+from edify.session.commit import CommitInput, CommitInputError
+from edify.session.commit_pipeline import commit_pipeline
 from tests.pytest_helpers import (
     add_submodule,
     create_submodule_origin,
@@ -54,7 +54,7 @@ def test_commit_with_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     )
 
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(True, "All checks passed"),
     ):
         result = commit_pipeline(ci, cwd=parent)
@@ -98,7 +98,7 @@ def test_commit_submodule_no_message(
 
     with (
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             return_value=(True, "ok"),
         ),
         pytest.raises(CommitInputError, match="no ## Submodule"),
@@ -123,7 +123,7 @@ def test_commit_submodule_orphan_message(
     )
 
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(True, "ok"),
     ):
         result = commit_pipeline(ci, cwd=parent)
@@ -151,7 +151,7 @@ def test_commit_no_submodule_changes(
     )
 
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(True, "ok"),
     ):
         result = commit_pipeline(ci, cwd=parent)
@@ -188,7 +188,7 @@ def test_commit_amend_parent(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     )
 
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(True, "ok"),
     ):
         result = commit_pipeline(ci, cwd=tmp_path)
@@ -260,7 +260,7 @@ def test_commit_amend_submodule(
     )
 
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(True, "ok"),
     ):
         result = commit_pipeline(ci, cwd=parent)
@@ -306,7 +306,7 @@ def test_commit_amend_validation(
     )
 
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(True, "ok"),
     ):
         result = commit_pipeline(ci, cwd=tmp_path)
@@ -362,7 +362,7 @@ def test_commit_multi_submodule_order(
     )
 
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(True, "ok"),
     ):
         result = commit_pipeline(ci, cwd=parent)

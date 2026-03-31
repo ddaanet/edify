@@ -1,6 +1,6 @@
 """Pure-function unit tests for diff3_merge_segments resolution matrix."""
 
-from claudeutils.worktree.resolve import (
+from edify.worktree.resolve import (
     _format_conflict_segment,
     _resolve_heading,
     _segments_to_content_with_conflicts,

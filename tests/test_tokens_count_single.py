@@ -7,12 +7,12 @@ from unittest.mock import Mock
 import pytest
 from anthropic import AuthenticationError, RateLimitError
 
-from claudeutils.exceptions import (
+from edify.exceptions import (
     ApiAuthenticationError,
     ApiRateLimitError,
     FileReadError,
 )
-from claudeutils.tokens import (
+from edify.tokens import (
     ModelId,
     count_tokens_for_file,
 )

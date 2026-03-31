@@ -14,10 +14,11 @@ but we can measure:
 This gives a proxy for orchestrator context consumption when doing edits inline.
 
 Data source: ~/.claude/projects/ JSONL session files.
-Filters: claudeutils projects only, excludes sidechain entries.
+Filters: edify projects only, excludes sidechain entries.
 
 Output: TSV to stdout, summary to stderr.
 """
+
 import json
 import os
 import re
@@ -51,22 +52,31 @@ def extract_inline_sequences(entries):
     prev_context = "start"
 
     def flush_seq(next_context):
-        nonlocal current_seq, current_input_chars, current_read_chars, current_write_chars, prev_context
+        nonlocal \
+            current_seq, \
+            current_input_chars, \
+            current_read_chars, \
+            current_write_chars, \
+            prev_context
         if current_seq:
             # Only include sequences with at least one edit operation
             has_edit = any(tc["name"] in ("Edit", "Write") for tc in current_seq)
             if has_edit:
-                sequences.append({
-                    "tool_calls": current_seq,
-                    "total_input_chars": current_input_chars,
-                    "read_chars": current_read_chars,
-                    "write_chars": current_write_chars,
-                    "n_tools": len(current_seq),
-                    "n_edits": sum(1 for tc in current_seq if tc["name"] in ("Edit", "Write")),
-                    "n_reads": sum(1 for tc in current_seq if tc["name"] == "Read"),
-                    "prev_context": prev_context,
-                    "next_context": next_context,
-                })
+                sequences.append(
+                    {
+                        "tool_calls": current_seq,
+                        "total_input_chars": current_input_chars,
+                        "read_chars": current_read_chars,
+                        "write_chars": current_write_chars,
+                        "n_tools": len(current_seq),
+                        "n_edits": sum(
+                            1 for tc in current_seq if tc["name"] in ("Edit", "Write")
+                        ),
+                        "n_reads": sum(1 for tc in current_seq if tc["name"] == "Read"),
+                        "prev_context": prev_context,
+                        "next_context": next_context,
+                    }
+                )
         current_seq = []
         current_input_chars = 0
         current_read_chars = 0
@@ -140,7 +150,10 @@ def print_dist(label, values, unit=""):
     p50 = percentile(values, 50)
     p75 = percentile(values, 75)
     p90 = percentile(values, 90)
-    print(f"  {label} (n={n}): p25={p25:.0f}{unit} p50={p50:.0f}{unit} p75={p75:.0f}{unit} p90={p90:.0f}{unit} max={values[-1]:.0f}{unit}", file=sys.stderr)
+    print(
+        f"  {label} (n={n}): p25={p25:.0f}{unit} p50={p50:.0f}{unit} p75={p75:.0f}{unit} p90={p90:.0f}{unit} max={values[-1]:.0f}{unit}",
+        file=sys.stderr,
+    )
 
 
 def main():
@@ -148,7 +161,7 @@ def main():
     sessions_scanned = 0
 
     for proj_name in sorted(os.listdir(CLAUDE_PROJECTS_DIR)):
-        if "claudeutils" not in proj_name:
+        if "edify" not in proj_name:
             continue
         proj_path = CLAUDE_PROJECTS_DIR / proj_name
         if not proj_path.is_dir():
@@ -182,8 +195,17 @@ def main():
     print(f"Inline-edit sequences found: {len(all_seqs)}", file=sys.stderr)
 
     # --- TSV output ---
-    header = ["n_tools", "n_edits", "n_reads", "total_input_chars", "write_chars",
-              "prev_context", "next_context", "session", "project"]
+    header = [
+        "n_tools",
+        "n_edits",
+        "n_reads",
+        "total_input_chars",
+        "write_chars",
+        "prev_context",
+        "next_context",
+        "session",
+        "project",
+    ]
     print("\t".join(header))
     for s in all_seqs:
         row = [
@@ -200,9 +222,9 @@ def main():
         print("\t".join(row))
 
     # --- Summary stats ---
-    print(f"\n{'='*70}", file=sys.stderr)
+    print(f"\n{'=' * 70}", file=sys.stderr)
     print("INLINE EDIT SEQUENCE SUMMARY", file=sys.stderr)
-    print(f"{'='*70}", file=sys.stderr)
+    print(f"{'=' * 70}", file=sys.stderr)
 
     print_dist("tools per sequence", [s["n_tools"] for s in all_seqs])
     print_dist("edits per sequence", [s["n_edits"] for s in all_seqs])
@@ -211,17 +233,24 @@ def main():
     print_dist("write chars per sequence", [s["write_chars"] for s in all_seqs])
 
     # Sequences between Task calls (orchestrator doing inline work between delegations)
-    between_tasks = [s for s in all_seqs if s["prev_context"] == "task" and s["next_context"] == "task"]
+    between_tasks = [
+        s
+        for s in all_seqs
+        if s["prev_context"] == "task" and s["next_context"] == "task"
+    ]
     if between_tasks:
-        print(f"\n  Between-task sequences (orchestrator inline, n={len(between_tasks)}):", file=sys.stderr)
+        print(
+            f"\n  Between-task sequences (orchestrator inline, n={len(between_tasks)}):",
+            file=sys.stderr,
+        )
         print_dist("    tools", [s["n_tools"] for s in between_tasks])
         print_dist("    edits", [s["n_edits"] for s in between_tasks])
         print_dist("    write_chars", [s["write_chars"] for s in between_tasks])
 
     # Distribution of sequence sizes (how much work is typically done inline)
-    print(f"\n{'='*70}", file=sys.stderr)
+    print(f"\n{'=' * 70}", file=sys.stderr)
     print("INLINE SEQUENCE SIZE DISTRIBUTION", file=sys.stderr)
-    print(f"{'='*70}", file=sys.stderr)
+    print(f"{'=' * 70}", file=sys.stderr)
     size_buckets = defaultdict(int)
     for s in all_seqs:
         n = s["n_edits"]

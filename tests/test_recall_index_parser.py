@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.recall.index_parser import IndexEntry, parse_memory_index
+from edify.recall.index_parser import IndexEntry, parse_memory_index
 
 
 def test_parse_memory_index_simple_entry(tmp_path: Path) -> None:

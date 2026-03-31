@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.markdown import process_file, process_lines
+from edify.markdown import process_file, process_lines
 
 
 def test_import_process_lines() -> None:

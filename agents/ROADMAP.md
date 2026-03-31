@@ -1,6 +1,6 @@
 # Roadmap
 
-Future enhancement ideas for claudeutils.
+Future enhancement ideas for edify.
 
 ## Markdown Formatter Survey ✅
 
@@ -81,7 +81,7 @@ command-based MCP could provide shell execution without this overhead.
   sandboxing)
 - MCP would need equivalent safety guarantees
 
-**Measurement:** Use `claudeutils tokens` command to compare tool description overhead
+**Measurement:** Use `edify tokens` command to compare tool description overhead
 
 ## Claude Wrapper Generator (plan-claude-wrapper.md)
 

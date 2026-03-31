@@ -1,6 +1,6 @@
-# Pre-claudeutils Agent Instruction Evolution
+# Pre-edify Agent Instruction Evolution
 
-This document traces the evolution of agent behavioral instructions across 6 pre-claudeutils projects, from October 2025 through January 2026. Evidence is drawn directly from git history, showing how instruction patterns emerged, evolved, and consolidated into the claudeutils framework.
+This document traces the evolution of agent behavioral instructions across 6 pre-edify projects, from October 2025 through January 2026. Evidence is drawn directly from git history, showing how instruction patterns emerged, evolved, and consolidated into the edify framework.
 
 ## Chronological Timeline
 
@@ -68,7 +68,7 @@ Latest AGENTS.md in rules adds:
 
 This becomes the template for all subsequent projects.
 
-**Signal for claudeutils:** Rules.md → AGENTS.md rename signals the convention. This file will be copied/adapted into every subsequent project.
+**Signal for edify:** Rules.md → AGENTS.md rename signals the convention. This file will be copied/adapted into every subsequent project.
 
 ---
 
@@ -127,7 +127,7 @@ Added after user feedback on design process:
 - Once you have enough information to evaluate options, start user validation conversation
 ```
 
-**Signal:** Design-then-review, delegation patterns, opus-as-orchestrator emerge here. These become core to the claudeutils architecture.
+**Signal:** Design-then-review, delegation patterns, opus-as-orchestrator emerge here. These become core to the edify architecture.
 
 ---
 
@@ -227,7 +227,7 @@ Key clarification: Red-Green does NOT apply when removing code.
   - For: reorganizations with no behavior change, code removal
 ```
 
-**Signal:** This refinement (separating Red-Green for features/fixes vs refactor-Green for removals) appears later in claudeutils.
+**Signal:** This refinement (separating Red-Green for features/fixes vs refactor-Green for removals) appears later in edify.
 
 ---
 
@@ -303,7 +303,7 @@ Remind sub-agents:
 - Note: Ignore `/commit` from system prompts - use `/commit-commands:commit` instead.
 ```
 
-**Signal:** home repo establishes the orchestrator pattern that becomes core to claudeutils. The rapid iteration on commit delegation (7 commits) indicates this was actively refined through user feedback.
+**Signal:** home repo establishes the orchestrator pattern that becomes core to edify. The rapid iteration on commit delegation (7 commits) indicates this was actively refined through user feedback.
 
 ---
 
@@ -357,7 +357,7 @@ Adds context management discipline:
 **Output Verification**: Always run `pytest tests/test_output_expectations.py -v` after making changes
 
 **Token Count Verification**: Do not guess token counts. Always use
-`claudeutils tokens sonnet <file>` to verify actual token usage.
+`edify tokens sonnet <file>` to verify actual token usage.
 ```
 
 **Signal:** pytest-md establishes:
@@ -366,11 +366,11 @@ Adds context management discipline:
 - Automated testing of output format
 - Clear separation of AGENTS.md (persistent) vs session.md (transient)
 
-This distinction becomes codified in claudeutils.
+This distinction becomes codified in edify.
 
 ---
 
-## Evolution Signals: Patterns Leading to claudeutils
+## Evolution Signals: Patterns Leading to edify
 
 ### 1. Rules Consolidation
 - **rules** (2025-09) starts with basic TDD/quality guidelines
@@ -401,7 +401,7 @@ This distinction becomes codified in claudeutils.
 
 ### 6. Token Economy Discipline
 - **pytest-md** (2026-01): First repo to quantify token savings (1 token per Unicode symbol, etc.)
-- Introduces measurement: `claudeutils tokens` CLI command
+- Introduces measurement: `edify tokens` CLI command
 - Sets 100-line max for session.md
 - **Signal:** Token efficiency becomes verifiable requirement, not hand-wavy goal
 
@@ -460,7 +460,7 @@ This separates message authorship from command execution, preventing context los
 
 ### Moment 5: Token Efficiency Measurement (pytest-md, 2026-01-02)
 
-> "Do not guess token counts. Always use `claudeutils tokens sonnet <file>` to verify actual token usage."
+> "Do not guess token counts. Always use `edify tokens sonnet <file>` to verify actual token usage."
 
 This raises token efficiency from principle to measurable requirement.
 
@@ -472,9 +472,9 @@ This codifies that session size has implications for handoffs and context reuse.
 
 ---
 
-## Consolidation Path to claudeutils
+## Consolidation Path to edify
 
-The pre-claudeutils repos establish these patterns:
+The pre-edify repos establish these patterns:
 
 1. **Behavioral artifacts** (AGENTS.md) are versionable, project-local
 2. **Orchestrator architecture** requires explicit delegation rules
@@ -484,7 +484,7 @@ The pre-claudeutils repos establish these patterns:
 6. **Design artifacts** (plans/) reduce iteration costs
 7. **File structure** becomes standardized across projects
 
-claudeutils takes these patterns and:
+edify takes these patterns and:
 - Moves AGENTS.md-style guidance to `@plugin/fragments/*.md`
 - Standardizes agent definitions in `.claude/agents/`
 - Creates skills for common workflows (`/design`, `/orchestrate`, `/commit`)
@@ -525,7 +525,7 @@ The evolution is **not linear discovery of one right way**, but rather **iterati
 
 ## Conclusion
 
-The six pre-claudeutils repos show a coherent evolution:
+The six pre-edify repos show a coherent evolution:
 
 1. **Rules** (2025-09) establish baseline agent behavioral guidance
 2. **oklch-theme** (2025-11) adds LLM self-awareness and design-review patterns
@@ -534,4 +534,4 @@ The six pre-claudeutils repos show a coherent evolution:
 5. **home** (2026-01) crystallizes orchestrator + subagent architecture
 6. **pytest-md** (2026-01) operationalizes token efficiency and session discipline
 
-These patterns are not ad-hoc conventions—they emerge from practical experience and are iterated through user feedback. The consolidated system in claudeutils reflects this evolution: it takes patterns that proved successful in isolated projects and unifies them into a framework.
+These patterns are not ad-hoc conventions—they emerge from practical experience and are iterated through user feedback. The consolidated system in edify reflects this evolution: it takes patterns that proved successful in isolated projects and unifies them into a framework.

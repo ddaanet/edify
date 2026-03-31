@@ -8,8 +8,8 @@ import pytest
 from anthropic import APIError
 from pytest_mock import MockerFixture
 
-from claudeutils.exceptions import ApiError
-from claudeutils.tokens import (
+from edify.exceptions import ApiError
+from edify.tokens import (
     ModelId,
     TokenCount,
     calculate_total,
@@ -52,7 +52,7 @@ class TestCountTokensForFiles:
 
         # Bypass token cache so API mock is exercised
         mocker.patch(
-            "claudeutils.token_cache.get_default_cache",
+            "edify.token_cache.get_default_cache",
             side_effect=Exception("no cache"),
         )
 

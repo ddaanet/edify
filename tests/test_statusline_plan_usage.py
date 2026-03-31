@@ -2,8 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
-from claudeutils.account.usage import UsageCache
-from claudeutils.statusline.plan_usage import get_plan_usage
+from edify.account.usage import UsageCache
+from edify.statusline.plan_usage import get_plan_usage
 
 
 def test_usage_cache_ttl() -> None:
@@ -20,7 +20,7 @@ def test_get_plan_usage() -> None:
         "usage_7d_percent": 42,
     }
 
-    with patch("claudeutils.statusline.plan_usage.UsageCache") as mock_cache_class:
+    with patch("edify.statusline.plan_usage.UsageCache") as mock_cache_class:
         mock_instance = MagicMock()
         mock_cache_class.return_value = mock_instance
         mock_instance.get.return_value = mock_usage_data
@@ -39,7 +39,7 @@ def test_get_plan_usage_api_failure() -> None:
     Per D8 (fail-safe), API failures return None instead of raising.
     """
     # Mock UsageCache.get() to raise an exception
-    with patch("claudeutils.statusline.plan_usage.UsageCache") as mock_cache_class:
+    with patch("edify.statusline.plan_usage.UsageCache") as mock_cache_class:
         mock_instance = MagicMock()
         mock_cache_class.return_value = mock_instance
         mock_instance.get.side_effect = Exception("API call failed")

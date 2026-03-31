@@ -8,7 +8,7 @@ from textwrap import dedent
 
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
+from edify.cli import cli
 
 
 def test_diff_lists_changed_files(tmp_path: Path) -> None:

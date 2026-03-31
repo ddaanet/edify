@@ -225,7 +225,7 @@ Always document the reason in the ignore comment with a reference to the source.
 
 ## Project Context
 
-**Project:** Claude Code Feedback Extractor (claudeutils)
+**Project:** Claude Code Feedback Extractor (edify)
 
 **Goal:** Extract user feedback from Claude Code conversation history for retrospective analysis.
 

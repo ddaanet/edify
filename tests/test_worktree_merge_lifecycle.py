@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.worktree.merge import _append_lifecycle_delivered, merge
+from edify.worktree.merge import _append_lifecycle_delivered, merge
 from tests.fixtures_worktree import make_repo_with_branch
 
 

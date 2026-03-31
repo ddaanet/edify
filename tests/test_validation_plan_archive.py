@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.validation.plan_archive import (
+from edify.validation.plan_archive import (
     check_plan_archive_coverage,
     get_archive_headings,
     get_staged_plan_deletions,

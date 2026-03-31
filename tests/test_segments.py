@@ -1,6 +1,6 @@
 """Tests for segment parsing functionality."""
 
-from claudeutils.markdown import parse_segments, process_lines
+from edify.markdown import parse_segments, process_lines
 
 
 def test_parse_segments_empty_input() -> None:

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.worktree.resolve import (
+from edify.worktree.resolve import (
     _merge_session_contents,
     resolve_session_md,
 )
@@ -201,7 +201,7 @@ def test_resolve_session_md_fallback_outputs_to_stdout(
             return ""
         return ""
 
-    monkeypatch.setattr("claudeutils.worktree.resolve._git", mock_git)
+    monkeypatch.setattr("edify.worktree.resolve._git", mock_git)
     resolve_session_md(["agents/session.md"], slug="test")
 
     captured = capsys.readouterr()

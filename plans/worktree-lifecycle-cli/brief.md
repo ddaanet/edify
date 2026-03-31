@@ -97,7 +97,7 @@ Source: `plans/worktree-ad-hoc-task/requirements.md`
 ### Requirements
 
 **FR-1: Add task to session.md before worktree creation**
-When the user requests a focused worktree for a task not yet in session.md, the worktree skill (Mode A) must add the task entry before invoking `claudeutils _worktree new`. The CLI requires the task to exist for `move_task_to_worktree()` and `focus_session()`.
+When the user requests a focused worktree for a task not yet in session.md, the worktree skill (Mode A) must add the task entry before invoking `edify _worktree new`. The CLI requires the task to exist for `move_task_to_worktree()` and `focus_session()`.
 
 Acceptance criteria:
 - Skill detects task absence after reading session.md

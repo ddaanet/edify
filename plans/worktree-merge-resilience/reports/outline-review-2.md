@@ -53,8 +53,8 @@ None.
 
 2. **Segment parser location unspecified**
    - Location: Key decisions, "Segment parser reuse"
-   - Problem: "Lives in a shared location importable by both" is vague. Implementation would need to decide where to put it. `src/claudeutils/validation/learnings.py` already defines `extract_titles()` with the same `TITLE_PATTERN` regex and is the natural home.
-   - Fix: Added candidate location: `src/claudeutils/validation/learnings.py`.
+   - Problem: "Lives in a shared location importable by both" is vague. Implementation would need to decide where to put it. `src/edify/validation/learnings.py` already defines `extract_titles()` with the same `TITLE_PATTERN` regex and is the natural home.
+   - Fix: Added candidate location: `src/edify/validation/learnings.py`.
    - **Status**: FIXED
 
 3. **Trigger mechanism imprecise for `merged` state**
@@ -83,7 +83,7 @@ None.
 - Line 53: "replace internals (lines 145-167)" changed to "rewrite body (lines 148-167, keeping function signature at line 145)"
 - Line 86: Trigger mechanism replaced with specific git commands for staged and committed states
 - Line 88-90: Added timing nuance paragraph for `merged` state
-- Line 107: "Lives in a shared location" changed to candidate location in `src/claudeutils/validation/learnings.py`
+- Line 107: "Lives in a shared location" changed to candidate location in `src/edify/validation/learnings.py`
 
 ## Positive Observations
 

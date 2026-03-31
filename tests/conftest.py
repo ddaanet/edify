@@ -9,8 +9,8 @@ import pytest
 from anthropic import Anthropic
 from pytest_mock import MockerFixture
 
-from claudeutils.token_cache import TokenCache, create_cache_engine
-from claudeutils.tokens import ModelId
+from edify.token_cache import TokenCache, create_cache_engine
+from edify.tokens import ModelId
 
 pytest_plugins = ["tests.fixtures_worktree"]
 
@@ -55,7 +55,7 @@ def temp_project_dir(
 
     # Patch for discovery module (used in test_discovery and test_agent_files)
     monkeypatch.setattr(
-        "claudeutils.discovery.get_project_history_dir", mock_get_history
+        "edify.discovery.get_project_history_dir", mock_get_history
     )
 
     return project, history_dir
@@ -81,10 +81,10 @@ def temp_history_dir(
 
     # Patch both modules for recursive extraction testing
     monkeypatch.setattr(
-        "claudeutils.extraction.get_project_history_dir", mock_get_history
+        "edify.extraction.get_project_history_dir", mock_get_history
     )
     monkeypatch.setattr(
-        "claudeutils.discovery.get_project_history_dir", mock_get_history
+        "edify.discovery.get_project_history_dir", mock_get_history
     )
 
     return tmp_path / "project", history_dir
@@ -99,7 +99,7 @@ def mock_anthropic_client(mocker: MockerFixture) -> Callable[..., Mock]:
 
     Returns function accepting token_count (int, default 5) or side_effect
     parameters. Creates mock with spec=Anthropic, patches
-    claudeutils.tokens.Anthropic.
+    edify.tokens.Anthropic.
     """
 
     def factory(
@@ -117,7 +117,7 @@ def mock_anthropic_client(mocker: MockerFixture) -> Callable[..., Mock]:
             mock_client.messages.count_tokens.return_value = mock_response
 
         mocker.patch(
-            "claudeutils.tokens.Anthropic", return_value=mock_client, autospec=True
+            "edify.tokens.Anthropic", return_value=mock_client, autospec=True
         )
         return mock_client
 
@@ -200,28 +200,28 @@ def mock_token_counting(
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-key")
 
         # Mock Anthropic client to avoid instantiation with SOCKS proxy
-        mocker.patch("claudeutils.tokens_cli.Anthropic", autospec=True)
+        mocker.patch("edify.tokens_cli.Anthropic", autospec=True)
 
         mocker.patch(
-            "claudeutils.tokens_cli.resolve_model_alias",
+            "edify.tokens_cli.resolve_model_alias",
             return_value=ModelId(model_id),
         )
 
         # Use in-memory cache so counts flow through the cache layer without disk I/O
         mocker.patch(
-            "claudeutils.token_cache.get_default_cache",
+            "edify.token_cache.get_default_cache",
             return_value=TokenCache(create_cache_engine(":memory:")),
         )
 
         # Handle both single count and list of counts
         if isinstance(counts, list):
             mocker.patch(
-                "claudeutils.token_cache._count_tokens_for_content",
+                "edify.token_cache._count_tokens_for_content",
                 side_effect=counts,
             )
         else:
             mocker.patch(
-                "claudeutils.token_cache._count_tokens_for_content",
+                "edify.token_cache._count_tokens_for_content",
                 return_value=counts,
             )
 
@@ -254,14 +254,14 @@ def cli_base_mocks(
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-key")
 
     mocker.patch(
-        "claudeutils.token_cache.get_default_cache",
+        "edify.token_cache.get_default_cache",
         return_value=TokenCache(create_cache_engine(":memory:")),
     )
 
     return {
-        "anthropic": mocker.patch("claudeutils.tokens_cli.Anthropic", autospec=True),
+        "anthropic": mocker.patch("edify.tokens_cli.Anthropic", autospec=True),
         "resolve": mocker.patch(
-            "claudeutils.tokens_cli.resolve_model_alias", autospec=True
+            "edify.tokens_cli.resolve_model_alias", autospec=True
         ),
     }
 

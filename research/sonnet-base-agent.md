@@ -8,7 +8,7 @@
 
 ## Environment
 
-- Working directory: /Users/david/code/claudeutils
+- Working directory: /Users/david/code/edify
 - Git repository: Yes (branch: pipeline)
 - Platform: darwin
 - OS Version: Darwin 24.6.0

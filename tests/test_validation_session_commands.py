@@ -1,6 +1,6 @@
 """Tests for session.md command semantic validation."""
 
-from claudeutils.validation.session_commands import (
+from edify.validation.session_commands import (
     check_command_presence,
     check_command_semantics,
     check_skill_allowlist,

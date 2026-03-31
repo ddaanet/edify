@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
+from edify.worktree.cli import worktree
 
 
 def _git(*args: str, cwd: Path | None = None) -> str:
@@ -354,7 +354,7 @@ def test_conflict_output_contains_all_fields(
 
     # Hint line
     assert "Resolve conflicts" in output, f"Missing 'Resolve conflicts' in: {output}"
-    assert "claudeutils _worktree merge" in output, (
+    assert "edify _worktree merge" in output, (
         f"Missing merge command in: {output}"
     )
     assert "test-feature" in output, f"Missing slug in hint: {output}"

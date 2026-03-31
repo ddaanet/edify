@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from claudeutils.statusline.cli import statusline
-from claudeutils.statusline.models import (
+from edify.statusline.cli import statusline
+from edify.statusline.models import (
     ContextUsage,
     ContextWindowInfo,
     CostInfo,
@@ -35,7 +35,7 @@ def test_cli_line1_integration() -> None:
     # Test case 1: Clean git state with thinking enabled
     input_data = StatuslineInput(
         model=ModelInfo(display_name="Claude Sonnet 4"),
-        workspace=WorkspaceInfo(current_dir="claudeutils"),
+        workspace=WorkspaceInfo(current_dir="edify"),
         transcript_path="/path/to/transcript.md",
         context_window=ContextWindowInfo(
             current_usage=ContextUsage(
@@ -55,11 +55,11 @@ def test_cli_line1_integration() -> None:
 
     runner = CliRunner()
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
-        patch("claudeutils.statusline.cli.get_account_state") as mock_account,
-        patch("claudeutils.statusline.cli.get_plan_usage") as mock_plan,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_account_state") as mock_account,
+        patch("edify.statusline.cli.get_plan_usage") as mock_plan,
     ):
         # Mock clean git state
         mock_git.return_value = GitStatus(branch="tools-rewrite", dirty=False)
@@ -105,11 +105,11 @@ def test_cli_line1_integration() -> None:
 
     # Test case 2: Dirty git state
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
-        patch("claudeutils.statusline.cli.get_account_state") as mock_account,
-        patch("claudeutils.statusline.cli.get_plan_usage") as mock_plan,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_account_state") as mock_account,
+        patch("edify.statusline.cli.get_plan_usage") as mock_plan,
     ):
         # Mock dirty git state
         mock_git.return_value = GitStatus(branch="tools-rewrite", dirty=True)
@@ -132,11 +132,11 @@ def test_cli_line1_integration() -> None:
 
     # Test case 3: Thinking disabled
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
-        patch("claudeutils.statusline.cli.get_account_state") as mock_account,
-        patch("claudeutils.statusline.cli.get_plan_usage") as mock_plan,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_account_state") as mock_account,
+        patch("edify.statusline.cli.get_plan_usage") as mock_plan,
     ):
         # Mock thinking disabled
         mock_git.return_value = GitStatus(branch="tools-rewrite", dirty=False)
@@ -190,11 +190,11 @@ def test_cli_line2_integration() -> None:
 
     runner = CliRunner()
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
-        patch("claudeutils.statusline.cli.get_account_state") as mock_account,
-        patch("claudeutils.statusline.cli.get_plan_usage") as mock_plan,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_account_state") as mock_account,
+        patch("edify.statusline.cli.get_plan_usage") as mock_plan,
     ):
         # Mock plan mode with usage data
         mock_git.return_value = GitStatus(branch="main", dirty=False)
@@ -225,11 +225,11 @@ def test_cli_line2_integration() -> None:
 
     # Test case 2: Mode="api"
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
-        patch("claudeutils.statusline.cli.get_account_state") as mock_account,
-        patch("claudeutils.statusline.cli.get_api_usage") as mock_api,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_account_state") as mock_account,
+        patch("edify.statusline.cli.get_api_usage") as mock_api,
     ):
         # Mock api mode
         mock_git.return_value = GitStatus(branch="main", dirty=False)

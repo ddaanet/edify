@@ -31,7 +31,7 @@ The claude.ai conversation proposed: Remember → Ground → Handoff → Deliver
 **Hook:** Open with the Sep 2025 rules.md — 14 rules, flat markdown. End with CLAUDE.md + 23 fragments + 18 skills + 14 sub-agents. Six months, one person, trial and error.
 
 **Evidence sources:**
-- `pre-claudeutils-evolution.md` — rules → emojipack → tuick → home arc
+- `pre-edify-evolution.md` — rules → emojipack → tuick → home arc
 - `synthesis.md` §Phase 1, §Phase 2
 - `topic-1-memory-system.md` §Phase 0
 - `cross-repo-patterns.md` §Agent Instruction Evolution Arc
@@ -141,7 +141,7 @@ The claude.ai conversation proposed: Remember → Ground → Handoff → Deliver
 | synthesis.md | Phase 1-2 | | | devddaanet | |
 | cross-topic-connections.md | | Pattern 2 | Pattern 3, Arc 2 | Pattern 3 | Meta-Pattern, Arc 1, Arc 5 |
 | appendix-underlying-model.md | §New | §T4 | §T1 | §T3 | Full (capstone) |
-| pre-claudeutils-evolution.md | Main | | | | Pre-history |
+| pre-edify-evolution.md | Main | | | | Pre-history |
 | cross-repo-patterns.md | Evolution arc | | | | |
 | pre-agentic-baseline.md | Contrast | | | | |
 | parallel-projects.md | | | | | |

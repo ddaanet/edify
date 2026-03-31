@@ -5,14 +5,14 @@ from pathlib import Path
 import pytest
 from pytest_mock import MockerFixture
 
-from claudeutils.user_config import get_api_key
+from edify.user_config import get_api_key
 
 
 @pytest.fixture
 def config_dir(tmp_path: Path, mocker: MockerFixture) -> Path:
     """Redirect CONFIG_FILE to a tmp_path-based location."""
     config_file = tmp_path / "config.toml"
-    mocker.patch("claudeutils.user_config.CONFIG_FILE", config_file)
+    mocker.patch("edify.user_config.CONFIG_FILE", config_file)
     return tmp_path
 
 

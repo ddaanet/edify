@@ -4,8 +4,8 @@ import json
 from datetime import UTC, datetime
 from unittest.mock import patch
 
-from claudeutils.statusline.api_usage import get_api_usage, get_switchback_time
-from claudeutils.statusline.models import ApiUsageData
+from edify.statusline.api_usage import get_api_usage, get_switchback_time
+from edify.statusline.models import ApiUsageData
 
 
 def test_get_api_usage() -> None:
@@ -135,7 +135,7 @@ def test_get_switchback_time() -> None:
     asserts get_switchback_time() returns "02/03 14:30".
     """
     test_datetime = datetime(2026, 2, 3, 14, 30, tzinfo=UTC)
-    with patch("claudeutils.statusline.api_usage.read_switchback_plist") as mock_read:
+    with patch("edify.statusline.api_usage.read_switchback_plist") as mock_read:
         mock_read.return_value = test_datetime
 
         result = get_switchback_time()

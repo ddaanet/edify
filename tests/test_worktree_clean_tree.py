@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
+from edify.worktree.cli import worktree
 
 
 def test_clean_tree_session_files_exempt(
@@ -62,7 +62,7 @@ def test_clean_tree_dirty_source(
     monkeypatch.chdir(repo_with_submodule)
 
     # Add source file
-    src_dir = repo_with_submodule / "src" / "claudeutils"
+    src_dir = repo_with_submodule / "src" / "edify"
     src_dir.mkdir(parents=True)
     (src_dir / "cli.py").write_text('"""Main CLI module."""\n')
     subprocess.run(["git", "add", "src/"], check=True, capture_output=True)
@@ -80,7 +80,7 @@ def test_clean_tree_dirty_source(
 
     # Should exit 1 with dirty file list
     assert result.exit_code == 1
-    assert " M src/claudeutils/cli.py" in result.output
+    assert " M src/edify/cli.py" in result.output
 
 
 def test_add_commit_nothing_staged(
@@ -123,7 +123,7 @@ def test_merge_ours_clean_tree(
     subprocess.run(["git", "branch", "test-slug"], check=True, capture_output=True)
 
     # Test 1: Main repo dirty (source files) → should fail
-    src_dir = repo_with_submodule / "src" / "claudeutils"
+    src_dir = repo_with_submodule / "src" / "edify"
     src_dir.mkdir(parents=True)
     (src_dir / "cli.py").write_text('"""Module."""\n')
     subprocess.run(["git", "add", "src/"], check=True, capture_output=True)

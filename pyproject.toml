@@ -1,5 +1,5 @@
 [project]
-name = "claudeutils"
+name = "edify"
 version = "0.0.2"
 description = "Tools for managing Claude Code conversations and projects"
 readme = "README.md"
@@ -19,7 +19,7 @@ Homepage = "https://github.com/ddaanet/claudeutils"
 Repository = "https://github.com/ddaanet/claudeutils"
 
 [project.scripts]
-claudeutils = "claudeutils.cli:main"
+edify = "edify.cli:main"
 
 [dependency-groups]
 dev = [

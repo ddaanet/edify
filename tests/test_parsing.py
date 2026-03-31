@@ -3,8 +3,8 @@
 import pytest
 from pydantic import ValidationError
 
-from claudeutils.models import FeedbackItem, FeedbackType
-from claudeutils.parsing import (
+from edify.models import FeedbackItem, FeedbackType
+from edify.parsing import (
     extract_feedback_from_entry,
     is_trivial,
 )

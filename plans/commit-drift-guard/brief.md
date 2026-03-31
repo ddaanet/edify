@@ -16,5 +16,5 @@ The `_commit` CLI accepts a `## Files` list but has no mechanism to verify those
 
 ## Context
 
-Surfaced during deliverable review round 2 when `claudeutils _commit` was used interactively. The skill runs discovery (diff), then drafts a message, then calls `_commit` — time passes between review and commit. Background research needed on patterns.
+Surfaced during deliverable review round 2 when `edify _commit` was used interactively. The skill runs discovery (diff), then drafts a message, then calls `_commit` — time passes between review and commit. Background research needed on patterns.
 

@@ -18,7 +18,7 @@ Cycle 3 completed successfully. Implemented `cached_count_tokens_for_file()` wra
 
 ### GREEN Phase
 - Status: VERIFIED
-- Implementation: `cached_count_tokens_for_file()` in `src/claudeutils/token_cache.py`
+- Implementation: `cached_count_tokens_for_file()` in `src/edify/token_cache.py`
 - Line count: ~40 lines
 - Test result: All 11 tests in `test_token_cache.py` pass
 - Full suite result: 1625/1626 passed, 1 xfail (no regressions)
@@ -26,7 +26,7 @@ Cycle 3 completed successfully. Implemented `cached_count_tokens_for_file()` wra
 ### REFACTOR Phase
 - Status: COMPLETED
 - Linting: Passed for modified files
-  - `src/claudeutils/token_cache.py`: All checks passed
+  - `src/edify/token_cache.py`: All checks passed
   - `tests/test_token_cache.py`: All checks passed
 - Changes made:
   - Fixed import ordering in test file
@@ -35,11 +35,11 @@ Cycle 3 completed successfully. Implemented `cached_count_tokens_for_file()` wra
   - Fixed docstring formatting to satisfy D205 rule
 
 ## Files Modified
-- `/Users/david/code/claudeutils-wt/ar-token-cache/src/claudeutils/token_cache.py`
+- `/Users/david/code/edify-wt/ar-token-cache/src/edify/token_cache.py`
   - Added imports: `hashlib`, `Path`, `Anthropic`, `ModelId`, `count_tokens_for_file`
   - Added function: `cached_count_tokens_for_file()`
 
-- `/Users/david/code/claudeutils-wt/ar-token-cache/tests/test_token_cache.py`
+- `/Users/david/code/edify-wt/ar-token-cache/tests/test_token_cache.py`
   - Added imports: `hashlib`, `Path`, `Mock`, `MockerFixture`
   - Added `cached_count_tokens_for_file` to imports
   - Added class: `TestCachedCountTokens` with 3 test methods

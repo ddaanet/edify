@@ -21,8 +21,8 @@ Acceptance criteria:
 - Token counting mechanism exists to measure file sizes against budget
 - Index generation build step produces correct index from entry metadata
 - Concurrent entry writes conflict only on entries, never on index (index regenerates)
-- `claudeutils _recall resolve "when <trigger>"` works identically pre/post migration (backward compatible)
-- `parse_memory_index()` in `src/claudeutils/recall/index_parser.py` handles hierarchical structure at arbitrary depth
+- `edify _recall resolve "when <trigger>"` works identically pre/post migration (backward compatible)
+- `parse_memory_index()` in `src/edify/recall/index_parser.py` handles hierarchical structure at arbitrary depth
 - `/when` and `/how` CLI commands resolve entries through the hierarchy transparently
 - `/recall` loop behavior updated for multi-level traversal
 
@@ -105,13 +105,13 @@ Acceptance criteria:
 - No behavioral regression at existing pipeline recall points
 
 **FR-8: Recall tool consolidation**
-Consolidate the two recall CLI modules (`src/claudeutils/recall/` and `src/claudeutils/recall_cli/`) and the when resolver (`src/claudeutils/when/`) into a unified recall interface.
+Consolidate the two recall CLI modules (`src/edify/recall/` and `src/edify/recall_cli/`) and the when resolver (`src/edify/when/`) into a unified recall interface.
 
 Acceptance criteria:
 - Single CLI entry point for recall operations (resolve, check, diff)
 - `when` resolver integrated (not a separate module)
 - Resolver reads from memory submodule (FR-9) instead of `agents/` working tree paths
-- Backward-compatible CLI: `claudeutils _recall resolve` still works (time-limited — plan deprecation and removal of old paths)
+- Backward-compatible CLI: `edify _recall resolve` still works (time-limited — plan deprecation and removal of old paths)
 - Test coverage maintained (currently 20+ test files across the three modules)
 
 **FR-9: Memory submodule storage**
@@ -126,8 +126,8 @@ Acceptance criteria:
 - Memory submodule exists with shared branch
 - All worktrees can read current memory content after fast-forward
 - Writes from any worktree are visible to others after propagation
-- Worktree lifecycle code (`src/claudeutils/worktree/`) handles multiple submodules with per-submodule strategy (C-6)
-- `claudeutils _recall resolve` reads from submodule path transparently
+- Worktree lifecycle code (`src/edify/worktree/`) handles multiple submodules with per-submodule strategy (C-6)
+- `edify _recall resolve` reads from submodule path transparently
 
 **FR-10: Capture-time memory writes**
 Eliminate learnings.md staging area and /codify batch consolidation. Write decisions and memory entries to permanent locations at capture time — when the agent has richest context for routing (which file, which section, trigger keywords).
@@ -165,7 +165,7 @@ Acceptance criteria:
 
 **FR-12: Usage scoring**
 Track per-entry resolution frequency as informational signal. Absorbed from recall-pipeline.
-- Acceptance: `claudeutils _recall stats` shows per-entry resolution count and last-used date
+- Acceptance: `edify _recall stats` shows per-entry resolution count and last-used date
 - Note: Zero resolutions does not imply low value — scoring informs human judgment, not automated pruning
 
 **FR-13: Recall deduplication**
@@ -179,7 +179,7 @@ Detect and merge duplicate recall entries across decision files (`agents/decisio
 Hierarchical index must support thousands of entries (projected from bulk documentation conversion) without degrading lookup performance or agent context budget.
 
 **NFR-2: Backward compatibility**
-All existing CLI commands (`claudeutils _recall resolve`, `claudeutils _recall check`, `claudeutils _recall diff`, `claudeutils _when`) must continue working during migration. Old paths are time-limited — plan deprecation schedule and removal.
+All existing CLI commands (`edify _recall resolve`, `edify _recall check`, `edify _recall diff`, `edify _when`) must continue working during migration. Old paths are time-limited — plan deprecation schedule and removal.
 
 **NFR-3: Incremental migration**
 Migration from flat to hierarchical index can proceed incrementally — partial hierarchy (some domains split, others still flat) must work correctly.
@@ -199,13 +199,13 @@ FR-1 (hierarchical index) must be operational before FR-4 bulk conversion popula
 FR-1 requires token counting infrastructure to determine split boundaries. Token counting mechanism must exist before migration begins.
 
 **C-4: Existing infrastructure**
-Current infrastructure: `src/claudeutils/recall/` (9 modules), `src/claudeutils/recall_cli/` (2 modules), `src/claudeutils/when/` (5 modules), `agents/memory-index.md` (366 entries), `agents/learnings.md` (staging area — removed by FR-10), `/recall` skill, `/when` and `/how` skills, `/codify` skill (removed by FR-10), pretooluse-recall-check hook, 20+ test files. All must be accounted for during consolidation.
+Current infrastructure: `src/edify/recall/` (9 modules), `src/edify/recall_cli/` (2 modules), `src/edify/when/` (5 modules), `agents/memory-index.md` (366 entries), `agents/learnings.md` (staging area — removed by FR-10), `/recall` skill, `/when` and `/how` skills, `/codify` skill (removed by FR-10), pretooluse-recall-check hook, 20+ test files. All must be accounted for during consolidation.
 
 **C-5: Cross-worktree memory visibility**
 Memory must be accessible from all worktrees without merge-from-main. The submodule shared-branch model (FR-9) satisfies this — all worktrees fast-forward to the same branch head.
 
 **C-6: Worktree multi-submodule support**
-Worktree lifecycle code (`src/claudeutils/worktree/`) currently hardcodes `plugin` (38 occurrences across 4 files). Must be refactored to support multiple submodules with per-submodule strategy dispatch: plugin uses branch-per-worktree, memory submodule uses single-shared-branch. This is prerequisite infrastructure for FR-9.
+Worktree lifecycle code (`src/edify/worktree/`) currently hardcodes `plugin` (38 occurrences across 4 files). Must be refactored to support multiple submodules with per-submodule strategy dispatch: plugin uses branch-per-worktree, memory submodule uses single-shared-branch. This is prerequisite infrastructure for FR-9.
 
 ### Out of Scope
 

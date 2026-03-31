@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import _delete_branch, worktree
-from claudeutils.worktree.git_ops import _classify_branch, _is_branch_merged
+from edify.worktree.cli import _delete_branch, worktree
+from edify.worktree.git_ops import _classify_branch, _is_branch_merged
 from tests.fixtures_worktree import (
     BranchSpec,
     _run_git,

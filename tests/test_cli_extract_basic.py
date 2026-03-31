@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
-from claudeutils.models import FeedbackItem, FeedbackType
+from edify.cli import cli
+from edify.models import FeedbackItem, FeedbackType
 
 from . import pytest_helpers
 
@@ -32,9 +32,9 @@ def test_extract_command_basic(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
     def mock_extract(sid: str, proj: str) -> list[FeedbackItem]:
         return [feedback_item]
 
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
     monkeypatch.setattr(
-        "claudeutils.cli.get_project_history_dir",
+        "edify.cli.get_project_history_dir",
         lambda p: history_dir,
     )
     monkeypatch.chdir(project_dir)
@@ -71,9 +71,9 @@ def test_extract_with_output_flag(
 
     output_file = tmp_path / "feedback.json"
 
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
     monkeypatch.setattr(
-        "claudeutils.cli.get_project_history_dir",
+        "edify.cli.get_project_history_dir",
         lambda p: history_dir,
     )
     monkeypatch.chdir(project_dir)
@@ -104,9 +104,9 @@ def test_extract_with_project_flag(
         called_with.append((sid, proj))
         return []
 
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
     monkeypatch.setattr(
-        "claudeutils.cli.get_project_history_dir",
+        "edify.cli.get_project_history_dir",
         lambda p: history_dir,
     )
 
@@ -143,9 +143,9 @@ def test_extract_full_session_id(
     def mock_extract(sid: str, proj: str) -> list[FeedbackItem]:
         return [feedback_item]
 
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
     monkeypatch.setattr(
-        "claudeutils.cli.get_project_history_dir",
+        "edify.cli.get_project_history_dir",
         lambda p: history_dir,
     )
     monkeypatch.chdir(project_dir)
@@ -187,9 +187,9 @@ def test_extract_partial_prefix(
         called_with.append(sid)
         return [feedback_item]
 
-    monkeypatch.setattr("claudeutils.cli.extract_feedback_recursively", mock_extract)
+    monkeypatch.setattr("edify.cli.extract_feedback_recursively", mock_extract)
     monkeypatch.setattr(
-        "claudeutils.cli.get_project_history_dir",
+        "edify.cli.get_project_history_dir",
         lambda p: history_dir,
     )
     monkeypatch.chdir(project_dir)
@@ -217,7 +217,7 @@ def test_extract_ambiguous_prefix(
     (history_dir / f"{session_id2}.jsonl").write_text('{"test": 2}\n')
 
     monkeypatch.setattr(
-        "claudeutils.cli.get_project_history_dir",
+        "edify.cli.get_project_history_dir",
         lambda p: history_dir,
     )
     monkeypatch.chdir(project_dir)
@@ -241,7 +241,7 @@ def test_extract_no_matching_session(
     (history_dir / f"{session_id}.jsonl").write_text('{"test": 1}\n')
 
     monkeypatch.setattr(
-        "claudeutils.cli.get_project_history_dir",
+        "edify.cli.get_project_history_dir",
         lambda p: history_dir,
     )
     monkeypatch.chdir(project_dir)

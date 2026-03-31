@@ -10,7 +10,7 @@ Token counting, markdown cleanup, and formatter selection decisions.
 
 **Rationale:** Token counts vary by model; explicit model choice ensures accurate counts
 
-**CLI Usage:** `claudeutils tokens sonnet file.md`
+**CLI Usage:** `edify tokens sonnet file.md`
 
 **Implementation:** `count_tokens_for_file(path: Path, model: str)`
 
@@ -73,7 +73,7 @@ Token counting, markdown cleanup, and formatter selection decisions.
 
 **Decision:** Defer glob pattern expansion to future release
 
-**Rationale:** Simplify initial implementation; users can use shell expansion if needed (e.g., `claudeutils tokens *.md --model sonnet`)
+**Rationale:** Simplify initial implementation; users can use shell expansion if needed (e.g., `edify tokens *.md --model sonnet`)
 
 **Future:** May add built-in glob support in later version
 

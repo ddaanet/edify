@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.worktree.git_ops import _is_merge_commit, _is_merge_of
+from edify.worktree.git_ops import _is_merge_commit, _is_merge_of
 from tests.fixtures_worktree import _git_setup
 
 

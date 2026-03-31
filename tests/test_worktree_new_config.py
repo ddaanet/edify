@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
+from edify.worktree.cli import worktree
 
 
 def test_new_environment_initialization(
@@ -35,7 +35,7 @@ def test_new_environment_initialization(
             )
         return original_run(args, **kwargs)
 
-    monkeypatch.setattr("claudeutils.worktree.cli.subprocess.run", mock_run)
+    monkeypatch.setattr("edify.worktree.cli.subprocess.run", mock_run)
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["new", "--branch", "test-setup"])
@@ -150,7 +150,7 @@ def test_new_environment_init_failure(
             )
         return original_run(args, **kwargs)
 
-    monkeypatch.setattr("claudeutils.worktree.cli.subprocess.run", mock_run)
+    monkeypatch.setattr("edify.worktree.cli.subprocess.run", mock_run)
 
     runner = CliRunner()
     result = runner.invoke(worktree, ["new", "--branch", "test-failure"])

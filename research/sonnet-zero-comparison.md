@@ -277,7 +277,7 @@ Comparing the zero-subagent to baseline-subagent contexts:
 
 **Baseline subagent:**
 
-- Working Directory: /Users/david/code/claudeutils
+- Working Directory: /Users/david/code/edify
 
 **Zero subagent:**
 

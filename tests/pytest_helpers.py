@@ -44,7 +44,7 @@ def setup_cli_mocks(
         monkeypatch.setattr("os.getcwd", lambda: cwd)
     if history_dir:
         monkeypatch.setattr(
-            "claudeutils.cli.get_project_history_dir",
+            "edify.cli.get_project_history_dir",
             make_mock_history_dir(history_dir),
         )
 

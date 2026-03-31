@@ -7,8 +7,8 @@ from unittest.mock import Mock
 import anthropic
 import pytest
 
-from claudeutils.exceptions import ModelResolutionError
-from claudeutils.tokens import resolve_model_alias
+from edify.exceptions import ModelResolutionError
+from edify.tokens import resolve_model_alias
 
 
 class TestResolveModelAliasBasic:

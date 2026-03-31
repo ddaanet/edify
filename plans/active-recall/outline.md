@@ -8,17 +8,17 @@ Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. R
 
 **What (FR):** Token counting with caching for repeated calls (C-3 prerequisite for FR-1 split threshold).
 
-**How (DP):** sqlite cache via sqlalchemy wrapping existing `count_tokens_for_file()`. Composite key `(md5_hex, model_id)`, `last_used` for eviction, `platformdirs.user_cache_dir("claudeutils") / "token_cache.db"`.
+**How (DP):** sqlite cache via sqlalchemy wrapping existing `count_tokens_for_file()`. Composite key `(md5_hex, model_id)`, `last_used` for eviction, `platformdirs.user_cache_dir("edify") / "token_cache.db"`.
 
 **Type:** Implementation
 **Readiness:** Executable — all design decisions resolved (storage, schema, key structure, integration point).
 
-**Inputs:** `src/claudeutils/tokens.py`, `tokens_cli.py` (pre-existing)
+**Inputs:** `src/edify/tokens.py`, `tokens_cli.py` (pre-existing)
 **Outputs:** Cached token counting API — `count_tokens_for_file()` checks cache before Anthropic API call
 **Controls:** NFR-4 (token budget as design target)
 **Mechanism:** sonnet, worktree
 
-**File set:** `src/claudeutils/tokens.py`, new `src/claudeutils/token_cache.py` (or similar), tests
+**File set:** `src/edify/tokens.py`, new `src/edify/token_cache.py` (or similar), tests
 
 ---
 
@@ -33,18 +33,18 @@ Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. R
 **Type:** Implementation (refactor + migration)
 **Readiness:** Executable — merge targets identified, model unification approach clear.
 
-**Inputs:** `src/claudeutils/recall/` (9 modules), `src/claudeutils/recall_cli/` (2 modules), `src/claudeutils/when/` (5 modules), 22 test files (pre-existing)
-**Outputs:** Unified `src/claudeutils/recall/` module with single `IndexEntry` model, single CLI group, deprecation alias
+**Inputs:** `src/edify/recall/` (9 modules), `src/edify/recall_cli/` (2 modules), `src/edify/when/` (5 modules), 22 test files (pre-existing)
+**Outputs:** Unified `src/edify/recall/` module with single `IndexEntry` model, single CLI group, deprecation alias
 **Controls:** NFR-2 (backward compat during migration), C-4 (infrastructure accounting)
 **Mechanism:** sonnet, worktree
 
 **NFR-2 CLI disposition:**
-- `claudeutils _recall resolve` — preserved (canonical)
-- `claudeutils _recall check` — preserved in unified module
-- `claudeutils _recall diff` — preserved in unified module
-- `claudeutils _when` — thin deprecation alias with warning → removal after migration
+- `edify _recall resolve` — preserved (canonical)
+- `edify _recall check` — preserved in unified module
+- `edify _recall diff` — preserved in unified module
+- `edify _when` — thin deprecation alias with warning → removal after migration
 
-**File set:** `src/claudeutils/recall/`, `src/claudeutils/recall_cli/`, `src/claudeutils/when/`, `tests/` (22 files)
+**File set:** `src/edify/recall/`, `src/edify/recall_cli/`, `src/edify/when/`, `tests/` (22 files)
 
 ---
 
@@ -79,12 +79,12 @@ Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. R
 **Type:** Implementation (refactor)
 **Readiness:** Executable — scope clear (42 hardcoded refs), strategy dispatch pattern straightforward.
 
-**Inputs:** `src/claudeutils/worktree/` (4 affected files, pre-existing)
+**Inputs:** `src/edify/worktree/` (4 affected files, pre-existing)
 **Outputs:** Configurable submodule handling in worktree lifecycle, strategy dispatch for branch-per-worktree vs single-shared-branch
 **Controls:** C-6 (multi-submodule support)
 **Mechanism:** sonnet, worktree
 
-**File set:** `src/claudeutils/worktree/git_ops.py`, `merge.py`, `merge_state.py`, `cli.py`, tests
+**File set:** `src/edify/worktree/git_ops.py`, `merge.py`, `merge_state.py`, `cli.py`, tests
 
 ---
 
@@ -109,7 +109,7 @@ Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. R
 **Controls:** C-5 (cross-worktree visibility), FR-9 acceptance criteria
 **Mechanism:** sonnet, worktree
 
-**File set:** `.gitmodules`, `memory/` (new submodule), resolver config in `src/claudeutils/recall/`, propagation hook/script
+**File set:** `.gitmodules`, `memory/` (new submodule), resolver config in `src/edify/recall/`, propagation hook/script
 
 **Design question (S-J/S-D ordering):** S-D builds the hierarchical index. Two options: (a) S-J migrates existing flat content into submodule, S-D later restructures it into hierarchy inside submodule; (b) S-J creates empty submodule structure, S-D builds hierarchy directly inside it. Option (b) avoids double-migration but requires S-J before S-D implementation. Option (a) lets S-D start design in parallel. Recommended: S-J creates submodule with minimal scaffolding, S-D builds hierarchy directly in submodule. S-D's design phase can proceed without S-J; only S-D's implementation needs the submodule to exist.
 
@@ -145,7 +145,7 @@ Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. R
 **Controls:** NFR-1 (scaling), NFR-3 (incremental migration), NFR-4 (token budget targets)
 **Mechanism:** sonnet, worktree
 
-**File set:** `src/claudeutils/recall/index_parser.py`, `memory/` hierarchy (in submodule), `agents/memory-index.md` (removed after migration), index generation script, migration script, hook config, skill files (`/when`, `/how`), tests
+**File set:** `src/edify/recall/index_parser.py`, `memory/` hierarchy (in submodule), `agents/memory-index.md` (removed after migration), index generation script, migration script, hook config, skill files (`/when`, `/how`), tests
 
 **Tear decision (S-C/S-D coupling):** FR-5 scope includes "index hierarchy design" but structural decisions (branch/leaf, no mixed indices) are already resolved from design discussion. S-D proceeds with current hierarchy design. If S-C produces different hierarchy recommendations, they feed into S-D's design phase as revision input, not a blocker. The C→D knowledge edge is limited to entry format, not index structure. S-D does NOT depend on S-C.
 
@@ -171,7 +171,7 @@ Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. R
 **Controls:** FR-2 (per-entry class decision), FR-3 (partition by dependency)
 **Mechanism:** sonnet, worktree
 
-**File set:** `src/claudeutils/recall/models.py`, tests
+**File set:** `src/edify/recall/models.py`, tests
 
 **Recall note (automation profiles):** Per "when converting external documentation to recall entries" — `how` entries are automation-safe for extraction, `when` entries require hand-curation from operational experience. This distinction informs S-G's pipeline design (corrector intensity differs by class) and S-E's metadata model (class must be available for routing decisions).
 
@@ -452,9 +452,9 @@ S-D's design phase can proceed without S-J (design questions are about hierarchy
 
 | Infrastructure item | Handling sub-problem |
 |---|---|
-| `src/claudeutils/recall/` (9 modules) | S-B (consolidation target) |
-| `src/claudeutils/recall_cli/` (2 modules) | S-B (merged into recall/) |
-| `src/claudeutils/when/` (5 modules) | S-B (merged into recall/) |
+| `src/edify/recall/` (9 modules) | S-B (consolidation target) |
+| `src/edify/recall_cli/` (2 modules) | S-B (merged into recall/) |
+| `src/edify/when/` (5 modules) | S-B (merged into recall/) |
 | `agents/memory-index.md` (366 entries) | S-D (migrated to hierarchy in submodule) |
 | `agents/learnings.md` | S-L (removed) |
 | `/recall` skill | S-F (mode simplification) |

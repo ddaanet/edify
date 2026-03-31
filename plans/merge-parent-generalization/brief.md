@@ -17,11 +17,11 @@ Generalize `merge.py` to accept an arbitrary parent branch:
 
 ## Success Criteria
 
-- `claudeutils _worktree merge --parent <branch> <slug>` works for any named branch
+- `edify _worktree merge --parent <branch> <slug>` works for any named branch
 - `--from-main` remains as shorthand for `--parent main`
 - Existing merge behavior unchanged when no `--parent` specified
 
 ## References
 
-- `src/claudeutils/worktree/merge.py` — current implementation
+- `src/edify/worktree/merge.py` — current implementation
 - `tests/test_worktree_merge_from_main.py`, `tests/test_worktree_merge_parent.py` — existing tests

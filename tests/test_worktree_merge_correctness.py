@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.worktree.git_ops import _is_branch_merged
-from claudeutils.worktree.merge import (
+from edify.worktree.git_ops import _is_branch_merged
+from edify.worktree.merge import (
     _phase1_validate_clean_trees,
     _phase3_merge_parent,
     _phase4_merge_commit_and_precommit,

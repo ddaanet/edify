@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from claudeutils.planstate.aggregation import (
+from edify.planstate.aggregation import (
     TreeInfo,
     _commits_since_handoff,
     _is_dirty,
@@ -201,7 +201,7 @@ def test_aggregate_trees_no_dedup(tmp_path: Path) -> None:
         "\n"
     )
 
-    with patch("claudeutils.planstate.aggregation.subprocess.run") as mock_run:
+    with patch("edify.planstate.aggregation.subprocess.run") as mock_run:
         mock_run.return_value = MagicMock(returncode=0, stdout=porcelain)
         result = aggregate_trees(main_path)
 

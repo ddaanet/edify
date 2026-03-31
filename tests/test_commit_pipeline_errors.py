@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from claudeutils.session.commit import CommitInput
-from claudeutils.session.commit_pipeline import (
+from edify.session.commit import CommitInput
+from edify.session.commit_pipeline import (
     CommitResult,
     _error,
     _git_commit,
@@ -53,11 +53,11 @@ def test_pipeline_returns_failure_on_git_commit_error(
     # Mock only precommit (needs justfile) and _git_commit (need it to fail)
     with (
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             return_value=(True, "ok"),
         ),
         patch(
-            "claudeutils.session.commit_pipeline._git_commit",
+            "edify.session.commit_pipeline._git_commit",
             side_effect=subprocess.CalledProcessError(1, ["git", "commit"]),
         ),
     ):
@@ -88,11 +88,11 @@ def test_pipeline_returns_failure_on_stage_error(
     ci = CommitInput(files=["a.py"], message="update")
     with (
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             return_value=(True, "ok"),
         ),
         patch(
-            "claudeutils.session.commit_pipeline._stage_files",
+            "edify.session.commit_pipeline._stage_files",
             side_effect=subprocess.CalledProcessError(
                 128, ["git", "add"], stderr="fatal: staging failed"
             ),
@@ -158,16 +158,16 @@ def test_pipeline_validates_before_submodule_commit(
 
     with (
         patch(
-            "claudeutils.session.commit_pipeline.discover_submodules",
+            "edify.session.commit_pipeline.discover_submodules",
             return_value=["plugin"],
         ),
-        patch("claudeutils.session.commit_pipeline.validate_files"),
+        patch("edify.session.commit_pipeline.validate_files"),
         patch(
-            "claudeutils.session.commit_pipeline._commit_submodule",
+            "edify.session.commit_pipeline._commit_submodule",
             commit_sub,
         ),
         patch(
-            "claudeutils.session.commit_pipeline._validate",
+            "edify.session.commit_pipeline._validate",
             return_value=validate_fail,
         ),
     ):
@@ -227,11 +227,11 @@ def test_submodule_commit_failure_propagates(
 
     with (
         patch(
-            "claudeutils.session.commit_pipeline.discover_submodules",
+            "edify.session.commit_pipeline.discover_submodules",
             return_value=["plugin"],
         ),
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             return_value=(True, "ok"),
         ),
         patch("subprocess.run", side_effect=mock_run),
@@ -268,7 +268,7 @@ def test_commit_amend_no_edit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     ci = CommitInput(files=["tracked.py"], message=None, options={"amend", "no-edit"})
 
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(True, "ok"),
     ):
         result = commit_pipeline(ci, cwd=tmp_path)

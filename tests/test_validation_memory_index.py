@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.validation.memory_index import validate
+from edify.validation.memory_index import validate
 
 
 @pytest.fixture

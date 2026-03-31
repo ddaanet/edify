@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.validation.learnings import parse_segments
-from claudeutils.worktree.cli import worktree
+from edify.validation.learnings import parse_segments
+from edify.worktree.cli import worktree
 
 
 def _git(*args: str, cwd: Path | None = None) -> str:

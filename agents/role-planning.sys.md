@@ -291,7 +291,7 @@ Write sections in implementation order. Feature 1 is implemented first. Write pl
 
 ## Project Context
 
-**Project:** Claude Code Feedback Extractor (claudeutils)
+**Project:** Claude Code Feedback Extractor (edify)
 
 **Goal:** Extract user feedback from Claude Code conversation history for retrospective
 analysis.
@@ -342,15 +342,15 @@ just check            # Run ruff + mypy only
 just format           # Auto-format code
 
 # Tool usage
-claudeutils list                        # List all sessions
-claudeutils extract <prefix>            # Extract feedback by session prefix
-claudeutils extract <prefix> -o out.json  # Extract to file
-claudeutils list --project /path        # Use custom project directory
+edify list                        # List all sessions
+edify extract <prefix>            # Extract feedback by session prefix
+edify extract <prefix> -o out.json  # Extract to file
+edify list --project /path        # Use custom project directory
 
 # Token counting (requires ANTHROPIC_API_KEY)
-claudeutils tokens sonnet file.md       # Count tokens in a file
-claudeutils tokens opus file1 file2     # Count tokens across multiple files
-claudeutils tokens haiku file.md --json # JSON output format
+edify tokens sonnet file.md       # Count tokens in a file
+edify tokens opus file1 file2     # Count tokens across multiple files
+edify tokens haiku file.md --json # JSON output format
 
 # Dependency management
 uv add pytest         # Add dependency

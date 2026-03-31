@@ -7,7 +7,7 @@
 
 | Type | File | Lines | Change |
 |------|------|-------|--------|
-| Code | `src/claudeutils/worktree/resolve.py` | 163 | +53/−25 |
+| Code | `src/edify/worktree/resolve.py` | 163 | +53/−25 |
 | Test | `tests/test_worktree_merge_blocker_fixes.py` | 147 | New file |
 
 Conformance baseline: session.md completed-work description (no formal design document).

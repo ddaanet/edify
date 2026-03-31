@@ -26,7 +26,7 @@ These aren't density issues (no redundant helper pattern to extract). They're de
 
 ### Scope Decision Needed
 
-Is prepare-runbook.py in scope for the codebase sweep? The current requirements target `cli.py`, `merge.py`, `utils.py` — all in `src/claudeutils/worktree/`. prepare-runbook.py is in `plugin/bin/`. The structural design quality axis adds a different kind of work (architectural revision vs mechanical pattern replacement).
+Is prepare-runbook.py in scope for the codebase sweep? The current requirements target `cli.py`, `merge.py`, `utils.py` — all in `src/edify/worktree/`. prepare-runbook.py is in `plugin/bin/`. The structural design quality axis adds a different kind of work (architectural revision vs mechanical pattern replacement).
 
 Options:
 - **Expand sweep:** Add prepare-runbook.py + design quality axis. Larger scope, mixed work types.

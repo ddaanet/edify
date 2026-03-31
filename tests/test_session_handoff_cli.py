@@ -9,8 +9,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
-from claudeutils.session.handoff.pipeline import load_state, save_state
+from edify.cli import cli
+from edify.session.handoff.pipeline import load_state, save_state
 from tests.pytest_helpers import (
     add_submodule,
     create_submodule_origin,
@@ -314,7 +314,7 @@ def test_handoff_skips_empty_git_block(
     session_file = _setup_cli_repo(tmp_path)
 
     monkeypatch.setattr(
-        "claudeutils.session.handoff.cli.git_changes",
+        "edify.session.handoff.cli.git_changes",
         lambda: "",
     )
 

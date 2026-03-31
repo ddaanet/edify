@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
+from edify.worktree.cli import worktree
 
 
 def test_new_collision_detection(
@@ -213,7 +213,7 @@ def test_new_task_name_with_branch_override(
         marked.append((task, slug))
 
     monkeypatch.setattr(
-        "claudeutils.worktree.cli.add_slug_marker",
+        "edify.worktree.cli.add_slug_marker",
         mock_mark,
     )
 
@@ -265,7 +265,7 @@ def test_new_positional_task_name_derives_slug_with_session(
         marked.append((task, slug))
 
     monkeypatch.setattr(
-        "claudeutils.worktree.cli.add_slug_marker",
+        "edify.worktree.cli.add_slug_marker",
         mock_mark,
     )
 
@@ -312,7 +312,7 @@ def test_new_cleans_up_on_git_failure(
     init_repo(repo_path)
 
     monkeypatch.setattr(
-        "claudeutils.worktree.cli._setup_worktree",
+        "edify.worktree.cli._setup_worktree",
         lambda *a, **kw: (_ for _ in ()).throw(
             subprocess.CalledProcessError(255, "git worktree add")
         ),

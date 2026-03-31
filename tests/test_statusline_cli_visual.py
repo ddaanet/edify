@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from claudeutils.statusline.cli import statusline
-from claudeutils.statusline.display import StatuslineFormatter
-from claudeutils.statusline.models import (
+from edify.statusline.cli import statusline
+from edify.statusline.display import StatuslineFormatter
+from edify.statusline.models import (
     ContextUsage,
     ContextWindowInfo,
     CostInfo,
@@ -24,7 +24,7 @@ def test_cli_visual_line_structure() -> None:
     """Test that CLI outputs correct line structure with all visual elements."""
     input_data = StatuslineInput(
         model=ModelInfo(display_name="Claude Opus 4"),
-        workspace=WorkspaceInfo(current_dir="/Users/david/code/claudeutils"),
+        workspace=WorkspaceInfo(current_dir="/Users/david/code/edify"),
         transcript_path="/path/to/transcript.md",
         context_window=ContextWindowInfo(
             current_usage=ContextUsage(
@@ -44,12 +44,12 @@ def test_cli_visual_line_structure() -> None:
     runner = CliRunner()
 
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_python_env") as mock_python,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
-        patch("claudeutils.statusline.cli.get_account_state") as mock_account,
-        patch("claudeutils.statusline.cli.get_plan_usage") as mock_plan,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_python_env") as mock_python,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_account_state") as mock_account,
+        patch("edify.statusline.cli.get_plan_usage") as mock_plan,
     ):
         mock_git.return_value = GitStatus(branch="main", dirty=False)
         mock_python.return_value = PythonEnv(name=".venv")
@@ -123,12 +123,12 @@ def test_cli_double_space_separators() -> None:
     runner = CliRunner()
 
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_python_env") as mock_python,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
-        patch("claudeutils.statusline.cli.get_account_state") as mock_account,
-        patch("claudeutils.statusline.cli.get_plan_usage") as mock_plan,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_python_env") as mock_python,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_account_state") as mock_account,
+        patch("edify.statusline.cli.get_plan_usage") as mock_plan,
     ):
         mock_git.return_value = GitStatus(branch="main", dirty=False)
         mock_python.return_value = PythonEnv(name=None)
@@ -179,12 +179,12 @@ def test_cli_python_env_conditional() -> None:
 
     # Test case 1: With Python env
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_python_env") as mock_python,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
-        patch("claudeutils.statusline.cli.get_account_state") as mock_account,
-        patch("claudeutils.statusline.cli.get_plan_usage") as mock_plan,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_python_env") as mock_python,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_account_state") as mock_account,
+        patch("edify.statusline.cli.get_plan_usage") as mock_plan,
     ):
         mock_git.return_value = GitStatus(branch="main", dirty=False)
         mock_python.return_value = PythonEnv(name=".venv")
@@ -204,12 +204,12 @@ def test_cli_python_env_conditional() -> None:
 
     # Test case 2: Without Python env
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_python_env") as mock_python,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
-        patch("claudeutils.statusline.cli.get_account_state") as mock_account,
-        patch("claudeutils.statusline.cli.get_plan_usage") as mock_plan,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_python_env") as mock_python,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_account_state") as mock_account,
+        patch("edify.statusline.cli.get_plan_usage") as mock_plan,
     ):
         mock_git.return_value = GitStatus(branch="main", dirty=False)
         mock_python.return_value = PythonEnv(name=None)
@@ -254,12 +254,12 @@ def test_cli_ansi_color_preservation() -> None:
     runner = CliRunner()
 
     with (
-        patch("claudeutils.statusline.cli.get_git_status") as mock_git,
-        patch("claudeutils.statusline.cli.get_python_env") as mock_python,
-        patch("claudeutils.statusline.cli.get_thinking_state") as mock_thinking,
-        patch("claudeutils.statusline.cli.calculate_context_tokens") as mock_context,
-        patch("claudeutils.statusline.cli.get_account_state") as mock_account,
-        patch("claudeutils.statusline.cli.get_plan_usage") as mock_plan,
+        patch("edify.statusline.cli.get_git_status") as mock_git,
+        patch("edify.statusline.cli.get_python_env") as mock_python,
+        patch("edify.statusline.cli.get_thinking_state") as mock_thinking,
+        patch("edify.statusline.cli.calculate_context_tokens") as mock_context,
+        patch("edify.statusline.cli.get_account_state") as mock_account,
+        patch("edify.statusline.cli.get_plan_usage") as mock_plan,
     ):
         mock_git.return_value = GitStatus(branch="main", dirty=False)
         mock_python.return_value = PythonEnv(name=None)

@@ -1,6 +1,6 @@
 """Tests for blocker merge fixes: section positioning and deduplication."""
 
-from claudeutils.worktree.resolve import _merge_session_contents
+from edify.worktree.resolve import _merge_session_contents
 
 
 class TestBlockerSectionPositioning:

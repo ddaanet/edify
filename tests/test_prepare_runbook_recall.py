@@ -116,7 +116,7 @@ class TestResolveRecallEntries:
         assert resolve_recall_entries([]) == ""
 
     def test_calls_subprocess_with_triggers(self) -> None:
-        """Invokes claudeutils _recall resolve with all triggers."""
+        """Invokes edify _recall resolve with all triggers."""
         with patch.object(
             _mod.subprocess,
             "run",
@@ -124,7 +124,7 @@ class TestResolveRecallEntries:
         ) as mock_run:
             result = resolve_recall_entries(["when writing artifacts", "when testing"])
             call_args = mock_run.call_args[0][0]
-            assert call_args[:3] == ["claudeutils", "_recall", "resolve"]
+            assert call_args[:3] == ["edify", "_recall", "resolve"]
             assert "when writing artifacts" in call_args
             assert result == "# Resolved\ncontent"
 
@@ -136,7 +136,7 @@ class TestResolveRecallEntries:
     def test_returns_empty_on_binary_not_found(self) -> None:
         """FileNotFoundError (missing binary) returns empty string."""
         with patch.object(
-            _mod.subprocess, "run", side_effect=FileNotFoundError("claudeutils")
+            _mod.subprocess, "run", side_effect=FileNotFoundError("edify")
         ):
             assert resolve_recall_entries(["when something"]) == ""
 

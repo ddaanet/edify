@@ -372,8 +372,8 @@ All numeric thresholds (N values above) are ungrounded defaults requiring measur
 | Source | Used for |
 |--------|----------|
 | `agents/memory-index.md` (366 entries) | Empirical trigger format patterns, frequency analysis |
-| `src/claudeutils/when/resolver.py` | Heading construction, resolution chain |
-| `src/claudeutils/recall/index_parser.py` | Keyword extraction, entry parsing |
+| `src/edify/when/resolver.py` | Heading construction, resolution chain |
+| `src/edify/recall/index_parser.py` | Keyword extraction, entry parsing |
 | `agents/decisions/workflow-advanced.md` | Existing naming conventions (decision-2026-02-18, -02-24) |
 | `plans/active-recall/brief.md` | Architectural decisions, embedded keywords design |
 | `agents/learnings.md` | Hierarchical index anti-patterns (mixed nodes) |

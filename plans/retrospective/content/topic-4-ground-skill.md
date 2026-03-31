@@ -28,7 +28,7 @@ Evidence bundle for the "external research mandate" topic of the retrospective b
 
 ### Excerpt 1: The User Catches Confabulated Scoring
 
-**Session:** `bcab8b4c` | **Project:** main (claudeutils) | **Date:** 2026-02-16
+**Session:** `bcab8b4c` | **Project:** main (edify) | **Date:** 2026-02-16
 
 The user asked to "Establish grounded methodology to order and batch pending tasks." The agent produced a task prioritization document with subjective weights and no external anchoring. The user opened the output file, saw the problem, and interrupted:
 
@@ -58,7 +58,7 @@ Two parallel agents dispatched — internal brainstorm + external web search. Th
 
 ### Excerpt 3: Naming the Trigger — LLMs Can't Self-Assess "Ungrounded"
 
-**Session:** `dfd23c89` | **Project:** main (claudeutils) | **Date:** 2026-02-16
+**Session:** `dfd23c89` | **Project:** main (edify) | **Date:** 2026-02-16
 
 During the ground skill outline review, the user challenged the trigger wording:
 

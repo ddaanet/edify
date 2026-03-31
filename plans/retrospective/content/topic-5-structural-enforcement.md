@@ -28,7 +28,7 @@ Structural enforcement didn't begin with D+B anchoring. The first enforcement me
 | Read-before-act | Protocol read required | home, Jan 2026 |
 | Shared infrastructure | Agent-core submodule | home, Jan 2026 |
 
-The pre-history shows enforcement escalating through the same pattern as the claudeutils era — each mechanism addresses failures of the previous one — but at a coarser granularity. `just agent` prevents bad commits; role separation prevents wrong tool usage; platform config prevents configuration drift. The claudeutils era applies the same principle at the instruction-following level.
+The pre-history shows enforcement escalating through the same pattern as the edify era — each mechanism addresses failures of the previous one — but at a coarser granularity. `just agent` prevents bad commits; role separation prevents wrong tool usage; platform config prevents configuration drift. The edify era applies the same principle at the instruction-following level.
 
 ### Phase A: Foundation (Feb 8)
 
@@ -264,7 +264,7 @@ Topic injection (UPS Tier 2.75) was the attempt to use keyword matching for ambi
                           → Topic injection: semantic matching fails (Mar 1-6)
 ```
 
-Each rung exists because the previous one failed under a specific condition. The pre-claudeutils rungs (Oct 2025–Jan 2026) operated at the workflow level (commit gates, role separation, platform config). The claudeutils rungs (Feb–Mar 2026) operate at the instruction-following level (D+B anchoring, hooks). The principle is the same: replace advisory instructions with structural mechanisms.
+Each rung exists because the previous one failed under a specific condition. The pre-edify rungs (Oct 2025–Jan 2026) operated at the workflow level (commit gates, role separation, platform config). The edify rungs (Feb–Mar 2026) operate at the instruction-following level (D+B anchoring, hooks). The principle is the same: replace advisory instructions with structural mechanisms.
 
 ---
 

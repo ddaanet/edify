@@ -1,6 +1,6 @@
 """Tests for recall artifact parsing."""
 
-from claudeutils.recall_cli.artifact import parse_entry_keys_section, parse_trigger
+from edify.recall_cli.artifact import parse_entry_keys_section, parse_trigger
 
 
 def test_parse_entry_keys_section_returns_entries() -> None:

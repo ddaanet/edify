@@ -13,10 +13,10 @@ Measure actual distributions for all 5 threshold dimensions across the 366-entry
 Write `plans/prototypes/threshold-analyzer.py`.
 
 **Inputs:**
-- `agents/memory-index.md` — parsed via `parse_memory_index()` from `src/claudeutils/recall/index_parser.py`
-- `src/claudeutils/recall/relevance.py` — `score_relevance()` for pairwise overlap
-- `src/claudeutils/when/fuzzy.py` — `score_match()` for fuzzy matching
-- `src/claudeutils/recall/index_parser.py` — `extract_keywords()` for keyword analysis
+- `agents/memory-index.md` — parsed via `parse_memory_index()` from `src/edify/recall/index_parser.py`
+- `src/edify/recall/relevance.py` — `score_relevance()` for pairwise overlap
+- `src/edify/when/fuzzy.py` — `score_match()` for fuzzy matching
+- `src/edify/recall/index_parser.py` — `extract_keywords()` for keyword analysis
 
 **Measurements to compute:**
 

@@ -2,7 +2,7 @@
 
 Extracted: 2026-03-11
 
-## Pre-claudeutils Repos (6)
+## Pre-edify Repos (6)
 
 ### rules
 - **Path:** `~/code/rules`
@@ -30,7 +30,7 @@ Extracted: 2026-03-11
 - **Notes:** Gemini agent project. AGENTS.md titled "Agent Memory" with retrospective-driven rule updates. Added "LLM Limitation Awareness" section — earliest known metacognitive rules.
 
 ### box-api
-- **Path:** `~/code/claudeutils/scratch/box-api`
+- **Path:** `~/code/edify/scratch/box-api`
 - **Commits:** 46 (expected ~46)
 - **Date range:** 2025-11-14 to 2025-12-08
 - **Agentic commits (path):** 23 — heavy AGENTS.md activity
@@ -43,7 +43,7 @@ Extracted: 2026-03-11
 - **Notes:** Most AGENTS.md-heavy of the scratch repos. Shows cross-pollination from tuick project. Agent-specific `just` recipes pattern established here.
 
 ### emojipack
-- **Path:** `~/code/claudeutils/scratch/emojipack`
+- **Path:** `~/code/edify/scratch/emojipack`
 - **Commits:** 70 (expected ~70)
 - **Date range:** 2025-10-12 to 2026-01-08
 - **Agentic commits (path):** 8
@@ -54,7 +54,7 @@ Extracted: 2026-03-11
 - **Notes:** Earliest structured TDD rules. "Red-Green does not apply when removing code" — first exception-based refinement.
 
 ### home
-- **Path:** `~/code/claudeutils/scratch/home`
+- **Path:** `~/code/edify/scratch/home`
 - **Commits:** 76 (expected ~76)
 - **Date range:** 2025-11-05 to 2026-01-13
 - **Agentic commits (path):** 8
@@ -66,7 +66,7 @@ Extracted: 2026-03-11
 - **Notes:** Most architecturally significant. Introduces: orchestrator model (opus orchestrates, haiku/sonnet execute), file organization table, session management, sub-agent delegation protocol, commit workflow delegation. All in 2 days.
 
 ### pytest-md
-- **Path:** `~/code/claudeutils/scratch/pytest-md`
+- **Path:** `~/code/edify/scratch/pytest-md`
 - **Commits:** 55 (expected ~55)
 - **Date range:** 2026-01-02 to 2026-01-12
 - **Agentic commits (path):** 19

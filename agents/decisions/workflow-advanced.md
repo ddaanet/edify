@@ -34,7 +34,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Anti-pattern:** Dropping articles (a, an, the) from trigger phrases when the heading contains them. `_build_heading()` does literal reconstruction — missing articles cause section lookup failure.
 
-**Correct pattern:** Keep trigger phrasing aligned with section heading text (case-insensitive, but articles must be present if in heading). Verify with `claudeutils _recall resolve "when <trigger>"` before committing.
+**Correct pattern:** Keep trigger phrasing aligned with section heading text (case-insensitive, but articles must be present if in heading). Verify with `edify _recall resolve "when <trigger>"` before committing.
 
 **Evidence:** Batch-resolve failed during planstate-delivered runbook execution. Code fix deferred to plans/when-resolve-fix (fuzzy heading match in `_resolve_trigger()`).
 
@@ -167,7 +167,7 @@ Requirements handling, knowledge management, and specialized workflow patterns.
 
 **Anti-pattern:** Full excerpts per entry (heading + source + relevance + content excerpt). Creates stale snapshots — if decision files change between artifact creation and consumption, excerpts are outdated.
 
-**Correct pattern:** Entry keys only. Artifact lists trigger phrases with 1-line relevance notes. Downstream consumers batch-resolve via `claudeutils _recall resolve` to get current content. No staleness, no excerpt duplication.
+**Correct pattern:** Entry keys only. Artifact lists trigger phrases with 1-line relevance notes. Downstream consumers batch-resolve via `edify _recall resolve` to get current content. No staleness, no excerpt duplication.
 
 ### When Requirements Capture Needs Recall
 

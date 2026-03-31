@@ -1,6 +1,6 @@
 # Recall Artifact: Active Recall System
 
-Resolve entries via `claudeutils _recall resolve` — do not use inline summaries.
+Resolve entries via `edify _recall resolve` — do not use inline summaries.
 
 ## Entry Keys
 

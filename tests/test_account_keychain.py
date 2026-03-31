@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock, patch
 
-from claudeutils.account import Keychain
+from edify.account import Keychain
 
 
 def test_keychain_find_success() -> None:
@@ -14,7 +14,7 @@ def test_keychain_find_success() -> None:
     mock_result.returncode = 0
 
     with patch(
-        "claudeutils.account.keychain.subprocess.run", return_value=mock_result
+        "edify.account.keychain.subprocess.run", return_value=mock_result
     ) as mock_run:
         # Create Keychain instance and call find
         keychain = Keychain()
@@ -46,7 +46,7 @@ def test_keychain_add() -> None:
     mock_result.returncode = 0
 
     with patch(
-        "claudeutils.account.keychain.subprocess.run", return_value=mock_result
+        "edify.account.keychain.subprocess.run", return_value=mock_result
     ) as mock_run:
         # Create Keychain instance and call add
         keychain = Keychain()
@@ -74,7 +74,7 @@ def test_keychain_delete() -> None:
     mock_result.returncode = 0
 
     with patch(
-        "claudeutils.account.keychain.subprocess.run", return_value=mock_result
+        "edify.account.keychain.subprocess.run", return_value=mock_result
     ) as mock_run:
         # Create Keychain instance and call delete
         keychain = Keychain()
@@ -102,7 +102,7 @@ def test_keychain_find_not_found() -> None:
     mock_result.returncode = 1  # Non-zero indicates entry not found
 
     with patch(
-        "claudeutils.account.keychain.subprocess.run", return_value=mock_result
+        "edify.account.keychain.subprocess.run", return_value=mock_result
     ) as mock_run:
         # Create Keychain instance and call find
         keychain = Keychain()
@@ -132,7 +132,7 @@ def test_keychain_command_not_found() -> None:
     """Test Keychain.find() gracefully handles security command unavailable."""
     # Mock subprocess.run to raise FileNotFoundError when security command doesn't exist
     with patch(
-        "claudeutils.account.keychain.subprocess.run",
+        "edify.account.keychain.subprocess.run",
         side_effect=FileNotFoundError("security command not found"),
     ) as mock_run:
         # Create Keychain instance and call find

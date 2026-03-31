@@ -14,7 +14,7 @@ The `/design` skill is the highest-leverage ungrounded workflow skill, gating al
 
 ## Current Design Skill Structure
 
-**Source:** `/Users/david/code/claudeutils/.claude/skills/design/SKILL.md`
+**Source:** `/Users/david/code/edify/.claude/skills/design/SKILL.md`
 
 ### Phase 0: Complexity Triage
 
@@ -287,7 +287,7 @@ plugin/bin/when-resolve.py "when behavioral code" "when complexity" "when triage
 
 ## Learnings Applicable to Design Process
 
-From `/Users/david/code/claudeutils/agents/learnings.md`:
+From `/Users/david/code/edify/agents/learnings.md`:
 
 **"When companion tasks bundled into /design invocation"**
 - Anti-pattern: Agent treats companion work as exempt from design process — no recall, no skill loading, no classification gate. Rationalizes "well-specified from prior RCA" to skip all process steps.
@@ -327,7 +327,7 @@ From `agents/decisions/workflow-planning.md`:
 
 ### Gap 1: Ungrounded Foundation
 
-The grounding audit (`/Users/david/code/claudeutils/plans/reports/workflow-grounding-audit.md`) explicitly states:
+The grounding audit (`/Users/david/code/edify/plans/reports/workflow-grounding-audit.md`) explicitly states:
 > "`/design` in particular has accumulated 4+ structural patches (triage gate, sufficiency gate, recall artifact, D+B anchors) that might have been unnecessary with grounded foundations."
 
 The skill is reactive-patched rather than principled. Current structure reflects:
@@ -396,13 +396,13 @@ The audit identified 4+ structural patches on /design. Each patch is locally cor
 
 ## Key File Paths
 
-- `/Users/david/code/claudeutils/.claude/skills/design/SKILL.md` — main skill
-- `/Users/david/code/claudeutils/.claude/skills/design/references/research-protocol.md` — A.3-A.5
-- `/Users/david/code/claudeutils/.claude/skills/design/references/discussion-protocol.md` — Phase B
-- `/Users/david/code/claudeutils/.claude/skills/design/references/design-content-rules.md` — Phase C.1
-- `/Users/david/code/claudeutils/plans/reports/workflow-grounding-audit.md` — grounding priority + provenance
-- `/Users/david/code/claudeutils/agents/decisions/workflow-optimization.md` — "design ceremony" and "design resolves to simple" decisions
-- `/Users/david/code/claudeutils/agents/decisions/workflow-planning.md` — triage behavioral code, late-addition requirements decisions
-- `/Users/david/code/claudeutils/agents/decisions/workflow-core.md` — TDD/oneshot integration, three-tier assessment
-- `/Users/david/code/claudeutils/agents/decisions/workflow-execution.md` — outline-first design, model selection, agent-name validation
-- `/Users/david/code/claudeutils/agents/learnings.md` — companion task + recall gate learnings
+- `/Users/david/code/edify/.claude/skills/design/SKILL.md` — main skill
+- `/Users/david/code/edify/.claude/skills/design/references/research-protocol.md` — A.3-A.5
+- `/Users/david/code/edify/.claude/skills/design/references/discussion-protocol.md` — Phase B
+- `/Users/david/code/edify/.claude/skills/design/references/design-content-rules.md` — Phase C.1
+- `/Users/david/code/edify/plans/reports/workflow-grounding-audit.md` — grounding priority + provenance
+- `/Users/david/code/edify/agents/decisions/workflow-optimization.md` — "design ceremony" and "design resolves to simple" decisions
+- `/Users/david/code/edify/agents/decisions/workflow-planning.md` — triage behavioral code, late-addition requirements decisions
+- `/Users/david/code/edify/agents/decisions/workflow-core.md` — TDD/oneshot integration, three-tier assessment
+- `/Users/david/code/edify/agents/decisions/workflow-execution.md` — outline-first design, model selection, agent-name validation
+- `/Users/david/code/edify/agents/learnings.md` — companion task + recall gate learnings

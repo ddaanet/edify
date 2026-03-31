@@ -4,13 +4,13 @@
 
 ### D-1: STATUS rendering via Stop hook + trigger convention
 
-**Mechanism:** Agent outputs `Status.` as final line → Stop hook detects `^Status\.$` → hook runs `claudeutils _status` → returns ANSI-colored `systemMessage` → user sees rich output bypassing dim styling.
+**Mechanism:** Agent outputs `Status.` as final line → Stop hook detects `^Status\.$` → hook runs `edify _status` → returns ANSI-colored `systemMessage` → user sees rich output bypassing dim styling.
 
 **Agent contribution:** Emit trigger string. No rendering, no Bash call to `_status`.
 
 **Hook contract:**
 - Trigger regex: `^Status\.$` (full line match, prevents false positives)
-- Runs `claudeutils _status` on match
+- Runs `edify _status` on match
 - Returns `systemMessage` with ANSI reset (`\033[0m`) at start of each line
 - `additionalContext` tells agent status was displayed (prevents re-render)
 - Infinite loop guard via `stop_hook_active` check
@@ -28,7 +28,7 @@
 | Context-mode logic | Input validation (clean files, missing sections) |
 | Vet checkpoint classification (trivial/non-trivial/report) | Vet check execution (pattern match + mtime) |
 
-**Composition:** Skill builds structured markdown input → pipes to `claudeutils _commit` via Bash stdin → outputs `Status.` trigger on success.
+**Composition:** Skill builds structured markdown input → pipes to `edify _commit` via Bash stdin → outputs `Status.` trigger on success.
 
 **CLI input format (from `commit.py` parser):**
 ```
@@ -83,7 +83,7 @@ SP-H must ship first — trigger string is meaningless without the hook. SP-1 an
 ## Files Affected
 
 **SP-H:**
-- NEW: `src/claudeutils/hooks/__init__.py`, `src/claudeutils/hooks/stop_status_display.py`
+- NEW: `src/edify/hooks/__init__.py`, `src/edify/hooks/stop_status_display.py`
 - NEW: `tests/test_stop_hook_status.py`
 - EDIT: `.claude/settings.json` (register Stop hook)
 

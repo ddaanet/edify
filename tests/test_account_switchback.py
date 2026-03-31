@@ -4,8 +4,8 @@ import plistlib
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from claudeutils.account import create_switchback_plist
-from claudeutils.account.switchback import read_switchback_plist
+from edify.account import create_switchback_plist
+from edify.account.switchback import read_switchback_plist
 
 
 def test_create_switchback_plist(tmp_path: Path) -> None:
@@ -84,9 +84,9 @@ def test_read_switchback_plist() -> None:
     mock_file_obj.__exit__.return_value = False
 
     with (
-        patch("claudeutils.account.switchback.Path.home", return_value=mock_path),
+        patch("edify.account.switchback.Path.home", return_value=mock_path),
         patch(
-            "claudeutils.account.switchback.plistlib.load", return_value=mock_plist_data
+            "edify.account.switchback.plistlib.load", return_value=mock_plist_data
         ),
         patch("builtins.open", return_value=mock_file_obj),
     ):
@@ -106,7 +106,7 @@ def test_read_switchback_plist_missing(tmp_path: Path) -> None:
     mock_home = tmp_path / "home"
     mock_home.mkdir()
 
-    with patch("claudeutils.account.switchback.Path.home", return_value=mock_home):
+    with patch("edify.account.switchback.Path.home", return_value=mock_home):
         result = read_switchback_plist()
 
     # Verify result is None when plist file doesn't exist

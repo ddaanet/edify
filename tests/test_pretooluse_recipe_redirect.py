@@ -125,21 +125,21 @@ class TestRedirectPatterns:
         )
         assert result
         assert (
-            "claudeutils _worktree" in result["hookSpecificOutput"]["additionalContext"]
+            "edify _worktree" in result["hookSpecificOutput"]["additionalContext"]
         )
         assert (
-            "claudeutils _worktree merge"
+            "edify _worktree merge"
             not in result["hookSpecificOutput"]["additionalContext"]
         )
 
     def test_git_merge_redirect(self) -> None:
-        """Git merge redirects to claudeutils _worktree merge."""
+        """Git merge redirects to edify _worktree merge."""
         result = call_hook(
             {"tool_name": "Bash", "tool_input": {"command": "git merge main"}}
         )
         assert result
         assert (
-            "claudeutils _worktree merge"
+            "edify _worktree merge"
             in result["hookSpecificOutput"]["additionalContext"]
         )
 

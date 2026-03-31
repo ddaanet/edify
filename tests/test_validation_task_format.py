@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.validation.tasks import validate, validate_task_name_format
+from edify.validation.tasks import validate, validate_task_name_format
 
 
 class TestValidateTaskNameFormat:

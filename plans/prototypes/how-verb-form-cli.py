@@ -8,13 +8,13 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
-from claudeutils.paths import encode_project_path
+from edify.paths import encode_project_path
 
 # Match Bash tool calls containing _recall resolve with "how" args
 RECALL_HOW_RE = re.compile(r'_recall\s+resolve\b.*?"how\s+([^"]+)"', re.DOTALL)
 # Also match direct /how via CLI
 DIRECT_HOW_RE = re.compile(
-    r'claudeutils\s+_(?:when|how)\s+resolve\s+"?how\s+([^"\n]+)"?'
+    r'edify\s+_(?:when|how)\s+resolve\s+"?how\s+([^"\n]+)"?'
 )
 
 INFINITIVE_RE = re.compile(r"^to\s+(\w+)\b")
@@ -46,7 +46,7 @@ def classify(query: str) -> str:
 
 def main() -> None:
     projects_dir = Path.home() / ".claude" / "projects"
-    encoded = encode_project_path("/Users/david/code/claudeutils")
+    encoded = encode_project_path("/Users/david/code/edify")
 
     queries: list[str] = []
 

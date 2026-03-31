@@ -2,7 +2,7 @@
 
 import pytest
 
-from claudeutils.hooks.stop_status_display import (
+from edify.hooks.stop_status_display import (
     format_ansi,
     process_hook,
     should_trigger,

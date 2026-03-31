@@ -9,7 +9,7 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
-from claudeutils.paths import encode_project_path
+from edify.paths import encode_project_path
 
 INFINITIVE_RE = re.compile(r"^to\s+(\w+)\b")
 GERUND_RE = re.compile(r"^(\w+ing)\b")
@@ -41,7 +41,7 @@ def classify(query: str) -> str:
 
 def main() -> None:
     projects_dir = Path.home() / ".claude" / "projects"
-    encoded = encode_project_path("/Users/david/code/claudeutils")
+    encoded = encode_project_path("/Users/david/code/edify")
 
     queries: list[tuple[str, str]] = []  # (args, session_id)
 

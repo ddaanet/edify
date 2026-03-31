@@ -6,24 +6,24 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from claudeutils.paths import encode_project_path
+from edify.paths import encode_project_path
 
 PENDING_PATTERN = re.compile(r'^\s*(?:p|pending)\s*:\s*(.+)', re.IGNORECASE)
 TASK_NAME_PATTERN = re.compile(r'\*\*(.+?)\*\*')
 TASK_LINE_PATTERN = re.compile(r'(?:task\s*(?:name)?|name)\s*:\s*\*?\*?(.+?)\*?\*?\s*$', re.IGNORECASE | re.MULTILINE)
 
 PROJECT_DIRS = [
-    Path.home() / "code" / "claudeutils",
+    Path.home() / "code" / "edify",
 ]
 # Worktree sibling container
-wt_container = Path.home() / "code" / "claudeutils-wt"
+wt_container = Path.home() / "code" / "edify-wt"
 if wt_container.exists():
     for d in sorted(wt_container.iterdir()):
         if d.is_dir():
             PROJECT_DIRS.append(d)
-# Old convention: claudeutils-*
+# Old convention: edify-*
 for d in sorted((Path.home() / "code").iterdir()):
-    if d.is_dir() and d.name.startswith("claudeutils-") and d.name != "claudeutils-wt":
+    if d.is_dir() and d.name.startswith("edify-") and d.name != "edify-wt":
         PROJECT_DIRS.append(d)
 
 

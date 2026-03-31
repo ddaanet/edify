@@ -24,7 +24,7 @@ Evidence bundles for the agentic programming retrospective blog post. Sep 2025�
 | File | Content |
 |------|---------|
 | `pre-agentic-baseline.md` | calendar-cli, celebtwin — contrast before agent instructions |
-| `pre-claudeutils-evolution.md` | 6 pre-claudeutils repos: rules → oklch-theme → home → plugin |
+| `pre-edify-evolution.md` | 6 pre-edify repos: rules → oklch-theme → home → plugin |
 | `repo-inventory.md` | Per-repo commit inventory across 16 repos |
 | `cross-repo-patterns.md` | Instruction evolution arc, pattern propagation, plugin extraction |
 | `topic-cross-reference.md` | New evidence mapped to existing 5 topics |

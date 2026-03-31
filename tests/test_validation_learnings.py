@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.validation.learnings import validate
+from edify.validation.learnings import validate
 
 
 def test_valid_learnings_file_returns_no_errors(tmp_path: Path) -> None:

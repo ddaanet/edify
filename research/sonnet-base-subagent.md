@@ -294,7 +294,7 @@ EOF
 
 ### Working Environment
 
-- Working Directory: /Users/david/code/claudeutils
+- Working Directory: /Users/david/code/edify
 - Is Git Repo: Yes
 - Platform: darwin
 - OS Version: Darwin 24.6.0

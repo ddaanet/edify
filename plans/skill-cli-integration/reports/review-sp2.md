@@ -6,7 +6,7 @@
 
 ## Summary
 
-The skill correctly composes structured markdown input for `claudeutils _commit` via heredoc (Step 4), replaces the Post-Commit section with `Status.` trigger convention (D-1), simplifies Step 1b to info-gathering only, and adds `Bash(claudeutils _commit*)` to allowed-tools. The CLI input format (`## Files`, `## Options`, `## Submodule`, `## Message`) matches the parser at `src/claudeutils/session/commit.py`.
+The skill correctly composes structured markdown input for `edify _commit` via heredoc (Step 4), replaces the Post-Commit section with `Status.` trigger convention (D-1), simplifies Step 1b to info-gathering only, and adds `Bash(edify _commit*)` to allowed-tools. The CLI input format (`## Files`, `## Options`, `## Submodule`, `## Message`) matches the parser at `src/edify/session/commit.py`.
 
 Three composition boundary violations identified — all pre-existing or requiring CLI-side changes.
 
@@ -53,10 +53,10 @@ Three composition boundary violations identified — all pre-existing or requiri
 | Requirement (D-2) | Status | Evidence |
 |-------------------|--------|----------|
 | Skill keeps: discovery, vet classification, message drafting, gitmoji, settings triage, context-mode | Satisfied | Steps 1-3 preserved |
-| CLI owns: File staging, validation, submodule commit, parent commit | Satisfied (new work) | Step 4 delegates to `claudeutils _commit` |
+| CLI owns: File staging, validation, submodule commit, parent commit | Satisfied (new work) | Step 4 delegates to `edify _commit` |
 | Composition: structured markdown → heredoc → CLI | Satisfied | SKILL.md:148-162 |
 | CLI input format matches parser | Satisfied | `## Files`, `## Options`, `## Submodule`, `## Message` |
 | Post-commit: `Status.` trigger | Satisfied | SKILL.md:175-183 |
-| allowed-tools updated | Satisfied | `Bash(claudeutils _commit*)` added |
+| allowed-tools updated | Satisfied | `Bash(edify _commit*)` added |
 | Pre-existing boundary violations (M-1, M-3) | DEFERRED | Not in change scope |
 | `--test` CLI option gap (M-2) | DEFERRED | Requires CLI-side work |

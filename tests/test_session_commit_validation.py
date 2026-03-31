@@ -10,9 +10,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from claudeutils.session.commit import CommitInput
-from claudeutils.session.commit_gate import vet_check
-from claudeutils.session.commit_pipeline import commit_pipeline
+from edify.session.commit import CommitInput
+from edify.session.commit_gate import vet_check
+from edify.session.commit_pipeline import commit_pipeline
 from tests.pytest_helpers import init_repo_at as _init_repo
 
 # Cycle 6.4: validation levels
@@ -30,11 +30,11 @@ def test_commit_just_lint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
     lint = MagicMock(return_value=(True, "ok"))
     with (
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             precommit,
         ),
         patch(
-            "claudeutils.session.commit_pipeline._run_lint",
+            "edify.session.commit_pipeline._run_lint",
             lint,
         ),
     ):
@@ -59,11 +59,11 @@ def test_commit_default_calls_vet(
     vet.return_value.passed = True
     with (
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             return_value=(True, "ok"),
         ),
         patch(
-            "claudeutils.session.commit_pipeline.vet_check",
+            "edify.session.commit_pipeline.vet_check",
             vet,
         ),
     ):
@@ -85,11 +85,11 @@ def test_commit_skips_vet_when_no_vet(
     vet = MagicMock()
     with (
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             return_value=(True, "ok"),
         ),
         patch(
-            "claudeutils.session.commit_pipeline.vet_check",
+            "edify.session.commit_pipeline.vet_check",
             vet,
         ),
     ):
@@ -126,11 +126,11 @@ def test_commit_combined_options(
     lint = MagicMock(return_value=(True, "ok"))
     with (
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             precommit,
         ),
         patch(
-            "claudeutils.session.commit_pipeline._run_lint",
+            "edify.session.commit_pipeline._run_lint",
             lint,
         ),
     ):
@@ -168,11 +168,11 @@ def test_validate_stale_vet_failure(
     stale_result.unreviewed_files = []
     with (
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             return_value=(True, "ok"),
         ),
         patch(
-            "claudeutils.session.commit_pipeline.vet_check",
+            "edify.session.commit_pipeline.vet_check",
             return_value=stale_result,
         ),
     ):
@@ -200,11 +200,11 @@ def test_validate_unknown_reason(
     unknown_result.unreviewed_files = []
     with (
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             return_value=(True, "ok"),
         ),
         patch(
-            "claudeutils.session.commit_pipeline.vet_check",
+            "edify.session.commit_pipeline.vet_check",
             return_value=unknown_result,
         ),
     ):
@@ -224,7 +224,7 @@ def test_vet_stale_includes_file_detail(
     # Create pyproject.toml with require-review patterns
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text(
-        """[tool.claudeutils.commit]
+        """[tool.edify.commit]
 require-review = ["src/**/*.py"]
 """
     )
@@ -271,15 +271,15 @@ def test_commit_just_lint_no_vet(
     vet = MagicMock()
     with (
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             precommit,
         ),
         patch(
-            "claudeutils.session.commit_pipeline._run_lint",
+            "edify.session.commit_pipeline._run_lint",
             lint,
         ),
         patch(
-            "claudeutils.session.commit_pipeline.vet_check",
+            "edify.session.commit_pipeline.vet_check",
             vet,
         ),
     ):

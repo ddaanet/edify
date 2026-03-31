@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 import pytest
 
-from claudeutils.session.commit import CommitInput
-from claudeutils.session.commit_gate import CleanFileError
-from claudeutils.session.commit_pipeline import (
+from edify.session.commit import CommitInput
+from edify.session.commit_gate import CleanFileError
+from edify.session.commit_pipeline import (
     CommitResult,
     _strip_hints,
     commit_pipeline,
@@ -41,7 +41,7 @@ def test_commit_parent_only(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
     )
 
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(True, "All checks passed"),
     ):
         result = commit_pipeline(ci, cwd=tmp_path)
@@ -77,7 +77,7 @@ def test_commit_precommit_failure(
     )
 
     with patch(
-        "claudeutils.session.commit_pipeline._run_precommit",
+        "edify.session.commit_pipeline._run_precommit",
         return_value=(False, "lint failed: E501"),
     ):
         result = commit_pipeline(ci, cwd=tmp_path)
@@ -199,7 +199,7 @@ def test_submodule_clean_error_shows_full_path(
 
     with (
         patch(
-            "claudeutils.session.commit_pipeline._run_precommit",
+            "edify.session.commit_pipeline._run_precommit",
             return_value=(True, "ok"),
         ),
         pytest.raises(CleanFileError, match="no uncommitted changes") as exc_info,

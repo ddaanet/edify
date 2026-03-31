@@ -1,9 +1,9 @@
-"""Tests for claudeutils data models."""
+"""Tests for edify data models."""
 
 import pytest
 from pydantic import ValidationError
 
-from claudeutils.models import SessionInfo
+from edify.models import SessionInfo
 
 from . import pytest_helpers as helpers
 

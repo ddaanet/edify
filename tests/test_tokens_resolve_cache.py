@@ -10,7 +10,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from claudeutils.tokens import resolve_model_alias
+from edify.tokens import resolve_model_alias
 
 
 class TestResolveModelAliasCache:

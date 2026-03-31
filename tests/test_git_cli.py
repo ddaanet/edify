@@ -1,4 +1,4 @@
-"""Tests for claudeutils._git changes command."""
+"""Tests for edify._git changes command."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.git_cli import git_group
+from edify.git_cli import git_group
 from tests.pytest_helpers import add_submodule, create_submodule_origin, init_repo_at
 
 

@@ -6,7 +6,7 @@ Threshold distribution analysis (`plans/reports/threshold-distributions.md`) fou
 
 ## Current scoring
 
-`src/claudeutils/recall/relevance.py` — `score_relevance()` uses `len(matched) / len(entry.keywords)`. All keywords weighted equally.
+`src/edify/recall/relevance.py` — `score_relevance()` uses `len(matched) / len(entry.keywords)`. All keywords weighted equally.
 
 ## Task
 
@@ -20,6 +20,6 @@ Prototype IDF-weighted relevance scoring. Exploration work — `plans/prototypes
 ## References
 
 - `plans/reports/threshold-distributions.md` — distribution data, discrimination analysis (§4)
-- `src/claudeutils/recall/relevance.py` — current scoring implementation
-- `src/claudeutils/recall/index_parser.py` — `extract_keywords()`, `IndexEntry` model
+- `src/edify/recall/relevance.py` — current scoring implementation
+- `src/edify/recall/index_parser.py` — `extract_keywords()`, `IndexEntry` model
 - `plans/prototypes/threshold-analyzer.py` — reusable analysis patterns

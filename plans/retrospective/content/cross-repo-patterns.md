@@ -75,7 +75,7 @@ No settled convention. The CLAUDE.md name existed as early as Oct 2025 (jobsearc
 
 ### Phase G: CLAUDE.md + plugin + fragments (Jan-Feb 2026)
 
-**Repos:** `pytest-md/plugin` → `home` → `claudeutils`
+**Repos:** `pytest-md/plugin` → `home` → `edify`
 
 Extraction into shared infrastructure. Per-project AGENTS.md/CLAUDE.md → shared fragments + decisions + skills.
 
@@ -97,7 +97,7 @@ Extraction into shared infrastructure. Per-project AGENTS.md/CLAUDE.md → share
 
 ## 2. Pattern Propagation Timeline
 
-Which claudeutils practices appeared in parallel projects and when.
+Which edify practices appeared in parallel projects and when.
 
 ### Patterns and their propagation
 
@@ -111,14 +111,14 @@ Which claudeutils practices appeared in parallel projects and when.
 | .claude/ directory | pytest-md (Jan 3) | jobsearch (Jan 21) | settings.json files |
 | Agent-core submodule | pytest-md (Jan 20) | home (Jan 22), devddaanet (Mar 5) | .gitmodules + plugin/ |
 | CLAUDE.md with @refs | pytest-md (Jan 28) | home (Jan 23) | @file reference pattern |
-| Worktree workflow | claudeutils (Feb 2026) | devddaanet (Mar 2026) | worktree-sync feature |
-| Deliverable-review | claudeutils (Feb 2026) | devddaanet (Mar 2026) | Review→fix→re-review cycle completed, but post-delivery commits show continued bug fixes |
+| Worktree workflow | edify (Feb 2026) | devddaanet (Mar 2026) | worktree-sync feature |
+| Deliverable-review | edify (Feb 2026) | devddaanet (Mar 2026) | Review→fix→re-review cycle completed, but post-delivery commits show continued bug fixes |
 
 ### Propagation speed
 
 - **Fast (days):** emojipack patterns → tuick (template copy, same developer)
 - **Medium (weeks):** emojipack patterns → box-api (template copy with project-specific adaptation)
-- **Slow (months):** claudeutils patterns → devddaanet (full pipeline adoption required infrastructure maturity)
+- **Slow (months):** edify patterns → devddaanet (full pipeline adoption required infrastructure maturity)
 
 ## 3. Agent-core Extraction Story
 
@@ -154,4 +154,4 @@ First 5 commits show extraction sequence:
 
 ### Phase 5: Maturation (Feb – Mar 2026)
 
-Agent-core accumulates 204 commits in the pytest-md nested repo (Jan 15 – Feb 6), then the claudeutils main repo becomes the primary development location. By March, new projects (devddaanet) are born with plugin from the start — adoption cost approaches zero.
+Agent-core accumulates 204 commits in the pytest-md nested repo (Jan 15 – Feb 6), then the edify main repo becomes the primary development location. By March, new projects (devddaanet) are born with plugin from the start — adoption cost approaches zero.

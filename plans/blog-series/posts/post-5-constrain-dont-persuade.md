@@ -78,7 +78,7 @@ The appendix to this retrospective states the principle directly:
 
 Prose instruction: "Check the error handling decision before writing error handling code." The model can generate linguistically consistent output without executing this step — "I've written error handling that's consistent with the patterns I've seen" is a valid completion.
 
-Tool-call gate: `claudeutils _recall resolve "when raising exceptions"`. The model must either execute the command (producing output that enters its context) or not execute it (absence is observable). The completion space is constrained to {execute, skip}, and skip is detectable.
+Tool-call gate: `edify _recall resolve "when raising exceptions"`. The model must either execute the command (producing output that enters its context) or not execute it (absence is observable). The completion space is constrained to {execute, skip}, and skip is detectable.
 
 PreToolUse hook: platform intercepts the tool call before execution. The agent cannot bypass through rationalization — the enforcement happens at a layer below agent control.
 

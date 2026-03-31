@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.validation.memory_index import validate
+from edify.validation.memory_index import validate
 
 
 def test_exempt_sections_removed_after_migration(tmp_path: Path) -> None:

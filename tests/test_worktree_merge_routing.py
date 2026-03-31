@@ -6,10 +6,10 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
-from claudeutils.worktree.git_ops import _is_branch_merged
-from claudeutils.worktree.merge import merge
-from claudeutils.worktree.merge_state import _detect_merge_state
+from edify.worktree.cli import worktree
+from edify.worktree.git_ops import _is_branch_merged
+from edify.worktree.merge import merge
+from edify.worktree.merge_state import _detect_merge_state
 
 
 def _run(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:

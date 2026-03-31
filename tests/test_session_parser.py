@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.session.parse import (
+from edify.session.parse import (
     ParsedTask,
     SessionData,
     SessionFileError,

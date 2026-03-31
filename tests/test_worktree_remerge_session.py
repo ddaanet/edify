@@ -8,9 +8,9 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from click.testing import CliRunner
 
-from claudeutils.worktree.cli import worktree
-from claudeutils.worktree.remerge import remerge_session_md
-from claudeutils.worktree.resolve import _merge_session_contents
+from edify.worktree.cli import worktree
+from edify.worktree.remerge import remerge_session_md
+from edify.worktree.resolve import _merge_session_contents
 
 
 def _git_helper(*args: str, cwd: Path | None = None) -> str:

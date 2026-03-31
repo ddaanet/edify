@@ -12,44 +12,44 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 # All sessions with /design invocations
 SESSIONS = """
--Users-david-code-claudeutils-continuation-passing/7a774b81-084f-4307-ad71-b1c8d37b46f0
--Users-david-code-claudeutils-continuation-passing/cb82aca8-5e1e-4d82-9ccb-ee7c59b3deb0
--Users-david-code-claudeutils-memory-index-recall/1362c8b6-cc0d-48bf-bd7b-78002ae6d65d
--Users-david-code-claudeutils-memory-index-recall/3f0ecf5f-785b-4089-aeb5-3eda96110bd1
--Users-david-code-claudeutils-plugin-migration/130ad4c3-11fc-43d3-ad0c-a54fb85e77df
--Users-david-code-claudeutils-prompt-composer-eval/0f669ee2-560a-4c7d-81a2-793b1ea39c7f
--Users-david-code-claudeutils-wt-design-quality-gates/4452d81a-4250-48a5-8afa-07a253429fc8
--Users-david-code-claudeutils-wt-design-workwoods/f36b9829-b075-4272-a8a8-37f6d9988c15
--Users-david-code-claudeutils-wt-error-handling-design/383be939-fbff-4398-b209-df8223c65a9d
--Users-david-code-claudeutils-wt-planstate-delivered/106ae2db-6270-436a-a420-4d8e2d6182c6
--Users-david-code-claudeutils-wt-prepare-runbook-fixes/c2391c15-c317-4635-b76d-f554a62fba70
--Users-david-code-claudeutils-wt-pushback/2e376b75-4d5d-4465-96fe-277521b5be27
--Users-david-code-claudeutils-wt-requirements-skill/b89c8ef6-7eef-444e-bbb0-cc0c5e80ce01
--Users-david-code-claudeutils-wt-runbook-skill-fixes/09bcd67d-cc27-4a5e-a6d6-6ecaff6cce7f
--Users-david-code-claudeutils-wt-when-resolve-fix/1731750b-38a6-44de-86a9-267ca6d54ae2
--Users-david-code-claudeutils-wt-worktree-merge-data-loss/ebe6cbf8-eaff-4cc2-bb1d-4c5e60b301dc
--Users-david-code-claudeutils-wt-worktree-merge-resilience/bf04aacb-3942-4907-85dd-38cec4c74bbe
--Users-david-code-claudeutils-wt-worktree-rm-error-ux/26ea8674-503d-47dc-af31-6878d6f846cc
--Users-david-code-claudeutils-wt-worktree-rm-safety-gate/f43a07d1-5999-41c6-b6ac-37d28df20f74
--Users-david-code-claudeutils-wt-worktree/262b20bd-707a-4f37-a367-b3778b476577
--Users-david-code-claudeutils-wt-worktree/889b451a-d2af-4351-bd69-6705da28a74a
--Users-david-code-claudeutils-wt-wt-merge-session-loss/f420e1c1-5266-4509-81e0-cf1a1f79ae34
--Users-david-code-claudeutils/065996f4-c62a-4d2b-ad28-f6a559870543
--Users-david-code-claudeutils/1926e939-1494-474f-8d0c-84da0db5da79
--Users-david-code-claudeutils/4c9ba70f-142e-4ce5-8023-bebdaa3eb6f7
--Users-david-code-claudeutils/4d06bcdf-847b-4f07-8e37-3abb74660ab3
--Users-david-code-claudeutils/4ec020d3-da78-429c-b598-57cc738d6bd2
--Users-david-code-claudeutils/7de1cdd1-d79e-446d-9343-b93da377dffe
--Users-david-code-claudeutils/8e01b115-8e67-4910-8525-6fc21b4f051d
--Users-david-code-claudeutils/a7e0dd5a-aa0a-419b-92ae-1316582f32ef
--Users-david-code-claudeutils/b2fbde3a-4f42-40cb-ba74-5c20492eac06
--Users-david-code-claudeutils/b305cd51-0dba-4e4c-82c1-c178d85bc3b3
--Users-david-code-claudeutils/b5509d34-16ca-4114-a76d-373459ec4a7d
--Users-david-code-claudeutils/bb473a1c-fad1-4ef0-8758-11992710dc8d
--Users-david-code-claudeutils/dfd23c89-1fbb-478a-af54-821ab6dbe291
--Users-david-code-claudeutils/e106aa80-f2a7-486c-ba5e-746f17c5acdc
--Users-david-code-claudeutils/e6b4297e-18c2-43e2-8b51-9c7f2cf5f4ba
--Users-david-code-claudeutils/f90ea499-baf5-4417-9f2f-493b17cdf9ed
+-Users-david-code-edify-continuation-passing/7a774b81-084f-4307-ad71-b1c8d37b46f0
+-Users-david-code-edify-continuation-passing/cb82aca8-5e1e-4d82-9ccb-ee7c59b3deb0
+-Users-david-code-edify-memory-index-recall/1362c8b6-cc0d-48bf-bd7b-78002ae6d65d
+-Users-david-code-edify-memory-index-recall/3f0ecf5f-785b-4089-aeb5-3eda96110bd1
+-Users-david-code-edify-plugin-migration/130ad4c3-11fc-43d3-ad0c-a54fb85e77df
+-Users-david-code-edify-prompt-composer-eval/0f669ee2-560a-4c7d-81a2-793b1ea39c7f
+-Users-david-code-edify-wt-design-quality-gates/4452d81a-4250-48a5-8afa-07a253429fc8
+-Users-david-code-edify-wt-design-workwoods/f36b9829-b075-4272-a8a8-37f6d9988c15
+-Users-david-code-edify-wt-error-handling-design/383be939-fbff-4398-b209-df8223c65a9d
+-Users-david-code-edify-wt-planstate-delivered/106ae2db-6270-436a-a420-4d8e2d6182c6
+-Users-david-code-edify-wt-prepare-runbook-fixes/c2391c15-c317-4635-b76d-f554a62fba70
+-Users-david-code-edify-wt-pushback/2e376b75-4d5d-4465-96fe-277521b5be27
+-Users-david-code-edify-wt-requirements-skill/b89c8ef6-7eef-444e-bbb0-cc0c5e80ce01
+-Users-david-code-edify-wt-runbook-skill-fixes/09bcd67d-cc27-4a5e-a6d6-6ecaff6cce7f
+-Users-david-code-edify-wt-when-resolve-fix/1731750b-38a6-44de-86a9-267ca6d54ae2
+-Users-david-code-edify-wt-worktree-merge-data-loss/ebe6cbf8-eaff-4cc2-bb1d-4c5e60b301dc
+-Users-david-code-edify-wt-worktree-merge-resilience/bf04aacb-3942-4907-85dd-38cec4c74bbe
+-Users-david-code-edify-wt-worktree-rm-error-ux/26ea8674-503d-47dc-af31-6878d6f846cc
+-Users-david-code-edify-wt-worktree-rm-safety-gate/f43a07d1-5999-41c6-b6ac-37d28df20f74
+-Users-david-code-edify-wt-worktree/262b20bd-707a-4f37-a367-b3778b476577
+-Users-david-code-edify-wt-worktree/889b451a-d2af-4351-bd69-6705da28a74a
+-Users-david-code-edify-wt-wt-merge-session-loss/f420e1c1-5266-4509-81e0-cf1a1f79ae34
+-Users-david-code-edify/065996f4-c62a-4d2b-ad28-f6a559870543
+-Users-david-code-edify/1926e939-1494-474f-8d0c-84da0db5da79
+-Users-david-code-edify/4c9ba70f-142e-4ce5-8023-bebdaa3eb6f7
+-Users-david-code-edify/4d06bcdf-847b-4f07-8e37-3abb74660ab3
+-Users-david-code-edify/4ec020d3-da78-429c-b598-57cc738d6bd2
+-Users-david-code-edify/7de1cdd1-d79e-446d-9343-b93da377dffe
+-Users-david-code-edify/8e01b115-8e67-4910-8525-6fc21b4f051d
+-Users-david-code-edify/a7e0dd5a-aa0a-419b-92ae-1316582f32ef
+-Users-david-code-edify/b2fbde3a-4f42-40cb-ba74-5c20492eac06
+-Users-david-code-edify/b305cd51-0dba-4e4c-82c1-c178d85bc3b3
+-Users-david-code-edify/b5509d34-16ca-4114-a76d-373459ec4a7d
+-Users-david-code-edify/bb473a1c-fad1-4ef0-8758-11992710dc8d
+-Users-david-code-edify/dfd23c89-1fbb-478a-af54-821ab6dbe291
+-Users-david-code-edify/e106aa80-f2a7-486c-ba5e-746f17c5acdc
+-Users-david-code-edify/e6b4297e-18c2-43e2-8b51-9c7f2cf5f4ba
+-Users-david-code-edify/f90ea499-baf5-4417-9f2f-493b17cdf9ed
 """.strip().split("\n")
 
 PROJECTS_DIR = Path.home() / ".claude" / "projects"
@@ -254,7 +254,7 @@ for entry in SESSIONS:
         continue
 
     # Decode project name for display
-    project_name = encoded_dir.replace("-Users-david-code-claudeutils", "main")
+    project_name = encoded_dir.replace("-Users-david-code-edify", "main")
     if project_name.startswith("main-wt-"):
         project_name = project_name[8:]  # strip "main-wt-"
     elif project_name.startswith("main-"):

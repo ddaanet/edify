@@ -248,7 +248,7 @@ Remote settings merge into `remoteConfig.settings` without overwriting local con
 
 ## 5. Implementation Recommendations
 
-### For this project (claudeutils-bash-git-prompt)
+### For this project (edify-bash-git-prompt)
 
 **Immediate next steps:**
 

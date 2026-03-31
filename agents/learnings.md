@@ -54,7 +54,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 ## When delegating external repo git operations
 - Anti-pattern: Dispatch artisan agents to run `git -C ~/code/<repo>` on repos outside the project tree. Sandbox write-allow restrictions block the agent even though the operations are read-only.
 - Correct pattern: Execute git read operations (`git -C`, `git log`, `git show`) directly from the parent session. Sub-agents only work reliably within the project's sandbox-allowed paths.
-- scratch/* repos under claudeutils worked because `~/code/claudeutils` is in the write-allow list. External repos (~/code/rules, ~/code/tuick, etc.) failed.
+- scratch/* repos under edify worked because `~/code/edify` is in the write-allow list. External repos (~/code/rules, ~/code/tuick, etc.) failed.
 ## When dispatching corrector with plan-path-containing prompts
 - Anti-pattern: Including template notation like `plans/{plan}/` or `plans/<name>/` anywhere in the corrector prompt text. The PreToolUse recall-check hook uses `re.search(r"plans/([^/]+)/", prompt)` to extract the job name — it finds the FIRST match, which may be template text rather than the actual plan path.
 - Correct pattern: Put the actual plan path (`plans/outline-proofing/`) as the FIRST `plans/X/` reference in the prompt (e.g., "Plan: plans/outline-proofing/ — review implementation changes"). Avoid template-style placeholders in requirement text; use natural language descriptions instead.
@@ -187,11 +187,11 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Evidence: settings.json conflict. OURS removed all hooks (plugin conversion). THEIRS had full hooks section (base content + new stop hook). Initially attributed hooks to "branch's full hooks section" and almost kept them, violating OURS' intentional removal.
 
 ## When renaming across submodule boundaries
-- Anti-pattern: Replacing all `claudeutils` → `edify` inside submodule because the outline says "do both identities at once." Submodule files that call parent's installed CLI (`subprocess.run(["claudeutils",...])`, `from claudeutils.x import y`, pip install `"claudeutils==..."`, error messages saying "use claudeutils _worktree") break immediately because the CLI/package is still named `claudeutils`.
+- Anti-pattern: Replacing all `edify` → `edify` inside submodule because the outline says "do both identities at once." Submodule files that call parent's installed CLI (`subprocess.run(["edify",...])`, `from edify.x import y`, pip install `"edify==..."`, error messages saying "use edify _worktree") break immediately because the CLI/package is still named `edify`.
 - Correct pattern: Distinguish directory-path references (rename with directory) from runtime CLI/package references (rename with package). In SP-1 (directory rename), only path refs change. Runtime refs change in SP-2 (package rename). Apply this filter per-file, not per-directory.
-- Evidence: `just precommit` failed with `edify: command not found` (portable.just validators), `test_x_uses_planstate_command_over_session` failed (hook import `from edify.planstate`), test assertions for `claudeutils _worktree` in error messages.
+- Evidence: `just precommit` failed with `edify: command not found` (portable.just validators), `test_x_uses_planstate_command_over_session` failed (hook import `from edify.planstate`), test assertions for `edify _worktree` in error messages.
 
 ## When scoping grep discovery for bulk rename
 - Anti-pattern: Searching only common file extensions (`.md, .py, .sh, .json, .yaml, .toml`) for rename targets. Misses less common extensions like `.just` that contain executable path references.
 - Correct pattern: Use extensionless grep across the full tree, then exclude binary files. Or enumerate all tracked text file extensions via `git ls-files` before constructing the glob pattern. Missing one extension causes failures that surface only at precommit.
-- Evidence: `portable.just` had 30+ `agent-core` refs and 10+ `claudeutils` refs — all missed by discovery. Caught when `just precommit` failed on version consistency check.
+- Evidence: `portable.just` had 30+ `agent-core` refs and 10+ `edify` refs — all missed by discovery. Caught when `just precommit` failed on version consistency check.

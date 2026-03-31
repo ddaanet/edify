@@ -14,7 +14,7 @@ Systematic review of all post syntheses for unsubstantiated claims.
 
 **C1.2: "16 repos"**
 - Quote: "16 repos"
-- **Resolution: GROUNDED.** `repo-inventory.md` enumerates exactly 16 repos (6 pre-claudeutils + 8 parallel + 2 non-agentic). Emojipack standalone counted as duplicate but listed. PASS.
+- **Resolution: GROUNDED.** `repo-inventory.md` enumerates exactly 16 repos (6 pre-edify + 8 parallel + 2 non-agentic). Emojipack standalone counted as duplicate but listed. PASS.
 
 **C1.3: "18 direct AGENTS.md commits" in tuick**
 - Quote: "18 direct AGENTS.md commits — more than any other project"
@@ -22,7 +22,7 @@ Systematic review of all post syntheses for unsubstantiated claims.
 
 **C1.4: "7 commits iterating on commit delegation in one day"**
 - Quote: "7 commits iterating on this in one day"
-- **Resolution: GROUNDED.** `pre-claudeutils-evolution.md` and `synthesis.md` both cite this specific detail from home repo analysis. The home repo-inventory entry confirms 8 agentic-path commits concentrated on Jan 12-13. PASS.
+- **Resolution: GROUNDED.** `pre-edify-evolution.md` and `synthesis.md` both cite this specific detail from home repo analysis. The home repo-inventory entry confirms 8 agentic-path commits concentrated on Jan 12-13. PASS.
 
 **C1.5: "23 fragments, 18 skills, 14 sub-agents"**
 - Quote: Hook paragraph
@@ -40,7 +40,7 @@ Systematic review of all post syntheses for unsubstantiated claims.
 
 **C2.2: "90 minutes between confabulation catch and skill creation"**
 - Quote: "Commit `cae5ef11` (Feb 16, 10:36 — 90 min after `ab4813a4`)"
-- **Resolution: ADJUSTED.** Cannot verify commit timestamps from this repo (sandbox restrictions on claudeutils main). The timestamps come from the topic report's analysis. Remove the "90 min" claim or soften to "same day" (commit dates confirm both on Feb 16).
+- **Resolution: ADJUSTED.** Cannot verify commit timestamps from this repo (sandbox restrictions on edify main). The timestamps come from the topic report's analysis. Remove the "90 min" claim or soften to "same day" (commit dates confirm both on Feb 16).
 
 **C2.3: "Skipped A.3-A.4, user noticed 47 minutes later"**
 - Quote: from topic-4 citing session `6e808dbc`

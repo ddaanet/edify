@@ -1,1 +1,1 @@
-"""Tests for claudeutils."""
+"""Tests for edify."""

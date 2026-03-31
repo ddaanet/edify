@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 
-from claudeutils.model import read_overrides, write_overrides
+from edify.model import read_overrides, write_overrides
 
 
 def test_read_overrides() -> None:

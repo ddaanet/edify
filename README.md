@@ -1,4 +1,4 @@
-# claudeutils
+# edify
 
 Workflow infrastructure for [Claude Code][claude-code]. Two parts: a Python CLI
 for working with session data and project structure, and a framework of skills,
@@ -8,8 +8,8 @@ workflows — design, planning, TDD, orchestration, review, and handoff.
 Not on PyPI. Install from source:
 
 ```bash
-git clone https://github.com/ddaanet/claudeutils
-cd claudeutils
+git clone https://github.com/ddaanet/edify
+cd edify
 uv tool install .
 ```
 
@@ -63,7 +63,7 @@ framework maintains persistent project memory across sessions:
 - **plan-archive.md** — completed plan summaries, loaded on demand during design
   research and diagnostic sessions
 
-`claudeutils validate` enforces consistency across these files — cross-reference
+`edify validate` enforces consistency across these files — cross-reference
 integrity, format conventions, key uniqueness.
 
 The memory system solves the "agent amnesia" problem: without it, every session
@@ -80,14 +80,14 @@ across all sessions.
 
 ```bash
 # List conversation sessions
-claudeutils list
+edify list
 
 # Extract feedback from a session (prefix match on UUID)
-claudeutils extract e12d203f
+edify extract e12d203f
 
 # Full pipeline: collect all → filter noise → extract rules
-claudeutils collect | claudeutils analyze -
-claudeutils collect | claudeutils rules --input -
+edify collect | edify analyze -
+edify collect | edify rules --input -
 ```
 
 `collect` gathers feedback from every session. `analyze` categorizes it
@@ -104,7 +104,7 @@ the structure in place, then you run [dprint] for consistent formatting.
 
 ```bash
 # Fix files changed in working tree
-git status --short | cut -c4- | claudeutils markdown
+git status --short | cut -c4- | edify markdown
 ```
 
 Reads file paths from stdin, modifies files in place.
@@ -114,9 +114,9 @@ Reads file paths from stdin, modifies files in place.
 Count tokens using the Anthropic API. Requires `ANTHROPIC_API_KEY`.
 
 ```bash
-claudeutils tokens sonnet prompt.md
-claudeutils tokens opus file1.md file2.md
-claudeutils tokens haiku prompt.md --json
+edify tokens sonnet prompt.md
+edify tokens opus file1.md file2.md
+edify tokens haiku prompt.md --json
 ```
 
 Aliases (`haiku`, `sonnet`, `opus`) resolve to the latest model version. Full
@@ -127,13 +127,13 @@ model IDs also work.
 Switch between API providers and plan modes. Manage default model overrides.
 
 ```bash
-claudeutils account status
-claudeutils account api
-claudeutils account plan
+edify account status
+edify account api
+edify account plan
 
-claudeutils model list
-claudeutils model set claude-sonnet-4-5-20250929
-claudeutils model reset
+edify model list
+edify model set claude-sonnet-4-5-20250929
+edify model reset
 ```
 
 ### Composition
@@ -151,8 +151,8 @@ fragments:
 ```
 
 ```bash
-claudeutils compose compose.yaml --validate strict
-claudeutils compose compose.yaml --dry-run
+edify compose compose.yaml --validate strict
+edify compose compose.yaml --dry-run
 ```
 
 ### Validation
@@ -161,12 +161,12 @@ Validate project structure and conventions — memory index consistency, decisio
 file formatting, job tracking, learnings format, task key uniqueness.
 
 ```bash
-claudeutils validate                    # all validators
-claudeutils validate memory-index       # specific validator
-claudeutils validate decisions
-claudeutils validate jobs
-claudeutils validate learnings
-claudeutils validate tasks
+edify validate                    # all validators
+edify validate memory-index       # specific validator
+edify validate decisions
+edify validate jobs
+edify validate learnings
+edify validate tasks
 ```
 
 ### Recall analysis
@@ -175,8 +175,8 @@ Measure whether agents actually consult relevant memory index entries when
 working on related topics. Runs against local session history.
 
 ```bash
-claudeutils recall --index agents/memory-index.md
-claudeutils recall --index agents/memory-index.md --sessions 50 --output report.md
+edify recall --index agents/memory-index.md
+edify recall --index agents/memory-index.md --sessions 50 --output report.md
 ```
 
 ### Statusline

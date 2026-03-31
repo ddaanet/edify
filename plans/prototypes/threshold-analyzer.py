@@ -19,13 +19,13 @@ from pathlib import Path
 # Add src/ to path for project imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from claudeutils.recall.index_parser import (
+from edify.recall.index_parser import (
     IndexEntry,
     extract_keywords,
     parse_memory_index,
 )
-from claudeutils.validation.memory_index_helpers import collect_semantic_headers
-from claudeutils.when.fuzzy import score_match
+from edify.validation.memory_index_helpers import collect_semantic_headers
+from edify.when.fuzzy import score_match
 
 
 def percentiles(values: list[float]) -> dict[str, float]:

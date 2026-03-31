@@ -1,5 +1,5 @@
 {
-  "name": "claudeutils-markdown-test-corpus",
+  "name": "edify-markdown-test-corpus",
   "version": "1.0.0",
   "description": "Extract user feedback from Claude Code conversation history for retrospective analysis.",
   "main": "index.js",

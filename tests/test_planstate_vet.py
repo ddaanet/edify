@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.planstate.models import VetChain, VetStatus
-from claudeutils.planstate.vet import get_vet_status
+from edify.planstate.models import VetChain, VetStatus
+from edify.planstate.vet import get_vet_status
 
 
 @pytest.mark.parametrize(

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from claudeutils.worktree.session import remove_slug_marker
+from edify.worktree.session import remove_slug_marker
 
 
 def test_remove_slug_marker_basic(tmp_path: Path) -> None:

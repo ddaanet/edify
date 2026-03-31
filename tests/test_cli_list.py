@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from claudeutils.cli import cli
-from claudeutils.models import SessionInfo
+from edify.cli import cli
+from edify.models import SessionInfo
 
 
 def test_cli_no_args_shows_usage() -> None:
@@ -29,7 +29,7 @@ def test_list_command_default_project(
     project_dir = tmp_path / "test-project"
     project_dir.mkdir()
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
     monkeypatch.chdir(project_dir)
 
     runner = CliRunner()
@@ -46,7 +46,7 @@ def test_list_command_with_project_flag(monkeypatch: pytest.MonkeyPatch) -> None
         called_with.append(project_dir)
         return []
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
 
     runner = CliRunner()
     runner.invoke(cli, ["list", "--project", "/custom/path"])
@@ -66,7 +66,7 @@ def test_list_output_format(monkeypatch: pytest.MonkeyPatch) -> None:
             )
         ]
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["list"])
@@ -96,7 +96,7 @@ def test_list_sorted_by_timestamp(monkeypatch: pytest.MonkeyPatch) -> None:
             ),
         ]
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["list"])
@@ -125,7 +125,7 @@ def test_list_long_title_truncated(monkeypatch: pytest.MonkeyPatch) -> None:
             )
         ]
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["list"])
@@ -140,7 +140,7 @@ def test_list_no_sessions_message(monkeypatch: pytest.MonkeyPatch) -> None:
     def mock_list(project_dir: str) -> list[SessionInfo]:
         return []
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["list"])
@@ -155,7 +155,7 @@ def test_list_nonexistent_project_error(monkeypatch: pytest.MonkeyPatch) -> None
         # Simulates what list_top_level_sessions does for nonexistent dirs
         return []
 
-    monkeypatch.setattr("claudeutils.cli.list_top_level_sessions", mock_list)
+    monkeypatch.setattr("edify.cli.list_top_level_sessions", mock_list)
 
     runner = CliRunner()
     result = runner.invoke(cli, ["list", "--project", "/nonexistent/path"])

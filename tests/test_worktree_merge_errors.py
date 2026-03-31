@@ -7,9 +7,9 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from click.testing import CliRunner
 
-from claudeutils.git import _git
-from claudeutils.worktree.cli import worktree
-from claudeutils.worktree.merge import _format_git_error
+from edify.git import _git
+from edify.worktree.cli import worktree
+from edify.worktree.merge import _format_git_error
 
 
 def test_format_git_error_includes_stderr() -> None:

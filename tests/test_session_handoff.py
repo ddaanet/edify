@@ -8,12 +8,12 @@ from pathlib import Path
 
 import pytest
 
-from claudeutils.session.handoff.parse import (
+from edify.session.handoff.parse import (
     HandoffInput,
     HandoffInputError,
     parse_handoff_input,
 )
-from claudeutils.session.handoff.pipeline import (
+from edify.session.handoff.pipeline import (
     HandoffState,
     clear_state,
     load_state,

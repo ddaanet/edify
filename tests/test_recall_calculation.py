@@ -1,13 +1,13 @@
 """Tests for recall calculation and discovery patterns."""
 
-from claudeutils.recall.index_parser import IndexEntry
-from claudeutils.recall.recall import (
+from edify.recall.index_parser import IndexEntry
+from edify.recall.recall import (
     DiscoveryPattern,
     calculate_recall,
     classify_discovery_pattern,
 )
-from claudeutils.recall.relevance import RelevanceScore
-from claudeutils.recall.tool_calls import ToolCall
+from edify.recall.relevance import RelevanceScore
+from edify.recall.tool_calls import ToolCall
 
 
 def test_discovery_pattern_direct() -> None:
@@ -311,7 +311,7 @@ def test_discovery_pattern_absolute_vs_relative_paths() -> None:
             tool_name="Read",
             tool_id="read_1",
             input={
-                "file_path": "/Users/david/code/claudeutils/agents/decisions/testing.md"
+                "file_path": "/Users/david/code/edify/agents/decisions/testing.md"
             },
             timestamp="2025-12-16T10:00:00.000Z",
             session_id="session1",

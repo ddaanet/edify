@@ -1,6 +1,6 @@
 # TDD Recall Artifact: Skill-CLI Integration
 
-Resolve ALL entries via `claudeutils _recall resolve` before starting work.
+Resolve ALL entries via `edify _recall resolve` before starting work.
 
 ## Entry Keys
 

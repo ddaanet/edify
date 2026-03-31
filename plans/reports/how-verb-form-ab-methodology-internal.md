@@ -17,14 +17,14 @@ The project has substantial existing infrastructure for session analysis and age
 
 ### 1.1 Unit Tests for Fuzzy Matching
 
-**File:** `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_when_fuzzy.py`
+**File:** `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_when_fuzzy.py`
 
 The fuzzy matcher has comprehensive unit test coverage:
 - **Test patterns:** Subsequence matching, boundary bonuses, consecutive match bonuses, gap penalties, word-overlap tiebreaker, minimum score thresholds
 - **Coverage:** Tests verify that matching behavior is deterministic across different query/candidate pairs
 - **Limitations:** Tests measure matching accuracy in isolation—they don't simulate agent recognition during index scanning or measure whether matched entries are semantically relevant
 
-The fuzzy matcher implementation (`/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/fuzzy.py`) uses modified fzf V2 scoring with:
+The fuzzy matcher implementation (`/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/fuzzy.py`) uses modified fzf V2 scoring with:
 - Consecutive character bonuses
 - Boundary bonuses (whitespace=10, delimiter=9, camelcase=7)
 - Gap penalties
@@ -36,10 +36,10 @@ The fuzzy matcher implementation (`/Users/david/code/claudeutils-wt/ar-how-verb-
 ### 1.2 Recall CLI and Resolution Tests
 
 **Files:**
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_recall_cli_resolve.py` — Tests `_recall resolve` command with artifact mode and argument mode
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_recall_artifact.py` — Tests artifact parsing (Entry Keys section)
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_recall_cli_check.py` — Tests validity checks on recall artifacts
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_recall_cli_integration.py` — End-to-end resolution tests
+- `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_recall_cli_resolve.py` — Tests `_recall resolve` command with artifact mode and argument mode
+- `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_recall_artifact.py` — Tests artifact parsing (Entry Keys section)
+- `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_recall_cli_check.py` — Tests validity checks on recall artifacts
+- `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_recall_cli_integration.py` — End-to-end resolution tests
 
 **Test patterns:** These test the plumbing (file reading, parsing, fuzzy matching) but use mocked resolver (`mock_resolve.side_effect = [...]`) rather than real index data. They verify exit codes, content deduplication, null entry handling—structural correctness, not behavioral measurement.
 
@@ -47,7 +47,7 @@ The fuzzy matcher implementation (`/Users/david/code/claudeutils-wt/ar-how-verb-
 
 ### 1.3 Recall Integration Tests
 
-**File:** `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_recall_integration.py`
+**File:** `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_recall_integration.py`
 
 - Marked with `@pytest.mark.e2e`
 - Creates synthetic index and session JSONL, runs tool call extraction, topic extraction, relevance scoring
@@ -55,7 +55,7 @@ The fuzzy matcher implementation (`/Users/david/code/claudeutils-wt/ar-how-verb-
 
 ### 1.4 Tool Call Extraction
 
-**File:** `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_recall_tool_calls.py`
+**File:** `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_recall_tool_calls.py`
 
 Tests extraction of tool calls from session JSONL:
 - Reads Skill tool invocations with `skill="how"` from session files
@@ -64,7 +64,7 @@ Tests extraction of tool calls from session JSONL:
 
 ## 2. Session Scraper and Analysis Pipeline
 
-**File:** `/Users/david/code/claudeutils-wt/ar-how-verb-form/plans/prototypes/session-scraper.py` (1020 lines)
+**File:** `/Users/david/code/edify-wt/ar-how-verb-form/plans/prototypes/session-scraper.py` (1020 lines)
 
 ### 2.1 Six-Stage Pipeline Architecture
 
@@ -112,7 +112,7 @@ The session scraper provides a production-quality pipeline for analyzing Claude 
 
 ## 3. Prototype Scripts for How-Verb Analysis
 
-**Files in `/Users/david/code/claudeutils-wt/ar-how-verb-form/plans/prototypes/`:**
+**Files in `/Users/david/code/edify-wt/ar-how-verb-form/plans/prototypes/`:**
 
 ### 3.1 How-Verb-Form Query Extraction
 
@@ -129,7 +129,7 @@ The session scraper provides a production-quality pipeline for analyzing Claude 
 - **Reuse value:** Cleanest extraction method; can be adapted to feed into A/B framework
 
 **`how-verb-form-cli.py`** (122 lines)
-- Extracts `/how` from CLI/Bash tool invocations (`_recall resolve`, `claudeutils _when resolve`)
+- Extracts `/how` from CLI/Bash tool invocations (`_recall resolve`, `edify _when resolve`)
 - Same verb form classification
 - **Reuse value:** Identifies CLI-level resolution patterns
 
@@ -153,7 +153,7 @@ HOW_ENTRIES = [
 - Raw "to" penalty: what if resolver didn't strip "to "?
 
 **Key findings from prototype execution:**
-- `removeprefix("to ")` band-aid at line 196 in `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/resolver.py` masks the real problem
+- `removeprefix("to ")` band-aid at line 196 in `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/resolver.py` masks the real problem
 - Fuzzy matcher scores "to X" lower than bare "X", but band-aid makes them equivalent post-stripping
 - **Relevance to A/B test:** Illustrates the core problem being tested—how format affects matching
 
@@ -275,15 +275,15 @@ HOW_ENTRIES = [
 - **Query extraction patterns** — JSONL parsing for `/how` tool calls (how-verb-form-skill-calls.py, lines 42-80)
 - **Score calculation** — Fuzzy match scoring across variants (how-verb-form-scores.py, lines 41-112)
 
-**Note:** These are prototype scripts—not in src/claudeutils/, so reuse requires copying or refactoring into library code.
+**Note:** These are prototype scripts—not in src/edify/, so reuse requires copying or refactoring into library code.
 
 ### 6.3 From Recall Infrastructure
 
-- **`parse_index()`** — Read memory-index.md (`src/claudeutils/when/index_parser.py`)
-- **`fuzzy.rank_matches()`** — Rank candidates for a query (`src/claudeutils/when/fuzzy.py`)
-- **`score_match()`** — Single query-candidate score (`src/claudeutils/when/fuzzy.py`, line ~50)
+- **`parse_index()`** — Read memory-index.md (`src/edify/when/index_parser.py`)
+- **`fuzzy.rank_matches()`** — Rank candidates for a query (`src/edify/when/fuzzy.py`)
+- **`score_match()`** — Single query-candidate score (`src/edify/when/fuzzy.py`, line ~50)
 
-**Import path:** `from claudeutils.when.index_parser import parse_index` and `from claudeutils.when.fuzzy import rank_matches, score_match`
+**Import path:** `from edify.when.index_parser import parse_index` and `from edify.when.fuzzy import rank_matches, score_match`
 
 ## 7. Testing Infrastructure Summary
 
@@ -293,7 +293,7 @@ HOW_ENTRIES = [
 | **Recall Resolution** | `tests/test_recall_cli_resolve.py` | CLI tests | Partial | Tests plumbing; mocked resolver, not real behavior |
 | **Session Parser** | `plans/prototypes/session-scraper.py` | Pipeline tool | Yes | Can extract task context and `/how` queries |
 | **How-Verb Analysis** | `plans/prototypes/how-verb-form-*.py` | Extraction | Yes | Can classify verb forms; extract query patterns |
-| **Index Parser** | `src/claudeutils/when/index_parser.py` | Library | Yes | Read variants for comparison |
+| **Index Parser** | `src/edify/when/index_parser.py` | Library | Yes | Read variants for comparison |
 | **Task Replay** | (None exists) | — | No | Needs to be built |
 | **Agent Simulation** | (None exists) | — | No | Needs to be built; depends on Claude Code API |
 | **Ground Truth** | (None exists) | — | No | Needs manual annotation or proxy definition |
@@ -301,7 +301,7 @@ HOW_ENTRIES = [
 ## 8. Implementation Priorities
 
 **High-value, low-effort:**
-1. Refactor verb form classification into `src/claudeutils/` (reuse from prototypes)
+1. Refactor verb form classification into `src/edify/` (reuse from prototypes)
 2. Add index variant generator (parse + transform + validate)
 3. Add task selector (use session scraper to find `/how`-heavy tasks)
 
@@ -316,22 +316,22 @@ HOW_ENTRIES = [
 ## 9. Files Referenced
 
 ### Core Recall/When Infrastructure
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/fuzzy.py` — Fuzzy matcher
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/resolver.py` — Resolution with "to " band-aid (line 196)
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/src/claudeutils/when/index_parser.py` — Index parsing
+- `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/fuzzy.py` — Fuzzy matcher
+- `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/resolver.py` — Resolution with "to " band-aid (line 196)
+- `/Users/david/code/edify-wt/ar-how-verb-form/src/edify/when/index_parser.py` — Index parsing
 
 ### Tests
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_when_fuzzy.py` — Fuzzy matcher tests
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_recall_cli_resolve.py` — Resolution tests
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/tests/test_recall_tool_calls.py` — Tool call extraction
+- `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_when_fuzzy.py` — Fuzzy matcher tests
+- `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_recall_cli_resolve.py` — Resolution tests
+- `/Users/david/code/edify-wt/ar-how-verb-form/tests/test_recall_tool_calls.py` — Tool call extraction
 
 ### Prototype Scripts (Reusable)
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/plans/prototypes/session-scraper.py` — Session analysis pipeline
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/plans/prototypes/how-verb-form-extract.py` — Query extraction
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/plans/prototypes/how-verb-form-skill-calls.py` — Clean skill-level extraction
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/plans/prototypes/how-verb-form-scores.py` — Fuzzy score analysis
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/plans/prototypes/how-verb-form-cli.py` — CLI-level query extraction
+- `/Users/david/code/edify-wt/ar-how-verb-form/plans/prototypes/session-scraper.py` — Session analysis pipeline
+- `/Users/david/code/edify-wt/ar-how-verb-form/plans/prototypes/how-verb-form-extract.py` — Query extraction
+- `/Users/david/code/edify-wt/ar-how-verb-form/plans/prototypes/how-verb-form-skill-calls.py` — Clean skill-level extraction
+- `/Users/david/code/edify-wt/ar-how-verb-form/plans/prototypes/how-verb-form-scores.py` — Fuzzy score analysis
+- `/Users/david/code/edify-wt/ar-how-verb-form/plans/prototypes/how-verb-form-cli.py` — CLI-level query extraction
 
 ### Supporting Infrastructure
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/agents/session.md` — Session context with problem statement and prototype references
-- `/Users/david/code/claudeutils-wt/ar-how-verb-form/agents/learnings.md` — Section on "When grounding recall system behavior" (definitions of meaningful measurement)
+- `/Users/david/code/edify-wt/ar-how-verb-form/agents/session.md` — Session context with problem statement and prototype references
+- `/Users/david/code/edify-wt/ar-how-verb-form/agents/learnings.md` — Section on "When grounding recall system behavior" (definitions of meaningful measurement)
