@@ -1,31 +1,32 @@
 # Session Handoff: 2026-03-31
 
-**Status:** Edify rename SP-1 complete (submodule + parent). SP-2 (package rename) pending — needs own /runbook pass.
+**Status:** Edify rename complete (SP-1 + SP-2 + SP-3). Package now `edify`, CLI now `edify`. Remaining FRs (GitHub rename, PyPI, delivered plan cleanup, marketplace) are separate tasks.
 
 ## Completed This Session
 
-**SP-1 (submodule directory rename `agent-core` → `plugin`):**
-- Phase 1: 81 files in submodule — `agent-core` → `plugin` (192 refs), `edify` → `edify` (117 refs)
-- Phase 2: 224 files in parent — git mv, .gitmodules, all path references
-- Runtime CLI revert: submodule files that invoke parent's installed CLI (`subprocess.run(["edify",...])`, pip install, error messages) kept as `edify` — breaks if renamed before SP-2
-- Stragglers: 3 in Phase 1 verification, 3 in Phase 2, plus `portable.just` (.just extension missed by discovery grep)
-- Sandbox-protected files (.claude/settings.json, .envrc symlink) patched via `tmp/patch-protected.sh`
-- Test suite: 1820/1821 pass, 1 xfail. Pre-existing `test_x_uses_planstate_command_over_session` surfaced and fixed (import path regression from CLI name change in hook)
-- Lightweight delegation from runbook outline (no /runbook expansion) — user considering dropping Tier 3
+**SP-2 (package rename `claudeutils` → `edify`):**
+- `src/claudeutils/` → `src/edify/` (103 files moved)
+- CLI entry point: `edify = "edify.cli:main"` in pyproject.toml
+- All imports rewritten: 103 src files, 160 test files, 7 plugin runtime ref files
+- Agentic prose + active plans updated (~94 + ~370 occurrences)
+- Submodule commit (plugin runtime refs deferred from SP-1) + parent commit
+- 419 files changed total, 1820/1821 tests pass, 1 xfail (matches baseline)
+- Execution: /inline Tier 2 — scout discovery, 5 parallel artisan agents, scout verification
+- Reports in `plans/edify-rename/reports/sp2-*.md`
 
 **Execution approach:**
-- Orchestrated directly from `plans/edify-rename/runbook-outline.md` without /runbook expansion
-- 6 parallel artisan agents per phase (sliding window 4), scout for discovery/verification
-- Reports in `plans/edify-rename/reports/step-*.md`
+- `uv sync` sufficient to swap installed package name (not `uv tool install --force`)
+- Review skip justified: mechanical string replacement, verification grep + precommit is the quality gate
+- GitHub URL stragglers in pyproject.toml intentionally deferred (FR-12)
 
 ## In-tree Tasks
 
-- [>] **Edify rename** — `/orchestrate edify-rename` | sonnet
+- [ ] **Edify rename** — `/design plans/edify-rename/requirements.md` | sonnet
   - Plan: edify-rename | Status: reviewed
   - SP-3 (plan cleanup): complete
-  - SP-1 (submodule rename): complete — 2 submodule commits + 1 parent commit
-  - SP-2 (package rename): pending SP-1 — needs own /runbook pass after SP-1 lands
-  - Key constraint for SP-2: submodule runtime refs to `edify` (3 Python imports, prepare-runbook subprocess, pretooluse error msgs, portable.just validators, sessionstart pip install) change only when parent package renames
+  - SP-1 (submodule rename): complete
+  - SP-2 (package rename): complete
+  - Remaining FRs: FR-10 (delete delivered plans), FR-11 (marketplace), FR-12 (GitHub repo rename), FR-13 (PyPI PEP 541), FR-9c (PyPI name), FR-9d (.claude/rules)
 - [ ] **Centralize recall** — `/design plans/centralize-recall/brief.md` | opus | restart
   - Plan: centralize-recall | Segmented /recall skill (<1ktok core), replace inline recall across skills/agents. Prerequisite (remove-index-skill) now complete.
 - [ ] **Outline template trim** — `/design plans/outline-template-trim/brief.md` | opus | restart
@@ -216,9 +217,8 @@
 - User questioning entire design → runbook → orchestrate pipeline, behavioral guardrails, and planning-first paradigm [from: session-cli-tool]
 - No decisions made yet — discussion only. Next session should not assume pipeline continuity. [from: session-cli-tool]
 
-**SP-2 CLI name boundary:**
-- Submodule files with runtime `claudeutils` refs (3 Python imports, subprocess call, pretooluse error msgs, portable.just validators, sessionstart pip install) — change only when parent package renames in SP-2
-- `.just` extension was missed by SP-1 discovery grep — include in SP-2 scope
+**SP-2 bulk rename corrupted learnings.md historical examples:**
+- Mechanical `claudeutils` → `edify` replacement changed quoted examples in learnings that described *what happened during SP-1*. E.g., "Replacing all `claudeutils` → `edify`" became "Replacing all `edify` → `edify`" (nonsensical). Lines ~57, ~190-192 affected. Fix during next /codify pass or manually.
 
 ## Reference Files
 
@@ -231,7 +231,8 @@
 - `plans/threshold-token-migration/brief.md` — Line-based to token-based threshold migration
 - `plans/edify-rename/requirements.md` — Full brand rename requirements (proofed)
 - `plans/edify-rename/runbook-outline.md` — SP-1 execution plan (also basis for SP-2)
+- `plans/edify-rename/reports/sp2-discovery.md` — SP-2 scope inventory (388 files, 1389 occurrences)
 
 ## Next Steps
 
-SP-2 (package rename `edify` → `edify`) needs its own /runbook pass. Scope: pyproject.toml entry point, src/ directory rename, all remaining `edify` CLI/import refs across parent and submodule. The submodule runtime refs deferred from SP-1 are part of SP-2 scope.
+Edify rename core work complete (SP-1 + SP-2 + SP-3). Remaining edify-rename FRs are external/low-priority (GitHub repo rename, PyPI claim, delivered plan cleanup, marketplace). Next priority: pick from backlog per WSJF scoring.
