@@ -186,7 +186,7 @@ def _setup_worktree_safe(
 def clean_tree() -> None:
     """Verify clean tree except session context."""
     parent = _git("status", "--porcelain")
-    submodule = _git("-C", "agent-core", "status", "--porcelain", check=False)
+    submodule = _git("-C", "plugin", "status", "--porcelain", check=False)
     exempt = {"session.md", "learnings.md"}
     dirty = [
         line
@@ -307,9 +307,9 @@ def _check_not_dirty(slug: str, worktree_path: Path) -> None:  # noqa: ARG001
                 "Commit or stash before removing worktree."
             )
             _fail(msg, 2)
-    if _is_submodule_dirty("agent-core"):
+    if _is_submodule_dirty("plugin"):
         msg = (
-            "Submodule (agent-core) has uncommitted changes. "
+            "Submodule (plugin) has uncommitted changes. "
             "Commit or stash before removing worktree."
         )
         _fail(msg, 2)

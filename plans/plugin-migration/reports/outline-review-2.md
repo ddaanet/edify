@@ -60,7 +60,7 @@ The runbook outline had a critical omission (missing Phase 0 for directory renam
 
 1. **Missing Phase 0: Directory Rename**
    - Location: Phase structure
-   - Problem: Design D-1 specifies git repo rename from agent-core to edify-plugin. This is a fundamental structural change that must be a runbook step, but outline had no phase for it. All subsequent phases reference `edify-plugin/` paths but the directory rename was never specified.
+   - Problem: Design D-1 specifies git repo rename from plugin to edify-plugin. This is a fundamental structural change that must be a runbook step, but outline had no phase for it. All subsequent phases reference `edify-plugin/` paths but the directory rename was never specified.
    - Fix: Added Phase 0 with step 0.1 for directory rename (git mv + path updates in .gitmodules, justfile, settings.json, CLAUDE.md). Updated phase numbering, dependencies, and total step count (16→17 steps, 6→7 phases).
    - **Status**: FIXED
 
@@ -78,10 +78,10 @@ The runbook outline had a critical omission (missing Phase 0 for directory renam
    - Fix: Updated step 3.1 to specify "direct format `{"PreToolUse": [...]}` using `$CLAUDE_PLUGIN_ROOT` paths (per D-4)".
    - **Status**: FIXED
 
-3. **agent-core References Not Updated**
+3. **plugin References Not Updated**
    - Location: Multiple phases (1, 2, 3, 4, 5, 6)
-   - Problem: All steps, checkpoints, and expansion guidance referenced `agent-core/` paths when design specifies rename to `edify-plugin/`. This creates confusion and execution errors.
-   - Fix: Updated all 24 references from `agent-core` to `edify-plugin` across phase steps, checkpoints, expansion guidance, and dependency notes.
+   - Problem: All steps, checkpoints, and expansion guidance referenced `plugin/` paths when design specifies rename to `edify-plugin/`. This creates confusion and execution errors.
+   - Fix: Updated all 24 references from `plugin` to `edify-plugin` across phase steps, checkpoints, expansion guidance, and dependency notes.
    - **Status**: FIXED
 
 4. **Phase Dependencies Incorrect**
@@ -92,10 +92,10 @@ The runbook outline had a critical omission (missing Phase 0 for directory renam
 
 ### Minor Issues
 
-1. **Purpose Line Still Referenced agent-core**
+1. **Purpose Line Still Referenced plugin**
    - Location: Document header
-   - Problem: Purpose stated "Migrate agent-core from symlink-based..." but should reference the renamed directory.
-   - Fix: Updated to "Migrate edify-plugin (was agent-core) from symlink-based..." to reflect the rename and provide historical context.
+   - Problem: Purpose stated "Migrate plugin from symlink-based..." but should reference the renamed directory.
+   - Fix: Updated to "Migrate edify-plugin (was plugin) from symlink-based..." to reflect the rename and provide historical context.
    - **Status**: FIXED
 
 2. **Requirements Mapping Table Lacked Notes Column**
@@ -106,14 +106,14 @@ The runbook outline had a critical omission (missing Phase 0 for directory renam
 
 3. **Cache Filename Not Updated for Rename**
    - Location: Phase 6 step 6.2
-   - Problem: Step 6.2 referenced `.cache/just-help-agent-core.txt` but filename should update to `just-help-edify-plugin.txt` after directory rename.
+   - Problem: Step 6.2 referenced `.cache/just-help-plugin.txt` but filename should update to `just-help-edify-plugin.txt` after directory rename.
    - Fix: Updated step 6.2 to reference `.cache/just-help-edify-plugin.txt` and noted filename change in step description.
    - **Status**: FIXED
 
 4. **D-1 Summary Too Brief**
    - Location: Key Design Decisions section
    - Problem: D-1 was listed as "Plugin name = edify" but design has full naming hierarchy table with three distinct concepts (product, git repo, marketplace plugin).
-   - Fix: Expanded D-1 to "Naming hierarchy: product = edify, git repo = edify-plugin (was agent-core), marketplace plugin = edify".
+   - Fix: Expanded D-1 to "Naming hierarchy: product = edify, git repo = edify-plugin (was plugin), marketplace plugin = edify".
    - **Status**: FIXED
 
 5. **D-4 Summary Lacked Format Specification**
@@ -155,7 +155,7 @@ The runbook outline had a critical omission (missing Phase 0 for directory renam
 ## Fixes Applied
 
 **Document header:**
-- Updated purpose line: "edify-plugin (was agent-core)" for rename context
+- Updated purpose line: "edify-plugin (was plugin)" for rename context
 
 **Requirements Mapping:**
 - Added Notes column with clarifications for all requirements
@@ -177,12 +177,12 @@ The runbook outline had a critical omission (missing Phase 0 for directory renam
 - Updated step 1.2 path to `edify-plugin/.version`
 
 **Phase 2:**
-- Updated all paths from `agent-core/` to `edify-plugin/` (4 occurrences)
+- Updated all paths from `plugin/` to `edify-plugin/` (4 occurrences)
 - Added D-8 reference for consumer mode deferral
 
 **Phase 3:**
 - Updated step 3.1 format from "wrapper" to "direct format `{"PreToolUse": [...]}`"
-- Updated all paths from `agent-core/` to `edify-plugin/` (3 occurrences)
+- Updated all paths from `plugin/` to `edify-plugin/` (3 occurrences)
 - Added D-4 reference
 
 **Phase 4:**
@@ -192,12 +192,12 @@ The runbook outline had a critical omission (missing Phase 0 for directory renam
 - Updated step 4.2 import path to `edify-plugin/just/portable.just`
 
 **Phase 5:**
-- Updated all paths from `agent-core/` to `edify-plugin/` (4 occurrences in step descriptions)
+- Updated all paths from `plugin/` to `edify-plugin/` (4 occurrences in step descriptions)
 - Updated validation command to `claude --plugin-dir ./edify-plugin`
 
 **Phase 6:**
-- Updated dependency note from "agent-core justfile" to "edify-plugin justfile"
-- Updated step 6.2 filename from `just-help-agent-core.txt` to `just-help-edify-plugin.txt`
+- Updated dependency note from "plugin justfile" to "edify-plugin justfile"
+- Updated step 6.2 filename from `just-help-plugin.txt` to `just-help-edify-plugin.txt`
 
 **Complexity Distribution:**
 - Added Phase 0 row (1 step, Trivial, 6%)

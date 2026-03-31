@@ -13,8 +13,8 @@
 
 ## Architecture
 
-- **Consolidate** FR-1–5 + existing patterns (ln, git worktree, git merge) into `agent-core/hooks/pretooluse-recipe-redirect.py`
-- **Delete** `agent-core/hooks/pretooluse-block-rm-lock.sh` after absorption
+- **Consolidate** FR-1–5 + existing patterns (ln, git worktree, git merge) into `plugin/hooks/pretooluse-recipe-redirect.py`
+- **Delete** `plugin/hooks/pretooluse-block-rm-lock.sh` after absorption
 - **Update** `.claude/settings.json` to remove block-rm-lock hook entry
 - **Routing table** with per-pattern action type:
   - Soft redirect: `additionalContext` message, exit 0

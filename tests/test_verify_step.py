@@ -7,7 +7,7 @@ import pytest
 
 SCRIPT = (
     Path(__file__).parent.parent
-    / "agent-core"
+    / "plugin"
     / "skills"
     / "orchestrate"
     / "scripts"

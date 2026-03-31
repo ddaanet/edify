@@ -1,6 +1,6 @@
 # Hook Infrastructure Analysis
 
-**Status:** All hook scripts analyzed. 4 hooks currently symlinked to agent-core. No local hooks in .claude/hooks/.
+**Status:** All hook scripts analyzed. 4 hooks currently symlinked to plugin. No local hooks in .claude/hooks/.
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### Hook Registry
 
-Hooks are configured via `settings.json` hooks section. All 4 hooks are currently located in `agent-core/hooks/` and invoked via `$CLAUDE_PROJECT_DIR` path expansion.
+Hooks are configured via `settings.json` hooks section. All 4 hooks are currently located in `plugin/hooks/` and invoked via `$CLAUDE_PROJECT_DIR` path expansion.
 
 **Hook Events Configured:**
 
@@ -22,13 +22,13 @@ Hooks are configured via `settings.json` hooks section. All 4 hooks are currentl
 
 ## Hook Scripts Inventory
 
-All hooks are stored in `/Users/david/code/claudeutils-plugin-migration/agent-core/hooks/` and must be symlinked to `.claude/hooks/` or migrated to plugin.
+All hooks are stored in `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/` and must be symlinked to `.claude/hooks/` or migrated to plugin.
 
 ### 1. pretooluse-block-tmp.sh
 
 **Event:** PreToolUse
 **Matcher:** Write|Edit
-**Location:** `agent-core/hooks/pretooluse-block-tmp.sh`
+**Location:** `plugin/hooks/pretooluse-block-tmp.sh`
 **Language:** Bash
 
 **Purpose:**
@@ -67,21 +67,21 @@ Prevents writes to system `/tmp/` or `/private/tmp/`. Enforces project-local `tm
 
 **Event:** PreToolUse
 **Matcher:** Write|Edit
-**Location:** `agent-core/hooks/pretooluse-symlink-redirect.sh`
+**Location:** `plugin/hooks/pretooluse-symlink-redirect.sh`
 **Language:** Bash
 
 **Purpose:**
-Detects when agent attempts to write/edit a file that is symlinked to agent-core. Blocks the write and suggests the correct target path instead.
+Detects when agent attempts to write/edit a file that is symlinked to plugin. Blocks the write and suggests the correct target path instead.
 
 **Implementation Details:**
 - Reads JSON input from stdin
 - Extracts `.tool_name` and `.tool_input.file_path`
 - Checks if file exists and is a symlink: `[[ -L "$file_path" ]]`
-- If symlink target contains `agent-core/`:
+- If symlink target contains `plugin/`:
   - Resolves relative symlink to absolute path using `readlink` + `dirname` + `cd`
   - Normalizes path with pwd
   - Strips project prefix using `$CLAUDE_PROJECT_DIR` to create relative path
-  - Blocks with message: "🚫 BLOCKED: This file is symlinked to agent-core" and "Instead, $tool_name file: $relative_target"
+  - Blocks with message: "🚫 BLOCKED: This file is symlinked to plugin" and "Instead, $tool_name file: $relative_target"
   - Exits 2
 - Otherwise: allows (exit 0)
 
@@ -94,7 +94,7 @@ Detects when agent attempts to write/edit a file that is symlinked to agent-core
 - `$CLAUDE_PROJECT_DIR` — Used to compute relative path for error message
 
 **Critical Logic:**
-- Only blocks symlinks pointing into agent-core/, not arbitrary symlinks
+- Only blocks symlinks pointing into plugin/, not arbitrary symlinks
 - Converts relative symlink paths to absolute by resolving directory context
 - Normalizes paths to handle `..` and other path quirks
 
@@ -108,7 +108,7 @@ Detects when agent attempts to write/edit a file that is symlinked to agent-core
 
 **Event:** PreToolUse, PostToolUse
 **Matcher:** Bash
-**Location:** `agent-core/hooks/submodule-safety.py`
+**Location:** `plugin/hooks/submodule-safety.py`
 **Language:** Python 3
 
 **Purpose:**
@@ -165,7 +165,7 @@ Dual-mode hook: Hard boundary to prevent agent confusion when working directory 
 
 **Event:** UserPromptSubmit
 **Matcher:** None (fires on all prompts)
-**Location:** `agent-core/hooks/userpromptsubmit-shortcuts.py`
+**Location:** `plugin/hooks/userpromptsubmit-shortcuts.py`
 **Language:** Python 3
 **Timeout:** 5 seconds
 
@@ -255,9 +255,9 @@ Expand workflow shortcuts (Tier 1 commands and Tier 2 directives) into full inst
 
 ### Critical Considerations for Plugin Hooks
 
-1. **Symlink Redirect Logic** — `pretooluse-symlink-redirect.sh` uses symlink detection to prevent writes to agent-core. In plugin context:
+1. **Symlink Redirect Logic** — `pretooluse-symlink-redirect.sh` uses symlink detection to prevent writes to plugin. In plugin context:
    - Plugin hooks cannot access files outside their plugin directory by default
-   - Symlinks pointing to agent-core (relative paths like `../../agent-core/`) will need absolute path resolution
+   - Symlinks pointing to plugin (relative paths like `../../plugin/`) will need absolute path resolution
    - Current relative path computation may break if plugin is deployed to different location
    - **Recommendation:** Test symlink resolution in plugin environment; may need absolute path canonicalization
 
@@ -281,9 +281,9 @@ Expand workflow shortcuts (Tier 1 commands and Tier 2 directives) into full inst
 
 ## Hook Invocation Paths
 
-**Current (symlinked from agent-core):**
+**Current (symlinked from plugin):**
 ```
-.claude/settings.json → $CLAUDE_PROJECT_DIR/agent-core/hooks/script.sh|.py
+.claude/settings.json → $CLAUDE_PROJECT_DIR/plugin/hooks/script.sh|.py
 ```
 
 **Plugin Migration:**
@@ -294,7 +294,7 @@ Expand workflow shortcuts (Tier 1 commands and Tier 2 directives) into full inst
 **Path Resolution Difference:**
 - Symlinked: `$CLAUDE_PROJECT_DIR` = project root (e.g., `/Users/david/code/claudeutils-plugin-migration`)
 - Plugin: `$CLAUDE_PLUGIN_ROOT` = plugin directory (e.g., `~/.claude/plugins/edify`)
-- Relative path computation affected: plugin scripts cannot use `../../agent-core/` relative links
+- Relative path computation affected: plugin scripts cannot use `../../plugin/` relative links
 
 ---
 
@@ -344,17 +344,17 @@ Expand workflow shortcuts (Tier 1 commands and Tier 2 directives) into full inst
    - `pretooluse-symlink-redirect.sh` (env var substitution + symlink test in plugin)
    - `submodule-safety.py` (env var substitution + cwd context test)
 
-3. **Phase 3** — Remove symlinks from agent-core (post-migration validation)
+3. **Phase 3** — Remove symlinks from plugin (post-migration validation)
 
 ---
 
 ## File Locations
 
 **Agent-core hooks (current):**
-- `/Users/david/code/claudeutils-plugin-migration/agent-core/hooks/pretooluse-block-tmp.sh`
-- `/Users/david/code/claudeutils-plugin-migration/agent-core/hooks/pretooluse-symlink-redirect.sh`
-- `/Users/david/code/claudeutils-plugin-migration/agent-core/hooks/submodule-safety.py`
-- `/Users/david/code/claudeutils-plugin-migration/agent-core/hooks/userpromptsubmit-shortcuts.py`
+- `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/pretooluse-block-tmp.sh`
+- `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/pretooluse-symlink-redirect.sh`
+- `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/submodule-safety.py`
+- `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/userpromptsubmit-shortcuts.py`
 
 **Settings configuration:**
 - `/Users/david/code/claudeutils-plugin-migration/.claude/settings.json` (lines 34–81)

@@ -23,7 +23,7 @@ from tests.fixtures.validate_runbook_fixtures import (
     VIOLATION_VERIFY_GREEN_PATHS,
 )
 
-SCRIPT = Path(__file__).parent.parent / "agent-core" / "bin" / "validate-runbook.py"
+SCRIPT = Path(__file__).parent.parent / "plugin" / "bin" / "validate-runbook.py"
 
 _spec = importlib.util.spec_from_file_location("validate_runbook", SCRIPT)
 _mod = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]
@@ -96,7 +96,7 @@ def test_model_tags_violation(run_validate: _RunValidateFn) -> None:
     code, content = run_validate("model-tags", "violation", VIOLATION_MODEL_TAGS)
     assert code == 1
     assert "**Result:** FAIL" in content
-    assert "agent-core/skills/myskill/SKILL.md" in content
+    assert "plugin/skills/myskill/SKILL.md" in content
     assert "**Expected:** opus" in content
 
 

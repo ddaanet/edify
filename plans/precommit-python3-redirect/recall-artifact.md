@@ -1,6 +1,6 @@
 # Recall Artifact: Precommit Python3 Redirect
 
-Resolve entries via `agent-core/bin/when-resolve.py` — do not use inline summaries.
+Resolve entries via `plugin/bin/when-resolve.py` — do not use inline summaries.
 
 ## Entry Keys
 

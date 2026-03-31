@@ -1,6 +1,6 @@
 # Hook Batch 2
 
-Two new hooks for tool-use governance. Builds on existing hook infrastructure in `agent-core/hooks/`.
+Two new hooks for tool-use governance. Builds on existing hook infrastructure in `plugin/hooks/`.
 
 ## Requirements
 

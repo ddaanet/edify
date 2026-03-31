@@ -17,7 +17,7 @@ Requires Python 3.14+ and [uv].
 
 ## Agent Framework
 
-The `agent-core/` submodule provides workflow infrastructure for Claude Code
+The `plugin/` submodule provides workflow infrastructure for Claude Code
 projects. Currently installed as a git submodule with symlinks
 (`just sync-to-parent`); converting to a Claude Code plugin.
 

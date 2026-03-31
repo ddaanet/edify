@@ -71,8 +71,8 @@ Decomposition via DSM banding + Axiomatic Design zigzag + TRL readiness scale. R
 **What (C-6):** Refactor worktree lifecycle code to support multiple submodules with per-submodule strategy dispatch. Prerequisite infrastructure for FR-9 memory submodule.
 
 **How (DP):**
-- Extract hardcoded `agent-core` references (42 occurrences across 4 files: `git_ops.py`, `merge.py`, `merge_state.py`, `cli.py`) into configurable submodule registry
-- Per-submodule strategy: `agent-core` uses branch-per-worktree (current behavior), `memory` uses single-shared-branch (new)
+- Extract hardcoded `plugin` references (42 occurrences across 4 files: `git_ops.py`, `merge.py`, `merge_state.py`, `cli.py`) into configurable submodule registry
+- Per-submodule strategy: `plugin` uses branch-per-worktree (current behavior), `memory` uses single-shared-branch (new)
 - Strategy dispatch in worktree create/merge/remove operations
 - Submodule registry as configuration (not hardcoded) — future submodules add config, not code
 

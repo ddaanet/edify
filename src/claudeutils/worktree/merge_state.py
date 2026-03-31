@@ -16,7 +16,7 @@ def _detect_merge_state(slug: str) -> str:
 
     Detection order (D-5):
     1. merged: branch is ancestor of HEAD
-    2. submodule_conflicts: MERGE_HEAD exists in agent-core
+    2. submodule_conflicts: MERGE_HEAD exists in plugin
     3. parent_resolved: MERGE_HEAD exists in parent, no unresolved conflicts
     4. parent_conflicts: MERGE_HEAD exists in parent, unresolved conflicts present
     5. clean: none of the above
@@ -25,7 +25,7 @@ def _detect_merge_state(slug: str) -> str:
         return "merged"
 
     submodule_merge_head = subprocess.run(
-        ["git", "-C", "agent-core", "rev-parse", "--verify", "MERGE_HEAD"],
+        ["git", "-C", "plugin", "rev-parse", "--verify", "MERGE_HEAD"],
         capture_output=True,
         check=False,
     )

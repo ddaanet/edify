@@ -9,7 +9,7 @@ Agent-core is a shared submodule providing unified workflow infrastructure for C
 ## Directory Tree Overview
 
 ```
-agent-core/
+plugin/
 ├── .git/                          # Submodule git repository
 ├── .claude/                       # Agent-core local configuration
 │   ├── CLAUDE.local.md.example    # Development-only context (not synced to parent)
@@ -33,7 +33,7 @@ agent-core/
 
 ## Skills Directory
 
-All 16 skills in `/Users/david/code/claudeutils-plugin-migration/agent-core/skills/`:
+All 16 skills in `/Users/david/code/claudeutils-plugin-migration/plugin/skills/`:
 
 | Skill | Type | Location | Purpose |
 |-------|------|----------|---------|
@@ -67,7 +67,7 @@ All 16 skills in `/Users/david/code/claudeutils-plugin-migration/agent-core/skil
 
 ## Agents Directory
 
-All 14 agents in `/Users/david/code/claudeutils-plugin-migration/agent-core/agents/`:
+All 14 agents in `/Users/david/code/claudeutils-plugin-migration/plugin/agents/`:
 
 | Agent | File Size | Purpose |
 |-------|-----------|---------|
@@ -95,14 +95,14 @@ All 14 agents in `/Users/david/code/claudeutils-plugin-migration/agent-core/agen
 
 ## Hooks Directory
 
-Four hook scripts in `/Users/david/code/claudeutils-plugin-migration/agent-core/hooks/`:
+Four hook scripts in `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/`:
 
 ### Hook Scripts
 
 | Hook | Event | Language | Purpose |
 |------|-------|----------|---------|
 | pretooluse-block-tmp.sh | PreToolUse | Bash | Block writes to system `/tmp/`, enforce project-local `tmp/` |
-| pretooluse-symlink-redirect.sh | PreToolUse | Bash | Block writes to symlinked files, suggest write to agent-core source |
+| pretooluse-symlink-redirect.sh | PreToolUse | Bash | Block writes to symlinked files, suggest write to plugin source |
 | submodule-safety.py | PreToolUse / PostToolUse | Python | Enforce project root cwd, block cross-submodule commands |
 | userpromptsubmit-shortcuts.py | UserPromptSubmit | Python | Expand workflow shortcuts (s, x, xc, r, h, hc, ci, ?) |
 
@@ -115,8 +115,8 @@ Four hook scripts in `/Users/david/code/claudeutils-plugin-migration/agent-core/
 - Outputs error to stderr, exits with code 2 to block operation
 
 **pretooluse-symlink-redirect.sh:**
-- Checks if target file is a symlink to agent-core
-- If so, blocks Write/Edit and suggests writing to agent-core source instead
+- Checks if target file is a symlink to plugin
+- If so, blocks Write/Edit and suggests writing to plugin source instead
 - Uses readlink to resolve symlink target
 - Handles relative symlinks by converting to absolute
 
@@ -139,19 +139,19 @@ Hooks are currently configured in `.claude/settings.json` (not in plugin.json):
 - **PostToolUse** matchers: Bash
 - **UserPromptSubmit** → global (no matcher)
 
-Symlinks in `.claude/hooks/` point to agent-core source:
+Symlinks in `.claude/hooks/` point to plugin source:
 ```
-pretooluse-block-tmp.sh → ../../agent-core/hooks/pretooluse-block-tmp.sh
-pretooluse-symlink-redirect.sh → ../../agent-core/hooks/pretooluse-symlink-redirect.sh
-submodule-safety.py → ../../agent-core/hooks/submodule-safety.py
-userpromptsubmit-shortcuts.py → ../../agent-core/hooks/userpromptsubmit-shortcuts.py
+pretooluse-block-tmp.sh → ../../plugin/hooks/pretooluse-block-tmp.sh
+pretooluse-symlink-redirect.sh → ../../plugin/hooks/pretooluse-symlink-redirect.sh
+submodule-safety.py → ../../plugin/hooks/submodule-safety.py
+userpromptsubmit-shortcuts.py → ../../plugin/hooks/userpromptsubmit-shortcuts.py
 ```
 
 ---
 
 ## Bin Directory
 
-Eleven utility scripts in `/Users/david/code/claudeutils-plugin-migration/agent-core/bin/`:
+Eleven utility scripts in `/Users/david/code/claudeutils-plugin-migration/plugin/bin/`:
 
 | Script | Language | Purpose |
 |--------|----------|---------|
@@ -176,7 +176,7 @@ Eleven utility scripts in `/Users/david/code/claudeutils-plugin-migration/agent-
 
 ## Fragments Directory
 
-Nineteen instruction fragments in `/Users/david/code/claudeutils-plugin-migration/agent-core/fragments/`:
+Nineteen instruction fragments in `/Users/david/code/claudeutils-plugin-migration/plugin/fragments/`:
 
 | Fragment | Purpose |
 |----------|---------|
@@ -205,11 +205,11 @@ Nineteen instruction fragments in `/Users/david/code/claudeutils-plugin-migratio
 
 ## Templates Directory
 
-Three files in `/Users/david/code/claudeutils-plugin-migration/agent-core/templates/`:
+Three files in `/Users/david/code/claudeutils-plugin-migration/plugin/templates/`:
 
 | File | Purpose |
 |------|---------|
-| CLAUDE.template.md | Template CLAUDE.md for new projects using agent-core |
+| CLAUDE.template.md | Template CLAUDE.md for new projects using plugin |
 | dotenvrc | Environment variable configuration example |
 | README.md | Templates directory documentation |
 
@@ -217,7 +217,7 @@ Three files in `/Users/david/code/claudeutils-plugin-migration/agent-core/templa
 
 ## Documentation (docs) Directory
 
-Six workflow and pattern guides in `/Users/david/code/claudeutils-plugin-migration/agent-core/docs/`:
+Six workflow and pattern guides in `/Users/david/code/claudeutils-plugin-migration/plugin/docs/`:
 
 | Document | Lines | Purpose |
 |----------|-------|---------|
@@ -232,7 +232,7 @@ Six workflow and pattern guides in `/Users/david/code/claudeutils-plugin-migrati
 
 ## Configs Directory
 
-Configuration templates in `/Users/david/code/claudeutils-plugin-migration/agent-core/configs/`:
+Configuration templates in `/Users/david/code/claudeutils-plugin-migration/plugin/configs/`:
 
 | Config | Purpose |
 |--------|---------|
@@ -248,32 +248,32 @@ Configuration templates in `/Users/david/code/claudeutils-plugin-migration/agent
 ## Current Symlinks in .claude/
 
 **Skills (.claude/skills/):** 17 symlinks
-- commit → ../../agent-core/skills/commit
-- design → ../../agent-core/skills/design
-- gitmoji → ../../agent-core/skills/gitmoji
-- handoff → ../../agent-core/skills/handoff
-- handoff-haiku → ../../agent-core/skills/handoff-haiku
-- next → ../../agent-core/skills/next
-- opus-design-question → ../../agent-core/skills/opus-design-question
-- orchestrate → ../../agent-core/skills/orchestrate
-- plan-adhoc → ../../agent-core/skills/plan-adhoc
-- plan-tdd → ../../agent-core/skills/plan-tdd
-- reflect → ../../agent-core/skills/reflect
-- remember → ../../agent-core/skills/remember
-- review-tdd-plan → ../../agent-core/skills/review-tdd-plan
-- shelve → ../../agent-core/skills/shelve
-- token-efficient-bash → ../../agent-core/skills/token-efficient-bash
-- vet → ../../agent-core/skills/vet
+- commit → ../../plugin/skills/commit
+- design → ../../plugin/skills/design
+- gitmoji → ../../plugin/skills/gitmoji
+- handoff → ../../plugin/skills/handoff
+- handoff-haiku → ../../plugin/skills/handoff-haiku
+- next → ../../plugin/skills/next
+- opus-design-question → ../../plugin/skills/opus-design-question
+- orchestrate → ../../plugin/skills/orchestrate
+- plan-adhoc → ../../plugin/skills/plan-adhoc
+- plan-tdd → ../../plugin/skills/plan-tdd
+- reflect → ../../plugin/skills/reflect
+- remember → ../../plugin/skills/remember
+- review-tdd-plan → ../../plugin/skills/review-tdd-plan
+- shelve → ../../plugin/skills/shelve
+- token-efficient-bash → ../../plugin/skills/token-efficient-bash
+- vet → ../../plugin/skills/vet
 
 **Agents (.claude/agents/):** Mix of symlinks and task files
 - Symlinks: design-vet-agent.md, outline-review-agent.md, quiet-explore.md, quiet-task.md, refactor.md, review-tdd-process.md, runbook-outline-review-agent.md, tdd-plan-reviewer.md, tdd-task.md, test-hooks.md, vet-agent.md, vet-fix-agent.md
 - Task files (generated by prepare-runbook.py): `*-task.md` files from prior plans (claude-tools-recovery-task.md, claude-tools-rewrite-task.md, consolidation-task.md, etc.)
 
 **Hooks (.claude/hooks/):** 4 symlinks
-- pretooluse-block-tmp.sh → ../../agent-core/hooks/pretooluse-block-tmp.sh
-- pretooluse-symlink-redirect.sh → ../../agent-core/hooks/pretooluse-symlink-redirect.sh
-- submodule-safety.py → ../../agent-core/hooks/submodule-safety.py
-- userpromptsubmit-shortcuts.py → ../../agent-core/hooks/userpromptsubmit-shortcuts.py
+- pretooluse-block-tmp.sh → ../../plugin/hooks/pretooluse-block-tmp.sh
+- pretooluse-symlink-redirect.sh → ../../plugin/hooks/pretooluse-symlink-redirect.sh
+- submodule-safety.py → ../../plugin/hooks/submodule-safety.py
+- userpromptsubmit-shortcuts.py → ../../plugin/hooks/userpromptsubmit-shortcuts.py
 
 ---
 
@@ -319,7 +319,7 @@ Current hook configuration in `.claude/settings.json`:
     "hooks": [
       {
         "type": "command",
-        "command": "python3 $CLAUDE_PROJECT_DIR/agent-core/hooks/userpromptsubmit-shortcuts.py",
+        "command": "python3 $CLAUDE_PROJECT_DIR/plugin/hooks/userpromptsubmit-shortcuts.py",
         "timeout": 5
       }
     ]
@@ -331,19 +331,19 @@ Current hook configuration in `.claude/settings.json`:
 
 ## Justfile
 
-Single justfile at `/Users/david/code/claudeutils-plugin-migration/agent-core/justfile`:
+Single justfile at `/Users/david/code/claudeutils-plugin-migration/plugin/justfile`:
 
 | Recipe | Purpose |
 |--------|---------|
 | help | List available recipes |
 | sync-to-parent | Create symlinks in parent project's .claude/ directory |
-| precommit | Stub validation (agent-core has no validation requirements) |
+| precommit | Stub validation (plugin has no validation requirements) |
 
 **Key recipe:** `sync-to-parent` creates relative symlinks for:
-- All skills in `agent-core/skills/*/` → `.claude/skills/`
-- All agent files in `agent-core/agents/*.md` → `.claude/agents/`
-- All hook files in `agent-core/hooks/*.sh` and `*.py` → `.claude/hooks/`
-- Cleans stale skill symlinks (source deleted in agent-core)
+- All skills in `plugin/skills/*/` → `.claude/skills/`
+- All agent files in `plugin/agents/*.md` → `.claude/agents/`
+- All hook files in `plugin/hooks/*.sh` and `*.py` → `.claude/hooks/`
+- Cleans stale skill symlinks (source deleted in plugin)
 
 ---
 
@@ -358,15 +358,15 @@ Single justfile at `/Users/david/code/claudeutils-plugin-migration/agent-core/ju
 **Current hook architecture:**
 - All hooks configured in `.claude/settings.json` (legacy)
 - No plugin.json for plugin-style metadata
-- Hooks executed via symlinks to agent-core source scripts
+- Hooks executed via symlinks to plugin source scripts
 
 ---
 
 ## Key Patterns and Observations
 
 ### Symlink Architecture
-- All agent-core content (skills, agents, hooks) exposed via relative symlinks in parent's `.claude/` directory
-- Symlinks point to agent-core source, enabling live editing without re-syncing
+- All plugin content (skills, agents, hooks) exposed via relative symlinks in parent's `.claude/` directory
+- Symlinks point to plugin source, enabling live editing without re-syncing
 - `just sync-to-parent` manages symlink lifecycle (create, update, remove stale)
 
 ### Hook Enforcement
@@ -404,15 +404,15 @@ Single justfile at `/Users/david/code/claudeutils-plugin-migration/agent-core/ju
 **Open questions:**
 - Can skills/agents be served from plugin, or only from .claude/ directory?
 - Does plugin.json support nested hooks array structure (PreToolUse → [array])?
-- How does plugin version/discovery interact with symlinked agent-core updates?
+- How does plugin version/discovery interact with symlinked plugin updates?
 
 ---
 
 ## Files Referenced
 
-- **Justfile:** `/Users/david/code/claudeutils-plugin-migration/agent-core/justfile`
-- **Hooks:** `/Users/david/code/claudeutils-plugin-migration/agent-core/hooks/*.sh`, `*.py`
+- **Justfile:** `/Users/david/code/claudeutils-plugin-migration/plugin/justfile`
+- **Hooks:** `/Users/david/code/claudeutils-plugin-migration/plugin/hooks/*.sh`, `*.py`
 - **Hook config:** `/Users/david/code/claudeutils-plugin-migration/.claude/settings.json`
-- **Skills:** `/Users/david/code/claudeutils-plugin-migration/agent-core/skills/*/SKILL.md`
-- **Agents:** `/Users/david/code/claudeutils-plugin-migration/agent-core/agents/*.md`
+- **Skills:** `/Users/david/code/claudeutils-plugin-migration/plugin/skills/*/SKILL.md`
+- **Agents:** `/Users/david/code/claudeutils-plugin-migration/plugin/agents/*.md`
 - **Symlinks:** `.claude/skills/`, `.claude/agents/`, `.claude/hooks/` (all relative to project root)

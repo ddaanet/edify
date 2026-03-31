@@ -141,9 +141,9 @@
 
 ### Internal Sources
 
-- `agent-core/skills/proof/SKILL.md` — reword-accumulate-sync protocol
-- `agent-core/agents/corrector.md` — severity taxonomy, status taxonomy, investigation gates
-- `agent-core/skills/deliverable-review/SKILL.md` — two-layer review, severity classification
+- `plugin/skills/proof/SKILL.md` — reword-accumulate-sync protocol
+- `plugin/agents/corrector.md` — severity taxonomy, status taxonomy, investigation gates
+- `plugin/skills/deliverable-review/SKILL.md` — two-layer review, severity classification
 - `plans/interactive-review/brief.md` — dogfooding feedback (presentation, research gap)
 - `plans/interactive-review/requirements.md` — FR-1 through FR-7, constraints
 

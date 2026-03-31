@@ -19,7 +19,7 @@ Structural enforcement didn't begin with tool-call anchoring in February 2026. T
   → Agent-vs-human command separation (box-api, Nov 2025)
     → Platform config: .claude/settings.json (pytest-md, Jan 2026)
       → Orchestrator constraints: Allowed/Delegate (home, Jan 2026)
-        → Shared infrastructure: agent-core submodule (home, Jan 2026)
+        → Shared infrastructure: plugin submodule (home, Jan 2026)
           → Defense-in-depth document: D+B named (Feb 8)
             → Prose gates skipped under momentum (Feb 24)
               → Gate inventory: 31 gates, 61% prose-only (Feb 24)

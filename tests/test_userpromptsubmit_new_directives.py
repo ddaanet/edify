@@ -10,7 +10,7 @@ from unittest.mock import patch
 # Import hook module using importlib (filename contains hyphen)
 HOOK_PATH = (
     Path(__file__).parent.parent
-    / "agent-core"
+    / "plugin"
     / "hooks"
     / "userpromptsubmit-shortcuts.py"
 )

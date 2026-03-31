@@ -25,7 +25,7 @@ Placed after existing skip checks (report paths, creation verbs), before the `Pa
 
 ## Files
 
-- `agent-core/bin/prepare-runbook.py` — add parent-directory check in `validate_file_references()`
+- `plugin/bin/prepare-runbook.py` — add parent-directory check in `validate_file_references()`
 - `tests/test_prepare_runbook_fenced.py` — add test: existing-parent warns, non-existent-parent silent
 
 ## Context

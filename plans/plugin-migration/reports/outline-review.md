@@ -35,7 +35,7 @@ None.
 
 1. **Hook migration path inconsistency**
    - Location: Component 2 (original)
-   - Problem: Outline said to create `agent-core/hooks/hooks.json` as a separate file, but plugin hooks belong in `plugin.json` at the plugin root. Having a separate hooks.json contradicts the plugin architecture where `plugin.json` is the single manifest.
+   - Problem: Outline said to create `plugin/hooks/hooks.json` as a separate file, but plugin hooks belong in `plugin.json` at the plugin root. Having a separate hooks.json contradicts the plugin architecture where `plugin.json` is the single manifest.
    - Fix: Rewrote Component 2 to define hooks inside `plugin.json`. Updated Component 1 to reference hook definitions in Component 2.
    - **Status**: FIXED
 
@@ -73,11 +73,11 @@ None.
 
 3. **Not all agents are symlinked**
    - Location: Problem section
-   - Problem: "12 agent symlinks" is accurate but implies all agent-core agents are symlinked. `remember-task.md` and `memory-refactor.md` exist in agent-core but aren't symlinked, suggesting selective distribution.
+   - Problem: "12 agent symlinks" is accurate but implies all plugin agents are symlinked. `remember-task.md` and `memory-refactor.md` exist in plugin but aren't symlinked, suggesting selective distribution.
    - Fix: Added clarifying note to Problem section.
    - **Status**: FIXED
 
-4. **agent-core/bin/ scripts not addressed**
+4. **plugin/bin/ scripts not addressed**
    - Location: (missing component)
    - Problem: Scripts like `prepare-runbook.py` and `batch-edit.py` are referenced by path in skills, agents, and settings.json. In consumer mode (marketplace), these paths won't resolve the same way.
    - Fix: Added Component 8 (Script Path Updates) with dev vs consumer path considerations.
@@ -97,8 +97,8 @@ None.
 
 7. **Plugin manifest path inconsistency**
    - Location: Component 1
-   - Problem: Original said `agent-core/.claude-plugin/plugin.json` (nested subdirectory). Plugin manifests typically live at plugin root as `plugin.json`.
-   - Fix: Corrected to `agent-core/plugin.json` with clarifying note.
+   - Problem: Original said `plugin/.claude-plugin/plugin.json` (nested subdirectory). Plugin manifests typically live at plugin root as `plugin.json`.
+   - Fix: Corrected to `plugin/plugin.json` with clarifying note.
    - **Status**: FIXED
 
 8. **Duplicate documentation reference**
@@ -117,7 +117,7 @@ None.
 - Component 4: Added idempotency consideration with Open Questions cross-reference
 - Component 6: Added preservation of non-symlink agents, fixed documentation reference
 - Component 7: Added requirement tag (R-5), cross-reference to Component 3, clarified version file paths
-- Added Component 8: Script Path Updates for `agent-core/bin/` portability
+- Added Component 8: Script Path Updates for `plugin/bin/` portability
 - Reordered sections: Scope before Open Questions
 - Added Implementation Order section with dependency graph
 - Added Rollback Strategy section

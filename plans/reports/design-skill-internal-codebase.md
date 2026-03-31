@@ -35,7 +35,7 @@ Four distinct sub-steps, each a structural patch:
 
 **Triage Recall (D+B anchor)**
 ```bash
-agent-core/bin/when-resolve.py "when behavioral code" "when complexity" "when triage" "when <domain-keyword>" ...
+plugin/bin/when-resolve.py "when behavioral code" "when complexity" "when triage" "when <domain-keyword>" ...
 ```
 - This tool call is a *structural anchor* — prevents classification from being skipped or rationalized away
 - Derives domain keywords from task/problem description
@@ -86,7 +86,7 @@ agent-core/bin/when-resolve.py "when behavioral code" "when complexity" "when tr
 
 **A.3-5 Research and Outline**
 - External research protocol in `references/research-protocol.md`
-- Recall diff: `agent-core/bin/recall-diff.sh <job-name>` before outline production
+- Recall diff: `plugin/bin/recall-diff.sh <job-name>` before outline production
 - Outline content: approach, key decisions, open questions, scope boundaries
 - Escape hatch: if user input already specifies approach+decisions+scope, compress A+B into single validation message
 

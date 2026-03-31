@@ -97,10 +97,10 @@ def _probe_registrations(worktree_path: Path) -> tuple[bool, bool]:
     """Check parent and submodule worktree registration."""
     parent_list = _git("worktree", "list", "--porcelain", check=False)
     submodule_list = _git(
-        "-C", "agent-core", "worktree", "list", "--porcelain", check=False
+        "-C", "plugin", "worktree", "list", "--porcelain", check=False
     )
     parent_reg = str(worktree_path) in parent_list
-    submodule_reg = str(worktree_path / "agent-core") in submodule_list
+    submodule_reg = str(worktree_path / "plugin") in submodule_list
     return parent_reg, submodule_reg
 
 
@@ -113,11 +113,11 @@ def _remove_worktrees(
     if submodule_registered:
         _git(
             "-C",
-            "agent-core",
+            "plugin",
             "worktree",
             "remove",
             "--force",
-            str(worktree_path / "agent-core"),
+            str(worktree_path / "plugin"),
         )
     if parent_registered:
         _git("worktree", "remove", "--force", str(worktree_path))
@@ -172,8 +172,8 @@ def _create_session_commit(slug: str, base: str, session: str) -> str:
 def _create_submodule_worktree(
     project_root: str, worktree_path: Path, slug: str
 ) -> None:
-    """Create agent-core submodule worktree if exists."""
-    agent_core = Path(project_root) / "agent-core"
+    """Create plugin submodule worktree if exists."""
+    agent_core = Path(project_root) / "plugin"
     if not agent_core.exists() or not (agent_core / ".git").exists():
         return
 
@@ -187,23 +187,23 @@ def _create_submodule_worktree(
         str(agent_core),
         "worktree",
         "add",
-        str(worktree_path / "agent-core"),
+        str(worktree_path / "plugin"),
         *flag,
         slug,
     )
 
 
 def _delete_submodule_branch(slug: str) -> str | None:
-    """Delete branch in agent-core submodule if it exists.
+    """Delete branch in plugin submodule if it exists.
 
     Returns a warning message string if deletion failed unexpectedly, None
     otherwise.
     """
-    agent_core = Path("agent-core")
+    agent_core = Path("plugin")
     if not agent_core.exists() or not (agent_core / ".git").exists():
         return None
     r = subprocess.run(
-        ["git", "-C", "agent-core", "branch", "-D", slug],
+        ["git", "-C", "plugin", "branch", "-D", slug],
         capture_output=True,
         text=True,
         check=False,

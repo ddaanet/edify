@@ -25,13 +25,13 @@ COMMIT_INPUT_FIXTURE = """\
 ## Files
 - src/commit/cli.py
 - src/commit/gate.py
-- agent-core/fragments/vet-requirement.md
+- plugin/fragments/vet-requirement.md
 
 ## Options
 - no-vet
 - amend
 
-## Submodule agent-core
+## Submodule plugin
 > 🤖 Update vet-requirement fragment
 >
 > - Add scripted gate classification reference
@@ -54,11 +54,11 @@ def test_parse_commit_input() -> None:
     assert result.files == [
         "src/commit/cli.py",
         "src/commit/gate.py",
-        "agent-core/fragments/vet-requirement.md",
+        "plugin/fragments/vet-requirement.md",
     ]
     assert result.options == {"no-vet", "amend"}
-    assert "agent-core" in result.submodules
-    msg = result.submodules["agent-core"]
+    assert "plugin" in result.submodules
+    msg = result.submodules["plugin"]
     assert msg.startswith("🤖 Update vet-requirement fragment")
     assert "- Add scripted gate classification reference" in msg
     assert result.message is not None
@@ -122,7 +122,7 @@ def test_parse_commit_multiple_submodules() -> None:
 ## Files
 - foo.py
 
-## Submodule agent-core
+## Submodule plugin
 > Core update
 
 ## Submodule other-lib
@@ -133,7 +133,7 @@ def test_parse_commit_multiple_submodules() -> None:
 """
     result = parse_commit_input(text)
     assert len(result.submodules) == 2
-    assert "agent-core" in result.submodules
+    assert "plugin" in result.submodules
     assert "other-lib" in result.submodules
 
 

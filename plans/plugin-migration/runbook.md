@@ -5,7 +5,7 @@ model: haiku
 
 # Plugin Migration Runbook
 
-**Context:** Migrate agent-core from symlink-based distribution to Claude Code plugin architecture (dev mode only).
+**Context:** Migrate plugin from symlink-based distribution to Claude Code plugin architecture (dev mode only).
 
 **Source:** `plans/plugin-migration/design.md`
 
@@ -65,12 +65,12 @@ model: haiku
 - Skills/agents already in correct structure for auto-discovery
 
 **Project Paths:**
-- Plugin manifest: `agent-core/.claude-plugin/plugin.json`
-- Version marker: `agent-core/.version`
-- Hook config: `agent-core/hooks/hooks.json`
-- Skills: `agent-core/skills/*/SKILL.md` (16 existing + 2 new)
-- Agents: `agent-core/agents/*.md` (14 files)
-- Portable recipes: `agent-core/just/portable.just`
+- Plugin manifest: `plugin/.claude-plugin/plugin.json`
+- Version marker: `plugin/.version`
+- Hook config: `plugin/hooks/hooks.json`
+- Skills: `plugin/skills/*/SKILL.md` (16 existing + 2 new)
+- Agents: `plugin/agents/*.md` (14 files)
+- Portable recipes: `plugin/just/portable.just`
 
 **Conventions:**
 - Use `$CLAUDE_PLUGIN_ROOT` in hook commands for portability
@@ -84,11 +84,11 @@ model: haiku
 
 ## Step 1.1: Create plugin manifest
 
-Create minimal plugin manifest at `agent-core/.claude-plugin/plugin.json`:
+Create minimal plugin manifest at `plugin/.claude-plugin/plugin.json`:
 
 ```bash
-mkdir -p agent-core/.claude-plugin
-cat > agent-core/.claude-plugin/plugin.json << 'EOF'
+mkdir -p plugin/.claude-plugin
+cat > plugin/.claude-plugin/plugin.json << 'EOF'
 {
   "name": "edify",
   "version": "1.0.0",
@@ -103,10 +103,10 @@ EOF
 
 ## Step 1.2: Create fragment version marker
 
-Create version marker at `agent-core/.version`:
+Create version marker at `plugin/.version`:
 
 ```bash
-printf '1.0.0' > agent-core/.version
+printf '1.0.0' > plugin/.version
 ```
 
 **Validation:** File exists, content exactly `1.0.0` (5 bytes, no trailing newline)
@@ -117,10 +117,10 @@ printf '1.0.0' > agent-core/.version
 
 ## Step 2.1: Verify agent structure
 
-Verify `agent-core/agents/` contains 14 agent `.md` files:
+Verify `plugin/agents/` contains 14 agent `.md` files:
 
 ```bash
-agent_count=$(find agent-core/agents -maxdepth 1 -name "*.md" -type f | wc -l)
+agent_count=$(find plugin/agents -maxdepth 1 -name "*.md" -type f | wc -l)
 echo "Agent count: $agent_count"
 [ "$agent_count" -eq 14 ] || echo "ERROR: Expected 14 agents"
 ```
@@ -129,11 +129,11 @@ echo "Agent count: $agent_count"
 
 ## Step 2.2: Verify skill structure
 
-Verify `agent-core/skills/` contains 16 skill subdirectories with `SKILL.md`:
+Verify `plugin/skills/` contains 16 skill subdirectories with `SKILL.md`:
 
 ```bash
-skill_count=$(find agent-core/skills -mindepth 1 -maxdepth 1 -type d | wc -l)
-skill_md_count=$(find agent-core/skills -name "SKILL.md" | wc -l)
+skill_count=$(find plugin/skills -mindepth 1 -maxdepth 1 -type d | wc -l)
+skill_md_count=$(find plugin/skills -name "SKILL.md" | wc -l)
 echo "Skill directory count: $skill_count"
 echo "SKILL.md count: $skill_md_count"
 [ "$skill_count" -eq 16 ] && [ "$skill_md_count" -eq 16 ] || echo "ERROR: Expected 16 skills"
@@ -143,7 +143,7 @@ echo "SKILL.md count: $skill_md_count"
 
 ## Step 2.3: Create /edify:init skill
 
-Create `/edify:init` skill at `agent-core/skills/init/SKILL.md` for dev mode scaffolding.
+Create `/edify:init` skill at `plugin/skills/init/SKILL.md` for dev mode scaffolding.
 
 **Note:** Skill content should provide procedural guidance for Claude on how to scaffold project structure (detect mode, create directories, copy templates, write version marker). See existing skills like `/token-efficient-bash` for procedural format patterns.
 
@@ -151,7 +151,7 @@ Create `/edify:init` skill at `agent-core/skills/init/SKILL.md` for dev mode sca
 
 ## Step 2.4: Create /edify:update skill
 
-Create `/edify:update` skill at `agent-core/skills/update/SKILL.md` for fragment sync.
+Create `/edify:update` skill at `plugin/skills/update/SKILL.md` for fragment sync.
 
 **Note:** Skill content should provide procedural guidance for version marker updates (dev mode: no-op, just update `.edify-version`; consumer mode: TODO markers).
 
@@ -161,10 +161,10 @@ Create `/edify:update` skill at `agent-core/skills/update/SKILL.md` for fragment
 
 ## Step 3.1: Create hooks.json
 
-Create `agent-core/hooks/hooks.json` with plugin hook configuration:
+Create `plugin/hooks/hooks.json` with plugin hook configuration:
 
 ```bash
-cat > agent-core/hooks/hooks.json << 'EOF'
+cat > plugin/hooks/hooks.json << 'EOF'
 {
   "hooks": {
     "PreToolUse": [
@@ -228,10 +228,10 @@ EOF
 
 ## Step 3.2: Delete obsolete hook script
 
-Delete `agent-core/hooks/pretooluse-symlink-redirect.sh`:
+Delete `plugin/hooks/pretooluse-symlink-redirect.sh`:
 
 ```bash
-rm agent-core/hooks/pretooluse-symlink-redirect.sh
+rm plugin/hooks/pretooluse-symlink-redirect.sh
 ```
 
 **Validation:** File no longer exists
@@ -240,7 +240,7 @@ rm agent-core/hooks/pretooluse-symlink-redirect.sh
 
 ## Step 3.3: Create version check hook
 
-Create `agent-core/hooks/userpromptsubmit-version-check.py` with once-per-session version mismatch detection.
+Create `plugin/hooks/userpromptsubmit-version-check.py` with once-per-session version mismatch detection.
 
 **Implementation:** Python script that checks `.edify-version` vs `.version`, uses temp file `tmp/.edify-version-checked` for once-per-session gating, injects warning via `additionalContext` if versions differ.
 
@@ -250,13 +250,13 @@ Create `agent-core/hooks/userpromptsubmit-version-check.py` with once-per-sessio
 
 ## Step 4.1: Create portable.just
 
-Extract portable recipes to `agent-core/just/portable.just` with minimal bash prolog (fail, visible, color variables). Include: claude, claude0, wt-new, wt-ls, wt-rm, wt-merge, precommit-base.
+Extract portable recipes to `plugin/just/portable.just` with minimal bash prolog (fail, visible, color variables). Include: claude, claude0, wt-new, wt-ls, wt-rm, wt-merge, precommit-base.
 
 ---
 
 ## Step 4.2: Update root justfile
 
-Add `import 'agent-core/just/portable.just'` at top, remove migrated recipes, keep project-specific recipes (test, format, check, lint, release, line-limits).
+Add `import 'plugin/just/portable.just'` at top, remove migrated recipes, keep project-specific recipes (test, format, check, lint, release, line-limits).
 
 ---
 
@@ -271,14 +271,14 @@ Remove all symlinks from `.claude/skills/` (16), `.claude/agents/` (12, preserve
 ## Step 5.2: Cleanup configuration and documentation
 
 - Remove `hooks` section from `.claude/settings.json`
-- Remove `sync-to-parent` recipe from `agent-core/justfile`
+- Remove `sync-to-parent` recipe from `plugin/justfile`
 - Update fragments: claude-config-layout.md, sandbox-exemptions.md, project-tooling.md, delegation.md (remove sync-to-parent references)
 
 ---
 
 ## Step 5.3: Validate all functionality
 
-**Plugin discovery:** `claude --plugin-dir ./agent-core` → verify skills in `/help`, agents in Task tool
+**Plugin discovery:** `claude --plugin-dir ./plugin` → verify skills in `/help`, agents in Task tool
 
 **Hook testing:** Restart session, trigger each event type (PreToolUse, PostToolUse, UserPromptSubmit), verify behavior matches baseline
 
@@ -298,9 +298,9 @@ Run `just cache` to rebuild `.cache/just-help.txt` after import changes.
 
 ---
 
-## Step 6.2: Regenerate agent-core just help cache
+## Step 6.2: Regenerate plugin just help cache
 
-Run `gmake -C agent-core all` to rebuild `.cache/just-help-agent-core.txt` after sync-to-parent removal.
+Run `gmake -C plugin all` to rebuild `.cache/just-help-plugin.txt` after sync-to-parent removal.
 
 ---
 
@@ -319,12 +319,12 @@ Run `gmake -C agent-core all` to rebuild `.cache/just-help-agent-core.txt` after
 ## Dependencies
 
 **Before This Runbook:**
-- agent-core submodule exists at current location
+- plugin submodule exists at current location
 - Skills loaded: `plugin-dev:plugin-structure`, `plugin-dev:hook-development`
 - Baseline measurements captured (for NFR validation)
 
 **After This Runbook:**
-- Plugin operational in dev mode (`--plugin-dir ./agent-core`)
+- Plugin operational in dev mode (`--plugin-dir ./plugin`)
 - Symlinks removed (point of no return for old workflow)
 - All functionality validated against requirements
 

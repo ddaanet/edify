@@ -142,15 +142,15 @@ def test_pipeline_validates_before_submodule_commit(
     _init_repo(tmp_path)
 
     # Set up submodule-like structure for partitioning
-    sub = tmp_path / "agent-core"
+    sub = tmp_path / "plugin"
     sub.mkdir()
     _init_repo(sub)
     (sub / "f.md").write_text("new")
 
     ci = CommitInput(
-        files=["agent-core/f.md"],
+        files=["plugin/f.md"],
         message="msg",
-        submodules={"agent-core": "sub msg"},
+        submodules={"plugin": "sub msg"},
     )
 
     commit_sub = MagicMock(return_value="ok")
@@ -159,7 +159,7 @@ def test_pipeline_validates_before_submodule_commit(
     with (
         patch(
             "claudeutils.session.commit_pipeline.discover_submodules",
-            return_value=["agent-core"],
+            return_value=["plugin"],
         ),
         patch("claudeutils.session.commit_pipeline.validate_files"),
         patch(
@@ -188,7 +188,7 @@ def test_submodule_commit_failure_propagates(
     monkeypatch.chdir(tmp_path)
     _init_repo(tmp_path)
 
-    sub = tmp_path / "agent-core"
+    sub = tmp_path / "plugin"
     sub.mkdir()
     _init_repo(sub)
     (sub / "f.md").write_text("v1\n")
@@ -203,9 +203,9 @@ def test_submodule_commit_failure_propagates(
     (sub / "f.md").write_text("v2\n")
 
     ci = CommitInput(
-        files=["agent-core/f.md"],
+        files=["plugin/f.md"],
         message="update",
-        submodules={"agent-core": "submodule commit"},
+        submodules={"plugin": "submodule commit"},
     )
 
     # Mock subprocess.run to simulate git commit failure with check=True
@@ -228,7 +228,7 @@ def test_submodule_commit_failure_propagates(
     with (
         patch(
             "claudeutils.session.commit_pipeline.discover_submodules",
-            return_value=["agent-core"],
+            return_value=["plugin"],
         ),
         patch(
             "claudeutils.session.commit_pipeline._run_precommit",

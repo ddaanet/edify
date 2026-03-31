@@ -26,7 +26,7 @@ Extract portable recipes and update root justfile.
 
 **Implementation**:
 1. Add import statement at top of `justfile`:
-   `import 'agent-core/portable.just'`
+   `import 'plugin/portable.just'`
 2. Add `set allow-duplicate-recipes` for intentional recipe overrides
 3. Remove recipes that moved to portable module(s):
    - `claude`, `claude0`, `lint`, `format`, `check`, `red-lint`, `precommit-base`, `test`, `wt-new`, `wt-task`, `wt-ls`, `wt-rm`, `wt-merge`

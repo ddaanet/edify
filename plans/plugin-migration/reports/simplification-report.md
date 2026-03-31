@@ -19,7 +19,7 @@ The outline contains 16 items across 7 phases (Phase 7 is inline). Each item tar
 
 **Identical-pattern items:** None found. No items share the same function/test structure with only fixture data varying. Each step performs a structurally different operation (create manifest vs rewrite hooks.json vs audit scripts vs create skill prose).
 
-**Independent same-module functions:** Steps 3.1 and 3.2 both create skills under `agent-core/skills/`, but in different subdirectories (`init/` vs `update/`). Each is a substantial agentic prose artifact requiring independent opus-level design reasoning. Batching would not reduce expansion cost -- each skill needs its own behavioral specification, idempotency design, and mode-detection logic.
+**Independent same-module functions:** Steps 3.1 and 3.2 both create skills under `plugin/skills/`, but in different subdirectories (`init/` vs `update/`). Each is a substantial agentic prose artifact requiring independent opus-level design reasoning. Batching would not reduce expansion cost -- each skill needs its own behavioral specification, idempotency design, and mode-detection logic.
 
 **Sequential additions:** No items add elements to the same data structure. The closest candidate -- Steps 6.1 (symlink deletion + settings cleanup) and 6.2 (fragment content updates) -- targets different file sets with different risk profiles. The outline explicitly preserves separation between destructive deletion and content updates.
 

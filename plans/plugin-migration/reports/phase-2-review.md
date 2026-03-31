@@ -37,7 +37,7 @@ None.
 
 3. **Step 2.3 validation uses bare relative path without execution context note**
    - Location: Step 2.3, Validation
-   - Problem: `bash agent-core/hooks/edify-setup.sh` is a relative path that resolves correctly only when run from the project root. No note indicates this constraint.
+   - Problem: `bash plugin/hooks/edify-setup.sh` is a relative path that resolves correctly only when run from the project root. No note indicates this constraint.
    - Fix: Added "from project root" qualifier to the validation command.
    - **Status**: FIXED
 
@@ -45,7 +45,7 @@ None.
 
 - Step 2.3, Implementation 2b — Corrected `uv pip install` invocation: added venv creation step (`uv venv`), fixed `--python` flag to point to interpreter path (`/bin/python`), corrected pip fallback to use `--target`
 - Step 2.4, Implementation 1+2 — Added wrapper-format context note to step 1; added parenthetical after JSON snippet clarifying it shows the `"SessionStart"` key value within `"hooks"`, not a standalone document
-- Step 2.3, Validation — Added "from project root" qualifier to `bash agent-core/hooks/edify-setup.sh`
+- Step 2.3, Validation — Added "from project root" qualifier to `bash plugin/hooks/edify-setup.sh`
 
 ## Unfixable Issues (Escalation Required)
 

@@ -263,7 +263,7 @@ Only then does the fix address the cause, not the symptoms.
 
 **Decision Date:** 2026-02-20
 
-**Anti-pattern:** Hardcoding project-specific paths (e.g., `agent-core/skills/**`) in reusable packages or submodule code.
+**Anti-pattern:** Hardcoding project-specific paths (e.g., `plugin/skills/**`) in reusable packages or submodule code.
 
 **Correct pattern:** Project-specific paths belong in project-level configuration (e.g., `pyproject.toml`). Reusable code reads config, doesn't hardcode paths.
 

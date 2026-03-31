@@ -443,7 +443,7 @@ Similarly, but without impact beyond cosmetic, "/git<tab>" completes to "/Gitmoj
 
 ## task-006: 2547aad2
 
-**Task:** fix what's broken with agent-core
+**Task:** fix what's broken with plugin
 
 **Relevant entries:**
 
@@ -515,7 +515,7 @@ Similarly, but without impact beyond cosmetic, "/git<tab>" completes to "/Gitmoj
 ## task-007: 2d7ee0e7
 
 **Task:** we have a situation
-the agent-core repo appears to be gone
+the plugin repo appears to be gone
 
 **Relevant entries:**
 

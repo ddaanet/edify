@@ -90,6 +90,6 @@ Run after T1-T4, informed by their results.
 
 ## Context
 
-- `/recall` skill: `agent-core/skills/recall/SKILL.md`
+- `/recall` skill: `plugin/skills/recall/SKILL.md`
 - Recall pass design: `plans/recall-pass/outline.md`
 - Discussion conclusions from design session: broad mode uses direct Read, section-level uses when-resolve.py

@@ -33,7 +33,7 @@ def test_new_submodule(
     assert worktree_path.exists()
     assert worktree_path.is_dir()
 
-    submodule_path = worktree_path / "agent-core"
+    submodule_path = worktree_path / "plugin"
     assert submodule_path.exists()
 
     result = subprocess.run(
@@ -83,7 +83,7 @@ def test_new_worktree_submodule(
     worktree_path = container_path / "feature-x"
     assert worktree_path.exists()
 
-    submodule_path = worktree_path / "agent-core"
+    submodule_path = worktree_path / "plugin"
     assert submodule_path.exists()
 
     result = subprocess.run(
@@ -102,7 +102,7 @@ def test_new_worktree_submodule(
     assert result.stdout.strip() == "feature-x"
 
     result = subprocess.run(
-        ["git", "-C", str(repo_path / "agent-core"), "worktree", "list"],
+        ["git", "-C", str(repo_path / "plugin"), "worktree", "list"],
         capture_output=True,
         text=True,
         check=True,
@@ -113,7 +113,7 @@ def test_new_worktree_submodule(
     assert result.exit_code == 0
 
     worktree_path2 = container_path / "feature-y"
-    submodule_path2 = worktree_path2 / "agent-core"
+    submodule_path2 = worktree_path2 / "plugin"
     assert submodule_path2.exists()
 
     result = subprocess.run(
@@ -132,7 +132,7 @@ def test_new_worktree_submodule(
     assert result.stdout.strip() == "feature-y"
 
     subprocess.run(
-        ["git", "-C", str(repo_path / "agent-core"), "branch", "existing-feature"],
+        ["git", "-C", str(repo_path / "plugin"), "branch", "existing-feature"],
         check=True,
         capture_output=True,
     )
@@ -141,7 +141,7 @@ def test_new_worktree_submodule(
     assert result.exit_code == 0
 
     worktree_path3 = container_path / "existing-feature"
-    submodule_path3 = worktree_path3 / "agent-core"
+    submodule_path3 = worktree_path3 / "plugin"
     assert submodule_path3.exists()
 
     result = subprocess.run(
@@ -179,7 +179,7 @@ def test_rm_deletes_submodule_branch(
 
     # Precondition: submodule branch exists
     sub_branch = subprocess.run(
-        ["git", "-C", "agent-core", "branch", "--list", "test-feature"],
+        ["git", "-C", "plugin", "branch", "--list", "test-feature"],
         capture_output=True,
         text=True,
         check=True,
@@ -200,7 +200,7 @@ def test_rm_deletes_submodule_branch(
 
     # Submodule branch gone
     sub_branch = subprocess.run(
-        ["git", "-C", "agent-core", "branch", "--list", "test-feature"],
+        ["git", "-C", "plugin", "branch", "--list", "test-feature"],
         capture_output=True,
         text=True,
         check=True,

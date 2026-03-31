@@ -27,7 +27,7 @@ Extract portable recipes and update root justfile.
 - Check if D-5 redesign has occurred (thematic modules vs single file)
 
 **Implementation**:
-1. Create `agent-core/portable.just` containing all portable recipes
+1. Create `plugin/portable.just` containing all portable recipes
 2. Extract these recipes (per D-5):
    - `claude` / `claude0` — opinionated launch wrapper (system prompt replacement, plugin config)
    - `lint` / `format` / `check` — ruff, mypy, docformatter
@@ -53,10 +53,10 @@ Extract portable recipes and update root justfile.
    ```
    Note: `safe`/`end-safe` are needed by `lint` and `check`; `visible`/`fail` are needed by `wt-*`. Do not omit them.
    Note: Variable merging across import boundaries means the root `bash_prolog` will override the portable module's `bash_prolog` in the root project context — this is correct behavior (root wins). The portable module's `bash_prolog` serves standalone-import consumers.
-6. Update `claude` recipe to use `--plugin-dir ./agent-core` flag
+6. Update `claude` recipe to use `--plugin-dir ./plugin` flag
 
 **Expected Outcome**:
-- Portable justfile module(s) exist in `agent-core/`
+- Portable justfile module(s) exist in `plugin/`
 - All portable recipes present with correct bash prolog
 - `release` and project-specific recipes NOT included
 
@@ -65,8 +65,8 @@ Extract portable recipes and update root justfile.
 - If `just` import syntax doesn't support the module structure → simplify to single file
 
 **Validation**:
-- `just --justfile agent-core/portable.just --list` shows all expected recipes
-- `just --justfile agent-core/portable.just --evaluate bash_prolog` shows the prolog string (confirms variable is defined)
+- `just --justfile plugin/portable.just --list` shows all expected recipes
+- `just --justfile plugin/portable.just --evaluate bash_prolog` shows the prolog string (confirms variable is defined)
 - No project-specific recipes present (`release`, `line-limits` absent from listing)
 
 ---

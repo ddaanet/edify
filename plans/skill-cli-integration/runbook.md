@@ -155,7 +155,7 @@ Register Python hook in `.claude/settings.json` alongside existing `stop-health-
 **Model:** opus (agentic-prose)
 **Blocked by:** Phase 2 + restart
 
-**Edit:** `agent-core/fragments/execute-rule.md` — MODE 1 section
+**Edit:** `plugin/fragments/execute-rule.md` — MODE 1 section
 
 **Remove:** The rendering template — everything between "**STATUS display format:**" and the end of MODE 1's rendering specification (~100 lines). Includes:
 - STATUS display format code block
@@ -193,7 +193,7 @@ Register Python hook in `.claude/settings.json` alongside existing `stop-health-
 **Blocked by:** Phase 2 + restart
 **Parallel with:** Phase 3
 
-**Edit:** `agent-core/skills/commit/SKILL.md`
+**Edit:** `plugin/skills/commit/SKILL.md`
 
 **Composition boundary (from D-2):**
 

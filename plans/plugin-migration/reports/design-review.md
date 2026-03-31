@@ -6,7 +6,7 @@
 
 ## Summary
 
-The design converts agent-core from a symlink-based distribution model to a Claude Code plugin with auto-discovery. It covers 8 components spanning plugin manifest, hook migration, fragment versioning, init/update skills, justfile modularization, symlink cleanup, post-upgrade version check, and script path updates. The document is well-structured with clear rationale for each design decision and correctly identifies the critical `$CLAUDE_PROJECT_DIR` vs `$CLAUDE_PLUGIN_ROOT` distinction.
+The design converts plugin from a symlink-based distribution model to a Claude Code plugin with auto-discovery. It covers 8 components spanning plugin manifest, hook migration, fragment versioning, init/update skills, justfile modularization, symlink cleanup, post-upgrade version check, and script path updates. The document is well-structured with clear rationale for each design decision and correctly identifies the critical `$CLAUDE_PROJECT_DIR` vs `$CLAUDE_PLUGIN_ROOT` distinction.
 
 **Overall Assessment**: Needs Minor Changes
 
@@ -21,12 +21,12 @@ None found.
 ### Major Issues
 
 1. **Symlink count discrepancy (skills)**
-   - Problem: Design claimed "17 symlinks" in `.claude/skills/` (Component 6, step 1) but actual count is 16. Verified via `ls -la .claude/skills/ | grep '^l' | wc -l` = 16, matching the 16 skill directories in `agent-core/skills/`.
+   - Problem: Design claimed "17 symlinks" in `.claude/skills/` (Component 6, step 1) but actual count is 16. Verified via `ls -la .claude/skills/ | grep '^l' | wc -l` = 16, matching the 16 skill directories in `plugin/skills/`.
    - Impact: Incorrect count could cause planner to expect an extra symlink or miss validation.
    - Fix Applied: Changed "17 symlinks" to "16 symlinks" in Component 6.
 
 2. **Fragment count discrepancy**
-   - Problem: Directory layout said "19 instruction fragments" but `agent-core/fragments/` contains 20 files (including `workflows-terminology.md`).
+   - Problem: Directory layout said "19 instruction fragments" but `plugin/fragments/` contains 20 files (including `workflows-terminology.md`).
    - Impact: Minor mismatch, but could cause confusion during validation.
    - Fix Applied: Changed "19" to "20" in directory layout.
 
@@ -46,7 +46,7 @@ None found.
    - Fix Applied: Expanded the `import` documentation in Component 5 to clarify that `portable.just` must define its own minimal `bash_prolog` (or equivalent) with the subset of helpers needed by portable recipes.
 
 6. **Cache file regeneration missing from affected files**
-   - Problem: `.cache/just-help.txt` and `.cache/just-help-agent-core.txt` are generated from justfile content and loaded via CLAUDE.md `@` references. Changes to both justfiles (root: import + recipe removal; agent-core: sync-to-parent removal) invalidate these caches.
+   - Problem: `.cache/just-help.txt` and `.cache/just-help-plugin.txt` are generated from justfile content and loaded via CLAUDE.md `@` references. Changes to both justfiles (root: import + recipe removal; plugin: sync-to-parent removal) invalidate these caches.
    - Impact: Stale cache would show incorrect recipe lists in CLAUDE.md context.
    - Fix Applied: Added both cache files to Affected Files (Modify).
 
@@ -57,7 +57,7 @@ None found.
    - Fix Applied: Removed the `/tmp/` option, kept only `$CLAUDE_PROJECT_DIR/tmp/.edify-version-checked`, and added a note about the system `/tmp/` conflict.
 
 2. **Incomplete directory layout**
-   - Problem: Directory layout omitted several existing directories: `.claude/` (agent-core's own dev config), `docs/`, `scripts/`, `migrations/`, `Makefile`, `README.md`.
+   - Problem: Directory layout omitted several existing directories: `.claude/` (plugin's own dev config), `docs/`, `scripts/`, `migrations/`, `Makefile`, `README.md`.
    - Fix Applied: Added all missing directories and files to the layout tree for completeness.
 
 3. **Outline naming drift unacknowledged**
@@ -65,8 +65,8 @@ None found.
    - Fix Applied: Added a "Naming note" in the Requirements section explicitly stating the design supersedes outline naming.
 
 4. **`precommit-base` consumer mode ambiguity**
-   - Problem: Recipe extraction rules mentioned both `$CLAUDE_PLUGIN_ROOT/bin/` and `agent-core/bin/` paths without clarifying which applies to this migration.
-   - Fix Applied: Clarified that `precommit-base` uses `agent-core/bin/` paths for dev mode only, with consumer mode deferred per D-7.
+   - Problem: Recipe extraction rules mentioned both `$CLAUDE_PLUGIN_ROOT/bin/` and `plugin/bin/` paths without clarifying which applies to this migration.
+   - Fix Applied: Clarified that `precommit-base` uses `plugin/bin/` paths for dev mode only, with consumer mode deferred per D-7.
 
 5. **Root justfile cache rebuild note**
    - Problem: Root justfile changes section didn't mention that imported recipes affect `just --list` output, which feeds into the CLAUDE.md `@` cached reference.
@@ -108,7 +108,7 @@ None found.
 
 2. **`.gitignore` updates**: Component 6 step 7 says "Update `.gitignore` if needed" but doesn't specify what changes. Since symlinks in `.claude/` are tracked in git, their removal means the directories may need `.gitkeep` files or `.gitignore` adjustments. Planner should audit `.gitignore` during implementation.
 
-3. **`precommit-base` validator paths**: The `precommit-base` recipe will call `agent-core/bin/validate-*.py` scripts. These validators may reference project-specific paths (e.g., `agents/session.md`, `agents/learnings.md`). Verify they work correctly when invoked from an imported recipe context where CWD is the project root.
+3. **`precommit-base` validator paths**: The `precommit-base` recipe will call `plugin/bin/validate-*.py` scripts. These validators may reference project-specific paths (e.g., `agents/session.md`, `agents/learnings.md`). Verify they work correctly when invoked from an imported recipe context where CWD is the project root.
 
 4. **Hook testing sequence**: The testing strategy lists "Manual hook testing" but doesn't specify the test procedure. The existing `test-hooks.md` agent could be leveraged for systematic hook verification post-migration.
 

@@ -1,6 +1,6 @@
 # Review: SP-2 /commit skill CLI composition
 
-**Scope**: `agent-core/skills/commit/SKILL.md` — Step 4 replacement, Step 1b simplification, Post-Commit replacement, allowed-tools update
+**Scope**: `plugin/skills/commit/SKILL.md` — Step 4 replacement, Step 1b simplification, Post-Commit replacement, allowed-tools update
 **Date**: 2026-03-30
 **Design reference**: `plans/skill-cli-integration/outline.md` D-2
 

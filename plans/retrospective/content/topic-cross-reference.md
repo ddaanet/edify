@@ -14,10 +14,10 @@ Maps evidence from expanded repos to the 5 existing retrospective topics.
 | 2025-11-23 | box-api | `0bbdbf8` | AGENTS.md with session-specific rules. "Include any feedback that is general enough in scope" — filtering criterion for what to remember. |
 | 2026-01-12 | home | `e31a4c0` | File organization table with session.md, design-decisions.md. Memory distributed across file types by content. |
 | 2026-01-12 | pytest-md | `69bf88b` | Session log design — structured conversation state persistence. |
-| 2026-01-15 | pytest-md/agent-core | `5783aef` | Agent-core initialized — memory patterns extracted into shared infrastructure. |
+| 2026-01-15 | pytest-md/plugin | `5783aef` | Agent-core initialized — memory patterns extracted into shared infrastructure. |
 | 2026-02-27 | home | `ebcabc1` | Memory infrastructure setup — decision files consolidated. |
 
-**Arc:** Human-written rules (rules) → agent retrospective self-update (oklch-theme) → structured file taxonomy (home) → shared infrastructure (agent-core) → memory-index + recall system (claudeutils).
+**Arc:** Human-written rules (rules) → agent retrospective self-update (oklch-theme) → structured file taxonomy (home) → shared infrastructure (plugin) → memory-index + recall system (claudeutils).
 
 ## Topic 2: Pushback Protocol
 
@@ -72,4 +72,4 @@ Maps evidence from expanded repos to the 5 existing retrospective topics.
 | 2026-01-13 | home | `37b08e7` | "Require protocol read before execution" — read-before-act gate. |
 | 2026-01-22 | home | `83cef17` | Agent-core submodule — enforcement via shared infrastructure. Rules can't drift per-project. |
 
-**Arc:** `just agent` gate (emojipack) → agent-specific recipes (box-api) → platform config (pytest-md) → orchestrator constraints (home) → shared infrastructure (agent-core) → D+B tool-call anchoring → PreToolUse hooks (claudeutils).
+**Arc:** `just agent` gate (emojipack) → agent-specific recipes (box-api) → platform config (pytest-md) → orchestrator constraints (home) → shared infrastructure (plugin) → D+B tool-call anchoring → PreToolUse hooks (claudeutils).

@@ -35,13 +35,13 @@ def _setup_diverged_submodule(
     """
     commit_file(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
 
-    agent_core_path = repo_with_submodule / "agent-core"
+    agent_core_path = repo_with_submodule / "plugin"
     commit_file(
         agent_core_path, "fetch_change.txt", "fetch test change", "Fetch test change"
     )
 
     base_commit = _git("-C", str(agent_core_path), "rev-parse", "HEAD")
-    _update_submodule_pointer(repo_with_submodule, "Update agent-core pointer")
+    _update_submodule_pointer(repo_with_submodule, "Update plugin pointer")
 
     _git("branch", branch_name, cwd=repo_with_submodule)
     result = CliRunner().invoke(worktree, ["new", "--branch", branch_name])
@@ -52,9 +52,9 @@ def _setup_diverged_submodule(
         agent_core_path, "diverged_change.txt", "diverged change", "Diverged change"
     )
 
-    ls_out = _git("ls-tree", branch_name, "--", "agent-core", cwd=repo_with_submodule)
+    ls_out = _git("ls-tree", branch_name, "--", "plugin", cwd=repo_with_submodule)
     if not ls_out:
-        pytest.skip("Branch has no agent-core submodule entry (test incomplete)")
+        pytest.skip("Branch has no plugin submodule entry (test incomplete)")
     wt_submodule_commit = ls_out.split()[2]
 
     return agent_core_path, wt_submodule_commit
@@ -84,7 +84,7 @@ def test_merge_submodule_fetch(
     ) -> MagicMock | object:
         if args and isinstance(args[0], list):
             cmd = args[0]
-            if "merge-base" in cmd and "-C" in cmd and "agent-core" in cmd:
+            if "merge-base" in cmd and "-C" in cmd and "plugin" in cmd:
                 # Only intercept submodule merge-base, not parent validation
                 merge_base_calls.append(cmd)
                 result_obj = MagicMock()
@@ -134,7 +134,7 @@ def test_merge_submodule_fetch(
 
 def _update_submodule_pointer(repo: Path, message: str) -> None:
     """Stage and commit submodule pointer update."""
-    _git("add", "agent-core", cwd=repo)
+    _git("add", "plugin", cwd=repo)
     _git("commit", "-m", message, cwd=repo)
 
 
@@ -150,9 +150,9 @@ def _setup_merge_test_worktree(
     """
     commit_file(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
 
-    agent_core_path = repo_with_submodule / "agent-core"
+    agent_core_path = repo_with_submodule / "plugin"
     commit_file(agent_core_path, "base_change.txt", "base change", "Base change")
-    _update_submodule_pointer(repo_with_submodule, "Update agent-core to base")
+    _update_submodule_pointer(repo_with_submodule, "Update plugin to base")
 
     _git("branch", branch_name, cwd=repo_with_submodule)
     result = CliRunner().invoke(worktree, ["new", "--branch", branch_name])
@@ -164,7 +164,7 @@ def _setup_merge_test_worktree(
 
     wt_container = repo_with_submodule.parent / f"{repo_with_submodule.name}-wt"
     wt_base = wt_container / branch_name
-    wt_agent_core = wt_base / "agent-core"
+    wt_agent_core = wt_base / "plugin"
     commit_file(wt_agent_core, "wt_change.txt", "wt change", "Worktree change")
     wt_commit = _git("-C", str(wt_agent_core), "rev-parse", "HEAD")
 
@@ -183,10 +183,10 @@ def test_merge_submodule_merge_commit(
 
     Merge commit logic:
     - If no merge needed: skip entirely
-    - If merge needed: run git -C agent-core merge --no-edit <wt-commit>
-    - Stage submodule: git add agent-core
-    - Check if staged: git diff --cached --quiet agent-core (exit != 0 means changes)
-    - If staged changes: commit with "🔀 Merge agent-core from <slug>"
+    - If merge needed: run git -C plugin merge --no-edit <wt-commit>
+    - Stage submodule: git add plugin
+    - Check if staged: git diff --cached --quiet plugin (exit != 0 means changes)
+    - If staged changes: commit with "🔀 Merge plugin from <slug>"
     - If no staged changes: skip commit
     """
     monkeypatch.chdir(repo_with_submodule)
@@ -241,7 +241,7 @@ def test_merge_submodule_merge_commit(
     assert recent_commits[0] == "🔀 Merge merge-test", (
         f"Latest commit should be parent merge, got: {recent_commits[0]}"
     )
-    assert recent_commits[1] == "🔀 Merge agent-core from merge-test", (
+    assert recent_commits[1] == "🔀 Merge plugin from merge-test", (
         f"Previous commit should be submodule merge, got: {recent_commits[1]}"
     )
 
@@ -253,13 +253,13 @@ def _setup_submodule_conflict(
 ) -> tuple[Path, Path, str]:
     """Set up a submodule conflict scenario.
 
-    Creates diverging changes to the same file in agent-core on main and
+    Creates diverging changes to the same file in plugin on main and
     the worktree branch, producing a conflict when merge is attempted.
 
     Returns:
         Tuple of (agent_core_path, wt_agent_core, wt_commit)
     """
-    agent_core_path = repo_with_submodule / "agent-core"
+    agent_core_path = repo_with_submodule / "plugin"
 
     commit_file(agent_core_path, "conflict.txt", "base content", "Base change")
     _update_submodule_pointer(repo_with_submodule, "Update to base commit")
@@ -270,7 +270,7 @@ def _setup_submodule_conflict(
 
     wt_container = repo_with_submodule.parent / f"{repo_with_submodule.name}-wt"
     wt_base = wt_container / branch_name
-    wt_agent_core = wt_base / "agent-core"
+    wt_agent_core = wt_base / "plugin"
     commit_file(wt_agent_core, "conflict.txt", "wt change", "Worktree conflict change")
     wt_commit = _git("-C", str(wt_agent_core), "rev-parse", "HEAD")
 
@@ -318,7 +318,7 @@ def test_submodule_conflict_does_not_abort_pipeline(
         check=False,
     )
     assert merge_head_check.returncode == 0, (
-        "agent-core MERGE_HEAD should exist after submodule conflict"
+        "plugin MERGE_HEAD should exist after submodule conflict"
     )
 
 
@@ -332,8 +332,8 @@ def test_merge_resume_after_submodule_resolution(
 
     Scenario:
     - First merge creates submodule conflict (exit 0 or 3)
-    - Manually resolve agent-core conflict and commit
-    - Stage the updated agent-core pointer
+    - Manually resolve plugin conflict and commit
+    - Stage the updated plugin pointer
     - Re-run merge → should succeed (exit 0)
     - Verify commit log shows both resolution and final merge commits
     """
@@ -343,7 +343,7 @@ def test_merge_resume_after_submodule_resolution(
         repo_with_submodule, "resume-test", commit_file
     )
 
-    # First merge: submodule conflict leaves MERGE_HEAD in agent-core.
+    # First merge: submodule conflict leaves MERGE_HEAD in plugin.
     # Phase 4 detects MERGE_HEAD and exits 3 (Fix #3).
     result = CliRunner().invoke(worktree, ["merge", "resume-test"])
     assert result.exit_code == 3, (
@@ -356,8 +356,8 @@ def test_merge_resume_after_submodule_resolution(
     _git("-C", str(agent_core_path), "add", "conflict.txt")
     _git("-C", str(agent_core_path), "commit", "-m", "Resolve submodule conflict")
 
-    # Stage the updated agent-core pointer
-    _git("add", "agent-core", cwd=repo_with_submodule)
+    # Stage the updated plugin pointer
+    _git("add", "plugin", cwd=repo_with_submodule)
 
     # Second merge: should succeed (exit 0)
     result = CliRunner().invoke(worktree, ["merge", "resume-test"])
@@ -365,7 +365,7 @@ def test_merge_resume_after_submodule_resolution(
         f"Second merge should exit 0, got {result.exit_code}: {result.output}"
     )
 
-    # Verify wt_commit is ancestor of current agent-core HEAD
+    # Verify wt_commit is ancestor of current plugin HEAD
     ancestor_check = subprocess.run(
         [
             "git",
@@ -380,7 +380,7 @@ def test_merge_resume_after_submodule_resolution(
         capture_output=True,
     )
     assert ancestor_check.returncode == 0, (
-        "wt_commit should be ancestor of agent-core HEAD after resolution"
+        "wt_commit should be ancestor of plugin HEAD after resolution"
     )
 
     # Both merge commits share the same message: first run commits parent merge

@@ -179,21 +179,21 @@ Introduces:
 
 The copy-paste-adapt model of Phase 1-2 doesn't scale. Each project maintains its own AGENTS.md, diverging over time. Agent-core is the answer.
 
-**Origin:** `~/code/pytest-md/agent-core`, 204 commits, Jan 15–Feb 6, 2026. A nested repo inside pytest-md.
+**Origin:** `~/code/pytest-md/plugin`, 204 commits, Jan 15–Feb 6, 2026. A nested repo inside pytest-md.
 
-First commit (`5783aef`): "Initialize agent-core repository structure." The next four commits show the extraction sequence: shared justfile recipes, shared ruff/mypy configs, agent instruction fragments, baseline task agent.
+First commit (`5783aef`): "Initialize plugin repository structure." The next four commits show the extraction sequence: shared justfile recipes, shared ruff/mypy configs, agent instruction fragments, baseline task agent.
 
 **Adoption timeline:**
 
 | Date | Repo | Event |
 |------|------|-------|
-| Jan 15 | pytest-md/agent-core | Created (204 commits over 3 weeks) |
+| Jan 15 | pytest-md/plugin | Created (204 commits over 3 weeks) |
 | Jan 20 | pytest-md | First submodule addition |
 | Jan 22 | home | Agent-core submodule + skill symlinks |
-| Feb 6 | pytest-md | Migrate to agent-core Tier 2 structure |
-| Mar 5 | devddaanet | Born with agent-core from initial commit |
+| Feb 6 | pytest-md | Migrate to plugin Tier 2 structure |
+| Mar 5 | devddaanet | Born with plugin from initial commit |
 
-By March, new projects include agent-core in their initial commit. Adoption cost approaches zero.
+By March, new projects include plugin in their initial commit. Adoption cost approaches zero.
 
 ### The AGENTS.md → CLAUDE.md Migration
 
@@ -226,7 +226,7 @@ Every major claudeutils pattern propagated here within days to weeks of its intr
 
 ### devddaanet — Full Pipeline in Production
 
-`~/code/devddaanet`, 63 commits, Mar 5–11, 2026. **Every commit is agentic.** Born with agent-core from initial commit.
+`~/code/devddaanet`, 63 commits, Mar 5–11, 2026. **Every commit is agentic.** Born with plugin from initial commit.
 
 Shows the full claudeutils pipeline working on a real project:
 - Requirements → design → runbook → orchestrate → deliverable-review → fix → re-review → delivered
@@ -243,7 +243,7 @@ The existing retrospective covered five topics from claudeutils' own history. Th
 
 **Pre-history:** Agent instructions ARE the proto-memory system. rules.md (Sep 2025) is human-written rules consumed by agents. oklch-theme (Nov 2025) adds agent self-update: "perform a retrospective and update this file." home (Jan 2026) introduces structured file taxonomy (AGENTS.md, session.md, design-decisions.md, plans/).
 
-**Arc:** Human-written flat rules → agent retrospective self-update → structured file taxonomy → shared infrastructure (agent-core) → memory-index + recall system.
+**Arc:** Human-written flat rules → agent retrospective self-update → structured file taxonomy → shared infrastructure (plugin) → memory-index + recall system.
 
 **Spontaneous recall rate: 0%.** Direct measurement across 129 recall tool invocations in 69 sessions found zero spontaneous agent-initiated lookups. Every invocation was either skill-procedural (87.6% — mandated by `/design` triage, `/runbook` steps, or discussion-mode grounding) or user-triggered (12.4%). The original "actionable index" concept — entries loaded in context that would self-trigger agent recognition — did not produce spontaneous recall behavior. Agents had the tools but never used them without procedural instruction. (Method: `plans/measure-agent-recall/report.md`)
 
@@ -269,7 +269,7 @@ This is a stronger finding than the previously cited 4.1% statistic, which measu
 
 **Pre-history:** emojipack (Oct 2025): "`just agent` before every commit" — the first commit gate. box-api (Nov 2025): agent-vs-human command separation. pytest-md (Jan 2026): `.claude/settings.json` — platform-level configuration as enforcement. home (Jan 2026): orchestrator constraints (Allowed/Delegate model).
 
-**Arc:** `just agent` gate → agent-specific recipes → platform config → orchestrator constraints → shared infrastructure (agent-core) → D+B tool-call anchoring → PreToolUse hooks.
+**Arc:** `just agent` gate → agent-specific recipes → platform config → orchestrator constraints → shared infrastructure (plugin) → D+B tool-call anchoring → PreToolUse hooks.
 
 ---
 
@@ -286,7 +286,7 @@ rules.md (flat rules)
           → AGENTS.md + CLAUDE.md coexistence (naming unsettled)
             → .claude/ directory with settings, skills, agents
               → CLAUDE.md with @file references to fragments
-                → agent-core submodule (shared infrastructure)
+                → plugin submodule (shared infrastructure)
 ```
 
 Not a linear progression. tuick's cognitive protocols were added and removed the same day. jobsearch's CLAUDE.md was reverse-merged into AGENTS.md. Multiple naming conventions coexisted for months.
@@ -297,17 +297,17 @@ Patterns propagated at different speeds:
 
 - **Immediate** (days): home's AGENTS.md iterations propagated to claudeutils within days. The orchestrator protocol appears in both repos on the same dates.
 - **Template copy** (weeks): emojipack → tuick → box-api. Core TDD and `just agent` rules copied with project-specific adaptations. Content similarity visible in AGENTS.md text.
-- **Infrastructure adoption** (months): claudeutils patterns → devddaanet. Full pipeline adoption requires agent-core maturity. devddaanet in March 2026 uses patterns that took months to develop in claudeutils.
+- **Infrastructure adoption** (months): claudeutils patterns → devddaanet. Full pipeline adoption requires plugin maturity. devddaanet in March 2026 uses patterns that took months to develop in claudeutils.
 
 ### Agent-core as Extraction
 
-The move from per-project AGENTS.md to shared agent-core follows a classic library extraction pattern:
+The move from per-project AGENTS.md to shared plugin follows a classic library extraction pattern:
 
 1. **Duplication** (Oct 2025–Jan 2026): Each project copies and adapts rules. Divergence accumulates.
 2. **Skills emerge** (Jan 2026): pytest-md creates `.claude/` with commit and handoff skills. Per-project, not shared.
 3. **Extraction** (Jan 15): Agent-core initialized in pytest-md. Shared recipes, configs, fragments, agents.
 4. **Adoption** (Jan–Mar 2026): Submodule added to pytest-md, home, devddaanet. Per-project AGENTS.md replaced by CLAUDE.md + @references to shared fragments.
-5. **Zero-cost adoption** (Mar 2026): New projects include agent-core in their initial commit.
+5. **Zero-cost adoption** (Mar 2026): New projects include plugin in their initial commit.
 
 ---
 

@@ -1,8 +1,8 @@
 # Deliverable Review: Prioritize Skill
 
 **Scope:** Three artifacts (441 lines total)
-- `agent-core/skills/prioritize/SKILL.md` (128 lines)
-- `agent-core/skills/prioritize/references/scoring-tables.md` (151 lines)
+- `plugin/skills/prioritize/SKILL.md` (128 lines)
+- `plugin/skills/prioritize/references/scoring-tables.md` (151 lines)
 - `plans/reports/task-prioritization-methodology.md` (164 lines)
 
 **Review Axes:**

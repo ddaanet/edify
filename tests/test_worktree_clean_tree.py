@@ -155,7 +155,7 @@ def test_merge_ours_clean_tree(
     subprocess.run(["git", "restore", "agents/"], check=True, capture_output=True)
 
     # Test 5: Submodule dirty → should fail
-    (repo_with_submodule / "agent-core" / "README.md").write_text(
+    (repo_with_submodule / "plugin" / "README.md").write_text(
         "modified submodule\n"
     )
     result = runner.invoke(worktree, ["merge", "test-slug"])

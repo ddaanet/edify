@@ -128,8 +128,8 @@ Unchanged. Two axes: implementation certainty × requirement stability → Simpl
 
 | Destination | Quality Obligations | Convention Set |
 |------------|-------------------|----------------|
-| `src/`, `agent-core/` | Production: tests, lint, module structure, review | Full production conventions |
-| `agent-core/skills/`, `agents/` | Agentic prose: wording quality, behavioral verification | Opus-tier editing, behavior invariance |
+| `src/`, `plugin/` | Production: tests, lint, module structure, review | Full production conventions |
+| `plugin/skills/`, `agents/` | Agentic prose: wording quality, behavioral verification | Opus-tier editing, behavior invariance |
 | `plans/prototypes/`, `plans/spikes/` | Exploration: functional, documented purpose, no test mirrors | Minimal conventions |
 | `plans/reports/`, `agents/decisions/` | Investigation: accuracy, completeness, grounding | Prose quality conventions |
 | `tmp/` | Ephemeral: none | No conventions |
@@ -190,7 +190,7 @@ If exploration or investigation work reaches /runbook (e.g., large exploration w
 |-------------|-----------------|-------------------|
 | Production (`src/`) | Include test mirrors, lint, module split | Full TDD cycles |
 | Exploration (`plans/prototypes/`) | Script files only, no test mirrors | General steps (write, verify, iterate) |
-| Agentic prose (`agent-core/skills/`) | Skill files + behavior verification | Prose review cycles |
+| Agentic prose (`plugin/skills/`) | Skill files + behavior verification | Prose review cycles |
 | Investigation (`plans/reports/`) | Report files only | General steps |
 
 **Effect:** A single-file prototype in `plans/prototypes/` assessed against exploration conventions → Tier 1 (direct, <6 files, single session). Same script assessed against production conventions → inflated count from test mirrors, lint setup, module structure.
@@ -262,8 +262,8 @@ If exploration or investigation work reaches /runbook (e.g., large exploration w
 
 - `plans/complexity-routing/problem.md` — Problem statement with 4 identified gaps
 - `agents/learnings.md` lines 59-63 — "When routing prototype/exploration work through pipeline"
-- `agent-core/skills/design/SKILL.md` — Phase 0 classification, Phase B routing gates
-- `agent-core/skills/runbook/SKILL.md` — Tier 1/2/3 assessment criteria
+- `plugin/skills/design/SKILL.md` — Phase 0 classification, Phase B routing gates
+- `plugin/skills/runbook/SKILL.md` — Tier 1/2/3 assessment criteria
 - Commit `a86043cc` — Session-scraper design routing failure evidence
 - Commit `557c2eed` — Prior design skill grounding (6 frameworks, 8 principles)
 - `plans/reports/design-skill-grounding.md` — Prior grounding report with gap analysis

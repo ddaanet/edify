@@ -205,7 +205,7 @@ Current infrastructure: `src/claudeutils/recall/` (9 modules), `src/claudeutils/
 Memory must be accessible from all worktrees without merge-from-main. The submodule shared-branch model (FR-9) satisfies this — all worktrees fast-forward to the same branch head.
 
 **C-6: Worktree multi-submodule support**
-Worktree lifecycle code (`src/claudeutils/worktree/`) currently hardcodes `agent-core` (38 occurrences across 4 files). Must be refactored to support multiple submodules with per-submodule strategy dispatch: agent-core uses branch-per-worktree, memory submodule uses single-shared-branch. This is prerequisite infrastructure for FR-9.
+Worktree lifecycle code (`src/claudeutils/worktree/`) currently hardcodes `plugin` (38 occurrences across 4 files). Must be refactored to support multiple submodules with per-submodule strategy dispatch: plugin uses branch-per-worktree, memory submodule uses single-shared-branch. This is prerequisite infrastructure for FR-9.
 
 ### Out of Scope
 

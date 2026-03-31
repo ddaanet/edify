@@ -7,10 +7,10 @@ paths:
 
 When planning work that creates or modifies plugin components (skills, agents, hooks, commands, plugin structure), include domain-specific validation in vet checkpoint steps.
 
-**Domain validation skill:** `agent-core/skills/plugin-dev-validation/SKILL.md`
+**Domain validation skill:** `plugin/skills/plugin-dev-validation/SKILL.md`
 
 **Artifact types:**
-- Skills (`.claude/skills/**/SKILL.md`, `agent-core/skills/**/SKILL.md`)
+- Skills (`.claude/skills/**/SKILL.md`, `plugin/skills/**/SKILL.md`)
 - Agents (`.claude/agents/*.md`)
 - Hooks (`.claude/hooks/*.{sh,py}`, hook configuration in `settings.json`)
 - Commands (`.claude/commands/**/*`)
@@ -20,7 +20,7 @@ When planning work that creates or modifies plugin components (skills, agents, h
 
 When writing runbook review checkpoint steps for plugin development work:
 
-1. Read and apply criteria from `agent-core/skills/plugin-dev-validation/SKILL.md`
+1. Read and apply criteria from `plugin/skills/plugin-dev-validation/SKILL.md`
 2. Specify artifact type being reviewed (skills, agents, hooks, commands, plugin-structure)
 3. Domain validation criteria are additive — generic quality + alignment checks still apply
 
@@ -32,7 +32,7 @@ When writing runbook review checkpoint steps for plugin development work:
 Delegate to corrector:
 - Review all changes for quality, security, and alignment
 - **Domain validation:** Read and apply criteria from
-  `agent-core/skills/plugin-dev-validation/SKILL.md`
+  `plugin/skills/plugin-dev-validation/SKILL.md`
   for artifact type: [skills|agents|hooks|commands|plugin-structure]
 - Write report to `plans/<plan-name>/reports/vet-step-N.md`
 ```

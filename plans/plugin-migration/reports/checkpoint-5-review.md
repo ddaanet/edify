@@ -1,6 +1,6 @@
 # Review: Phase 5 — Version Coordination and Release
 
-**Scope**: Phase 5 changed files: `.edify.yaml`, `agent-core` (submodule pointer), `justfile`, `plans/prototypes/validate-edify-yaml.py`
+**Scope**: Phase 5 changed files: `.edify.yaml`, `plugin` (submodule pointer), `justfile`, `plans/prototypes/validate-edify-yaml.py`
 **Date**: 2026-03-21T13:03:12Z
 **Mode**: review + fix
 
@@ -53,4 +53,4 @@ None.
 - `bump-plugin-version.py` preserves existing JSON formatting (indent=2, trailing newline)
 - `validate-edify-yaml.py` correctly placed in `plans/prototypes/` — not wired into precommit where it would over-constrain `sync_policy`
 - Precommit integration placed after `run-checks` and before `run-pytest` — correct ordering (fast static checks before slower tests)
-- `agent-core/.claude-plugin/plugin.json` added to `git add` in release recipe — versions stay in sync across commits
+- `plugin/.claude-plugin/plugin.json` added to `git add` in release recipe — versions stay in sync across commits

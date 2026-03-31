@@ -102,7 +102,7 @@ def setup_git_repo(tmp_path: Path) -> None:
 
 def setup_baseline_agents(tmp_path: Path) -> None:
     """Create minimal baseline agent files that prepare-runbook.py reads."""
-    agents_dir = tmp_path / "agent-core" / "agents"
+    agents_dir = tmp_path / "plugin" / "agents"
     agents_dir.mkdir(parents=True, exist_ok=True)
 
     artisan = agents_dir / "artisan.md"

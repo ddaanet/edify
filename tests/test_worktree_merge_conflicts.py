@@ -38,7 +38,7 @@ def test_merge_conflict_agent_core(
     mock_precommit: None,
     commit_file: Callable[[Path, str, str, str], None],
 ) -> None:
-    """Auto-resolve agent-core conflict (already merged in Phase 2)."""
+    """Auto-resolve plugin conflict (already merged in Phase 2)."""
     monkeypatch.chdir(repo_with_submodule)
     commit_file(repo_with_submodule, ".gitignore", "wt/\n", "Add gitignore")
 
@@ -46,32 +46,32 @@ def test_merge_conflict_agent_core(
 
     # Branch: file change + submodule update
     commit_file(wt_path, "branch-file.txt", "branch content\n", "Branch change")
-    (wt_path / "agent-core" / "branch-change.txt").write_text("branch change\n")
-    _git("add", "branch-change.txt", cwd=wt_path / "agent-core")
-    _git("commit", "-m", "Branch change in submodule", cwd=wt_path / "agent-core")
-    _git("add", "agent-core", cwd=wt_path)
-    _git("commit", "-m", "Update agent-core on branch", cwd=wt_path)
+    (wt_path / "plugin" / "branch-change.txt").write_text("branch change\n")
+    _git("add", "branch-change.txt", cwd=wt_path / "plugin")
+    _git("commit", "-m", "Branch change in submodule", cwd=wt_path / "plugin")
+    _git("add", "plugin", cwd=wt_path)
+    _git("commit", "-m", "Update plugin on branch", cwd=wt_path)
 
     # Main: file change + different submodule update
     _git("checkout", "main", cwd=repo_with_submodule)
     commit_file(repo_with_submodule, "main-file.txt", "main content\n", "Main change")
-    (repo_with_submodule / "agent-core" / "main-change.txt").write_text("main change\n")
-    _git("add", "main-change.txt", cwd=repo_with_submodule / "agent-core")
+    (repo_with_submodule / "plugin" / "main-change.txt").write_text("main change\n")
+    _git("add", "main-change.txt", cwd=repo_with_submodule / "plugin")
     _git(
         "commit",
         "-m",
         "Main change in submodule",
-        cwd=repo_with_submodule / "agent-core",
+        cwd=repo_with_submodule / "plugin",
     )
-    _git("add", "agent-core", cwd=repo_with_submodule)
-    _git("commit", "-m", "Update agent-core on main", cwd=repo_with_submodule)
+    _git("add", "plugin", cwd=repo_with_submodule)
+    _git("commit", "-m", "Update plugin on main", cwd=repo_with_submodule)
 
     result = CliRunner().invoke(worktree, ["merge", "test-merge"])
     assert result.exit_code == 0, f"merge should succeed: {result.output}"
 
-    # agent-core auto-resolved
+    # plugin auto-resolved
     unmerged = _git("diff", "--name-only", "--diff-filter=U", cwd=repo_with_submodule)
-    assert "agent-core" not in unmerged
+    assert "plugin" not in unmerged
 
     # Merge complete (no MERGE_HEAD)
     r = subprocess.run(

@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 SCRIPT = (
-    Path(__file__).resolve().parent.parent / "agent-core" / "bin" / "triage-feedback.sh"
+    Path(__file__).resolve().parent.parent / "plugin" / "bin" / "triage-feedback.sh"
 )
 
 

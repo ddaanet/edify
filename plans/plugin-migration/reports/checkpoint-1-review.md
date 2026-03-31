@@ -1,12 +1,12 @@
 # Review: Phase 1 Checkpoint — Plugin Manifest and Structure
 
-**Scope**: agent-core submodule (plugin manifest + hooks.json), plans/plugin-migration/reports/step-1-3-report.md, plans/prototypes/validate-hooks-json.py
+**Scope**: plugin submodule (plugin manifest + hooks.json), plans/plugin-migration/reports/step-1-3-report.md, plans/prototypes/validate-hooks-json.py
 **Date**: 2026-03-20
 **Mode**: review + fix
 
 ## Summary
 
-Phase 1 delivers two artifacts inside the agent-core submodule: `.claude-plugin/plugin.json` (plugin manifest) and `hooks/hooks.json` (plugin hook configuration in wrapper format). Both artifacts are structurally correct and consistent with the design and outline specs. The validation prototype and step report were added to document verification. `just dev` passes. One minor fix applied.
+Phase 1 delivers two artifacts inside the plugin submodule: `.claude-plugin/plugin.json` (plugin manifest) and `hooks/hooks.json` (plugin hook configuration in wrapper format). Both artifacts are structurally correct and consistent with the design and outline specs. The validation prototype and step report were added to document verification. `just dev` passes. One minor fix applied.
 
 **Overall Assessment**: Ready
 
@@ -24,7 +24,7 @@ None.
 
 1. **validate-hooks-json.py uses relative path**
    - Location: `plans/prototypes/validate-hooks-json.py:4`
-   - Note: `open("agent-core/hooks/hooks.json")` only resolves correctly when the script is run from the project root. No documentation of the required working directory. Running from any other directory silently opens wrong path or raises FileNotFoundError.
+   - Note: `open("plugin/hooks/hooks.json")` only resolves correctly when the script is run from the project root. No documentation of the required working directory. Running from any other directory silently opens wrong path or raises FileNotFoundError.
    - **Status**: FIXED — added comment documenting run-from-project-root requirement
 
 2. **Hook validation evidence conflates hook and sandbox**

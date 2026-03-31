@@ -142,7 +142,7 @@ def test_merge_continues_to_phase3_when_submodule_conflicts(
 ) -> None:
     """Test merge routes submodule_conflicts state to Phase 3.
 
-    When agent-core has MERGE_HEAD (mid-merge), calling merge(slug) should:
+    When plugin has MERGE_HEAD (mid-merge), calling merge(slug) should:
     - Detect submodule_conflicts state (not clean)
     - Skip the clean-tree check
     - Route to Phase 3 (merge parent)
@@ -158,15 +158,15 @@ def test_merge_continues_to_phase3_when_submodule_conflicts(
     )
     _run(repo_with_submodule, "checkout", "main")
 
-    # Create conflicting commits on agent-core
-    agent_core = repo_with_submodule / "agent-core"
+    # Create conflicting commits on plugin
+    agent_core = repo_with_submodule / "plugin"
     _commit_file(agent_core, "feature.py", "main feature\n", "Main feature")
 
     _run(agent_core, "checkout", "-b", "ac-feature")
     _commit_file(agent_core, "feature.py", "branch feature\n", "Branch feature")
     _run(agent_core, "checkout", "main")
 
-    # Put agent-core in mid-merge state
+    # Put plugin in mid-merge state
     merge_result = subprocess.run(
         ["git", "-C", str(agent_core), "merge", "--no-commit", "--no-ff", "ac-feature"],
         capture_output=True,
@@ -177,7 +177,7 @@ def test_merge_continues_to_phase3_when_submodule_conflicts(
         _run(agent_core, "checkout", "--ours", "feature.py")
         _run(agent_core, "add", "feature.py")
 
-    assert _has_merge_head(agent_core), "agent-core should have MERGE_HEAD"
+    assert _has_merge_head(agent_core), "plugin should have MERGE_HEAD"
 
     state = _detect_merge_state("test-branch")
     assert state == "submodule_conflicts", (

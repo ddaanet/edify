@@ -90,7 +90,7 @@ The single most pervasive failure mode, appearing in four of five topics:
 | Dec 15 | tuick: cognitive protocols removed | T2 (dead end discarded) |
 | Jan 3 | pytest-md: .claude/settings.json | T5 (platform config enforcement) |
 | Jan 12 | home: file taxonomy, orchestrator constraints | T1 (structured memory), T5 (Allowed/Delegate model) |
-| Jan 15 | agent-core initialized | T1 (shared memory infra), T5 (shared enforcement infra) |
+| Jan 15 | plugin initialized | T1 (shared memory infra), T5 (shared enforcement infra) |
 
 ### Week 1: Feb 1-8 — Foundations laid independently
 
@@ -199,7 +199,7 @@ The pre-history provides earlier instances of the same principle at a coarser gr
 
 ```
 `just agent` → agent recipes → platform config → orchestrator constraints
-  → agent-core shared infra → D+B tool-call anchoring → unconditional gates → PreToolUse hooks
+  → plugin shared infra → D+B tool-call anchoring → unconditional gates → PreToolUse hooks
 ```
 
 The pre-history adds five months to the chronological spine. The ladder starts not with D+B but with the first `just agent` commit gate in October 2025. Each rung exists because the previous one failed under a specific condition. The extended arc makes the pattern more visible: the project was building structural enforcement for months before naming it.

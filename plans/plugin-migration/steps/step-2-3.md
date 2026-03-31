@@ -25,14 +25,14 @@ Phase 5 must complete first (`.edify.yaml` exists for setup hook to read/update)
 **Execution Model**: Sonnet
 
 **Prerequisites**:
-- Read `agent-core/hooks/sessionstart-health.sh` (current state — understand existing structure)
+- Read `plugin/hooks/sessionstart-health.sh` (current state — understand existing structure)
 - Read outline.md Component 2 "Consolidated setup hook" section
 - Read outline.md §Key Decisions D-7 (python deps mechanism)
 - Step 5.1 complete (`.edify.yaml` exists)
 - Recall: "when using session start hooks" — SessionStart output discarded for new interactive sessions (#10373). UPS fallback already handled by existing session flag (`$TMPDIR/health-${session_id}`).
 
 **Implementation**:
-1. Edit `agent-core/hooks/sessionstart-health.sh`, inserting setup sections before existing health checks:
+1. Edit `plugin/hooks/sessionstart-health.sh`, inserting setup sections before existing health checks:
    a. **Export `EDIFY_PLUGIN_ROOT`** via `$CLAUDE_ENV_FILE`:
       ```bash
       if [ -n "${CLAUDE_ENV_FILE:-}" ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
@@ -69,7 +69,7 @@ Phase 5 must complete first (`.edify.yaml` exists for setup hook to read/update)
 - If `.edify.yaml` doesn't exist → create it (first run scenario)
 
 **Validation**:
-- Script runs without error from project root: `bash agent-core/hooks/sessionstart-health.sh`
+- Script runs without error from project root: `bash plugin/hooks/sessionstart-health.sh`
 - After run: `.edify.yaml` version matches `plugin.json` version
 - Script is idempotent: running twice produces same result
 - **STOP and report Phase 2 results to orchestrator before proceeding to Phase 3**

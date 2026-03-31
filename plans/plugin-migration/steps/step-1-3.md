@@ -8,7 +8,7 @@
 
 ## Phase Context
 
-Create the plugin structure inside existing `agent-core/` directory. Checkpoint at end gates all downstream phases.
+Create the plugin structure inside existing `plugin/` directory. Checkpoint at end gates all downstream phases.
 
 ---
 
@@ -16,7 +16,7 @@ Create the plugin structure inside existing `agent-core/` directory. Checkpoint 
 
 ## Step 1.3: Validate plugin loading (checkpoint)
 
-**Objective**: Verify plugin auto-discovery works with `claude --plugin-dir ./agent-core`. Gates all downstream phases.
+**Objective**: Verify plugin auto-discovery works with `claude --plugin-dir ./plugin`. Gates all downstream phases.
 
 **Prerequisites**:
 - Steps 1.1, 1.2 complete
@@ -28,7 +28,7 @@ Create the plugin structure inside existing `agent-core/` directory. Checkpoint 
 1. **FR-1 Skills**: Verify plugin skills discoverable from a clean directory (no `.claude/`):
    ```bash
    mkdir -p tmp/plugin-verify && cd tmp/plugin-verify && \
-     claude -p "list your available slash commands" --plugin-dir ../../agent-core 2>&1 | tee ../../tmp/plugin-verify-skills.txt && \
+     claude -p "list your available slash commands" --plugin-dir ../../plugin 2>&1 | tee ../../tmp/plugin-verify-skills.txt && \
      cd ../..
    ```
    - Output must contain plugin skills (`/design`, `/commit`, `/orchestrate`, `/handoff`)
@@ -36,20 +36,20 @@ Create the plugin structure inside existing `agent-core/` directory. Checkpoint 
 2. **FR-1 Agents**: Verify plugin agents discoverable:
    ```bash
    cd tmp/plugin-verify && \
-     claude -p "list your available agents" --plugin-dir ../../agent-core 2>&1 | tee ../../tmp/plugin-verify-agents.txt && \
+     claude -p "list your available agents" --plugin-dir ../../plugin 2>&1 | tee ../../tmp/plugin-verify-agents.txt && \
      cd ../..
    ```
-   - Output must list agents from `agent-core/agents/`
+   - Output must list agents from `plugin/agents/`
 3. **FR-8 Coexistence**: Verify plan-specific agents coexist with plugin agents:
    ```bash
-   claude -p "list your available agents" --plugin-dir ./agent-core 2>&1 | tee tmp/plugin-verify-coexist.txt
+   claude -p "list your available agents" --plugin-dir ./plugin 2>&1 | tee tmp/plugin-verify-coexist.txt
    ```
    - Run from project root (has `.claude/agents/handoff-cli-tool-*.md`)
    - Output must contain both plugin agents AND plan-specific agents — no conflicts
 4. **FR-1 Hooks**: Verify hooks fire from plugin:
    ```bash
    cd tmp/plugin-verify && \
-     claude -p "write the word test to /tmp/hook-test.txt" --plugin-dir ../../agent-core 2>&1 | tee ../../tmp/plugin-verify-hooks.txt && \
+     claude -p "write the word test to /tmp/hook-test.txt" --plugin-dir ../../plugin 2>&1 | tee ../../tmp/plugin-verify-hooks.txt && \
      cd ../..
    ```
    - `pretooluse-block-tmp.sh` should block the `/tmp` write — look for hook output in response

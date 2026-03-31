@@ -20,12 +20,12 @@ from tests.pytest_helpers import (
 
 
 def _init_repo_with_submodule(tmp_path: Path) -> Path:
-    """Set up parent repo with agent-core submodule."""
+    """Set up parent repo with plugin submodule."""
     origin = create_submodule_origin(tmp_path, "sub")
     parent = tmp_path / "parent"
     parent.mkdir()
     _init_repo(parent)
-    add_submodule(parent, origin, "agent-core")
+    add_submodule(parent, origin, "plugin")
     subprocess.run(
         ["git", "commit", "-m", "add submodule"],
         cwd=parent,
@@ -43,14 +43,14 @@ def test_commit_with_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     parent = _init_repo_with_submodule(tmp_path)
     monkeypatch.chdir(parent)
 
-    (parent / "agent-core" / "new.md").write_text("new content")
+    (parent / "plugin" / "new.md").write_text("new content")
     (parent / "src").mkdir(exist_ok=True)
     (parent / "src" / "main.py").write_text("code")
 
     ci = CommitInput(
-        files=["agent-core/new.md", "src/main.py"],
+        files=["plugin/new.md", "src/main.py"],
         message="✨ Parent commit",
-        submodules={"agent-core": "Add new.md to submodule"},
+        submodules={"plugin": "Add new.md to submodule"},
     )
 
     with patch(
@@ -60,11 +60,11 @@ def test_commit_with_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
         result = commit_pipeline(ci, cwd=parent)
 
     assert result.success is True
-    assert "agent-core:" in result.output
+    assert "plugin:" in result.output
 
     sub_log = subprocess.run(
         ["git", "log", "--oneline", "-1"],
-        cwd=parent / "agent-core",
+        cwd=parent / "plugin",
         capture_output=True,
         text=True,
         check=False,
@@ -88,10 +88,10 @@ def test_commit_submodule_no_message(
     parent = _init_repo_with_submodule(tmp_path)
     monkeypatch.chdir(parent)
 
-    (parent / "agent-core" / "new.md").write_text("content")
+    (parent / "plugin" / "new.md").write_text("content")
 
     ci = CommitInput(
-        files=["agent-core/new.md"],
+        files=["plugin/new.md"],
         message="Commit without submodule msg",
         submodules={},
     )
@@ -119,7 +119,7 @@ def test_commit_submodule_orphan_message(
     ci = CommitInput(
         files=["src/main.py"],
         message="Parent only",
-        submodules={"agent-core": "Orphaned submodule message"},
+        submodules={"plugin": "Orphaned submodule message"},
     )
 
     with patch(
@@ -131,7 +131,7 @@ def test_commit_submodule_orphan_message(
     assert result.success is True
     assert "**Warning:**" in result.output
     assert "no changes found" in result.output
-    assert "agent-core" in result.output
+    assert "plugin" in result.output
 
 
 def test_commit_no_submodule_changes(
@@ -215,21 +215,21 @@ def test_commit_amend_submodule(
     parent = _init_repo_with_submodule(tmp_path)
     monkeypatch.chdir(parent)
 
-    (parent / "agent-core" / "feat.md").write_text("v1")
+    (parent / "plugin" / "feat.md").write_text("v1")
     subprocess.run(
         ["git", "add", "feat.md"],
-        cwd=parent / "agent-core",
+        cwd=parent / "plugin",
         check=True,
         capture_output=True,
     )
     subprocess.run(
         ["git", "commit", "-m", "sub original"],
-        cwd=parent / "agent-core",
+        cwd=parent / "plugin",
         check=True,
         capture_output=True,
     )
     subprocess.run(
-        ["git", "add", "agent-core"],
+        ["git", "add", "plugin"],
         cwd=parent,
         check=True,
         capture_output=True,
@@ -249,14 +249,14 @@ def test_commit_amend_submodule(
         capture_output=True,
     )
 
-    (parent / "agent-core" / "feat.md").write_text("v2")
+    (parent / "plugin" / "feat.md").write_text("v2")
     (parent / "src" / "main.py").write_text("v2")
 
     ci = CommitInput(
-        files=["agent-core/feat.md", "src/main.py"],
+        files=["plugin/feat.md", "src/main.py"],
         message="✨ Amended parent",
         options={"amend"},
-        submodules={"agent-core": "Amended submodule"},
+        submodules={"plugin": "Amended submodule"},
     )
 
     with patch(
@@ -266,12 +266,12 @@ def test_commit_amend_submodule(
         result = commit_pipeline(ci, cwd=parent)
 
     assert result.success is True
-    assert "agent-core:" in result.output
+    assert "plugin:" in result.output
 
     # Submodule should have 2 commits: init and amended
     sub_log = subprocess.run(
         ["git", "log", "--oneline"],
-        cwd=parent / "agent-core",
+        cwd=parent / "plugin",
         capture_output=True,
         text=True,
         check=False,

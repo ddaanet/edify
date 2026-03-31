@@ -2,12 +2,12 @@
 
 **Resolution:** `claude -p` headless mode replaces tmux-based TUI interaction for plugin verification.
 
-**Spike result:** `claude -p "list your available slash commands" --plugin-dir ./agent-core` from a clean directory (no `.claude/`) returns all plugin skills. The `-p` flag runs non-interactively, bypasses Ink TUI entirely, outputs plain text. No tmux send-keys, no ANSI parsing, no readiness polling needed.
+**Spike result:** `claude -p "list your available slash commands" --plugin-dir ./plugin` from a clean directory (no `.claude/`) returns all plugin skills. The `-p` flag runs non-interactively, bypasses Ink TUI entirely, outputs plain text. No tmux send-keys, no ANSI parsing, no readiness polling needed.
 
 **Verification mechanism (applied to Steps 1.3, 6.1, 6.3):**
-- **Skills (FR-1):** `claude -p "list your available slash commands" --plugin-dir ./agent-core`
-- **Agents (FR-1, FR-8):** `claude -p "list your available agents" --plugin-dir ./agent-core`
-- **Hooks (FR-1):** `claude -p "write test to /tmp/x" --plugin-dir ./agent-core` — triggers `pretooluse-block-tmp.sh`
+- **Skills (FR-1):** `claude -p "list your available slash commands" --plugin-dir ./plugin`
+- **Agents (FR-1, FR-8):** `claude -p "list your available agents" --plugin-dir ./plugin`
+- **Hooks (FR-1):** `claude -p "write test to /tmp/x" --plugin-dir ./plugin` — triggers `pretooluse-block-tmp.sh`
 - **Clean-room test:** Run from `tmp/plugin-verify/` (no `.claude/`) to confirm `--plugin-dir` is the sole discovery path
 - **Coexistence (FR-8):** Run from project root (has `.claude/agents/handoff-cli-tool-*.md`) to verify both sources
 - **NFR-1 (dev reload):** Manual — edit skill, re-run check, confirm change visible. Only remaining manual step.

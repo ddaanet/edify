@@ -82,11 +82,11 @@ Extracted: 2026-03-11
 ### pytest-md
 - **Path:** `~/code/pytest-md`
 - **Commits:** 49 (expected ~49)
-- **Date range:** 2026-01-02 to 2026-01-10 (main); agent-core nested: 204 commits, 2026-01-15 to 2026-02-06
+- **Date range:** 2026-01-02 to 2026-01-10 (main); plugin nested: 204 commits, 2026-01-15 to 2026-02-06
 - **Agentic commits (path):** 30
-  - `f82e7a2` 2026-01-28 Add CLAUDE.md with @file references and update agent-core submodule
-  - `16f7953` 2026-01-20 Restructure Claude Code skills and add agent-core submodule
-  - `eaa2498` 2026-02-06 Migrate to agent-core Tier 2 structure
+  - `f82e7a2` 2026-01-28 Add CLAUDE.md with @file references and update plugin submodule
+  - `16f7953` 2026-01-20 Restructure Claude Code skills and add plugin submodule
+  - `eaa2498` 2026-02-06 Migrate to plugin Tier 2 structure
 - **Agent-core nested repo:** 204 commits (2026-01-15 to 2026-02-06). Agent-core's origin before submodule extraction.
 
 ### home
@@ -94,8 +94,8 @@ Extracted: 2026-03-11
 - **Commits:** 157 (expected ~157)
 - **Date range:** 2025-11-05 to 2026-03-11
 - **Migration:** `091073f` 2026-01-18 "Rename AGENTS.md→CLAUDE.md, add load rule for session context"
-- **Agent-core adoption:** `83cef17` 2026-01-22 "Add agent-core submodule and symlink skills/agents"
-- **Agentic commits (path):** 63 — heaviest consumer of agent-core patterns
+- **Agent-core adoption:** `83cef17` 2026-01-22 "Add plugin submodule and symlink skills/agents"
+- **Agentic commits (path):** 63 — heaviest consumer of plugin patterns
 
 ### tuick
 - **Path:** `~/code/tuick`
@@ -154,7 +154,7 @@ Extracted: 2026-03-11
 - **Agent instruction files:** None
 - **Gitmoji usage:** 0/11
 
-## Special: pytest-md/agent-core (nested)
-- **Path:** `~/code/pytest-md/agent-core`
+## Special: pytest-md/plugin (nested)
+- **Path:** `~/code/pytest-md/plugin`
 - **Commits:** 204
 - **Date range:** 2026-01-15 to 2026-02-06

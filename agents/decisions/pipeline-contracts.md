@@ -18,7 +18,7 @@ Centralized I/O contracts for the design-to-deliverable pipeline. Authoritative 
 
 ## When Routing Artifact Review
 
-**Core routing table:** `agent-core/fragments/review-requirement.md` "Reviewer routing by artifact type" (always-loaded, canonical).
+**Core routing table:** `plugin/fragments/review-requirement.md` "Reviewer routing by artifact type" (always-loaded, canonical).
 
 **Orchestration-specific extensions:**
 
@@ -35,7 +35,7 @@ Centralized I/O contracts for the design-to-deliverable pipeline. Authoritative 
 
 ## How To Review Delegation Scope Template
 
-Every review delegation must include execution context (per `agent-core/fragments/review-requirement.md`):
+Every review delegation must include execution context (per `plugin/fragments/review-requirement.md`):
 
 **Required:**
 - **Scope IN:** What was produced (files, sections, features)
@@ -110,7 +110,7 @@ Inline phases in orchestrator-plan.md use `Execution: inline` (vs `Execution: st
 
 **Anti-pattern:** Trusting corrector output without providing execution context.
 
-**Evidence:** Phase 6 error: reviewer "fixed" edify-plugin → agent-core based on stale filesystem state.
+**Evidence:** Phase 6 error: reviewer "fixed" edify-plugin → plugin based on stale filesystem state.
 
 **Correct pattern:** Provide execution context (IN/OUT scope, changed files, requirements). Grep UNFIXABLE after return.
 
@@ -180,7 +180,7 @@ Inline phases in orchestrator-plan.md use `Execution: inline` (vs `Execution: st
 
 ### How To Dispatch Corrector From Inline Skill
 
-Corrector dispatch follows standardized template in `agent-core/skills/inline/references/corrector-template.md`. Key fields: scope (uncommitted changes via git diff against baseline), design context (from outline.md or design.md), recall context (review-relevant entries from recall-artifact.md or lightweight fallback), report path.
+Corrector dispatch follows standardized template in `plugin/skills/inline/references/corrector-template.md`. Key fields: scope (uncommitted changes via git diff against baseline), design context (from outline.md or design.md), recall context (review-relevant entries from recall-artifact.md or lightweight fallback), report path.
 
 ### When Triage Feedback Shows Divergence
 

@@ -249,7 +249,7 @@ Detailed implementation decisions for claudeutils codebase. Consult this documen
 - Multi-line content handled naturally without escaping
 - Simpler parsing and generation
 
-**Script location:** `agent-core/bin/batch-edit.py`
+**Script location:** `plugin/bin/batch-edit.py`
 
 **Impact:** Token efficiency for automated edit operations.
 

@@ -7,7 +7,7 @@ Replace Stop hook fallback with UserPromptSubmit fallback for session health che
 ### Functional Requirements
 
 **FR-1: UPS health check fallback**
-When SessionStart hook (`agent-core/hooks/sessionstart-health.sh`) did not execute (e.g., after `/clear`, on hook failure), the first UserPromptSubmit invocation runs the health check instead.
+When SessionStart hook (`plugin/hooks/sessionstart-health.sh`) did not execute (e.g., after `/clear`, on hook failure), the first UserPromptSubmit invocation runs the health check instead.
 - Acceptance: `/clear` then user message → UPS hook detects missing SessionStart flag and runs health check
 - Acceptance: Normal session (SessionStart fired) → UPS hook skips health check (no double-run)
 - Acceptance: Health check results appear in `additionalContext` (same output as SessionStart)

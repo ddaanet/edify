@@ -1,6 +1,6 @@
 # Review: SP-1 execute-rule.md MODE 1 simplification
 
-**Scope**: `agent-core/fragments/execute-rule.md` — MODE 1 rendering template removal and MODE 3 STATUS reference update
+**Scope**: `plugin/fragments/execute-rule.md` — MODE 1 rendering template removal and MODE 3 STATUS reference update
 **Date**: 2026-03-30
 **Mode**: review + fix
 
@@ -23,7 +23,7 @@ None.
 ### Minor Issues
 
 1. **Rendering label wording deviates from D-3 spec**
-   - Location: `agent-core/fragments/execute-rule.md:15`
+   - Location: `plugin/fragments/execute-rule.md:15`
    - Note: D-3 specifies the replacement text as `"Run: output \`Status.\` — Stop hook renders via \`_status\` CLI."` The implementation uses `"**Rendering:** Output \`Status.\` as final line — Stop hook renders via \`_status\` CLI."` The label (`Rendering:` vs `Run:`) and framing (`Output ... as final line` vs the D-3 phrasing) differ slightly. `**Rendering:**` as a bold label is consistent with the other bold-label style in MODE 1 (e.g., `**Planstate-derived commands:**`, `**Session continuation:**`) and is semantically equivalent. D-3's `"Run:"` phrasing is imperative while `"Rendering:"` is categorical — the latter fits the fragment's existing label-value pattern better.
    - **Status**: OUT-OF-SCOPE — wording is stylistically superior to D-3's spec and consistent with surrounding fragment conventions. Not a defect.
 
@@ -43,7 +43,7 @@ No fixes required.
 | Next-task-when-blocked rule kept | Satisfied | execute-rule.md:28-30 |
 | Graceful degradation kept | Satisfied | execute-rule.md:31-35 |
 | MODE 3 STATUS reference updated | Satisfied | execute-rule.md:54 — `/commit` now "outputs `Status.`" |
-| No orphaned "Display STATUS per execute-rule.md" references | Satisfied | grep confirms no such references remain in agent-core |
+| No orphaned "Display STATUS per execute-rule.md" references | Satisfied | grep confirms no such references remain in plugin |
 | D-1 trigger convention: `Status.` as final output | Satisfied | execute-rule.md:15 matches hook regex `^Status\.\Z` in stop_status_display.py:21 |
 
 ---

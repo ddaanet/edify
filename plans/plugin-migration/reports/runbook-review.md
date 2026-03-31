@@ -116,7 +116,7 @@ None.
   - 14 agent .md files exist (matches Step 2.1 validation target)
   - 16 skill SKILL.md files exist (matches Step 2.2 validation target)
   - Hook scripts referenced in Step 3.1 all exist (pretooluse-block-tmp.sh, submodule-safety.py, userpromptsubmit-shortcuts.py)
-  - Justfile exists at agent-core/justfile (target for modification in Phase 5.2)
+  - Justfile exists at plugin/justfile (target for modification in Phase 5.2)
 
 **Requirements traceability:**
 - Every FR/NFR maps to specific phase and step
@@ -134,7 +134,7 @@ None.
    - After creating `userpromptsubmit-version-check.py`, add validation: "File exists, contains version comparison logic, exits with code 0 on match"
 
 2. **Add validation command to Step 4.1**
-   - Specify: "File exists at `agent-core/just/portable.just`, contains 7 recipe definitions (claude, claude0, wt-new, wt-ls, wt-rm, wt-merge, precommit-base)"
+   - Specify: "File exists at `plugin/just/portable.just`, contains 7 recipe definitions (claude, claude0, wt-new, wt-ls, wt-rm, wt-merge, precommit-base)"
 
 3. **Expand Step 5.2 documentation update guidance**
    - Specify which references to remove from each fragment:

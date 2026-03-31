@@ -46,7 +46,7 @@ def test_format_rich_ls_renders_gate_lines() -> None:
     plan_without_gate = PlanState(
         name="normal-plan",
         status="planned",
-        next_action="agent-core/bin/prepare-runbook.py plans/normal-plan",
+        next_action="plugin/bin/prepare-runbook.py plans/normal-plan",
         gate=None,
         artifacts={"design.md", "runbook-phase-1.md"},
         tree_path=wt_path,

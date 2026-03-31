@@ -59,7 +59,7 @@ The outline provides a solid structural foundation with clear phase boundaries a
 
 1. **Phase 2 skill investigation based on incorrect premise**
    - Location: Phase 2 steps 2.2-2.3
-   - Problem: Step 2.2 says "Verify no skills directory exists (design says 16 skills symlinked, but Glob shows none — investigate)". This is a misunderstanding. Design says "16 skill symlinks" in `.claude/skills/` pointing to `agent-core/skills/`. The source directory `agent-core/skills/` DOES exist with 16 subdirectories. Step searches for `*.md` files when skills use `SKILL.md` inside subdirectories.
+   - Problem: Step 2.2 says "Verify no skills directory exists (design says 16 skills symlinked, but Glob shows none — investigate)". This is a misunderstanding. Design says "16 skill symlinks" in `.claude/skills/` pointing to `plugin/skills/`. The source directory `plugin/skills/` DOES exist with 16 subdirectories. Step searches for `*.md` files when skills use `SKILL.md` inside subdirectories.
    - Fix: Replaced steps 2.2-2.3 with single step verifying skill directory structure matches plugin auto-discovery requirements
    - **Status**: FIXED
 
@@ -86,7 +86,7 @@ The outline provides a solid structural foundation with clear phase boundaries a
 3. **Phase 6 dependency description incomplete**
    - Location: Phase 6 Dependencies section
    - Problem: Says "Phase 4 (justfile import), Phase 5 (cleanup complete)" but cache regeneration only depends on Phase 4 changes (justfile import affects output) — Phase 5 doesn't change justfile
-   - Fix: Corrected dependency to "Phase 4 (justfile import changes `just --list` output), Phase 5 (agent-core justfile sync-to-parent removal)"
+   - Fix: Corrected dependency to "Phase 4 (justfile import changes `just --list` output), Phase 5 (plugin justfile sync-to-parent removal)"
    - **Status**: FIXED
 
 4. **Phase 2 complexity estimate incorrect**
@@ -105,8 +105,8 @@ The outline provides a solid structural foundation with clear phase boundaries a
 
 1. **Step 2.1 title vague**
    - Location: Phase 2 step 2.1
-   - Problem: "Verify agent-core/agents/ structure" — unclear what verification entails
-   - Fix: Changed to "Verify agent-core/agents/ contains 14 agent .md files (no moves needed for plugin discovery)"
+   - Problem: "Verify plugin/agents/ structure" — unclear what verification entails
+   - Fix: Changed to "Verify plugin/agents/ contains 14 agent .md files (no moves needed for plugin discovery)"
    - **Status**: FIXED
 
 2. **Step 3.3 missing hook behavior detail**

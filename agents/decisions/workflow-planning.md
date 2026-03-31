@@ -294,7 +294,7 @@ This is not full test code — it is precise prose that preserves the specificat
 **Pattern:** Planner detects domain (via rules files, design mentions, path patterns) → writes review step referencing domain validation skill + artifact type → orchestrator copies instruction verbatim → corrector reads skill file and applies criteria.
 
 **Architecture:**
-- **Domain validation skill:** `agent-core/skills/<domain>-validation/SKILL.md` — structured review criteria (Critical/Major/Minor + examples)
+- **Domain validation skill:** `plugin/skills/<domain>-validation/SKILL.md` — structured review criteria (Critical/Major/Minor + examples)
 - **Rules file:** `.claude/rules/<domain>-validation.md` — path-matched context injection for planner
 - **Planner awareness:** plan-adhoc and plan-tdd include "Domain Validation" subsection in vet checkpoint guidance
 - **No agent proliferation:** One corrector, enriched via skill files (not separate domain-specific review agents)

@@ -26,7 +26,7 @@ Systematic review of all post syntheses for unsubstantiated claims.
 
 **C1.5: "23 fragments, 18 skills, 14 sub-agents"**
 - Quote: Hook paragraph
-- **Resolution: ADJUSTED.** Current codebase counts: 33 skills, 27 fragments, 13 agents. The claude.ai conversation explored agent-core at a snapshot in time. Update to current counts. The growth itself is part of the story.
+- **Resolution: ADJUSTED.** Current codebase counts: 33 skills, 27 fragments, 13 agents. The claude.ai conversation explored plugin at a snapshot in time. Update to current counts. The growth itself is part of the story.
 
 ---
 

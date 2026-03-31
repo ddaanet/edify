@@ -161,20 +161,20 @@ def test_submodule_clean_error_shows_full_path(
     monkeypatch.chdir(tmp_path)
     _init_repo(tmp_path)
 
-    origin = create_submodule_origin(tmp_path, "agent-core")
-    add_submodule(tmp_path, origin, "agent-core")
+    origin = create_submodule_origin(tmp_path, "plugin")
+    add_submodule(tmp_path, origin, "plugin")
 
-    (tmp_path / "agent-core" / "fragments").mkdir(parents=True)
-    (tmp_path / "agent-core" / "fragments" / "foo.md").write_text("content")
+    (tmp_path / "plugin" / "fragments").mkdir(parents=True)
+    (tmp_path / "plugin" / "fragments" / "foo.md").write_text("content")
     subprocess.run(
         ["git", "add", "."],
-        cwd=tmp_path / "agent-core",
+        cwd=tmp_path / "plugin",
         check=True,
         capture_output=True,
     )
     subprocess.run(
         ["git", "commit", "-m", "add fragment"],
-        cwd=tmp_path / "agent-core",
+        cwd=tmp_path / "plugin",
         check=True,
         capture_output=True,
     )
@@ -192,9 +192,9 @@ def test_submodule_clean_error_shows_full_path(
     )
 
     ci = CommitInput(
-        files=["agent-core/fragments/foo.md"],
+        files=["plugin/fragments/foo.md"],
         message="test commit",
-        submodules={"agent-core": "Add fragment"},
+        submodules={"plugin": "Add fragment"},
     )
 
     with (
@@ -207,6 +207,6 @@ def test_submodule_clean_error_shows_full_path(
         commit_pipeline(ci, cwd=tmp_path)
 
     err = exc_info.value
-    assert any("agent-core" in f for f in err.clean_files), (
-        f"Expected path with 'agent-core' in {err.clean_files}"
+    assert any("plugin" in f for f in err.clean_files), (
+        f"Expected path with 'plugin' in {err.clean_files}"
     )

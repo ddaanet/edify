@@ -15,4 +15,4 @@ Same applies to `d:` mode conclusions that produce pending work — the discussi
 
 ## Scope
 
-Edit `agent-core/fragments/execute-rule.md` — p: directive section. Agentic-prose change.
+Edit `plugin/fragments/execute-rule.md` — p: directive section. Agentic-prose change.

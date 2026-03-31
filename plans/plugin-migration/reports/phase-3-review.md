@@ -29,8 +29,8 @@ None.
 
 1. **Template target exists but step said "Create"**
    - Location: Step 3.1, Implementation item 2
-   - Problem: `agent-core/templates/CLAUDE.template.md` already exists (verified via Glob). Step instructed "Create" which would cause executor to overwrite without reading. The template needs updating (existing file uses `@agent-core/fragments/` paths; step correctly specifies it should use `@agents/rules/` paths).
-   - Fix: Changed "Create" to "Update", added "(file exists — needs ref rewrites)" note, and clarified what must change (the `@agent-core/fragments/` → `@agents/rules/` rewrite).
+   - Problem: `plugin/templates/CLAUDE.template.md` already exists (verified via Glob). Step instructed "Create" which would cause executor to overwrite without reading. The template needs updating (existing file uses `@plugin/fragments/` paths; step correctly specifies it should use `@agents/rules/` paths).
+   - Fix: Changed "Create" to "Update", added "(file exists — needs ref rewrites)" note, and clarified what must change (the `@plugin/fragments/` → `@agents/rules/` rewrite).
    - **Status**: FIXED
 
 2. **Step 3.1 missing `jobs.md` from `agents/` scaffold list**
@@ -41,15 +41,15 @@ None.
 
 3. **Step 3.2 ambiguous fragment path "plugin's `fragments/`"**
    - Location: Step 3.2, Implementation item 1, bullet 1
-   - Problem: "plugin's `fragments/`" is ambiguous during bootstrap phase — the directory is still called `agent-core/`. Executor might create a separate `fragments/` directory.
-   - Fix: Replaced with explicit path: "plugin's fragments at `agent-core/fragments/`".
+   - Problem: "plugin's `fragments/`" is ambiguous during bootstrap phase — the directory is still called `plugin/`. Executor might create a separate `fragments/` directory.
+   - Fix: Replaced with explicit path: "plugin's fragments at `plugin/fragments/`".
    - **Status**: FIXED
 
 ## Fixes Applied
 
 - Step 3.1 Implementation item 1 — Replaced conversational framing with concrete behavior list (copy, rewrite, scaffold, generate, write) per outline FR-3 + Component 4. Added `jobs.md` to scaffold list. Added no-submodule-detection constraint.
-- Step 3.1 Implementation item 2 — Changed "Create" to "Update (file exists — needs ref rewrites)". Clarified the `@agent-core/fragments/` → `@agents/rules/` rewrite requirement.
-- Step 3.2 Implementation item 1 bullet 1 — Replaced "plugin's `fragments/`" with explicit `agent-core/fragments/` path.
+- Step 3.1 Implementation item 2 — Changed "Create" to "Update (file exists — needs ref rewrites)". Clarified the `@plugin/fragments/` → `@agents/rules/` rewrite requirement.
+- Step 3.2 Implementation item 1 bullet 1 — Replaced "plugin's `fragments/`" with explicit `plugin/fragments/` path.
 
 ## Unfixable Issues (Escalation Required)
 

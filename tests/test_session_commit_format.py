@@ -25,7 +25,7 @@ def test_format_success_submodule() -> None:
     """Submodule success: labeled with path, parent unlabeled."""
     output = format_commit_output(
         submodule_outputs={
-            "agent-core": (
+            "plugin": (
                 "[main 4b2c1a0] 🤖 Update fragment\n"
                 " 1 file changed, 5 insertions(+), 2 deletions(-)"
             ),
@@ -35,16 +35,16 @@ def test_format_success_submodule() -> None:
             " 4 files changed, 142 insertions(+), 8 deletions(-)"
         ),
     )
-    assert "agent-core:" in output
+    assert "plugin:" in output
     # Submodule output appears before parent
-    assert output.index("agent-core:") < output.index("Add commit CLI")
+    assert output.index("plugin:") < output.index("Add commit CLI")
 
 
 def test_format_warning() -> None:
     """Warning prepended before git output."""
     output = format_commit_output(
         warnings=[
-            "## Submodule agent-core has no matching files",
+            "## Submodule plugin has no matching files",
         ],
         parent_output="[main a7f38c2] ✨ Add commit CLI",
     )
@@ -68,7 +68,7 @@ def test_format_strips_hints() -> None:
 def test_format_empty_parent_with_submodule() -> None:
     """Empty parent_output with submodule output → no trailing newline."""
     output = format_commit_output(
-        submodule_outputs={"agent-core": "[main 4b2c1a0] 🤖 Update fragment"},
+        submodule_outputs={"plugin": "[main 4b2c1a0] 🤖 Update fragment"},
         parent_output="",
     )
     assert not output.endswith("\n")

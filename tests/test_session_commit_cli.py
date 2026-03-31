@@ -134,7 +134,7 @@ def test_commit_cli_submodule_missing_message_exits_2(
     parent = tmp_path / "parent"
     parent.mkdir()
     _init_repo(parent)
-    add_submodule(parent, origin, "agent-core")
+    add_submodule(parent, origin, "plugin")
     subprocess.run(
         ["git", "commit", "-m", "add submodule"],
         cwd=parent,
@@ -143,9 +143,9 @@ def test_commit_cli_submodule_missing_message_exits_2(
     )
     monkeypatch.chdir(parent)
 
-    (parent / "agent-core" / "new.md").write_text("content")
+    (parent / "plugin" / "new.md").write_text("content")
 
-    stdin = "## Files\n- agent-core/new.md\n\n## Message\n> ✨ Add to submod\n"
+    stdin = "## Files\n- plugin/new.md\n\n## Message\n> ✨ Add to submod\n"
 
     runner = CliRunner()
     result = runner.invoke(commit_cmd, input=stdin)

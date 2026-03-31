@@ -195,11 +195,11 @@ Git workflow, platform constraints, code patterns, and naming conventions.
 
 **Decision Date:** 2026-02-18
 
-**Anti-pattern:** `wt rm` removes worktree directory but leaves `.git/modules/agent-core/config` `core.worktree` pointing to the deleted directory. Also doesn't check if submodule branch has unmerged commits (parent repo branch merged but submodule branch diverged).
+**Anti-pattern:** `wt rm` removes worktree directory but leaves `.git/modules/plugin/config` `core.worktree` pointing to the deleted directory. Also doesn't check if submodule branch has unmerged commits (parent repo branch merged but submodule branch diverged).
 
 **Correct pattern:** `wt rm` must (1) restore submodule's `core.worktree` to main checkout path, (2) check submodule branch merge status before deletion. Both are data-loss vectors — stale config breaks all submodule operations, unmerged submodule branch loses commits.
 
-**Evidence:** `git -C agent-core` failed with "cannot chdir to removed directory" after `wt rm runbook-skill-fixes`. Agent-core branch had 3 files of real diffs silently orphaned.
+**Evidence:** `git -C plugin` failed with "cannot chdir to removed directory" after `wt rm runbook-skill-fixes`. Agent-core branch had 3 files of real diffs silently orphaned.
 
 ### When Importing Artifacts From Worktrees
 

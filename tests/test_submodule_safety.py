@@ -10,7 +10,7 @@ from typing import Any
 import pytest
 
 _hook_path = (
-    Path(__file__).parent.parent / "agent-core" / "hooks" / "submodule-safety.py"
+    Path(__file__).parent.parent / "plugin" / "hooks" / "submodule-safety.py"
 )
 _spec = importlib.util.spec_from_file_location("submodule_safety", _hook_path)
 assert _spec is not None

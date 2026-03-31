@@ -485,7 +485,7 @@ The pre-claudeutils repos establish these patterns:
 7. **File structure** becomes standardized across projects
 
 claudeutils takes these patterns and:
-- Moves AGENTS.md-style guidance to `@agent-core/fragments/*.md`
+- Moves AGENTS.md-style guidance to `@plugin/fragments/*.md`
 - Standardizes agent definitions in `.claude/agents/`
 - Creates skills for common workflows (`/design`, `/orchestrate`, `/commit`)
 - Implements the session/worktree model from the home repo

@@ -2,7 +2,7 @@
 import json
 
 # Run from project root
-d = json.load(open("agent-core/hooks/hooks.json"))
+d = json.load(open("plugin/hooks/hooks.json"))
 assert "hooks" in d, "Missing 'hooks' wrapper key"
 print("Events:", list(d["hooks"].keys()))
 

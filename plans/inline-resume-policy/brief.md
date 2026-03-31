@@ -4,7 +4,7 @@ Add resume-between-cycles directive to /inline skill's delegation protocol. Curr
 
 ## Change
 
-Edit `agent-core/skills/inline/SKILL.md` delegation protocol section. Add: "Resume same agent between cycles within a phase. Fresh agent when context nears 150k tokens."
+Edit `plugin/skills/inline/SKILL.md` delegation protocol section. Add: "Resume same agent between cycles within a phase. Fresh agent when context nears 150k tokens."
 
 ## Source
 

@@ -1,11 +1,11 @@
 # Code Deliverable Review
 
-## File: agent-core/bin/bump-plugin-version.py
+## File: plugin/bin/bump-plugin-version.py
 
 ### Findings
 
 - [Minor] :10 — robustness: No version format validation. Any string accepted (e.g., empty string, non-semver). Low risk since callers (`just release`) provide validated input from `uv version --short`.
-- [Minor] :15 — modularity: Path resolution via `Path(__file__).parent.parent` couples the script to its directory position within `agent-core/`. Correct for current layout but fragile if script moves. Acceptable given the mechanical nature of the script.
+- [Minor] :15 — modularity: Path resolution via `Path(__file__).parent.parent` couples the script to its directory position within `plugin/`. Correct for current layout but fragile if script moves. Acceptable given the mechanical nature of the script.
 
 ### Assessment
 
@@ -13,11 +13,11 @@ Clean, focused script. Correctly implements the plugin.json half of FR-12 (bump)
 
 ---
 
-## File: agent-core/bin/check-version-consistency.py
+## File: plugin/bin/check-version-consistency.py
 
 ### Findings
 
-- [Minor] :10 — robustness: `Path(__file__).parent.parent.parent` assumes the script lives at `<repo>/agent-core/bin/`. Matches current layout; fragile on restructuring. Acceptable given project conventions.
+- [Minor] :10 — robustness: `Path(__file__).parent.parent.parent` assumes the script lives at `<repo>/plugin/bin/`. Matches current layout; fragile on restructuring. Acceptable given project conventions.
 - [Minor] :39 — robustness: TOML parsing via line scan handles `version = "X.Y.Z"` in `[project]` but would fail on valid TOML like `version="X.Y.Z"` (no spaces) — the `partition("=")` handles this, but `stripped.startswith("version")` also matches `version_suffix` or similar keys. Risk is negligible in practice since `[project]` section has a well-defined schema, but a more precise match (e.g., `re.match(r'version\s*=', stripped)`) would be safer.
 - [Minor] :56 — idempotency: Provides actionable guidance ("Run: just release") on mismatch. Good UX.
 
@@ -27,7 +27,7 @@ Correct implementation of FR-12 precommit validation. The TOML line-scan approac
 
 ---
 
-## File: agent-core/hooks/sessionstart-health.sh
+## File: plugin/hooks/sessionstart-health.sh
 
 ### Findings
 
@@ -45,7 +45,7 @@ The setup section implements FR-10 (version provenance) and FR-11 (CLI venv inst
 
 ---
 
-## File: agent-core/hooks/stop-health-fallback.sh
+## File: plugin/hooks/stop-health-fallback.sh
 
 ### Findings
 
@@ -57,7 +57,7 @@ Clean, no issues. The unbound variable fix (adding `TMPDIR` default on line 4, r
 
 ---
 
-## File: agent-core/hooks/pretooluse-recipe-redirect.py
+## File: plugin/hooks/pretooluse-recipe-redirect.py
 
 ### Findings
 

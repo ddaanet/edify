@@ -25,15 +25,15 @@ Create `/edify:init` and `/edify:update` skills — agentic prose artifacts requ
 
 **Prerequisites**:
 - Read outline.md Component 4 `/edify:update` section (verify conflict policy has been added)
-- Read `agent-core/skills/init/SKILL.md` (created in Step 3.1 — understand separation of concerns)
+- Read `plugin/skills/init/SKILL.md` (created in Step 3.1 — understand separation of concerns)
 - Read 1-2 existing skills for format reference
 
 **Implementation**:
-1. Create `agent-core/skills/update/SKILL.md`:
+1. Create `plugin/skills/update/SKILL.md`:
    - Behavior: sync fragments + portable justfile module(s), update `.edify.yaml` version
    - Separate from init — update is sync-only, not scaffolding
    - Should handle:
-     - Compare current fragments in `agents/rules/` with plugin's fragments at `agent-core/fragments/`
+     - Compare current fragments in `agents/rules/` with plugin's fragments at `plugin/fragments/`
      - Copy updated fragments, preserving any local customizations (warn on conflicts)
      - Sync portable justfile module(s) to project
      - Update `.edify.yaml` version to match current plugin version
@@ -41,7 +41,7 @@ Create `/edify:init` and `/edify:update` skills — agentic prose artifacts requ
    - Frontmatter: `name: update`, appropriate description
 
 **Expected Outcome**:
-- `agent-core/skills/update/SKILL.md` exists with valid skill frontmatter
+- `plugin/skills/update/SKILL.md` exists with valid skill frontmatter
 - Skill clearly separated from `/edify:init` (sync vs scaffold)
 - Handles conflict detection for modified fragments
 

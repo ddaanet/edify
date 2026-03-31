@@ -21,8 +21,8 @@ Execute after plugin verified working. Irreversible within session.
 **Prerequisites**:
 - Phases 1, 2, 5 complete (plugin fully verified, version coordination in place)
 - Post-phase state verification:
-  - `agent-core/hooks/hooks.json` contains all 9 surviving hooks (setup integrated into `sessionstart-health.sh`, no new hook added)
-  - `agent-core/.claude-plugin/plugin.json` exists
+  - `plugin/hooks/hooks.json` contains all 9 surviving hooks (setup integrated into `sessionstart-health.sh`, no new hook added)
+  - `plugin/.claude-plugin/plugin.json` exists
   - `sessionstart-health.sh` updated with setup responsibilities (Step 2.3)
 
 **Implementation**:
@@ -43,10 +43,10 @@ Execute after plugin verified working. Irreversible within session.
    - Remove `Write(.claude/agents/*)`
    - Remove `Write(.claude/hooks/*)`
    - Remove `Bash(ln:*)`
-6. **Remove `sync-to-parent` recipe** from `agent-core/justfile`
-7. **Delete `pretooluse-symlink-redirect.sh`** from `agent-core/hooks/`:
-   - `rm agent-core/hooks/pretooluse-symlink-redirect.sh`
-   - Verify entry removed from `agent-core/hooks/hooks.json` (done in Step 2.1)
+6. **Remove `sync-to-parent` recipe** from `plugin/justfile`
+7. **Delete `pretooluse-symlink-redirect.sh`** from `plugin/hooks/`:
+   - `rm plugin/hooks/pretooluse-symlink-redirect.sh`
+   - Verify entry removed from `plugin/hooks/hooks.json` (done in Step 2.1)
 8. **Update `.gitignore`**: run `grep -n 'symlink\|\.claude/skills\|\.claude/agents\|\.claude/hooks' .gitignore` — remove any lines that tracked symlinks as generated artifacts
 
 **Expected Outcome**:
@@ -58,7 +58,7 @@ Execute after plugin verified working. Irreversible within session.
 - `pretooluse-symlink-redirect.sh` deleted
 
 **Error Conditions**:
-- If `find -type l` finds non-agent-core symlinks → investigate before deleting
+- If `find -type l` finds non-plugin symlinks → investigate before deleting
 - If `handoff-cli-tool-*.md` files cannot be deleted (permission error, unexpected file type) → investigate before proceeding
 - If settings.json parse fails after editing → fix JSON syntax
 
@@ -68,11 +68,11 @@ Execute after plugin verified working. Irreversible within session.
 - `find .claude/hooks/ -type l | wc -l` returns 0
 - `ls .claude/agents/handoff-cli-tool-*.md 2>/dev/null | wc -l` returns 0
 - `python3 -c "import json; d=json.load(open('.claude/settings.json')); assert 'hooks' not in d; print('OK')"`
-- `test ! -f agent-core/hooks/pretooluse-symlink-redirect.sh && echo OK` returns OK
+- `test ! -f plugin/hooks/pretooluse-symlink-redirect.sh && echo OK` returns OK
 - **Automated plugin check** (from project root, symlinks now removed):
   ```bash
-  claude -p "list your available slash commands" --plugin-dir ./agent-core 2>&1 | grep -c "design\|commit\|orchestrate" && \
-  claude -p "list your available agents" --plugin-dir ./agent-core 2>&1 | grep -c "agent"
+  claude -p "list your available slash commands" --plugin-dir ./plugin 2>&1 | grep -c "design\|commit\|orchestrate" && \
+  claude -p "list your available agents" --plugin-dir ./plugin 2>&1 | grep -c "agent"
   ```
   Skills and agents must be discoverable via `--plugin-dir` alone (no symlinks remain)
 

@@ -1,6 +1,6 @@
 # Skill Review: Content Density Criterion
 
-**File:** `agent-core/skills/design/references/write-outline.md`, line 121
+**File:** `plugin/skills/design/references/write-outline.md`, line 121
 
 ## Findings
 

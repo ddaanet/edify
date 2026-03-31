@@ -54,35 +54,35 @@ Prerequisite: Assess prototype gaps against FR-1/FR-2 needs. The prototype has s
 
 - Step 2.1: Memory system evolution
   - Git: `git log -S` for "memory-index", "recall", "when_trigger", "metacognitive"
-  - Git: `git log --follow` on `agents/memory-index.md`, `agent-core/skills/recall/`
+  - Git: `git log --follow` on `agents/memory-index.md`, `plugin/skills/recall/`
   - Sessions: Project dirs `memory-index-recall` (16), `when-recall` (24), `recall-tool-anchoring` (12), `active-recall-system` (14), `recall-cli-integration` (9), `recall-tool-consolidation` (3), `recall-pass-requirements` (8), `recall-fix` (1), `runbook-recall-expansion` (4), `review-recall-null` (1), `when-recall-evaluation` (1)
   - Key inflection: 4.1% metacognitive activation rate discovery
   - Output: `plans/retrospective/reports/topic-1-memory-system.md`
 
 - Step 2.2: Pushback protocol
   - Git: `git log -S` for "pushback", "sycophancy", "agreement_momentum", "stress-test"
-  - Git: `git log --follow` on `agent-core/fragments/pushback.md`
+  - Git: `git log --follow` on `plugin/fragments/pushback.md`
   - Sessions: Project dirs `pushback` (29), `pushback-grounding` (1)
   - Key inflection: prose rules rationalized past → structural enforcement
   - Output: `plans/retrospective/reports/topic-2-pushback.md`
 
 - Step 2.3: Deliverable-review origins
   - Git: `git log -S` for "deliverable-review", "statusline-parity", "ISO 25010", "IEEE 1012"
-  - Git: `git log --follow` on `agent-core/skills/deliverable-review/`, `agents/decisions/deliverable-review.md`
+  - Git: `git log --follow` on `plugin/skills/deliverable-review/`, `agents/decisions/deliverable-review.md`
   - Sessions: Project dirs `parity-failures` (7), `quality-infra-reform` (13), `design-quality-gates` (1)
   - Key inflection: 385 tests pass, 8 visual issues remain (statusline-parity)
   - Output: `plans/retrospective/reports/topic-3-deliverable-review.md`
 
 - Step 2.4: Ground skill origins
   - Git: `git log -S` for "ground", "confabulated", "WSJF", "diverge-converge"
-  - Git: `git log --follow` on `agent-core/skills/ground/`, `agents/decisions/workflow-optimization.md`
+  - Git: `git log --follow` on `plugin/skills/ground/`, `agents/decisions/workflow-optimization.md`
   - Sessions: Project dirs `design-grounding-update` (11), `update-grounding-skill` (1)
   - Key inflection: confabulated prioritization scoring caught → external research mandate
   - Output: `plans/retrospective/reports/topic-4-ground-skill.md`
 
 - Step 2.5: Structural enforcement / gating
   - Git: `git log -S` for "D+B", "tool-call anchor", "PreToolUse", "gate_anchor", "structural enforcement"
-  - Git: `git log --follow` on `agent-core/fragments/pushback.md`, `agents/decisions/defense-in-depth.md`
+  - Git: `git log --follow` on `plugin/fragments/pushback.md`, `agents/decisions/defense-in-depth.md`
   - Sessions: Project dirs `recall-tool-anchoring` (12), `userpromptsubmit-topic` (7), `ups-topic-injection` (8 → mapped to project dir), `fix-ups-topic-findings` (1), `rm-ups-topic` (1)
   - Key inflection: prose instructions skipped under momentum → tool-call anchoring
   - Output: `plans/retrospective/reports/topic-5-structural-enforcement.md`

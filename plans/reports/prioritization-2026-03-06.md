@@ -55,7 +55,7 @@
 | 46 | Generate memory index | 3 | 3 | 3 | 9 | 5 | 3 | 8 | 1.1 | opus |
 | 47 | Merge lock retry | 2 | 1 | 3 | 6 | 5 | 1 | 6 | 1.0 | sonnet |
 | 48 | Recall usage scoring | 3 | 1 | 3 | 7 | 5 | 2 | 7 | 1.0 | sonnet |
-| 49 | agent-core lint coverage | 2 | 2 | 3 | 7 | 5 | 2 | 7 | 1.0 | opus |
+| 49 | plugin lint coverage | 2 | 2 | 3 | 7 | 5 | 2 | 7 | 1.0 | opus |
 | 50 | Recall pipeline | 3 | 2 | 3 | 8 | 5 | 3 | 8 | 1.0 | opus |
 | 51 | Update prioritize skill | 2 | 1 | 1 | 4 | 3 | 1 | 4 | 1.0 | sonnet |
 | 52 | Compensate-continue skill | 3 | 2 | 5 | 10 | 8 | 3 | 11 | 0.9 | opus |

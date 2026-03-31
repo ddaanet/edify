@@ -113,7 +113,7 @@ def _check_clean_for_merge(
         click.echo(f"Clean tree required for merge ({label}{suffix})")
         raise SystemExit(1)
 
-    submodule_path = (path / "agent-core") if path else Path("agent-core")
+    submodule_path = (path / "plugin") if path else Path("plugin")
     if not (submodule_path.exists() and (submodule_path / ".git").exists()):
         return
     submodule = _git(
@@ -147,19 +147,19 @@ def _phase1_validate_clean_trees(slug: str, *, from_main: bool = False) -> None:
         exempt_paths={
             "agents/session.md",
             "agents/learnings.md",
-            "agent-core",
+            "plugin",
         }
     )
 
 
 def _phase2_resolve_submodule(slug: str) -> None:
     """Phase 2: Resolve submodule if worktree commit differs from local."""
-    wt_ls_output = _git("ls-tree", slug, "--", "agent-core", check=False)
+    wt_ls_output = _git("ls-tree", slug, "--", "plugin", check=False)
     if not wt_ls_output:
         return
 
     wt_commit = wt_ls_output.split()[2]
-    local_commit = _git("-C", "agent-core", "rev-parse", "HEAD", check=False)
+    local_commit = _git("-C", "plugin", "rev-parse", "HEAD", check=False)
 
     if wt_commit == local_commit:
         return
@@ -168,7 +168,7 @@ def _phase2_resolve_submodule(slug: str) -> None:
         [
             "git",
             "-C",
-            "agent-core",
+            "plugin",
             "merge-base",
             "--is-ancestor",
             wt_commit,
@@ -178,30 +178,30 @@ def _phase2_resolve_submodule(slug: str) -> None:
     )
     if result.returncode != 0:
         result = subprocess.run(
-            ["git", "-C", "agent-core", "cat-file", "-e", wt_commit],
+            ["git", "-C", "plugin", "cat-file", "-e", wt_commit],
             check=False,
         )
         if result.returncode != 0:
-            wt_agent_core = wt_path(slug) / "agent-core"
-            _git("-C", "agent-core", "fetch", str(wt_agent_core), "HEAD")
+            wt_agent_core = wt_path(slug) / "plugin"
+            _git("-C", "plugin", "fetch", str(wt_agent_core), "HEAD")
 
         # Try submodule merge; if it conflicts, leave MERGE_HEAD in place and return
         merge_result = subprocess.run(
-            ["git", "-C", "agent-core", "merge", "--no-edit", wt_commit],
+            ["git", "-C", "plugin", "merge", "--no-edit", wt_commit],
             capture_output=True,
             check=False,
         )
         if merge_result.returncode != 0:
             return
 
-        _git("add", "agent-core")
+        _git("add", "plugin")
 
         result = subprocess.run(
-            ["git", "diff", "--cached", "--quiet", "agent-core"],
+            ["git", "diff", "--cached", "--quiet", "plugin"],
             check=False,
         )
         if result.returncode != 0:
-            _git("commit", "-m", f"🔀 Merge agent-core from {slug}")
+            _git("commit", "-m", f"🔀 Merge plugin from {slug}")
 
 
 def _auto_resolve_known_conflicts(
@@ -210,11 +210,11 @@ def _auto_resolve_known_conflicts(
     *,
     from_main: bool = False,  # noqa: ARG001
 ) -> list[str]:
-    """Auto-resolve known conflicts: agent-core (ours), session.md, learnings.md."""
-    if "agent-core" in conflicts:
-        _git("checkout", "--ours", "agent-core")
-        _git("add", "agent-core")
-        conflicts = [c for c in conflicts if c != "agent-core"]
+    """Auto-resolve known conflicts: plugin (ours), session.md, learnings.md."""
+    if "plugin" in conflicts:
+        _git("checkout", "--ours", "plugin")
+        _git("add", "plugin")
+        conflicts = [c for c in conflicts if c != "plugin"]
     conflicts = resolve_session_md(conflicts, slug=slug)
     return resolve_learnings_md(conflicts)
 
@@ -353,16 +353,16 @@ def _phase4_merge_commit_and_precommit(slug: str, *, from_main: bool = False) ->
         click.echo(precommit_result.stderr)
         raise SystemExit(1)
 
-    submodule_path = Path("agent-core")
+    submodule_path = Path("plugin")
     if submodule_path.exists() and (submodule_path / ".git").exists():
         sub_merge_head = subprocess.run(
-            ["git", "-C", "agent-core", "rev-parse", "--verify", "MERGE_HEAD"],
+            ["git", "-C", "plugin", "rev-parse", "--verify", "MERGE_HEAD"],
             capture_output=True,
             check=False,
         )
         if sub_merge_head.returncode == 0:
-            click.echo("Submodule agent-core has unresolved merge conflict")
-            click.echo("Resolve in agent-core/, then re-run merge")
+            click.echo("Submodule plugin has unresolved merge conflict")
+            click.echo("Resolve in plugin/, then re-run merge")
             raise SystemExit(3)
 
 

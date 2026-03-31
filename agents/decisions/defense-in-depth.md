@@ -101,7 +101,7 @@ This pattern applies beyond parity tests—use for any quality gate design:
 
 **Correct pattern:** Script handles deterministic checks (blocking, zero false positives). Agent enriches existing review for semantic checks (advisory). Different enforcement layers for different failure modes — defense-in-depth.
 
-**Evidence:** FR-2 model review split. File path matching (agent-core/skills/ → opus) is scriptable with zero false positives. Semantic complexity ("is this synthesis?") requires runbook-corrector judgment during existing Phase 1 per-phase review.
+**Evidence:** FR-2 model review split. File path matching (plugin/skills/ → opus) is scriptable with zero false positives. Semantic complexity ("is this synthesis?") requires runbook-corrector judgment during existing Phase 1 per-phase review.
 
 ## When Reviewing Quality Gate Coverage
 

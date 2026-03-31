@@ -16,7 +16,7 @@ Plugin skills discoverable. Key skills confirmed:
 
 Run from clean directory (`tmp/plugin-verify`, no `.claude/`):
 
-Plugin agents discoverable from `agent-core/agents/`. Confirmed:
+Plugin agents discoverable from `plugin/agents/`. Confirmed:
 - corrector, design-corrector, outline-corrector, runbook-corrector, runbook-outline-corrector
 - test-driver, tdd-auditor, refactor
 - artisan, scout
@@ -50,8 +50,8 @@ The `/tmp` write was blocked. Full output: `tmp/plugin-verify-hooks.txt`
 Manual check: Edit one skill file (add a comment), re-run Check 1, confirm the edit is reflected in output.
 
 **Procedure:**
-1. Edit any skill file, e.g. add a comment line to `agent-core/skills/commit/SKILL.md`
-2. Re-run: `cd tmp/plugin-verify && claude -p "list your available slash commands" --plugin-dir ../../agent-core`
+1. Edit any skill file, e.g. add a comment line to `plugin/skills/commit/SKILL.md`
+2. Re-run: `cd tmp/plugin-verify && claude -p "list your available slash commands" --plugin-dir ../../plugin`
 3. Confirm skill content changed (or check the skill file is loaded with the edit visible)
 4. Revert the comment edit when done
 
@@ -59,8 +59,8 @@ Manual check: Edit one skill file (add a comment), re-run Check 1, confirm the e
 
 All automated checks (1-4) pass. Plugin structure is correct:
 - plugin.json format accepted by Claude Code
-- Skills auto-discovered from `agent-core/skills/`
-- Agents auto-discovered from `agent-core/agents/`
+- Skills auto-discovered from `plugin/skills/`
+- Agents auto-discovered from `plugin/agents/`
 - hooks.json loaded, PreToolUse hooks firing
 - No agent namespace conflicts between plugin and project-local agents
 

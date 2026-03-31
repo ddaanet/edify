@@ -106,8 +106,8 @@ None.
 
 2. **Ambiguous justfile reference in Step 6.1**
    - Location: Step 6.1
-   - Problem: "Remove `sync-to-parent` recipe from justfile" — unclear which justfile (root vs `agent-core/justfile`). `sync-to-parent` lives in `agent-core/justfile`.
-   - Fix: Changed to "Remove `sync-to-parent` recipe from `agent-core/justfile`".
+   - Problem: "Remove `sync-to-parent` recipe from justfile" — unclear which justfile (root vs `plugin/justfile`). `sync-to-parent` lives in `plugin/justfile`.
+   - Fix: Changed to "Remove `sync-to-parent` recipe from `plugin/justfile`".
    - **Status**: FIXED
 
 3. **Missing cache regeneration in Step 4.2**
@@ -147,7 +147,7 @@ None.
 - Step 1.2: Added explicit list of all 9 surviving hooks
 - Step 2.4: Added post-phase state note and validation checkpoint
 - Step 4.2: Added cache regeneration instruction
-- Step 6.1: Clarified `agent-core/justfile` for sync-to-parent removal
+- Step 6.1: Clarified `plugin/justfile` for sync-to-parent removal
 - Step 6.2: Renumbered from 6.3, added Files and Depends-on
 - Step 6.3: Renumbered from 6.2, added Depends-on and checkpoint language
 - Phase Dependencies: Added Phase 3/4 note to Phase 6 dependencies
@@ -155,7 +155,7 @@ None.
 
 ## Design Alignment
 
-- **Architecture**: Aligned. Outline follows bootstrap strategy (build inside `agent-core/`, rename last)
+- **Architecture**: Aligned. Outline follows bootstrap strategy (build inside `plugin/`, rename last)
 - **Module structure**: Aligned. Plugin manifest, hooks.json, skills all in correct locations per outline.md
 - **Key decisions**: D-1 through D-7 correctly referenced. D-4 wrapper format matches proofed outline (corrects design.md). D-5 single-vs-modular tension flagged as UNFIXABLE
 - **Design.md vs outline.md**: Outline correctly treats outline.md as authoritative. Design.md deliverables for `.version` file and `userpromptsubmit-version-check.py` are superseded (version in `plugin.json`, check in `edify-setup.sh`)
@@ -164,9 +164,9 @@ None.
 
 | File | Current Lines | Phase | Projected Lines | Assessment |
 |------|--------------|-------|----------------|------------|
-| `agent-core/hooks/hooks.json` | 57 | 1, 2 | ~100 (rewrite with 9 hooks + setup hook) | No concern |
+| `plugin/hooks/hooks.json` | 57 | 1, 2 | ~100 (rewrite with 9 hooks + setup hook) | No concern |
 | `justfile` | 638 | 4 | ~500 (recipes removed, import added) | Net reduction |
-| `agent-core/justfile` | 108 | 6 | ~100 (sync-to-parent removed) | No concern |
+| `plugin/justfile` | 108 | 6 | ~100 (sync-to-parent removed) | No concern |
 | New: `edify-setup.sh` | 0 | 2 | ~60-80 | No concern |
 | New: `plugin.json` | 0 | 1 | ~5 | No concern |
 | New: `.edify.yaml` | 0 | 5 | ~5 | No concern |

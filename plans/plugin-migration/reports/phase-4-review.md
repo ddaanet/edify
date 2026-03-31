@@ -41,8 +41,8 @@ None.
 
 3. **Thematic module validation missing**
    - Location: Step 4.1, Validation section
-   - Problem: Validation only specified the single-file case (`just --justfile agent-core/portable.just --list`). The thematic module path (if D-5 redesign occurs) had no validation command.
-   - Fix: Added thematic-case validation (`just --justfile agent-core/<module>.just --list` for each module) and a prolog verification command.
+   - Problem: Validation only specified the single-file case (`just --justfile plugin/portable.just --list`). The thematic module path (if D-5 redesign occurs) had no validation command.
+   - Fix: Added thematic-case validation (`just --justfile plugin/<module>.just --list` for each module) and a prolog verification command.
    - **Status**: FIXED
 
 ## Fixes Applied

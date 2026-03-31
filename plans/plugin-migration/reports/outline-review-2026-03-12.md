@@ -64,7 +64,7 @@ No interface mismatches detected.
 
 The outline explicitly corrects three design.md errors (Design Corrections section):
 
-1. **D-4 hooks.json format**: Design says direct format; outline says wrapper format per official docs. The existing `agent-core/hooks/hooks.json` uses direct format (current settings.json format), but plugin hooks.json may require wrapper format. Outline cites official plugin docs as authority. **Verdict**: Outline correction is reasonable; will be validated empirically during implementation (R-1 risk covers this).
+1. **D-4 hooks.json format**: Design says direct format; outline says wrapper format per official docs. The existing `plugin/hooks/hooks.json` uses direct format (current settings.json format), but plugin hooks.json may require wrapper format. Outline cites official plugin docs as authority. **Verdict**: Outline correction is reasonable; will be validated empirically during implementation (R-1 risk covers this).
 
 2. **Hook inventory**: Design lists 4 hooks; outline lists 10 (all audited). **Verdict**: Outline is correct per filesystem audit.
 

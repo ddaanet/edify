@@ -7,7 +7,7 @@ import pytest
 
 from tests.pytest_helpers import setup_baseline_agents, setup_git_repo
 
-SCRIPT = Path(__file__).parent.parent / "agent-core" / "bin" / "prepare-runbook.py"
+SCRIPT = Path(__file__).parent.parent / "plugin" / "bin" / "prepare-runbook.py"
 
 _spec = importlib.util.spec_from_file_location("prepare_runbook", SCRIPT)
 _mod = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]

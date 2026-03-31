@@ -37,7 +37,7 @@ Three integration points:
 ## References
 
 - `plans/handoff-cli-tool/reports/deliverable-review.md` -- M#4 finding
-- `agent-core/skills/commit/SKILL.md` -- current commit skill
-- `agent-core/skills/handoff/SKILL.md` -- current handoff skill
-- `agent-core/fragments/execute-rule.md` -- MODE 1 STATUS template
+- `plugin/skills/commit/SKILL.md` -- current commit skill
+- `plugin/skills/handoff/SKILL.md` -- current handoff skill
+- `plugin/fragments/execute-rule.md` -- MODE 1 STATUS template
 - Learnings: "When reviewing CLI-skill integration"

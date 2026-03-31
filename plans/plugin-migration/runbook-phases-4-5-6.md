@@ -12,11 +12,11 @@
 
 ### Step 4.1: Create portable.just
 
-**Objective:** Extract portable recipes to `agent-core/just/portable.just` with minimal bash prolog.
+**Objective:** Extract portable recipes to `plugin/just/portable.just` with minimal bash prolog.
 
 **Execution Model:** Haiku
 
-**Implementation:** Create `agent-core/just/portable.just` with extracted recipes (claude, claude0, wt-*, precommit-base) and minimal bash prolog (fail, visible, color variables only).
+**Implementation:** Create `plugin/just/portable.just` with extracted recipes (claude, claude0, wt-*, precommit-base) and minimal bash prolog (fail, visible, color variables only).
 
 **Design Reference:** D-5 (justfile import), Design Component 5
 
@@ -30,7 +30,7 @@
 
 **Execution Model:** Haiku
 
-**Implementation:** Add `import 'agent-core/just/portable.just'` at top, remove claude/wt-*/precommit-base recipes, keep test/format/check/lint/release.
+**Implementation:** Add `import 'plugin/just/portable.just'` at top, remove claude/wt-*/precommit-base recipes, keep test/format/check/lint/release.
 
 **Success Criteria:** Root justfile imports portable.just, project recipes remain
 
@@ -58,7 +58,7 @@
 
 **Implementation:**
 - Remove `hooks` section from `.claude/settings.json`
-- Remove `sync-to-parent` recipe from `agent-core/justfile`
+- Remove `sync-to-parent` recipe from `plugin/justfile`
 - Update fragments: claude-config-layout.md, sandbox-exemptions.md, project-tooling.md, delegation.md
 
 **Success Criteria:** Configuration cleaned, docs updated
@@ -72,7 +72,7 @@
 **Execution Model:** Sonnet (validation requires analysis)
 
 **Implementation:**
-- Plugin discovery: `claude --plugin-dir ./agent-core` → verify skills/agents load
+- Plugin discovery: `claude --plugin-dir ./plugin` → verify skills/agents load
 - Hook testing: trigger each event type, verify behavior matches baseline
 - Agent coexistence: create test `*-task.md`, verify both plugin and local agents visible
 - NFR-1: compare edit→restart cycle time with baseline
@@ -96,12 +96,12 @@
 
 ---
 
-### Step 6.2: Regenerate agent-core just help cache
+### Step 6.2: Regenerate plugin just help cache
 
-**Objective:** Rebuild `.cache/just-help-agent-core.txt` after sync-to-parent removal.
+**Objective:** Rebuild `.cache/just-help-plugin.txt` after sync-to-parent removal.
 
 **Execution Model:** Haiku
 
-**Implementation:** Run `gmake -C agent-core all` to regenerate
+**Implementation:** Run `gmake -C plugin all` to regenerate
 
 **Success Criteria:** Cache reflects removed recipe

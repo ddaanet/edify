@@ -14,32 +14,32 @@ Phase 5 must complete first (`.edify.yaml` exists for setup hook to read/update)
 **Prerequisites**:
 - Read outline.md Component 2 hook script changes table (authoritative list of which scripts need audit)
 - Read each of the 4 scripts:
-  - `agent-core/hooks/pretooluse-recipe-redirect.py`
-  - `agent-core/hooks/pretooluse-recall-check.py`
-  - `agent-core/hooks/sessionstart-health.sh`
-  - `agent-core/hooks/stop-health-fallback.sh`
+  - `plugin/hooks/pretooluse-recipe-redirect.py`
+  - `plugin/hooks/pretooluse-recall-check.py`
+  - `plugin/hooks/sessionstart-health.sh`
+  - `plugin/hooks/stop-health-fallback.sh`
 
 **Implementation**:
 1. For each script, check:
    - Uses of `$CLAUDE_PROJECT_DIR` — these are correct (available in all hook types, resolves to project root)
-   - Hardcoded `agent-core/` paths — these need `$CLAUDE_PLUGIN_ROOT` substitution (or `$EDIFY_PLUGIN_ROOT` after setup hook runs)
+   - Hardcoded `plugin/` paths — these need `$CLAUDE_PLUGIN_ROOT` substitution (or `$EDIFY_PLUGIN_ROOT` after setup hook runs)
    - Relative path references — must use absolute paths via env vars
 2. Record findings per script in a report at `plans/plugin-migration/reports/hook-audit.md`:
    - Script name
    - Finding: no-change-needed OR specific edits required (with line numbers)
    - Rationale
 3. Apply fixes per audit findings:
-   - Replace hardcoded `agent-core/` paths with `$CLAUDE_PLUGIN_ROOT` or `$EDIFY_PLUGIN_ROOT`
+   - Replace hardcoded `plugin/` paths with `$CLAUDE_PLUGIN_ROOT` or `$EDIFY_PLUGIN_ROOT`
    - Fix any relative path references to use absolute resolution
-4. Delete `agent-core/hooks/pretooluse-symlink-redirect.sh` — purpose eliminated by plugin migration
-5. Verify no remaining bare references: `grep -r 'agent-core/' agent-core/hooks/*.py agent-core/hooks/*.sh` returns no matches (except comments)
+4. Delete `plugin/hooks/pretooluse-symlink-redirect.sh` — purpose eliminated by plugin migration
+5. Verify no remaining bare references: `grep -r 'plugin/' plugin/hooks/*.py plugin/hooks/*.sh` returns no matches (except comments)
 
 **Expected Outcome**:
 - `plans/plugin-migration/reports/hook-audit.md` exists with per-script findings
 - Each script classified as no-change or with specific edits listed
 - Audit fixes applied to all scripts requiring changes
 - `pretooluse-symlink-redirect.sh` deleted
-- No remaining bare `agent-core/` references in hook scripts
+- No remaining bare `plugin/` references in hook scripts
 
 **Error Conditions**:
 - If a script uses env vars not available in plugin context → escalate (design assumption violated)
@@ -50,8 +50,8 @@ Phase 5 must complete first (`.edify.yaml` exists for setup hook to read/update)
 **Validation**:
 - Audit report exists with entries for all 4 scripts
 - No scripts left unaudited
-- `grep -r 'agent-core/' agent-core/hooks/*.py agent-core/hooks/*.sh` returns no matches (except comments)
-- `ls agent-core/hooks/pretooluse-symlink-redirect.sh` returns "No such file"
+- `grep -r 'plugin/' plugin/hooks/*.py plugin/hooks/*.sh` returns no matches (except comments)
+- `ls plugin/hooks/pretooluse-symlink-redirect.sh` returns "No such file"
 
 ---
 
@@ -63,14 +63,14 @@ Phase 5 must complete first (`.edify.yaml` exists for setup hook to read/update)
 **Execution Model**: Sonnet
 
 **Prerequisites**:
-- Read `agent-core/hooks/sessionstart-health.sh` (current state — understand existing structure)
+- Read `plugin/hooks/sessionstart-health.sh` (current state — understand existing structure)
 - Read outline.md Component 2 "Consolidated setup hook" section
 - Read outline.md §Key Decisions D-7 (python deps mechanism)
 - Step 5.1 complete (`.edify.yaml` exists)
 - Recall: "when using session start hooks" — SessionStart output discarded for new interactive sessions (#10373). UPS fallback already handled by existing session flag (`$TMPDIR/health-${session_id}`).
 
 **Implementation**:
-1. Edit `agent-core/hooks/sessionstart-health.sh`, inserting setup sections before existing health checks:
+1. Edit `plugin/hooks/sessionstart-health.sh`, inserting setup sections before existing health checks:
    a. **Export `EDIFY_PLUGIN_ROOT`** via `$CLAUDE_ENV_FILE`:
       ```bash
       if [ -n "${CLAUDE_ENV_FILE:-}" ] && [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
@@ -107,7 +107,7 @@ Phase 5 must complete first (`.edify.yaml` exists for setup hook to read/update)
 - If `.edify.yaml` doesn't exist → create it (first run scenario)
 
 **Validation**:
-- Script runs without error from project root: `bash agent-core/hooks/sessionstart-health.sh`
+- Script runs without error from project root: `bash plugin/hooks/sessionstart-health.sh`
 - After run: `.edify.yaml` version matches `plugin.json` version
 - Script is idempotent: running twice produces same result
 - **STOP and report Phase 2 results to orchestrator before proceeding to Phase 3**

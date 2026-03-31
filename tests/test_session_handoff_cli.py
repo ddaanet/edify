@@ -157,8 +157,8 @@ def test_handoff_shows_submodule_changes(
         check=True,
         capture_output=True,
     )
-    origin = create_submodule_origin(tmp_path, "agent-core")
-    add_submodule(parent, origin, "agent-core")
+    origin = create_submodule_origin(tmp_path, "plugin")
+    add_submodule(parent, origin, "plugin")
     subprocess.run(
         ["git", "commit", "-m", "add sub"],
         cwd=parent,
@@ -185,7 +185,7 @@ def test_handoff_shows_submodule_changes(
     )
 
     # Dirty the submodule
-    (parent / "agent-core" / "dirty.md").write_text("new file\n")
+    (parent / "plugin" / "dirty.md").write_text("new file\n")
 
     runner = CliRunner()
     result = runner.invoke(
@@ -197,7 +197,7 @@ def test_handoff_shows_submodule_changes(
 
     assert result.exit_code == 0
     # Should include submodule section with internal file changes
-    assert "## Submodule: agent-core" in result.output
+    assert "## Submodule: plugin" in result.output
     assert "dirty.md" in result.output
 
 

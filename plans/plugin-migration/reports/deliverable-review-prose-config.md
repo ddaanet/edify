@@ -1,13 +1,13 @@
 # Prose + Config Deliverable Review
 
-## File: agent-core/skills/init/SKILL.md
+## File: plugin/skills/init/SKILL.md
 
 ### Findings
 
 - [Minor] :4 — excess: `Bash(find:*)` in allowed-tools is unnecessary. The skill uses Glob for file discovery (Step 2 says "List all `.md` files"), and no step calls `find`. Dead permission.
 - [Minor] :4 — excess: `Bash(python3:*)` in allowed-tools grants broad Python execution. Only used for SHA-256 hash computation (Step 6). `Bash(sha256sum:*)` is already listed and sufficient for that purpose.
 - [Minor] :95-96 — determinism: Step 6 says "Compute SHA-256 hashes" but doesn't specify the tool. Could use `sha256sum` (allowed) or `python3 -c hashlib...` (also allowed). A single prescribed method would reduce agent choice variance.
-- [Minor] :78-79 — completeness: Step 5 Case A rewrites `@agent-core/fragments/` and `@edify-plugin/fragments/` refs but does not mention `@agents/rules/` → `@agents/rules/` (no-op). If a project already ran init once and has `@agents/rules/` refs, re-running is correctly a no-op. Behavior is correct; documenting the no-op case would improve clarity.
+- [Minor] :78-79 — completeness: Step 5 Case A rewrites `@plugin/fragments/` and `@edify-plugin/fragments/` refs but does not mention `@agents/rules/` → `@agents/rules/` (no-op). If a project already ran init once and has `@agents/rules/` refs, re-running is correctly a no-op. Behavior is correct; documenting the no-op case would improve clarity.
 
 ### Assessment
 
@@ -15,13 +15,13 @@ Well-structured, idempotent skill. Steps are ordered correctly (read version, in
 
 ---
 
-## File: agent-core/skills/update/SKILL.md
+## File: plugin/skills/update/SKILL.md
 
 ### Findings
 
 - [Major] :53 — functional correctness: Source path for portable.just is `$CLAUDE_PLUGIN_ROOT/just/portable.just` but the actual file location is `$CLAUDE_PLUGIN_ROOT/portable.just` (no `just/` subdirectory). Agent executing this skill will fail to find the source file, skipping justfile sync entirely.
 - [Minor] :4 — excess: Same `Bash(find:*)` and `Bash(python3:*)` excess as init skill.
-- [Minor] :12 — accuracy: "In dev mode (submodule), fragments are read directly via `@agent-core/fragments/` references -- update is a no-op." This is informational guidance, not enforced. No guard prevents running update in dev mode. Low risk since dev mode projects won't have `agents/rules/` unless they also ran init.
+- [Minor] :12 — accuracy: "In dev mode (submodule), fragments are read directly via `@plugin/fragments/` references -- update is a no-op." This is informational guidance, not enforced. No guard prevents running update in dev mode. Low risk since dev mode projects won't have `agents/rules/` unless they also ran init.
 
 ### Assessment
 
@@ -29,7 +29,7 @@ FR-4 conformance is mostly complete: conflict detection algorithm matches the ou
 
 ---
 
-## File: agent-core/fragments/claude-config-layout.md
+## File: plugin/fragments/claude-config-layout.md
 
 ### Findings
 
@@ -41,7 +41,7 @@ Clean removal. No stale references to symlinks remain.
 
 ---
 
-## File: agent-core/fragments/project-tooling.md
+## File: plugin/fragments/project-tooling.md
 
 ### Findings
 
@@ -53,7 +53,7 @@ Clean removal. No stale references remain.
 
 ---
 
-## File: agent-core/fragments/sandbox-exemptions.md
+## File: plugin/fragments/sandbox-exemptions.md
 
 ### Findings
 
@@ -65,7 +65,7 @@ Clean removal. No stale references remain.
 
 ---
 
-## File: agent-core/skills/inline/SKILL.md
+## File: plugin/skills/inline/SKILL.md
 
 ### Findings
 
@@ -77,7 +77,7 @@ No migration-related changes to review. File is pre-existing and outside migrati
 
 ---
 
-## File: agent-core/skills/inline/references/review-dispatch-template.md
+## File: plugin/skills/inline/references/review-dispatch-template.md
 
 ### Findings
 
@@ -89,7 +89,7 @@ No migration-related changes to review.
 
 ---
 
-## File: agent-core/skills/runbook/SKILL.md
+## File: plugin/skills/runbook/SKILL.md
 
 ### Findings
 
@@ -101,7 +101,7 @@ No migration-related changes to review.
 
 ---
 
-## File: agent-core/skills/runbook/references/tier3-planning-process.md
+## File: plugin/skills/runbook/references/tier3-planning-process.md
 
 ### Findings
 
@@ -113,7 +113,7 @@ No migration-related changes to review.
 
 ---
 
-## File: agent-core/.claude-plugin/plugin.json
+## File: plugin/.claude-plugin/plugin.json
 
 ### Findings
 
@@ -125,7 +125,7 @@ Minimal correct manifest. Version consistency with pyproject.toml confirmed (`0.
 
 ---
 
-## File: agent-core/hooks/hooks.json
+## File: plugin/hooks/hooks.json
 
 ### Findings
 
@@ -138,17 +138,17 @@ FR-9 conformance verified: all 8 surviving hooks migrated (pretooluse-symlink-re
 
 ---
 
-## File: agent-core/portable.just
+## File: plugin/portable.just
 
 ### Findings
 
-- [Minor] :84 — robustness: `git ls-files -z src/ tests/ agent-core/hooks/ agent-core/bin/` in test sentinel hash computation hardcodes `agent-core/` paths. In consumer projects (post-rename to `edify-plugin/`), these paths won't exist, making the sentinel hash exclude hook/bin changes. Low impact: sentinel is a speed optimization; worst case is unnecessary test reruns, not missed tests.
+- [Minor] :84 — robustness: `git ls-files -z src/ tests/ plugin/hooks/ plugin/bin/` in test sentinel hash computation hardcodes `plugin/` paths. In consumer projects (post-rename to `edify-plugin/`), these paths won't exist, making the sentinel hash exclude hook/bin changes. Low impact: sentinel is a speed optimization; worst case is unnecessary test reruns, not missed tests.
 - [Minor] :102 — robustness: `run-line-limits` calls `./scripts/check_line_limits.sh` with a relative path. Consumer projects may not have this script. Would fail silently or noisily depending on `set -e`. The precommit recipe calls this (line 139), so consumer projects using `just precommit` from portable.just would need this script.
-- [Minor] :136 — completeness: `precommit` recipe includes `report "version consistency" python3 agent-core/bin/check-version-consistency.py` with hardcoded `agent-core/` path. Same rename concern as test sentinel.
+- [Minor] :136 — completeness: `precommit` recipe includes `report "version consistency" python3 plugin/bin/check-version-consistency.py` with hardcoded `plugin/` path. Same rename concern as test sentinel.
 
 ### Assessment
 
-FR-6 conformance: full opinionated recipe stack present (`claude`, `claude0`, `precommit`, `precommit-base`, `test`, `format`, `lint`, `red-lint`, `check`, `wt-*`). Matches D-5 specification. The `bash_prolog` is self-contained as documented. `wt-*` recipes are manual fallbacks per D-5. Variable merge across import boundaries works (root justfile overrides `bash_prolog`). Hardcoded `agent-core/` paths are pre-rename artifacts -- rename is out of scope per outline ("cosmetic, happens last").
+FR-6 conformance: full opinionated recipe stack present (`claude`, `claude0`, `precommit`, `precommit-base`, `test`, `format`, `lint`, `red-lint`, `check`, `wt-*`). Matches D-5 specification. The `bash_prolog` is self-contained as documented. `wt-*` recipes are manual fallbacks per D-5. Variable merge across import boundaries works (root justfile overrides `bash_prolog`). Hardcoded `plugin/` paths are pre-rename artifacts -- rename is out of scope per outline ("cosmetic, happens last").
 
 ---
 
@@ -156,7 +156,7 @@ FR-6 conformance: full opinionated recipe stack present (`claude`, `claude0`, `p
 
 ### Findings
 
-- No findings. Clean import of `agent-core/portable.just` (line 6). `set allow-duplicate-recipes` and `set allow-duplicate-variables` enable override per D-5. Project-specific recipes (`dev`, `setup`, `line-limits`, `green`, `release`) are preserved. The `bash_prolog` override (line 179+) correctly replaces portable.just's prolog with the project's version including trace support and styled output.
+- No findings. Clean import of `plugin/portable.just` (line 6). `set allow-duplicate-recipes` and `set allow-duplicate-variables` enable override per D-5. Project-specific recipes (`dev`, `setup`, `line-limits`, `green`, `release`) are preserved. The `bash_prolog` override (line 179+) correctly replaces portable.just's prolog with the project's version including trace support and styled output.
 
 ### Assessment
 
@@ -164,7 +164,7 @@ FR-6 conformance: root justfile imports portable module and adds project-specifi
 
 ---
 
-## File: agent-core/justfile
+## File: plugin/justfile
 
 ### Findings
 
@@ -180,7 +180,7 @@ Clean removal. Stub precommit allows `just precommit` to succeed within the subm
 
 ### Findings
 
-- No findings. Version `0.0.2` matches plugin.json and pyproject.toml. `sync_policy: nag` matches D-6 default. No `synced_hashes` section -- correct for dev mode where `/edify:init` was not run (fragments are read directly via `@agent-core/fragments/` refs). FR-10 conformance verified (SessionStart hook writes version).
+- No findings. Version `0.0.2` matches plugin.json and pyproject.toml. `sync_policy: nag` matches D-6 default. No `synced_hashes` section -- correct for dev mode where `/edify:init` was not run (fragments are read directly via `@plugin/fragments/` refs). FR-10 conformance verified (SessionStart hook writes version).
 
 ### Assessment
 
@@ -212,7 +212,7 @@ Matches the actual recipe list from `just --list --unsorted`.
 
 ---
 
-## File: agent-core/templates/CLAUDE.template.md
+## File: plugin/templates/CLAUDE.template.md
 
 ### Findings
 
@@ -239,6 +239,6 @@ FR-3 conformance: template uses `@agents/rules/` references (12 fragments). All 
 
 **Overall assessment:**
 
-The migration deliverables are structurally sound. FR-1 through FR-12 are addressed. The plugin manifest, hooks migration, fragment versioning, init/update skills, justfile modularization, symlink cleanup, and documentation updates are all conformant with the outline. The single Major issue (wrong path in update skill) is a straightforward fix. The 12 Minor findings are stylistic consistency, robustness edge cases, and allowed-tools excess -- none affect correctness in the current deployment context (dev mode with `agent-core/` directory name).
+The migration deliverables are structurally sound. FR-1 through FR-12 are addressed. The plugin manifest, hooks migration, fragment versioning, init/update skills, justfile modularization, symlink cleanup, and documentation updates are all conformant with the outline. The single Major issue (wrong path in update skill) is a straightforward fix. The 12 Minor findings are stylistic consistency, robustness edge cases, and allowed-tools excess -- none affect correctness in the current deployment context (dev mode with `plugin/` directory name).
 
 Files not modified by the migration (inline/SKILL.md, runbook/SKILL.md, review-dispatch-template.md, tier3-planning-process.md) were listed in the review manifest but confirmed unchanged in the migration branch.

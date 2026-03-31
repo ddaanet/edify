@@ -12,4 +12,4 @@
 ## Delivery
 
 - `plans/prototypes/score.py` — new file (exploration)
-- `agent-core/skills/prioritize/SKILL.md` — edit (agentic-prose)
+- `plugin/skills/prioritize/SKILL.md` — edit (agentic-prose)

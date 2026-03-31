@@ -198,7 +198,7 @@ def repo_with_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path
 
     Returns the main repo path. The repo has:
     - Initial commit with README.md
-    - agent-core submodule initialized
+    - plugin submodule initialized
     - agents/session.md, agents/learnings.md committed
     """
     repo_path = tmp_path / "repo"
@@ -223,8 +223,8 @@ def repo_with_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path
         ["git", "commit", "-m", "Initial commit"], check=True, capture_output=True
     )
 
-    # Initialize submodule (agent-core)
-    submodule_path = repo_path / "agent-core"
+    # Initialize submodule (plugin)
+    submodule_path = repo_path / "plugin"
     submodule_path.mkdir()
     subprocess.run(["git", "init"], cwd=submodule_path, check=True, capture_output=True)
     subprocess.run(
@@ -252,7 +252,7 @@ def repo_with_submodule(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path
 
     # Add submodule to main repo
     subprocess.run(
-        ["git", "submodule", "add", str(submodule_path), "agent-core"],
+        ["git", "submodule", "add", str(submodule_path), "plugin"],
         cwd=repo_path,
         check=True,
         capture_output=True,
@@ -305,7 +305,7 @@ def setup_repo_with_submodule() -> Callable[[Path, Callable[[Path], None]], None
         """Set up test repo with submodule using gitlink."""
         init_repo(repo_path)
 
-        agent_core_path = repo_path / "agent-core"
+        agent_core_path = repo_path / "plugin"
         agent_core_path.mkdir()
         subprocess.run(
             ["git", "init"], cwd=agent_core_path, check=True, capture_output=True
@@ -338,7 +338,7 @@ def setup_repo_with_submodule() -> Callable[[Path, Callable[[Path], None]], None
         )
 
         (repo_path / ".gitmodules").write_text(
-            '[submodule "agent-core"]\n\tpath = agent-core\n\turl = ./agent-core\n'
+            '[submodule "plugin"]\n\tpath = plugin\n\turl = ./plugin\n'
         )
 
         result = subprocess.run(
@@ -356,7 +356,7 @@ def setup_repo_with_submodule() -> Callable[[Path, Callable[[Path], None]], None
                 "update-index",
                 "--add",
                 "--cacheinfo",
-                f"160000,{commit_hash},agent-core",
+                f"160000,{commit_hash},plugin",
             ],
             cwd=repo_path,
             check=True,

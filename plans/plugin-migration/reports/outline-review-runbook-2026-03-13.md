@@ -126,8 +126,8 @@ None.
 
 ## Design Alignment
 
-- **Architecture**: Aligned. Bootstrap strategy (build inside agent-core/, rename last) correctly reflected throughout.
-- **Module structure**: Aligned. All target files use `agent-core/` paths per bootstrap constraint.
+- **Architecture**: Aligned. Bootstrap strategy (build inside plugin/, rename last) correctly reflected throughout.
+- **Module structure**: Aligned. All target files use `plugin/` paths per bootstrap constraint.
 - **Key decisions**: All 7 decisions (D-1 through D-7) referenced in outline and correctly applied. D-4 wrapper format corrected (outline corrects design.md). D-5 recipe list now matches outline.
 - **Design corrections**: Runbook-outline correctly works from proofed outline.md, not stale design.md. Five design.md errors documented in outline's Design Corrections section are properly avoided.
 

@@ -88,7 +88,7 @@ Claude Code hook configuration, output channels, session mechanics, and sub-agen
 
 **Correct pattern:** All hook commands must use `$CLAUDE_PROJECT_DIR/` prefix for absolute resolution. Claude Code sets this env var to the project root regardless of cwd.
 
-**Evidence:** Agent ran 4+ bash commands from `agent-core/` subdirectory without the submodule-safety hook blocking. Hook errors visible on `git submodule status` confirmed the hook script wasn't found.
+**Evidence:** Agent ran 4+ bash commands from `plugin/` subdirectory without the submodule-safety hook blocking. Hook errors visible on `git submodule status` confirmed the hook script wasn't found.
 
 ## .Hook Implementation Patterns
 

@@ -206,7 +206,7 @@ def _get_suggestions(query: str, candidates: list[str], limit: int = 3) -> list[
 
 ### 4. UserPromptSubmit Hook: Pattern Guards and Continuation Parsing
 
-**File:** `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/agent-core/hooks/userpromptsubmit-shortcuts.py`
+**File:** `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/plugin/hooks/userpromptsubmit-shortcuts.py`
 
 **Approach:** Tiered regex pattern matching with false-positive filtering
 
@@ -302,7 +302,7 @@ Mode 2: Inline prose with delimiters
 
 ### 5. PreToolUse Hook: Command Routing
 
-**File:** `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/agent-core/hooks/pretooluse-recipe-redirect.py`
+**File:** `/Users/david/code/claudeutils-wt/userpromptsubmit-topic/plugin/hooks/pretooluse-recipe-redirect.py`
 
 **Approach:** Regex-based command routing with three matching functions
 

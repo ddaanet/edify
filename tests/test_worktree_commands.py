@@ -215,12 +215,12 @@ def test_rm_worktree_registration_probing(
     assert str(worktree_path) in parent_list
 
     submodule_list = subprocess.run(
-        ["git", "-C", "agent-core", "worktree", "list", "--porcelain"],
+        ["git", "-C", "plugin", "worktree", "list", "--porcelain"],
         capture_output=True,
         text=True,
         check=True,
     ).stdout
-    assert str(worktree_path / "agent-core") in submodule_list
+    assert str(worktree_path / "plugin") in submodule_list
 
     result = CliRunner().invoke(worktree, ["rm", "test-slug"])
     assert result.exit_code == 0
@@ -235,12 +235,12 @@ def test_rm_worktree_registration_probing(
     assert str(worktree_path) not in parent_list_after
 
     submodule_list_after = subprocess.run(
-        ["git", "-C", "agent-core", "worktree", "list", "--porcelain"],
+        ["git", "-C", "plugin", "worktree", "list", "--porcelain"],
         capture_output=True,
         text=True,
         check=True,
     ).stdout
-    assert str(worktree_path / "agent-core") not in submodule_list_after
+    assert str(worktree_path / "plugin") not in submodule_list_after
 
 
 def test_rm_submodule_first_ordering(
@@ -269,7 +269,7 @@ def test_rm_submodule_first_ordering(
     parent_cmd = call_sequence[1]
 
     assert submodule_cmd[1] == "-C"
-    assert submodule_cmd[2] == "agent-core"
+    assert submodule_cmd[2] == "plugin"
     assert submodule_cmd[3] == "worktree"
     assert submodule_cmd[4] == "remove"
     assert submodule_cmd[5] == "--force"

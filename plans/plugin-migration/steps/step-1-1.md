@@ -8,7 +8,7 @@
 
 ## Phase Context
 
-Create the plugin structure inside existing `agent-core/` directory. Checkpoint at end gates all downstream phases.
+Create the plugin structure inside existing `plugin/` directory. Checkpoint at end gates all downstream phases.
 
 ---
 
@@ -16,14 +16,14 @@ Create the plugin structure inside existing `agent-core/` directory. Checkpoint 
 
 ## Step 1.1: Create plugin manifest
 
-**Objective**: Create `agent-core/.claude-plugin/plugin.json` with plugin name and version matching `pyproject.toml`.
+**Objective**: Create `plugin/.claude-plugin/plugin.json` with plugin name and version matching `pyproject.toml`.
 
 **Prerequisites**:
 - Read `pyproject.toml` (extract current version — currently `0.0.2`)
 
 **Implementation**:
-1. Create directory `agent-core/.claude-plugin/`
-2. Create `agent-core/.claude-plugin/plugin.json`:
+1. Create directory `plugin/.claude-plugin/`
+2. Create `plugin/.claude-plugin/plugin.json`:
    ```json
    {
      "name": "edify",
@@ -34,7 +34,7 @@ Create the plugin structure inside existing `agent-core/` directory. Checkpoint 
 3. Version must match `pyproject.toml` `version` field exactly
 
 **Expected Outcome**:
-- `agent-core/.claude-plugin/plugin.json` exists with valid JSON
+- `plugin/.claude-plugin/plugin.json` exists with valid JSON
 - `name` is `edify`, `version` matches `pyproject.toml`
 
 **Error Conditions**:
@@ -42,6 +42,6 @@ Create the plugin structure inside existing `agent-core/` directory. Checkpoint 
 - If `pyproject.toml` version format is unexpected → escalate
 
 **Validation**:
-- `cat agent-core/.claude-plugin/plugin.json | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['name']=='edify'; print('OK:', d['version'])"`
+- `cat plugin/.claude-plugin/plugin.json | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['name']=='edify'; print('OK:', d['version'])"`
 
 ---

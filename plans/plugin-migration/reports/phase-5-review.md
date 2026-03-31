@@ -37,8 +37,8 @@ Phase 5 is a 2-step general phase creating `.edify.yaml` and adding the version 
 
 4. **Expected Outcome claims script "is executable" (Step 5.2)**
    - Location: Step 5.2, Expected Outcome
-   - Problem: "exists and is executable" — the step invokes it as `python3 agent-core/bin/check-version-consistency.py`, not as a direct executable. Other scripts in `agent-core/bin/` follow the same pattern (confirmed by justfile precommit calling scripts via `python3`). The executable-flag claim is inconsistent.
-   - Fix: Updated to "exists (invoked as `python3 agent-core/bin/...`, not as a direct executable)".
+   - Problem: "exists and is executable" — the step invokes it as `python3 plugin/bin/check-version-consistency.py`, not as a direct executable. Other scripts in `plugin/bin/` follow the same pattern (confirmed by justfile precommit calling scripts via `python3`). The executable-flag claim is inconsistent.
+   - Fix: Updated to "exists (invoked as `python3 plugin/bin/...`, not as a direct executable)".
    - **Status**: FIXED
 
 ### Prerequisite Format

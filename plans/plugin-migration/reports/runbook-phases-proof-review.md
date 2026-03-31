@@ -36,7 +36,7 @@ Reviewed all 6 phase files for consistency with the /proof verdict list. Four is
 
 3. **Phase 3.1 duplicate implementation bullet (orphan from pre-/proof text)**
    - Location: `runbook-phase-3.md`, Step 3.1 Implementation, item 1
-   - Problem: After the /proof edit added the CLAUDE.md conditional (exists → rewrite refs; not exists → generate from template), the standalone line "Generate CLAUDE.md from `agent-core/templates/CLAUDE.template.md`" remained as an orphan bullet. This line now appears twice — once as the else-branch of the conditional (correct) and once as a standalone unconditional action (wrong, would override the conditional logic).
+   - Problem: After the /proof edit added the CLAUDE.md conditional (exists → rewrite refs; not exists → generate from template), the standalone line "Generate CLAUDE.md from `plugin/templates/CLAUDE.template.md`" remained as an orphan bullet. This line now appears twice — once as the else-branch of the conditional (correct) and once as a standalone unconditional action (wrong, would override the conditional logic).
    - Fix: Removed the duplicate standalone line at line 29 (original)
    - **Status**: FIXED
 

@@ -56,6 +56,6 @@ Four integration points remaining:
 
 - `plans/skill-cli-integration/outline.md` — Original design (D-2 composition boundary, D-4 handoff deferral)
 - `plans/skill-cli-integration/reports/review-sp2.md` — SP-2 skill review (M-1, M-2, M-3 — reviewer said rework, agent overrode to ready)
-- `agent-core/skills/commit/SKILL.md` — Current commit skill (post-SP-2)
-- `agent-core/skills/handoff/SKILL.md` — Current handoff skill
+- `plugin/skills/commit/SKILL.md` — Current commit skill (post-SP-2)
+- `plugin/skills/handoff/SKILL.md` — Current handoff skill
 - Learnings: "When reviewing CLI-skill integration" (circular justification pattern)

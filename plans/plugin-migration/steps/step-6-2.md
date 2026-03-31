@@ -21,10 +21,10 @@ Execute after plugin verified working. Irreversible within session.
 **Prerequisites**:
 - Step 6.1 complete (symlinks removed, sync-to-parent deleted)
 - Read each fragment before editing:
-  - `agent-core/fragments/project-tooling.md`
-  - `agent-core/fragments/claude-config-layout.md`
-  - `agent-core/fragments/sandbox-exemptions.md`
-  - `agent-core/fragments/delegation.md` (outline specified as target — verify for any `sync-to-parent` references; currently none found, but confirm before skipping)
+  - `plugin/fragments/project-tooling.md`
+  - `plugin/fragments/claude-config-layout.md`
+  - `plugin/fragments/sandbox-exemptions.md`
+  - `plugin/fragments/delegation.md` (outline specified as target — verify for any `sync-to-parent` references; currently none found, but confirm before skipping)
 
 **Implementation**:
 1. `project-tooling.md`: remove `sync-to-parent` references (recipe no longer exists), remove anti-pattern example using `ln -sf` to create symlinks
@@ -42,7 +42,7 @@ Execute after plugin verified working. Irreversible within session.
 - If removing a section leaves orphan cross-references → fix or note
 
 **Validation**:
-- `grep -r 'sync-to-parent' agent-core/fragments/` returns no matches
-- `grep 'sync-to-parent\|Symlinks in .claude' agent-core/fragments/claude-config-layout.md` returns no matches
+- `grep -r 'sync-to-parent' plugin/fragments/` returns no matches
+- `grep 'sync-to-parent\|Symlinks in .claude' plugin/fragments/claude-config-layout.md` returns no matches
 
 ---

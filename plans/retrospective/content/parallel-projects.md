@@ -1,13 +1,13 @@
 # Parallel Project Evidence — Retrospective Expansion
 
-Evidence from 8 parallel agentic projects showing pattern propagation and agent-core adoption.
+Evidence from 8 parallel agentic projects showing pattern propagation and plugin adoption.
 
 ## pytest-md
 
 - **Date range:** 2026-01-02 to 2026-02-06
 - **Agent instruction files:** AGENTS.md → CLAUDE.md (full migration)
 - **Migration:** `f82e7a2` 2026-01-28 "Add CLAUDE.md with @file references"
-- **Agent-core adoption:** `16f7953` 2026-01-20 "Restructure Claude Code skills and add agent-core submodule"
+- **Agent-core adoption:** `16f7953` 2026-01-20 "Restructure Claude Code skills and add plugin submodule"
 - **Pattern usage:** TDD workflow skills, commit/handoff skills, session log design, plan directory structure
 
 ### Key commits
@@ -20,19 +20,19 @@ Evidence from 8 parallel agentic projects showing pattern propagation and agent-
 | 2026-01-12 | `69bf88b` | Add TDD workflow skills and session log design |
 | 2026-01-12 | `94d2622` | Restructure skills to Claude Code format |
 | 2026-01-12 | `aa8ee90` | Add commit and handoff skills |
-| 2026-01-20 | `16f7953` | Add agent-core submodule |
+| 2026-01-20 | `16f7953` | Add plugin submodule |
 | 2026-01-28 | `f82e7a2` | Add CLAUDE.md with @file references |
 | 2026-01-30 | `de59b20` | Phase 5-6 TDD runbook with design and agent tooling |
-| 2026-02-06 | `eaa2498` | Migrate to agent-core Tier 2 structure |
+| 2026-02-06 | `eaa2498` | Migrate to plugin Tier 2 structure |
 
 ### Agent-core nested repo (origin)
 
-204 commits (2026-01-15 to 2026-02-06). First: "Initialize agent-core repository structure". Last: "Add memory-refactor agent for documentation splitting."
+204 commits (2026-01-15 to 2026-02-06). First: "Initialize plugin repository structure". Last: "Add memory-refactor agent for documentation splitting."
 
-This is agent-core's birthplace before extraction as a submodule to claudeutils. Contains the full early history of fragments, skills, agents, and workflow patterns.
+This is plugin's birthplace before extraction as a submodule to claudeutils. Contains the full early history of fragments, skills, agents, and workflow patterns.
 
 First 5 commits:
-- `5783aef` Initialize agent-core repository structure
+- `5783aef` Initialize plugin repository structure
 - `66af17c` Step 2: Extract shared justfile recipes from existing projects
 - `0e2f365` Step 3: Extract shared ruff and mypy configurations
 - `e5c3ba3` Phase 1: Add agent instruction fragments and documentation enhancements
@@ -50,7 +50,7 @@ Last 5 commits:
 - **Date range:** 2025-11-05 to 2026-03-11
 - **Agent instruction files:** AGENTS.md → CLAUDE.md (migrated 2026-01-18)
 - **Migration:** `091073f` 2026-01-18 "Rename AGENTS.md→CLAUDE.md, add load rule for session context"
-- **Agent-core adoption:** `83cef17` 2026-01-22 "Add agent-core submodule and symlink skills/agents"
+- **Agent-core adoption:** `83cef17` 2026-01-22 "Add plugin submodule and symlink skills/agents"
 - **Pattern usage:** Full claudeutils workflow adoption, statusline context bar, memory infrastructure
 
 ### Key commits
@@ -60,16 +60,16 @@ Last 5 commits:
 | 2026-01-12 | `e31a4c0` | Initial AGENTS.md with orchestrator model |
 | 2026-01-13 | `deb0d91` | Formalize orchestrator constraints and subagent protocol |
 | 2026-01-18 | `091073f` | Rename AGENTS.md→CLAUDE.md |
-| 2026-01-22 | `83cef17` | Add agent-core submodule |
-| 2026-01-23 | `7c67a7a` | Update CLAUDE.md based on agent-core |
+| 2026-01-22 | `83cef17` | Add plugin submodule |
+| 2026-01-23 | `7c67a7a` | Update CLAUDE.md based on plugin |
 | 2026-01-24 | `404ede3` | Add token-efficient bash rules |
-| 2026-01-29 | `f236481` | Update agent-core with dotenvrc, intent comments |
+| 2026-01-29 | `f236481` | Update plugin with dotenvrc, intent comments |
 | 2026-01-30 | `88f05ad` | Replace handoff-lite with handoff-haiku skill |
-| 2026-02-02 | `e065fbb` | Add agent-core agent and hook symlinks |
-| 2026-02-27 | `59a4829` | Add agent-core hooks, agents, and skills symlinks |
+| 2026-02-02 | `e065fbb` | Add plugin agent and hook symlinks |
+| 2026-02-27 | `59a4829` | Add plugin hooks, agents, and skills symlinks |
 | 2026-02-27 | `ebcabc1` | Set up memory infrastructure and consolidate decision files |
 
-**Notes:** Longest continuous agentic evolution (Nov 2025 – Mar 2026). Shows full lifecycle: early AGENTS.md → CLAUDE.md migration → agent-core adoption → memory infrastructure → hooks. Most complete pattern propagation evidence.
+**Notes:** Longest continuous agentic evolution (Nov 2025 – Mar 2026). Shows full lifecycle: early AGENTS.md → CLAUDE.md migration → plugin adoption → memory infrastructure → hooks. Most complete pattern propagation evidence.
 
 ## tuick
 
@@ -120,15 +120,15 @@ Last 5 commits:
 ## devddaanet
 
 - **Date range:** 2026-03-05 to 2026-03-11
-- **Agent instruction files:** CLAUDE.md via agent-core
+- **Agent instruction files:** CLAUDE.md via plugin
 - **Pattern usage:** Worktree-sync, deliverable-review, plan-specific agents, inline execution
-- **Agent-core adoption:** `b7e48cd` 2026-03-05 (initial commit includes agent-core submodule)
+- **Agent-core adoption:** `b7e48cd` 2026-03-05 (initial commit includes plugin submodule)
 
 ### Key commits
 
 | Date | Hash | Event |
 |------|------|-------|
-| 2026-03-05 | `7a0bcdf` | Initial commit with agent-core submodule |
+| 2026-03-05 | `7a0bcdf` | Initial commit with plugin submodule |
 | 2026-03-05 | `73c2918` | Replace rsync with Unison bidirectional sync |
 | 2026-03-08 | `b714bd8` | Reorder sync to git-first with per-tree unison gating |
 | 2026-03-09 | `feed833` | Capture worktree-sync requirements from sync gap analysis |
@@ -137,7 +137,7 @@ Last 5 commits:
 | 2026-03-10 | `cae9155` | Fix worktree-sync deliverable-review findings |
 | 2026-03-10 | `4ffb1ea` | Re-review worktree-sync: all findings resolved, delivered |
 
-**Notes:** Most mature pattern consumer. Every commit is agentic. Shows full pipeline in production: requirements → design → runbook → orchestrate → deliverable-review → fix → re-review → delivered. Born with agent-core from day 1.
+**Notes:** Most mature pattern consumer. Every commit is agentic. Shows full pipeline in production: requirements → design → runbook → orchestrate → deliverable-review → fix → re-review → delivered. Born with plugin from day 1.
 
 ## deepface
 

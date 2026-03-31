@@ -8,11 +8,11 @@ The `CLAUDE.md` file in the project root provides comprehensive instructions for
 
 ## Composition and Generation
 
-`CLAUDE.md` is generated from shared fragments stored in the `agent-core` repository. This allows consistent agent instructions to be shared across multiple projects while remaining customizable per project.
+`CLAUDE.md` is generated from shared fragments stored in the `plugin` repository. This allows consistent agent instructions to be shared across multiple projects while remaining customizable per project.
 
 ### Source Fragments
 
-The `CLAUDE.md` file is composed from fragments stored in `agent-core/fragments/`. These fragments provide modular, reusable instruction components that are imported via `@`-references.
+The `CLAUDE.md` file is composed from fragments stored in `plugin/fragments/`. These fragments provide modular, reusable instruction components that are imported via `@`-references.
 
 Core fragments include communication rules, delegation patterns, tool batching guidelines, and workflow-specific instructions.
 
@@ -54,7 +54,7 @@ generate-agents:
 - **CLAUDE.md**: Tracked in git (generated file, but committed for visibility)
 - **compose.yaml**: Tracked in git (composition configuration)
 - **compose.sh**: Tracked in git (generation script)
-- **agent-core/**: Added as git submodule
+- **plugin/**: Added as git submodule
 
 ## Future Enhancements
 

@@ -103,7 +103,7 @@ _NEXT_ACTION_TEMPLATES: dict[str, str | None] = {
     "outlined": "/design plans/{plan_name}/outline.md",
     "inline-planned": "/inline plans/{plan_name}",
     "designed": "/runbook plans/{plan_name}/design.md",
-    "planned": "agent-core/bin/prepare-runbook.py plans/{plan_name}",
+    "planned": "plugin/bin/prepare-runbook.py plans/{plan_name}",
     "ready": "/orchestrate {plan_name}",
     "review-pending": "/deliverable-review plans/{plan_name}",
 }

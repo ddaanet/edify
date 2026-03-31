@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 SCRIPT = (
-    Path(__file__).parent.parent / "agent-core/skills/orchestrate/scripts/verify-red.sh"
+    Path(__file__).parent.parent / "plugin/skills/orchestrate/scripts/verify-red.sh"
 )
 
 

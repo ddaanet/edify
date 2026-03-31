@@ -120,7 +120,7 @@ Model selection, review scoping, recall integration, and classification routing 
 **Identification method:** Grep for the invariant pattern (e.g., `err=True` for output routing, `MERGE_HEAD` for state lifecycle) across the codebase.
 
 **Where documented:**
-- Operational (always-loaded): `agent-core/fragments/review-requirement.md` — optional field in execution context
+- Operational (always-loaded): `plugin/fragments/review-requirement.md` — optional field in execution context
 - Rationale (decision record): this section
 
 **Evidence:** Phase 5 checkpoint audited exit codes cross-cuttingly but missed MERGE_HEAD lifecycle — vet scope was limited to changed files. resolve.py had relevant calls but wasn't in the changed-files list.

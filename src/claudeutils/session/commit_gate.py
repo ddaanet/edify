@@ -123,7 +123,7 @@ def _newest_file(files: list[Path]) -> tuple[float, Path]:
     return newest.stat().st_mtime, newest
 
 
-_AGENT_CORE_PATTERNS = ["agent-core/bin/**", "agent-core/skills/**/*.sh"]
+_AGENT_CORE_PATTERNS = ["plugin/bin/**", "plugin/skills/**/*.sh"]
 
 
 def vet_check(files: list[str], *, cwd: Path | None = None) -> VetResult:

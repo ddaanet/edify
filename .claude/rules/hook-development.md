@@ -14,7 +14,7 @@ paths:
 
 This provides hook event types, prompt-based hooks API, validation patterns, and integration with ${CLAUDE_PLUGIN_ROOT}.
 
-**Configuration reference:** Read `agent-core/fragments/claude-config-layout.md` for hook configuration locations, output formats, activation requirements, and security patterns.
+**Configuration reference:** Read `plugin/fragments/claude-config-layout.md` for hook configuration locations, output formats, activation requirements, and security patterns.
 
 **Implementation patterns:** Read `agents/decisions/hook-patterns.md` for output channel audiences, redirect message authoring, user-visible message constraints, and pre-delegation gate design.
 

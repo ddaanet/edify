@@ -116,7 +116,7 @@ Each recalled entry needs a scope signal: "This applies when [condition]." Witho
 
 **Consumer:** Haiku/sonnet task agent, dispatched by orchestrator.
 **Available context:** Common context (from prepare-runbook.py), step file, design reference. No Skill tool — cannot invoke `/when`.
-**Memory access:** Can use `agent-core/bin/when-resolve.py` via Bash (if Bash is in allowed-tools).
+**Memory access:** Can use `plugin/bin/when-resolve.py` via Bash (if Bash is in allowed-tools).
 
 **This is the critical pass.** Task agents are where 2.9% recall manifests. They have the most constrained context and the least capability to self-retrieve.
 

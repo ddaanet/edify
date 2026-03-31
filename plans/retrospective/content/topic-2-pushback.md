@@ -248,5 +248,5 @@ The pre-claudeutils history adds context: pushback wasn't a natural starting poi
 | Improvement design | `plans/pushback-improvement/design.md` (commit `326c418d`) | Three interventions for S3 failure |
 | Improvement research | `plans/pushback/reports/pushback-improvement-research.md` (git history) | 16 references on sycophancy mitigation |
 | Grounding requirements | `plans/pushback-grounding/requirements.md` | Claim verification + recall for d: discussions |
-| Current fragment | `agent-core/fragments/pushback.md` | Verdict-first protocol + grounding gates |
+| Current fragment | `plugin/fragments/pushback.md` | Verdict-first protocol + grounding gates |
 | Validation sessions | Sessions `986a00d2`, `5952058f`, `1f594e71` | S1-S4 test results across iterations |

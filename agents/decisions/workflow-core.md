@@ -11,10 +11,10 @@ Workflow-related architectural decisions and patterns.
 **Status:** Complete - All phases delivered, pattern validated
 
 **Key Components:**
-- Baseline task agent (`agent-core/agents/artisan.md`)
-- Runbook preparation script (`agent-core/bin/prepare-runbook.py`)
+- Baseline task agent (`plugin/agents/artisan.md`)
+- Runbook preparation script (`plugin/bin/prepare-runbook.py`)
 - 5 skills: `/design`, `/plan-adhoc`, `/orchestrate`, `/review`, `/codify`
-- Complete documentation (documented in CLAUDE.md and agent-core)
+- Complete documentation (documented in CLAUDE.md and plugin)
 
 **Weak orchestrator pattern:**
 
@@ -35,7 +35,7 @@ Workflow-related architectural decisions and patterns.
 - Production-ready workflow for ad-hoc tasks
 - Reduced context overhead through specialized agents
 - Standardized terminology across documentation
-- Reusable components via agent-core submodule
+- Reusable components via plugin submodule
 
 ## How to Integrate Tdd Workflow
 
@@ -46,13 +46,13 @@ Workflow-related architectural decisions and patterns.
 **Status:** Complete - All 8 steps delivered, production-ready
 
 **Key Components:**
-- TDD workflow documentation (`agent-core/agents/tdd-workflow.md`)
-- TDD baseline agent (`agent-core/agents/test-driver.md`)
+- TDD workflow documentation (`plugin/agents/tdd-workflow.md`)
+- TDD baseline agent (`plugin/agents/test-driver.md`)
 - `/plan-tdd` skill with 5-phase execution (includes automated review)
 - Cycle-based runbooks supporting RED/GREEN/REFACTOR progression
 - TDD task agent pattern with cycle-aware instruction sets
-- TDD runbook reviewer (`agent-core/agents/runbook-corrector.md`) for prescriptive code detection
-- Review skill (`agent-core/skills/review-tdd-plan/`) for anti-pattern detection
+- TDD runbook reviewer (`plugin/agents/runbook-corrector.md`) for prescriptive code detection
+- Review skill (`plugin/skills/review-tdd-plan/`) for anti-pattern detection
 
 **TDD workflow:**
 
@@ -79,7 +79,7 @@ Workflow-related architectural decisions and patterns.
 - Production-ready TDD workflow for test-first development
 - Enforced test-first methodology via /plan-tdd skill
 - Prescriptive code detection prevents "copy-paste" implementations
-- Reusable cycle patterns via agent-core documentation
+- Reusable cycle patterns via plugin documentation
 - Consistent terminology across test and implementation phases
 - Proper execution flow: design → plan → review → prepare → orchestrate
 

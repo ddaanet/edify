@@ -1,6 +1,6 @@
 # Review: Phase 3 — Migration Skills (/edify:init, /edify:update)
 
-**Scope**: agent-core/skills/init/SKILL.md, agent-core/skills/update/SKILL.md, agent-core/templates/CLAUDE.template.md
+**Scope**: plugin/skills/init/SKILL.md, plugin/skills/update/SKILL.md, plugin/templates/CLAUDE.template.md
 **Date**: 2026-03-21
 **Mode**: review + fix
 
@@ -15,7 +15,7 @@ Phase 3 creates two agentic skill prose artifacts (`/edify:init` and `/edify:upd
 ### Critical Issues
 
 1. **Init skill missing allowed-tools for hash computation**
-   - Location: agent-core/skills/init/SKILL.md, line 4
+   - Location: plugin/skills/init/SKILL.md, line 4
    - Problem: Step 6 requires computing SHA-256 hashes for each copied fragment to populate `synced_hashes`. The `allowed-tools` frontmatter includes `Bash(cp:*)` and `Bash(find:*)` but omits `Bash(python3:*)` and `Bash(sha256sum:*)`. Without these, the agent cannot compute hashes and will either skip the hash population step (leaving `.edify.yaml` with `synced_hashes: {}`) or fail with a permission error.
    - Fix: Add `Bash(python3:*)` and `Bash(sha256sum:*)` to `allowed-tools` — matching update skill's frontmatter which already has both.
    - **Status**: FIXED
@@ -23,7 +23,7 @@ Phase 3 creates two agentic skill prose artifacts (`/edify:init` and `/edify:upd
 ### Major Issues
 
 1. **Update skill does not guard against missing portable.just source**
-   - Location: agent-core/skills/update/SKILL.md, Step 3 and Step 4
+   - Location: plugin/skills/update/SKILL.md, Step 3 and Step 4
    - Problem: Step 3 lists `$CLAUDE_PLUGIN_ROOT/just/portable.just` as a sync target. Phase 4 creates this file — it does not exist yet. If `/edify:update` runs before Phase 4, the agent tries to compute a SHA-256 hash of a non-existent source file. The four-way classification in Step 4 covers missing *destination* files (New case) but not missing *source* files. The agent will either error out or produce undefined behavior when the source doesn't exist.
    - Fix: Add a guard at the start of Step 3's portable justfile handling: if source does not exist, skip that sync target and note it in the summary as "not yet available".
    - **Status**: FIXED
@@ -31,15 +31,15 @@ Phase 3 creates two agentic skill prose artifacts (`/edify:init` and `/edify:upd
 ### Minor Issues
 
 1. **Init skill Step 6 two-write sequence is ambiguous**
-   - Location: agent-core/skills/init/SKILL.md, lines 89-112
+   - Location: plugin/skills/init/SKILL.md, lines 89-112
    - Note: Step 6 says "create `.edify.yaml`" first with `synced_hashes: {}`, then says "After initial creation, compute content hashes... and populate the `synced_hashes` map." This implies the agent writes `.edify.yaml` twice — once with empty hashes, then again with computed hashes. The prose doesn't say to update the existing file; it says to "populate" which an agent may interpret as a second write or as populating before writing. This ambiguity could cause the idempotency guard (first check "if `.edify.yaml` does not exist") to fire correctly the first time but then the second write would be updating an existing file — which would bypass the idempotency check. Clarify that the two-phase creation is a single write: compute hashes first, then write the complete `.edify.yaml` in one operation.
    - **Status**: FIXED
 
 ## Fixes Applied
 
-- `agent-core/skills/init/SKILL.md:4` — Added `Bash(python3:*)` and `Bash(sha256sum:*)` to `allowed-tools` (hash computation in Step 6 requires these)
-- `agent-core/skills/update/SKILL.md` — Added guard at Step 3 portable justfile section: skip sync target if source file does not exist, report as unavailable in summary
-- `agent-core/skills/init/SKILL.md:89-112` — Clarified Step 6 two-phase sequence: compute hashes first, then write complete `.edify.yaml` in a single operation
+- `plugin/skills/init/SKILL.md:4` — Added `Bash(python3:*)` and `Bash(sha256sum:*)` to `allowed-tools` (hash computation in Step 6 requires these)
+- `plugin/skills/update/SKILL.md` — Added guard at Step 3 portable justfile section: skip sync target if source file does not exist, report as unavailable in summary
+- `plugin/skills/init/SKILL.md:89-112` — Clarified Step 6 two-phase sequence: compute hashes first, then write complete `.edify.yaml` in a single operation
 
 ## Requirements Validation
 
@@ -60,4 +60,4 @@ Phase 3 creates two agentic skill prose artifacts (`/edify:init` and `/edify:upd
 - Step separation is clean: init owns scaffolding, update owns sync. No overlap.
 - Summary output format in both skills is concrete and enumerated — useful for human review after automated execution.
 - Prerequisite check in update skill (agents/rules/ must exist) fails fast with actionable error.
-- Case A / Case B CLAUDE.md handling correctly handles both `@agent-core/fragments/` and `@edify-plugin/fragments/` rewrite targets.
+- Case A / Case B CLAUDE.md handling correctly handles both `@plugin/fragments/` and `@edify-plugin/fragments/` rewrite targets.

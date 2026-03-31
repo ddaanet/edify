@@ -62,7 +62,7 @@ Phase 1 (this scope): Create `plans/prototypes/score.py` and update SKILL.md to 
 
 ### References
 
-- `agent-core/skills/prioritize/SKILL.md` — current skill being updated
-- `agent-core/skills/prioritize/references/scoring-tables.md` — scoring criteria (unchanged)
+- `plugin/skills/prioritize/SKILL.md` — current skill being updated
+- `plugin/skills/prioritize/references/scoring-tables.md` — scoring criteria (unchanged)
 - `plans/reports/deliverable-review-prioritize.md` — prior review findings
 - `plans/update-prioritize-skill/recall-artifact.md` — recall entries informing requirements

@@ -80,7 +80,7 @@ None.
 
 3. **Hardcoded reference count discrepancy with requirements**
    - Location: S-I
-   - Problem: S-I says "42 occurrences across 4 files", requirements say "38 hardcoded agent-core references across 4 files". Verified via grep: 42 is the correct count (requirements stale).
+   - Problem: S-I says "42 occurrences across 4 files", requirements say "38 hardcoded plugin references across 4 files". Verified via grep: 42 is the correct count (requirements stale).
    - Fix: No change to outline (42 is correct). Requirements.md has the stale number.
    - **Status**: NOTED (requirements.md needs update, not outline)
 

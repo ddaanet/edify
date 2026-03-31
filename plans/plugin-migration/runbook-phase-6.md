@@ -11,8 +11,8 @@ Execute after plugin verified working. Irreversible within session.
 **Prerequisites**:
 - Phases 1, 2, 5 complete (plugin fully verified, version coordination in place)
 - Post-phase state verification:
-  - `agent-core/hooks/hooks.json` contains all 9 surviving hooks (setup integrated into `sessionstart-health.sh`, no new hook added)
-  - `agent-core/.claude-plugin/plugin.json` exists
+  - `plugin/hooks/hooks.json` contains all 9 surviving hooks (setup integrated into `sessionstart-health.sh`, no new hook added)
+  - `plugin/.claude-plugin/plugin.json` exists
   - `sessionstart-health.sh` updated with setup responsibilities (Step 2.3)
 
 **Implementation**:
@@ -33,10 +33,10 @@ Execute after plugin verified working. Irreversible within session.
    - Remove `Write(.claude/agents/*)`
    - Remove `Write(.claude/hooks/*)`
    - Remove `Bash(ln:*)`
-6. **Remove `sync-to-parent` recipe** from `agent-core/justfile`
-7. **Delete `pretooluse-symlink-redirect.sh`** from `agent-core/hooks/`:
-   - `rm agent-core/hooks/pretooluse-symlink-redirect.sh`
-   - Verify entry removed from `agent-core/hooks/hooks.json` (done in Step 2.1)
+6. **Remove `sync-to-parent` recipe** from `plugin/justfile`
+7. **Delete `pretooluse-symlink-redirect.sh`** from `plugin/hooks/`:
+   - `rm plugin/hooks/pretooluse-symlink-redirect.sh`
+   - Verify entry removed from `plugin/hooks/hooks.json` (done in Step 2.1)
 8. **Update `.gitignore`**: run `grep -n 'symlink\|\.claude/skills\|\.claude/agents\|\.claude/hooks' .gitignore` — remove any lines that tracked symlinks as generated artifacts
 
 **Expected Outcome**:
@@ -48,7 +48,7 @@ Execute after plugin verified working. Irreversible within session.
 - `pretooluse-symlink-redirect.sh` deleted
 
 **Error Conditions**:
-- If `find -type l` finds non-agent-core symlinks → investigate before deleting
+- If `find -type l` finds non-plugin symlinks → investigate before deleting
 - If `handoff-cli-tool-*.md` files cannot be deleted (permission error, unexpected file type) → investigate before proceeding
 - If settings.json parse fails after editing → fix JSON syntax
 
@@ -58,11 +58,11 @@ Execute after plugin verified working. Irreversible within session.
 - `find .claude/hooks/ -type l | wc -l` returns 0
 - `ls .claude/agents/handoff-cli-tool-*.md 2>/dev/null | wc -l` returns 0
 - `python3 -c "import json; d=json.load(open('.claude/settings.json')); assert 'hooks' not in d; print('OK')"`
-- `test ! -f agent-core/hooks/pretooluse-symlink-redirect.sh && echo OK` returns OK
+- `test ! -f plugin/hooks/pretooluse-symlink-redirect.sh && echo OK` returns OK
 - **Automated plugin check** (from project root, symlinks now removed):
   ```bash
-  claude -p "list your available slash commands" --plugin-dir ./agent-core 2>&1 | grep -c "design\|commit\|orchestrate" && \
-  claude -p "list your available agents" --plugin-dir ./agent-core 2>&1 | grep -c "agent"
+  claude -p "list your available slash commands" --plugin-dir ./plugin 2>&1 | grep -c "design\|commit\|orchestrate" && \
+  claude -p "list your available agents" --plugin-dir ./plugin 2>&1 | grep -c "agent"
   ```
   Skills and agents must be discoverable via `--plugin-dir` alone (no symlinks remain)
 
@@ -75,10 +75,10 @@ Execute after plugin verified working. Irreversible within session.
 **Prerequisites**:
 - Step 6.1 complete (symlinks removed, sync-to-parent deleted)
 - Read each fragment before editing:
-  - `agent-core/fragments/project-tooling.md`
-  - `agent-core/fragments/claude-config-layout.md`
-  - `agent-core/fragments/sandbox-exemptions.md`
-  - `agent-core/fragments/delegation.md` (outline specified as target — verify for any `sync-to-parent` references; currently none found, but confirm before skipping)
+  - `plugin/fragments/project-tooling.md`
+  - `plugin/fragments/claude-config-layout.md`
+  - `plugin/fragments/sandbox-exemptions.md`
+  - `plugin/fragments/delegation.md` (outline specified as target — verify for any `sync-to-parent` references; currently none found, but confirm before skipping)
 
 **Implementation**:
 1. `project-tooling.md`: remove `sync-to-parent` references (recipe no longer exists), remove anti-pattern example using `ln -sf` to create symlinks
@@ -96,8 +96,8 @@ Execute after plugin verified working. Irreversible within session.
 - If removing a section leaves orphan cross-references → fix or note
 
 **Validation**:
-- `grep -r 'sync-to-parent' agent-core/fragments/` returns no matches
-- `grep 'sync-to-parent\|Symlinks in .claude' agent-core/fragments/claude-config-layout.md` returns no matches
+- `grep -r 'sync-to-parent' plugin/fragments/` returns no matches
+- `grep 'sync-to-parent\|Symlinks in .claude' plugin/fragments/claude-config-layout.md` returns no matches
 
 ---
 
@@ -111,13 +111,13 @@ Execute after plugin verified working. Irreversible within session.
 **Implementation**:
 1. **FR-1**: Plugin auto-discovery works without symlinks (automated via `-p` headless mode):
    ```bash
-   claude -p "list your available slash commands" --plugin-dir ./agent-core 2>&1 | tee tmp/migration-verify-skills.txt
-   claude -p "list your available agents" --plugin-dir ./agent-core 2>&1 | tee tmp/migration-verify-agents.txt
+   claude -p "list your available slash commands" --plugin-dir ./plugin 2>&1 | tee tmp/migration-verify-skills.txt
+   claude -p "list your available agents" --plugin-dir ./plugin 2>&1 | tee tmp/migration-verify-agents.txt
    ```
    - Skills and agents must appear in output (no symlinks, `--plugin-dir` only)
 2. **FR-7**: All functionality preserved
-   - `grep -r '@agent-core/' CLAUDE.md agents/ .claude/rules/ | grep -v Binary` — each path must exist: `ls <path>` for each returned reference
-   - `grep -rh '^@' agent-core/fragments/ agent-core/skills/ | sort -u` — verify each referenced fragment path exists on disk
+   - `grep -r '@plugin/' CLAUDE.md agents/ .claude/rules/ | grep -v Binary` — each path must exist: `ls <path>` for each returned reference
+   - `grep -rh '^@' plugin/fragments/ plugin/skills/ | sort -u` — verify each referenced fragment path exists on disk
 3. **FR-9**: All hooks fire from plugin, settings.json hooks section empty
    - Verify hooks.json contains all hooks
    - Verify settings.json has no hooks section

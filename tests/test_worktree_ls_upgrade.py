@@ -284,7 +284,7 @@ def test_rich_mode_plan_and_gate(tmp_path: Path) -> None:
 
     # Verify plan line for bar (planned status)
     assert (
-        "  Plan: bar [planned] → agent-core/bin/prepare-runbook.py plans/bar"
+        "  Plan: bar [planned] → plugin/bin/prepare-runbook.py plans/bar"
         in result.output
     ), f"Expected plan line for bar with planned status, got: {result.output}"
 

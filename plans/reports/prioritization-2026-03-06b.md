@@ -38,7 +38,7 @@
 | 30 | Merge lock retry | 2 | 1 | 3 | 6 | 5 | 1 | 6 | 1.0 | sonnet |
 | 31 | Generate memory index | 2 | 2 | 3 | 7 | 5 | 2 | 7 | 1.0 | opus |
 | 32 | Cross-tree requirements | 2 | 2 | 3 | 7 | 5 | 2 | 7 | 1.0 | sonnet |
-| 33 | agent-core lint coverage | 2 | 2 | 3 | 7 | 5 | 2 | 7 | 1.0 | opus |
+| 33 | plugin lint coverage | 2 | 2 | 3 | 7 | 5 | 2 | 7 | 1.0 | opus |
 | 34 | Recall learnings design | 2 | 2 | 3 | 7 | 5 | 2 | 7 | 1.0 | opus |
 | 35 | Corrector audit | 2 | 2 | 3 | 7 | 5 | 2 | 7 | 1.0 | sonnet |
 | 36 | Design decomposition tier | 2 | 2 | 3 | 7 | 5 | 2 | 7 | 1.0 | opus, restart |

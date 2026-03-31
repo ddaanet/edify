@@ -7,7 +7,7 @@
 **New tasks scored:**
 - Directive skill promotion (1.6) — opus, d:/p:/w prose-gate failures
 - Plan-completion ceremony (1.4) — opus, 7/12 orphaned plans traced to this gap
-- agent-core lint coverage (1.0) — opus, zero enforcement on load-bearing hooks
+- plugin lint coverage (1.0) — opus, zero enforcement on load-bearing hooks
 - Worktree exit ceremony (1.6) — sonnet, restored after autostrategy merge drop
 - Discuss-to-pending chain (1.6) — sonnet, restored after autostrategy merge drop
 - Worktree merge resilience (2.2) — sonnet, outlined, ready for /runbook
@@ -69,7 +69,7 @@
 | 46 | Moderate outline gate | 3 | 3 | 3 | 9 | 5 | 3 | 8 | 1.1 | opus, self-ref |
 | 46 | Dev integration branch | 3 | 3 | 3 | 9 | 5 | 3 | 8 | 1.1 | opus |
 | 51 | Worktree CLI UX | 3 | 1 | 3 | 7 | 5 | 2 | 7 | 1.0 | sonnet |
-| 51 | agent-core lint coverage * | 3 | 2 | 3 | 8 | 5 | 3 | 8 | 1.0 | opus |
+| 51 | plugin lint coverage * | 3 | 2 | 3 | 8 | 5 | 3 | 8 | 1.0 | opus |
 | 51 | Recall deduplication | 3 | 2 | 3 | 8 | 5 | 3 | 8 | 1.0 | sonnet |
 | 51 | Recall pipeline | 3 | 2 | 3 | 8 | 5 | 3 | 8 | 1.0 | opus |
 | 51 | Compensate-continue skill | 3 | 2 | 3 | 8 | 5 | 3 | 8 | 1.0 | opus |
@@ -115,7 +115,7 @@ No tier structure. WSJF scores shown inline on each task for transparent orderin
 
 - **Directive skill promotion WF=5:** d: fires every discussion, p: every task creation. DP=3: directive infrastructure stable but growing. CRR=5: 2× grounding skip + 3× model misclassification in single session.
 - **Plan-completion ceremony WF=3:** Fires per plan delivery (weekly). DP=3: orphan count grows. CRR=5: 7/12 orphans traced to this gap, defect compounding.
-- **agent-core lint coverage WF=3:** Hook edits are weekly. DP=2: hooks stable. CRR=3: proactive catch, no incidents yet. ME=5: no design artifact.
+- **plugin lint coverage WF=3:** Hook edits are weekly. DP=2: hooks stable. CRR=3: proactive catch, no incidents yet. ME=5: no design artifact.
 - **Worktree exit ceremony WF=3, CRR=3:** Per-worktree lifecycle. Requirements exist (brief.md).
 - **Discuss-to-pending chain WF=3, CRR=3:** Per-discussion verdict. 3× missed in one session. Requirements exist (brief.md).
 - **Worktree merge resilience WF=3, CRR=5:** Per-merge. Outline ready. Post-diff3 validation shows no current data loss, but outline addresses gaps (divergent edits, precommit structural validation) that diff3 doesn't cover.

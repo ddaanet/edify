@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 HOOK_PATH = (
     Path(__file__).parent.parent
-    / "agent-core"
+    / "plugin"
     / "hooks"
     / "pretooluse-recipe-redirect.py"
 )

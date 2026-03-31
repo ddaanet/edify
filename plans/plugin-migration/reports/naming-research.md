@@ -48,7 +48,7 @@
 | Name | Reason |
 |------|--------|
 | `ac` | Abbreviation |
-| `agent-core` | Internal codename |
+| `plugin` | Internal codename |
 | `cadwyn` | Pretentious (Welsh for "chain") |
 | `praxium` | Pretentious (fake Latin) |
 | `steward` | Not googlable (too common) |

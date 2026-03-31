@@ -39,7 +39,7 @@ None.
 
 3. **Post-Commit removal target text mismatch in Phase 4**
    - Location: Phase 4, Replace Post-Commit section
-   - Problem: Runbook said `Remove "Display STATUS per execute-rule.md MODE 1."` but actual text in `agent-core/skills/commit/SKILL.md` (line 178) is `"Then display STATUS per execute-rule.md MODE 1."` — the leading "Then" was absent. Executor using the runbook's text as an exact match target would fail to locate the line.
+   - Problem: Runbook said `Remove "Display STATUS per execute-rule.md MODE 1."` but actual text in `plugin/skills/commit/SKILL.md` (line 178) is `"Then display STATUS per execute-rule.md MODE 1."` — the leading "Then" was absent. Executor using the runbook's text as an exact match target would fail to locate the line.
    - Fix: Updated removal target to `"Then display STATUS per execute-rule.md MODE 1."`
    - **Status**: FIXED
 

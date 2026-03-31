@@ -11,7 +11,7 @@ The codebase has well-established review infrastructure spanning three architect
 
 ### 1. `/proof` Skill — Interactive Artifact Validation
 
-**Location:** `/Users/david/code/claudeutils/agent-core/skills/proof/SKILL.md`
+**Location:** `/Users/david/code/claudeutils/plugin/skills/proof/SKILL.md`
 
 **Purpose:** Structured review loop for planning artifacts (outline.md, design.md, requirements.md, runbook phases). Replaces single-turn "does this look right?" with iterative protocol.
 
@@ -45,10 +45,10 @@ The codebase has well-established review infrastructure spanning three architect
 ### 2. Severity-Based Verdict Vocabulary
 
 **Sources:**
-- `/Users/david/code/claudeutils/agent-core/agents/corrector.md` (Status Taxonomy, lines 18-78)
-- `/Users/david/code/claudeutils/agent-core/agents/outline-corrector.md`
-- `/Users/david/code/claudeutils/agent-core/agents/design-corrector.md`
-- `/Users/david/code/claudeutils/agent-core/skills/deliverable-review/SKILL.md` (lines 138-142)
+- `/Users/david/code/claudeutils/plugin/agents/corrector.md` (Status Taxonomy, lines 18-78)
+- `/Users/david/code/claudeutils/plugin/agents/outline-corrector.md`
+- `/Users/david/code/claudeutils/plugin/agents/design-corrector.md`
+- `/Users/david/code/claudeutils/plugin/skills/deliverable-review/SKILL.md` (lines 138-142)
 
 **Severity Levels (All Artifacts):**
 
@@ -90,10 +90,10 @@ The codebase has well-established review infrastructure spanning three architect
 ### 3. Corrector Agents — Fix-All Policy
 
 **Locations:**
-- `/Users/david/code/claudeutils/agent-core/agents/corrector.md` (implementation review)
-- `/Users/david/code/claudeutils/agent-core/agents/outline-corrector.md` (design outline review)
-- `/Users/david/code/claudeutils/agent-core/agents/design-corrector.md` (design document review)
-- `/Users/david/code/claudeutils/agent-core/agents/runbook-corrector.md` (runbook/phase review)
+- `/Users/david/code/claudeutils/plugin/agents/corrector.md` (implementation review)
+- `/Users/david/code/claudeutils/plugin/agents/outline-corrector.md` (design outline review)
+- `/Users/david/code/claudeutils/plugin/agents/design-corrector.md` (design document review)
+- `/Users/david/code/claudeutils/plugin/agents/runbook-corrector.md` (runbook/phase review)
 
 **Core Directive:** Write review (audit trail) → Fix ALL issues → Escalate unfixable → Return filepath
 
@@ -147,7 +147,7 @@ The codebase has well-established review infrastructure spanning three architect
 
 ### 4. Deliverable Review Skill — Two-Layer Review
 
-**Location:** `/Users/david/code/claudeutils/agent-core/skills/deliverable-review/SKILL.md`
+**Location:** `/Users/david/code/claudeutils/plugin/skills/deliverable-review/SKILL.md`
 
 **Purpose:** Review production artifacts after plan execution (code, tests, docs, config).
 
@@ -205,7 +205,7 @@ The codebase has well-established review infrastructure spanning three architect
 
 ### 5. Review-Plan Skill — Runbook Quality Validation
 
-**Location:** `/Users/david/code/claudeutils/agent-core/skills/review-plan/SKILL.md`
+**Location:** `/Users/david/code/claudeutils/plugin/skills/review-plan/SKILL.md`
 
 **Purpose:** Validate runbook phase quality for TDD discipline, step clarity, and LLM failure modes.
 
@@ -238,9 +238,9 @@ The codebase has well-established review infrastructure spanning three architect
 ### 6. AskUserQuestion Usage Patterns
 
 **Sources:**
-- `/Users/david/code/claudeutils/agent-core/agents/corrector.md` (lines 174-182)
-- `/Users/david/code/claudeutils/agent-core/skills/requirements/SKILL.md`
-- `/Users/david/code/claudeutils/agent-core/skills/review/SKILL.md`
+- `/Users/david/code/claudeutils/plugin/agents/corrector.md` (lines 174-182)
+- `/Users/david/code/claudeutils/plugin/skills/requirements/SKILL.md`
+- `/Users/david/code/claudeutils/plugin/skills/review/SKILL.md`
 
 **Pattern 1: Scope Disambiguation (corrector agent)**
 ```
@@ -549,13 +549,13 @@ Items: 18 total
 
 ### Skill/Agent Files
 
-- `/Users/david/code/claudeutils/agent-core/skills/proof/SKILL.md` — Interactive artifact validation
-- `/Users/david/code/claudeutils/agent-core/skills/deliverable-review/SKILL.md` — Two-layer production review
-- `/Users/david/code/claudeutils/agent-core/skills/review-plan/SKILL.md` — Runbook quality validation
-- `/Users/david/code/claudeutils/agent-core/agents/corrector.md` — Implementation review + fix-all
-- `/Users/david/code/claudeutils/agent-core/agents/outline-corrector.md` — Outline review + fix-all
-- `/Users/david/code/claudeutils/agent-core/agents/design-corrector.md` — Design review + fix-all
-- `/Users/david/code/claudeutils/agent-core/agents/runbook-corrector.md` — Runbook review + fix-all
+- `/Users/david/code/claudeutils/plugin/skills/proof/SKILL.md` — Interactive artifact validation
+- `/Users/david/code/claudeutils/plugin/skills/deliverable-review/SKILL.md` — Two-layer production review
+- `/Users/david/code/claudeutils/plugin/skills/review-plan/SKILL.md` — Runbook quality validation
+- `/Users/david/code/claudeutils/plugin/agents/corrector.md` — Implementation review + fix-all
+- `/Users/david/code/claudeutils/plugin/agents/outline-corrector.md` — Outline review + fix-all
+- `/Users/david/code/claudeutils/plugin/agents/design-corrector.md` — Design review + fix-all
+- `/Users/david/code/claudeutils/plugin/agents/runbook-corrector.md` — Runbook review + fix-all
 
 ### Decision/Pattern Files
 

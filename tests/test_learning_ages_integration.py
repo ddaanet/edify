@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Import module with hyphens in name
-script_path = Path(__file__).parent.parent / "agent-core" / "bin" / "learning-ages.py"
+script_path = Path(__file__).parent.parent / "plugin" / "bin" / "learning-ages.py"
 spec = importlib.util.spec_from_file_location("learning_ages", script_path)
 assert spec is not None, "Failed to create module spec"
 assert spec.loader is not None, "Module spec has no loader"

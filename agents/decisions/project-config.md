@@ -146,11 +146,11 @@ description: |
 
 **Problem:** Heredocs broken in sandbox mode — zsh uses `TMPPREFIX` (not `TMPDIR`) for heredoc temp files. Default `/tmp/zsh` is outside sandbox allowlist.
 
-**Solution:** `export TMPPREFIX="${TMPDIR:-/tmp}/zsh"` in `agent-core/configs/claude-env.sh` (sourced by `.envrc`)
+**Solution:** `export TMPPREFIX="${TMPDIR:-/tmp}/zsh"` in `plugin/configs/claude-env.sh` (sourced by `.envrc`)
 
 **Rationale:** Claude Code sandbox sets TMPDIR but not TMPPREFIX for zsh.
 
-**Status:** Resolved in agent-core configuration.
+**Status:** Resolved in plugin configuration.
 
 **Impact:** Heredocs work correctly in sandbox mode.
 
@@ -207,7 +207,7 @@ description: |
 
 **Anti-pattern:** Using `agents/` as project root marker.
 
-**Rationale:** Subdirectories may contain their own `agents/` folders (e.g., `agent-core/agents/`), causing scripts to stop at wrong level.
+**Rationale:** Subdirectories may contain their own `agents/` folders (e.g., `plugin/agents/`), causing scripts to stop at wrong level.
 
 **Impact:** Scripts correctly identify project root regardless of subdirectory structure.
 

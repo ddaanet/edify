@@ -15,7 +15,7 @@ Claude Code plugins solve all of these via auto-discovery of skills/agents and n
 
 **Source:** `plans/plugin-migration/outline.md` + design conversation
 
-**Naming note:** The outline uses pre-decision naming (`/ac:init`, `.ac-version`, `agent-core/`). This design supersedes those: plugin marketplace name is `edify`, git repo is `edify-plugin` (was `agent-core`). All `ac` and `agent-core` references in the outline should be read accordingly.
+**Naming note:** The outline uses pre-decision naming (`/ac:init`, `.ac-version`, `plugin/`). This design supersedes those: plugin marketplace name is `edify`, git repo is `edify-plugin` (was `plugin`). All `ac` and `plugin` references in the outline should be read accordingly.
 
 **Functional:**
 - FR-1: Skills, agents, hooks load via plugin auto-discovery (no symlinks) — addressed by Components 1-2
@@ -347,7 +347,7 @@ Scripts are referenced from three contexts:
 | Concept | Name | Git repo | Notes |
 |---------|------|----------|-------|
 | Product | edify | `edify` (was claudeutils) | Latin *aedificare* = "to build" + "to instruct" |
-| Plugin | edify (marketplace) | `edify-plugin` (was agent-core) | Submodule directory = `edify-plugin/` |
+| Plugin | edify (marketplace) | `edify-plugin` (was plugin) | Submodule directory = `edify-plugin/` |
 | Python package | edify | `edify` (same repo) | Statusline, session extraction, TDD tooling |
 
 **Why `edify-plugin` not `edify-core`:** The Python package has equal claim to "core" — spending that word on the plugin forecloses the best name for the package. `edify-plugin` is self-documenting and never needs disambiguation.

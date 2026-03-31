@@ -20,7 +20,7 @@ Existing same-step suppression (create-verb pattern, lines 1249-1252) stays unch
 
 ## Files
 
-- `agent-core/bin/prepare-runbook.py` — production code
+- `plugin/bin/prepare-runbook.py` — production code
 - `tests/test_prepare_runbook_fenced.py` — existing test file (extend with new test class)
 
 ## Recall Constraints
@@ -69,7 +69,7 @@ Existing same-step suppression (create-verb pattern, lines 1249-1252) stays unch
 **Approach:** Regex similar to existing `create_pattern` but extracting all matches rather than checking a specific ref. Pattern: `(?:Create|Write|mkdir)\s[^`]*\`(path-with-extension)\`` applied to fence-stripped content.
 
 **Changes:**
-- File: `agent-core/bin/prepare-runbook.py`
+- File: `plugin/bin/prepare-runbook.py`
   Action: Replace stub with regex extraction using `strip_fenced_blocks` + findall
   Location hint: after `extract_file_references` function (~line 1202)
 
@@ -136,7 +136,7 @@ Existing same-step suppression (create-verb pattern, lines 1249-1252) stays unch
 **Approach:** Add a collection pass before line 1231. Modify the warning message at line 1257.
 
 **Changes:**
-- File: `agent-core/bin/prepare-runbook.py`
+- File: `plugin/bin/prepare-runbook.py`
   Action: Add plan-wide collection pass + modify validation logic in `validate_file_references`
   Location hint: lines 1213-1260
 
@@ -171,7 +171,7 @@ Existing same-step suppression (create-verb pattern, lines 1249-1252) stays unch
 **Approach:** The `step_items` list (lines 1217-1222) already combines cycles and steps. Use the same list for the collection pass.
 
 **Changes:**
-- File: `agent-core/bin/prepare-runbook.py`
+- File: `plugin/bin/prepare-runbook.py`
   Action: Ensure collection pass uses `step_items` (covers both cycles and steps)
   Location hint: collection pass added in cycle 1.3
 

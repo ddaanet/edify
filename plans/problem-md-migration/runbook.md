@@ -29,22 +29,22 @@ Verify: all 12 renames staged, no `problem.md` files remain under `plans/`.
 **task_plans.py** (`src/claudeutils/validation/task_plans.py`):
 - `_RECOGNIZED_ARTIFACTS`: remove `"problem.md"` from the set (line 8)
 
-**focus-session.py** (`agent-core/bin/focus-session.py`):
+**focus-session.py** (`plugin/bin/focus-session.py`):
 - Remove or update `problem.md` reference (line 183)
 
-Verify: `grep -r 'problem\.md' src/ agent-core/bin/` returns no hits.
+Verify: `grep -r 'problem\.md' src/ plugin/bin/` returns no hits.
 
 ### Step 3: Agentic prose — update enumeration sites
 
 All changes are mechanical removal/replacement of `problem.md` from lists:
 
-- `agent-core/fragments/execute-rule.md`: remove `problem.md` from artifact list (line 216), update example task path if still referencing problem.md
-- `agent-core/skills/design/SKILL.md`: remove from requirements source list (line 30)
-- `agent-core/skills/reflect/SKILL.md`: replace `problem.md` with `brief.md` in example (line 88)
-- `agent-core/skills/design/references/write-outline.md`: replace `problem.md` with `brief.md` in escape hatch (line 108)
-- `agent-core/skills/design/references/research-protocol.md`: replace `problem.md` with `brief.md` in escape hatch (line 35)
+- `plugin/fragments/execute-rule.md`: remove `problem.md` from artifact list (line 216), update example task path if still referencing problem.md
+- `plugin/skills/design/SKILL.md`: remove from requirements source list (line 30)
+- `plugin/skills/reflect/SKILL.md`: replace `problem.md` with `brief.md` in example (line 88)
+- `plugin/skills/design/references/write-outline.md`: replace `problem.md` with `brief.md` in escape hatch (line 108)
+- `plugin/skills/design/references/research-protocol.md`: replace `problem.md` with `brief.md` in escape hatch (line 35)
 
-Verify: `grep -r 'problem\.md' agent-core/` returns no hits (excluding this plan's own files).
+Verify: `grep -r 'problem\.md' plugin/` returns no hits (excluding this plan's own files).
 
 ### Step 4: Test updates
 

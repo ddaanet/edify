@@ -88,7 +88,7 @@ No existing tool combines position bias optimization + model-specific variants +
 
 ## .When Applying Prompt Research
 
-The fragment system (`agent-core/fragments/` + CLAUDE.md `@` references) solves modular composition. Remaining opportunities:
+The fragment system (`plugin/fragments/` + CLAUDE.md `@` references) solves modular composition. Remaining opportunities:
 - ~~**Position optimization** — order fragments/rules by criticality (primacy/recency)~~ **Done** (Feb 2026)
 - ~~**Token budget tracking** — formal counting to prevent context bloat~~ **Done** (Feb 2026)
 - **Model-specific variants** — if haiku execution quality becomes a problem
@@ -110,6 +110,6 @@ CLAUDE.md sections ordered by position bias research (primacy strongest, recency
 
 `workflows-terminology` stays at absolute primacy (line 1) as entry point.
 
-**Token budget:** ~15k tokens heuristic (well under 30k threshold). Measured by `agent-core/bin/context-budget.py`.
+**Token budget:** ~15k tokens heuristic (well under 30k threshold). Measured by `plugin/bin/context-budget.py`.
 
 **Future:** If adherence issues emerge in specific zones, consider further reordering within zones or promoting individual fragments.

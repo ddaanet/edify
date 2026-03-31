@@ -24,13 +24,13 @@ Execute after plugin verified working. Irreversible within session.
 **Implementation**:
 1. **FR-1**: Plugin auto-discovery works without symlinks (automated via `-p` headless mode):
    ```bash
-   claude -p "list your available slash commands" --plugin-dir ./agent-core 2>&1 | tee tmp/migration-verify-skills.txt
-   claude -p "list your available agents" --plugin-dir ./agent-core 2>&1 | tee tmp/migration-verify-agents.txt
+   claude -p "list your available slash commands" --plugin-dir ./plugin 2>&1 | tee tmp/migration-verify-skills.txt
+   claude -p "list your available agents" --plugin-dir ./plugin 2>&1 | tee tmp/migration-verify-agents.txt
    ```
    - Skills and agents must appear in output (no symlinks, `--plugin-dir` only)
 2. **FR-7**: All functionality preserved
-   - `grep -r '@agent-core/' CLAUDE.md agents/ .claude/rules/ | grep -v Binary` — each path must exist: `ls <path>` for each returned reference
-   - `grep -rh '^@' agent-core/fragments/ agent-core/skills/ | sort -u` — verify each referenced fragment path exists on disk
+   - `grep -r '@plugin/' CLAUDE.md agents/ .claude/rules/ | grep -v Binary` — each path must exist: `ls <path>` for each returned reference
+   - `grep -rh '^@' plugin/fragments/ plugin/skills/ | sort -u` — verify each referenced fragment path exists on disk
 3. **FR-9**: All hooks fire from plugin, settings.json hooks section empty
    - Verify hooks.json contains all hooks
    - Verify settings.json has no hooks section

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-SCRIPT = Path(__file__).parent.parent / "agent-core" / "bin" / "validate-runbook.py"
+SCRIPT = Path(__file__).parent.parent / "plugin" / "bin" / "validate-runbook.py"
 
 _spec = importlib.util.spec_from_file_location("validate_runbook", SCRIPT)
 _mod = importlib.util.module_from_spec(_spec)  # type: ignore[arg-type]

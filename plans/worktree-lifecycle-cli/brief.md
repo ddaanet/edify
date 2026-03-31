@@ -57,7 +57,7 @@ Two UPS Tier 1 shortcuts:
 
 ### Implementation notes
 
-- UPS hook: `agent-core/hooks/userpromptsubmit-shortcuts.py`
+- UPS hook: `plugin/hooks/userpromptsubmit-shortcuts.py`
 - Tier 1 commands are exact-match, simplest tier (like `c`, `y`)
 - `additionalContext` is agent-only, `systemMessage` is user-only (~60 char budget)
 - `dangerouslyDisableSandbox: true` required for clipboard access

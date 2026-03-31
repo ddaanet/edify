@@ -9,13 +9,13 @@
 
 **Result: PASS**
 
-`claude -p "What slash commands are available to you?" --plugin-dir ./agent-core` returned all plugin skills:
+`claude -p "What slash commands are available to you?" --plugin-dir ./plugin` returned all plugin skills:
 
 - All `edify:` namespaced workflow skills discoverable (design, requirements, runbook, orchestrate, inline, etc.)
 - Maintenance, init, and utility skills discoverable
 - Plugin-dev skills discoverable (from enabled plugin-dev@claude-plugins-official)
 
-`claude -p "What agents are available?" --plugin-dir ./agent-core` returned 30 agents including:
+`claude -p "What agents are available?" --plugin-dir ./plugin` returned 30 agents including:
 
 - `edify:runbook-corrector`, `edify:corrector`, `edify:brainstorm-name`, `edify:test-driver`, `edify:artisan`, `edify:scout`, `edify:runbook-simplifier`, `edify:refactor`, `edify:hooks-tester`, `edify:design-corrector`, `edify:outline-corrector`, `edify:runbook-outline-corrector`, `edify:tdd-auditor`
 - Plan-specific agents coexisting: `plugin-migration-task`, `plugin-migration-corrector`
@@ -25,14 +25,14 @@
 
 **Result: PASS**
 
-All 22 `@agent-core/` fragment paths referenced in CLAUDE.md, agents/, and .claude/rules/ exist on disk:
+All 22 `@plugin/` fragment paths referenced in CLAUDE.md, agents/, and .claude/rules/ exist on disk:
 
 - All 17 fragments in CLAUDE.md: OK
-- `agent-core/fragments/error-classification.md`: OK
-- `agent-core/fragments/prerequisite-validation.md`: OK
-- `agent-core/fragments/escalation-acceptance.md`: OK
-- `agent-core/fragments/task-failure-lifecycle.md`: OK
-- `agent-core/fragments/commit-delegation.md`: OK
+- `plugin/fragments/error-classification.md`: OK
+- `plugin/fragments/prerequisite-validation.md`: OK
+- `plugin/fragments/escalation-acceptance.md`: OK
+- `plugin/fragments/task-failure-lifecycle.md`: OK
+- `plugin/fragments/commit-delegation.md`: OK
 
 No `@`-references inside fragments/ or skills/ directories (grep returned empty).
 
@@ -49,7 +49,7 @@ No `@`-references inside fragments/ or skills/ directories (grep returned empty)
 
 `settings.json` has no `hooks` key (confirmed by reading file — only keys: attribution, permissions, enabledPlugins, sandbox, plansDirectory).
 
-`pretooluse-symlink-redirect.sh` deleted (confirmed: `test -f agent-core/hooks/pretooluse-symlink-redirect.sh` → false).
+`pretooluse-symlink-redirect.sh` deleted (confirmed: `test -f plugin/hooks/pretooluse-symlink-redirect.sh` → false).
 
 ## NFR-2: No token overhead increase
 
@@ -61,7 +61,7 @@ Same content loaded via plugin auto-discovery instead of symlinks. No empirical 
 
 **Result: PASS**
 
-`grep -r 'sync-to-parent' agent-core/fragments/` returns no matches.
+`grep -r 'sync-to-parent' plugin/fragments/` returns no matches.
 
 ## just precommit
 
@@ -85,4 +85,4 @@ Session-structure warnings are expected (pre-existing worktrees not in session.m
 
 ## Summary
 
-All requirements met. System fully functional without symlinks via `--plugin-dir ./agent-core` plugin auto-discovery. Proceed to Phase 7 (directory rename: `agent-core/` → `edify-plugin/`).
+All requirements met. System fully functional without symlinks via `--plugin-dir ./plugin` plugin auto-discovery. Proceed to Phase 7 (directory rename: `plugin/` → `edify-plugin/`).

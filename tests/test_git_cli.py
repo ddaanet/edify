@@ -71,7 +71,7 @@ def test_git_changes_with_submodule(
     parent = tmp_path / "parent"
     parent.mkdir()
     init_repo_at(parent)
-    sub_path = _add_submodule(parent, tmp_path, "agent-core")
+    sub_path = _add_submodule(parent, tmp_path, "plugin")
     monkeypatch.chdir(parent)
 
     # Make the submodule dirty: add a new untracked file (clear "?? " prefix in status)
@@ -81,14 +81,14 @@ def test_git_changes_with_submodule(
     result = runner.invoke(git_group, ["changes"])
 
     assert result.exit_code == 0
-    assert "## Submodule: agent-core" in result.output
-    # Status line must show prefixed path: agent-core/new_file.txt not bare new_file.txt
-    assert "agent-core/new_file.txt" in result.output
+    assert "## Submodule: plugin" in result.output
+    # Status line must show prefixed path: plugin/new_file.txt not bare new_file.txt
+    assert "plugin/new_file.txt" in result.output
     # Verify that any status line for new_file.txt includes the submodule prefix
     lines = result.output.splitlines()
     for line in lines:
         if "new_file.txt" in line and not line.strip().startswith("#"):
-            assert "agent-core/" in line
+            assert "plugin/" in line
 
 
 def test_git_changes_clean_submodule_omitted(
@@ -98,7 +98,7 @@ def test_git_changes_clean_submodule_omitted(
     parent = tmp_path / "parent"
     parent.mkdir()
     init_repo_at(parent)
-    _add_submodule(parent, tmp_path, "agent-core")
+    _add_submodule(parent, tmp_path, "plugin")
     monkeypatch.chdir(parent)
 
     # Make only the parent dirty (not the submodule)

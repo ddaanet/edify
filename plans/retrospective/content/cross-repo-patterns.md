@@ -73,9 +73,9 @@ No settled convention. The CLAUDE.md name existed as early as Oct 2025 (jobsearc
 - `home` (`091073f`, 2026-01-18): "Rename AGENTS.md→CLAUDE.md"
 - `pytest-md` (`f82e7a2`, 2026-01-28): "Add CLAUDE.md with @file references"
 
-### Phase G: CLAUDE.md + agent-core + fragments (Jan-Feb 2026)
+### Phase G: CLAUDE.md + plugin + fragments (Jan-Feb 2026)
 
-**Repos:** `pytest-md/agent-core` → `home` → `claudeutils`
+**Repos:** `pytest-md/plugin` → `home` → `claudeutils`
 
 Extraction into shared infrastructure. Per-project AGENTS.md/CLAUDE.md → shared fragments + decisions + skills.
 
@@ -92,7 +92,7 @@ Extraction into shared infrastructure. Per-project AGENTS.md/CLAUDE.md → share
 | 2025-12-15 | D: multi-agent | tuick | `7a97ef3` Multi-agent restructuring |
 | 2026-01-03 | F: .claude/ | pytest-md | `fd939eb` Settings.json |
 | 2026-01-12 | F: skills | pytest-md | `aa8ee90` Commit/handoff skills |
-| 2026-01-15 | G: agent-core | pytest-md/agent-core | `5783aef` Shared infrastructure |
+| 2026-01-15 | G: plugin | pytest-md/plugin | `5783aef` Shared infrastructure |
 | 2026-01-18 | F: migration | home | `091073f` AGENTS.md→CLAUDE.md |
 
 ## 2. Pattern Propagation Timeline
@@ -109,7 +109,7 @@ Which claudeutils practices appeared in parallel projects and when.
 | Session.md tracking | home (Jan 12) | ddaanet (Jan 8) | Session management section in AGENTS.md |
 | Commit delegation | home (Jan 13) | — | "Use /commit-commands:commit to commit" |
 | .claude/ directory | pytest-md (Jan 3) | jobsearch (Jan 21) | settings.json files |
-| Agent-core submodule | pytest-md (Jan 20) | home (Jan 22), devddaanet (Mar 5) | .gitmodules + agent-core/ |
+| Agent-core submodule | pytest-md (Jan 20) | home (Jan 22), devddaanet (Mar 5) | .gitmodules + plugin/ |
 | CLAUDE.md with @refs | pytest-md (Jan 28) | home (Jan 23) | @file reference pattern |
 | Worktree workflow | claudeutils (Feb 2026) | devddaanet (Mar 2026) | worktree-sync feature |
 | Deliverable-review | claudeutils (Feb 2026) | devddaanet (Mar 2026) | Review→fix→re-review cycle completed, but post-delivery commits show continued bug fixes |
@@ -132,9 +132,9 @@ Each project maintained its own AGENTS.md. Cross-pollination via copy-paste-adap
 
 `pytest-md` creates `.claude/` directory with skills (commit, handoff, TDD workflow). Skills are per-project — no sharing mechanism yet.
 
-### Phase 3: Extraction into agent-core (Jan 15, 2026)
+### Phase 3: Extraction into plugin (Jan 15, 2026)
 
-`pytest-md/agent-core` initialized with `5783aef` "Initialize agent-core repository structure."
+`pytest-md/plugin` initialized with `5783aef` "Initialize plugin repository structure."
 
 First 5 commits show extraction sequence:
 1. Repository structure
@@ -147,11 +147,11 @@ First 5 commits show extraction sequence:
 
 | Date | Repo | Event |
 |------|------|-------|
-| 2026-01-20 | pytest-md | First agent-core submodule addition |
+| 2026-01-20 | pytest-md | First plugin submodule addition |
 | 2026-01-22 | home | Agent-core submodule + skill symlinks |
-| 2026-02-06 | pytest-md | Migrate to agent-core Tier 2 structure |
-| 2026-03-05 | devddaanet | Born with agent-core (initial commit includes submodule) |
+| 2026-02-06 | pytest-md | Migrate to plugin Tier 2 structure |
+| 2026-03-05 | devddaanet | Born with plugin (initial commit includes submodule) |
 
 ### Phase 5: Maturation (Feb – Mar 2026)
 
-Agent-core accumulates 204 commits in the pytest-md nested repo (Jan 15 – Feb 6), then the claudeutils main repo becomes the primary development location. By March, new projects (devddaanet) are born with agent-core from the start — adoption cost approaches zero.
+Agent-core accumulates 204 commits in the pytest-md nested repo (Jan 15 – Feb 6), then the claudeutils main repo becomes the primary development location. By March, new projects (devddaanet) are born with plugin from the start — adoption cost approaches zero.

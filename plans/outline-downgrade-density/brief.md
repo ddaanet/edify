@@ -22,7 +22,7 @@ The threshold (≤3) needs validation — it's based on reasoning about where co
 
 ## Affected Files
 
-- `agent-core/skills/design/references/write-outline.md` §Post-Outline Complexity Re-check
+- `plugin/skills/design/references/write-outline.md` §Post-Outline Complexity Re-check
 
 ## Evidence
 

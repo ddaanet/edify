@@ -1,6 +1,6 @@
 # Review: Phase 2 Checkpoint — Hook Migration
 
-**Scope**: Phase 2 changed files: `.edify.yaml`, `agent-core` (submodule pointer), `plans/plugin-migration/reports/hook-audit.md`
+**Scope**: Phase 2 changed files: `.edify.yaml`, `plugin` (submodule pointer), `plans/plugin-migration/reports/hook-audit.md`
 **Date**: 2026-03-21
 **Mode**: review + fix
 
@@ -17,7 +17,7 @@ Phase 2 delivers hook migration to plugin (hooks.json), consolidated setup hook 
 ### Critical Issues
 
 1. **`stop-health-fallback.sh` crashes with unbound variable**
-   - Location: `agent-core/hooks/stop-health-fallback.sh:28`
+   - Location: `plugin/hooks/stop-health-fallback.sh:28`
    - Problem: `python3 "$CLAUDE_PLUGIN_ROOT/bin/learning-ages.py"` uses bare `$CLAUDE_PLUGIN_ROOT`. With `set -euo pipefail`, this triggers `unbound variable` when `CLAUDE_PLUGIN_ROOT` is not exported (e.g., direct test invocation, or if hook fires outside plugin context). Confirmed: `bash stop-health-fallback.sh <<< '...'` exits 1 with "CLAUDE_PLUGIN_ROOT: unbound variable". The identical line in `sessionstart-health.sh` correctly uses `${CLAUDE_PLUGIN_ROOT:-}` safe form (line 97).
    - Fix: Change to `${CLAUDE_PLUGIN_ROOT:-}` pattern, matching sessionstart-health.sh line 97.
    - **Status**: FIXED
@@ -29,14 +29,14 @@ None.
 ### Minor Issues
 
 1. **Inconsistent `python3` prefix in hooks.json commands**
-   - Location: `agent-core/hooks/hooks.json:22,61`
+   - Location: `plugin/hooks/hooks.json:22,61`
    - Note: `pretooluse-recipe-redirect.py` and `userpromptsubmit-shortcuts.py` are invoked as `python3 $CLAUDE_PLUGIN_ROOT/hooks/...py` while `submodule-safety.py` and `pretooluse-recall-check.py` are invoked directly (no `python3` prefix). All four scripts have shebangs (`#!/usr/bin/env python3`) and are executable. Notably, `pretooluse-recipe-redirect.py` itself blocks `python3 script.py` invocations from agent Bash commands — inconsistent that hooks.json uses that pattern. Fix: remove `python3` prefix from both commands.
    - **Status**: FIXED
 
 ## Fixes Applied
 
-- `agent-core/hooks/stop-health-fallback.sh:28` — Changed `"$CLAUDE_PLUGIN_ROOT/bin/learning-ages.py"` to `"${CLAUDE_PLUGIN_ROOT:-}/bin/learning-ages.py"` and `"$CLAUDE_PROJECT_DIR/agents/learnings.md"` to `"${CLAUDE_PROJECT_DIR:-$PWD}/agents/learnings.md"` — matches sessionstart-health.sh safe form pattern, prevents unbound variable crash when hook fires outside plugin context
-- `agent-core/hooks/hooks.json:22,61` — Removed `python3` prefix from `pretooluse-recipe-redirect.py` and `userpromptsubmit-shortcuts.py` command entries — all .py hook scripts have shebangs and are executable, consistent with submodule-safety.py and pretooluse-recall-check.py invocation style
+- `plugin/hooks/stop-health-fallback.sh:28` — Changed `"$CLAUDE_PLUGIN_ROOT/bin/learning-ages.py"` to `"${CLAUDE_PLUGIN_ROOT:-}/bin/learning-ages.py"` and `"$CLAUDE_PROJECT_DIR/agents/learnings.md"` to `"${CLAUDE_PROJECT_DIR:-$PWD}/agents/learnings.md"` — matches sessionstart-health.sh safe form pattern, prevents unbound variable crash when hook fires outside plugin context
+- `plugin/hooks/hooks.json:22,61` — Removed `python3` prefix from `pretooluse-recipe-redirect.py` and `userpromptsubmit-shortcuts.py` command entries — all .py hook scripts have shebangs and are executable, consistent with submodule-safety.py and pretooluse-recall-check.py invocation style
 
 ## Requirements Validation
 
@@ -59,7 +59,7 @@ None.
 - All setup failures are non-fatal — appended to `message`, script always outputs `systemMessage`
 - `pretooluse-symlink-redirect.sh` correctly deleted (purpose eliminated)
 - hooks.json wrapper format (`{"hooks": {...}}`) matches outline correction D-4 (corrects design.md)
-- No remaining `agent-core/` bare references in any hook script (grep confirms)
+- No remaining `plugin/` bare references in any hook script (grep confirms)
 - hook-audit.md provides per-script findings with rationale — good traceability
 - `.edify.yaml` version (`0.0.2`) matches plugin.json version (`0.0.2`) — version provenance working
 

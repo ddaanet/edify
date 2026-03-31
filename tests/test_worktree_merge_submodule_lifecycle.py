@@ -19,9 +19,9 @@ def test_submodule_merge_head_not_orphaned_after_parent_merge(
 ) -> None:
     """Submodule MERGE_HEAD must not be orphaned after successful parent merge.
 
-    Bug: Phase 2 submodule merge fails (conflict), leaves MERGE_HEAD in agent-core.
+    Bug: Phase 2 submodule merge fails (conflict), leaves MERGE_HEAD in plugin.
     Phase 3+4 succeed on parent, exit 0. MERGE_HEAD persists undetected.
-    Fix: after Phase 4 commit, check agent-core for MERGE_HEAD. If present, exit 3.
+    Fix: after Phase 4 commit, check plugin for MERGE_HEAD. If present, exit 3.
     """
     monkeypatch.chdir(repo_with_submodule)
 
@@ -33,7 +33,7 @@ def test_submodule_merge_head_not_orphaned_after_parent_merge(
     result = runner.invoke(worktree, ["merge", "sub-merge-head-test"])
 
     assert "Traceback" not in result.output, f"Unexpected traceback: {result.output}"
-    # BUG: exits 0 with orphaned MERGE_HEAD in agent-core
+    # BUG: exits 0 with orphaned MERGE_HEAD in plugin
     # Fix: detect MERGE_HEAD after Phase 4, report and exit 3
     assert result.exit_code == 3, (
         f"Expected exit 3 (submodule MERGE_HEAD detected),"
@@ -45,5 +45,5 @@ def test_submodule_merge_head_not_orphaned_after_parent_merge(
         check=False,
     )
     assert merge_head_check.returncode == 0, (
-        "agent-core MERGE_HEAD should still exist (user must resolve and re-run)"
+        "plugin MERGE_HEAD should still exist (user must resolve and re-run)"
     )

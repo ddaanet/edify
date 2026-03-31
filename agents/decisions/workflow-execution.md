@@ -247,7 +247,7 @@ Design review, orchestration, TDD, runbook artifacts, and skill chaining pattern
 
 **Impact:** Users compose skill chains in natural prose. Skills are decoupled — no knowledge of downstream skills. Backward compatible: solo invocations behave identically to hardcoded exits.
 
-**Reference:** `agent-core/fragments/continuation-passing.md`, `plans/continuation-passing/design.md`
+**Reference:** `plugin/fragments/continuation-passing.md`, `plans/continuation-passing/design.md`
 
 ### When Using Hook Based Parsing
 

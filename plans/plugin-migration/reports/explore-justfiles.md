@@ -2,7 +2,7 @@
 
 ## Summary
 
-This project uses a three-tier justfile architecture: a root justfile with project-specific recipes, an agent-core justfile with reusable symlink utilities, and a Makefile for cache management. The root justfile imports bash helper functions via template variables (not `include` statements) and orchestrates checks/builds. Recipes are partitioned by concern: development workflows (dev/format/check/lint), testing/validation (test/precommit), worktree management (wt-new/wt-ls/wt-rm/wt-merge), and releases (release). The architecture emphasizes project tooling principles: recipes encapsulate complex operations, handle sandbox detection for Claude Code environments, and provide consistent error handling.
+This project uses a three-tier justfile architecture: a root justfile with project-specific recipes, an plugin justfile with reusable symlink utilities, and a Makefile for cache management. The root justfile imports bash helper functions via template variables (not `include` statements) and orchestrates checks/builds. Recipes are partitioned by concern: development workflows (dev/format/check/lint), testing/validation (test/precommit), worktree management (wt-new/wt-ls/wt-rm/wt-merge), and releases (release). The architecture emphasizes project tooling principles: recipes encapsulate complex operations, handle sandbox detection for Claude Code environments, and provide consistent error handling.
 
 ## Key Findings
 
@@ -16,14 +16,14 @@ This project uses a three-tier justfile architecture: a root justfile with proje
 |--------|---------|------------|
 | `help` | List available recipes | Delegates to `just --list --unsorted` |
 | `dev` | Format + cache + precommit | Chained execution: `format cache precommit` |
-| `cache` | Rebuild cached help output | Calls `gmake --no-print-directory -C agent-core all` to generate `.cache/just-help*.txt` |
+| `cache` | Rebuild cached help output | Calls `gmake --no-print-directory -C plugin all` to generate `.cache/just-help*.txt` |
 | `precommit` | Run all validation checks | Calls 7 validators, lint checks, pytest, line limits (lines 24-35) |
 | `test *ARGS` | Run pytest with optional arguments | Supports argument pass-through (`pytest {{ ARGS }}`) |
 | `line-limits` | Check file line limits | Calls `./scripts/check_line_limits.sh` |
 | `wt-new name base="HEAD"` | Create worktree for parallel work | Git worktree + submodule init + direnv + initial commit |
 | `wt-ls` | List active git worktrees | Delegates to `git worktree list` |
 | `wt-rm name` | Remove worktree and branch | Force-removes worktree (submodule-aware), deletes branch with fallback |
-| `wt-merge name` | Merge worktree + resolve conflicts | Fetches agent-core branch, auto-resolves session.md, commits |
+| `wt-merge name` | Merge worktree + resolve conflicts | Fetches plugin branch, auto-resolves session.md, commits |
 | `lint` | Format + style checks + tests | Disables complexity rules (`C901` etc), runs pytest-quiet |
 | `check` | Code style without modifications | Runs ruff/docformatter/mypy without changes |
 | `format` | Auto-format code | Ruff + docformatter with diff-based reformatting patch system |
@@ -74,9 +74,9 @@ Detects Claude Code sandbox by checking `/tmp` writability. Skips `uv sync` in s
 
 ---
 
-### 2. Agent-Core Justfile — `/Users/david/code/claudeutils-plugin-migration/agent-core/justfile`
+### 2. Agent-Core Justfile — `/Users/david/code/claudeutils-plugin-migration/plugin/justfile`
 
-**File type:** Justfile for agent-core submodule (98 lines)
+**File type:** Justfile for plugin submodule (98 lines)
 
 **Recipes:**
 
@@ -84,26 +84,26 @@ Detects Claude Code sandbox by checking `/tmp` writability. Skips `uv sync` in s
 |--------|---------|---------|
 | `help` | List available recipes | `just --list --unsorted` |
 | `sync-to-parent` | Create symlinks in parent's `.claude/` | Detailed below |
-| `precommit` | Stub validation | Just prints `✓ Precommit OK` (agent-core has no validation) |
+| `precommit` | Stub validation | Just prints `✓ Precommit OK` (plugin has no validation) |
 
 **sync-to-parent detailed implementation:**
 
-Creates relative symlinks from parent project's `.claude/` directory to agent-core sources:
+Creates relative symlinks from parent project's `.claude/` directory to plugin sources:
 
 **Structure created:**
 ```
 parent-project/.claude/
-  skills/ → (symlinks to ../../agent-core/skills/*)
-  agents/ → (symlinks to ../../agent-core/agents/*.md)
-  hooks/ → (symlinks to ../../agent-core/hooks/*.sh, *.py)
+  skills/ → (symlinks to ../../plugin/skills/*)
+  agents/ → (symlinks to ../../plugin/agents/*.md)
+  hooks/ → (symlinks to ../../plugin/hooks/*.sh, *.py)
 ```
 
 **Algorithm:**
 1. Detect parent directory: `PARENT_DIR="$(cd .. && pwd)"`
 2. Create `.claude/{skills,agents,hooks}` if missing
 3. **Clean stale symlinks**: iterate `$CLAUDE_DIR/skills/*/`, remove symlinks where source doesn't exist
-4. **Sync skills**: For each directory in `agent-core/skills/`, create relative symlink (removes existing target)
-5. **Sync agents**: For each `.md` file in `agent-core/agents/`, create relative symlink
+4. **Sync skills**: For each directory in `plugin/skills/`, create relative symlink (removes existing target)
+5. **Sync agents**: For each `.md` file in `plugin/agents/`, create relative symlink
 6. **Sync hooks**: If `hooks/` exists, sync `hooks.json`, all `.sh` and `.py` files to `.claude/hooks/` (chmod +x hook files)
 
 **Error handling:** Uses `set -euo pipefail` (fail on error, exit undefined variables, fail on pipe failures). Removes targets before creating new symlinks (no error if target missing).
@@ -113,11 +113,11 @@ parent-project/.claude/
 **Platform:**
 - Uses `ln -s` for relative symlinks (portable across Unix)
 - Uses `rm -rf` / `rm -f` (platform-aware based on file type)
-- Relative symlink paths: `../../agent-core/skills/$skill_name` (portable across worktrees)
+- Relative symlink paths: `../../plugin/skills/$skill_name` (portable across worktrees)
 
 ---
 
-### 3. Makefile — `/Users/david/code/claudeutils-plugin-migration/agent-core/Makefile`
+### 3. Makefile — `/Users/david/code/claudeutils-plugin-migration/plugin/Makefile`
 
 **File type:** GNU Make configuration (35 lines)
 
@@ -127,7 +127,7 @@ parent-project/.claude/
 
 | Target | Produces | Details |
 |--------|----------|---------|
-| `all` (default) | `.cache/just-help.txt` + `.cache/just-help-agent-core.txt` | Depends on justfiles |
+| `all` (default) | `.cache/just-help.txt` + `.cache/just-help-plugin.txt` | Depends on justfiles |
 | `check` | (validation only) | Runs `make -q all`, exits non-zero if stale |
 | `clean` | (none) | Deletes both cache files |
 
@@ -137,17 +137,17 @@ parent-project/.claude/
 $(CACHE_DIR)/just-help.txt: $(PARENT)/justfile | $(CACHE_DIR)
     cd $(PARENT) && just help > .cache/just-help.txt
 
-$(CACHE_DIR)/just-help-agent-core.txt: justfile | $(CACHE_DIR)
+$(CACHE_DIR)/just-help-plugin.txt: justfile | $(CACHE_DIR)
     just help > $@
 ```
 
 - Root cache depends on root justfile
-- Agent-core cache depends on agent-core justfile
+- Agent-core cache depends on plugin justfile
 - Order-only dependency `|` ensures `.cache/` directory exists before writing files
 
 **Integration with root justfile:**
 
-The `cache` recipe (line 18 of root justfile) calls `gmake --no-print-directory -C agent-core all`, which runs this Makefile. It's invoked before `precommit` in the `dev` workflow (line 15).
+The `cache` recipe (line 18 of root justfile) calls `gmake --no-print-directory -C plugin all`, which runs this Makefile. It's invoked before `precommit` in the `dev` workflow (line 15).
 
 ---
 
@@ -161,7 +161,7 @@ The `cache` recipe (line 18 of root justfile) calls `gmake --no-print-directory 
 - ✅ Makefile coordinates cache generation (standalone tool)
 
 **Why no imports?**
-- Just language doesn't support imports from agent-core in a reusable way
+- Just language doesn't support imports from plugin in a reusable way
 - Template variable approach (`bash_prolog := ...`) is the idiomatic workaround
 - Allows recipes to embed full prolog on-demand without file path coupling
 
@@ -169,7 +169,7 @@ The `cache` recipe (line 18 of root justfile) calls `gmake --no-print-directory 
 
 ```
 dev → format → (uses sync + helpers from bash_prolog)
-    → cache  → gmake C agent-core
+    → cache  → gmake C plugin
     → precommit → (runs 7 validators + checks)
 
 precommit → sync (function, not recipe)
@@ -215,10 +215,10 @@ branch="wt/{{name}}"                            # Create feature branch
 git worktree add "$wt_dir" -b "$branch" "{{base}}"
 
 # Step 2: Initialize submodule with reference to avoid remote fetch
-(cd "$wt_dir" && git submodule update --init --reference "$main_dir/agent-core")
+(cd "$wt_dir" && git submodule update --init --reference "$main_dir/plugin")
 
-# Step 3: Check out agent-core submodule on its own branch
-(cd "$wt_dir/agent-core" && git checkout -b "wt/{{name}}")
+# Step 3: Check out plugin submodule on its own branch
+(cd "$wt_dir/plugin" && git checkout -b "wt/{{name}}")
 
 # Step 4: Set up Python environment
 (cd "$wt_dir" && uv sync)
@@ -231,8 +231,8 @@ git worktree add "$wt_dir" -b "$branch" "{{base}}"
 ```
 
 **Submodule handling (key gotcha):**
-- Uses `--reference "$main_dir/agent-core"` to avoid remote fetch (agent-core is local)
-- If commits in agent-core aren't pushed, remote clone would fail
+- Uses `--reference "$main_dir/plugin"` to avoid remote fetch (plugin is local)
+- If commits in plugin aren't pushed, remote clone would fail
 - Reference tells git to use local objects as alternates (efficient, local-only)
 - Agent-core gets its own branch (not detached HEAD) for easier merge tracking
 
@@ -289,18 +289,18 @@ fi
 
 **Implementation (2 steps):**
 
-**Step 1: Fetch and merge agent-core commits**
+**Step 1: Fetch and merge plugin commits**
 ```bash
-# Check if agent-core branch exists in worktree
-if [ -d "$wt_dir/agent-core" ] && (cd "$wt_dir/agent-core" && git rev-parse --verify "$branch" >/dev/null 2>&1); then
-    # Fetch commits from worktree's agent-core into main's submodule
-    (cd agent-core && git fetch "$wt_dir/agent-core" "$branch:$branch")
+# Check if plugin branch exists in worktree
+if [ -d "$wt_dir/plugin" ] && (cd "$wt_dir/plugin" && git rev-parse --verify "$branch" >/dev/null 2>&1); then
+    # Fetch commits from worktree's plugin into main's submodule
+    (cd plugin && git fetch "$wt_dir/plugin" "$branch:$branch")
     # Merge the branch
-    (cd agent-core && git merge --no-edit "$branch")
+    (cd plugin && git merge --no-edit "$branch")
     # Clean up local branch
-    (cd agent-core && git branch -d "$branch")
+    (cd plugin && git branch -d "$branch")
     # Stage submodule change
-    git add agent-core
+    git add plugin
 fi
 ```
 
@@ -346,12 +346,12 @@ fi
 **Sequence:**
 
 1. `sync` — Update Python dependencies (skipped in sandbox)
-2. `agent-core/bin/validate-tasks.py agents/session.md agents/learnings.md` — Validate session and learnings structure
-3. `agent-core/bin/validate-learnings.py agents/learnings.md` — Additional learnings validation
-4. `agent-core/bin/validate-decision-files.py` — Validate agents/decisions/*.md structure
-5. `agent-core/bin/validate-memory-index.py agents/memory-index.md` — Validate memory index format
-6. `agent-core/bin/validate-jobs.py` — Validate jobs.md structure
-7. `gmake --no-print-directory -C agent-core check` — Agent-core cache validation (Makefile)
+2. `plugin/bin/validate-tasks.py agents/session.md agents/learnings.md` — Validate session and learnings structure
+3. `plugin/bin/validate-learnings.py agents/learnings.md` — Additional learnings validation
+4. `plugin/bin/validate-decision-files.py` — Validate agents/decisions/*.md structure
+5. `plugin/bin/validate-memory-index.py agents/memory-index.md` — Validate memory index format
+6. `plugin/bin/validate-jobs.py` — Validate jobs.md structure
+7. `gmake --no-print-directory -C plugin check` — Agent-core cache validation (Makefile)
 8. `run-checks` — ruff, docformatter, mypy checks
 9. `safe pytest-quiet` — Run tests with quiet mode (bug workaround)
 10. `run-line-limits` — Check line length constraints
@@ -440,7 +440,7 @@ Supports explicit rollback via `just release --rollback` (if release commit at H
 sandboxed := shell('[ -w /tmp ] && echo "0" || echo "1"')
 ```
 
-**Used in:** Makefile (agent-core/configs/justfile-base.just)
+**Used in:** Makefile (plugin/configs/justfile-base.just)
 
 **In root justfile:** Inline check in `sync()` function:
 ```bash
@@ -451,7 +451,7 @@ sync() { if [ -w /tmp ]; then uv sync -q; fi; }
 
 ### Relative Symlink Paths
 
-**Pattern:** `ln -s "../../agent-core/skills/$skill_name" "$target"`
+**Pattern:** `ln -s "../../plugin/skills/$skill_name" "$target"`
 
 **Portability:** Works across worktrees because paths are relative to `.claude/` location.
 
@@ -461,10 +461,10 @@ sync() { if [ -w /tmp ]; then uv sync -q; fi; }
 
 **Pattern in wt-new:**
 ```bash
-git submodule update --init --reference "$main_dir/agent-core"
+git submodule update --init --reference "$main_dir/plugin"
 ```
 
-**Solves:** Unpushed agent-core commits. Avoids remote fetch by using local objects as alternates.
+**Solves:** Unpushed plugin commits. Avoids remote fetch by using local objects as alternates.
 
 **Documented in:** agents/learnings.md (Git worktree submodule gotchas)
 
@@ -486,7 +486,7 @@ fi
 
 ## Gaps / Unresolved Questions
 
-1. **No testfile imports discovered** — Justfile uses template variables instead of `include`. The comment in Makefile (lines 4-5) says "FUTURE: When justfiles are factored to use agent-core includes..." — This suggests a planned refactoring to add `include` statements, not yet implemented.
+1. **No testfile imports discovered** — Justfile uses template variables instead of `include`. The comment in Makefile (lines 4-5) says "FUTURE: When justfiles are factored to use plugin includes..." — This suggests a planned refactoring to add `include` statements, not yet implemented.
 
 2. **Cache staleness enforcement** — Makefile `check` target exits non-zero if cache is stale, but root `precommit` calls `gmake check` which could fail. How is this failure propagated? (Answer: `set -e` in bash_prolog catches it.)
 
@@ -500,16 +500,16 @@ fi
 
 7. **Worktree session.md handling** — wt-merge auto-resolves with `--ours`. Implies parent session.md is always correct. But execute-rule.md mentions focused session.md for worktrees. Are these two mechanisms aligned? (Answer: execute-rule.md describes the initial focused session.md in the worktree; wt-merge assumes final session.md in worktree was updated during execution, parent's version is newer.)
 
-8. **Agent-core cache output** — Root justfile reads `.cache/just-help-agent-core.txt` via CLAUDE.md `@` reference. Is this cache always fresh before it's read? (Answer: Yes — `dev` recipe calls `cache` before `precommit`, which runs validators that might read it.)
+8. **Agent-core cache output** — Root justfile reads `.cache/just-help-plugin.txt` via CLAUDE.md `@` reference. Is this cache always fresh before it's read? (Answer: Yes — `dev` recipe calls `cache` before `precommit`, which runs validators that might read it.)
 
 ---
 
 ## File Locations (Absolute Paths)
 
 - **Root justfile:** `/Users/david/code/claudeutils-plugin-migration/justfile` (390 lines)
-- **Agent-core justfile:** `/Users/david/code/claudeutils-plugin-migration/agent-core/justfile` (98 lines)
-- **Agent-core Makefile:** `/Users/david/code/claudeutils-plugin-migration/agent-core/Makefile` (35 lines)
-- **Base config template:** `/Users/david/code/claudeutils-plugin-migration/agent-core/configs/justfile-base.just` (152 lines)
+- **Agent-core justfile:** `/Users/david/code/claudeutils-plugin-migration/plugin/justfile` (98 lines)
+- **Agent-core Makefile:** `/Users/david/code/claudeutils-plugin-migration/plugin/Makefile` (35 lines)
+- **Base config template:** `/Users/david/code/claudeutils-plugin-migration/plugin/configs/justfile-base.just` (152 lines)
 
 ---
 
@@ -531,7 +531,7 @@ fi
 | `check` | root | Validation | ❌ (Python) | Partial | No |
 | `format` | root | Transformation | ❌ (Python) | Partial | No |
 | `release` | root | Publishing | ❌ (Python+gh) | ❌ (protected) | No |
-| `sync-to-parent` | agent-core | Setup | ✅ | ❌ (needs `dangerouslyDisableSandbox`) | Yes (hook reloads) |
+| `sync-to-parent` | plugin | Setup | ✅ | ❌ (needs `dangerouslyDisableSandbox`) | Yes (hook reloads) |
 
 ---
 
@@ -539,7 +539,7 @@ fi
 
 **Architecture:** Justfiles use inline bash prolog injection (`#!{{ bash_prolog }}`) rather than imports. Root justfile is project-specific (Python validation, PyPI release). Agent-core justfile is generic (symlink management). Makefile coordinates cache generation.
 
-**Key strength:** Clear separation of concerns. Root handles project builds; agent-core handles environment setup. No cyclic dependencies.
+**Key strength:** Clear separation of concerns. Root handles project builds; plugin handles environment setup. No cyclic dependencies.
 
 **Key risk:** No include mechanism discovered. Future refactoring (per Makefile comment) may change this pattern. Template variable approach is idiomatic but less flexible than includes.
 

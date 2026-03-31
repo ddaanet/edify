@@ -12,7 +12,7 @@ import pytest
 # Import the hook script as a module
 hook_script_path = (
     Path(__file__).parent.parent
-    / "agent-core"
+    / "plugin"
     / "hooks"
     / "userpromptsubmit-shortcuts.py"
 )

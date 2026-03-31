@@ -22,7 +22,7 @@ _PATH_PREFIXES = (
     "plans/",
     "src/",
     "agents/",
-    "agent-core/",
+    "plugin/",
     "tests/",
     ".claude/",
 )

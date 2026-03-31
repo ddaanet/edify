@@ -23,7 +23,7 @@
 | 6.1 | `.claude/` symlinks (delete), `settings.json` (edit) | FR-7, FR-9 |
 | 6.2 | fragments (edit) | FR-7 |
 | 6.3 | — (validation checkpoint) | FR-1, FR-7, FR-9 |
-| 7 | directory rename + all `agent-core/` path refs | — |
+| 7 | directory rename + all `plugin/` path refs | — |
 | NFR-1 | validated at Step 1.3 | NFR-1 |
 | NFR-2 | architectural (same content, different mechanism) | NFR-2 |
 
@@ -70,7 +70,7 @@ The following recommendations should be incorporated during full runbook expansi
 - Step 1.3 tmux verification mechanism needs design before execution. Applies to Steps 2.4, 6.1, 6.3 verification as well
 
 **Bootstrap constraint:**
-- agent-core/ must remain functional throughout migration
+- plugin/ must remain functional throughout migration
 - Plugin verified alongside existing symlinks before symlink removal (Phase 6)
 - Recall entry "when hook commands use relative paths" applies: all hooks.json commands must use `$CLAUDE_PLUGIN_ROOT` prefix for absolute resolution
 
@@ -78,22 +78,22 @@ The following recommendations should be incorporated during full runbook expansi
 
 ### Phase 1: Plugin manifest and structure (type: general)
 
-Create the plugin structure inside existing `agent-core/` directory.
+Create the plugin structure inside existing `plugin/` directory.
 
 - Step 1.1: Create `.claude-plugin/plugin.json`
   - Name: `edify`, version matching `pyproject.toml` current version
-  - Target: `agent-core/.claude-plugin/plugin.json`
-  - Verify: `cat agent-core/.claude-plugin/plugin.json` shows valid JSON with name and version
-  - Files: `agent-core/.claude-plugin/plugin.json` (create), `pyproject.toml` (read for version)
+  - Target: `plugin/.claude-plugin/plugin.json`
+  - Verify: `cat plugin/.claude-plugin/plugin.json` shows valid JSON with name and version
+  - Files: `plugin/.claude-plugin/plugin.json` (create), `pyproject.toml` (read for version)
 
 - Step 1.2: Create plugin `hooks/hooks.json` in wrapper format
-  - Migrate all hook definitions from `.claude/settings.json` hooks section into `agent-core/hooks/hooks.json`
+  - Migrate all hook definitions from `.claude/settings.json` hooks section into `plugin/hooks/hooks.json`
   - Wrapper format: `{"hooks": {"PreToolUse": [...], ...}}` per D-4
   - All commands use `$CLAUDE_PLUGIN_ROOT/hooks/` prefix (not `$CLAUDE_PROJECT_DIR`)
   - Omit `pretooluse-symlink-redirect.sh` (deleted in Phase 2)
   - Include all 9 surviving hooks: `pretooluse-block-tmp.sh`, `submodule-safety.py` (PreToolUse+PostToolUse), `pretooluse-recipe-redirect.py`, `pretooluse-recall-check.py`, `posttooluse-autoformat.sh`, `userpromptsubmit-shortcuts.py`, `sessionstart-health.sh`, `stop-health-fallback.sh` (see outline.md Component 2 for full inventory)
   - Verify: JSON validates, all 9 surviving hooks present with correct matchers
-  - Files: `agent-core/hooks/hooks.json` (rewrite from current subset), `.claude/settings.json` (read for current bindings)
+  - Files: `plugin/hooks/hooks.json` (rewrite from current subset), `.claude/settings.json` (read for current bindings)
 
 - Step 1.3: Validate plugin loading
   - Verify FR-1 (auto-discovery), NFR-1 (dev mode cycle)
@@ -124,19 +124,19 @@ Migrate all hooks to plugin, create consolidated setup hook, audit scripts for e
 - Step 2.1: Audit hook scripts for env var usage
   - Scripts needing audit (from outline Component 2 table): `pretooluse-recipe-redirect.py`, `pretooluse-recall-check.py`, `sessionstart-health.sh`, `stop-health-fallback.sh`
   - Check each for `$CLAUDE_PROJECT_DIR` usage — must resolve correctly under plugin context
-  - Check for hardcoded `agent-core/` paths that need `$CLAUDE_PLUGIN_ROOT` substitution
+  - Check for hardcoded `plugin/` paths that need `$CLAUDE_PLUGIN_ROOT` substitution
   - Record findings per script: no-change-needed or specific edits required
-  - Files: 4 scripts in `agent-core/hooks/`
+  - Files: 4 scripts in `plugin/hooks/`
 
 - Step 2.2: Apply hook script fixes from audit
   - Apply any env var fixes identified in Step 2.1
   - Delete `pretooluse-symlink-redirect.sh` (purpose eliminated by plugin migration)
   - Verify remaining scripts have no relative path references (recall: hook commands must use absolute paths)
-  - Files: affected scripts from audit + `agent-core/hooks/pretooluse-symlink-redirect.sh` (delete)
+  - Files: affected scripts from audit + `plugin/hooks/pretooluse-symlink-redirect.sh` (delete)
   - Depends on: Step 2.1
 
 - Step 2.3: Create consolidated `edify-setup.sh`
-  - New file: `agent-core/hooks/edify-setup.sh`
+  - New file: `plugin/hooks/edify-setup.sh`
   - Handles (per outline Component 2):
     - Export `EDIFY_PLUGIN_ROOT` via `$CLAUDE_ENV_FILE` (grounded: official mechanism)
     - `uv pip install claudeutils==X.Y.Z` into `$CLAUDE_PLUGIN_ROOT/.venv` (FR-11) — with `uv` availability check, pip fallback (R-3). Note: package is currently `claudeutils` on PyPI; rename to `edify` is separate work
@@ -145,15 +145,15 @@ Migrate all hooks to plugin, create consolidated setup hook, audit scripts for e
   - UPS fallback: transcript scraping for setup marker (if SessionStart discarded — recall: #10373)
   - Script must be idempotent
   - Verify: script runs without error, `.edify.yaml` updated, env var available in subsequent commands
-  - Files: `agent-core/hooks/edify-setup.sh` (create)
+  - Files: `plugin/hooks/edify-setup.sh` (create)
 
 - Step 2.4: Wire setup hook into hooks.json
-  - Post-phase state: `agent-core/hooks/hooks.json` (rewritten in Step 1.2) contains all 9 surviving hooks in wrapper format
-  - Add SessionStart entry for `edify-setup.sh` in `agent-core/hooks/hooks.json`
+  - Post-phase state: `plugin/hooks/hooks.json` (rewritten in Step 1.2) contains all 9 surviving hooks in wrapper format
+  - Add SessionStart entry for `edify-setup.sh` in `plugin/hooks/hooks.json`
   - Ensure it runs before `sessionstart-health.sh` (setup provides env vars health check may need)
   - Verify: restart session → setup hook fires → env vars available (same tmux verification mechanism as Step 1.3)
   - Validation checkpoint — STOP and report Phase 2 results before proceeding
-  - Files: `agent-core/hooks/hooks.json` (edit)
+  - Files: `plugin/hooks/hooks.json` (edit)
   - Depends on: Steps 2.2, 2.3
 
 ### Phase 3: Migration skills (type: general, model: opus)
@@ -161,19 +161,19 @@ Migrate all hooks to plugin, create consolidated setup hook, audit scripts for e
 Create `/edify:init` and `/edify:update` skills — agentic prose artifacts requiring opus.
 
 - Step 3.1: Create `/edify:init` skill
-  - New skill at `agent-core/skills/init/SKILL.md`
+  - New skill at `plugin/skills/init/SKILL.md`
   - **Conversational, not predetermined recipe.** No real consumer use case yet — over-specifying behavior bakes in unvalidated assumptions
   - Skill loads reference material (outline Component 4, fragment inventory, template) and discusses setup with user
   - Reference points: fragment list, `agents/` structure, CLAUDE.md template, `.edify.yaml` format
   - Idempotent: check before acting, never destroy existing content
-  - Need to create template: `agent-core/templates/CLAUDE.template.md`
-  - Files: `agent-core/skills/init/SKILL.md` (create), `agent-core/templates/CLAUDE.template.md` (create)
+  - Need to create template: `plugin/templates/CLAUDE.template.md`
+  - Files: `plugin/skills/init/SKILL.md` (create), `plugin/templates/CLAUDE.template.md` (create)
 
 - Step 3.2: Create `/edify:update` skill
-  - New skill at `agent-core/skills/update/SKILL.md`
+  - New skill at `plugin/skills/update/SKILL.md`
   - Behavior: sync fragments + `portable.just`, update `.edify.yaml` version
   - Separate from init — update is sync-only, not scaffolding
-  - Files: `agent-core/skills/update/SKILL.md` (create)
+  - Files: `plugin/skills/update/SKILL.md` (create)
 
 ### Phase 4: Justfile modularization (type: general)
 
@@ -192,11 +192,11 @@ Extract portable recipes and update root justfile.
     - `wt-*` — manual worktree fallbacks (per D-5: included in portable stack)
   - Do NOT include `release` (project-specific)
   - Each module needs its own minimal bash prolog (`fail`, `visible`, color variables) — cannot rely on root justfile's `bash_prolog`
-  - Target: `agent-core/` (module structure TBD by D-5 redesign)
+  - Target: `plugin/` (module structure TBD by D-5 redesign)
   - Files: justfile module(s) (create)
 
 - Step 4.2: Update root justfile to import portable modules
-  - Import module(s) from `agent-core/`
+  - Import module(s) from `plugin/`
   - Remove recipes that moved to portable modules
   - Keep project-specific recipes (release, line-limits, project-specific helpers)
   - Keep `bash_prolog` for project-specific helper functions
@@ -211,12 +211,12 @@ Extract portable recipes and update root justfile.
 Execute after plugin verified working. Irreversible within session.
 
 - Step 6.1: Remove symlinks and clean settings.json
-  - Post-phase state: `agent-core/hooks/hooks.json` contains all 9 surviving hooks (Phase 1+2), `agent-core/.claude-plugin/plugin.json` exists (Phase 1), `agent-core/hooks/edify-setup.sh` wired into hooks.json (Phase 2)
+  - Post-phase state: `plugin/hooks/hooks.json` contains all 9 surviving hooks (Phase 1+2), `plugin/.claude-plugin/plugin.json` exists (Phase 1), `plugin/hooks/edify-setup.sh` wired into hooks.json (Phase 2)
   - Remove 33 skill symlinks from `.claude/skills/`
   - Remove 13 agent symlinks from `.claude/agents/` (PRESERVE 6 `handoff-cli-tool-*.md` regular files)
   - Remove 4 hook symlinks from `.claude/hooks/`
   - Remove ALL hook entries from `.claude/settings.json` hooks section
-  - Remove `sync-to-parent` recipe from `agent-core/justfile`
+  - Remove `sync-to-parent` recipe from `plugin/justfile`
   - Remove deny rules from `settings.json`: `Write(.claude/skills/*)`, `Write(.claude/agents/*)`, `Write(.claude/hooks/*)`, `Bash(ln:*)` — no longer needed
   - Update `.gitignore` if needed
   - Verify plugin still discovers all skills/agents/hooks (same tmux verification mechanism as Step 1.3)
@@ -228,7 +228,7 @@ Execute after plugin verified working. Irreversible within session.
   - `fragments/claude-config-layout.md`: remove symlink section
   - `fragments/sandbox-exemptions.md`: remove `sync-to-parent` subsection
   - `fragments/delegation.md`: update examples referencing `sync-to-parent`
-  - Files: 4 fragments in `agent-core/fragments/` (edit)
+  - Files: 4 fragments in `plugin/fragments/` (edit)
   - Depends on: Step 6.1
 
 - Step 6.3: Validate migration completeness
@@ -242,16 +242,16 @@ Execute after plugin verified working. Irreversible within session.
 
 ### Phase 7: Directory rename (type: inline)
 
-Rename `agent-core/` → `edify-plugin/` and update all references. All decisions pre-resolved, mechanical replacement.
+Rename `plugin/` → `edify-plugin/` and update all references. All decisions pre-resolved, mechanical replacement.
 Depends on: Phase 6 (symlinks removed, migration validated)
 
-- `mv agent-core/ edify-plugin/`
-- `settings.json` `permissions.allow`: update all `agent-core/bin/` → `edify-plugin/bin/`
-- `settings.json` `sandbox.excludedCommands`: update `agent-core/bin/prepare-runbook.py` → `edify-plugin/bin/prepare-runbook.py`
-- `justfile`: update import paths from `agent-core/` → `edify-plugin/`
-- CLAUDE.md `@`-references: update `agent-core/` → `edify-plugin/`
-- Any fragment, skill, or agent referencing `agent-core/` paths
-- `--plugin-dir ./agent-core` → `--plugin-dir ./edify-plugin` in justfile `claude` recipe
+- `mv plugin/ edify-plugin/`
+- `settings.json` `permissions.allow`: update all `plugin/bin/` → `edify-plugin/bin/`
+- `settings.json` `sandbox.excludedCommands`: update `plugin/bin/prepare-runbook.py` → `edify-plugin/bin/prepare-runbook.py`
+- `justfile`: update import paths from `plugin/` → `edify-plugin/`
+- CLAUDE.md `@`-references: update `plugin/` → `edify-plugin/`
+- Any fragment, skill, or agent referencing `plugin/` paths
+- `--plugin-dir ./plugin` → `--plugin-dir ./edify-plugin` in justfile `claude` recipe
 - Verify: `just precommit` passes, `just claude` launches correctly
 
 ---

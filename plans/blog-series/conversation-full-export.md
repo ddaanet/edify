@@ -1,7 +1,7 @@
-# Conversation Export — Blog Series Planning (agent-core)
+# Conversation Export — Blog Series Planning (plugin)
 
 **Date:** 2026-03-13
-**Projet:** claudeutils / agent-core
+**Projet:** claudeutils / plugin
 
 ---
 
@@ -9,11 +9,11 @@
 
 ### User
 
-Récupère le contexte du projet sur mon GitHub. Actuellement ça s'appelle claudeutils il y a un sous module qui s'appelle agent-core.
+Récupère le contexte du projet sur mon GitHub. Actuellement ça s'appelle claudeutils il y a un sous module qui s'appelle plugin.
 
 ### Claude
 
-*(Recherche web "claudeutils agent-core GitHub" — pas de résultat pertinent)*
+*(Recherche web "claudeutils plugin GitHub" — pas de résultat pertinent)*
 
 La recherche générique ne trouve pas ton repo spécifique. J'ai besoin d'un peu plus d'info pour le localiser.
 
@@ -39,15 +39,15 @@ Le repo `claudeutils` existe bien sur ton profil. Voyons ce qu'il contient :
 
 *(Explore la structure du repo — 12M, src/, tests/, agents/, plans/, etc.)*
 
-*(Lit CLAUDE.md — références @agent-core/fragments/*, documentation progressive, recipes justfile)*
+*(Lit CLAUDE.md — références @plugin/fragments/*, documentation progressive, recipes justfile)*
 
-*(Vérifie le submodule — agent-core pointe vers git@github.com:ddaanet/agent-core.git, commit 6cafc1d)*
+*(Vérifie le submodule — plugin pointe vers git@github.com:ddaanet/plugin.git, commit 6cafc1d)*
 
-*(Clone agent-core via HTTPS — succès)*
+*(Clone plugin via HTTPS — succès)*
 
-*(Explore agent-core — skills/, agents/, fragments/, hooks/, bin/, docs/, configs/, templates/)*
+*(Explore plugin — skills/, agents/, fragments/, hooks/, bin/, docs/, configs/, templates/)*
 
-*(Lit agent-core/README.md — 18 skills, 14 sub-agents, 23 fragments, 4 hooks, pipeline design→handoff)*
+*(Lit plugin/README.md — 18 skills, 14 sub-agents, 23 fragments, 4 hooks, pipeline design→handoff)*
 
 *(Lit claudeutils/README.md — CLI commands, agent framework, memory management, development setup)*
 
@@ -74,7 +74,7 @@ OK, j'ai tout récupéré et parcouru. Voici le contexte du projet :
 
 Stack : Click, Pydantic, Anthropic SDK, PyYAML. Linting strict avec `ruff ALL` + `mypy strict`. Tests avec pytest (~100+ fichiers de test).
 
-**2. agent-core** (sous-module git `agent-core/`) — le framework de workflow pour Claude Code :
+**2. plugin** (sous-module git `plugin/`) — le framework de workflow pour Claude Code :
 
 - **Pipeline structuré** : `/design` → `/runbook` → `[plan-reviewer]` → `/orchestrate` → `[vet-fix-agent]` → `/handoff`
 - **18 skills** (slash-commands), **14 sub-agents** (via Task tool en contexte isolé), **23 fragments** d'instruction, **4 hooks**
@@ -82,7 +82,7 @@ Stack : Click, Pydantic, Anthropic SDK, PyYAML. Linting strict avec `ruff ALL` +
 - **Modes de session** : `s` (status), `x` (execute), `xc` (execute+commit), `r` (resume), `wt` (worktree)
 - En cours de migration vers un plugin Claude Code (`edify-plugin`)
 
-Le `CLAUDE.md` à la racine compose tout avec des `@agent-core/fragments/...` references.
+Le `CLAUDE.md` à la racine compose tout avec des `@plugin/fragments/...` references.
 
 Qu'est-ce que tu voulais faire avec ce contexte ? Tu mentionnais vouloir push d'abord — c'est à jour ou il y a des changements locaux que je devrais connaître ?
 
@@ -102,11 +102,11 @@ C'est le contexte du projet initialise la mémoire du projet avec ça
 
 1. User is David Allouche (ddaanet on GitHub). Main project: claudeutils — Python CLI + agent framework for Claude Code.
 2. claudeutils CLI: click-based, Python 3.14+, uv, pydantic, mypy strict, ruff ALL. Cmds: extract/collect/analyze, markdown, tokens, account, compose, validate, recall, statusline, when, worktree.
-3. agent-core: git submodule in claudeutils. 18 skills, 14 sub-agents, 23 fragments, 4 hooks. Pipeline: design→runbook→orchestrate→vet→handoff. Migrating to plugin (edify-plugin).
-4. agent-core memory system: session.md (handoff), learnings.md (append-only), memory-index.md (keyword catalog), decisions/ (permanent), jobs.md (plan lifecycle). Session modes: s/x/xc/r/wt.
-5. Repos: github.com/ddaanet/claudeutils (public, Python) and github.com/ddaanet/agent-core (public, submodule). Build: hatchling. Tasks: justfile. Tests: pytest (~100+ test files).
+3. plugin: git submodule in claudeutils. 18 skills, 14 sub-agents, 23 fragments, 4 hooks. Pipeline: design→runbook→orchestrate→vet→handoff. Migrating to plugin (edify-plugin).
+4. plugin memory system: session.md (handoff), learnings.md (append-only), memory-index.md (keyword catalog), decisions/ (permanent), jobs.md (plan lifecycle). Session modes: s/x/xc/r/wt.
+5. Repos: github.com/ddaanet/claudeutils (public, Python) and github.com/ddaanet/plugin (public, submodule). Build: hatchling. Tasks: justfile. Tests: pytest (~100+ test files).
 
-C'est fait. 5 entrées mémoire initialisées couvrant l'essentiel : ton identité GitHub, la stack et les commandes du CLI, la structure d'agent-core (pipeline, skills, agents, fragments), le système mémoire, et les infos repo/build. Ça sera disponible dans toutes les conversations de ce projet.
+C'est fait. 5 entrées mémoire initialisées couvrant l'essentiel : ton identité GitHub, la stack et les commandes du CLI, la structure d'plugin (pipeline, skills, agents, fragments), le système mémoire, et les infos repo/build. Ça sera disponible dans toutes les conversations de ce projet.
 
 ---
 
@@ -235,7 +235,7 @@ Ddaa.net a un blog maison, basé sur la génération statique de HTML, un partir
 
 ### Claude
 
-*(Ajoute mémoire #7 : Blog on ddaa.net: static HTML generated from markdown. Content marketing plan: blog series on agent-core patterns + LinkedIn promotion in FR and EN.)*
+*(Ajoute mémoire #7 : Blog on ddaa.net: static HTML generated from markdown. Content marketing plan: blog series on plugin patterns + LinkedIn promotion in FR and EN.)*
 
 Parfait, donc le livrable c'est du markdown directement. Pas de friction technique.
 

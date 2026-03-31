@@ -7,31 +7,31 @@
 
 | Type | File | + | - |
 |------|------|---|---|
-| Code | agent-core/bin/bump-plugin-version.py | +34 | -0 |
-| Code | agent-core/bin/check-version-consistency.py | +63 | -0 |
-| Code | agent-core/hooks/sessionstart-health.sh | +79 | -2 |
-| Code | agent-core/hooks/stop-health-fallback.sh | +2 | -2 |
-| Code | agent-core/hooks/pretooluse-recipe-redirect.py | +0 | -7 |
-| Agentic prose | agent-core/skills/init/SKILL.md | +132 | -0 |
-| Agentic prose | agent-core/skills/update/SKILL.md | +136 | -0 |
-| Agentic prose | agent-core/fragments/claude-config-layout.md | +0 | -5 |
-| Agentic prose | agent-core/fragments/project-tooling.md | +0 | -3 |
-| Agentic prose | agent-core/fragments/sandbox-exemptions.md | +0 | -7 |
-| Configuration | agent-core/.claude-plugin/plugin.json | +5 | -0 |
-| Configuration | agent-core/hooks/hooks.json | +88 | -55 |
-| Configuration | agent-core/portable.just | +472 | -0 |
+| Code | plugin/bin/bump-plugin-version.py | +34 | -0 |
+| Code | plugin/bin/check-version-consistency.py | +63 | -0 |
+| Code | plugin/hooks/sessionstart-health.sh | +79 | -2 |
+| Code | plugin/hooks/stop-health-fallback.sh | +2 | -2 |
+| Code | plugin/hooks/pretooluse-recipe-redirect.py | +0 | -7 |
+| Agentic prose | plugin/skills/init/SKILL.md | +132 | -0 |
+| Agentic prose | plugin/skills/update/SKILL.md | +136 | -0 |
+| Agentic prose | plugin/fragments/claude-config-layout.md | +0 | -5 |
+| Agentic prose | plugin/fragments/project-tooling.md | +0 | -3 |
+| Agentic prose | plugin/fragments/sandbox-exemptions.md | +0 | -7 |
+| Configuration | plugin/.claude-plugin/plugin.json | +5 | -0 |
+| Configuration | plugin/hooks/hooks.json | +88 | -55 |
+| Configuration | plugin/portable.just | +472 | -0 |
 | Configuration | justfile | +9 | -346 |
-| Configuration | agent-core/justfile | +0 | -98 |
+| Configuration | plugin/justfile | +0 | -98 |
 | Configuration | .edify.yaml | +4 | -0 |
 | Configuration | .gitignore | +1 | -1 |
 | Configuration | .cache/just-help.txt | +21 | -0 |
-| Human docs | agent-core/templates/CLAUDE.template.md | +12 | -12 |
+| Human docs | plugin/templates/CLAUDE.template.md | +12 | -12 |
 
 **Totals:** 19 files, +1058 / -538, net +520
 
 **Note:** Inventory script listed 23 files; 4 agentic prose files (inline/SKILL.md, runbook/SKILL.md, review-dispatch-template.md, tier3-planning-process.md) showed zero diff in submodule commit range — excluded as not modified by migration.
 
-**Design conformance:** 11/13 outline In-scope items delivered. Two items explicitly deferred: directory rename (`agent-core/` → `edify-plugin/`, "cosmetic, last step") and marketplace setup. Step 6.3 checkpoint confirms: "Proceed to Phase 7 (directory rename)."
+**Design conformance:** 11/13 outline In-scope items delivered. Two items explicitly deferred: directory rename (`plugin/` → `edify-plugin/`, "cosmetic, last step") and marketplace setup. Step 6.3 checkpoint confirms: "Proceed to Phase 7 (directory rename)."
 
 ## Critical Findings
 
@@ -68,8 +68,8 @@ Impact: In the most common session type (new interactive), `EDIFY_PLUGIN_ROOT` i
 
 **Pre-rename state (5, 6, 7):**
 - sessionstart-health.sh:30 — Package name `claudeutils` vs D-1 decision `edify`. Correct for current state (pyproject.toml is `claudeutils`). Rename deferred with directory rename.
-- check-version-consistency.py:11 — Hardcoded `agent-core` path. Correct pre-rename; needs update with rename.
-- portable.just:84,102,136 — Hardcoded `agent-core/` and `./scripts/check_line_limits.sh` paths. Consumer projects post-rename need these updated.
+- check-version-consistency.py:11 — Hardcoded `plugin` path. Correct pre-rename; needs update with rename.
+- portable.just:84,102,136 — Hardcoded `plugin/` and `./scripts/check_line_limits.sh` paths. Consumer projects post-rename need these updated.
 
 **Skill allowed-tools (8):**
 - init/SKILL.md:4, update/SKILL.md:4 — `Bash(python3:*)` and `Bash(find:*)` in allowed-tools are excess. `python3` is in settings.json deny list (overrides allowed-tools). `find` unused by any step.

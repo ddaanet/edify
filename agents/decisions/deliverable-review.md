@@ -104,7 +104,7 @@ Summary: counts by severity and axis, gap analysis results.
 1. Sub-agents lack Task and Skill tools — cannot delegate to any reviewer.
 2. All reviews must be delegated to prevent implementer bias — implementer never reviews own work.
 
-**Domain-specific routing:** corrector (code), skill-reviewer (skills), agent-creator (agents), runbook-corrector (planning), corrector + doc-writing skill (human docs). See artifact review routing table in `agent-core/fragments/review-requirement.md`.
+**Domain-specific routing:** corrector (code), skill-reviewer (skills), agent-creator (agents), runbook-corrector (planning), corrector + doc-writing skill (human docs). See artifact review routing table in `plugin/fragments/review-requirement.md`.
 
 ### When Deliverable Review Catches Drift
 

@@ -138,7 +138,7 @@ def test_status_priority_detection(
         (["inline-plan.md"], "/inline plans/test-plan"),
         (
             ["design.md", "runbook-phase-1.md", "runbook-phase-2.md"],
-            "agent-core/bin/prepare-runbook.py plans/test-plan",
+            "plugin/bin/prepare-runbook.py plans/test-plan",
         ),
         (
             ["design.md", "runbook-phase-1.md", "steps", "orchestrator-plan.md"],

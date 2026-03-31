@@ -48,7 +48,7 @@ home (Jan 12-13, 2026) introduced in two days:
 - Orchestrator constraints: opus operates read-only, delegates all source edits
 - Commit delegation protocol (7 commits iterating in one day — each describing what was wrong with the previous version)
 
-Then agent-core extraction (Jan 15): shared recipes, configs, fragments, agents across projects. By March, new projects include agent-core in their initial commit. Adoption cost approaches zero.
+Then plugin extraction (Jan 15): shared recipes, configs, fragments, agents across projects. By March, new projects include plugin in their initial commit. Adoption cost approaches zero.
 
 ### What Remember Actually Is
 
@@ -71,8 +71,8 @@ It's still programming. Process flow, data flow, debugging, verification — the
 | Cognitive protocols: added and removed in 3 days | tuick `a3e15a1` (Dec 12), `26c3b5d` (Dec 15) |
 | oklch-theme: started Gemini, iterated Claude Desktop | oklch-theme `64cbf8f`, AGENTS.md references "Gemini agent" |
 | home: architectural leap in 2 days | home commits Jan 12-13 |
-| Agent-core extraction | pytest-md/agent-core `5783aef` (Jan 15) |
-| Zero-cost adoption by March | devddaanet: agent-core from initial commit (Mar 5) |
+| Agent-core extraction | pytest-md/plugin `5783aef` (Jan 15) |
+| Zero-cost adoption by March | devddaanet: plugin from initial commit (Mar 5) |
 | Four AGENTS.md/CLAUDE.md migration patterns | home `091073f`, tuick coexistence, jobsearch `eec32b4`, ddaanet replacement |
 
 ## Transition to Post 2

@@ -23,7 +23,7 @@ plans/
 **Start Date:** 2025-12
 **Current Phase:** 3 complete, 4 ready
 
-**Purpose:** Unify rules and patterns across repositories via agent-core submodule.
+**Purpose:** Unify rules and patterns across repositories via plugin submodule.
 
 **Progress:**
 - ✅ Phase 1: Foundation and basic unification (10 steps, completed)
@@ -67,7 +67,7 @@ plans/
 
 **Dependencies:**
 - Requires unification project completion
-- agent-core submodule must be stable
+- plugin submodule must be stable
 
 **Owner:** Sonnet orchestrator
 
@@ -209,7 +209,7 @@ model: sonnet  # default model for steps
 - **agents/workflow.md** - Complete oneshot workflow guide
 - **agents/decisions/** - Architectural decisions
 - **agents/session.md** - Current session handoff context
-- **agent-core/bin/prepare-runbook.py** - Runbook artifact generator
+- **plugin/bin/prepare-runbook.py** - Runbook artifact generator
 
 ---
 

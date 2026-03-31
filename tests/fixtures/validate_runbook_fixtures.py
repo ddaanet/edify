@@ -17,7 +17,7 @@ title: Script Runbook
 **GREEN Phase:**
 
 **Changes:**
-- File: `agent-core/skills/commit/format-message.sh`
+- File: `plugin/skills/commit/format-message.sh`
   Action: Create
 
 ---
@@ -62,7 +62,7 @@ title: Violation Runbook
 **GREEN Phase:**
 
 **Changes:**
-- File: `agent-core/skills/myskill/SKILL.md`
+- File: `plugin/skills/myskill/SKILL.md`
   Action: Create
 
 ---

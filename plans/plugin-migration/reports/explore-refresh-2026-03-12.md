@@ -9,7 +9,7 @@ Agent-core is a comprehensive workflow infrastructure for Claude Code agents, cu
 ## 1. Agent-Core Directory Structure (Top 2 Levels)
 
 ```
-agent-core/
+plugin/
 ├── agents/              # 13 agent definitions (specialized sub-agents)
 ├── bin/                 # Utility and validator scripts
 ├── configs/             # Shared tool configurations (ruff, mypy, docformatter, justfile)
@@ -26,7 +26,7 @@ agent-core/
 
 ---
 
-## 2. Hooks in agent-core/hooks/
+## 2. Hooks in plugin/hooks/
 
 All hook files present and configured in `hooks.json`:
 
@@ -77,7 +77,7 @@ shelve, token-efficient-bash, when, worktree
 
 ## 4. Settings.json Hooks Section
 
-Cannot access (permission denied — in deny-list). However, hooks.json shows complete hook registry within agent-core/hooks/. The actual .claude/settings.json would reference this registry for plugin/hook orchestration.
+Cannot access (permission denied — in deny-list). However, hooks.json shows complete hook registry within plugin/hooks/. The actual .claude/settings.json would reference this registry for plugin/hook orchestration.
 
 ---
 
@@ -91,7 +91,7 @@ setup             # Set up development environment
 sync-to-parent    # Sync skills and agents to parent .claude directory via symlinks
 ```
 
-**Agent-core justfile:** No output (likely no recipes specific to agent-core, or uses root recipes).
+**Agent-core justfile:** No output (likely no recipes specific to plugin, or uses root recipes).
 
 ---
 
@@ -126,7 +126,7 @@ Status from README.md (line 12-13): "Currently installed as a git submodule; con
 
 1. **Complete Infrastructure Stack:** All skills, agents, fragments, and hooks are present and working (evidenced by symlinks in .claude/ and hooks.json registry).
 
-2. **Submodule → Plugin Gap:** Current installation assumes agent-core as a git submodule with `just sync-to-parent` to create symlinks. Plugin model would require:
+2. **Submodule → Plugin Gap:** Current installation assumes plugin as a git submodule with `just sync-to-parent` to create symlinks. Plugin model would require:
    - Plugin package structure (manifest.json or equivalent)
    - Declarative hook/skill/agent registration
    - No symlink dependency on parent project structure

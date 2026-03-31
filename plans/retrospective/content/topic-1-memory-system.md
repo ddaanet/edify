@@ -14,7 +14,7 @@ Before memory-index.md existed, agent instructions *were* the memory system. The
 | 2025-11-23 | box-api | `0bbdbf8` | Session-specific rules with filtering: "Include any feedback that is general enough in scope." First curation criterion for what to remember. |
 | 2026-01-12 | home | `e31a4c0` | File organization table: AGENTS.md (behavioral), session.md (transient), design-decisions.md (rationale), plans/ (artifacts). Memory distributed by content type. |
 | 2026-01-12 | pytest-md | `69bf88b` | Session log design — structured conversation state persistence. 100-line max, archive strategy. |
-| 2026-01-15 | pytest-md/agent-core | `5783aef` | Agent-core initialized — memory patterns extracted into shared infrastructure. |
+| 2026-01-15 | pytest-md/plugin | `5783aef` | Agent-core initialized — memory patterns extracted into shared infrastructure. |
 
 **Arc:** Human-written flat rules → agent retrospective self-update → filtering criterion for persistence → structured file taxonomy → shared infrastructure. Each step adds a capability: authorship (human→agent), selectivity (what to keep), organization (where to put it), sharing (across projects).
 
@@ -318,7 +318,7 @@ Human-written flat rules (rules, Sep 2025)
   → Agent retrospective self-update (oklch-theme, Nov 2025)
     → Filtering criterion for persistence (box-api, Nov 2025)
       → Structured file taxonomy (home, Jan 2026)
-        → Shared infrastructure extraction (agent-core, Jan 2026)
+        → Shared infrastructure extraction (plugin, Jan 2026)
           → Always-loaded memory index (Feb 2026)
             → Active lookup tools /when, /how (Feb 2026)
               → 4.1% usage measured, recognition bottleneck named (Feb 20)

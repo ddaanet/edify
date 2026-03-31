@@ -10,7 +10,7 @@ Change injection from runbook-level to phase-level: inject into phase preambles 
 
 ## Scope
 
-`agent-core/bin/prepare-runbook.py` — behavioral code change.
+`plugin/bin/prepare-runbook.py` — behavioral code change.
 
 ## Origin
 

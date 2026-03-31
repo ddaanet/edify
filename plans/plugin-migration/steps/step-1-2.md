@@ -8,7 +8,7 @@
 
 ## Phase Context
 
-Create the plugin structure inside existing `agent-core/` directory. Checkpoint at end gates all downstream phases.
+Create the plugin structure inside existing `plugin/` directory. Checkpoint at end gates all downstream phases.
 
 ---
 
@@ -16,15 +16,15 @@ Create the plugin structure inside existing `agent-core/` directory. Checkpoint 
 
 ## Step 1.2: Create plugin hooks.json in wrapper format
 
-**Objective**: Rewrite `agent-core/hooks/hooks.json` to contain all 9 surviving hook definitions in wrapper format, with `$CLAUDE_PLUGIN_ROOT` paths.
+**Objective**: Rewrite `plugin/hooks/hooks.json` to contain all 9 surviving hook definitions in wrapper format, with `$CLAUDE_PLUGIN_ROOT` paths.
 
 **Prerequisites**:
 - Read `.claude/settings.visible.json` hooks section (current hook bindings — source of truth for matchers and event types)
-- Read `agent-core/hooks/hooks.json` (current subset — will be fully rewritten)
+- Read `plugin/hooks/hooks.json` (current subset — will be fully rewritten)
 - Read `plans/plugin-migration/outline.md` Component 2 hook inventory table (authoritative list of all hooks and their matchers)
 
 **Implementation**:
-1. Rewrite `agent-core/hooks/hooks.json` in wrapper format per D-4:
+1. Rewrite `plugin/hooks/hooks.json` in wrapper format per D-4:
    ```json
    {
      "hooks": {
@@ -50,7 +50,7 @@ Create the plugin structure inside existing `agent-core/` directory. Checkpoint 
 5. Preserve existing command prefixes where needed (`python3`, `bash`)
 
 **Expected Outcome**:
-- `agent-core/hooks/hooks.json` contains wrapper format with all 5 event types
+- `plugin/hooks/hooks.json` contains wrapper format with all 5 event types
 - 9 hook entries total (submodule-safety appears in both PreToolUse and PostToolUse)
 - All paths use `$CLAUDE_PLUGIN_ROOT/hooks/`
 
@@ -59,7 +59,7 @@ Create the plugin structure inside existing `agent-core/` directory. Checkpoint 
 - If hook count doesn't match 9 → verify against `plans/plugin-migration/outline.md` Component 2 table
 
 **Validation**:
-- `python3 -c "import json; d=json.load(open('agent-core/hooks/hooks.json')); assert 'hooks' in d; print('Events:', list(d['hooks'].keys()))"`
+- `python3 -c "import json; d=json.load(open('plugin/hooks/hooks.json')); assert 'hooks' in d; print('Events:', list(d['hooks'].keys()))"`
 - Count hook entries across all events equals 9
 
 ---

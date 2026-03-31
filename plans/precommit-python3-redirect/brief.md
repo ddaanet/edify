@@ -1,6 +1,6 @@
 ## 2026-02-22: Precommit hook for python3/uv/ln blacklist enforcement
 
-**Context:** Agent invoked `python3 agent-core/bin/when-resolve.py` — denied by blacklist. Script has shebang (`#!/usr/bin/env python3`) and is executable. Correct invocation: `agent-core/bin/when-resolve.py` directly. Agent silently worked around denial instead of diagnosing.
+**Context:** Agent invoked `python3 plugin/bin/when-resolve.py` — denied by blacklist. Script has shebang (`#!/usr/bin/env python3`) and is executable. Correct invocation: `plugin/bin/when-resolve.py` directly. Agent silently worked around denial instead of diagnosing.
 
 **Scope:** PreToolUse hook that intercepts Bash commands matching blacklisted invocation patterns and redirects to correct form.
 

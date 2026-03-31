@@ -4,16 +4,16 @@
 
 ## Problem
 
-agent-core distributes skills, agents, and hooks to projects via git submodule + symlinks.
-Pain: `just sync-to-parent` ceremony, symlink breakage in worktrees, submodule version pinning across branches (tooling updates don't propagate until merge), hook path indirection (settings.json → `.claude/hooks/` symlink → `agent-core/hooks/` script), non-trivial adoption for new projects.
+plugin distributes skills, agents, and hooks to projects via git submodule + symlinks.
+Pain: `just sync-to-parent` ceremony, symlink breakage in worktrees, submodule version pinning across branches (tooling updates don't propagate until merge), hook path indirection (settings.json → `.claude/hooks/` symlink → `plugin/hooks/` script), non-trivial adoption for new projects.
 
-Current state (audited 2026-03-12): 33 skill symlinks, 13 agent symlinks, 4 hook symlinks in `.claude/` pointing to `../../agent-core/`. Additionally, 6 generated plan-specific agents (`handoff-cli-tool-*.md`: corrector, impl-corrector, implementer, task, test-corrector, tester) as regular files in `.claude/agents/`. Hooks are configured in two places: `.claude/settings.json` hooks section (referencing both `.claude/hooks/` symlinks and `agent-core/hooks/` direct paths) and `agent-core/hooks/hooks.json` (subset).
+Current state (audited 2026-03-12): 33 skill symlinks, 13 agent symlinks, 4 hook symlinks in `.claude/` pointing to `../../plugin/`. Additionally, 6 generated plan-specific agents (`handoff-cli-tool-*.md`: corrector, impl-corrector, implementer, task, test-corrector, tester) as regular files in `.claude/agents/`. Hooks are configured in two places: `.claude/settings.json` hooks section (referencing both `.claude/hooks/` symlinks and `plugin/hooks/` direct paths) and `plugin/hooks/hooks.json` (subset).
 
 ## Approach
 
-Convert agent-core into a Claude Code plugin named `edify`. Plugin auto-discovers skills/agents/hooks (no symlinks). Both dev and consumer modes ship together:
+Convert plugin into a Claude Code plugin named `edify`. Plugin auto-discovers skills/agents/hooks (no symlinks). Both dev and consumer modes ship together:
 
-- **Dev mode:** Submodule + `--plugin-dir ./agent-core` — only for edify-plugin development itself (editing skills requires full edify context)
+- **Dev mode:** Submodule + `--plugin-dir ./plugin` — only for edify-plugin development itself (editing skills requires full edify context)
 - **Consumer mode:** Plugin install from marketplace — the primary deployment model for all other projects
 
 SessionStart hook exports `$EDIFY_PLUGIN_ROOT` via `$CLAUDE_ENV_FILE` (grounded: official Claude Code mechanism, available in all subsequent Bash commands). Scripts reference `$EDIFY_PLUGIN_ROOT/bin/` — works in both modes.
@@ -22,7 +22,7 @@ Normal update path is marketplace (`claude plugin update edify`) for both modes.
 
 ## Key Decisions
 
-- **D-1 Naming:** Plugin = `edify` (marketplace), repo = `edify-plugin` (was `agent-core`), Python package = `edify` (was `claudeutils`)
+- **D-1 Naming:** Plugin = `edify` (marketplace), repo = `edify-plugin` (was `plugin`), Python package = `edify` (was `claudeutils`)
 - **D-2 Hook scripts unchanged:** Scripts use `$CLAUDE_PROJECT_DIR` correctly; hooks.json commands use `$CLAUDE_PLUGIN_ROOT` to locate scripts. Moving hooks from settings.json to plugin hooks.json does not change env var availability (grounded: both vars available in all hook types)
 - **D-3 Fragment distribution via skill:** `/edify:init` is a skill (needs reasoning + conditional logic), not a standalone script
 - **D-4 hooks.json format:** Wrapper format `{"hooks": {"PreToolUse": [...]}}` per official Claude Code docs (grounded: code.claude.com/docs/en/plugins migration guide)
@@ -60,7 +60,7 @@ Normal update path is marketplace (`claude plugin update edify`) for both modes.
 
 | Requirement | Validation |
 |-------------|------------|
-| FR-1 | `claude --plugin-dir ./agent-core` → `/help` lists plugin skills; agents appear in `/agents` |
+| FR-1 | `claude --plugin-dir ./plugin` → `/help` lists plugin skills; agents appear in `/agents` |
 | FR-2 | `just claude` launches with system prompt replacement, skills available |
 | FR-3 | Clean project + `/edify:init` → functional CLAUDE.md with `@` refs to `agents/rules/`, fragments copied |
 | FR-4 | Bump `plugin.json` version, restart → `/edify:update` syncs unmodified files, skips user-edited files with warning. `--force` overwrites conflicts. `.edify.yaml` version + synced hashes updated |
@@ -79,10 +79,10 @@ Normal update path is marketplace (`claude plugin update edify`) for both modes.
 
 ### 1. Plugin Manifest
 
-- Create `agent-core/.claude-plugin/plugin.json` (name: `edify`, version matching `pyproject.toml`)
+- Create `plugin/.claude-plugin/plugin.json` (name: `edify`, version matching `pyproject.toml`)
 - Existing `skills/`, `agents/` directories already in correct layout for plugin auto-discovery
 - Hook definitions in `hooks/hooks.json` (wrapper format, see Component 2)
-- Directory stays as `agent-core/` during development — rename is cosmetic, happens last
+- Directory stays as `plugin/` during development — rename is cosmetic, happens last
 
 ### 2. Hook Migration
 
@@ -93,8 +93,8 @@ Complete hook inventory (audited from settings.json + hooks/ directory):
 | `pretooluse-block-tmp.sh` | PreToolUse | Write\|Edit | settings.json (via .claude/ symlink) | Migrate to plugin hooks.json |
 | `pretooluse-symlink-redirect.sh` | PreToolUse | Write\|Edit | settings.json (via .claude/ symlink) | **Delete** (purpose eliminated) |
 | `submodule-safety.py` | PreToolUse + PostToolUse | Bash | settings.json (via .claude/ symlink) | Migrate to plugin hooks.json |
-| `pretooluse-recipe-redirect.py` | PreToolUse | Bash | settings.json (direct agent-core/ path) | Migrate to plugin hooks.json |
-| `pretooluse-recall-check.py` | PreToolUse | Task | settings.json (direct agent-core/ path) | Migrate to plugin hooks.json |
+| `pretooluse-recipe-redirect.py` | PreToolUse | Bash | settings.json (direct plugin/ path) | Migrate to plugin hooks.json |
+| `pretooluse-recall-check.py` | PreToolUse | Task | settings.json (direct plugin/ path) | Migrate to plugin hooks.json |
 | `posttooluse-autoformat.sh` | PostToolUse | Write\|Edit | settings.json + hooks.json | Migrate to plugin hooks.json |
 | `userpromptsubmit-shortcuts.py` | UserPromptSubmit | (none) | settings.json + hooks.json | Migrate to plugin hooks.json |
 | `sessionstart-health.sh` | SessionStart | * | settings.json + hooks.json | Migrate to plugin hooks.json |
@@ -182,10 +182,10 @@ Execute **last** — only after plugin verified working.
 ### 7. Script Path Updates + Permissions
 
 - `bin/` scripts referenced from skills, settings.json, and justfile
-- After rename: paths change from `agent-core/bin/...` to `edify-plugin/bin/...`
-- `settings.json` permissions.allow: update `agent-core/bin/` → `edify-plugin/bin/`
+- After rename: paths change from `plugin/bin/...` to `edify-plugin/bin/...`
+- `settings.json` permissions.allow: update `plugin/bin/` → `edify-plugin/bin/`
 - `settings.json` sandbox.excludedCommands: update path
-- Mechanical `agent-core/` → `edify-plugin/` replacement
+- Mechanical `plugin/` → `edify-plugin/` replacement
 - CLI migration (moving scripts to edify CLI proper) is separate future work
 
 ### 8. Documentation Updates
@@ -194,7 +194,7 @@ Execute **last** — only after plugin verified working.
 - `fragments/claude-config-layout.md` — remove symlink section
 - `fragments/sandbox-exemptions.md` — remove `sync-to-parent` subsection
 - `fragments/delegation.md` — update examples referencing `sync-to-parent`
-- Any fragment referencing `agent-core/` paths → update to `edify-plugin/`
+- Any fragment referencing `plugin/` paths → update to `edify-plugin/`
 
 ## Scope
 
@@ -209,7 +209,7 @@ Execute **last** — only after plugin verified working.
 - Documentation updates
 - Plugin-local venv for edify CLI via `uv`
 - Marketplace setup
-- Directory rename (`agent-core/` → `edify-plugin/`, cosmetic, last step)
+- Directory rename (`plugin/` → `edify-plugin/`, cosmetic, last step)
 
 **Out:**
 - Fragment content changes (behavioral rules stay as-is)
@@ -225,11 +225,11 @@ Execute **last** — only after plugin verified working.
 **Bootstrap constraint:** edify tooling must remain functional throughout migration. Cannot rename directory first — breaks all paths.
 
 **Strategy:**
-- Build plugin structure inside existing `agent-core/` (add `.claude-plugin/plugin.json`, `hooks/hooks.json`)
-- `--plugin-dir ./agent-core` works — plugin name is `edify` regardless of directory name
+- Build plugin structure inside existing `plugin/` (add `.claude-plugin/plugin.json`, `hooks/hooks.json`)
+- `--plugin-dir ./plugin` works — plugin name is `edify` regardless of directory name
 - Verify plugin loading alongside existing symlinks (both paths work during transition)
 - Symlink cleanup + settings.json hook removal once plugin verified
-- Directory rename (`agent-core/` → `edify-plugin/`) is cosmetic — last step
+- Directory rename (`plugin/` → `edify-plugin/`) is cosmetic — last step
 - All changes merge to main atomically via branch merge
 - No rollback section needed — revert = don't merge
 
@@ -240,7 +240,7 @@ Issues found in `design.md` during this refresh:
 1. **D-4 hooks.json format is wrong.** Design says direct format; official Claude Code docs confirm wrapper format `{"hooks": {...}}` for plugin hooks.json
 2. **Hook inventory incomplete.** Design lists 4 hooks; current codebase has 10 hook scripts with 8 distinct bindings across 5 event types
 3. **Artifact counts stale.** Design says "16 skills, 12 agents"; audit shows 33 skills, 13 agents, 6 generated agents, 27 fragments
-4. **Dual hook configuration not addressed.** Current settings.json hooks reference both `.claude/hooks/` (symlinks) and `agent-core/hooks/` (direct). Migration must consolidate both into single plugin hooks.json
+4. **Dual hook configuration not addressed.** Current settings.json hooks reference both `.claude/hooks/` (symlinks) and `plugin/hooks/` (direct). Migration must consolidate both into single plugin hooks.json
 5. **D-8 (consumer mode deferred) is wrong.** `$CLAUDE_ENV_FILE` mechanism resolves the path resolution blocker. Both modes ship together
 
 ## Resolved Questions
@@ -255,7 +255,7 @@ Issues found in `design.md` during this refresh:
 - **Justfile import:** Variables merge, shallower definitions override (grounded via Context7)
 - **Python dependency mechanism:** Plugin-local venv via `uv pip install` in SessionStart hook
 - **Version scheme:** Semver, marketplace-driven, matches PyPI. Single version across `plugin.json` and `pyproject.toml`
-- **Bootstrap strategy:** Build plugin inside `agent-core/`, rename last
+- **Bootstrap strategy:** Build plugin inside `plugin/`, rename last
 - **Update conflict policy:** Warn-and-skip for user-edited files, auto-update for unmodified. Detection via synced content hashes in `.edify.yaml`. `--force` for intentional overwrite
 
 ## Risks

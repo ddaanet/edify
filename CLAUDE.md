@@ -1,16 +1,16 @@
 # Agent Instructions
 
-@agent-core/fragments/workflows-terminology.md
+@plugin/fragments/workflows-terminology.md
 
 ---
 
 ## Core Behavioral Rules
 
-@agent-core/fragments/communication.md
+@plugin/fragments/communication.md
 
-@agent-core/fragments/execute-rule.md
+@plugin/fragments/execute-rule.md
 
-@agent-core/fragments/pushback.md
+@plugin/fragments/pushback.md
 
 **Pending task notation:**
 
@@ -20,9 +20,9 @@ When user says "pending: task description":
 - Assess model tier (opus/sonnet/haiku) with reasoning
 - Respond: task name (noun-phrase, not verbatim user text), model tier, restart flag if needed
 
-@agent-core/fragments/execution-routing.md
+@plugin/fragments/execution-routing.md
 
-@agent-core/fragments/delegation.md
+@plugin/fragments/delegation.md
 
 ---
 
@@ -48,27 +48,27 @@ When user says "pending: task description":
 
 ## Operational Rules
 
-@agent-core/fragments/error-handling.md
+@plugin/fragments/error-handling.md
 
-@agent-core/fragments/token-economy.md
+@plugin/fragments/token-economy.md
 
-@agent-core/fragments/commit-skill-usage.md
+@plugin/fragments/commit-skill-usage.md
 
-@agent-core/fragments/no-estimates.md
+@plugin/fragments/no-estimates.md
 
-@agent-core/fragments/no-confabulation.md
+@plugin/fragments/no-confabulation.md
 
-@agent-core/fragments/source-not-generated.md
+@plugin/fragments/source-not-generated.md
 
-@agent-core/fragments/code-removal.md
+@plugin/fragments/code-removal.md
 
-@agent-core/fragments/tmp-directory.md
+@plugin/fragments/tmp-directory.md
 
 ## Reference & Tooling
 
-@agent-core/fragments/design-decisions.md
+@plugin/fragments/design-decisions.md
 
-@agent-core/fragments/project-tooling.md
+@plugin/fragments/project-tooling.md
 
 ### Available Recipes
 
@@ -77,4 +77,4 @@ When user says "pending: task description":
 - `just dev` — Format and run all checks
 - `just format` / `just lint` / `just check` — Code formatting and style
 
-@agent-core/fragments/tool-batching.md
+@plugin/fragments/tool-batching.md

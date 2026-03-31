@@ -7,7 +7,7 @@
     "allow": [
       "Bash(git:*)",
       "Bash(wc:*)",
-      "Bash(claudeutils:*)",
+      "Bash(edify:*)",
       "Bash(just:*)",
       "Bash(pytest:*)",
       "Bash(ruff:*)",
@@ -16,9 +16,9 @@
       "Bash(pbcopy:*)",
       "Bash(echo:*)",
       "Bash(printf:*)",
-      "Bash(agent-core/bin/prepare-runbook.py:*)",
-      "Bash(agent-core/bin/recall-*:*)",
-      "Bash(agent-core/bin/task-context.sh:*)",
+      "Bash(plugin/bin/prepare-runbook.py:*)",
+      "Bash(plugin/bin/recall-*:*)",
+      "Bash(plugin/bin/task-context.sh:*)",
       "Skill",
       "WebSearch",
       "WebFetch",
@@ -43,11 +43,11 @@
       "WebFetch(domain:claudefa.st)",
       "WebFetch(domain:gitmoji.dev)",
       "WebFetch(domain:pypi.org)",
-      "Bash(agent-core/bin/validate-memory-index.py:*)",
-      "Bash(agent-core/bin/learning-ages.py agents/learnings.md)",
+      "Bash(plugin/bin/validate-memory-index.py:*)",
+      "Bash(plugin/bin/learning-ages.py agents/learnings.md)",
       "Bash(uv sync:*)",
-      "Bash(agent-core/bin/triage-feedback.sh:*)",
-      "Bash(agent-core/bin/magic-query-log:*)",
+      "Bash(plugin/bin/triage-feedback.sh:*)",
+      "Bash(plugin/bin/magic-query-log:*)",
       "Bash(plans/prototypes/session-scraper.py:*)"
     ],
     "deny": [
@@ -105,7 +105,7 @@
     "excludedCommands": [
       "git",
       "just",
-      "agent-core/bin/prepare-runbook.py"
+      "plugin/bin/prepare-runbook.py"
     ]
   },
   "plansDirectory": "plans/claude/"

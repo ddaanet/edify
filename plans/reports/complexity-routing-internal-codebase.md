@@ -13,7 +13,7 @@
 
 ## 1. Current Classification and Routing Logic
 
-### Location: `/Users/david/code/claudeutils-wt/session-scraping-prototype/agent-core/skills/design/SKILL.md`
+### Location: `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/skills/design/SKILL.md`
 
 #### Phase 0: Complexity Triage (Lines 24-103)
 
@@ -24,7 +24,7 @@
 
 **Triage Recall (D+B anchor):** Lines 47-59
 - Loads: "when behavioral code", "when complexity", "when triage", domain keywords
-- Invokes: `agent-core/bin/when-resolve.py` before classification
+- Invokes: `plugin/bin/when-resolve.py` before classification
 - Purpose: surface codified decisions constraining classification before triage happens
 
 **Classification Criteria (Lines 60-75):**
@@ -66,7 +66,7 @@ Uses Stacey Matrix framework (named axes):
 - Routes incomplete design to `/runbook` for phase-by-phase planning
 - → Commit design, `/handoff [CONTINUATION: /commit]`
 
-### Location: `/Users/david/code/claudeutils-wt/session-scraping-prototype/agent-core/skills/runbook/SKILL.md`
+### Location: `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/skills/runbook/SKILL.md`
 
 #### Tier Assessment (Lines 72-175)
 
@@ -295,12 +295,12 @@ From requirement definitions:
 - `plans/prototypes/` — exploration, one-off analysis, spikes (no test mirrors, no TDD required)
 - `plans/spikes/` — exploratory investigations (no formal ceremony)
 - `src/` — production code (requires test mirrors, lint gates, module structure)
-- `agent-core/bin/` — utility scripts (production-grade, may need tests)
+- `plugin/bin/` — utility scripts (production-grade, may need tests)
 - `plans/<job>/` — plan artifacts (prose design, runbooks, reports)
 
 **Evidence:**
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/agent-core/skills/requirements/SKILL.md` line 96 states: "Save exploration prototypes to `plans/prototypes/` (not `tmp/`) — they are referenced artifacts, not ephemera"
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/session-scraping/requirements.md` line 61 states: "Start as scripts in `plans/prototypes/` or `agent-core/bin/`. Integration into `src/claudeutils/` happens later"
+- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/skills/requirements/SKILL.md` line 96 states: "Save exploration prototypes to `plans/prototypes/` (not `tmp/`) — they are referenced artifacts, not ephemera"
+- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/session-scraping/requirements.md` line 61 states: "Start as scripts in `plans/prototypes/` or `plugin/bin/`. Integration into `src/claudeutils/` happens later"
 
 **3. Behavior-type classification (current, lines 340-343 in workflow-planning.md):**
 - Behavioral code: new functions, changed logic paths, conditional branches (routes Moderate minimum)
@@ -308,10 +308,10 @@ From requirement definitions:
 
 **4. Work-type in execution roles (implicit):**
 
-From `/Users/david/code/claudeutils-wt/session-scraping-prototype/agent-core/docs/general-workflow.md` line 3:
+From `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/docs/general-workflow.md` line 3:
 - Purpose: Execute one-off, ad-hoc tasks that don't repeat
 
-From `/Users/david/code/claudeutils-wt/session-scraping-prototype/agent-core/docs/tdd-workflow.md` lines 20, 41:
+From `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/docs/tdd-workflow.md` lines 20, 41:
 - Prototype/exploration → opposite of "feature requires behavioral verification"
 
 ---
@@ -510,8 +510,8 @@ Tier 3: >15 files
 ## 10. Key File Locations (Absolute Paths)
 
 ### Classification and Routing Logic
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/agent-core/skills/design/SKILL.md` — Phase 0 (triage), Phase B (sufficiency), Phase C.5 (execution readiness)
-- `/Users/david/code/claudeutils-wt/session-scraping-prototype/agent-core/skills/runbook/SKILL.md` — Tier 1/2/3 assessment criteria
+- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/skills/design/SKILL.md` — Phase 0 (triage), Phase B (sufficiency), Phase C.5 (execution readiness)
+- `/Users/david/code/claudeutils-wt/session-scraping-prototype/plugin/skills/runbook/SKILL.md` — Tier 1/2/3 assessment criteria
 
 ### Grounding and Evidence
 - `/Users/david/code/claudeutils-wt/session-scraping-prototype/plans/complexity-routing/problem.md` — Problem statement, gaps, grounding questions

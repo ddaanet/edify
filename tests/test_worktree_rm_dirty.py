@@ -41,32 +41,32 @@ def test_is_submodule_dirty(
 
     init_repo(repo_path)
 
-    assert _is_submodule_dirty("agent-core") is False
+    assert _is_submodule_dirty("plugin") is False
 
     original_run = subprocess.run
 
     def mock_run_clean(*args: object, **kwargs: object) -> object:
         cmd = args[0] if args else kwargs.get("args")
-        if isinstance(cmd, list) and "-C" in cmd and "agent-core" in cmd:
+        if isinstance(cmd, list) and "-C" in cmd and "plugin" in cmd:
             return subprocess.CompletedProcess(
                 args=cmd, returncode=0, stdout="", stderr=""
             )
         return original_run(*args, **kwargs)  # type: ignore[call-overload]
 
     monkeypatch.setattr(subprocess, "run", mock_run_clean)
-    (repo_path / "agent-core").mkdir()
-    assert _is_submodule_dirty("agent-core") is False
+    (repo_path / "plugin").mkdir()
+    assert _is_submodule_dirty("plugin") is False
 
     def mock_run_dirty(*args: object, **kwargs: object) -> object:
         cmd = args[0] if args else kwargs.get("args")
-        if isinstance(cmd, list) and "-C" in cmd and "agent-core" in cmd:
+        if isinstance(cmd, list) and "-C" in cmd and "plugin" in cmd:
             return subprocess.CompletedProcess(
                 args=cmd, returncode=0, stdout=" M file.txt\n", stderr=""
             )
         return original_run(*args, **kwargs)  # type: ignore[call-overload]
 
     monkeypatch.setattr(subprocess, "run", mock_run_dirty)
-    assert _is_submodule_dirty("agent-core") is True
+    assert _is_submodule_dirty("plugin") is True
 
 
 def test_rm_blocks_on_dirty_worktree(

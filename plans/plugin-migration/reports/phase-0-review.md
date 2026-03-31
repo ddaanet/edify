@@ -5,7 +5,7 @@
 
 ## Summary
 
-Phase 0 runbook renames `agent-core/` to `edify-plugin/` across the entire project. Review found **significant coverage gaps** in file identification, incomplete grep pattern, and missing validation for critical file types. The symlink auto-adjust explanation is correct but lacks testing guidance. Several categories of files were missed that will break after rename.
+Phase 0 runbook renames `plugin/` to `edify-plugin/` across the entire project. Review found **significant coverage gaps** in file identification, incomplete grep pattern, and missing validation for critical file types. The symlink auto-adjust explanation is correct but lacks testing guidance. Several categories of files were missed that will break after rename.
 
 **Overall Assessment**: Needs Significant Changes
 
@@ -15,15 +15,15 @@ Phase 0 runbook renames `agent-core/` to `edify-plugin/` across the entire proje
 
 1. **Missing .claude/rules/*.md path updates**
    - Location: runbook-phase-0.md:49-53 (grep command) + step 4-7 (affected files)
-   - Problem: `.claude/rules/skill-development.md` contains `paths: ["agent-core/skills/**/*"]` frontmatter that won't be caught by grep (excluded directory). Two other rules files also contain references.
+   - Problem: `.claude/rules/skill-development.md` contains `paths: ["plugin/skills/**/*"]` frontmatter that won't be caught by grep (excluded directory). Two other rules files also contain references.
    - Fix: Add explicit step to update `.claude/rules/` files:
-     - `skill-development.md` line 4: `agent-core/skills/**/*` → `edify-plugin/skills/**/*`
-     - `commit-work.md`: contains `@agent-core/fragments/commit-delegation.md` reference
-     - `planning-work.md`: contains `@agent-core/fragments/` references
+     - `skill-development.md` line 4: `plugin/skills/**/*` → `edify-plugin/skills/**/*`
+     - `commit-work.md`: contains `@plugin/fragments/commit-delegation.md` reference
+     - `planning-work.md`: contains `@plugin/fragments/` references
 
 2. **Missing plan-specific agent file updates**
    - Location: runbook-phase-0.md:99-107 (affected files)
-   - Problem: 6 plan-specific agent files in `.claude/agents/` contain agent-core references but are not listed as affected files. These are NOT symlinks (type f), so they need explicit path updates.
+   - Problem: 6 plan-specific agent files in `.claude/agents/` contain plugin references but are not listed as affected files. These are NOT symlinks (type f), so they need explicit path updates.
    - Files found:
      - `.claude/agents/plugin-migration-task.md` (ironically, the agent for THIS plan)
      - `.claude/agents/claude-tools-rewrite-task.md`
@@ -35,7 +35,7 @@ Phase 0 runbook renames `agent-core/` to `edify-plugin/` across the entire proje
 
 3. **Missing plans/ directory updates**
    - Location: runbook-phase-0.md:49-53 (grep coverage)
-   - Problem: Found 41 references in `plans/` subdirectories (reflect-rca-prose-gates, validator-consolidation, commit-unification, workflow-skills-audit). These are design docs, outlines, and reports that contain agent-core paths in examples and file references.
+   - Problem: Found 41 references in `plans/` subdirectories (reflect-rca-prose-gates, validator-consolidation, commit-unification, workflow-skills-audit). These are design docs, outlines, and reports that contain plugin paths in examples and file references.
    - Impact: Historical plan documentation will contain stale paths (confusing but not breaking)
    - Fix: Decision needed - update historical docs vs accept staleness. If updating, add explicit step for `plans/*/` files. Grep found files at:
      - `plans/reflect-rca-prose-gates/outline.md` (2 refs)
@@ -46,25 +46,25 @@ Phase 0 runbook renames `agent-core/` to `edify-plugin/` across the entire proje
      - `plans/commit-unification/reports/vet-review.md` (2 refs)
      - `plans/workflow-skills-audit/audit.md` (8 refs)
 
-4. **agent-core/Makefile contains agent-core reference**
-   - Location: agent-core/Makefile:4, 10, 30
-   - Problem: Makefile comment line 4 says "FUTURE: When justfiles are factored to use agent-core includes", line 10 target name is `just-help-agent-core.txt`, line 30 creates that file
+4. **plugin/Makefile contains plugin reference**
+   - Location: plugin/Makefile:4, 10, 30
+   - Problem: Makefile comment line 4 says "FUTURE: When justfiles are factored to use plugin includes", line 10 target name is `just-help-plugin.txt`, line 30 creates that file
    - Impact: Target name must change to match cache file rename
-   - Fix: Update Makefile to rename target `just-help-agent-core.txt` → `just-help-edify-plugin.txt` (line 10, 30)
+   - Fix: Update Makefile to rename target `just-help-plugin.txt` → `just-help-edify-plugin.txt` (line 10, 30)
 
 5. **Incomplete grep pattern excludes critical directories**
    - Location: runbook-phase-0.md:49-53
-   - Problem: `--exclude-dir=edify-plugin` prevents finding agent-core references INSIDE the renamed directory (like Makefile, comments, documentation)
-   - Rationale: After `git mv agent-core edify-plugin`, the grep runs and excludes the NEW directory name, but self-references inside edify-plugin/ should be checked
+   - Problem: `--exclude-dir=edify-plugin` prevents finding plugin references INSIDE the renamed directory (like Makefile, comments, documentation)
+   - Rationale: After `git mv plugin edify-plugin`, the grep runs and excludes the NEW directory name, but self-references inside edify-plugin/ should be checked
    - Fix: Remove `--exclude-dir=edify-plugin` from grep, or run grep BEFORE git mv
 
 ### Major Issues
 
 6. **Missing session.md update**
    - Location: runbook-phase-0.md (not mentioned anywhere)
-   - Problem: session.md likely contains agent-core references in "Reference Files" or "Completed This Session" sections
+   - Problem: session.md likely contains plugin references in "Reference Files" or "Completed This Session" sections
    - Evidence: Current session.md shows "Design updated (naming + format fixes)" referencing old paths
-   - Fix: Add explicit step to update `agents/session.md` agent-core → edify-plugin
+   - Fix: Add explicit step to update `agents/session.md` plugin → edify-plugin
 
 7. **Symlink testing incomplete**
    - Location: runbook-phase-0.md:40-43, 84
@@ -91,13 +91,13 @@ Phase 0 runbook renames `agent-core/` to `edify-plugin/` across the entire proje
 
 9. **Worktree submodule reference unclear**
    - Location: justfile:65 (identified in grep)
-   - Problem: `--reference "$main_dir/agent-core"` in wt-new recipe must update to edify-plugin, but runbook doesn't explicitly call this out in step 3 (Update root justfile)
+   - Problem: `--reference "$main_dir/plugin"` in wt-new recipe must update to edify-plugin, but runbook doesn't explicitly call this out in step 3 (Update root justfile)
    - Impact: After rename, `just wt-new` will fail with "reference repository does not exist"
-   - Fix: Add explicit note in step 3 that wt-new, wt-merge recipes contain agent-core in submodule operations
+   - Fix: Add explicit note in step 3 that wt-new, wt-merge recipes contain plugin in submodule operations
 
 10. **Cache filename change timing unclear**
     - Location: runbook-phase-0.md:45-47
-    - Problem: "Update cache filenames" step 7 says "Rename .cache/just-help-agent-core.txt" but doesn't clarify if this happens BEFORE or AFTER updating CLAUDE.md @ references (step 5)
+    - Problem: "Update cache filenames" step 7 says "Rename .cache/just-help-plugin.txt" but doesn't clarify if this happens BEFORE or AFTER updating CLAUDE.md @ references (step 5)
     - Impact: If CLAUDE.md updated first but cache file not renamed, @ reference breaks immediately
     - Fix: Reorder steps - rename cache file BEFORE updating CLAUDE.md @ reference
 
@@ -106,7 +106,7 @@ Phase 0 runbook renames `agent-core/` to `edify-plugin/` across the entire proje
 11. **Git status validation insufficient**
    - Location: runbook-phase-0.md:82
    - Problem: "`git status` shows renamed files, no deleted/added files" is ambiguous - git mv shows as renamed (R) but also stages the change
-   - Suggestion: Clarify expected output: "git status shows 'renamed: agent-core/ -> edify-plugin/' and modified files (.gitmodules, justfile, etc.)"
+   - Suggestion: Clarify expected output: "git status shows 'renamed: plugin/ -> edify-plugin/' and modified files (.gitmodules, justfile, etc.)"
 
 12. **Unexpected reference handling vague**
    - Location: runbook-phase-0.md:76
@@ -127,7 +127,7 @@ Phase 0 is preparatory - no direct requirement mapping. However, correct directo
 | Component | Phase 0 Impact | Status |
 |-----------|----------------|--------|
 | C-1 Plugin Manifest | Must reference edify-plugin/ paths | Blocked by Critical #1-5 |
-| C-2 Hook Migration | settings.json hooks reference agent-core/ paths | Covered (step 4) |
+| C-2 Hook Migration | settings.json hooks reference plugin/ paths | Covered (step 4) |
 | C-3 Version Marker | File created in edify-plugin/ | Unblocked |
 | C-4 Init Skill | Will reference edify-plugin/ paths | Unblocked after rename |
 | C-5 Justfile Recipes | Import from edify-plugin/ path | Covered (step 3) |

@@ -3,7 +3,7 @@
 # - Only use `2>/dev/null` for probing (checking exit status when command has no quiet option)
 # - Only use `|| true` to continue after expected failures (required with `set -e`)
 
-import 'agent-core/portable.just'
+import 'plugin/portable.just'
 
 set allow-duplicate-recipes
 set allow-duplicate-variables
@@ -138,9 +138,9 @@ release *ARGS: _fail_if_claudecode dev
     # Perform local changes: version bump, commit, build
     visible uv version --bump "$BUMP"
     version=$(uv version --short)
-    agent-core/bin/bump-plugin-version.py "$version"
-    agent-core/bin/check-version-consistency.py
-    git add pyproject.toml uv.lock agent-core/.claude-plugin/plugin.json
+    plugin/bin/bump-plugin-version.py "$version"
+    plugin/bin/check-version-consistency.py
+    git add pyproject.toml uv.lock plugin/.claude-plugin/plugin.json
     visible git commit -m "🔖 Release $version"
     tag="v$(uv version --short)"
     visible uv build
@@ -260,7 +260,7 @@ run-pytest() {
     local current_hash
     current_hash=$( {
         python3 --version 2>&1
-        git ls-files -z src/ tests/ agent-core/hooks/ agent-core/bin/ | sort -z | xargs -0 cat
+        git ls-files -z src/ tests/ plugin/hooks/ plugin/bin/ | sort -z | xargs -0 cat
         cat pyproject.toml
     } | cksum )
     if [ -f "$sentinel" ] && [ "$(cat "$sentinel")" = "$current_hash" ]; then

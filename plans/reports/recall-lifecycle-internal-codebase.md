@@ -22,7 +22,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.1 `/requirements` Skill
 
-**File:** `/Users/david/code/claudeutils/agent-core/skills/requirements/SKILL.md`
+**File:** `/Users/david/code/claudeutils/plugin/skills/requirements/SKILL.md`
 
 **Artifact Role:** CREATES initial `recall-artifact.md`
 
@@ -35,7 +35,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 - **Selection criteria:** Lines 61-62 — Include entries that "informed requirements or constrain implementation"; exclude read-but-irrelevant entries
 - **Output location:** Line 63 — `plans/<job>/recall-artifact.md`
 
-**Consumption Mode:** Broad + topic-scoped — `/recall all` protocol (deep + broad per agent-core/skills/recall/SKILL.md, not shown but referenced)
+**Consumption Mode:** Broad + topic-scoped — `/recall all` protocol (deep + broad per plugin/skills/recall/SKILL.md, not shown but referenced)
 
 **Key Characteristics:**
 - Generated AFTER mode detection and BEFORE extraction/elicitation
@@ -47,7 +47,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.2 `/design` Skill
 
-**File:** `/Users/david/code/claudeutils/agent-core/skills/design/SKILL.md`
+**File:** `/Users/david/code/claudeutils/plugin/skills/design/SKILL.md`
 
 **Artifact Role:** CREATES, AUGMENTS, and CONSUMES `recall-artifact.md`
 
@@ -61,7 +61,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 1. **Phase 0 — Triage Recall (Lines 46-57)**
    - Structural anchor: before classification, load triage-relevant decisions
-   - Command: `agent-core/bin/when-resolve.py "when behavioral code" "when complexity" ...`
+   - Command: `plugin/bin/when-resolve.py "when behavioral code" "when complexity" ...`
    - Purpose: Codified decisions constrain classification before it happens
    - Consumption mode: Targeted (domain + triage keywords)
 
@@ -79,7 +79,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
    - **Output:** Append to existing `recall-artifact.md` (Edit, not Write)
 
 4. **Phase C.1 — Recall Diff (Lines 349-351)**
-   - **Command:** `agent-core/bin/recall-diff.sh <job-name>` (bash script, lines 1-28 in recall-diff.sh)
+   - **Command:** `plugin/bin/recall-diff.sh <job-name>` (bash script, lines 1-28 in recall-diff.sh)
    - **Purpose:** Approach commitment, revised scope, or rejected alternatives change relevance
    - **Augmentation rules:** Add entries surfaced by discussion, remove entries for rejected approaches
    - **Output:** Update existing `recall-artifact.md`
@@ -98,14 +98,14 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.3 `/runbook` Skill
 
-**File:** `/Users/david/code/claudeutils/agent-core/skills/runbook/SKILL.md`
+**File:** `/Users/david/code/claudeutils/plugin/skills/runbook/SKILL.md`
 
 **Artifact Role:** CONSUMES (reads), AUGMENTS, and PASSES DOWNSTREAM
 
 **Reference Locations:**
 - Lines 116-120: Tier 1 recall context — lightweight recall if no artifact exists
 - Lines 132-136: Tier 2 recall context — lightweight recall if no artifact exists
-- `agent-core/skills/runbook/references/tier3-planning-process.md` lines 26-33: Phase 0.5 augmentation
+- `plugin/skills/runbook/references/tier3-planning-process.md` lines 26-33: Phase 0.5 augmentation
 
 **Process Timeline:**
 
@@ -125,7 +125,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 3. **Tier 3 — Phase 0.75 Augmentation via Recall Diff (tier3-planning-process.md lines 47-49)**
    - **Gate anchor:** Same as `/design` C.1 — file locations, discovered patterns make different entries relevant
-   - **Command:** `agent-core/bin/recall-diff.sh <job-name>`
+   - **Command:** `plugin/bin/recall-diff.sh <job-name>`
    - **Augmentation:** Add entries revealed by codebase discovery, remove entries for non-applicable patterns
    - **Output:** Update existing artifact
 
@@ -148,7 +148,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.4 `/inline` Skill
 
-**File:** `/Users/david/code/claudeutils/agent-core/skills/inline/SKILL.md`
+**File:** `/Users/david/code/claudeutils/plugin/skills/inline/SKILL.md`
 
 **Artifact Role:** CONSUMES, CURATES consumer-specific variants, PASSES to sub-agents
 
@@ -170,7 +170,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
    - **Creation:** Write separate artifact per consumer type: `plans/<job>/tdd-recall-artifact.md`, `plans/<job>/corrector-recall-artifact.md`, etc.
    - **Format:** Per-type format rules (constraint format for haiku, rationale for sonnet/opus)
    - **Principle:** Parent does cognitive work (selecting relevant entries); child does mechanical work (resolving them) — context isolation
-   - **Delegation prompt:** "Read `plans/<job>/<type>-recall-artifact.md`, then batch-resolve via `agent-core/bin/when-resolve.py`"
+   - **Delegation prompt:** "Read `plans/<job>/<type>-recall-artifact.md`, then batch-resolve via `plugin/bin/when-resolve.py`"
    - **Output:** Create consumer-specific artifact files alongside primary artifact
 
 **Consumption Model:**
@@ -195,7 +195,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.5 `/orchestrate` Skill
 
-**File:** `/Users/david/code/claudeutils/agent-core/skills/orchestrate/SKILL.md`
+**File:** `/Users/david/code/claudeutils/plugin/skills/orchestrate/SKILL.md`
 
 **Artifact Role:** READS (indirect, via checkpoints and inline execution), PASSES to sub-agents
 
@@ -206,7 +206,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 **Process:**
 
 1. **Phase 3.3 Checkpoint Delegation (Line 161)**
-   - **Command:** `Bash: agent-core/bin/recall-resolve.sh plans/<name>/recall-artifact.md` (hypothetical wrapper — actual script is `recall-diff.sh` or `when-resolve.py` batch calls)
+   - **Command:** `Bash: plugin/bin/recall-resolve.sh plans/<name>/recall-artifact.md` (hypothetical wrapper — actual script is `recall-diff.sh` or `when-resolve.py` batch calls)
    - **Purpose:** Resolve artifact entries into checkpoint agent context
    - **Fallback:** Lightweight recall if artifact absent or script fails
    - **Delegation:** Corrector receives resolved entries for review-relevant patterns
@@ -228,7 +228,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 ### 1.6 `/deliverable-review` Skill
 
-**File:** `/Users/david/code/claudeutils/agent-core/skills/deliverable-review/SKILL.md`
+**File:** `/Users/david/code/claudeutils/plugin/skills/deliverable-review/SKILL.md`
 
 **Artifact Role:** OPTIONALLY CONSUMES via lightweight recall fallback
 
@@ -237,7 +237,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 **Process:**
 
 1. **Phase 3 Layer 2 — Interactive Full-Artifact Review (Line 95)**
-   - **Command:** `Bash: agent-core/bin/recall-resolve.sh plans/<plan>/recall-artifact.md` (conditional)
+   - **Command:** `Bash: plugin/bin/recall-resolve.sh plans/<plan>/recall-artifact.md` (conditional)
    - **Condition:** If artifact exists and recall-resolve succeeds, use resolved content
    - **Fallback:** Lightweight recall — Read memory-index, identify review-relevant entries, batch-resolve via `when-resolve.py`
    - **Purpose:** Supplement cross-cutting checks with resolved decision content (common review failures, quality anti-patterns)
@@ -256,7 +256,7 @@ Each artifact serves a specific gate and is consumed by specific downstream stag
 
 The codebase implements a **context isolation principle** for delegated execution: the parent session does cognitive work (selecting relevant entries from full recall-artifact), the child sub-agent does mechanical work (resolving those entries into fresh context).
 
-**Source:** agents/session.md lines 13-16; agent-core/skills/inline/SKILL.md lines 96-102
+**Source:** agents/session.md lines 13-16; plugin/skills/inline/SKILL.md lines 96-102
 
 **Consumer Types:**
 
@@ -269,7 +269,7 @@ The codebase implements a **context isolation principle** for delegated executio
 **Format Rules:**
 - Haiku/Sonnet consumers: Constraint format — DO/DO NOT rules with explicit applicability markers
 - Opus consumers: Rationale format — key points with context
-- All: Single command included — `agent-core/bin/when-resolve.py "entry1" "entry2" ...` for mechanical invocation
+- All: Single command included — `plugin/bin/when-resolve.py "entry1" "entry2" ...` for mechanical invocation
 
 ### 2.2 Consumer Artifact Examples
 
@@ -288,7 +288,7 @@ The codebase implements a **context isolation principle** for delegated executio
 **Invocation Pattern (line 93):**
 ```
 Piecemeal TDD dispatch — one cycle per test-driver invocation, resume between.
-Prompt includes: "Read `plans/recall-null/tdd-recall-artifact.md`, then batch-resolve ALL entries via `agent-core/bin/when-resolve.py`."
+Prompt includes: "Read `plans/recall-null/tdd-recall-artifact.md`, then batch-resolve ALL entries via `plugin/bin/when-resolve.py`."
 ```
 
 **Skill-Reviewer Optional Delegation (line 99):**
@@ -299,12 +299,12 @@ Optional — corrector may suffice for standardized pattern propagation. Invoke 
 
 ### 2.3 Sub-Agent Recall Protocol
 
-**Source:** agent-core/skills/inline/SKILL.md lines 96-102
+**Source:** plugin/skills/inline/SKILL.md lines 96-102
 
 **Protocol Rules:**
 1. **Curation happens in parent:** "Curate subset of plan recall-artifact entries relevant to delegation target"
 2. **Per-consumer artifact:** "Write separate artifact per type (e.g., `plans/<job>/tdd-recall-artifact.md`)"
-3. **Mechanical invocation:** Include in each prompt: "Read `plans/<job>/<type>-recall-artifact.md`, then batch-resolve via `agent-core/bin/when-resolve.py`"
+3. **Mechanical invocation:** Include in each prompt: "Read `plans/<job>/<type>-recall-artifact.md`, then batch-resolve via `plugin/bin/when-resolve.py`"
 4. **Context isolation:** "Parent does cognitive work (selecting entries, curating context). Child does mechanical work (resolving entries, executing). Sub-agents have no parent context."
 
 **Anti-Pattern from Execution Feedback:**
@@ -318,7 +318,7 @@ Optional — corrector may suffice for standardized pattern propagation. Invoke 
 
 **Root Cause:** "Treating Task agents as context-sharing rather than context-isolated."
 
-**Fix:** `triggers=("${(@f)$(< plans/inline-execute/tdd-recall-artifact.md)}") && agent-core/bin/when-resolve.py "${triggers[@]}"`
+**Fix:** `triggers=("${(@f)$(< plans/inline-execute/tdd-recall-artifact.md)}") && plugin/bin/when-resolve.py "${triggers[@]}"`
 
 ---
 
@@ -326,7 +326,7 @@ Optional — corrector may suffice for standardized pattern propagation. Invoke 
 
 ### 3.1 Script Specification
 
-**File:** `/Users/david/code/claudeutils/agent-core/bin/recall-diff.sh` (lines 1-28)
+**File:** `/Users/david/code/claudeutils/plugin/bin/recall-diff.sh` (lines 1-28)
 
 **Purpose:** Detect files changed since recall-artifact was written, determine if relevance has shifted
 
@@ -472,7 +472,7 @@ outline.md / design.md progression:
 ```markdown
 # Recall Artifact: <Job Name>
 
-Resolve entries via `agent-core/bin/when-resolve.py` — do not use inline summaries.
+Resolve entries via `plugin/bin/when-resolve.py` — do not use inline summaries.
 
 ## Entry Keys
 
@@ -505,29 +505,29 @@ Both `/design` and `/runbook` enforce structural anchors via mandatory tool call
 
 **Design Phase 0 — Triage Recall (line 46):**
 ```bash
-agent-core/bin/when-resolve.py "when behavioral code" "when complexity" "when triage" "when <domain-keyword>" ...
+plugin/bin/when-resolve.py "when behavioral code" "when complexity" "when triage" "when <domain-keyword>" ...
 ```
 Structural anchor: prevents classification from being skipped or rationalized.
 
 **Design Phase A.2.5 — Post-Explore Recall (line 223):**
 ```bash
 # New entries found:
-agent-core/bin/when-resolve.py "when <trigger>" ...
+plugin/bin/when-resolve.py "when <trigger>" ...
 
 # No new entries (no-op path):
-agent-core/bin/when-resolve.py null
+plugin/bin/when-resolve.py null
 ```
 Structural anchor: proves gate was reached (both success and no-op paths recorded).
 
 **Runbook Phase 0.75 — Recall Diff (line 47):**
 ```bash
-agent-core/bin/recall-diff.sh <job-name>
+plugin/bin/recall-diff.sh <job-name>
 ```
 Structural anchor: detects if changed files alter recall relevance before expansion.
 
 ### 5.4 Consumer-Specific Curation Rules
 
-**Source:** agent-core/skills/inline/SKILL.md lines 96-102
+**Source:** plugin/skills/inline/SKILL.md lines 96-102
 
 **Rule 1: Parent does cognitive work, child does mechanical work**
 - Parent session: Reads primary artifact, selects relevant entries per consumer type
@@ -541,7 +541,7 @@ Structural anchor: detects if changed files alter recall relevance before expans
 - Each artifact contains only entries relevant to that consumer's domain
 
 **Rule 3: Mechanical invocation command included**
-- Standard pattern: "Read `plans/<job>/<type>-recall-artifact.md`, then batch-resolve ALL entries via `agent-core/bin/when-resolve.py`"
+- Standard pattern: "Read `plans/<job>/<type>-recall-artifact.md`, then batch-resolve ALL entries via `plugin/bin/when-resolve.py`"
 - No sub-agent decision judgment — command is mechanical
 - Prevents word-splitting bugs (when invocation was inline) and ensures complete resolution
 
@@ -555,7 +555,7 @@ Lines 46, 89: "Curate from plan recall-artifact. Include entries about review fa
 
 **Fallback (lines 50-65):** If artifact absent, lightweight recall:
 ```bash
-agent-core/bin/when-resolve.py \
+plugin/bin/when-resolve.py \
   "when concluding reviews" \
   "when corrector rejects planning artifacts" \
   "when recall-artifact is absent during review" \
@@ -634,22 +634,22 @@ agent-core/bin/when-resolve.py \
 ## 7. File Locations and References
 
 ### Core Skill Files
-- `/Users/david/code/claudeutils/agent-core/skills/requirements/SKILL.md` — recall-artifact creation (lines 32-64)
-- `/Users/david/code/claudeutils/agent-core/skills/design/SKILL.md` — recall-artifact lifecycle A.1/A.2.5/C.1 (lines 46-57, 190-211, 219-225, 349-351)
-- `/Users/david/code/claudeutils/agent-core/skills/runbook/SKILL.md` — recall-artifact consumption/augmentation (lines 116-136)
-- `/Users/david/code/claudeutils/agent-core/skills/inline/SKILL.md` — consumer-specific curation (lines 96-102)
-- `/Users/david/code/claudeutils/agent-core/skills/orchestrate/SKILL.md` — checkpoint delegation (line 161)
-- `/Users/david/code/claudeutils/agent-core/skills/deliverable-review/SKILL.md` — optional recall consumption (line 95)
+- `/Users/david/code/claudeutils/plugin/skills/requirements/SKILL.md` — recall-artifact creation (lines 32-64)
+- `/Users/david/code/claudeutils/plugin/skills/design/SKILL.md` — recall-artifact lifecycle A.1/A.2.5/C.1 (lines 46-57, 190-211, 219-225, 349-351)
+- `/Users/david/code/claudeutils/plugin/skills/runbook/SKILL.md` — recall-artifact consumption/augmentation (lines 116-136)
+- `/Users/david/code/claudeutils/plugin/skills/inline/SKILL.md` — consumer-specific curation (lines 96-102)
+- `/Users/david/code/claudeutils/plugin/skills/orchestrate/SKILL.md` — checkpoint delegation (line 161)
+- `/Users/david/code/claudeutils/plugin/skills/deliverable-review/SKILL.md` — optional recall consumption (line 95)
 
 ### Reference Files
-- `/Users/david/code/claudeutils/agent-core/skills/design/references/research-protocol.md` — recall diff application (lines 15-17)
-- `/Users/david/code/claudeutils/agent-core/skills/runbook/references/tier3-planning-process.md` — Phase 0.5 augmentation (lines 26-33), Phase 0.75 recall-diff (lines 47-49)
-- `/Users/david/code/claudeutils/agent-core/skills/inline/references/corrector-template.md` — corrector recall context, lightweight fallback (lines 25-65)
+- `/Users/david/code/claudeutils/plugin/skills/design/references/research-protocol.md` — recall diff application (lines 15-17)
+- `/Users/david/code/claudeutils/plugin/skills/runbook/references/tier3-planning-process.md` — Phase 0.5 augmentation (lines 26-33), Phase 0.75 recall-diff (lines 47-49)
+- `/Users/david/code/claudeutils/plugin/skills/inline/references/corrector-template.md` — corrector recall context, lightweight fallback (lines 25-65)
 
 ### Helper Scripts
-- `/Users/david/code/claudeutils/agent-core/bin/recall-diff.sh` — detect changed files since artifact mtime (lines 1-28)
-- `/Users/david/code/claudeutils/agent-core/bin/recall-check.sh` — verify artifact exists and non-empty (lines 1-20)
-- `/Users/david/code/claudeutils/agent-core/bin/when-resolve.py` — resolve entry keys to current content (referenced throughout)
+- `/Users/david/code/claudeutils/plugin/bin/recall-diff.sh` — detect changed files since artifact mtime (lines 1-28)
+- `/Users/david/code/claudeutils/plugin/bin/recall-check.sh` — verify artifact exists and non-empty (lines 1-20)
+- `/Users/david/code/claudeutils/plugin/bin/when-resolve.py` — resolve entry keys to current content (referenced throughout)
 
 ### Plan Examples
 - `/Users/david/code/claudeutils/plans/recall-null/outline.md` — consumer-artifact execution model (lines 88-101)

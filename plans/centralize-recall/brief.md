@@ -42,7 +42,7 @@ Intentionally vague reference language in core: "process details in references/"
 Each skill's recall section becomes a `/recall` Skill invocation (or Read for sub-agents):
 
 - **Main-session skills** (/design, /runbook, /inline, /orchestrate): `Invoke /recall` with appropriate mode
-- **Sub-agents** (correctors, agents): `Read agent-core/skills/recall/SKILL.md` for minimal core, then Read appropriate reference if needed
+- **Sub-agents** (correctors, agents): `Read plugin/skills/recall/SKILL.md` for minimal core, then Read appropriate reference if needed
 - **/requirements already follows this pattern** — use as template
 
 ### 3. Differentiate error paths in consumers
@@ -61,7 +61,7 @@ Each skill's recall section becomes a `/recall` Skill invocation (or Read for su
 
 - Exact token count for minimal core — need to draft to measure against <1ktok target
 - Whether `/recall <context>` (indicating lens: designing, testing, implementing) is the right invocation pattern vs bare `/recall` with context inferred — discussed but not resolved
-- Sub-agent path validation: does "Read agent-core/skills/recall/SKILL.md" work reliably from agent definitions?
+- Sub-agent path validation: does "Read plugin/skills/recall/SKILL.md" work reliably from agent definitions?
 
 ## Dependencies
 

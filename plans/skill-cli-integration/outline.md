@@ -40,7 +40,7 @@
 - no-vet
 - just-lint
 
-## Submodule agent-core
+## Submodule plugin
 > Submodule commit message
 
 ## Message
@@ -88,7 +88,7 @@ SP-H must ship first — trigger string is meaningless without the hook. SP-1 an
 - EDIT: `.claude/settings.json` (register Stop hook)
 
 **SP-1:**
-- EDIT: `agent-core/fragments/execute-rule.md` (MODE 1 section)
+- EDIT: `plugin/fragments/execute-rule.md` (MODE 1 section)
 
 **SP-2:**
-- EDIT: `agent-core/skills/commit/SKILL.md` (execution steps)
+- EDIT: `plugin/skills/commit/SKILL.md` (execution steps)
