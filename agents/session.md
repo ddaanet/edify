@@ -1,33 +1,31 @@
-# Session Handoff: 2026-03-30
+# Session Handoff: 2026-03-31
 
-**Status:** Edify rename SP-3 complete, SP-1 runbook outlined and proofed. Ready for SP-1 orchestration.
+**Status:** Edify rename SP-1 complete (submodule + parent). SP-2 (package rename) pending — needs own /runbook pass.
 
 ## Completed This Session
 
-**SP-3 (plan cleanup):**
-- Archived 8 delivered plans to `agents/plan-archive.md`: discuss-redesign, fix-migration-findings, handoff-cli-tool, inline-lifecycle-gate, prose-infra-batch, recall-gate, remove-fuzzy-recall, runbook-quality-directives (~138 files deleted)
-- Verified Q-4: remove-fuzzy-recall confirmed delivered 2026-03-16
-- Preserved exceptions: edify-rename (active), retrospective (outline exception)
+**SP-1 (submodule directory rename `agent-core` → `plugin`):**
+- Phase 1: 81 files in submodule — `agent-core` → `plugin` (192 refs), `claudeutils` → `edify` (117 refs)
+- Phase 2: 224 files in parent — git mv, .gitmodules, all path references
+- Runtime CLI revert: submodule files that invoke parent's installed CLI (`subprocess.run(["claudeutils",...])`, pip install, error messages) kept as `claudeutils` — breaks if renamed before SP-2
+- Stragglers: 3 in Phase 1 verification, 3 in Phase 2, plus `portable.just` (.just extension missed by discovery grep)
+- Sandbox-protected files (.claude/settings.json, .envrc symlink) patched via `tmp/patch-protected.sh`
+- Test suite: 1820/1821 pass, 1 xfail. Pre-existing `test_x_uses_planstate_command_over_session` surfaced and fixed (import path regression from CLI name change in hook)
+- Lightweight delegation from runbook outline (no /runbook expansion) — user considering dropping Tier 3
 
-**SP-1 runbook outline:**
-- Tier 3 assessment: 200+ files, parallel dispatch benefit
-- Two general phases: submodule internal commit (Phase 1), parent repo commit (Phase 2)
-- Corrector review: 6 fixes (requirements mapping, .gitmodules name field, .envrc verification, expansion guidance)
-- /proof: 3 revisions (all steps delegated for context churn reduction, sliding window max 4 agents, orchestrator as pure sequencer)
-- Lightweight orchestration exit (Execution Model section present)
-
-**Fixes:**
-- `.claude/.gitignore`: dropped trailing slashes (patterns now match non-directory entries)
-- Removed obsolete sync-to-parent and symlink references from CLAUDE.md, session.md, project-config.md, memory-index.md
-- Removed stale recall artifact entry (symlink decision deleted)
+**Execution approach:**
+- Orchestrated directly from `plans/edify-rename/runbook-outline.md` without /runbook expansion
+- 6 parallel artisan agents per phase (sliding window 4), scout for discovery/verification
+- Reports in `plans/edify-rename/reports/step-*.md`
 
 ## In-tree Tasks
 
 - [>] **Edify rename** — `/orchestrate edify-rename` | sonnet
-  - Plan: edify-rename | Status: reviewed (SP-1 runbook outline proofed, Execution Model present)
+  - Plan: edify-rename | Status: reviewed
   - SP-3 (plan cleanup): complete
-  - SP-1 (submodule rename): execute from `plans/edify-rename/runbook-outline.md` — orchestrator is pure sequencer, sliding window max 4 agents
+  - SP-1 (submodule rename): complete — 2 submodule commits + 1 parent commit
   - SP-2 (package rename): pending SP-1 — needs own /runbook pass after SP-1 lands
+  - Key constraint for SP-2: submodule runtime refs to `claudeutils` (3 Python imports, prepare-runbook subprocess, pretooluse error msgs, portable.just validators, sessionstart pip install) change only when parent package renames
 - [ ] **Centralize recall** — `/design plans/centralize-recall/brief.md` | opus | restart
   - Plan: centralize-recall | Segmented /recall skill (<1ktok core), replace inline recall across skills/agents. Prerequisite (remove-index-skill) now complete.
 - [ ] **Outline template trim** — `/design plans/outline-template-trim/brief.md` | opus | restart
@@ -37,11 +35,8 @@
 
 ## Worktree Tasks
 
-- [x] **Fix batch findings** — plan archived
 - [ ] **Skill context probe** — `/design plans/fr3-skill-context/requirements.md` | sonnet
   - Plan: fr3-skill-context | Investigate `context:` param on Skill tool; create test skill, document behavior
-- [x] **Session CLI tool** → `session-cli-tool` — merged this session
-  - FR-13: File PEP 541 claim on pypi/support for `edify` name (parallel, non-blocking for rename)
 - [ ] **Worktree merge lifecycle** — `/runbook plans/worktree-merge-resilience/outline.md` | sonnet | 2.8
   - Plan: worktree-merge-resilience | Status: outlined
   - Absorbs: Merge lifecycle audit, Plan-completion ceremony
@@ -119,7 +114,6 @@
   - Plan: prototypes | Status: requirements
 - [ ] **Planstate brief inference** — `/design plans/planstate-brief-inference/requirements.md` | sonnet | 1.0
   - Plan: planstate-brief-inference | Status: requirements
-- [x] **Small fixes batch** — plan delivered; FR-3 extracted to fr3-skill-context
 - [ ] **Incident counting** — `/design plans/incident-counting/brief.md` | opus | 0.6
   - Plan: incident-counting | Status: briefed
 - [ ] **Recall pipeline** — `/design` | sonnet | 1.0
@@ -221,6 +215,11 @@
 - `test_worktree_merge_learnings.py::test_merge_learnings_segment_diff3_prevents_orphans` — intermittent merge conflict failure. Passes on retry. [from: session-cli-tool]
 - User questioning entire design → runbook → orchestrate pipeline, behavioral guardrails, and planning-first paradigm [from: session-cli-tool]
 - No decisions made yet — discussion only. Next session should not assume pipeline continuity. [from: session-cli-tool]
+
+**SP-2 CLI name boundary:**
+- Submodule files with runtime `claudeutils` refs (3 Python imports, subprocess call, pretooluse error msgs, portable.just validators, sessionstart pip install) — change only when parent package renames in SP-2
+- `.just` extension was missed by SP-1 discovery grep — include in SP-2 scope
+
 ## Reference Files
 
 - `plans/reports/prioritization-2026-03-12.md` — WSJF scoring, 42 tasks ranked
@@ -231,7 +230,8 @@
 - `plans/merge-parent-generalization/brief.md` — Generalize merge to arbitrary parent branch
 - `plans/threshold-token-migration/brief.md` — Line-based to token-based threshold migration
 - `plans/edify-rename/requirements.md` — Full brand rename requirements (proofed)
+- `plans/edify-rename/runbook-outline.md` — SP-1 execution plan (also basis for SP-2)
 
 ## Next Steps
 
-SP-1 ready for orchestration: execute from `plans/edify-rename/runbook-outline.md` per Execution Model. Orchestrator is pure sequencer — all steps delegated, sliding window max 4 agents. After SP-1 lands, SP-2 needs its own /runbook pass.
+SP-2 (package rename `claudeutils` → `edify`) needs its own /runbook pass. Scope: pyproject.toml entry point, src/ directory rename, all remaining `claudeutils` CLI/import refs across parent and submodule. The submodule runtime refs deferred from SP-1 are part of SP-2 scope.

@@ -185,3 +185,13 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Anti-pattern: Reading THEIRS content in a conflict region and attributing it to "the branch added this." When the diff3 base is empty or unclear, the content in THEIRS may be the merge base preserved unchanged — not new additions. Incorrectly attributing base content to a branch leads to wrong resolution (keeping content that OURS intentionally removed).
 - Correct pattern: Check the diff3 base (`||||||| <hash>` section) to determine which side added or removed content. If OURS lacks content that THEIRS has, and the base also had it, OURS removed it intentionally — resolution should honor the removal. If base is empty, both sides added independently — resolution is union.
 - Evidence: settings.json conflict. OURS removed all hooks (plugin conversion). THEIRS had full hooks section (base content + new stop hook). Initially attributed hooks to "branch's full hooks section" and almost kept them, violating OURS' intentional removal.
+
+## When renaming across submodule boundaries
+- Anti-pattern: Replacing all `claudeutils` → `edify` inside submodule because the outline says "do both identities at once." Submodule files that call parent's installed CLI (`subprocess.run(["claudeutils",...])`, `from claudeutils.x import y`, pip install `"claudeutils==..."`, error messages saying "use claudeutils _worktree") break immediately because the CLI/package is still named `claudeutils`.
+- Correct pattern: Distinguish directory-path references (rename with directory) from runtime CLI/package references (rename with package). In SP-1 (directory rename), only path refs change. Runtime refs change in SP-2 (package rename). Apply this filter per-file, not per-directory.
+- Evidence: `just precommit` failed with `edify: command not found` (portable.just validators), `test_x_uses_planstate_command_over_session` failed (hook import `from edify.planstate`), test assertions for `claudeutils _worktree` in error messages.
+
+## When scoping grep discovery for bulk rename
+- Anti-pattern: Searching only common file extensions (`.md, .py, .sh, .json, .yaml, .toml`) for rename targets. Misses less common extensions like `.just` that contain executable path references.
+- Correct pattern: Use extensionless grep across the full tree, then exclude binary files. Or enumerate all tracked text file extensions via `git ls-files` before constructing the glob pattern. Missing one extension causes failures that surface only at precommit.
+- Evidence: `portable.just` had 30+ `agent-core` refs and 10+ `claudeutils` refs — all missed by discovery. Caught when `just precommit` failed on version consistency check.
