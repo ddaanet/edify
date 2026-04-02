@@ -2,7 +2,7 @@
 
 Plugin distribution via Claude Code marketplace system. Reference: https://code.claude.com/docs/en/plugin-marketplaces
 
-## .Ecosystem
+## Ecosystem
 
 | Repo | Role | Location |
 |------|------|----------|
@@ -12,7 +12,7 @@ Plugin distribution via Claude Code marketplace system. Reference: https://code.
 
 Marketplace name `ddaanet` — install commands: `/plugin install ddaa@ddaanet`, `/plugin install edify@ddaanet`
 
-## .Distribution model
+## Distribution model
 
 - `claude-plugins` is metadata-only — `.claude-plugin/marketplace.json` pointing to external repos, no runtime code
 - `README.md` and `marketplace.json` must stay in sync
