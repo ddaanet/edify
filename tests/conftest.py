@@ -12,8 +12,6 @@ from pytest_mock import MockerFixture
 from edify.token_cache import TokenCache, create_cache_engine
 from edify.tokens import ModelId
 
-pytest_plugins = ["tests.fixtures_worktree"]
-
 
 # API Key Management
 @pytest.fixture(autouse=True)

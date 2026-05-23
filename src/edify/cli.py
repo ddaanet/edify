@@ -5,87 +5,15 @@ import logging
 import re
 import sys
 from pathlib import Path
-from typing import cast
 
 import click
 
-from edify.account.cli import account
-from edify.compose import compose, load_config
 from edify.discovery import list_top_level_sessions
 from edify.exceptions import ClaudeUtilsError
 from edify.extraction import extract_feedback_recursively
-from edify.filtering import categorize_feedback, filter_feedback
-from edify.git_cli import git_group
 from edify.markdown import process_file
-from edify.model.cli import model
-from edify.models import FeedbackItem
 from edify.paths import get_project_history_dir
-from edify.recall.cli import recall
-from edify.recall_cli.cli import recall_cmd
-from edify.session.cli import commit_cmd, handoff_cmd, status_cmd
-from edify.statusline.cli import statusline
 from edify.tokens_cli import handle_tokens
-from edify.validation.cli import validate
-from edify.when.cli import when_cmd
-from edify.worktree.cli import worktree
-
-
-def _handle_compose_error(e: Exception) -> None:
-    """Handle compose errors and exit with appropriate code."""
-    if isinstance(e, FileNotFoundError):
-        error_msg = str(e)
-        if "Fragment not found" in error_msg:
-            click.echo(f"Error: {e}", err=True)
-            sys.exit(2)
-        else:
-            click.echo(f"Error: Configuration file not found: {e}", err=True)
-            sys.exit(4)
-    elif isinstance(e, ValueError):
-        click.echo(f"Configuration error: {e}", err=True)
-        sys.exit(1)
-    elif isinstance(e, (TypeError, OSError)):
-        click.echo(f"Error: {e}", err=True)
-        sys.exit(3)
-
-
-def _show_compose_plan(config_file: str, config: dict[str, object]) -> None:
-    """Display compose plan in dry-run mode."""
-    click.echo("Dry-run mode - plan:")
-    click.echo(f"  Config: {config_file}")
-    fragments_list = config.get("fragments", [])
-    frag_count = len(fragments_list) if isinstance(fragments_list, list) else 0
-    click.echo(f"  Fragments: {frag_count} file(s)")
-    click.echo(f"  Output: {config.get('output', 'N/A')}")
-
-
-def _filter_rule_items(
-    items: list[FeedbackItem], min_length: int
-) -> list[FeedbackItem]:
-    """Filter and deduplicate feedback items for rules extraction."""
-    filtered_items = filter_feedback(items)
-    rule_items = [
-        item
-        for item in filtered_items
-        if not (
-            (
-                item.content.lower().startswith("how ")
-                or item.content.lower().startswith("claude code:")
-            )
-            or len(item.content) < min_length
-            or len(item.content) > 1000
-        )
-    ]
-
-    # Sort and deduplicate
-    rule_items.sort(key=lambda x: x.timestamp)
-    seen_prefixes: set[str] = set()
-    deduped_items = []
-    for item in rule_items:
-        prefix = item.content[:100].lower()
-        if prefix not in seen_prefixes:
-            seen_prefixes.add(prefix)
-            deduped_items.append(item)
-    return deduped_items
 
 
 def find_session_by_prefix(prefix: str, project_dir: str) -> str:
@@ -115,14 +43,7 @@ def find_session_by_prefix(prefix: str, project_dir: str) -> str:
 
 
 @click.version_option(package_name="edify-cli", message="%(package)s %(version)s")
-@click.group(
-    help="Extract feedback from Claude Code sessions",
-    epilog=(
-        "Pipeline: collect -> analyze -> rules. Use collect to gather all "
-        "feedback, analyze to filter and categorize, rules to extract "
-        "actionable items."
-    ),
-)
+@click.group(help="Edify CLI: session scraping, token counting, markdown processing")
 def cli() -> None:
     """Command-line interface entry point."""
     logging.basicConfig(
@@ -142,20 +63,6 @@ def list_sessions(project: str | None) -> None:
     else:
         for session in sessions:
             print(f"[{session.session_id[:8]}] {session.title}")
-
-
-cli.add_command(account)
-cli.add_command(model)
-cli.add_command(recall)
-cli.add_command(recall_cmd)
-cli.add_command(statusline)
-cli.add_command(validate)
-cli.add_command(when_cmd)
-cli.add_command(worktree)
-cli.add_command(handoff_cmd, "_handoff")
-cli.add_command(commit_cmd, "_commit")
-cli.add_command(status_cmd, "_status")
-cli.add_command(git_group)
 
 
 @cli.command(help="Extract feedback from session")
@@ -196,80 +103,6 @@ def collect(project: str | None, output: str | None) -> None:
     (Path(output).write_text if output else print)(json_output)
 
 
-@cli.command(help="Analyze feedback items")
-@click.option(
-    "--input", "input_path", required=True, help="Input JSON file, or '-' for stdin"
-)
-@click.option(
-    "--format",
-    "output_format",
-    type=click.Choice(["text", "json"]),
-    default="text",
-    help="Output format",
-)
-def analyze(input_path: str, output_format: str) -> None:
-    """Analyze and categorize feedback."""
-    json_text = sys.stdin.read() if input_path == "-" else Path(input_path).read_text()
-    items = [FeedbackItem.model_validate(item) for item in json.loads(json_text)]
-    filtered_items = filter_feedback(items)
-    categories: dict[str, int] = {}
-    for item in filtered_items:
-        category = categorize_feedback(item)
-        categories[category] = categories.get(category, 0) + 1
-    if output_format == "json":
-        print(
-            json.dumps(
-                {
-                    "total": len(items),
-                    "filtered": len(filtered_items),
-                    "categories": categories,
-                }
-            )
-        )
-    else:
-        print(f"total: {len(items)}\nfiltered: {len(filtered_items)}\ncategories:")
-        for category, count in categories.items():
-            print(f"  {category}: {count}")
-
-
-@cli.command(help="Extract rule-worthy feedback items")
-@click.option(
-    "--input", "input_path", required=True, help="Input JSON file, or '-' for stdin"
-)
-@click.option(
-    "--min-length",
-    type=int,
-    default=20,
-    help="Minimum length for rule-worthy items (default: 20)",
-)
-@click.option(
-    "--format",
-    "output_format",
-    type=click.Choice(["text", "json"]),
-    default="text",
-    help="Output format",
-)
-def rules(input_path: str, min_length: int, output_format: str) -> None:
-    """Extract actionable rules from feedback."""
-    json_text = sys.stdin.read() if input_path == "-" else Path(input_path).read_text()
-    items = [FeedbackItem.model_validate(item) for item in json.loads(json_text)]
-    deduped_items = _filter_rule_items(items, min_length)
-    if output_format == "json":
-        output = [
-            {
-                "index": i + 1,
-                "timestamp": item.timestamp,
-                "session_id": item.session_id,
-                "content": item.content,
-            }
-            for i, item in enumerate(deduped_items)
-        ]
-        print(json.dumps(output))
-    else:
-        for i, item in enumerate(deduped_items, 1):
-            print(f"{i}. {item.content}")
-
-
 @cli.command(help="Count tokens in one or more files using Anthropic API")
 @click.option(
     "--model",
@@ -285,86 +118,6 @@ def rules(input_path: str, min_length: int, output_format: str) -> None:
 def tokens(model: str, files: tuple[str, ...], *, json_output: bool) -> None:
     """Count tokens in files via Anthropic API."""
     handle_tokens(model, list(files), json_output=json_output)
-
-
-@cli.command(
-    help="Compose markdown from YAML configuration",
-    epilog=(
-        "Load composition configuration from YAML file and compose markdown "
-        "fragments into a single output file. Supports header adjustment, "
-        "custom separators, and strict/warn validation modes."
-    ),
-)
-@click.argument("config_file", type=click.Path())
-@click.option(
-    "--output",
-    type=click.Path(),
-    default=None,
-    help="Override output path from config",
-)
-@click.option(
-    "--validate",
-    type=click.Choice(["strict", "warn"]),
-    default="strict",
-    help="Validation mode for missing fragments",
-)
-@click.option(
-    "--verbose",
-    is_flag=True,
-    help="Show detailed output",
-)
-@click.option(
-    "--dry-run",
-    is_flag=True,
-    help="Show plan without writing",
-)
-def compose_command(
-    config_file: str,
-    output: str | None,
-    validate: str,
-    verbose: bool,  # noqa: FBT001
-    dry_run: bool,  # noqa: FBT001
-) -> None:
-    """Compose markdown from configuration."""
-    config_path = Path(config_file)
-    if not config_path.exists():
-        click.echo(f"Error: Configuration file not found: {config_file}", err=True)
-        sys.exit(4)
-
-    try:
-        if verbose:
-            click.echo(f"Loading config from {config_file}")
-
-        config = load_config(config_file)
-
-        if output:
-            config["output"] = output
-
-        if dry_run:
-            _show_compose_plan(config_file, config)
-            return
-
-        # Extract config values with type narrowing
-        fragments_val = cast("list[Path | str]", config.get("fragments", []))
-        output_val = cast("Path | str", config["output"])
-        title_val = cast("str | None", config.get("title"))
-        adjust_headers_val = cast("bool", config.get("adjust_headers", False))
-        separator_val = cast("str", config.get("separator", "---"))
-
-        compose(
-            fragments=fragments_val,
-            output=output_val,
-            title=title_val,
-            adjust_headers=adjust_headers_val,
-            separator=separator_val,
-            validate_mode=validate,
-        )
-
-        if verbose:
-            click.echo(f"Successfully composed to {config.get('output')}")
-
-    except (FileNotFoundError, ValueError, TypeError, OSError) as e:
-        _handle_compose_error(e)
 
 
 @cli.command(help="Process markdown files")
@@ -390,7 +143,6 @@ def markdown() -> None:
         except ClaudeUtilsError as e:
             errors.append(str(e))
 
-    # Report errors
     if errors:
         for error in errors:
             print(error, file=sys.stderr)

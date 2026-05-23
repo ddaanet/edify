@@ -1,8 +1,0 @@
-- **Classification:** Moderate (composite — two components)
-- **Implementation certainty:** High — tools exist (git log, session-scraper prototype with all 4 stages), approach fully specified in requirements
-- **Requirement stability:** High — 4 FRs with concrete acceptance criteria, explicit scope boundaries, dependencies validated
-- **Behavioral code check:** Yes (component 1). Session-scraper extensions add/change functions in prototype code.
-- **Work type:** Composite — (1) Exploration (session-scraper extensions), (2) Investigation (evidence gathering)
-- **Artifact destination:** (1) exploration (`plans/prototypes/`), (2) investigation (`plans/retrospective/reports/`)
-- **Sequencing:** Component 1 (scraper extensions) blocks Component 2 (evidence gathering). C-1 requires `/requirements` pass before modifying prototype.
-- **Evidence:** FRs specify concrete tools but blocker notes flag prototype gaps (multiple prefixes per topic, cross-project scanning). `scan_projects(prefix=None)` scans all projects but per-topic filtering, multi-project tree aggregation, and excerpt extraction may need extensions. Extensions are prototype-weight (exploration destination, general steps, no test mirrors).

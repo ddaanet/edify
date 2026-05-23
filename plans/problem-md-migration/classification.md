@@ -1,7 +1,0 @@
-- **Classification:** Moderate
-- **Implementation certainty:** High — rename files, fix a function, add precommit check. All concrete.
-- **Requirement stability:** High — 4 FRs mechanism-specified in the brief.
-- **Behavioral code check:** Yes — `_derive_next_action` logic change (new resolution path), precommit gate (new validation function). Moderate minimum.
-- **Work type:** Production — delivers planstate fix and precommit enforcement.
-- **Artifact destination:** production (`src/` planstate code, precommit script)
-- **Evidence:** "When triaging behavioral code as simple" recall entry confirms: new logic paths → Moderate.

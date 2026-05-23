@@ -1,7 +1,0 @@
-- **Classification:** Simple
-- **Implementation certainty:** High — approach fully specified in brief, single bullet-point addition
-- **Requirement stability:** High — single FR with concrete mechanism specified
-- **Behavioral code check:** No — prose edit to reference document
-- **Work type:** Production
-- **Artifact destination:** agentic-prose
-- **Evidence:** Recall "when behavioral code" confirms behavioral = code constructs. Brief specifies exact criterion.

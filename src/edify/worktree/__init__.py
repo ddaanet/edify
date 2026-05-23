@@ -1,1 +1,0 @@
-"""Worktree management module."""

@@ -1,7 +1,0 @@
-- **Classification:** Simple
-- **Implementation certainty:** High — update `paths:` frontmatter in 3 rules files
-- **Requirement stability:** High — FR-9d mechanism-specified
-- **Behavioral code check:** No — frontmatter metadata only
-- **Work type:** Production
-- **Artifact destination:** agentic-prose
-- **Evidence:** Grep confirms 3 files reference `.claude/` paths that should be `plugin/` source paths

@@ -91,7 +91,7 @@ wheels = [
 ]
 
 [[package]]
-name = "edify"
+name = "edify-cli"
 version = "0.0.2"
 source = { editable = "." }
 dependencies = [
