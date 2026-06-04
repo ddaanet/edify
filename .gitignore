@@ -36,3 +36,4 @@ list/
 /objects
 /refs
 /.claude/settings.json
+.claude/settings.local.json
