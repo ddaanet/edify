@@ -28,8 +28,6 @@ list/
 /.zprofile
 /.zshrc
 /.claude/commands
-/.claude/handoff.md
-/.claude/handoff-task.md
 /HEAD
 /config
 /hooks
