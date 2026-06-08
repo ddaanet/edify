@@ -123,15 +123,23 @@ def head(xs: list[int]) -> int:
 
 - [ ] **Step 4: Characterize real CrossHair output (record, do not assert yet)**
 
-Run: `uv run crosshair check --report_verbose tests/fixtures/check_targets/head_buggy.py; echo "exit=$?"`
-Expected: a line matching `tests/fixtures/check_targets/head_buggy.py:<line>: error: <message>` on stdout, and `exit=1`.
+Run: `uv run crosshair check tests/fixtures/check_targets/head_buggy.py; echo "exit=$?"`
+Run: `uv run crosshair check tests/fixtures/check_targets/head_fixed.py; echo "exit=$?"`
 
-Run: `uv run crosshair check --report_verbose tests/fixtures/check_targets/head_fixed.py; echo "exit=$?"`
-Expected: no `error:` lines, `exit=0`.
+**RECORDED (crosshair 0.0.106, Python 3.14.3) — supersedes the original plan:**
 
-If the observed line format or exit codes differ from the above, note the actual
-strings — Tasks 4 and 7 assert against this format; adjust those assertions to
-the recorded reality before proceeding.
+- The original plan used `--report_verbose`. **That was wrong**: `--report_verbose`
+  emits a full Python traceback, not a parseable line. The **default** (no flag)
+  `crosshair check` emits the concise machine line we want. So
+  `build_crosshair_argv` (Task 3) must NOT pass `--report_verbose`.
+- Buggy fixture, on **stdout**, `exit=1`:
+  `<abspath>/head_buggy.py:13: error: IndexError:  when calling head([])`
+  (note: the message after `error: ` is `IndexError:  when calling head([])` —
+  two spaces; location is an absolute path ending `:13`.) stderr is empty.
+- Fixed fixture: no output, `exit=0`.
+- The Task 4 regex `^(?P<location>.+?:\d+): error: (?P<message>.*)$` matches the
+  recorded line (location `…/head_buggy.py:13`, message `IndexError:  when calling
+  head([])`). Task 4 and Task 7 assertions hold as written.
 
 - [ ] **Step 5: Commit**
 
@@ -247,11 +255,10 @@ from edify.check import build_crosshair_argv
 
 
 def test_argv_basic() -> None:
-    """argv invokes `crosshair check --report_verbose` on the target."""
+    """argv invokes `crosshair check` on the target."""
     assert build_crosshair_argv("foo.py") == [
         "crosshair",
         "check",
-        "--report_verbose",
         "foo.py",
     ]
 
@@ -261,7 +268,6 @@ def test_argv_with_timeout() -> None:
     assert build_crosshair_argv("pkg.mod.fn", per_condition_timeout=5.0) == [
         "crosshair",
         "check",
-        "--report_verbose",
         "--per_condition_timeout=5.0",
         "pkg.mod.fn",
     ]
@@ -291,7 +297,7 @@ def build_crosshair_argv(
     Returns:
         The argv list to pass to ``subprocess.run``.
     """
-    argv = ["crosshair", "check", "--report_verbose"]
+    argv = ["crosshair", "check"]
     if per_condition_timeout is not None:
         argv.append(f"--per_condition_timeout={per_condition_timeout}")
     argv.append(target)
