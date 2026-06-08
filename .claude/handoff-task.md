@@ -1,8 +1,14 @@
 ## Current task
 
-Decouple the `deliverable-review` and `prioritize` skills from the deleted workflow pipeline — the `deliverable-review` edit was left mid-stream last session (Opus work).
+Execute the verify-loop implementation plan (`edify check` CrossHair CLI +
+`formalize` skill) — plan written and self-reviewed, not yet started, awaiting
+the execution-mode choice.
 
 ## Open decisions
 
-- `deliverable-review` couplings to remove: the `recall`/`_recall resolve` block (dead), the "Memory index pattern verification" step (dead), and a next-steps lifecycle reference — confirm those three are the full set or sweep for more.
-- Whether to trim the now-public `ddaanet/cwd-safety` DESIGN.md History section, which exposes cross-repo commit hashes and the agent-core teardown / superpowers pivot narrative.
+- Execution mode: subagent-driven (recommended, fresh agent per task) vs inline
+  with checkpoints.
+- Task 1 is a gate: confirm `crosshair-tool` installs and runs under Python
+  3.14 *before* building further; if it doesn't, stop and pick a fallback
+  (pin a compatible interpreter for a check-only path, or defer) rather than
+  working around silently.
