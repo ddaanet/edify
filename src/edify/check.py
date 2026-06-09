@@ -1,6 +1,7 @@
 """Core types and parsing for the ``edify check`` verification command."""
 
 import enum
+import re
 from dataclasses import dataclass, field
 
 
@@ -49,3 +50,51 @@ def build_crosshair_argv(
         argv.append(f"--per_condition_timeout={per_condition_timeout}")
     argv.append(target)
     return argv
+
+
+_FINDING_RE = re.compile(r"^(?P<location>.+?:\d+): error: (?P<message>.*)$")
+
+
+def parse_crosshair_output(
+    exit_code: int,
+    stdout: str,
+    stderr: str,
+    *,
+    target: str,
+) -> CheckResult:
+    """Map a CrossHair run to a CheckResult.
+
+    Exit codes (CrossHair contract): 0 = no counterexample within budget,
+    1 = counterexample(s) found, 2 (or other) = error.
+
+    Args:
+        exit_code: CrossHair process return code.
+        stdout: Captured standard output (machine-readable error lines).
+        stderr: Captured standard error (context for errors).
+        target: The target that was checked, echoed into the result.
+
+    Returns:
+        A CheckResult whose status reflects the exit code.
+    """
+    if exit_code == 0:
+        return CheckResult(status=CheckStatus.VERIFIED, target=target)
+    if exit_code == 1:
+        findings = tuple(
+            Finding(
+                location=match.group("location"),
+                message=match.group("message"),
+            )
+            for line in stdout.splitlines()
+            if (match := _FINDING_RE.match(line.strip()))
+        )
+        return CheckResult(
+            status=CheckStatus.REFUTED,
+            target=target,
+            findings=findings,
+            detail=stdout.strip(),
+        )
+    return CheckResult(
+        status=CheckStatus.ERROR,
+        target=target,
+        detail=(stderr.strip() or stdout.strip()),
+    )
