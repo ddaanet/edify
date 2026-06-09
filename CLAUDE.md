@@ -22,14 +22,15 @@ Edify is a lean Claude Code skills bundle plus a small CLI toolkit. Direction: L
 
 ## CLI (`edify-cli`)
 
-Source in `src/edify/`. Three tools:
+Source in `src/edify/`. Four tools:
 - **Session scraping** — `edify list | extract <prefix> | collect`
 - **Token counting** — `edify tokens FILE...` (Anthropic API)
 - **Markdown postprocessing** — `edify markdown` (reads paths from stdin)
+- **Contract checking** — `edify check <target>` (CrossHair verification)
 
 ## Skills
 
-In `plugin/skills/`, invoked via slash command: `proof`, `ground`, `requirements`, `deliverable-review`, `token-efficient-bash`.
+In `plugin/skills/`, invoked via slash command: `proof`, `ground`, `requirements`, `deliverable-review`, `token-efficient-bash`, `formalize`.
 
 ## Recipes
 
