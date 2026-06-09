@@ -8,6 +8,7 @@ from pathlib import Path
 
 import click
 
+from edify.check_cli import handle_check
 from edify.discovery import list_top_level_sessions
 from edify.exceptions import ClaudeUtilsError
 from edify.extraction import extract_feedback_recursively
@@ -118,6 +119,30 @@ def collect(project: str | None, output: str | None) -> None:
 def tokens(model: str, files: tuple[str, ...], *, json_output: bool) -> None:
     """Count tokens in files via Anthropic API."""
     handle_tokens(model, list(files), json_output=json_output)
+
+
+@cli.command(help="Verify a Python target against its icontract contract")
+@click.argument("target")
+@click.option(
+    "--timeout",
+    "per_condition_timeout",
+    type=float,
+    default=None,
+    help="Per-condition timeout in seconds (CrossHair --per_condition_timeout)",
+)
+@click.option("--json", "json_output", is_flag=True, help="Output JSON")
+def check(
+    target: str,
+    per_condition_timeout: float | None,
+    *,
+    json_output: bool,
+) -> None:
+    """Check TARGET (file path or dotted module.func) against its contract."""
+    handle_check(
+        target,
+        per_condition_timeout=per_condition_timeout,
+        json_output=json_output,
+    )
 
 
 @cli.command(help="Process markdown files")

@@ -77,3 +77,27 @@ def test_handle_check_error_exits_two(
     with pytest.raises(SystemExit) as exc:
         handle_check("foo.py")
     assert exc.value.code == 2
+
+
+from click.testing import CliRunner
+
+from edify.cli import cli
+
+
+def test_check_help_lists_target_and_json() -> None:
+    """`edify check --help` documents the TARGET arg and --json flag."""
+    result = CliRunner().invoke(cli, ["check", "--help"])
+    assert result.exit_code == 0
+    assert "TARGET" in result.output
+    assert "--json" in result.output
+
+
+def test_check_command_invokes_handler(mocker: MockerFixture) -> None:
+    """`edify check foo.py` routes to run_crosshair with that target."""
+    spy = mocker.patch(
+        "edify.check_cli.run_crosshair",
+        return_value=CheckResult(status=CheckStatus.VERIFIED, target="foo.py"),
+    )
+    result = CliRunner().invoke(cli, ["check", "foo.py"])
+    assert result.exit_code == 0
+    spy.assert_called_once_with("foo.py", per_condition_timeout=None)
