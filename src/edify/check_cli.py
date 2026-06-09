@@ -1,7 +1,7 @@
 """CLI handler for the ``check`` subcommand."""
 
 import json
-import subprocess  # noqa: S404
+import subprocess
 import sys
 
 from edify.check import (
@@ -31,7 +31,7 @@ def run_crosshair(
     """
     argv = build_crosshair_argv(target, per_condition_timeout=per_condition_timeout)
     try:
-        proc = subprocess.run(argv, capture_output=True, text=True, check=False)  # noqa: S603
+        proc = subprocess.run(argv, capture_output=True, text=True, check=False)
     except FileNotFoundError as exc:
         raise CrossHairUnavailableError from exc
     return parse_crosshair_output(

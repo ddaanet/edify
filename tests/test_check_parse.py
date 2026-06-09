@@ -1,6 +1,11 @@
 """Tests for CrossHair output parsing and check result types."""
 
-from edify.check import CheckResult, CheckStatus, Finding
+from edify.check import (
+    CheckResult,
+    CheckStatus,
+    Finding,
+    parse_crosshair_output,
+)
 
 
 def test_check_result_defaults() -> None:
@@ -17,9 +22,6 @@ def test_finding_fields() -> None:
     finding = Finding(location="foo.py:3", message="boom")
     assert finding.location == "foo.py:3"
     assert finding.message == "boom"
-
-
-from edify.check import parse_crosshair_output
 
 
 def test_exit_zero_is_verified() -> None:

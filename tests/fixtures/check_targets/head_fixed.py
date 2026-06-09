@@ -1,4 +1,7 @@
-"""Seed (fixed): head with a precondition. CrossHair verifies it."""
+"""Seed (fixed): head with a precondition.
+
+CrossHair verifies it.
+"""
 
 from icontract import ensure, require
 

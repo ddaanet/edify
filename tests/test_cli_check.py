@@ -3,10 +3,12 @@
 import json
 
 import pytest
+from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 from edify.check import CheckResult, CheckStatus, Finding
 from edify.check_cli import handle_check, run_crosshair
+from edify.cli import cli
 from edify.exceptions import CrossHairUnavailableError
 
 
@@ -77,11 +79,6 @@ def test_handle_check_error_exits_two(
     with pytest.raises(SystemExit) as exc:
         handle_check("foo.py")
     assert exc.value.code == 2
-
-
-from click.testing import CliRunner
-
-from edify.cli import cli
 
 
 def test_check_help_lists_target_and_json() -> None:

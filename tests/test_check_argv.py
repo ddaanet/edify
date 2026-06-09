@@ -4,7 +4,7 @@ from edify.check import build_crosshair_argv
 
 
 def test_argv_basic() -> None:
-    """argv invokes `crosshair check` on the target."""
+    """Argv invokes `crosshair check` on the target."""
     assert build_crosshair_argv("foo.py") == [
         "crosshair",
         "check",
