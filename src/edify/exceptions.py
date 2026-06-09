@@ -62,3 +62,14 @@ class MarkdownProcessingError(ClaudeUtilsError):
 
 class MarkdownInnerFenceError(ClaudeUtilsError):
     """Raised when inner fence is detected in non-markdown block."""
+
+
+class CrossHairUnavailableError(ClaudeUtilsError):
+    """Raised when the CrossHair executable cannot be found."""
+
+    def __init__(self) -> None:
+        """Initialize with an actionable install hint."""
+        super().__init__(
+            "CrossHair is not available. Run `uv sync` "
+            "(crosshair-tool is a project dependency)."
+        )
