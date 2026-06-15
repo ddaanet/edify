@@ -1,15 +1,17 @@
 ## Current task
 
-Proving the verify-loop thesis (living design L5/L6): the design doc and a first
-`formalize` dogfood are done and committed; the open thread is which proof path
-to take next.
+Proving the verify-loop thesis: both qualitative halves are now dogfooded
+(D9 verify path, D10 catch-a-bug path + the L7 default-budget-vacuity finding),
+so the only remaining lever for L5 (catch-rate vs the paper's ~35–39% one-shot
+baseline) is the D8 eval harness.
 
 ## Open decisions
 
-- Proof path — pick one: (a) one more qualitative `formalize` run aimed at a
-  target that should *fail* (closes the only untested half of the loop — the
-  dogfood verified, never caught a bug; cheap, in-session); (b) scope + build
-  the eval harness (D8 — the only thing that yields a catch-rate against the
-  paper's ~35–39% one-shot baseline and actually closes L5; needs its own
-  spec/plan and Agent-SDK/`claude -p` plan credits); (c) stop — state is clean,
-  committed, precommit green, living-doc resume pointer current.
+- Proof path — pick one: (a) **L7 hardening first** (cheap, in-session): give the
+  CLI a minimum-budget floor or a vacuity guard so a default-budget `verified`
+  can't be hollow, since D10 showed a contract-violating bug passes at the
+  default CrossHair budget; (b) **scope + build the D8 eval harness** — the only
+  thing that yields a catch-rate number; needs its own spec/plan and
+  Agent-SDK/`claude -p` plan credits (the API-key variant is ToS-disallowed);
+  (c) **stop** — state is clean, committed, precommit green, living-doc resume
+  pointer current.
