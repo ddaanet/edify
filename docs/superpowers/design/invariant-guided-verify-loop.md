@@ -2,9 +2,9 @@
 
 **Status:** Living. Updated as the design evolves; supersedes the frozen spec
 where they diverge.
-**Verified against:** `df199c9` (2026-06-15). FR/NFR states below were true at
+**Verified against:** `bd37748` (2026-06-15). FR/NFR states below were true at
 this commit (`just precommit` green: 293/294 pass, 1 known xfail) —
-`git diff df199c9 -- src/edify tests` to find drift.
+`git diff bd37748 -- src/edify tests` to find drift.
 
 **Origin artifacts (frozen):**
 - Spec: `../specs/2026-06-08-invariant-guided-verify-loop-design.md`
