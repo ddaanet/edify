@@ -2,8 +2,9 @@
 
 **Status:** Living. Updated as the design evolves; supersedes the frozen spec
 where they diverge.
-**Verified against:** `7396bb3` (2026-06-15). FR/NFR states below were true at
-this commit — `git diff 7396bb3 -- src/edify tests` to find drift.
+**Verified against:** `25648c7` (2026-06-15). FR/NFR states below were true at
+this commit (`just precommit` green: 293/294 pass, 1 known xfail) —
+`git diff 25648c7 -- src/edify tests` to find drift.
 
 **Origin artifacts (frozen):**
 - Spec: `../specs/2026-06-08-invariant-guided-verify-loop-design.md`
@@ -16,10 +17,14 @@ open claim — see L5, L6.
 
 ## Now
 
-- **Focus:** thesis unproven (L5/L6); the loop works as designed on the seed.
-- **Next:** choose the proof path — run `formalize` on a *real* function
-  (qualitative, in-session, free) **or** stand up the eval harness (D8,
-  quantitative, plan credits). Pending decision, not blocked.
+- **Focus:** thesis unproven (L5/L6). One qualitative dogfood run done
+  (`parse_crosshair_output`, 2026-06-15: verified + verifier-probed, see D9) —
+  loop mechanics + honesty disciplines confirmed on real code, but no
+  catch-rate and the target *verified* rather than exposing a bug.
+- **Next:** either more qualitative runs on real targets that might *fail*
+  (to exercise the catch-a-bug path) **or** stand up the eval harness (D8,
+  quantitative, plan credits) — the only thing that closes L5. Pending
+  decision, not blocked.
 - **Do not:** re-litigate the backend (D1) or the four-state→three-state output
   (D4) — both settled. Check each decision's *Reopen-if* before reviving it.
 
@@ -68,6 +73,7 @@ open claim — see L5, L6.
 | D6 | Agent locus = in-context, not an isolated API loop. | Intent lives in project context and sometimes needs *asking*; an isolated agent can converge on a verified answer to the wrong question. | **Reopen if:** the eval harness needs an isolated runner — keep validation in-context regardless. |
 | D7 | `build_crosshair_argv` must NOT pass `--report_verbose`. | Discovered at implementation: `--report_verbose` emits a full traceback, not the parseable `file:line: error:` line. | Supersedes spec §3 (which assumed `--report_verbose`). |
 | D8 | Eval harness deferred. | Not the primary v0 artifact; a hand-rolled API-key harness is pay-per-token and ToS-disallowed on a subscription. | **Reopen if:** on Agent-SDK / `claude -p` plan credits — this is the path to prove L5/L6. |
+| D9 | Dogfood: edify contracts its own code, runtime-enforced via icontract. | The verify loop ran on `check.py:parse_crosshair_output` (2026-06-15); the verified I1–I4 contract is kept on the production function. Always-on `@ensure` postcondition checks (negligible cost on a parsing path) document + enforce the status⇔exit-code invariants. First contracted production function. | **Reopen if:** icontract runtime cost ever shows on a hot path, or the pattern (contracting production code) is reconsidered project-wide. |
 
 ## Limitations (inherent — can't, not won't)
 
@@ -76,7 +82,7 @@ open claim — see L5, L6.
 | L1 | No-contract / vacuous-`verified` detection is not enforced by the CLI; a target with no pre/post-condition is analyzed by nothing. | Deferred to `formalize` discipline (add a contract on `error`). Could move into the CLI later. |
 | L2 | `unknown` (timeout / unsupported construct) is indistinguishable from `verified` at the CLI boundary. | Accepted per D4; honest because both mean "no counterexample within budget." |
 | L4 | Bounded path-exploration — no soundness or termination guarantee. | Inherent to CrossHair; stated honestly per NFR5. |
-| L5 | **The repair loop's advantage over one-shot is unproven.** The spec stakes the loop on closing the paper's ~35–39% one-shot bug-reveal rate; no eval has run. | Open. Needs the D8 eval harness to measure. |
+| L5 | **The repair loop's advantage over one-shot is unproven.** The spec stakes the loop on closing the paper's ~35–39% one-shot bug-reveal rate; no eval has run. | Open. One qualitative run (D9) confirmed loop mechanics but produced no rate and caught no bug (target verified). Needs the D8 eval harness to measure. |
 | L6 | **Human-in-loop > isolated is unproven.** The validation-vs-verification claim has no measurement. | Open. |
 
 ## Non-goals (deliberate — won't, for now)
@@ -95,3 +101,4 @@ open claim — see L5, L6.
 | 2026-06-08 | Spec approved (CrossHair over Nagini/Lean; two differentiators: repair loop + human-in-loop validation). Prior-art honesty: generate-verify-repair is published research, not novel; the unfilled niche is the CLI/skill wrapper with human-in-loop intent disambiguation. |
 | 2026-06-09 | Plan executed end-to-end (Tasks 1–9, ten commits). Divergences recorded as D3–D5, D7. |
 | 2026-06-15 | Plumbing proven on the seed (refutes empty-list `head`, verifies the guarded version; e2e green). Thesis (L5/L6) still open. Living design extracted from the frozen spec + plan; added traceability, freshness stamp, Now/Reopen-if, Non-goals split from Limitations. |
+| 2026-06-15 | First dogfood run of the `formalize` loop on real code (`check.py:parse_crosshair_output`): contract I1–I4 verified, then a falsification probe confirmed the verdict was genuine (not `unknown`-in-disguise). Contract kept (D9). Loop mechanics + honesty disciplines confirmed on real code; L5 still open (no rate, no bug caught). |
