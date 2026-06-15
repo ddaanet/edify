@@ -35,3 +35,4 @@ list/
 /refs
 /.claude/settings.json
 .claude/settings.local.json
+/.claude/handoff-session
