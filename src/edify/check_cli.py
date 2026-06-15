@@ -39,10 +39,28 @@ def run_crosshair(
     )
 
 
-def _print_human(result: CheckResult) -> None:
+_VACUITY_WARNING = (
+    "warning: verified at CrossHair's default budget (no --timeout given); "
+    "this verdict may be vacuous if the contract's interesting paths were "
+    "never explored. Re-run with --timeout to harden it."
+)
+
+
+def _print_human(result: CheckResult, per_condition_timeout: float | None) -> None:
     """Print a human-readable rendering of a check result."""
     if result.status is CheckStatus.VERIFIED:
-        print(f"verified: {result.target} (no counterexample within budget)")
+        if per_condition_timeout is None:
+            print(
+                f"verified: {result.target} "
+                "(no counterexample within CrossHair's default budget)"
+            )
+            print(_VACUITY_WARNING, file=sys.stderr)
+        else:
+            print(
+                f"verified: {result.target} "
+                f"(no counterexample within {per_condition_timeout} s "
+                "per-condition budget)"
+            )
     elif result.status is CheckStatus.REFUTED:
         print(f"refuted: {result.target}")
         for finding in result.findings:
@@ -64,6 +82,9 @@ def handle_check(
     Exit codes: 0 verified, 1 refuted, 2 error.
     """
     result = run_crosshair(target, per_condition_timeout=per_condition_timeout)
+    vacuity_warning = (
+        result.status is CheckStatus.VERIFIED and per_condition_timeout is None
+    )
     if json_output:
         print(
             json.dumps(
@@ -75,9 +96,11 @@ def handle_check(
                         for f in result.findings
                     ],
                     "detail": result.detail,
+                    "budget": per_condition_timeout,
+                    "vacuity_warning": vacuity_warning,
                 }
             )
         )
     else:
-        _print_human(result)
+        _print_human(result, per_condition_timeout)
     sys.exit(_EXIT_CODES[result.status])

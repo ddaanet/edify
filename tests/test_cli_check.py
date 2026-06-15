@@ -81,6 +81,109 @@ def test_handle_check_error_exits_two(
     assert exc.value.code == 2
 
 
+def test_handle_check_verified_json_flags_vacuity_no_timeout(
+    mocker: MockerFixture,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """No --timeout: JSON vacuity_warning true and budget null."""
+    mocker.patch(
+        "edify.check_cli.run_crosshair",
+        return_value=CheckResult(status=CheckStatus.VERIFIED, target="foo.py"),
+    )
+    with pytest.raises(SystemExit):
+        handle_check("foo.py", json_output=True)
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["budget"] is None
+    assert payload["vacuity_warning"] is True
+
+
+def test_handle_check_verified_json_no_warning_with_timeout(
+    mocker: MockerFixture,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Verified with --timeout reports the budget and clears vacuity_warning."""
+    mocker.patch(
+        "edify.check_cli.run_crosshair",
+        return_value=CheckResult(status=CheckStatus.VERIFIED, target="foo.py"),
+    )
+    with pytest.raises(SystemExit):
+        handle_check("foo.py", per_condition_timeout=30.0, json_output=True)
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["budget"] == 30.0
+    assert payload["vacuity_warning"] is False
+
+
+def test_handle_check_refuted_json_not_vacuous(
+    mocker: MockerFixture,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Refuted is never vacuous, even with no --timeout."""
+    mocker.patch(
+        "edify.check_cli.run_crosshair",
+        return_value=CheckResult(
+            status=CheckStatus.REFUTED,
+            target="foo.py",
+            findings=(Finding(location="foo.py:3", message="bad"),),
+        ),
+    )
+    with pytest.raises(SystemExit):
+        handle_check("foo.py", json_output=True)
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["vacuity_warning"] is False
+    assert payload["budget"] is None
+
+
+def test_handle_check_verified_warns_on_stderr_no_timeout(
+    mocker: MockerFixture,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Verified with no --timeout emits a vacuity warning to stderr."""
+    mocker.patch(
+        "edify.check_cli.run_crosshair",
+        return_value=CheckResult(status=CheckStatus.VERIFIED, target="foo.py"),
+    )
+    with pytest.raises(SystemExit):
+        handle_check("foo.py")
+    captured = capsys.readouterr()
+    assert "default budget" in captured.out
+    assert "--timeout" in captured.err
+    assert "vacuous" in captured.err
+
+
+def test_handle_check_verified_reports_budget_with_timeout(
+    mocker: MockerFixture,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Verified with --timeout reports the budget and emits no warning."""
+    mocker.patch(
+        "edify.check_cli.run_crosshair",
+        return_value=CheckResult(status=CheckStatus.VERIFIED, target="foo.py"),
+    )
+    with pytest.raises(SystemExit):
+        handle_check("foo.py", per_condition_timeout=30.0)
+    captured = capsys.readouterr()
+    assert "30" in captured.out
+    assert captured.err == ""
+
+
+def test_handle_check_refuted_no_warning(
+    mocker: MockerFixture,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Refuted with no --timeout emits no vacuity warning to stderr."""
+    mocker.patch(
+        "edify.check_cli.run_crosshair",
+        return_value=CheckResult(
+            status=CheckStatus.REFUTED,
+            target="foo.py",
+            findings=(Finding(location="foo.py:3", message="bad"),),
+        ),
+    )
+    with pytest.raises(SystemExit):
+        handle_check("foo.py")
+    assert "vacuous" not in capsys.readouterr().err
+
+
 def test_check_help_lists_target_and_json() -> None:
     """`edify check --help` documents the TARGET arg and --json flag."""
     result = CliRunner().invoke(cli, ["check", "--help"])
