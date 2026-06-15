@@ -2,9 +2,9 @@
 
 **Status:** Living. Updated as the design evolves; supersedes the frozen spec
 where they diverge.
-**Verified against:** `bd37748` (2026-06-15). FR/NFR states below were true at
-this commit (`just precommit` green: 293/294 pass, 1 known xfail) —
-`git diff bd37748 -- src/edify tests` to find drift.
+**Verified against:** `a26bf0a0` (2026-06-15). FR/NFR states below were true at
+this commit (`just precommit` green: 299/300 pass, 1 known xfail) —
+`git diff a26bf0a0 -- src/edify tests` to find drift.
 
 **Origin artifacts (frozen):**
 - Spec: `../specs/2026-06-08-invariant-guided-verify-loop-design.md`
@@ -43,13 +43,14 @@ open claim — see L5, L6.
 | FR2 | Status is `verified`/`refuted`/`error`, derived from CrossHair exit 0/1/2. | Done | `check.py:parse_crosshair_output` · `test_check_parse.py::test_exit_zero_is_verified`, `::test_exit_two_is_error_with_detail` |
 | FR3 | A `refuted` result parses each `file:line: error: message` line into a `Finding(location, message)`. | Done | `check.py:parse_crosshair_output` · `test_check_parse.py::test_exit_one_parses_findings`, `::test_findings_ignore_non_error_lines` |
 | FR4 | Process exit codes mirror status (0/1/2) so the command composes in recipes and a future eval. | Done | `check_cli.py:_EXIT_CODES`, `handle_check` · `test_cli_check.py::test_handle_check_verified_exits_zero`, `::test_handle_check_refuted_exits_one_json`, `::test_handle_check_error_exits_two` |
-| FR5 | `--json` emits `{status, target, findings, detail}`; default is human-readable. | Done | `check_cli.py:handle_check`, `_print_human` · `test_cli_check.py::test_handle_check_refuted_exits_one_json` |
+| FR5 | `--json` emits `{status, target, findings, detail, budget, vacuity_warning}`; default is human-readable. | Done | `check_cli.py:handle_check`, `_print_human` · `test_cli_check.py::test_handle_check_refuted_exits_one_json`, `::test_handle_check_verified_json_flags_vacuity_no_timeout` |
 | FR6 | `--timeout` sets CrossHair `--per_condition_timeout`. | Done | `check.py:build_crosshair_argv` · `test_check_argv.py::test_argv_with_timeout` |
 | FR7 | A missing CrossHair executable raises an actionable `CrossHairUnavailableError`, never a silent failure. | Done | `check_cli.py:run_crosshair`, `exceptions.py:CrossHairUnavailableError` · `test_cli_check.py::test_run_crosshair_missing_binary` |
 | FR8 | `formalize` drives a propose-contract → check → repair loop with the in-context agent holding intent. | Done (prose) | `plugin/skills/formalize/SKILL.md` |
 | FR9 | `formalize` uses `AskUserQuestion` on genuine intent ambiguity, never inventing a spec. | Done (prose) | `plugin/skills/formalize/SKILL.md` |
 | FR10 | `formalize` triages every counterexample: code bug → fix code, spec bug → fix contract, intent ambiguity → ask. | Done (prose) | `plugin/skills/formalize/SKILL.md` |
 | FR11 | `formalize` caps repair iterations; on the cap it reports the honest unresolved state, never upgrading `refuted`/`error` to verified. | Done (prose) | `plugin/skills/formalize/SKILL.md` |
+| FR12 | A `verified` result reports the per-condition budget; with no `--timeout` it warns (stderr + JSON `vacuity_warning`) that the verdict used CrossHair's default budget and may be vacuous. | Done | `check_cli.py:handle_check`, `_print_human` · `test_cli_check.py::test_handle_check_verified_warns_on_stderr_no_timeout`, `::test_handle_check_verified_json_flags_vacuity_no_timeout` |
 
 ## Non-Functional Requirements
 
@@ -86,7 +87,7 @@ open claim — see L5, L6.
 | L4 | Bounded path-exploration — no soundness or termination guarantee. | Inherent to CrossHair; stated honestly per NFR5. |
 | L5 | **The repair loop's advantage over one-shot is unproven.** The spec stakes the loop on closing the paper's ~35–39% one-shot bug-reveal rate; no eval has run. | Open. The qualitative catch-a-bug path is now exercised (D10: refuted → code-bug triage → fix → verified, on a real function via fault injection). Still no *rate* — that needs the D8 eval harness. |
 | L6 | **Human-in-loop > isolated is unproven.** The validation-vs-verification claim has no measurement. | Open. |
-| L7 | **Default-budget `verified` can be vacuous.** When `--timeout` is omitted no `--per_condition_timeout` reaches CrossHair, and on a target whose interesting paths need specific synthesized input (e.g. two matching backticks) the default budget may never reach them — returning `verified` while the contract holds only emptily. Demonstrated in D10: a contract-violating bug passed at default budget, refuted only at `--timeout 30`. | Concrete instance of L2, but actionable: a `verified` is only as strong as the budget that produced it. The falsification-probe discipline catches it; a CLI minimum-budget floor or vacuity guard would harden it (deferred). D9 (`parse_crosshair_output`) was re-checked at `--timeout 30` and still verified — its verdict is not vacuous. |
+| L7 | **Default-budget `verified` can be vacuous.** When `--timeout` is omitted no `--per_condition_timeout` reaches CrossHair, and on a target whose interesting paths need specific synthesized input (e.g. two matching backticks) the default budget may never reach them — returning `verified` while the contract holds only emptily. Demonstrated in D10: a contract-violating bug passed at default budget, refuted only at `--timeout 30`. | **Surfaced (FR12, 2026-06-15):** `edify check` now reports the per-condition budget and warns when a `verified` used CrossHair's default budget (stderr + JSON `vacuity_warning`). A minimum-budget floor and an auto-probe vacuity guard were deliberately rejected — a fixed floor is an ungrounded threshold (D10 only flipped one target at 30 s), and auto-probing belongs in `formalize`, not the `check` primitive. The falsification-probe discipline still backs it. D9 (`parse_crosshair_output`) was re-checked at `--timeout 30` and still verified — its verdict is not vacuous. |
 
 ## Non-goals (deliberate — won't, for now)
 
@@ -106,3 +107,4 @@ open claim — see L5, L6.
 | 2026-06-15 | Plumbing proven on the seed (refutes empty-list `head`, verifies the guarded version; e2e green). Thesis (L5/L6) still open. Living design extracted from the frozen spec + plan; added traceability, freshness stamp, Now/Reopen-if, Non-goals split from Limitations. |
 | 2026-06-15 | First dogfood run of the `formalize` loop on real code (`check.py:parse_crosshair_output`): contract I1–I4 verified, then a falsification probe confirmed the verdict was genuine (not `unknown`-in-disguise). Contract kept (D9). Loop mechanics + honesty disciplines confirmed on real code; L5 still open (no rate, no bug caught). |
 | 2026-06-15 | Catch-a-bug dogfood on `markdown_inline_fixes.find_inline_code_spans` (D10). Genuine span contract written and verified; a fault-injected off-by-one was then refuted with a readable counterexample, triaged as a code bug, and the fix restored verified. Surfaced L7: at the default budget the planted bug passed `verified` — the refutation needed `--timeout 30`, exposing that default-budget `verified` can be vacuous. Contract kept. |
+| 2026-06-15 | L7 hardened by surfacing, not fixing or detecting: `edify check` reports the per-condition budget on a `verified` result and warns (stderr + JSON `vacuity_warning`) when the verdict used CrossHair's default budget (FR12). Minimum-budget floor and auto-probe both rejected as ungrounded / misplaced. Spec: `specs/2026-06-15-l7-vacuity-warning-design.md`. |
