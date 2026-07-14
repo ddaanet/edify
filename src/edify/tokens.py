@@ -44,6 +44,25 @@ class TokenCount(BaseModel):
     count: int
 
 
+# Claude Code / Plan OAuth tokens authenticate via Bearer, not the x-api-key header.
+_OAUTH_TOKEN_PREFIX = "sk-ant-oat"  # noqa: S105 - public token-format prefix, not a secret
+
+
+def make_client(api_key: str | None) -> Anthropic:
+    """Build an Anthropic client with the correct auth scheme.
+
+    OAuth tokens (``sk-ant-oat*``, e.g. Claude Code / Plan credentials)
+    authenticate via ``Authorization: Bearer`` (``auth_token``); standard API
+    keys use ``x-api-key`` (``api_key``). Passing an OAuth token as ``api_key``
+    returns 401, so route by prefix.
+    """
+    if not api_key:
+        return Anthropic()
+    if api_key.startswith(_OAUTH_TOKEN_PREFIX):
+        return Anthropic(auth_token=api_key)
+    return Anthropic(api_key=api_key)
+
+
 def resolve_model_alias(model: str, client: Anthropic, cache_dir: Path) -> ModelId:
     """Resolve model alias to full model ID.
 
@@ -188,8 +207,7 @@ def count_tokens_for_files(paths: list[Path], model: ModelId) -> list[TokenCount
     Returns:
         List of TokenCount objects with per-file counts
     """
-    api_key = get_api_key()
-    client = Anthropic(api_key=api_key) if api_key else Anthropic()
+    client = make_client(get_api_key())
 
     from edify.token_cache import cached_count_tokens_for_file, get_default_cache  # noqa: PLC0415, I001
 

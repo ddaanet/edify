@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 import platformdirs
-from anthropic import Anthropic, AuthenticationError
+from anthropic import AuthenticationError
 
 from edify.exceptions import (
     ApiAuthenticationError,
@@ -16,6 +16,7 @@ from edify.exceptions import (
 from edify.tokens import (
     calculate_total,
     count_tokens_for_files,
+    make_client,
     resolve_model_alias,
 )
 from edify.user_config import get_api_key
@@ -51,7 +52,7 @@ def handle_tokens(model: str, files: list[str], *, json_output: bool = False) ->
 
         file_paths = files
 
-        client = Anthropic(api_key=api_key)
+        client = make_client(api_key)
         cache_dir = Path(platformdirs.user_cache_dir("edify"))
         resolved_model = resolve_model_alias(model, client, cache_dir)
 
