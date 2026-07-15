@@ -197,8 +197,8 @@ def mock_token_counting(
         # Set fake API key to pass authentication check
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-key")
 
-        # Mock Anthropic client to avoid instantiation with SOCKS proxy
-        mocker.patch("edify.tokens_cli.Anthropic", autospec=True)
+        # Mock client construction to avoid instantiation with SOCKS proxy
+        mocker.patch("edify.tokens_cli.make_client", autospec=True)
 
         mocker.patch(
             "edify.tokens_cli.resolve_model_alias",
@@ -257,7 +257,7 @@ def cli_base_mocks(
     )
 
     return {
-        "anthropic": mocker.patch("edify.tokens_cli.Anthropic", autospec=True),
+        "anthropic": mocker.patch("edify.tokens_cli.make_client", autospec=True),
         "resolve": mocker.patch(
             "edify.tokens_cli.resolve_model_alias", autospec=True
         ),

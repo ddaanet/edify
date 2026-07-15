@@ -191,11 +191,11 @@ def test_cli_auth_error_shows_helpful_message(
     test_file = tmp_path / "test.md"
     test_file.write_text("Hello world")
 
-    # Mock Anthropic() to raise AuthenticationError
-    mock_anthropic_class = mocker.patch(
-        "edify.tokens_cli.Anthropic", autospec=True
+    # Mock client construction to raise AuthenticationError
+    mock_make_client = mocker.patch(
+        "edify.tokens_cli.make_client", autospec=True
     )
-    mock_anthropic_class.side_effect = AuthenticationError(
+    mock_make_client.side_effect = AuthenticationError(
         "Invalid API key", response=Mock(), body={}
     )
     with pytest.raises(SystemExit) as exc_info:
@@ -226,8 +226,8 @@ def test_cli_rate_limit_error_shows_message(
     # Set fake API key to pass authentication check
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-key")
 
-    # Mock Anthropic client to avoid instantiation with SOCKS proxy
-    mocker.patch("edify.tokens_cli.Anthropic", autospec=True)
+    # Mock client construction to avoid instantiation with SOCKS proxy
+    mocker.patch("edify.tokens_cli.make_client", autospec=True)
 
     # Setup mocks with resolve returning model and count_tokens raising error
     mock_resolve = mocker.patch(
@@ -329,7 +329,7 @@ def test_cli_detects_empty_api_key_before_sdk(
     # Mock config file fallback - should also return no key
     mocker.patch("edify.tokens_cli.get_api_key", return_value=None)
     # Mock SDK components - should NOT be called
-    mock_anthropic = mocker.patch("edify.tokens_cli.Anthropic", autospec=True)
+    mock_make_client = mocker.patch("edify.tokens_cli.make_client", autospec=True)
     mock_resolve = mocker.patch(
         "edify.tokens_cli.resolve_model_alias", autospec=True
     )
@@ -343,7 +343,7 @@ def test_cli_detects_empty_api_key_before_sdk(
     assert "ANTHROPIC_API_KEY" in captured.err
 
     # Verify SDK was never called
-    assert not mock_anthropic.called
+    assert not mock_make_client.called
     assert not mock_resolve.called
 
 
@@ -367,7 +367,7 @@ def test_cli_detects_missing_api_key_before_sdk(
     # Mock config file fallback - should also return no key
     mocker.patch("edify.tokens_cli.get_api_key", return_value=None)
     # Mock SDK components - should NOT be called
-    mock_anthropic = mocker.patch("edify.tokens_cli.Anthropic", autospec=True)
+    mock_make_client = mocker.patch("edify.tokens_cli.make_client", autospec=True)
     mock_resolve = mocker.patch(
         "edify.tokens_cli.resolve_model_alias", autospec=True
     )
@@ -381,5 +381,5 @@ def test_cli_detects_missing_api_key_before_sdk(
     assert "ANTHROPIC_API_KEY" in captured.err
 
     # Verify SDK was never called (missing key test)
-    assert not mock_anthropic.called
+    assert not mock_make_client.called
     assert not mock_resolve.called
