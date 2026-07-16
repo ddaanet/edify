@@ -1,0 +1,145 @@
+---
+name: deliverable-review
+description: >-
+  Review production artifacts after plan execution. Triggers on "review deliverables",
+  "deliverable review", "artifact review", or after completing plan execution.
+  Two-layer review (delegated per-file + interactive cross-project) producing
+  severity-classified report grounded in ISO 25010 / IEEE 1012.
+allowed-tools:
+  - Task
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - Write
+user-invocable: true
+---
+
+# Review Production Artifacts
+
+Review production artifacts against a design specification to identify conformance gaps, correctness issues, coverage holes, and excess artifacts.
+
+## Prerequisites
+
+Before starting, gather:
+- **Design document** — the conformance baseline (`plans/<plan>/design.md`)
+- **Plan directory** — for report output (`plans/<plan>/reports/`)
+
+## Process
+
+### Phase 1: Inventory
+
+1. Read the design's Scope section (IN/OUT) to establish expected deliverables
+2. Run exact command: `plugin/bin/deliverable-inventory.py` (no arguments, no pipes, no redirect). Outputs markdown tables: per-file diff stats and summary by type
+3. Classify each deliverable by artifact type (script auto-classifies, verify):
+
+| Type | Pattern | Review axes |
+|------|---------|-------------|
+| Code | `*.py` source | Universal + robustness, modularity, testability, idempotency, error signaling |
+| Test | `test_*.py` | Universal + specificity, coverage, independence |
+| Agentic prose | `SKILL.md`, agent defs | Universal + actionability, constraint precision, determinism, scope boundaries |
+| Human docs | Fragments, references | Universal + accuracy, consistency, completeness, usability |
+| Configuration | Justfile, pyproject | Universal only |
+
+Universal axes (all types): conformance, functional correctness, functional completeness, vacuity, excess.
+
+Full axis definitions: `agents/decisions/deliverable-review.md`
+
+### Phase 2: Gap Analysis
+
+Compare inventory against design In-scope items:
+- **Missing deliverables** — specified but not produced
+- **Unspecified deliverables** — produced but not in design scope
+- **Excess** in unspecified is acceptable if justified (edge case coverage, defensive tests)
+
+### Phase 3: Per-Deliverable Review
+
+Two-layer review. Layer 1 is optional (scales to large deliverable sets). Layer 2 is mandatory (catches what delegation cannot).
+
+#### Layer 1: Delegated Per-File Review (optional)
+
+Gate on total deliverable lines from Phase 1 inventory:
+
+| Total lines | Strategy |
+|-------------|----------|
+| < 500 | **Skip Layer 1** — Layer 2 handles full review |
+| 500–2000 | Two opus agents: code+test, prose+config |
+| > 2000 | Three opus agents: code, test, prose+config |
+
+When Layer 1 applies, partition deliverables by type and launch parallel review agents. Each agent receives:
+- Files to review (with line counts)
+- Design reference path
+- Applicable review axes for its artifact types
+- Output report path: `plans/<plan>/reports/deliverable-review-<type>.md`
+
+Use `run_in_background=true` for parallel agents.
+
+#### Layer 2: Interactive Full-Artifact Review (mandatory)
+
+Always runs in main session with full cross-project context.
+
+**Scope depends on whether Layer 1 ran:**
+
+| Layer 1 | Layer 2 scope |
+|---------|---------------|
+| Skipped (< 500 lines) | Full review: per-file axes AND cross-cutting checks |
+| Ran | Cross-cutting focus: issues delegation cannot catch |
+
+**Cross-cutting checks (always):**
+- Path consistency across documents
+- API contract alignment between modules
+- Naming convention uniformity
+- Fragment convention compliance
+- Other skills' allowed-tools and frontmatter cross-reference validation
+
+**Per-file review (when Layer 1 skipped):**
+- Read each deliverable and evaluate against type-specific axes
+- Record findings with: file:line, axis violated, severity, description
+
+**Why interactive is mandatory:** Delegated agents lack cross-project context — fragment conventions, other skills' configurations, inter-file consistency. Layer 2 reads deliverables directly against the design spec, not delegation reports. The two layers are independent.
+
+### Phase 4: Report
+
+Write consolidated report to `plans/<plan>/reports/deliverable-review.md`.
+
+**Report structure:**
+
+```markdown
+# Deliverable Review: <plan-name>
+
+**Date:** <date>
+**Methodology:** agents/decisions/deliverable-review.md
+
+## Inventory
+[Table: type, file, lines]
+[Design conformance summary]
+
+## Critical Findings
+[Numbered, with file:line, design requirement, impact]
+
+## Major Findings
+[Same format]
+
+## Minor Findings
+[Grouped by category, brief]
+
+## Gap Analysis
+[Table: design requirement, status (covered/missing), reference]
+
+## Summary
+[Severity counts, assessment]
+```
+
+**Severity classification:**
+- **Critical** — incorrect behavior, data loss, security, unimplemented design requirement
+- **Major** — missing functionality, broken references, vacuous artifact, test gap for specified scenario
+- **Minor** — style, clarity, naming, robustness edge case
+
+**Next steps:**
+
+Report severity counts only. No merge-readiness language — the user reads severity counts and decides what to act on. The report is the deliverable; the skill does not queue follow-up work or record lifecycle state.
+
+## References
+
+- **Methodology** — full axis definitions, ISO/IEEE sources: `agents/decisions/deliverable-review.md`
+- **Example report** — completed review with all sections: `references/example-report.md`

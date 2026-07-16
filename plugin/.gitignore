@@ -1,0 +1,32 @@
+# Local Claude Code configuration
+CLAUDE.local.md
+.claude/*.local.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+.venv
+
+# SessionStart hook artifacts (dev mode)
+.edify-venv/
+.edify-install.log
+.bin/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Incoming, unsorted
+__pycache__/

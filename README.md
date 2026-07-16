@@ -17,9 +17,9 @@ Requires Python 3.14+ and [uv].
 
 ## Agent Framework
 
-The `plugin/` submodule provides workflow infrastructure for Claude Code
-projects. Currently installed as a git submodule with symlinks
-(`just sync-to-parent`); converting to a Claude Code plugin.
+The `plugin/` directory is a Claude Code plugin providing workflow
+infrastructure for Claude Code projects. It lives as a plain subdirectory of
+this repo (previously a git submodule).
 
 It ships 18 skills, 14 specialized sub-agents, 23 instruction fragments, and
 hooks — but the two things that matter most are structured workflow and memory
