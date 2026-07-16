@@ -14,7 +14,8 @@
     "commit-commands@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
-    "gitlore@ddaanet": true
+    "gitlore@ddaanet": true,
+    "handoff@ddaanet": true
   },
   "sandbox": {
     "enabled": true,
