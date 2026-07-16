@@ -30,7 +30,7 @@ Source in `src/edify/`. Four tools:
 
 ## Skills
 
-In `plugin/skills/`, invoked via slash command: `proof`, `ground`, `requirements`, `deliverable-review`, `token-efficient-bash`, `formalize`.
+In `plugin/skills/`, invoked via slash command: `proof`, `ground`, `requirements`, `deliverable-review`, `formalize`.
 
 ## Recipes
 
