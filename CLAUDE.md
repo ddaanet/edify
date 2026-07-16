@@ -129,8 +129,6 @@ when a temp file should stay with the repo.**
 
 **Deny-list as routing signal:** When a CLI command fails and raw commands are denied, the deny list is a routing signal — it means "use the wrapper." After CLI failure, retry with escalated flags (`--force`) before decomposing into raw commands.
 
-**Relationship to Execution Routing:** Execution Routing (`execution-routing.md`) governs the _delegate vs do directly_ decision. This rule governs _how_ to execute: prefer existing project recipes over equivalent ad-hoc commands.
-
 #### Check Platform Capabilities Before Building
 
 **Anti-pattern:** Building custom review/workflow infrastructure without checking what the platform already ships.
@@ -141,13 +139,13 @@ when a temp file should stay with the repo.**
 
 #### Use Full-Featured CLI Invocations
 
-**Anti-pattern:** Using the bare/simple invocation form of a CLI when a richer form exists that automates side effects. Example: `_worktree new <slug>` instead of `_worktree new --task "Task Name"` — then manually editing session.md to compensate.
+**Anti-pattern:** Using the bare/simple invocation form of a CLI when a richer form exists that automates side effects — then manually performing those side effects to compensate.
 
-**Correct pattern:** Before invoking a CLI command, check `--help` or known options. Use the form that includes automation (session.md updates, focused sessions, validation). Manual side effects are worse, error-prone, and miss features.
+**Correct pattern:** Before invoking a CLI command, check `--help` or known options. Use the form that includes automation (validation, related updates). Manual side effects are worse, error-prone, and miss features.
 
-**Root cause:** Familiarity with the primitive form suppresses discovery of the full-featured form. The simple form's visible output (worktree created) masks the missing side effects.
+**Root cause:** Familiarity with the primitive form suppresses discovery of the full-featured form. The simple form's visible success masks the missing side effects.
 
-**Same class as:** Primitive visibility (see execution-routing.md) and ad-hoc Python scripting (write `edify _worktree ls` not `python3 -c "import..."`).
+**Same class as:** reaching for an ad-hoc `python3 -c "import..."` one-liner instead of the existing `edify` subcommand that already does the job.
 
 #### Rule Suppression by Procedure
 
@@ -155,7 +153,7 @@ when a temp file should stay with the repo.**
 
 **Correct pattern:** The check-for-existing-tools rule applies even when a procedure names a specific function. Specific instructions must not suppress general operational rules.
 
-**Evidence:** execute-rule.md said "Call `list_plans()`" → agent wrote ad-hoc Python → 3 failed attempts guessing attributes → 6-turn guided diagnostic. CLI existed the whole time (`edify _worktree ls`).
+**Evidence:** a procedure that said "call `<function>()`" led an agent to write ad-hoc Python — several failed attempts guessing attributes — when an `edify` subcommand already did the job. The named-function instruction suppressed the check-for-existing-tools rule.
 
 #### Validation Output Integrity
 

@@ -50,10 +50,12 @@ being a git submodule.
 Claude Code does a sparse partial clone of only `path`; the rest of the repo is
 not fetched into the cache.
 
-**Status:** Design decided; **de-submodule not yet executed** (irreversible
-structural change — awaiting go-ahead). The `plugin` submodule currently has
-unpushed local commits that must be absorbed into the parent history when this
-is executed.
+**Status:** De-submodule **executed 2026-07-16** (commit `c3c4477f`). The
+`plugin` submodule's unpushed commits were absorbed via the flatten (content is
+a blob-for-blob match with its old HEAD `c7cbaaf`), and its GitHub repo
+(`ddaanet/edify-plugin`) was archived. The runtime bootstrap below (SessionStart
+venv hook, PyPI publish, marketplace `git-subdir` entry) is designed here but
+**not yet implemented**.
 
 ## Plugin obtains the CLI via a SessionStart-built stdlib venv, pinned from PyPI
 

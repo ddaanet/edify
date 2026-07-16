@@ -153,7 +153,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 
 ## When dispatching corrector review from /inline
 - Anti-pattern: Dispatching `superpowers:code-reviewer` (PR review toolkit) for post-execution corrector review. That agent is for PR reviews, not inline execution quality gates.
-- Correct pattern: /inline Phase 4a routing table (review-requirement.md) says code/tests → `corrector` (subagent_type="corrector"). Use it directly — it's a fix-capable reviewer that writes reports and applies fixes.
+- Correct pattern: /inline Phase 4a routing table says code/tests → `corrector` (subagent_type="corrector"). Use it directly — it's a fix-capable reviewer that writes reports and applies fixes.
 - Evidence: User rejected `superpowers:code-reviewer` dispatch during RC8 fix /inline Phase 4a.
 
 ## When PEP 758 changes except syntax conventions

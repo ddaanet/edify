@@ -1,16 +1,8 @@
 ## Current task
 
-L7 hardening shipped end-to-end (FR12: `edify check` reports the per-condition
-budget and warns on stderr + JSON `vacuity_warning` when a `verified` used
-CrossHair's default budget) — committed, tree clean, precommit green; next is to
-pick the following verify-loop proof lever.
+The plugin-packaging design is fully specified but its runtime bootstrap is unbuilt — the SessionStart stdlib-venv hook, publishing `edify-cli` to PyPI, and the marketplace `git-subdir` entry all remain to implement.
 
 ## Open decisions
 
-- Next proof lever for the thesis: build the **D8 eval harness** (the only path
-  to an L5 catch-rate number vs the paper's ~35–39% one-shot baseline; needs its
-  own spec/plan and Agent-SDK / `claude -p` plan credits, API-key variant is
-  ToS-disallowed) vs **stop** (state is clean, L7 done).
-- Optional, gated: enrich the `crosshair-verified-falsification-probe` memory to
-  cross-reference FR12 as the shipped CLI-level surfacing of the budget-vacuity
-  lesson (currently it only describes the manual probe) — awaiting user approval.
+- Publish ordering: `edify-cli` must reach PyPI before the plugin version that pins it (the bootstrap installs `edify-cli==<version>`) — decide whether to publish first or develop the hook against a local index.
+- Two empirical checks still gate design choices: whether `${CLAUDE_PLUGIN_DATA}` substitutes in skill content, and whether a write into `${CLAUDE_PLUGIN_ROOT}` persists across a session (the latter would permit the simpler ROOT venv location).
