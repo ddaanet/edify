@@ -12,11 +12,6 @@ venv/
 ENV/
 .venv
 
-# SessionStart hook artifacts (dev mode)
-.edify-venv/
-.edify-install.log
-.bin/
-
 # Editor
 .vscode/
 .idea/
@@ -27,6 +22,3 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
-
-# Incoming, unsorted
-__pycache__/

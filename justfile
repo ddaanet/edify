@@ -19,11 +19,11 @@ help:
 [no-exit-message]
 dev: format precommit
 
-# Remove generated artifacts (plugin venv, shim, build)
+# Remove generated build artifacts
 [no-exit-message]
 clean:
     #!{{ bash_prolog }}
-    visible rm -rf plugin/.edify-venv plugin/.bin plugin/.edify-install.log dist
+    visible rm -rf dist
     echo "${GREEN}✓${NORMAL} Clean"
 
 # Set up development environment (venv, direnv, npm)

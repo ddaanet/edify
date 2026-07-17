@@ -53,61 +53,70 @@ not fetched into the cache.
 **Status:** De-submodule **executed 2026-07-16** (commit `c3c4477f`). The
 `plugin` submodule's unpushed commits were absorbed via the flatten (content is
 a blob-for-blob match with its old HEAD `c7cbaaf`), and its GitHub repo
-(`ddaanet/edify-plugin`) was archived. The runtime bootstrap below (SessionStart
-venv hook, PyPI publish, marketplace `git-subdir` entry) is designed here but
-**not yet implemented**.
+(`ddaanet/edify-plugin`) was archived. The **SessionStart venv hook is
+implemented** (2026-07-17): `plugin/bin/bootstrap-venv.sh` + `plugin/hooks/
+hooks.json`, covered by `tests/bootstrap-venv.bats` (run from pytest via
+`tests/test_bootstrap_hook.py`). Still pending: the PyPI publish and the
+marketplace `git-subdir` entry.
 
-## Plugin obtains the CLI via a SessionStart-built stdlib venv, pinned from PyPI
+## Plugin obtains the CLI via a SessionStart uv-built venv, pinned from an index
 
-**Decision Date:** 2026-07-16
+**Decision Date:** 2026-07-16 (stdlib) — **revised 2026-07-17 to use uv.**
 
-**Decision:** The plugin ships a `SessionStart` hook that builds a Python
-virtual environment and installs `edify-cli` from PyPI at a version pinned to
-the plugin's own version. The venv is built with the **standard library only**
-(`python3 -m venv` + `pip`), never `uv`.
+**Decision:** The plugin ships a `SessionStart` hook that uses **uv** to build a
+venv and install `edify-cli` at a version pinned to the plugin's own version. uv
+provisions a Python **≥3.14** interpreter for the venv even when the host
+`python3` is older. When uv is absent the hook degrades gracefully — it emits a
+SessionStart `systemMessage` (user-facing) and `additionalContext`
+(Claude-facing) reporting that edify-cli is unavailable, and exits 0 without
+blocking the session.
 
 **Options considered:**
 - A) Co-located source — plugin runs the CLI from the `src/` tree in the same
   repo. Impossible: subdir install does not copy sibling source into the cache.
 - B) Require a separate global install (`uv tool install edify-cli`) as a
   documented prerequisite. Works but couples the plugin to an out-of-band manual
-  step and to `uv` being present.
-- C) Plugin self-bootstraps a venv at `SessionStart` and installs
-  `edify-cli==<version>` from PyPI, using stdlib tooling only.
+  step.
+- C) Self-bootstrap a **stdlib** venv (`python3 -m venv` + pip), never uv.
+- D) Self-bootstrap a venv with **uv** at `SessionStart`, installing
+  `edify-cli==<version>` from an index.
 
-**Chosen:** C.
+**Chosen:** D. (C was the 2026-07-16 choice; reversed — see below.)
 
 **Rationale:**
-- The tree does not deliver the *code* to the plugin (A is impossible), but it
+- The tree does not deliver the *code* to the plugin (A impossible), but it
   delivers the *version pin*: `check-version-consistency.py` locks
-  `plugin.json` version == `pyproject.toml` version, so the hook can install the
+  `plugin.json` version == `pyproject.toml` version, so the hook installs the
   exact matching `edify-cli==<plugin version>` with no drift.
-- stdlib-only (not `uv`) because the bootstrap must run on any host with a
-  suitable `python3`; it cannot assume `uv` is installed.
+- **Why uv over stdlib (the reversal):** a stdlib venv inherits the host
+  interpreter, so C required the host `python3` to already be ≥3.14 and failed
+  loudly otherwise — unshippable on the many hosts still on 3.13. uv *fetches* a
+  ≥3.14 interpreter itself (`uv venv --python '>=3.14'`), removing the host floor
+  entirely. The price is a uv runtime dependency, paid down by graceful,
+  informative degradation when uv is missing rather than a hard failure.
 
 **Constraints this imposes:**
-- **Publish ordering is hard:** `edify-cli` must be on PyPI *before* the plugin
-  version that pins it. A plugin version can never lead its package.
-- **Host Python floor:** `edify-cli` requires Python ≥3.14. A stdlib venv
-  inherits the creating interpreter, so the host `python3` must already be
-  ≥3.14 — the bootstrap cannot install a newer interpreter (as `uv` could). The
-  hook version-checks and fails loudly if too old.
-- **ensurepip must be present:** Debian/Ubuntu split it into a `python3-venv`
-  apt package; a bare `python3 -m venv` fails there. The hook fails with a clear
-  "install python3-venv" message rather than silently.
+- **Publish ordering is hard:** `edify-cli` must be on the index *before* the
+  plugin version that pins it. A plugin version can never lead its package.
+- **uv is a runtime dependency:** the host must have `uv` on PATH. Absent uv,
+  edify-cli is unavailable that session and the hook says so (`systemMessage` +
+  `additionalContext`), exit 0 — the session is not blocked.
 - This reintroduces one `SessionStart` hook after the 2026-07-16 hook retirement
   — a load-bearing bootstrap, unrelated to the retired autoformat/block-tmp
   hooks. (See [[plugin-transition-eval]].)
 
-**Dev/test (decided 2026-07-17): local index first, never a PyPI push for
+**Dissolved by the uv switch:** the stdlib design's **host Python ≥3.14 floor**
+and its **ensurepip / `python3-venv` requirement** both vanish — uv provisions
+the interpreter and needs no host ensurepip.
+
+**Dev/test (decided 2026-07-17): local index first, never a registry push for
 dogfooding.** The bootstrap installs from a *package index*, not from PyPI
-specifically. To develop and test the hook, build the wheel locally and point
-pip at it (`pip install --find-links=<dist-dir> edify-cli==<version>`), prove the
-whole bootstrap green offline, then publish to real PyPI and drop the
-`--find-links`. The publish-ordering constraint binds *releases*, not
-development — never cut a throwaway public version just to exercise the
-bootstrap. (General rule, not edify-specific: local dogfooding must never require
-a registry publish.)
+specifically. To develop and test the hook, build the wheel locally and point uv
+at it (`UV_FIND_LINKS=<dist-dir>` / `--find-links`, or `UV_INDEX`), prove the
+whole bootstrap green offline, then publish to real PyPI and drop the override.
+The publish-ordering constraint binds *releases*, not development — never cut a
+throwaway public version just to exercise the bootstrap. (General rule, not
+edify-specific: local dogfooding must never require a registry publish.)
 
 ## venv lives in `CLAUDE_PLUGIN_DATA`, version-scoped by path
 
@@ -181,53 +190,26 @@ ROOT-persistence check) — never a hardcoded literal.
 placeholder confirms it. This is now a real gate (it selects the venv-location
 resolution above), not merely a preference between placeholder and literal.
 
-## Implementation sketch (not yet created)
+## Implementation (2026-07-17)
 
-`plugin/hooks/hooks.json`:
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      { "hooks": [ { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/bin/bootstrap-venv.sh\"" } ] }
-    ]
-  }
-}
-```
+Built and covered by hermetic tests — see the source rather than duplicating it
+here:
+- `plugin/hooks/hooks.json` — a `SessionStart` command hook running
+  `"${CLAUDE_PLUGIN_ROOT}/bin/bootstrap-venv.sh"` (300 s timeout).
+- `plugin/bin/bootstrap-venv.sh` — POSIX sh, shellcheck-clean. Parses the pinned
+  version from `plugin.json`; fast-path exits if `venv-<version>/bin/edify`
+  exists; else prunes stale `venv-*`, then `uv venv --python '>=3.14'` +
+  `uv pip install edify-cli==<version>`, then links `current`. Any bootstrap
+  failure — uv missing, venv build, install — emits SessionStart JSON
+  (`systemMessage` for the user + `hookSpecificOutput.additionalContext` for
+  Claude) and exits 0, so the session is never blocked; a missing version in
+  `plugin.json` is a packaging defect and exits 2.
+- `tests/bootstrap-venv.bats` — stubs `uv` on PATH to exercise the control logic
+  offline (fast-path, uv-missing, prune, happy path, venv/install failure,
+  missing-version), run from pytest via `tests/test_bootstrap_hook.py`; `bats`
+  is a declared npm dev dependency.
 
-`plugin/bin/bootstrap-venv.sh` (stdlib-only, fail-loud, idempotent):
-```sh
-#!/bin/sh
-set -eu
-
-VERSION=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
-  "${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json")
-VENV="${CLAUDE_PLUGIN_DATA}/venv-${VERSION}"
-
-# Fast path: matching venv already built.
-[ -x "${VENV}/bin/edify" ] && exit 0
-
-# Prune stale version venvs.
-for d in "${CLAUDE_PLUGIN_DATA}"/venv-*; do
-  [ -e "$d" ] || continue
-  [ "$d" = "$VENV" ] || rm -rf "$d"
-done
-
-# Enforce the edify-cli interpreter floor (>= 3.14).
-python3 - <<'PY' || { echo "edify plugin: needs python3 >= 3.14 on PATH" >&2; exit 2; }
-import sys
-sys.exit(0 if sys.version_info >= (3, 14) else 1)
-PY
-
-# Build with stdlib only (ensurepip required; Debian: python3-venv).
-python3 -m venv "$VENV" \
-  || { echo "edify plugin: 'python3 -m venv' failed — install python3-venv (ensurepip)" >&2; exit 2; }
-"${VENV}/bin/python" -m pip install --quiet --upgrade pip
-"${VENV}/bin/python" -m pip install --quiet "edify-cli==${VERSION}" \
-  || { echo "edify plugin: pip install edify-cli==${VERSION} failed" >&2; exit 2; }
-
-# Stable path for skills (pending the open-question verification above).
-ln -sfn "$VENV" "${CLAUDE_PLUGIN_DATA}/current"
-```
-
-`exit 2` surfaces the message as a non-blocking hook-error notice; SessionStart
-does not block the session on it.
+**Unverified end-to-end:** the real uv build + `edify-cli` install has not been
+run against a published package (edify-cli is not on PyPI yet). Drive it on a
+host with uv once a wheel exists:
+`UV_FIND_LINKS=<dist> CLAUDE_PLUGIN_ROOT=… CLAUDE_PLUGIN_DATA=… plugin/bin/bootstrap-venv.sh`.

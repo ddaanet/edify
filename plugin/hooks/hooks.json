@@ -1,0 +1,16 @@
+{
+  "description": "Bootstrap a stdlib venv with the version-matched edify-cli at session start.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/bin/bootstrap-venv.sh\"",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}
