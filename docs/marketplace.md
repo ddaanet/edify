@@ -8,9 +8,15 @@ Plugin distribution via Claude Code marketplace system. Reference: https://code.
 |------|------|----------|
 | `ddaanet/claude-plugins` | Marketplace manifest | `/Users/david/code/claude-plugins` |
 | `ddaanet/skills` | `ddaa` plugin — bilingual skills | `/Users/david/code/skills` |
-| `ddaanet/edify-plugin` | `edify` plugin — workflow infrastructure, agents, CLI toolkit | `/Users/david/code/claudeutils` |
+| `ddaanet/edify` | `edify` plugin (in `plugin/`) + the `edify-cli` package | `/Users/david/code/edify` |
 
 Marketplace name `ddaanet` — install commands: `/plugin install ddaa@ddaanet`, `/plugin install edify@ddaanet`
+
+`ddaanet/edify-plugin` was archived on 2026-07-16: the plugin lives in this
+repo's `plugin/` subdirectory and is sourced via `git-subdir` (see
+`agents/decisions/plugin-packaging.md`). The marketplace entry is not yet
+added — it waits on the first `edify-cli` PyPI publish, since the plugin's
+SessionStart hook installs `edify-cli==<plugin version>` from the index.
 
 ## Distribution model
 
