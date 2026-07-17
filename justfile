@@ -34,6 +34,21 @@ setup:
     visible npm install
     visible direnv allow
 
+# Verify the plugin's SessionStart bootstrap against a locally built wheel
+[no-exit-message]
+bootstrap-check:
+    #!{{ bash_prolog }}
+    visible uv build --wheel --out-dir dist
+    data="$PWD/tmp/bootstrap-check"
+    visible rm -rf "$data"
+    mkdir -p "$data"
+    # Install from the local wheel, not PyPI: dogfooding never needs a publish.
+    export UV_FIND_LINKS="$PWD/dist"
+    visible env CLAUDE_PLUGIN_ROOT="$PWD/plugin" CLAUDE_PLUGIN_DATA="$data" \
+        plugin/bin/bootstrap-venv.sh
+    visible "$data/current/bin/edify" --version
+    report-end-safe "Bootstrap"
+
 # Check file line limits
 [no-exit-message]
 line-limits:

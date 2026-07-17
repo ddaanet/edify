@@ -209,7 +209,10 @@ here:
   missing-version), run from pytest via `tests/test_bootstrap_hook.py`; `bats`
   is a declared npm dev dependency.
 
-**Unverified end-to-end:** the real uv build + `edify-cli` install has not been
-run against a published package (edify-cli is not on PyPI yet). Drive it on a
-host with uv once a wheel exists:
-`UV_FIND_LINKS=<dist> CLAUDE_PLUGIN_ROOT=… CLAUDE_PLUGIN_DATA=… plugin/bin/bootstrap-venv.sh`.
+**Verified end-to-end (2026-07-17)** on uv 0.10.8 against a locally built
+`edify_cli-0.0.2` wheel (`UV_FIND_LINKS=<dist>`), no registry involved: uv
+provisioned CPython 3.14.3, installed edify-cli 0.0.2 + 38 deps (CrossHair, z3)
+into `venv-0.0.2`, linked `current`, and `current/bin/edify --version` reported
+`edify-cli 0.0.2`. The fast path (second run) exited 0 with empty stdout, and
+with uv off PATH the hook emitted the "edify unavailable" SessionStart JSON and
+exited 0. `just bootstrap-check` reruns this whole loop.
