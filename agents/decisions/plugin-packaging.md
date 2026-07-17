@@ -99,6 +99,16 @@ the plugin's own version. The venv is built with the **standard library only**
   — a load-bearing bootstrap, unrelated to the retired autoformat/block-tmp
   hooks. (See [[plugin-transition-eval]].)
 
+**Dev/test (decided 2026-07-17): local index first, never a PyPI push for
+dogfooding.** The bootstrap installs from a *package index*, not from PyPI
+specifically. To develop and test the hook, build the wheel locally and point
+pip at it (`pip install --find-links=<dist-dir> edify-cli==<version>`), prove the
+whole bootstrap green offline, then publish to real PyPI and drop the
+`--find-links`. The publish-ordering constraint binds *releases*, not
+development — never cut a throwaway public version just to exercise the
+bootstrap. (General rule, not edify-specific: local dogfooding must never require
+a registry publish.)
+
 ## venv lives in `CLAUDE_PLUGIN_DATA`, version-scoped by path
 
 **Decision Date:** 2026-07-16
@@ -156,14 +166,20 @@ hook / MCP / LSP subprocesses — *not* documented for Bash-tool subprocesses. S
 skills must rely on content substitution (placeholder replaced in the markdown
 text), not on `$VAR` being live in the agent's shell.
 
-**Fallback:** `{id}` is deterministic and hardcodable — `edify@<marketplace>` →
-`~/.claude/plugins/data/edify-<marketplace>/` (characters outside `[A-Za-z0-9_-]`
-become `-`) — so a fully-literal path works if content substitution proves not
-to cover `CLAUDE_PLUGIN_DATA` here.
+**No hardcoded-path fallback (decided 2026-07-17).** If `${CLAUDE_PLUGIN_DATA}`
+proves not to substitute in skill content, the fix is *not* a literal
+`~/.claude/plugins/data/edify-<marketplace>/…` path baked into skills. A
+fallback path is exercised rarely, so its path *format* can drift (id-encoding
+or layout changes) and rot silently — failing exactly when the primary
+mechanism is already unavailable. The resolution is a proper substitutable
+mechanism decided then — e.g. moving the venv under `${CLAUDE_PLUGIN_ROOT}`,
+which *is* confirmed to substitute (the ROOT option above; itself gated on the
+ROOT-persistence check) — never a hardcoded literal.
 
 **One empirical confirmation pending:** that `${CLAUDE_PLUGIN_DATA}` (not just
 `ROOT`) substitutes in skill content — a one-line throwaway skill echoing the
-placeholder confirms it.
+placeholder confirms it. This is now a real gate (it selects the venv-location
+resolution above), not merely a preference between placeholder and literal.
 
 ## Implementation sketch (not yet created)
 
