@@ -15,7 +15,6 @@ from edify.exceptions import (
     FileReadError,
     ModelResolutionError,
 )
-from edify.user_config import get_api_key
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +62,36 @@ def make_client(api_key: str | None) -> Anthropic:
     return Anthropic(api_key=api_key)
 
 
+def _list_models(model: str, client: Anthropic) -> list[ModelInfo]:
+    """Fetch the models list, mapping API failures to edify errors.
+
+    AuthenticationError and RateLimitError subclass APIError; they mean the API
+    answered and refused, so they must not be reported as an outage.
+    """
+    try:
+        models_response = client.models.list()
+    except AuthenticationError as e:
+        raise ApiAuthenticationError(str(e)) from e
+    except RateLimitError as e:
+        raise ApiRateLimitError from e
+    except APIError as e:
+        raise ModelResolutionError(model) from e
+
+    return [
+        ModelInfo(id=model_obj.id, created_at=model_obj.created_at)
+        for model_obj in models_response
+    ]
+
+
+def _latest_match(models: list[ModelInfo], alias: str) -> ModelId | None:
+    """Return the most recently created model whose ID contains the alias."""
+    matching = [m for m in models if alias.lower() in m.id.lower()]
+    if not matching:
+        return None
+    matching.sort(key=lambda m: m.created_at, reverse=True)
+    return ModelId(matching[0].id)
+
+
 def resolve_model_alias(model: str, client: Anthropic, cache_dir: Path) -> ModelId:
     """Resolve model alias to full model ID.
 
@@ -79,6 +108,8 @@ def resolve_model_alias(model: str, client: Anthropic, cache_dir: Path) -> Model
         Resolved full model ID
 
     Raises:
+        ApiAuthenticationError: If the credential is missing or rejected
+        ApiRateLimitError: If the API rate limit is exceeded
         ModelResolutionError: If API is unreachable and model alias cannot be resolved
     """
     # Check if it's a full model ID with date suffix (last part is 8 digits)
@@ -100,15 +131,9 @@ def resolve_model_alias(model: str, client: Anthropic, cache_dir: Path) -> Model
 
             # Cache is valid if fetched_at is fresh (ignore file mtime)
             if age_seconds < CACHE_TTL_HOURS * 3600:
-                models = cache_data.models
-
-                # Filter models containing the alias (case-insensitive)
-                matching_models = [m for m in models if model.lower() in m.id.lower()]
-
-                if matching_models:
-                    # Sort by created_at descending and return latest
-                    matching_models.sort(key=lambda m: m.created_at, reverse=True)
-                    return ModelId(matching_models[0].id)
+                cached_match = _latest_match(cache_data.models, model)
+                if cached_match is not None:
+                    return cached_match
         except ValueError as e:
             logger.warning(
                 "Corrupted cache file at %s, will refresh from API: %s",
@@ -117,19 +142,7 @@ def resolve_model_alias(model: str, client: Anthropic, cache_dir: Path) -> Model
             )
 
     # Cache miss or expired - query API
-    try:
-        models_response = client.models.list()
-    except APIError as e:
-        raise ModelResolutionError(model) from e
-
-    # Convert API response to dict format
-    models_list = [
-        ModelInfo(
-            id=model_obj.id,
-            created_at=model_obj.created_at,
-        )
-        for model_obj in models_response
-    ]
+    models_list = _list_models(model, client)
 
     # Write cache
     try:
@@ -140,14 +153,7 @@ def resolve_model_alias(model: str, client: Anthropic, cache_dir: Path) -> Model
     except OSError as e:
         logger.warning("Failed to write cache at %s: %s", cache_file, e)
 
-    # Filter for matching models
-    matching_models = [m for m in models_list if model.lower() in m.id.lower()]
-
-    if matching_models:
-        matching_models.sort(key=lambda m: m.created_at, reverse=True)
-        return ModelId(matching_models[0].id)
-
-    return ModelId(model)
+    return _latest_match(models_list, model) or ModelId(model)
 
 
 def _count_tokens_for_content(content: str, model: ModelId, client: Anthropic) -> int:
@@ -164,7 +170,7 @@ def _count_tokens_for_content(content: str, model: ModelId, client: Anthropic) -
             messages=[{"role": "user", "content": content}],
         )
     except AuthenticationError as e:
-        raise ApiAuthenticationError from e
+        raise ApiAuthenticationError(str(e)) from e
     except RateLimitError as e:
         raise ApiRateLimitError from e
     except APIError as e:
@@ -197,18 +203,19 @@ def count_tokens_for_file(path: Path, model: ModelId, client: Anthropic) -> int:
     return _count_tokens_for_content(content, model, client)
 
 
-def count_tokens_for_files(paths: list[Path], model: ModelId) -> list[TokenCount]:
+def count_tokens_for_files(
+    paths: list[Path], model: ModelId, client: Anthropic
+) -> list[TokenCount]:
     """Count tokens in multiple files using Anthropic API with caching.
 
     Args:
         paths: List of paths to count tokens for
         model: Model to use for token counting
+        client: Anthropic API client, authenticated by the caller
 
     Returns:
         List of TokenCount objects with per-file counts
     """
-    client = make_client(get_api_key())
-
     from edify.token_cache import cached_count_tokens_for_file, get_default_cache  # noqa: PLC0415, I001
 
     cache = None

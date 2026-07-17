@@ -60,6 +60,7 @@ class TestCountTokensForFiles:
         results = count_tokens_for_files(
             [file1, file2, file3],
             ModelId("claude-sonnet-4-5-20250929"),
+            mock_client,
         )
 
         # Verify
@@ -88,10 +89,10 @@ class TestCountTokensForFiles:
             Mock(input_tokens=2),
             Mock(input_tokens=1),
         ]
-        mock_anthropic_client(side_effect=mock_responses)
+        mock_client = mock_anthropic_client(side_effect=mock_responses)
 
         # Call function
-        results = count_tokens_for_files([file1, file2], ModelId("sonnet"))
+        results = count_tokens_for_files([file1, file2], ModelId("sonnet"), mock_client)
 
         # Verify
         assert len(results) == 2
@@ -142,10 +143,12 @@ class TestCountTokensForFiles:
             Mock(input_tokens=20),
             Mock(input_tokens=30),
         ]
-        mock_anthropic_client(side_effect=mock_responses)
+        mock_client = mock_anthropic_client(side_effect=mock_responses)
 
         # Call function with files in order [b, a, c]
-        results = count_tokens_for_files([file_b, file_a, file_c], ModelId("haiku"))
+        results = count_tokens_for_files(
+            [file_b, file_a, file_c], ModelId("haiku"), mock_client
+        )
 
         # Verify order is preserved
         assert len(results) == 3

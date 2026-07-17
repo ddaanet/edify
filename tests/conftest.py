@@ -123,6 +123,12 @@ def mock_anthropic_client(mocker: MockerFixture) -> Callable[..., Mock]:
 
 
 @pytest.fixture
+def mock_client() -> Mock:
+    """Return a bare mock Anthropic client for callers that pass one in."""
+    return Mock(spec=Anthropic)
+
+
+@pytest.fixture
 def test_markdown_file(tmp_path: Path) -> Callable[..., Path]:
     """Factory fixture for creating test markdown files.
 

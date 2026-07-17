@@ -8,10 +8,16 @@ class ClaudeUtilsError(Exception):
 class ApiAuthenticationError(ClaudeUtilsError):
     """Raised when Anthropic API authentication fails."""
 
-    def __init__(self) -> None:
-        """Initialize with default authentication error message."""
+    def __init__(self, details: str | None = None) -> None:
+        """Initialize with the API's own reason, when there is one.
+
+        A bare instance means no credential was found at all; ``details``
+        carries the API's explanation (e.g. a revoked token), which
+        distinguishes "no key" from "key rejected".
+        """
+        reason = f" ({details})" if details else ""
         super().__init__(
-            "Authentication failed. Set ANTHROPIC_API_KEY env var "
+            f"Authentication failed{reason}. Set ANTHROPIC_API_KEY env var "
             "or add [anthropic] api_key to ~/.config/edify/config.toml"
         )
 

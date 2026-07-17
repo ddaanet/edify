@@ -7,7 +7,11 @@ from unittest.mock import Mock
 import anthropic
 import pytest
 
-from edify.exceptions import ModelResolutionError
+from edify.exceptions import (
+    ApiAuthenticationError,
+    ApiRateLimitError,
+    ModelResolutionError,
+)
 from edify.tokens import resolve_model_alias
 
 
@@ -136,3 +140,76 @@ class TestResolveModelAliasBasic:
         error_msg = str(exc_info.value).lower()
         assert "models api" in error_msg
         assert "unreachable" in error_msg
+
+    def test_auth_failure_reported_as_auth_not_unreachable(
+        self,
+        tmp_path: Path,
+        mock_models_api: Callable[..., Mock],
+    ) -> None:
+        """Report a 401 during resolution as authentication, not an outage.
+
+        Given: client.models.list() raises AuthenticationError (a subclass of
+               APIError), model="sonnet"
+        When: resolve_model_alias(model, client, cache_dir) called
+        Then: Raises ApiAuthenticationError naming the credential, and never
+        claims the API is unreachable or the failure is transient
+        """
+        cache_dir = tmp_path / "cache"
+        auth_error = anthropic.AuthenticationError(
+            "OAuth access token has been revoked.", response=Mock(), body={}
+        )
+        mock_client = mock_models_api(raise_error=auth_error)
+
+        with pytest.raises(ApiAuthenticationError) as exc_info:
+            resolve_model_alias("sonnet", mock_client, cache_dir)
+
+        error_msg = str(exc_info.value).lower()
+        assert "anthropic_api_key" in error_msg
+        assert "unreachable" not in error_msg
+        assert "transient" not in error_msg
+
+    def test_auth_failure_surfaces_api_explanation(
+        self,
+        tmp_path: Path,
+        mock_models_api: Callable[..., Mock],
+    ) -> None:
+        """Include the API's own reason so a revoked token is diagnosable.
+
+        Given: client.models.list() raises AuthenticationError whose message
+               says the token was revoked
+        When: resolve_model_alias(model, client, cache_dir) called
+        Then: The raised error repeats the API's explanation verbatim
+        """
+        cache_dir = tmp_path / "cache"
+        auth_error = anthropic.AuthenticationError(
+            "OAuth access token has been revoked.", response=Mock(), body={}
+        )
+        mock_client = mock_models_api(raise_error=auth_error)
+
+        with pytest.raises(ApiAuthenticationError) as exc_info:
+            resolve_model_alias("sonnet", mock_client, cache_dir)
+
+        assert "revoked" in str(exc_info.value)
+
+    def test_rate_limit_during_resolution_reported_as_rate_limit(
+        self,
+        tmp_path: Path,
+        mock_models_api: Callable[..., Mock],
+    ) -> None:
+        """Report a 429 during resolution as a rate limit, not an outage.
+
+        Given: client.models.list() raises RateLimitError (a subclass of
+               APIError), model="sonnet"
+        When: resolve_model_alias(model, client, cache_dir) called
+        Then: Raises ApiRateLimitError, not ModelResolutionError
+        """
+        cache_dir = tmp_path / "cache"
+        rate_error = anthropic.RateLimitError(
+            "Too many requests", response=Mock(), body={}
+        )
+        mock_client = mock_models_api(raise_error=rate_error)
+
+        with pytest.raises(ApiRateLimitError) as exc_info:
+            resolve_model_alias("sonnet", mock_client, cache_dir)
+
+        assert "rate limit" in str(exc_info.value).lower()

@@ -56,7 +56,9 @@ def handle_tokens(model: str, files: list[str], *, json_output: bool = False) ->
         cache_dir = Path(platformdirs.user_cache_dir("edify"))
         resolved_model = resolve_model_alias(model, client, cache_dir)
 
-        results = count_tokens_for_files([Path(f) for f in file_paths], resolved_model)
+        results = count_tokens_for_files(
+            [Path(f) for f in file_paths], resolved_model, client
+        )
 
         if json_output:
             total = calculate_total(results)
@@ -73,13 +75,14 @@ def handle_tokens(model: str, files: list[str], *, json_output: bool = False) ->
             if len(results) > 1:
                 total = calculate_total(results)
                 print(f"Total: {total} tokens")
-    except (AuthenticationError, ApiAuthenticationError) as e:
-        print(f"Error: Authentication failed. {e}", file=sys.stderr)
-        print(
-            "Set ANTHROPIC_API_KEY or add [anthropic] api_key "
-            "to ~/.config/edify/config.toml",
-            file=sys.stderr,
-        )
+    except ApiAuthenticationError as e:
+        # The message already names the failure and the two ways to fix it.
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except AuthenticationError as e:
+        # A raw SDK error escaping a path that does not wrap it (e.g. client
+        # construction); normalize it to the same wording.
+        print(f"Error: {ApiAuthenticationError(str(e))}", file=sys.stderr)
         sys.exit(1)
     except ApiRateLimitError as e:
         print(f"Error: Rate limit exceeded. {e}", file=sys.stderr)

@@ -3,23 +3,23 @@
 These tests require real API keys and network access.
 """
 
-import sys
 from pathlib import Path
 
 import pytest
+from click.testing import CliRunner
 
-from edify.cli import main
+from edify.cli import cli
 
 
 @pytest.mark.e2e
 def test_end_to_end_token_counting_with_alias_resolution(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test end-to-end token counting with model alias resolution.
 
     Given: Environment has valid ANTHROPIC_API_KEY, no models cache exists, real
       file "fixture.md" with known content, model="sonnet" (unversioned alias)
-    When: `edify tokens sonnet fixture.md` executed
+    When: `edify tokens --model sonnet fixture.md` executed
     Then:
       - Exits 0
       - First line shows resolved model ID
@@ -38,17 +38,12 @@ def test_end_to_end_token_counting_with_alias_resolution(
         lambda appname: str(cache_dir),
     )
 
-    # Patch argv and call main
-    monkeypatch.setattr(
-        sys, "argv", ["edify", "tokens", "sonnet", str(fixture_file)]
+    result = CliRunner().invoke(
+        cli, ["tokens", "--model", "sonnet", str(fixture_file)]
     )
 
-    # Call main function
-    main()
-
-    # Check output
-    captured = capsys.readouterr()
-    lines = captured.out.strip().split("\n")
-    assert len(lines) >= 2, f"Expected at least 2 lines, got: {captured.out}"
+    assert result.exit_code == 0, result.output
+    lines = result.output.strip().split("\n")
+    assert len(lines) >= 2, f"Expected at least 2 lines, got: {result.output}"
     assert lines[0].startswith("Using model: claude-"), f"First line: {lines[0]}"
     assert fixture_file.name in lines[1], f"Second line: {lines[1]}"
