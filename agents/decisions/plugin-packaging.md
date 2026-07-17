@@ -56,8 +56,14 @@ a blob-for-blob match with its old HEAD `c7cbaaf`), and its GitHub repo
 (`ddaanet/edify-plugin`) was archived. The **SessionStart venv hook is
 implemented** (2026-07-17): `plugin/bin/bootstrap-venv.sh` + `plugin/hooks/
 hooks.json`, covered by `tests/bootstrap-venv.bats` (run from pytest via
-`tests/test_bootstrap_hook.py`). Still pending: the PyPI publish and the
-marketplace `git-subdir` entry.
+`tests/test_bootstrap_hook.py`) and verified end-to-end against a local wheel
+(below).
+
+**Publication postponed indefinitely (2026-07-17, user decision).** The PyPI
+publish and the marketplace `git-subdir` entry are parked, not in progress. The
+marketplace manifest has no `edify` entry, so edify is uninstallable meanwhile;
+the `${CLAUDE_PLUGIN_DATA}`-substitution gate below stays open, since only a
+marketplace install can settle it.
 
 ## Plugin obtains the CLI via a SessionStart uv-built venv, pinned from an index
 
