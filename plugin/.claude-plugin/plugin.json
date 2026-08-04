@@ -1,5 +1,5 @@
 {
   "name": "edify",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A lean bundle of framework-agnostic Claude Code skills"
 }
