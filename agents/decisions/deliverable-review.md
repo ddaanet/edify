@@ -101,7 +101,7 @@ Summary: counts by severity and axis, gap analysis results.
 **Rule:** Orchestrator delegates ALL reviews after execution agents commit. Execution agents never delegate reviews.
 
 **Why execution agents can't delegate:**
-1. Sub-agents lack Task and Skill tools — cannot delegate to any reviewer.
+1. Implementer bias — an agent must not review its own work, so review is delegated by the orchestrator rather than self-invoked. (Previously justified as "sub-agents lack Task and Skill tools"; the Skill half is false as of 2026-08-10, the Task half unprobed. The policy is the reason.)
 2. All reviews must be delegated to prevent implementer bias — implementer never reviews own work.
 
 **Domain-specific routing:** corrector (code), skill-reviewer (skills), agent-creator (agents), runbook-corrector (planning), corrector + doc-writing skill (human docs).
@@ -116,7 +116,7 @@ Summary: counts by severity and axis, gap analysis results.
 
 **What deliverable review catches:** Stale copies, broken references, missing cross-references, naming inconsistencies across the deliverable set.
 
-**Evidence:** memory-index skill drifted during execution (3 entries missing); workflows-terminology.md referenced non-existent agent; runbook skill missing general-patterns.md reference. Each step's artifacts were internally consistent — gaps only visible holistically.
+**Evidence:** the memory index drifted during execution (3 entries missing); workflows-terminology.md referenced non-existent agent; runbook skill missing general-patterns.md reference. Each step's artifacts were internally consistent — gaps only visible holistically.
 
 ### When Resolving Deliverable Review Findings
 

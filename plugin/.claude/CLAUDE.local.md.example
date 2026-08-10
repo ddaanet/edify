@@ -16,7 +16,7 @@ Agent-core is a shared repository for unified agent rule fragments, configuratio
 - **CLAUDE.md** (this file) - Agent instructions, workflows, communication rules
 
 ### Current Work
-- **agents/session.md** - Current session handoff context
+- **.claude/handoff-task.md** - Current session handoff context
 - **agents/context.md** - Active multi-step task context (if exists)
 
 ---
@@ -53,7 +53,7 @@ This is the primary command for continuing work across sessions.
 ### Load Rule (#load)
 
 When asked to "#load" or "load", read the session context files:
-- `agents/session.md` - Current work state, handoff context, decisions, blockers
+- `.claude/handoff-task.md` - Current work state, handoff context, decisions, blockers
 - `agents/context.md` - Active multi-step task context (if exists)
 
 Do not search for these files; read them directly at these paths.

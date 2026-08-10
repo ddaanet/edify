@@ -35,9 +35,11 @@ Skill automatically detects appropriate mode based on conversation history.
 
 ### Process
 
-Invoke `/recall all` (deep + broad, topic-scoped). This is a skill invocation — `/recall` handles memory-index scanning, batch resolution, and tail-recursion. Derive topic from job name, conversation context, and any existing `plans/<job>/` artifacts.
+The memory index `memory/MEMORY.md` is **already in your context** — it is injected at session start. **Do not Read it.** Its one-line hooks are a routing table; the bodies are not preloaded, so recall is: pick the entries whose hooks match the topic, then Read those files. Also scan `agents/decisions/*.md` for decisions bearing on the same domain. Derive the topic from the job name, conversation context, and any existing `plans/<job>/` artifacts.
 
-**Gate anchor:** The `/recall all` Skill invocation is the structural anchor — a tool call on both paths. When no relevant entries are found, write the recall artifact with an explicit null entry (see format below). Downstream consumers batch-resolve it via `edify _recall resolve null` — the tool call fires on both paths without consumer-side conditional logic.
+Re-read the index only if it was edited this session or a compaction dropped it.
+
+**Gate anchor:** The recall artifact **write** is the structural anchor — a tool call that fires whether or not anything relevant turns up. When nothing relevant is found, write the artifact with an explicit null entry (see format below), so downstream consumers hit a file that exists on both paths and need no conditional logic of their own.
 
 **Boundaries:**
 - No agent delegation, no Context7, no web research — those belong to /design A.1
@@ -45,24 +47,26 @@ Invoke `/recall all` (deep + broad, topic-scoped). This is a skill invocation �
 
 ### Recall Artifact
 
-After recall completes, write `plans/<job>/recall-artifact.md`. Entry keys only — downstream consumers resolve fresh content at consumption time.
+After recall completes, write `plans/<job>/recall-artifact.md`. File paths only — downstream consumers Read them fresh at consumption time, so the artifact never goes stale.
+
+The artifact carries planning-stage **curation** into execution. Subagents do receive the memory index, but nothing is fetched for them automatically — auto-recall does not run below the main session. The artifact records which files the planner judged relevant, so no downstream agent has to re-derive that selection, and it covers corpora the index does not reach.
 
 **Format:**
 
 ```markdown
 # Recall Artifact: <Job Name>
 
-Resolve entries via `edify _recall resolve` — do not use inline summaries.
+Read each file listed below — do not rely on inline summaries.
 
-## Entry Keys
+## Entries
 
-<trigger phrase> — <1-line relevance note>
-<trigger phrase> — <1-line relevance note>
+memory/<name>.md — <1-line relevance note>
+agents/decisions/<name>.md — <1-line relevance note>
 ```
 
-**Null artifact (no relevant entries):** Write `null — no relevant entries found` as the sole entry. Downstream consumers batch-resolve it via `edify _recall resolve null` (silent exit) — the tool call anchors the gate without consumer-side empty-section handling. Augmenting consumers (/design A.1, /runbook Phase 0.5) remove the null entry when adding real ones.
+**Null artifact (nothing relevant):** Write `null — no relevant entries found` as the sole entry. Downstream consumers still Read the artifact and find the null marker, so the gate is anchored without consumer-side empty-section handling. Augmenting consumers (/design A.1, /runbook Phase 0.5) remove the null entry when adding real ones.
 
-**Selection criteria:** Include entries that informed requirements or constrain implementation. Exclude entries read but proved irrelevant — the artifact is curated, not exhaustive.
+**Selection criteria:** Include files that informed requirements or constrain implementation. Exclude files read but proved irrelevant — the artifact is curated, not exhaustive.
 
 **Output:** `plans/<job>/recall-artifact.md`
 
@@ -101,11 +105,11 @@ Quick scan to ground requirements (runs after extraction, so scan is targeted):
 
 ### Post-Explore Recall Gate
 
-Discovery via Glob/Grep may surface domains not anticipated during the initial recall pass. Re-scan memory-index (already in context from recall pass) for entries relevant to areas discovered during codebase exploration.
+Discovery via Glob/Grep may surface domains not anticipated during the initial recall pass. Re-scan the in-context index for entries relevant to areas discovered during codebase exploration — a scan of what you already hold, not a Read.
 
 **Gate anchor (D+B — tool call required):**
-- **New entries found:** `edify _recall resolve "when <trigger>" ...` — resolve into context, update recall artifact with new entry keys
-- **No new entries:** `edify _recall resolve null` — proves gate was reached
+- **New entries found:** Read the matching `memory/*.md` and `agents/decisions/*.md` files, then add their paths to the recall artifact
+- **No new entries:** state that explicitly in the response — the gate was reached and yielded nothing
 
 ### 3. Structure Requirements
 
@@ -255,7 +259,7 @@ Next steps (decision criteria):
 **Workflow positioning:**
 ```
 /requirements <job> → /design plans/<job>/ (seeds A.0)
-/requirements <job> → /handoff (document intent for later)
+/requirements <job> → /handoff:handoff (document intent for later)
 /requirements <job> → /runbook plans/<job>/requirements.md (direct to planning)
 /requirements <job> (standalone — capture intent, no immediate follow-up)
 ```

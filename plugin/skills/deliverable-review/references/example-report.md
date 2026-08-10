@@ -28,7 +28,7 @@
 ### C1. `wt-ls` still calls Python CLI (D8 violation)
 - **Source:** Prose review #12
 - **File:** `justfile:140-141`
-- **Design:** D8 — "wt-ls: Replace `edify _worktree ls` call with native bash"
+- **Design:** D8 — "wt-ls: Replace `git worktree` ls` call with native bash"
 - **Impact:** Last remaining coupling between justfile and Python CLI
 
 ### C2. `wt-merge` lacks THEIRS clean tree check (D8 violation)

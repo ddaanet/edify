@@ -12,7 +12,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-EXCLUDE = {"agents/session.md", "agents/plan-archive.md", "agents/learnings.md"}
+EXCLUDE = {".claude/handoff-task.md", ".claude/handoff-todo.md", "agents/learnings.md"}
 EXCLUDE_PREFIXES = ("plans/", "tmp/")
 
 

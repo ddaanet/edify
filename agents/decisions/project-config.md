@@ -27,7 +27,7 @@ Project-level configuration decisions for Claude Code, models, skills, and devel
 - Token cost is modest: 200 entries × ~25 tokens ≈ 5000 tokens (acceptable for always-loaded context)
 - Growth is naturally bounded by consolidation rate (~5-10 entries/session)
 
-**Impact:** memory-index.md header updated (append-only), consolidation-patterns.md updated, no changes to /codify skill logic.
+**Impact:** `memory/MEMORY.md` header updated (append-only), consolidation guidance updated, no change to consolidation logic.
 
 ## .Claude Code Rule Files
 
@@ -162,7 +162,7 @@ description: |
 
 **Decision Date:** 2026-02-04
 
-**Decision:** Flags are exact tokens, not prose containing flag-like words. (Historical: `/handoff --commit` flag was removed in favor of separate `/handoff` → `/commit` chain.)
+**Decision:** Flags are exact tokens, not prose containing flag-like words. (Historical: `/handoff:handoff --commit` flag was removed in favor of separate `/handoff:handoff` → `/commit-commands:commit` chain.)
 
 **Anti-pattern:** Parsing prose after a command as flags (substring match).
 
@@ -225,13 +225,13 @@ description: |
 
 ### How To Recall Sub-Agent Memory
 
-**Decision Date:** 2026-02-15
+**Decision Date:** 2026-02-15 — **rationale falsified and decision rewritten 2026-08-10**
 
-**Decision:** Inject memory index via `skills:` (discovery), recall via Bash transport (`edify _recall resolve "when <trigger>"`).
+**Decision:** Recall is a Read of the files the index names. Do not inject the index, and do not instruct any agent to Read it.
 
-**Anti-pattern:** Expecting sub-agents to use Skill tool for `/when` or `/how`.
+**Rationale (measured 2026-08-10, superseding the original):** Sub-agents receive `memory/MEMORY.md` natively, under the same `Contents of <path>` label the main session gets — so hand-injecting it duplicates what the platform already does, and Reading it spends context on something already held. What sub-agents lack is the *fetch*: auto-recall does not run below the main session, so a body arrives only if the agent Reads it.
 
-**Rationale:** Sub-agents lack Skill tool. Bash transport provides same recall capability with different invocation.
+**Original rationale, now false:** "Sub-agents lack Skill tool. Bash transport provides same recall capability." Probed 2026-08-10 — sub-agents have the `Skill` tool, are given the full skill listing, and resolve project-local plugin skills as well as marketplace ones. No Bash transport is needed for skill access.
 
 ### How To Augment Agent Context
 
@@ -239,11 +239,11 @@ description: |
 
 **Decision:** Two-tier context augmentation:
 - Always-inject (skills prolog): universal conventions, ~400 tokens, cached in system prompt
-- Index-and-recall (on-demand): domain-specific, recalled via bash transport
+- Index-and-recall (on-demand): domain-specific, Read directly from the natively-injected index
 
 **Key insight:** Discovery burden stays with capable agents (design/planning). Haiku gets pre-assembled context in runbook steps and agent system prompts.
 
-**Sub-agent gap:** CC sub-agent system prompt provides only identity and file search guidance — no prose quality, token economy, or error handling rules. Skills injection via `skills:` frontmatter is high value.
+**Sub-agent gap (revised 2026-08-10):** The gap is narrower than originally recorded. Sub-agents do get CLAUDE.md and the memory index, and they do have the `Skill` tool. What they do not get is the automatic memory *fetch*, so anything beyond the index one-liners must be Read explicitly. Skills injection via `skills:` frontmatter remains useful for conventions that should not depend on the agent choosing to invoke anything.
 
 ### When Agent-Creator Reviews Agents
 
