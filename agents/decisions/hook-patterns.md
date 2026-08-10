@@ -30,7 +30,7 @@ Claude Code hook configuration, output channels, session mechanics, and sub-agen
 
 **Anti-pattern:** Using PostToolUse hooks to capture Explore/claude-code-guide results.
 
-**Problem:** Hooks don't fire in sub-agents spawned via Task tool. Task matcher fires on ALL Tasks (noisy).
+**Problem:** Hooks don't fire in sub-agents spawned via the `Agent` tool. An `Agent` matcher fires on ALL spawns (noisy). The spawn tool is `Agent` and no `Task` tool exists (CC 2.1.226), so a matcher written against `Task` matches nothing.
 
 **Correct pattern:** Session-log based capture (future work) or quiet agents that write their own reports.
 
@@ -74,7 +74,7 @@ Claude Code hook configuration, output channels, session mechanics, and sub-agen
 
 **Decision:** Rules files (`.claude/rules/`) fire in main session only; sub-agents don't receive injection.
 
-**Anti-pattern:** Assuming sub-agents via Task tool receive rules file context.
+**Anti-pattern:** Assuming sub-agents via the `Agent` tool receive rules file context.
 
 **Consequence:** Domain context must be carried explicitly — planner writes it into runbook, orchestrator passes through task prompt.
 

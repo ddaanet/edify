@@ -5,7 +5,7 @@ description: >-
   "ground", "create a scoring
   system", "design a methodology", "build a framework", or "synthesize best
   practices". Parallel diverge-converge research preventing confabulated structures.
-allowed-tools: Read, Write, Grep, Glob, Bash, WebSearch, WebFetch, Task
+allowed-tools: Read, Write, Bash, WebSearch, WebFetch, Agent
 user-invocable: true
 ---
 

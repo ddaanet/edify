@@ -45,7 +45,7 @@ As the **final action** of this skill:
 3. If continuation present: peel first entry from (possibly modified) continuation, tail-call with remainder
 4. If no continuation: skill implements its own default-exit behavior (standalone/last-in-chain)
 
-**CRITICAL:** Do NOT include continuation metadata in Task tool prompts.
+**CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
 ```
 
 ## Transport Format
@@ -62,7 +62,7 @@ Bracket-delimited, comma-separated entries. Each entry: `/skill optional-args`.
 ## Sub-Agent Isolation
 
 Continuation metadata must never reach sub-agents:
-- Do NOT include `[CONTINUATION: ...]` in Task tool prompts
+- Do NOT include `[CONTINUATION: ...]` in Agent tool prompts
 - Continuation lives in main conversation context only
 - Skills construct Task prompts explicitly — no accidental inclusion path
 
@@ -131,7 +131,7 @@ The `r` command picks up the full chain context including remaining continuation
 ### Skill-Level Error Handling
 
 Each cooperative skill should handle errors by:
-- Catching failures from its own operations (Task tool errors, Read/Write failures)
+- Catching failures from its own operations (Agent tool errors, Read/Write failures)
 - Classifying per `error-classification.md` taxonomy (5 categories, retryable/non-retryable)
 - If the error is within the skill's scope to fix: fix and continue
 - If not: abort, record in session.md Blockers, do NOT invoke continuation tail-call
@@ -143,5 +143,5 @@ Each cooperative skill should handle errors by:
 1. Add `continuation:` block to YAML frontmatter
 2. Add `Skill` to `allowed-tools` if not present (needed for tail-call)
 3. Replace hardcoded tail-call with consumption protocol section
-4. Ensure Task tool prompts exclude continuation metadata
+4. Ensure Agent tool prompts exclude continuation metadata
 5. Add error handling: on failure, abort continuation and record in session.md Blockers

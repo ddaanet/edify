@@ -151,7 +151,7 @@ name: $AGENT_NAME
 description: Execute $PLAN_NAME steps with full plan context
 model: $MODEL
 color: $COLOR
-tools: ["Read", "Write", "Bash", "Grep", "Glob", "Edit"]
+tools: ["Read", "Write", "Bash", "Edit"]
 ---
 
 FRONTMATTER_EOF

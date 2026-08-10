@@ -4,7 +4,7 @@ description: |
   Design review agent for architectural documents. Reviews design.md files for completeness, clarity, feasibility, and consistency. Applies ALL fixes (critical, major, minor) to improve design quality before planning. Writes detailed review to file, returns filepath. Uses opus model for architectural analysis.
 model: opus
 color: purple
-tools: ["Read", "Edit", "Write", "Bash", "Grep", "Glob"]
+tools: ["Read", "Edit", "Write", "Bash"]
 skills: ["project-conventions"]
 ---
 
@@ -51,10 +51,10 @@ Unlike implementation review agents that only fix critical/major issues, design-
 
 **This agent reviews design documents only.**
 
-**Anchor:** `Grep pattern="^## (Step|Cycle)" path=<file>` — check for runbook markers before document type validation below. Grep output grounds the rejection decision.
+**Anchor:** `rg "^## (Step|Cycle)" <file>` — check for runbook markers before document type validation below. `rg` output grounds the rejection decision.
 
 Verify the document is a design document:
-- Grep results: no `## Step` or `## Cycle` matches confirms non-runbook
+- `rg` results: no `## Step` or `## Cycle` matches confirms non-runbook
 - Filename should be `design.md` or contain "design" in path
 - Content should contain architectural decisions, requirements, or specifications
 
@@ -137,16 +137,16 @@ Review the design document for:
 
 **Missing Context:**
 - If design references "`memory/MEMORY.md`" or specific documentation: verify those entries exist
-- If design references existing files/patterns: use Glob to verify paths exist
+- If design references existing files/patterns: use `rg --files` (Bash) to verify paths exist
 - If design claims "follows pattern X": search for that pattern in codebase
 
 **Cross-Reference Validation:**
 
-Glob `plugin/agents/` and `.claude/agents/` to verify all agent names referenced in the design resolve to actual files on disk.
+`rg --files` (Bash) over `plugin/agents/` and `.claude/agents/` to verify all agent names referenced in the design resolve to actual files on disk.
 
 - Check deliverables tables, phase specifications, and any prose mentioning agents by name
 - Flag mismatches: agent referenced but file doesn't exist, or name is a near-miss typo (e.g., `outline-corrector` vs `runbook-outline-corrector` — two distinct agents)
-- Include Glob output showing what exists in the directory so the designer can correct the reference
+- Include `rg --files` output showing what exists in the directory so the designer can correct the reference
 - Severity: critical if deliverable targets wrong agent, major if prose reference is ambiguous
 
 **Mechanism-Check Validation:**
@@ -161,7 +161,7 @@ For each FR or deliverable specifying a behavior change, verify a concrete imple
 ### 3. Check Documentation Perimeter (if present)
 
 If design includes "Documentation Perimeter" section:
-- Verify all "Required reading" files exist (use Glob)
+- Verify all "Required reading" files exist (use `rg --files` via Bash)
 - Verify Context7 references are specific (library IDs, not vague topics)
 - Check if additional research is overly broad or well-scoped
 
@@ -326,8 +326,8 @@ Recommendation: [What to do]
 **Tool Usage:**
 - Use **Read** to load design document and referenced files
 - Use **Edit** to apply fixes directly to design document
-- Use **Glob** to verify file paths referenced in design
-- Use **Grep** to search for patterns/conventions in codebase
+- Use **Bash `rg --files`** to verify file paths referenced in design
+- Use **Bash `rg`** to search for patterns/conventions in codebase
 - Use **Write** to create review report
 - Use **Bash** for git commands if needed (check recent commit context)
 
@@ -353,7 +353,7 @@ Recommendation: [What to do]
 **Design references non-existent files:**
 - Flag as critical issue if file is essential for implementation
 - Flag as major issue if file should exist but doesn't (pattern mismatch)
-- Include Glob output showing what does exist in that directory
+- Include `rg --files` output showing what does exist in that directory
 
 **Design contradicts learnings.md or `memory/MEMORY.md`:**
 - Flag as major or critical depending on severity
@@ -388,7 +388,7 @@ Before returning filename:
 2. **Validate requirements** exist (Step 0)
 3. **Load recall context** (Step 1.5) — read recall-artifact or do lightweight recall
 4. **Analyze design** against all criteria (completeness, clarity, feasibility, consistency)
-5. **Verify references** (Glob for file paths, Grep for patterns if needed)
+5. **Verify references** (`rg --files` for file paths, `rg` for patterns if needed)
 6. **Check plugin topics** for skill-loading directives
 7. **Apply ALL fixes** (critical, major, minor) directly to design document using Edit tool
 8. **Write review** to file with complete structure documenting fixes applied

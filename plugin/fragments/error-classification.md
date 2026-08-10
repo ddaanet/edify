@@ -89,7 +89,7 @@ Orchestrator:
 - Sonnet reviews plan before execution
 - Includes prerequisite validation checklist
 - Verifies all referenced files, directories, external resources exist
-- Documents verification method (Bash check, Read tool, Glob tool, etc.)
+- Documents verification method (Bash check, Read tool, `rg --files` (Bash), etc.)
 - Catches prerequisite failures ~80% of time before orchestration starts
 
 **During Execution (Agent Detection):**

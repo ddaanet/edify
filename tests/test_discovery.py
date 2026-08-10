@@ -123,7 +123,7 @@ def test_list_sessions_handles_newlines_in_title(
 
 
 def test_find_sub_agent_ids_successful_tasks() -> None:
-    """Extract agent IDs from successful Task tool completions."""
+    """Extract agent IDs from successful spawn-tool completions."""
     entries = [
         {
             "type": "user",

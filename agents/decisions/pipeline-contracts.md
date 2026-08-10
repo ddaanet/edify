@@ -29,7 +29,7 @@ Centralized I/O contracts for the design-to-deliverable pipeline. Authoritative 
 
 **Orchestrator handles all review delegation.** All reviews must be delegated to prevent implementer bias (implementer never reviews own work). The execution agent commits; the orchestrator reads the validation section and delegates the review.
 
-**Rationale corrected 2026-08-10.** This rule was previously justified by "sub-agents lack Task and Skill tools — they cannot delegate to any reviewer." Sub-agents *do* have the `Skill` tool (measured); `Task` availability was not probed. Treat the rule as the policy it is — implementer bias is the reason, and it holds whether or not the capability exists.
+**Rationale corrected 2026-08-10.** This rule was previously justified by "sub-agents lack Task and Skill tools — they cannot delegate to any reviewer." Both halves are now measured false: sub-agents have the `Skill` tool, and they can spawn sub-agents via the `Agent` tool (there is no `Task` tool at any level). The capability argument is dead. The rule stands as the policy it always was — implementer bias is the reason, and it holds precisely *because* an execution agent is now technically able to review its own work and must not.
 
 **Fix pattern:** All reviewers apply all fixes (critical, major, minor). Caller greps for UNFIXABLE.
 

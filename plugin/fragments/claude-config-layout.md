@@ -68,7 +68,7 @@
 
 **Hook execution scope:**
 - Hooks only active in main agent session
-- Do NOT fire in sub-agents spawned via Task tool
+- Do NOT fire in sub-agents spawned via Agent tool
 - Sub-agents can have tools (Bash, Write) but hook interceptors won't fire
 - Test hooks manually in main session, not via delegated agents
 
@@ -91,7 +91,7 @@
 - `cwd` persists between Bash calls
 - Can use relative paths safely
 
-**Sub-agents (Task tool):**
+**Sub-agents (Agent tool):**
 - `cwd` does NOT persist between calls
 - MUST use absolute paths or change directory within same command
 - CLAUDE.md absolute path guidance targets sub-agents

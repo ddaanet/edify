@@ -159,27 +159,34 @@ Git workflow, platform constraints, code patterns, and naming conventions.
 
 **Evidence:** 7 denied `git worktree`/`git branch` commands before using the wrapper's forced removal, which succeeded immediately.
 
-### When ClassifyHandoffIfNeeded Bug Occurs
-
-**Bug:** `ReferenceError: classifyHandoffIfNeeded is not defined` in Claude Code's SubagentStop processing.
-
-**Affected:** v2.1.27+. NOT fixed.
-
-**Scope:** Only `run_in_background=false` Task calls fail. `run_in_background=true` works.
-
-**Workaround:** Use `run_in_background=true` for Task calls.
-
-**GitHub issues:** #22087, #22544.
-
 ## .Sub-agent Limitations
 
-### When Sub-Agents Cannot Spawn Sub-Agents
+### When Sub-Agents Spawn Sub-Agents
 
-**Limitation:** Task tool is unavailable in sub-agents. All delegation must originate from main session.
+**Corrected 2026-08-10.** Previously read "Task tool is unavailable in
+sub-agents; all delegation must originate from main session." Both halves are
+false, probed across `general-purpose`, `edify:artisan`, `edify:corrector`.
 
-**Also unavailable:** MCP tools (Context7), hooks.
+- **Sub-agents can spawn sub-agents**, via a tool named `Agent`, directly
+  available and present even when the agent definition does not declare it.
+  There is no `Task` tool at any level. `Task*` tools exist but are
+  task-tracking, not spawning. Children get the full `subagent_type` roster.
+- **`Agent` parameters:** `description`, `prompt`, `subagent_type`, `name`,
+  `model`, `isolation` (`mode`/`team_name` where exposed). No `max_turns`, no
+  `run_in_background`, no `resume`; the schema rejects unknown parameters.
+- **Resumption is `SendMessage` to the agent's `name`**, which is why `name`
+  must be set at spawn time.
 
-**Available:** Read, Grep, Glob, Bash, Write, Edit (direct tool use only).
+**Real limitation — nested spawn is asynchronous and its result does not reach
+the parent.** The tool result is a launch acknowledgement only; in both probes
+the grandchild's completion surfaced in the *main* session while the parent went
+idle without its child's return value. Never design a sub-agent to consume it.
+
+**Still unavailable:** hooks (`agents/decisions/hook-patterns.md`). MCP was not
+re-probed — the old "MCP unavailable" claim has no fresh evidence.
+
+**Delegation is policy, not limitation** — implementer bias; see
+`agents/decisions/pipeline-contracts.md`.
 
 ### When Resolving Session.md Conflicts During Merge
 

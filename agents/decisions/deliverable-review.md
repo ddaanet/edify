@@ -100,9 +100,9 @@ Summary: counts by severity and axis, gap analysis results.
 
 **Rule:** Orchestrator delegates ALL reviews after execution agents commit. Execution agents never delegate reviews.
 
-**Why execution agents can't delegate:**
-1. Implementer bias — an agent must not review its own work, so review is delegated by the orchestrator rather than self-invoked. (Previously justified as "sub-agents lack Task and Skill tools"; the Skill half is false as of 2026-08-10, the Task half unprobed. The policy is the reason.)
-2. All reviews must be delegated to prevent implementer bias — implementer never reviews own work.
+**Why execution agents don't delegate:**
+1. Implementer bias — an agent must not review its own work, so review is delegated by the orchestrator rather than self-invoked.
+2. This is a policy, not a capability limit. It was previously justified as "sub-agents lack Task and Skill tools." Measured 2026-08-10: both halves are false — sub-agents have `Skill`, and they can spawn sub-agents via `Agent` (no `Task` tool exists at any level). An execution agent *can* dispatch its own reviewer; the rule is that it must not.
 
 **Domain-specific routing:** corrector (code), skill-reviewer (skills), agent-creator (agents), runbook-corrector (planning), corrector + doc-writing skill (human docs).
 

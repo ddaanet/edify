@@ -118,7 +118,9 @@ Patterns for delegation, orchestration protocol, model selection, and execution-
 
 **Anti-pattern:** Treating "dual signal" (time OR tool count) as reducing false positives. OR-logic is the union of both kill zones — it increases false positives vs either threshold alone.
 
-**Correct pattern:** Time and tool count address independent failure modes. Spinning (high activity, no convergence) → `max_turns`. Hanging (no activity, high wall-clock) → duration timeout. Independent guards, not a combined signal.
+**Correct pattern:** Time and tool count address independent failure modes. Spinning (high activity, no convergence) → a turn bound. Hanging (no activity, high wall-clock) → duration timeout. Independent guards, not a combined signal.
+
+**Availability, 2026-08-10:** neither guard is implementable today. The `Agent` tool has no `max_turns` parameter and no duration bound. The taxonomy above stands; the enforcement does not exist. See `plugin/fragments/escalation-acceptance.md`.
 
 ## .Execution Escalation
 
@@ -381,6 +383,6 @@ FR-17 documents the three-tier escalation requirement. Concrete detection mechan
 
 **Anti-pattern:** Using the full runbook pipeline when the planned work modifies pipeline skills (/design, /runbook) or pipeline contracts. Self-modification coupling: a runbook step that edits the runbook skill creates stale-instruction risk for subsequent steps.
 
-**Correct pattern:** Structure as inline task sequence orchestrated through session pending tasks. Each task executes with fresh CLAUDE.md loads, sidestepping stale instructions. TDD discipline preserved — executing session dispatches test-driver via Task tool per cycle.
+**Correct pattern:** Structure as inline task sequence orchestrated through session pending tasks. Each task executes with fresh CLAUDE.md loads, sidestepping stale instructions. TDD discipline preserved — executing session dispatches test-driver via Agent tool per cycle.
 
 **Also applies when:** No parallelization benefit (strict dependency chain), overhead/value mismatch (pipeline coordination cost > error-recovery value for ~10 sequential work units).

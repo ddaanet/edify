@@ -136,7 +136,7 @@ Read `references/review-examples.md` Section 5.5 for acceptable vs unacceptable 
 - **Restart triggers:** agent definitions (`.claude/agents/`), hook configuration, plugin changes, MCP server configuration
 - **NOT restart triggers:** decision documents, skills, and fragments Read on demand
 - **Distinction:** `@`-referenced files have content loaded at startup (restart needed); indexed-but-recalled files load on-demand (no restart)
-- **Detection:** Grep phase headers for "Restart required: Yes", cross-reference artifact type against trigger rules
+- **Detection:** `rg` phase headers for "Restart required: Yes", cross-reference artifact type against trigger rules
 - If reason invalid → VIOLATION: incorrect restart metadata (false restart delays execution)
 
 ### 7. Empty-First Cycle Ordering — TDD phases only
@@ -179,12 +179,12 @@ Read `references/review-examples.md` Section 5.5 for acceptable vs unacceptable 
 - GREEN phase "Changes" file references / step implementation paths
 - Verification commands (pytest, grep, etc.)
 
-**For each path:** Use Glob to verify the file exists. If not found, try fuzzy match.
+**For each path:** Use `rg --files` (Bash) to verify the file exists. If not found, try fuzzy match.
 
 **Classification:**
 - File doesn't exist and no similar file found → CRITICAL: path fabricated
 - File doesn't exist but similar files found → CRITICAL: wrong path (suggest correct files)
-- Test function referenced doesn't exist in target file → CRITICAL: function not found (use Grep to locate)
+- Test function referenced doesn't exist in target file → CRITICAL: function not found (use `rg` (Bash) to locate)
 
 ### 10. General Phase Step Quality — general phases only
 
@@ -313,7 +313,7 @@ Do NOT mark as UNFIXABLE or CRITICAL. Report as Minor with suggested correction.
 
 **1b. Check GREEN phases for implementation code (TDD):**
 
-Use Grep tool to find code blocks in GREEN phases:
+Use `rg` (Bash) to find code blocks in GREEN phases:
 
 **Pattern:** `^\*\*GREEN Phase:\*\*`
 **Context:** Use -A 20 to see 20 lines after each match
@@ -339,9 +339,9 @@ Use Grep tool to find code blocks in GREEN phases:
 
 Extract all file paths referenced in the runbook. For each path:
 
-1. Use Glob to check existence
+1. Use `rg --files` (Bash) to check existence
 2. If not found, search for similar files
-3. Use Grep to verify referenced functions exist in their target files
+3. Use `rg` (Bash) to verify referenced functions exist in their target files
 4. Mark missing paths as CRITICAL violations with suggested corrections
 
 ### Phase 3: Analyze Items

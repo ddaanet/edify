@@ -24,7 +24,7 @@ Review the changed files list. Approach commitment, revised scope, or rejected a
 
 **CRITICAL: Delegate to design-corrector for review.**
 
-Use Task tool with `subagent_type="design-corrector"`:
+Use Agent tool with `subagent_type="design-corrector"`:
 
 ```
 Review plans/<job-name>/design.md — Critical Design Review (CDR) criteria:

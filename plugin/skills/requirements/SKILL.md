@@ -1,7 +1,7 @@
 ---
 name: requirements
 description: Capture and document requirements for implementation. Triggers on "capture requirements", "document requirements", "what do I want to build", or feature discussions without clear documentation. Produces requirements.md artifact for design and planning phases.
-allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
+allowed-tools: Read, Write, Bash, AskUserQuestion
 user-invocable: true
 ---
 
@@ -23,7 +23,7 @@ Skill automatically detects appropriate mode based on conversation history.
 
 ## Mode Detection
 
-**Primary signal:** `Glob: plans/<job>/requirements.md` — if file exists, Read it and use as base for update/refinement (extract mode with existing artifact). If absent, fall through to conversation heuristic.
+**Primary signal:** `rg --files plans/<job>/requirements.md` — if file exists, Read it and use as base for update/refinement (extract mode with existing artifact). If absent, fall through to conversation heuristic.
 
 **Conversation heuristic (fallback):**
 - **Extract mode** — conversation contains substantive discussion (feature descriptions, constraints, scope)
@@ -91,12 +91,12 @@ Extract from conversation history:
 Quick scan to ground requirements (runs after extraction, so scan is targeted):
 
 **Discovery actions** (guideline: ~5 tool calls, flexible based on complexity):
-1. `Glob` for `plans/*/requirements.md` and `plans/*/design.md` — find related work
-2. `Grep` for key terms from extracted requirements — check what exists
+1. `rg --files` (Bash) for `plans/*/requirements.md` and `plans/*/design.md` — find related work
+2. `rg` (Bash) for key terms from extracted requirements — check what exists
 3. `Read` existing patterns in relevant area — inform constraints
 
 **Boundaries:**
-- Direct tool use only (Glob, Grep, Read, Bash, Write)
+- Direct tool use only (Read, Write, Bash (`rg`, `rg --files`))
 - No agent delegation
 - No Context7, no web research, no scout
 - Purpose: prevent naive requirements (e.g., "add X" when X exists)
@@ -105,7 +105,7 @@ Quick scan to ground requirements (runs after extraction, so scan is targeted):
 
 ### Post-Explore Recall Gate
 
-Discovery via Glob/Grep may surface domains not anticipated during the initial recall pass. Re-scan the in-context index for entries relevant to areas discovered during codebase exploration — a scan of what you already hold, not a Read.
+Discovery via `rg --files`/`rg` (Bash) may surface domains not anticipated during the initial recall pass. Re-scan the in-context index for entries relevant to areas discovered during codebase exploration — a scan of what you already hold, not a Read.
 
 **Gate anchor (D+B — tool call required):**
 - **New entries found:** Read the matching `memory/*.md` and `agents/decisions/*.md` files, then add their paths to the recall artifact

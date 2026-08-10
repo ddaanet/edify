@@ -66,13 +66,13 @@ Agent reliability patterns, artifact management, and implementation practices.
 
 **Anti-pattern:** Launching a fresh agent with the same prompt after a stopped/killed agent, losing prior context.
 
-**Correct pattern:** Use Task tool's `resume` parameter with the prior agent's ID. The agent retains full prior context (files read, reasoning done) and continues from where it stopped.
+**Correct pattern:** Resume the prior agent instead of relaunching. Send it a message with `SendMessage`, addressed by the `name` given at spawn — a send resumes the agent from its transcript with full prior context (files read, reasoning done).
 
-**Threshold for fresh launch:** If prior agent exchanged >15 messages (context likely near-full — 200K limit approaches), fresh launch is correct. Otherwise resume.
+**Mechanism corrected 2026-08-10.** This previously read "use Task tool's `resume` parameter with the prior agent's ID." There is no `Task` tool and no `resume` parameter — the spawn tool is `Agent`, whose parameters are `description`, `prompt`, `subagent_type`, `name`, `model`, `isolation`. Resumption moved to `SendMessage`, which is why naming an agent at spawn time now matters: the name is the resume handle.
 
 **Rationale:** Stopped agents may have completed expensive operations (file reads, web searches). Resuming preserves that work; relaunching repeats it.
 
-**Specific case — brainstorm-name:** Do not launch a new brainstorm-name agent with "do NOT repeat" constraints. Resume the prior agent. It retains its full context — existing candidates, conceptual space explored, metaphor domains considered. Resumption produces genuinely novel names; fresh launch risks adjacent-to-excluded names.
+**Specific case — brainstorm-name:** Do not launch a new brainstorm-name agent with "do NOT repeat" constraints. Resume the prior agent by name. It retains its full context — existing candidates, conceptual space explored, metaphor domains considered. Resumption produces genuinely novel names; fresh launch risks adjacent-to-excluded names.
 
 ### When Exploration Agents Report False Findings
 
@@ -108,10 +108,12 @@ Agent reliability patterns, artifact management, and implementation practices.
 
 6. **Extract delegation prompts** from session transcripts to control for prompt quality:
    ```python
-   # Parse .jsonl session file for Task tool calls
+   # Parse .jsonl session file for spawn calls.
+   # The tool was renamed Task -> Agent platform-side; historical
+   # transcripts record 'Task', current ones record 'Agent'.
    for msg in session:
        for block in msg.content:
-           if block.type == 'tool_use' and block.name == 'Task':
+           if block.type == 'tool_use' and block.name in ('Agent', 'Task'):
                print(block.input.prompt)
    ```
    Session files at `~/.claude/projects/<project-path>/<session-id>.jsonl`.

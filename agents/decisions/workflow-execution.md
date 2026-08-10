@@ -144,7 +144,7 @@ Design review, orchestration, TDD, runbook artifacts, and skill chaining pattern
 
 **Root cause:** Orchestrate skill said "model: [from orchestrator metadata, typically haiku]" — ambiguous, conflated orchestrator model with step execution model.
 
-**Correct pattern:** Read each step file's "Execution Model" field and pass that to Task tool's model parameter.
+**Correct pattern:** Read each step file's "Execution Model" field and pass that to Agent tool's model parameter.
 
 **Impact:** Haiku step agents skip complex behaviors (vet delegation, commit sequences) that sonnet would follow.
 
@@ -237,7 +237,7 @@ Design review, orchestration, TDD, runbook artifacts, and skill chaining pattern
 - D-2: Explicit passing via `[CONTINUATION: ...]` suffix in Skill args — deterministic, no context degradation
 - D-3: Skills own default-exit — used when standalone or last in chain, not appended by hook
 - D-4: Ephemeral lifecycle — continuations never persisted, execution-time only
-- D-5: Sub-agent isolation by convention — continuation excluded from Task tool prompts
+- D-5: Sub-agent isolation by convention — continuation excluded from Agent tool prompts
 - D-6: Two parsing modes (inline prose, multi-line list) — single skills pass through
 - D-7: Prose-to-explicit translation limited to explicit `/skill` references
 

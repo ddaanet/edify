@@ -5,7 +5,7 @@ description: >-
   validation. Triggers on "proof", "validate artifact", "review loop", or
   when an artifact needs a careful item-by-item read before it ships.
   Replaces ad-hoc single-turn validation with item-by-item review protocol.
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Task, AskUserQuestion
+allowed-tools: Read, Write, Edit, Bash, Agent, AskUserQuestion
 user-invocable: true
 ---
 
@@ -71,7 +71,7 @@ Emit a state line at every transition point. The act of generating the state lin
 
 ### Entry
 
-**Read the artifact under review.** If the artifact path contains a glob pattern (e.g., `section-*.md`), expand via Glob and read all matching files — present as a single composite review target.
+**Read the artifact under review.** If the artifact path contains a glob pattern (e.g., `section-*.md`), expand via `rg --files` (Bash) and read all matching files — present as a single composite review target.
 
 **Detect items.** Parse artifact structure to identify reviewable items. See `references/item-review.md` for granularity detection table and splitting indicators. When artifact has no detectable sub-items, it is one item — the loop runs once.
 

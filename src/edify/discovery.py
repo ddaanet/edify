@@ -70,8 +70,10 @@ def list_top_level_sessions(project_dir: str) -> list[SessionInfo]:
 def find_sub_agent_ids(session_file: Path) -> list[str]:
     """Extract all sub-agent IDs from a session JSONL file.
 
-    Scans for entries with successful Task tool completions that contain
-    an agentId in the toolUseResult field.
+    Scans for entries with successful spawn-tool completions that contain
+    an agentId in the toolUseResult field. Matching is on the presence of
+    agentId, not on the tool name, so it survived the platform rename of
+    the spawn tool from Task to Agent.
 
     Args:
         session_file: Path to session JSONL file

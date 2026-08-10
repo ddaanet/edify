@@ -5,7 +5,7 @@ description: >-
   architecture or implementation planning requests, or tasks needing
   complexity assessment. Triages simple/moderate/complex, produces design
   documents for complex jobs, routes moderate to /runbook.
-allowed-tools: Task, Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, Skill
+allowed-tools: Agent, Read, Write, Bash, WebSearch, WebFetch, Skill
 user-invocable: true
 continuation:
   cooperative: true
@@ -117,7 +117,7 @@ Assess work type alongside complexity — independent dimension (XP spike/story,
 
 #### Classification Gate
 
-**Structural check (D+B anchor):** If classification is borderline Simple/Moderate, verify with `Glob` or `Grep` on affected files to confirm whether behavioral code changes are involved (new functions, changed logic paths).
+**Structural check (D+B anchor):** If classification is borderline Simple/Moderate, verify with `rg --files` or `rg` (Bash) on affected files to confirm whether behavioral code changes are involved (new functions, changed logic paths).
 
 Produce this classification block before routing (visible output, not internal reasoning — **per-item if composite**):
 - **Classification:** [Simple / Moderate / Complex / Defect]
@@ -134,7 +134,7 @@ Produce this classification block before routing (visible output, not internal r
 
 - **Simple →** Lightweight recall-explore, then chain to `/inline`:
   1. Recall: from the in-context index, Read the memory and decision files matching the task's domain keywords
-  2. Explore: if affected files not already known, `Glob`/`Grep` to identify targets
+  2. Explore: if affected files not already known, `rg --files`/`rg` (Bash) to identify targets
   3. Execute: check for applicable skills and project recipes first, then implement directly
   4. Follow §Continuation (prepends `/inline plans/<job> execute`)
   Skip design — all other operational rules (skills, project tooling, communication) remain in effect.
@@ -196,6 +196,6 @@ As the **final action** of this skill:
 3. If continuation present: peel first entry from (possibly modified) continuation, tail-call with remainder
 4. If no continuation: default-exit — `/handoff:handoff` → `/commit-commands:commit`
 
-**CRITICAL:** Do NOT include continuation metadata in Task tool prompts.
+**CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
 
 **On failure:** Abort remaining continuation. Record in session.md Blockers: which phase failed, error category, remaining continuation orphaned.

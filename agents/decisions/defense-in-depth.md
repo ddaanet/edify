@@ -162,7 +162,9 @@ When designing a new quality gate or quality process:
 
 **Decision Date:** 2026-02-26
 
-**Anti-pattern:** PreToolUse hook on Task tool with exit 0 + additionalContext advisory. No model re-run between PreToolUse hook and tool execution for exit 0. Task dispatches, runs, completes before agent reads the advisory — the gate is post-delegation.
+**Anti-pattern:** PreToolUse hook on the spawn tool with exit 0 + additionalContext advisory. No model re-run between PreToolUse hook and tool execution for exit 0. The spawn dispatches, runs, completes before the agent reads the advisory — the gate is post-delegation.
+
+**Matcher name:** the spawn tool is `Agent`; no tool named `Task` exists (CC 2.1.226). The changelog documents no explicit rename, so treat "renamed from `Task`" as reconstruction — the observed fact is simply that a PreToolUse matcher written against `Task` matches nothing. No hook in this repo uses either matcher.
 
 **Correct pattern:** Block with `permissionDecision:deny`. Gate by `subagent_type` discriminator (execution agents: artisan, test-driver, corrector, runbook-corrector, design-corrector, outline-corrector, runbook-outline-corrector, tdd-auditor, refactor). Fragments don't load in sub-agents; recall-artifact is the only project context transport.
 

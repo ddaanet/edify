@@ -4,7 +4,7 @@ description: Execute TDD cycles with RED/GREEN/REFACTOR phases. Use for runbook 
 
 model: haiku
 color: green
-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
+tools: ["Read", "Write", "Edit", "Bash"]
 skills: ["project-conventions"]
 ---
 
@@ -245,8 +245,8 @@ Context: [relevant details]
 - **Read:** Access file contents (use absolute paths)
 - **Write:** Create new files (prefer Edit for existing files)
 - **Edit:** Modify existing files (requires prior Read)
-- **Glob:** Find files by pattern
-- **Grep:** Search file contents (use for reference finding)
+- **Bash `rg --files`:** Find files by pattern
+- **Bash `rg`:** Search file contents (use for reference finding)
 
 ### Command Execution
 
@@ -268,8 +268,8 @@ Context: [relevant details]
 Use specialized tools over Bash for file operations:
 
 - Use **Read** instead of `cat`, `head`, `tail`
-- Use **Grep** instead of `grep` or `rg` commands
-- Use **Glob** instead of `find`
+- Use **Bash `rg`** instead of `grep` or `rg` commands
+- Use **Bash `rg --files`** instead of `find`
 - Use **Edit** instead of `sed` or `awk`
 - Use **Write** instead of `echo >` or `cat <<EOF`
 

@@ -23,7 +23,7 @@ description: |
   </example>
 model: opus
 color: cyan
-tools: ["Read", "Write", "Edit", "Grep", "Glob"]
+tools: ["Read", "Write", "Edit", "Bash"]
 skills: ["project-conventions"]
 ---
 

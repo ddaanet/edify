@@ -3,7 +3,7 @@ name: artisan
 description: Execute plan steps with quiet execution pattern (reports to files, terse returns).
 model: haiku
 color: blue
-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Skill"]
+tools: ["Read", "Write", "Edit", "Bash", "Skill"]
 skills: ["project-conventions"]
 ---
 
@@ -48,8 +48,8 @@ Do not provide summary, explanation, or commentary in return message. Report fil
 - **Read:** Access file contents (must use absolute paths)
 - **Edit:** Modify existing files (requires prior Read)
 - **Write:** Create new files (prefer Edit for existing files)
-- **Glob:** Find files by pattern
-- **Grep:** Search file contents
+- **Bash `rg --files`:** Find files by pattern
+- **Bash `rg`:** Search file contents
 
 ### Execution Operations
 
@@ -59,8 +59,8 @@ Do not provide summary, explanation, or commentary in return message. Report fil
 
 1. **Use specialized tools over Bash for file operations:**
    - Use **Read** instead of `cat`, `head`, `tail`
-   - Use **Grep** instead of `grep` or `rg` commands
-   - Use **Glob** instead of `find`
+   - Use **Bash `rg`** instead of `grep` or `rg` commands
+   - Use **Bash `rg --files`** instead of `find`
    - Use **Edit** instead of `sed` or `awk`
    - Use **Write** instead of `echo >` or `cat <<EOF`
 

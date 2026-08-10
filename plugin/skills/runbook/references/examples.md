@@ -93,7 +93,7 @@ Strict RED-GREEN-REFACTOR: 1) RED: failing test, 2) Verify RED, 3) GREEN: minima
 - Tests: tests/test_auth.py
 
 **Conventions:**
-- Use Read/Write/Edit/Grep tools (not Bash for file ops)
+- Use Read/Write/Edit/`rg` (Bash)s (not Bash for file ops)
 - Report errors explicitly
 - Write notes to plans/auth-feature/reports/cycle-{X}-{Y}-notes.md
 
@@ -303,7 +303,7 @@ Create `plugin/agents/review-taxonomy.md`:
 
 1. **Locate Phase 1.4**: heading "Phase 1.4: File Size Awareness"
 2. **Delete entire section**: heading through next phase heading
-3. **Verify no orphaned references**: Grep SKILL.md for "1.4" and "file size awareness"
+3. **Verify no orphaned references**: `rg` SKILL.md for "1.4" and "file size awareness"
 4. **Remove cross-references**: update any remaining mentions
 
 **Expected Outcome**:
@@ -312,7 +312,7 @@ Create `plugin/agents/review-taxonomy.md`:
 - Surrounding sections maintain correct structure
 
 **Error Conditions**:
-- If section heading not found -> Grep for variants ("File Size", "file growth", "1.4")
+- If section heading not found -> `rg` for variants ("File Size", "file growth", "1.4")
 - If orphaned references found -> update or remove each reference
 
 **Validation**:

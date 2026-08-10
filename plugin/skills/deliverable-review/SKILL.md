@@ -6,10 +6,8 @@ description: >-
   Two-layer review (delegated per-file + interactive cross-project) producing
   severity-classified report grounded in ISO 25010 / IEEE 1012.
 allowed-tools:
-  - Task
+  - Agent
   - Read
-  - Grep
-  - Glob
   - Bash
   - Write
 user-invocable: true

@@ -54,7 +54,7 @@ STOP IMMEDIATELY if: RED phase test passes (expected failure) • RED phase fail
 Actions when stopped: 1) Document in reports/cycle-{X}-{Y}-notes.md 2) Test passes unexpectedly → Investigate if feature exists 3) Regression → STOP, report broken tests 4) Scope unclear → STOP, document ambiguity
 
 **Conventions:**
-- Use Read/Write/Edit/Grep tools (not Bash for file ops)
+- Use Read/Write/Edit/`rg` (Bash)s (not Bash for file ops)
 - Report errors explicitly (never suppress)
 """
 
@@ -1039,7 +1039,7 @@ def generate_task_agent(
     name = f"{runbook_name}-task"
     description = f"Execute steps for {runbook_name}"
     model_line = f"model: {model}\n" if model is not None else ""
-    frontmatter = f'---\nname: {name}\ndescription: {description}\n{model_line}color: blue\ntools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]\n---\n'
+    frontmatter = f'---\nname: {name}\ndescription: {description}\n{model_line}color: blue\ntools: ["Read", "Write", "Edit", "Bash"]\n---\n'
 
     result = frontmatter
     result += read_baseline_agent(baseline_type)
@@ -1063,7 +1063,7 @@ def generate_corrector_agent(
     """
     name = f"{runbook_name}-corrector"
     description = f"Review phase checkpoint for {runbook_name}"
-    frontmatter = f'---\nname: {name}\ndescription: {description}\nmodel: sonnet\ncolor: yellow\ntools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]\n---\n'
+    frontmatter = f'---\nname: {name}\ndescription: {description}\nmodel: sonnet\ncolor: yellow\ntools: ["Read", "Write", "Edit", "Bash"]\n---\n'
 
     result = frontmatter
     result += read_baseline_agent("corrector")
@@ -1127,7 +1127,7 @@ def generate_tdd_agents(
     for role, baseline_type, model, desc_template, color, footer in _TDD_ROLES:
         name = f"{runbook_name}-{role}"
         description = desc_template.format(name=runbook_name)
-        frontmatter = f'---\nname: {name}\ndescription: {description}\nmodel: {model}\ncolor: {color}\ntools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]\n---\n'
+        frontmatter = f'---\nname: {name}\ndescription: {description}\nmodel: {model}\ncolor: {color}\ntools: ["Read", "Write", "Edit", "Bash"]\n---\n'
         content = (
             frontmatter + read_baseline_agent(baseline_type) + plan_ctx_section + footer
         )

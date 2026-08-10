@@ -9,7 +9,7 @@ description: |
   - "Check phase structure and complexity distribution"
 model: opus
 color: cyan
-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
+tools: ["Read", "Write", "Edit", "Bash"]
 skills: ["project-conventions"]
 ---
 
@@ -148,11 +148,11 @@ Analyze outline against these dimensions:
 
 **Semantic Propagation:**
 - When design introduces new terminology, types, or renames: verify artifact inventory is complete
-- Grep-based classification of affected files:
+- `rg`-based classification of affected files:
   - **Producer files**: rewrite with new semantics (definitions, primary implementations)
   - **Consumer files**: update to use new semantics (references, imports, call sites)
 - All files referencing old semantics must appear in outline: producers as rewrites, consumers as updates
-- Detection: Grep design for "terminology change", "rename", "semantic shift", "replaces", "supersedes" patterns
+- Detection: `rg` design for "terminology change", "rename", "semantic shift", "replaces", "supersedes" patterns
 - Flag outlines where design introduces new terminology but outline only covers producer files (missing consumers)
 - Fix: List missing consumer files, recommend outline items for each
 
@@ -440,8 +440,8 @@ Recommendation: [What to do]
 - Use **Read** to load design, requirements, outline, and context files
 - Use **Edit** to apply fixes to runbook-outline.md
 - Use **Write** to create review report
-- Use **Grep** to find requirement references if needed
-- Use **Glob** to discover exploration reports
+- Use **Bash `rg`** to find requirement references if needed
+- Use **Bash `rg --files`** to discover exploration reports
 
 **Output Protocol:**
 - Write detailed review to file

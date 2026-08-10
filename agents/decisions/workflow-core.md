@@ -235,7 +235,7 @@ plans/<stream-name>/
 - Work benefits from agent isolation but not full orchestration
 - Components are sequential (no parallelization benefit)
 - No model switching needed
-- **Sequence:** Delegate via Task tool (artisan/test-driver) with context in prompts → vet agent → `/handoff:handoff` → `/commit-commands:commit`
+- **Sequence:** Delegate via Agent tool (artisan/test-driver) with context in prompts → vet agent → `/handoff:handoff` → `/commit-commands:commit`
 - **Repetitive pattern variant:** ~15-20 cycles with same pattern qualifies as Tier 2 — plan cycle descriptions, delegate individually, checkpoint every 3-5 cycles. Full runbook overhead not justified for simple repetitive work
 
 **Tier 3 (Full Runbook):**

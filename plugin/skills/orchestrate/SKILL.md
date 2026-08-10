@@ -65,13 +65,18 @@ Read the phase content from the orchestrator plan's `## Phase Files` section (pa
 ### 3.1 General Step Dispatch (D-2)
 
 ```
-Task tool:
+Agent tool:
   subagent_type: [from **Agent:** header field]
   prompt: "Execute step from: plans/<name>/steps/<step-file>"
   model: [from step entry model field]
-  max_turns: [from step entry max_turns field]
+  name: "step-N-M"
   description: "Step N-M: [step file name]"
 ```
+
+`name` is required for remediation: resuming an agent is a `SendMessage` to its
+name (Section 3.4). Do NOT pass `max_turns` — the `Agent` tool has no such
+parameter and rejects unknown ones. The `max_turns` column in the plan manifest
+is inert metadata; see Section 5.
 
 Orchestrator provides file reference only. Agent definition caches design + outline — no inline content in prompt.
 
@@ -83,13 +88,13 @@ Per TDD cycle (paired TEST + IMPLEMENT entries):
 
 **Step A — Dispatch tester:**
 ```
-Task tool:
+Agent tool:
   subagent_type: [from **Tester Agent:** header]
   prompt: "Execute test spec from: plans/<name>/steps/<test-file>"
   model: [from step entry]
-  max_turns: [from step entry]
+  name: "step-N-M-test"
 ```
-Save agent ID for resume.
+The `name` is the resume handle — resume via `SendMessage` to that name.
 
 **Step B — RED gate:**
 ```bash
@@ -103,13 +108,13 @@ Dispatch `<name>-test-corrector` with changed files. Review test quality. If UNF
 
 **Step D — Dispatch implementer:**
 ```
-Task tool:
+Agent tool:
   subagent_type: [from **Implementer Agent:** header]
   prompt: "Execute implementation from: plans/<name>/steps/<impl-file>"
   model: [from step entry]
-  max_turns: [from step entry]
+  name: "step-N-M-impl"
 ```
-Save agent ID for resume.
+The `name` is the resume handle — resume via `SendMessage` to that name.
 
 **Step E — GREEN gate:**
 ```bash
@@ -137,15 +142,19 @@ plugin/skills/orchestrate/scripts/verify-step.sh
 
 **Resume step agent** — it has context for fixing its own issues:
 ```
-Task tool (resume):
-  resume: [saved agent ID]
-  prompt: "Your step left uncommitted changes or precommit failures. Fix and commit."
+SendMessage:
+  to: [name given to the step agent at spawn]
+  message: "Your step left uncommitted changes or precommit failures. Fix and commit."
 ```
+A send resumes the agent from its transcript. This requires that the step agent
+was spawned with an explicit `name` — see 3.1. There is no `resume` parameter on
+`Agent`; naming at spawn time is what makes resumption possible.
+
 Skip resume if agent exchanged >15 messages (context near-full).
 
 **If resume fails or skipped** — delegate recovery to fresh sonnet agent:
 ```
-Task tool:
+Agent tool:
   subagent_type: "artisan"
   model: sonnet
   prompt: "[step file reference, git diff, git status, error output] Fix lint and commit issues."
@@ -169,8 +178,9 @@ git diff --name-only
 
 **Delegate checkpoint to corrector:**
 ```
-Task tool:
+Agent tool:
   subagent_type: [from **Corrector Agent:** header]
+  name: "phase-P-corrector"
   prompt: |
     Phase P Checkpoint
 
@@ -204,11 +214,11 @@ After any corrector review (phase checkpoint, TDD corrector, or impl-corrector),
 
 **Dispatch:**
 ```
-Task tool:
+Agent tool:
   subagent_type: "refactor"
   model: sonnet
+  name: "refactor-phase-P"
   prompt: "Refactor flagged files: [files from corrector report]. Warnings: [quoted warning text]. Design reference: plans/<name>/design.md"
-  max_turns: 20
 ```
 
 The refactor agent applies deslop directives (factorization-before-splitting) and returns `success`, `escalated: [reason]`, or `error: [reason]`. On `escalated` → write pending task to `.claude/handoff-task.md` for opus-level refactoring (section targeting: main → Worktree Tasks, worktree → In-tree Tasks). On `error` → log and continue (refactoring is advisory, not blocking).
@@ -229,7 +239,7 @@ Return: "fixed: [summary]" or "blocked: [what's needed]"
 
 **Acceptance criteria:** Every resolution must pass precommit, leave clean tree, validate against step criteria.
 
-**Execution bounds:** `max_turns` from orchestrator plan step entry — prevents spinning agents. Duration timeout deferred (platform gap).
+**Execution bounds:** none currently enforceable. The plan manifest still carries a `max_turns` column (emitted by `prepare-runbook.py`), but it is inert — the `Agent` tool has no `max_turns` parameter, and passing one is rejected. Both spinning and hanging guards are platform gaps; see `plugin/fragments/escalation-acceptance.md`.
 
 ## 5. Progress Tracking
 

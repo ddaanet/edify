@@ -5,7 +5,7 @@ description: >-
   Triggers on /inline, "execute inline", "run task", or when /design and
   /runbook route Tier 1/2 execution-ready work. Wraps corrector dispatch,
   triage feedback, and deliverable-review chaining.
-allowed-tools: Task, Read, Write, Edit, Bash, Grep, Glob, Skill
+allowed-tools: Agent, Read, Write, Edit, Bash, Skill
 user-invocable: true
 continuation:
   cooperative: true
@@ -130,7 +130,7 @@ Route changed files to the appropriate reviewer per `plugin/fragments/review-req
 
 **Two dispatch patterns:**
 - **Fix-capable reviewers** (corrector, agent-creator, design-corrector): Delegate, read report, grep UNFIXABLE. Agent applies fixes directly.
-- **Report-only reviewers** (skill-reviewer): Delegate, read report, apply fixes in calling session. Agent has Read/Grep/Glob only.
+- **Report-only reviewers** (skill-reviewer): Delegate, read report, apply fixes in calling session. Agent has Read plus Bash `rg` only.
 
 **Common fields per dispatch:**
 - **Scope:** uncommitted changes for this artifact group — implementation only
@@ -203,6 +203,6 @@ As the **final action** of this skill:
 3. If continuation present: peel first entry from (possibly modified) continuation, tail-call with remainder
 4. If no continuation: default-exit — `/handoff:handoff` → `/commit-commands:commit`
 
-**CRITICAL:** Do NOT include continuation metadata in Task tool prompts.
+**CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
 
 **On failure:** Abort remaining continuation. Record in session.md Blockers: which phase failed, error category, remaining continuation orphaned.

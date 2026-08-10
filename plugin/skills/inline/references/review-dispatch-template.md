@@ -4,7 +4,7 @@ Prompt template for reviewer delegation from /inline Phase 4a. Reviewer selectio
 
 ## Template
 
-Delegate to selected reviewer agent (Task tool, `subagent_type` per routing table):
+Delegate to selected reviewer agent (Agent tool, `subagent_type` per routing table):
 
 ```
 Review implementation changes against design specification.

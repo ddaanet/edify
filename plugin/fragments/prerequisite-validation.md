@@ -70,9 +70,9 @@ Status: READY
 test -d /absolute/path/to/dir
 echo "✓ Directory exists" or "✗ Directory missing"
 
-# Method 2: Glob tool (execution phase, discover resources)
-# Use Glob to list files in directory
-# If Glob returns empty, directory doesn't have expected resources
+# Method 2: `rg --files` via Bash (execution phase, discover resources)
+# Use `rg --files` (Bash) to list files in directory
+# If it returns nothing, the directory doesn't have expected resources
 
 # Method 3: Write permission check
 test -w /path/to/dir  # True if directory is writable
@@ -207,7 +207,7 @@ Report any missing prerequisites before execution starts."
 | Pitfall | Symptom | Prevention |
 |---------|---------|-----------|
 | Relative paths used | Different working directories cause failures | Always use absolute paths; verify with `pwd` in plan |
-| Assumptions not verified | File exists in source control but not checked out | Use Read or Glob tool; verify actual filesystem state |
+| Assumptions not verified | File exists in source control but not checked out | Use Read or `rg --files` (Bash); verify actual filesystem state |
 | Version mismatches | Tool exists but wrong version causes errors | Check version explicitly (e.g., `python --version`) |
 | Permission issues | File exists but not readable/writable | Check with `test -r` / `test -w` during planning |
 | Network assumptions | External service assumed available | Test connectivity; include timeout/retry in plan |
@@ -245,7 +245,7 @@ test -f /Users/david/code/pytest-md/CLAUDE.md || \
 **When task agents validate prerequisites:**
 
 1. **Read phase:** Use Read tool to verify files exist and are readable
-2. **Glob phase:** Use Glob to verify directory structure matches expectations
+2. **Discovery phase:** Use `rg --files` (Bash) to verify directory structure matches expectations
 3. **Plan context:** Re-read plan prerequisites section before starting step
 4. **Stop on validation failure:** If prerequisite check fails, report immediately (don't continue)
 

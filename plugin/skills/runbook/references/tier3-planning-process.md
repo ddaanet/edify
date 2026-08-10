@@ -36,15 +36,15 @@ If design document includes "Requirements" section:
    - For multi-session pipelines where design-time artifact may be stale, planner can regenerate from scratch
 
 3. **Verify actual file locations:**
-   - Use Glob to find source files referenced by the design
-   - Use Glob to find test files: `tests/test_*.py`, `tests/**/test_*.py`
-   - Use Grep to find specific functions, classes, or patterns mentioned in the design
+   - Use `rg --files` (Bash) to find source files referenced by the design
+   - Use `rg --files` (Bash) to find test files: `tests/test_*.py`, `tests/**/test_*.py`
+   - Use `rg` (Bash) to find specific functions, classes, or patterns mentioned in the design
    - Record actual file paths for use in runbook steps
-   - **NEVER assume file paths from conventions alone** -- always verify with Glob/Grep
+   - **NEVER assume file paths from conventions alone** -- always verify with `rg --files`/`rg` (Bash)
    - STOP if expected files not found: report missing files to user
 
 4. **Post-explore recall gate:**
-   Step 3's Glob/Grep verification discovers actual file locations and module structures — may reveal domains not anticipated during step 1 recall. Re-scan the in-context index for entries relevant to discovered areas — a scan of what you already hold, not a Read.
+   Step 3's `rg --files`/`rg` (Bash) verification discovers actual file locations and module structures — may reveal domains not anticipated during step 1 recall. Re-scan the in-context index for entries relevant to discovered areas — a scan of what you already hold, not a Read.
 
    **Gate anchor (D+B — tool call required):**
    - **New entries found:** Read the matching `memory/*.md` and `agents/decisions/*.md` files, then add their paths to the recall artifact
@@ -425,7 +425,7 @@ Delegate to `runbook-corrector` (fix-all mode) for cross-phase consistency:
 - Cross-phase dependency ordering
 - Item numbering consistency
 - Metadata accuracy
-- File path validation (all referenced paths exist -- use Glob)
+- File path validation (all referenced paths exist -- use `rg --files` via Bash)
 - Requirements satisfaction
 - **Type-specific criteria:**
   - TDD phases: Cross-phase RED/GREEN sequencing, no prescriptive code

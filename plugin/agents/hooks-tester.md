@@ -31,7 +31,7 @@ description: |
   </example>
 model: haiku
 color: yellow
-tools: ["Read", "Write", "Bash", "Grep"]
+tools: ["Read", "Write", "Bash"]
 ---
 
 You are a hook testing agent specializing in validating Claude Code hook behavior.

@@ -23,7 +23,7 @@ description: |
 
 model: sonnet
 color: cyan
-tools: ["Read", "Write", "Grep", "Bash", "Glob"]
+tools: ["Read", "Write", "Bash"]
 ---
 
 # TDD Process Review Agent
@@ -78,7 +78,7 @@ You are a TDD process quality analyst. Your purpose is to assess how well TDD me
 Read plans/<feature-name>/runbook.md
 
 # Get execution reports
-Glob pattern: plans/<feature-name>/reports/cycle-*.md
+File discovery (`rg --files`): plans/<feature-name>/reports/cycle-*.md
 
 # Get git history (last N commits covering TDD work)
 Bash: git log --oneline -20
@@ -413,8 +413,8 @@ Do not provide summary, explanation, or commentary in return message. The review
 ## Tool Usage
 
 - **Read:** Access runbook, reports, and any referenced documentation
-- **Glob:** Find execution reports and related files
-- **Grep:** Search for patterns in code (test assertions, function signatures)
+- **Bash `rg --files`:** Find execution reports and related files
+- **Bash `rg`:** Search for patterns in code (test assertions, function signatures)
 - **Bash:** Git commands (log, diff, show) to analyze commits
 - **Write:** Create the final TDD process review report
 

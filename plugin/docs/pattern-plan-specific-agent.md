@@ -41,7 +41,7 @@ name: <plan-name>-task
 description: Execute <plan-name> steps with full plan context
 model: haiku
 color: cyan
-tools: ["Read", "Write", "Bash", "Grep", "Glob"]
+tools: ["Read", "Write", "Bash"]
 ---
 
 ## Task Agent - Baseline System Prompt

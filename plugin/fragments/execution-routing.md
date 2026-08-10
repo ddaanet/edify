@@ -26,9 +26,9 @@ It is not a default mode for interactive work.
 - Answering questions about code you can Read directly
 - Content already loaded via CLAUDE.md @-references
 
-**Anti-pattern:** Read/Grep a file that's already in context via `@` reference.
+**Anti-pattern:** Read/`rg` a file that's already in context via `@` reference.
 
-**Correct pattern:** Work directly from loaded content — no Read/Grep needed.
+**Correct pattern:** Work directly from loaded content — no Read/`rg` needed.
 
 **Applies to:** CLAUDE.md `@`-references (recursive, loads transitive `@` refs) AND user-message `@`-references (single file, no recursion). Both inject file content into context — do not re-read either.
 

@@ -50,4 +50,4 @@ Incoming: `/orchestrate myplan [CONTINUATION: /handoff:handoff, /commit-commands
 
 ## Constraint
 
-This skill does NOT pass continuations to sub-agents (Task tool). Continuations apply only to the main session skill chain.
+This skill does NOT pass continuations to sub-agents (Agent tool). Continuations apply only to the main session skill chain.

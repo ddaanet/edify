@@ -84,7 +84,7 @@ Some steps require codebase exploration before implementation can begin.
 **Pattern:**
 ```markdown
 **Prerequisites**:
-- Grep `pattern` in `directory/` (identify all consumers of X)
+- `rg` `pattern` in `directory/` (identify all consumers of X)
 - Read results to understand usage patterns
 ```
 

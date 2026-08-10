@@ -4,7 +4,7 @@ description: |
   Decompose a design into executable implementation steps. Triggers on /runbook or when
   a design needs step-by-step planning. Creates runbooks with per-phase typing
   (TDD cycles, general steps, or inline pass-through) for weak orchestrator execution.
-allowed-tools: Task, Read, Write, Edit, Skill, Bash(mkdir:*, plugin/bin/prepare-runbook.py, echo:*|pbcopy)
+allowed-tools: Agent, Read, Write, Edit, Skill, Bash(mkdir:*, plugin/bin/prepare-runbook.py, echo:*|pbcopy)
 requires:
   - Design document from /design
   - CLAUDE.md for project conventions (if exists)
@@ -194,7 +194,7 @@ As the **final action** of this skill:
 3. If continuation present: peel first entry from (possibly modified) continuation, tail-call with remainder
 4. If no continuation: default-exit — `/handoff:handoff` → `/commit-commands:commit`
 
-**CRITICAL:** Do NOT include continuation metadata in Task tool prompts.
+**CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
 
 **On failure:** Abort remaining continuation. Record in session.md Blockers: which phase failed, error category, remaining continuation orphaned.
 

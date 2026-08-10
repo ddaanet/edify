@@ -3,7 +3,7 @@ name: corrector
 description: Review agent that applies all fixes directly. Reviews changes, writes report, applies all fixes (critical, major, minor), then returns report filepath.
 model: sonnet
 color: cyan
-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "AskUserQuestion"]
+tools: ["Read", "Write", "Edit", "Bash"]
 skills: ["project-conventions", "error-handling"]
 ---
 
@@ -45,7 +45,7 @@ Every UNFIXABLE issue must include a subcategory code and an investigation summa
 - Requirement says "validate input" but does not specify validation rules or error behavior
 
 **U-ARCH:**
-- Fix requires sub-agent to spawn sub-agents, but Task tool does not support nested delegation
+- Fix requires a sub-agent to consume its child's return value, but nested spawning is asynchronous — the child's result does not come back to the parent
 - Correction requires hook to fire in sub-agent context, but hooks only execute in main session
 
 **U-DESIGN:**
@@ -61,7 +61,7 @@ When classifying UNFIXABLE, include the investigation summary showing gate resul
 **Investigation:**
 1. Scope OUT: not listed
 2. Design deferral: not found in design.md
-3. Codebase patterns: Grep found no existing pattern for this case
+3. Codebase patterns: `rg` found no existing pattern for this case
 4. Conclusion: [why no fix path exists]
 ```
 
@@ -172,14 +172,9 @@ Task prompt SHOULD include execution context for phased or multi-step work. This
 
 ### 1. Determine Scope
 
-**If scope not provided in task prompt, ask user:**
+**If scope not provided in task prompt:** default to uncommitted changes (`git diff`, staged + unstaged) and state the assumption at the top of the report so the caller can re-dispatch with an explicit scope.
 
-Use AskUserQuestion tool with these options:
-1. "Uncommitted changes" - Review git diff (staged + unstaged)
-2. "Recent commits" - Review last N commits on current branch
-3. "Current branch" - Review all commits since branched from main
-4. "Specific files" - Review only specified files
-5. "Everything" - Uncommitted + recent commits
+Do not try to ask the user. A declared `AskUserQuestion` does not reach this agent, and a delegated reviewer has no user to ask — the orchestrator owns user interaction. Scope belongs in the dispatch prompt.
 
 **If scope provided:** Proceed directly to gathering changes.
 
@@ -301,9 +296,9 @@ Review all changes for:
 
 **Runbook File References (when reviewing runbooks/plans):**
 - Extract all file paths referenced in steps/cycles
-- Use Glob to verify each path exists in the codebase
+- Use `rg --files` (Bash) to verify each path exists in the codebase
 - Flag missing files as CRITICAL issues (runbooks with wrong paths fail immediately)
-- Check test function names exist in referenced test files (use Grep)
+- Check test function names exist in referenced test files (use `rg` via Bash)
 - Suggest correct paths when similar files are found
 
 **Self-referential modification (when reviewing runbooks/plans):**
@@ -435,7 +430,7 @@ Use timestamp format: `YYYY-MM-DD-HHMMSS`
 
 1. **Scope OUT check** — Is the item listed in scope OUT? If yes: classify OUT-OF-SCOPE or DEFERRED (not UNFIXABLE)
 2. **Design deferral check** — Does the design document explicitly defer this item? If yes: classify DEFERRED
-3. **Codebase pattern check** — Glob/Grep the codebase for existing patterns that resolve the issue. If a pattern exists: apply it (FIXED)
+3. **Codebase pattern check** — `rg --files`/`rg` (Bash) the codebase for existing patterns that resolve the issue. If a pattern exists: apply it (FIXED)
 4. **Escalation** — Only after gates 1-3 fail: classify UNFIXABLE with subcategory code and investigation summary (see Status Taxonomy section above for format)
 
 **Fix constraints:**
@@ -448,7 +443,7 @@ Use timestamp format: `YYYY-MM-DD-HHMMSS`
 
 **Review-fix integration (merge, don't append):**
 Before applying a fix that adds content to a file:
-1. Grep the target file for the heading or section the fix targets
+1. `rg` the target file for the heading or section the fix targets
 2. If heading exists: Edit within that section (merge content into existing structure)
 3. If no match: Append as new section
 This prevents structural duplication from parallel sections covering the same topic.
@@ -477,7 +472,7 @@ Recommendation: [What to do]
 - Use **Read** to examine specific files when needed
 - Use **Write** to create review report
 - Use **Edit** to apply fixes (all priorities)
-- Use **Grep** to search for patterns in code
+- Use **Bash `rg`** to search for patterns in code
 
 **Output Protocol:**
 - Write detailed review to file

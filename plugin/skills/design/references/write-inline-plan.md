@@ -20,7 +20,7 @@ OUT: [explicitly excluded]
 ### Generation Rules
 
 - **Code reading required.** Read all affected files before writing. Brief assumptions are starting points — actual codebase state determines the artifact. The value is catching brief/codebase divergence before execution.
-- **File paths from filesystem.** Enumerate actual paths using Glob/Grep, not brief assumptions. Verify files exist.
+- **File paths from filesystem.** Enumerate actual paths using `rg --files`/`rg` (Bash), not brief assumptions. Verify files exist.
 - **Per-file changes specific.** Each file entry states what section/line changes and why. Not "update SKILL.md" — "add §Routing Moderate section after §Classification Criteria."
 - **Boundaries explicit.** IN/OUT section prevents scope creep during /inline execution.
 - **No architecture, no options.** The design decision has already been made (it's why the job is Moderate, not Complex). Record what changes, not why the approach was chosen.

@@ -9,7 +9,7 @@ Detailed implementation decisions for edify codebase. Consult this document when
 **Limitation:** @ references only work in `CLAUDE.md`. Not supported in:
 - Skill `SKILL.md` files
 - Agent `.md` system prompts
-- Task tool prompts
+- Agent tool prompts
 
 **Workaround:** Place supporting files in skill directory and reference with relative path.
 
@@ -303,7 +303,7 @@ Detailed implementation decisions for edify codebase. Consult this document when
 
 **Decision Date:** 2026-02-23
 
-**Anti-pattern:** Assuming `.claude/agents/*.md` files with proper frontmatter are automatically available as `subagent_type` values in Task tool.
+**Anti-pattern:** Assuming `.claude/agents/*.md` files with proper frontmatter are automatically available as `subagent_type` values in Agent tool.
 
 **Correct pattern:** Use built-in agent types with phase context injected in prompt. Include agent instructions directly in Task prompt. Session restart MAY make custom agents discoverable but isn't guaranteed.
 

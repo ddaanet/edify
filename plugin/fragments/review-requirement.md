@@ -143,7 +143,7 @@ Return filepath or error.
 
 **Detection steps:**
 1. Read the report file returned by corrector
-2. Use Grep to search for `UNFIXABLE` in the report content
+2. Use `rg` (Bash) to search for `UNFIXABLE` in the report content
 3. If found: validate each UNFIXABLE issue (see validation below)
 4. If validation fails: resume corrector for reclassification with guidance (delegate again with specific reclassification instructions in prompt — no continuation mechanism available)
 5. If validated UNFIXABLE remains: **STOP**, report to user with report path, wait for guidance

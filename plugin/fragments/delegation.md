@@ -15,7 +15,7 @@ Match model cost to task complexity:
 
 ### Pre-Delegation Checkpoint
 
-Before invoking Task tool, verify:
+Before invoking Agent tool, verify:
 - Model matches stated plan (sonnet/opus)
 - If changing model, state reason explicitly
 
@@ -43,7 +43,7 @@ Execution agents report to files, not to orchestrator context.
 
 When a delegate is interrupted, stopped, or returns incomplete results — resume before relaunching.
 
-- Save agent ID from initial Task dispatch
+- Give the agent an explicit `name` at spawn; resuming is `SendMessage` to that name
 - **Resume if:** Agent has context for its own issues (dirty tree, incomplete work, lint failures)
 - **Skip resume if:** Agent exchanged >15 messages (context likely near-full — 200K token limit approaches)
 - **Fresh launch if:** Resume fails or context too large
@@ -52,9 +52,20 @@ When a delegate is interrupted, stopped, or returns incomplete results — resum
 
 ### Task Agent Tool Usage
 
-Remind task agents to use specialized tools:
-- **Grep** not `grep`/`rg`, **Glob** not `find`, **Read** not `cat`/`head`/`tail`
+Remind task agents to use specialized tools where they exist:
+- **Read** not `cat`/`head`/`tail`
 - **Write** not `echo >`, **Edit** not `sed`/`awk`
+
+**Search is the exception.** On native macOS/Linux builds (CC 2.1.117 onward)
+there are no `Grep` or `Glob` tools — they are replaced by search embedded in
+`Bash`. Windows and npm-installed builds keep them, and `--tools Grep,Glob`
+restores them on native builds (CC 2.1.162), so treat their presence as
+build-dependent rather than assumed either way.
+
+Search therefore goes through `Bash`: `rg` for content, `rg --files` or `ls`
+for discovery. An agent with no `Bash` in its `tools:` list has no search
+capability at all on a native build, and must be dispatched with explicit file
+paths.
 
 ### Recall Artifacts For Sub-Agents
 

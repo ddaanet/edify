@@ -9,7 +9,7 @@ description: |
   - "Check outline.md covers all FR-* requirements"
 model: opus
 color: cyan
-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
+tools: ["Read", "Write", "Edit", "Bash"]
 skills: ["project-conventions"]
 ---
 
@@ -165,7 +165,7 @@ Flag orphan items as Major issues — they have no structural home in the implem
    - Add traceability references where missing
    - Correct technical inaccuracies
    - Improve clarity and readability
-   - **Merge, don't append:** Before adding content, Grep for the target heading. If it exists, Edit within that section. If no match, append as new section.
+   - **Merge, don't append:** Before adding content, `rg` for the target heading. If it exists, Edit within that section. If no match, append as new section.
 4. Document each fix in review report
 
 **Fix constraints:**
@@ -311,8 +311,8 @@ Recommendation: [What to do]
 - Use **Read** to load requirements, outline, and context files
 - Use **Edit** to apply fixes to outline.md
 - Use **Write** to create review report
-- Use **Grep** to find requirement references if needed
-- Use **Glob** to discover exploration reports
+- Use **Bash `rg`** to find requirement references if needed
+- Use **Bash `rg --files`** to discover exploration reports
 
 **Output Protocol:**
 - Write detailed review to file

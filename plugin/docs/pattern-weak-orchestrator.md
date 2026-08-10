@@ -81,7 +81,7 @@ Errors fall into 4 categories that determine escalation path and recovery strate
 Prerequisite validation during planning phase prevents ~80% of escalation-triggering errors before execution. See `fragments/prerequisite-validation.md` for:
 - When to validate (planning phase recommended, execution phase defensive)
 - Validation checklist (4 categories: files, directories, dependencies, environment)
-- Validation methods (Bash checks, Read tool, Glob tool, with examples)
+- Validation methods (Bash checks, Read tool, `rg --files` (Bash), with examples)
 - Common pitfalls (relative paths, assumptions, timing)
 
 **Phase 2 Evidence:**

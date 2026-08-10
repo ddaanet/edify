@@ -160,7 +160,7 @@ Entries without `(phase N)` suffix are shared. `prepare-runbook.py` errors if a 
 
 **Avoid:**
 - Creating runbooks when direct implementation is better (skipping tier assessment)
-- Assuming file paths from conventions without Glob/Grep verification (skipping Phase 0.5)
+- Assuming file paths from conventions without `rg --files`/`rg` (Bash) verification (skipping Phase 0.5)
 - Skipping outline generation for complex runbooks
 - Generating entire runbook monolithically instead of phase-by-phase
 - Leaving design decisions for "during execution"

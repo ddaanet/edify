@@ -31,9 +31,9 @@
 
 ## Runbook File References (when reviewing runbooks/plans)
 - Extract all file paths referenced in steps/cycles
-- Use Glob to verify each path exists in the codebase
+- Use `rg --files` (Bash) to verify each path exists in the codebase
 - Flag missing files as CRITICAL issues (runbooks with wrong paths fail immediately)
-- Check test function names exist in referenced test files (use Grep)
+- Check test function names exist in referenced test files (use `rg` via Bash)
 - Suggest correct paths when similar files are found
 
 ## Self-Referential Modification (when reviewing runbooks/plans)

@@ -3,7 +3,7 @@ name: refactor
 description: Execute refactoring escalated from TDD cycles with sonnet-level evaluation
 model: sonnet
 color: yellow
-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
+tools: ["Read", "Write", "Edit", "Bash"]
 skills: ["project-conventions", "error-handling"]
 ---
 
@@ -144,7 +144,7 @@ just precommit
 Update all references to refactored code:
 
 1. **Plans directory** - All designs and runbooks
-   - Use Grep tool to search for `old_reference` in `plans/` directory
+   - Use `rg` (Bash) to search for `old_reference` in `plans/` directory
    - Update any references found
 
 2. **Agent documentation** - Files in `agents/` directory
@@ -162,7 +162,7 @@ Update all references to refactored code:
    ```
 
 Verification:
-- Use Grep tool to search for `old_reference` across `plans/`, `agents/`, `CLAUDE.md`
+- Use `rg` (Bash) to search for `old_reference` across `plans/`, `agents/`, `CLAUDE.md`
 - Should return no results.
 
 ### Step 6: Amend Commit
@@ -203,8 +203,8 @@ Do not provide summary, explanation, or commentary beyond the status line.
 - **Write:** Create new files (prefer Edit for existing)
 - **Edit:** Modify existing files
 - **Bash:** Execute commands (precommit, git, scripts)
-- **Grep:** Search for references
-- **Glob:** Find files
+- **Bash `rg`:** Search for references
+- **Bash `rg --files`:** Find files
 
 **Critical:**
 - Use absolute paths
