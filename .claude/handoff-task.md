@@ -1,8 +1,7 @@
 ## Current task
 
-The revived pipeline's dispatch surface (`Agent` spawn, name-based `SendMessage` resume, `rg`-via-Bash search) has never been exercised end to end. Separately, the local corpus's memory half is now on gitlore: the `ddaanet` tier is mounted and edify's local memory triaged against it. Folding the corpus into a living design document is still unstarted.
+The `edify:recall` spec is committed at `docs/superpowers/specs/2026-08-11-edify-recall-skill-design.md` and awaits the user's review; the implementation plan comes after that, then the skill and the eight-call-site rewire it specifies. Separately, a gitlore index-composition bug found this session is briefed at `../gitlore/brief-index-compose-drops-unterminated-final-line.md` for an agent working in that repo.
 
 ## Open decisions
 
-- Whether to build `plugin/skills/recall/` at all. The tier-mount precondition is now met — `ddaanet` is mounted and active — so its remaining job would be "select from the in-context index, then Read," which is `gitlore:recall` minus the hook. It earns its place only as the portable path for installs without gitlore; the living-design-doc half of the corpus integration is still open.
-- Where the Claude Code capability facts should live. `cc-subagent-context-capabilities` was judged repo-specific this session and stayed in edify's local memory rather than the tier, so both it and `agents/decisions/operational-tooling.md` are edify-local and still duplicate each other. One should become the owner when the corpus integration lands.
+- Whether `memory/cc-subagent-context-capabilities.md` or `agents/decisions/operational-tooling.md` owns the Claude Code capability facts. The recall spec routes `agents/decisions/` into the living design doc, which forces the question rather than leaving the two duplicating each other.
