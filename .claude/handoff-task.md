@@ -1,6 +1,6 @@
 ## Current task
 
-The `edify:recall` spec is committed at `docs/superpowers/specs/2026-08-11-edify-recall-skill-design.md` and awaits the user's review; the implementation plan comes after that, then the skill and the eight-call-site rewire it specifies. Separately, a gitlore index-composition bug found this session is briefed at `../gitlore/brief-index-compose-drops-unterminated-final-line.md` for an agent working in that repo.
+The `edify:recall` spec is committed at `docs/superpowers/specs/2026-08-11-edify-recall-skill-design.md` and awaits the user's review; the implementation plan comes after that, then the skill and the eight-call-site rewire it specifies. Two gitlore bugs found in earlier sessions are briefed for an agent working in that repo: `../gitlore/brief-index-compose-drops-unterminated-final-line.md` and `../gitlore/brief-orphaned-merge-head-no-state-file.md` (the latter already recovered by hand here; the gitlore-side defect itself is still open).
 
 ## Open decisions
 
