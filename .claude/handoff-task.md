@@ -1,7 +1,8 @@
 ## Current task
 
-The `edify:recall` spec is committed at `docs/superpowers/specs/2026-08-11-edify-recall-skill-design.md` and awaits the user's review; the implementation plan comes after that, then the skill and the eight-call-site rewire it specifies. Two gitlore bugs found in earlier sessions are briefed for an agent working in that repo: `../gitlore/brief-index-compose-drops-unterminated-final-line.md` and `../gitlore/brief-orphaned-merge-head-no-state-file.md` (the latter already recovered by hand here; the gitlore-side defect itself is still open).
+Two threads in flight: the edify-recall-skill plan (plans/edify-recall-skill/inline-plan.md) is finalized and awaits /inline execution; the pilfer-superpowers capture (plans/pilfer-superpowers/requirements.md) is written but not user-validated — /proof it, then /design once its open questions settle. The comparison analysis and repair backlog live in plans/pilfer-superpowers/reports/.
 
 ## Open decisions
 
-- Whether `memory/cc-subagent-context-capabilities.md` or `agents/decisions/operational-tooling.md` owns the Claude Code capability facts. The recall spec routes `agents/decisions/` into the living design doc, which forces the question rather than leaving the two duplicating each other.
+- Adoption sequencing: run the pipeline end-to-end exercise before pilfer-superpowers FR-5/6/7 (they modify never-exercised orchestration paths), or start with the text-only FRs — the e2e run would also produce the violation transcripts Q-4 needs.
+- pilfer-superpowers Q-1: depend on the installed superpowers plugin (invoke its skills by name) vs vendor copies into the edify plugin — blocks FR-13.

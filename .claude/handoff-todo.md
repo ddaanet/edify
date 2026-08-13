@@ -1,7 +1,8 @@
 ## Remaining
 
-- Review the committed `edify:recall` spec, then write its implementation plan.
-- Build `plugin/skills/recall/` and rewire the eight call sites the spec names.
-- Fold the local corpus, `agents/decisions/*.md` included, into a living design document.
-- Exercise the revived pipeline end to end: `Agent` dispatch, name-based `SendMessage` resume, and the plan-specific agents `prepare-runbook.py` generates.
-- Consolidate `memory/MEMORY.md` — it is over its 24.4KB read budget (28.6KB), silently dropping entries past the cutoff; last consolidated 2026-07-16.
+- Execute the finalized edify-recall plan via /inline (plans/edify-recall-skill/inline-plan.md)
+- /proof plans/pilfer-superpowers/requirements.md, then /design once Q-1/Q-3 are settled
+- Clear the repair backlog in plans/pilfer-superpowers/reports/edify-defects.md (cheap; precedes FR-11/FR-12 text work)
+- Fold agents/decisions/*.md into the living design doc
+- Consolidate memory/MEMORY.md under its 24.4KB budget (entries at the tail are silently dropped on load)
+- Exercise the revived pipeline end-to-end (design → runbook → orchestrate)
