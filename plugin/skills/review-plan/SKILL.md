@@ -64,7 +64,7 @@ Before applying review criteria, load project-specific quality patterns:
 
 1. **Infer plan directory** from the reviewed file path — if reviewing `plans/foo/runbook-phase-1.md` or `plans/foo/runbook.md`, the plan directory is `plans/foo/`. If no `plans/` prefix, skip recall.
 2. **Recall context:** Read `plans/<job>/recall-artifact.md`, then Read each file it lists — when the artifact exists, the files it lists carry decision content (failure modes, quality anti-patterns). Caller-provided entries take precedence; skip if already provided in the delegation prompt.
-3. **If the artifact is absent**: do lightweight recall — the `memory/MEMORY.md` index is already in your context (do not Read it); identify review-relevant entries (quality patterns, failure modes, testing conventions) and Read the matching `memory/*.md` and `agents/decisions/*.md` files. Proceed with whatever recall yields.
+3. **If the artifact is absent**: invoke `Skill(skill: "edify:recall", args: "<topic covering quality patterns, failure modes, testing conventions>")`.
 
 Recall supplements, does not replace, the review criteria below.
 

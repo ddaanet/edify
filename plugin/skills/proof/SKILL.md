@@ -5,7 +5,7 @@ description: >-
   validation. Triggers on "proof", "validate artifact", "review loop", or
   when an artifact needs a careful item-by-item read before it ships.
   Replaces ad-hoc single-turn validation with item-by-item review protocol.
-allowed-tools: Read, Write, Edit, Bash, Agent, AskUserQuestion
+allowed-tools: Read, Write, Edit, Bash, Agent, AskUserQuestion, Skill
 user-invocable: true
 ---
 
@@ -97,7 +97,7 @@ Recall: [domain-relevant context if any, or omitted if none]
 Verdict? (a)pprove (r)evise (k)ill (s)kip
 ```
 
-**Per-item recall (FR-3):** Before presenting each item, resolve domain-relevant recall entries for that item's topic. Null recall is silent — no "no relevant context found" noise.
+**Per-item recall (FR-3):** Before presenting each item, invoke `Skill(skill: "edify:recall", args: "<topic>")`. Null recall is silent — no "no relevant context found" noise.
 
 **Verdicts** — 4 explicit, uniform across all artifact types:
 - **approve** (a) — item correct, no changes

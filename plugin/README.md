@@ -39,6 +39,7 @@ conversation. Each lives in `skills/<name>/SKILL.md`.
 | `/deliverable-review` | Post-execution artifact review, severity-classified against ISO 25010 / IEEE 1012 |
 | `/ground` | Ground a methodology in external research before asserting it (diverge–converge) |
 | `/formalize` | Verify a Python function against intent via an icontract contract checked with `edify check` (CrossHair) |
+| `/recall` | Select and Read relevant memory-index entries for the current task or a given topic |
 
 ## Agents
 

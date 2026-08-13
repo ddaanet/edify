@@ -128,7 +128,7 @@ def _parse_artifact_path(entry_line):
 
 
 def resolve_recall_entries(paths, repo_root=None):
-    """Read the memory and decision files named in the recall artifact.
+    """Read the memory files named in the recall artifact.
 
     Returns the concatenated file contents, each under a heading naming its
     source path. Missing files warn and are skipped -- a stale artifact

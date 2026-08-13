@@ -49,16 +49,12 @@ Before doing design work, assess whether design is actually needed.
 
 #### Triage Recall (D+B anchor)
 
-Load triage-relevant decisions before classifying — surface codified decisions that constrain classification before it happens.
-
-The memory index `memory/MEMORY.md` is already in your context; **do not Read it**. Select the entries whose hooks bear on triage and Read those bodies, plus any `agents/decisions/*.md` covering the task's domain.
-
 ```
 Read plans/<job>/recall-artifact.md
 ```
 
 - This Read is the structural anchor — prevents classification from being skipped or rationalized. When `/requirements` ran, the artifact exists and the Read fires whether or not anything relevant turns up; the files it lists carry the planner's curation.
-- **No artifact** (triage entered without `/requirements`): the anchor is the Read of the files you selected from the index. If nothing matches, state that explicitly in the response — the gate was reached and yielded nothing.
+- **No artifact** (triage entered without `/requirements`): the anchor is invoking `Skill(skill: "edify:recall", args: "<topic>")`. If nothing matches, state that explicitly in the response — the gate was reached and yielded nothing.
 
 #### Classification Criteria
 

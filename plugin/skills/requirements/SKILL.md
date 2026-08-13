@@ -1,7 +1,7 @@
 ---
 name: requirements
 description: Capture and document requirements for implementation. Triggers on "capture requirements", "document requirements", "what do I want to build", or feature discussions without clear documentation. Produces requirements.md artifact for design and planning phases.
-allowed-tools: Read, Write, Bash, AskUserQuestion
+allowed-tools: Read, Write, Bash, AskUserQuestion, Skill
 user-invocable: true
 ---
 
@@ -35,9 +35,7 @@ Skill automatically detects appropriate mode based on conversation history.
 
 ### Process
 
-The memory index `memory/MEMORY.md` is **already in your context** — it is injected at session start. **Do not Read it.** Its one-line hooks are a routing table; the bodies are not preloaded, so recall is: pick the entries whose hooks match the topic, then Read those files. Also scan `agents/decisions/*.md` for decisions bearing on the same domain. Derive the topic from the job name, conversation context, and any existing `plans/<job>/` artifacts.
-
-Re-read the index only if it was edited this session or a compaction dropped it.
+Invoke `Skill(skill: "edify:recall", args: "<topic derived from job name and conversation>")`.
 
 **Gate anchor:** The recall artifact **write** is the structural anchor — a tool call that fires whether or not anything relevant turns up. When nothing relevant is found, write the artifact with an explicit null entry (see format below), so downstream consumers hit a file that exists on both paths and need no conditional logic of their own.
 
@@ -61,7 +59,6 @@ Read each file listed below — do not rely on inline summaries.
 ## Entries
 
 memory/<name>.md — <1-line relevance note>
-agents/decisions/<name>.md — <1-line relevance note>
 ```
 
 **Null artifact (nothing relevant):** Write `null — no relevant entries found` as the sole entry. Downstream consumers still Read the artifact and find the null marker, so the gate is anchored without consumer-side empty-section handling. Augmenting consumers (/design A.1, /runbook Phase 0.5) remove the null entry when adding real ones.
@@ -105,10 +102,10 @@ Quick scan to ground requirements (runs after extraction, so scan is targeted):
 
 ### Post-Explore Recall Gate
 
-Discovery via `rg --files`/`rg` (Bash) may surface domains not anticipated during the initial recall pass. Re-scan the in-context index for entries relevant to areas discovered during codebase exploration — a scan of what you already hold, not a Read.
+Discovery via `rg --files`/`rg` (Bash) may surface domains not anticipated during the initial recall pass. Invoke `Skill(skill: "edify:recall")` (no topic).
 
 **Gate anchor (D+B — tool call required):**
-- **New entries found:** Read the matching `memory/*.md` and `agents/decisions/*.md` files, then add their paths to the recall artifact
+- **New entries found:** Read the matching `memory/*.md` files, then add their paths to the recall artifact
 - **No new entries:** state that explicitly in the response — the gate was reached and yielded nothing
 
 ### 3. Structure Requirements

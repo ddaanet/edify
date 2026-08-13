@@ -1,6 +1,6 @@
-## Current task
+/inline just executed the edify-recall-skill plan: new `plugin/skills/recall/SKILL.md` plus rewires across `requirements`, `design`, `orchestrate`, `review-plan`, `proof` skills and the four corrector agents (per `docs/superpowers/specs/2026-08-11-edify-recall-skill-design.md` FR1-FR9). All three group reviews (skill-reviewer, agent-creator, corrector) passed; one gap (`Skill` missing from `allowed-tools` in `requirements`/`proof`) was fixed inline. Ready for `/deliverable-review plans/edify-recall-skill`, then commit.
 
-Two threads in flight: the edify-recall-skill plan (plans/edify-recall-skill/inline-plan.md) is finalized and awaits /inline execution; the pilfer-superpowers capture (plans/pilfer-superpowers/requirements.md) is written but not user-validated — /proof it, then /design once its open questions settle. The comparison analysis and repair backlog live in plans/pilfer-superpowers/reports/.
+Separately, the pilfer-superpowers capture (plans/pilfer-superpowers/requirements.md) is written but not user-validated — /proof it, then /design once its open questions settle. The comparison analysis and repair backlog live in plans/pilfer-superpowers/reports/.
 
 ## Open decisions
 

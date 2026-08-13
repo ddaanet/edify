@@ -191,7 +191,7 @@ Agent tool:
     - OUT: [from Phase Summaries section]
 
     **Design reference:** plans/<name>/design.md
-    **Review recall:** Read `plans/<name>/recall-artifact.md`, then Read each file it lists — when present, the files it lists carry review-relevant entries. If absent: the `memory/MEMORY.md` index is already in your context (do not Read it) — identify review-relevant entries and Read the matching `memory/*.md` and `agents/decisions/*.md` files.
+    **Review recall:** Read `plans/<name>/recall-artifact.md`, then Read each file it lists — when present, the files it lists carry review-relevant entries. If absent: invoke `Skill(skill: "edify:recall", args: "<topic derived from phase scope>")`.
     **Changed files:** [git diff --name-only output]
 
     Fix all issues. Write report to: plans/<name>/reports/checkpoint-P-review.md

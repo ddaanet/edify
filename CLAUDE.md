@@ -176,7 +176,7 @@ Source in `src/edify/`. Four tools:
 In `plugin/skills/`, invoked via slash command.
 
 - **Workflow pipeline:** `requirements` → `design` → `runbook` → `orchestrate` (Tier 3) or `inline` (Tier 1/2), with `review-plan` and `review` as the quality gates.
-- **Standalone:** `proof`, `ground`, `deliverable-review`, `formalize`.
+- **Standalone:** `proof`, `ground`, `deliverable-review`, `formalize`, `recall`.
 
 The pipeline agents live in `plugin/agents/` (correctors, `artisan`, `scout`,
 `test-driver`, `tdd-auditor`, `refactor`, and friends); its backing scripts are

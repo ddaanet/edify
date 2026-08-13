@@ -92,7 +92,7 @@ Use Read tool to load the full design document.
 **Recall context:** Read `plans/<job-name>/recall-artifact.md`, then Read each file it lists
 
 When the artifact exists, the files it lists carry decision content — failure modes and quality anti-patterns that augment reviewer awareness of project-specific patterns.
-If the artifact is absent: do lightweight recall — the `memory/MEMORY.md` index is already in your context, injected the same way it is for the main session, so **do not Read it**. Identify review-relevant entries (quality patterns, failure modes, architectural conventions) from it and Read the matching `memory/*.md` and `agents/decisions/*.md` files — bodies are never preloaded for a subagent, so nothing arrives unless you Read it. Proceed with whatever recall yields.
+If the artifact is absent: invoke `Skill(skill: "edify:recall", args: "<topic covering architectural conventions, quality patterns>")`.
 
 Recall supplements the review criteria below.
 
