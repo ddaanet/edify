@@ -20,15 +20,14 @@ If design document includes "Requirements" section:
 - Carry requirements context into runbook Common Context
 
 1. **Implementation recall (D+B anchor — tool call required):**
-   1. Select implementation-domain entries from the in-context index — patterns for building this, not classifying it. Do not Read `memory/MEMORY.md`; it is already loaded.
-   2. If `plans/<job>/recall-artifact.md` exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
-   3. Read any further `memory/*.md` or `agents/decisions/*.md` files the artifact does not already list.
-   4. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
-   5. Factor known constraints into step design and model selection.
+   1. If `plans/<job>/recall-artifact.md` exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
+   2. Invoke `Skill(skill: "edify:recall", args: "<topic covering implementation patterns for this design>")` for whatever the artifact does not already cover — patterns for building this, not classifying it.
+   3. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
+   4. Factor known constraints into step design and model selection.
 
 2. **Augment recall artifact** (`plans/<job>/recall-artifact.md`):
    - If artifact exists (design stage may have generated it via Pass 1): augment with implementation and testing learnings
-     - Read `agents/decisions/implementation-notes.md` and `agents/decisions/testing.md`
+     - Invoke `Skill(skill: "edify:recall", args: "implementation notes, testing conventions")`
      - Add entries relevant to the planned work -- planning-relevant only: model selection failures, phase typing decisions, checkpoint placement patterns, precommit gotchas
      - Do NOT add execution-level entries (mock patching, test structure details) -- those belong in step files, not recall
    - If artifact absent: generate the initial artifact (select files from the in-context index by problem-domain matching, Read them, then write the artifact listing their paths -- same process as the `/design` skill's Recall Artifact Generation section, but with implementation focus)
@@ -44,10 +43,10 @@ If design document includes "Requirements" section:
    - STOP if expected files not found: report missing files to user
 
 4. **Post-explore recall gate:**
-   Step 3's `rg --files`/`rg` (Bash) verification discovers actual file locations and module structures — may reveal domains not anticipated during step 1 recall. Re-scan the in-context index for entries relevant to discovered areas — a scan of what you already hold, not a Read.
+   Step 3's `rg --files`/`rg` (Bash) verification discovers actual file locations and module structures — may reveal domains not anticipated during step 1 recall. Invoke `Skill(skill: "edify:recall")` (no topic — selection runs against what the exploration just surfaced).
 
    **Gate anchor (D+B — tool call required):**
-   - **New entries found:** Read the matching `memory/*.md` and `agents/decisions/*.md` files, then add their paths to the recall artifact
+   - **New entries found:** add the paths recall selected to the recall artifact — recall has already Read the bodies
    - **No new entries:** state that explicitly — the gate was reached and yielded nothing
 
 ---

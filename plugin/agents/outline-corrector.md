@@ -9,7 +9,7 @@ description: |
   - "Check outline.md covers all FR-* requirements"
 model: opus
 color: cyan
-tools: ["Read", "Write", "Edit", "Bash"]
+tools: ["Read", "Write", "Edit", "Bash", "Skill"]
 skills: ["project-conventions"]
 ---
 
@@ -55,7 +55,7 @@ Recommendation: Use design-corrector for design.md, or corrector for runbooks
 1. Requirements file: `plans/<job>/requirements.md` (or from task prompt)
 2. Outline file: `plans/<job>/outline.md`
 3. Exploration reports (if referenced): `plans/<job>/reports/*.md`
-4. **Recall context:** Read `plans/<job>/recall-artifact.md`, then Read each file it lists — when the artifact exists, the files it lists carry decision content (failure modes, quality anti-patterns). If the artifact is absent: invoke `Skill(skill: "edify:recall", args: "<topic>")`.
+4. **Recall context:** Read `plans/<job>/recall-artifact.md`, then Read each file it lists — when the artifact exists, the files it lists carry decision content (failure modes, quality anti-patterns). If the artifact is absent: invoke `Skill(skill: "edify:recall", args: "<topic covering design conventions, requirements-traceability failure modes>")`.
 
 **Extract requirements:**
 - Identify all FR-* (functional requirements)

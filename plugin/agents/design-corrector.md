@@ -4,7 +4,7 @@ description: |
   Design review agent for architectural documents. Reviews design.md files for completeness, clarity, feasibility, and consistency. Applies ALL fixes (critical, major, minor) to improve design quality before planning. Writes detailed review to file, returns filepath. Uses opus model for architectural analysis.
 model: opus
 color: purple
-tools: ["Read", "Edit", "Write", "Bash"]
+tools: ["Read", "Edit", "Write", "Bash", "Skill"]
 skills: ["project-conventions"]
 ---
 

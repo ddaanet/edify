@@ -32,8 +32,9 @@ auto-memory feature is off, or no store is configured for this session): run
 
 **3. Resolve the corpus.** The corpus is the memory store this session's own
 context says it lives in — named in the auto-memory system-prompt section,
-not a fixed path. In this project that resolves to `memory/`, tier
-subdirectories included. Nothing outside that store.
+not a fixed path. In an edify checkout that resolves to `memory/`; elsewhere it
+resolves wherever that session's store lives. Tier subdirectories included.
+Nothing outside that store.
 
 **4. Select under discipline.** At most 5 entries. Include only entries you
 are certain will help — unsure means exclude. An empty selection is

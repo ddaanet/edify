@@ -36,7 +36,7 @@ If no requirements.md exists:
 
 | Level | Source | How | When |
 |-------|--------|-----|------|
-| 1. Local knowledge | The `memory/MEMORY.md` index is already in context — select from it and Read the memory files whose hooks match the topic. Also covers `agents/decisions/*.md` and `plugin/fragments/*.md` when referenced. | Read | Always (core) |
+| 1. Local knowledge | Invoke `Skill(skill: "edify:recall", args: "<topic>")` — it selects from the in-context index and Reads the bodies. Read `plugin/fragments/*.md` directly when referenced. | Skill invocation | Always (core) |
 | 2. Key skills | `plugin-dev:*` skills | Skill invocation | When design touches plugin components (hooks, agents, skills, MCP) |
 | 3. Context7 | Library documentation via Context7 MCP tools | Designer calls directly from main session (MCP tools unavailable in sub-agents), writes results to report file | When design involves external libraries/frameworks |
 | 4. Local explore | Codebase exploration | Delegate to scout agent | Always for complex designs |
@@ -64,7 +64,6 @@ Read each file listed below — do not rely on inline summaries.
 ## Entries
 
 memory/<name>.md — <1-line relevance note>
-agents/decisions/<name>.md — <1-line relevance note>
 ```
 
 **Null artifact (nothing relevant):** Write `null — no relevant entries found` as the sole entry. Downstream consumers still Read the artifact and find the null marker, so the gate is anchored without consumer-side empty-section handling. Augmenting consumers (/runbook Phase 0.5) remove the null entry when adding real ones.
@@ -81,10 +80,10 @@ For delegated exploration: Use Agent tool with `subagent_type="scout"`. Specify 
 
 #### A.2.5. Post-Explore Recall
 
-Exploration surfaces codebase areas not caught by A.1's topic-based recall. Re-scan the in-context index for entries relevant to domains discovered during exploration — a scan of what you already hold, not a Read.
+Exploration surfaces codebase areas not caught by A.1's topic-based recall. Invoke `Skill(skill: "edify:recall")` (no topic — selection runs against what the exploration just surfaced).
 
 **Gate anchor (D+B — tool call required):**
-- **New entries found:** Read the matching `memory/*.md` and `agents/decisions/*.md` files, then append their paths to the recall artifact via Edit if they have forward value for downstream consumers (runbook planning, execution, review)
+- **New entries found:** append the paths recall selected to the recall artifact via Edit if they have forward value for downstream consumers (runbook planning, execution, review) — recall has already Read the bodies
 - **No new entries:** state that explicitly in the response — the gate was reached and yielded nothing
 
 #### A.3-4. Research

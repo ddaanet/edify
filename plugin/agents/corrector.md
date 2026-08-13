@@ -3,7 +3,7 @@ name: corrector
 description: Review agent that applies all fixes directly. Reviews changes, writes report, applies all fixes (critical, major, minor), then returns report filepath.
 model: sonnet
 color: cyan
-tools: ["Read", "Write", "Edit", "Bash"]
+tools: ["Read", "Write", "Edit", "Bash", "Skill"]
 skills: ["project-conventions", "error-handling"]
 ---
 

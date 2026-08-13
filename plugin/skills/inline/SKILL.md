@@ -67,10 +67,9 @@ Read `plans/<job>/brief.md` if present (cross-tree context from other sessions).
 
 ### 2.3 Recall (D+B anchor — tool call required)
 
-1. Select execution-domain entries from the in-context index — patterns for implementing this, not classifying it. Do not Read `memory/MEMORY.md`; it is already loaded.
-2. If `plans/<job>/recall-artifact.md` exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
-3. Read any further `memory/*.md` or `agents/decisions/*.md` files the artifact does not already list.
-4. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
+1. If `plans/<job>/recall-artifact.md` exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
+2. Invoke `Skill(skill: "edify:recall", args: "<topic covering execution patterns for this task>")` for whatever the artifact does not already cover — patterns for implementing this, not classifying it.
+3. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
 
 ### 2.4 Reference Loading
 

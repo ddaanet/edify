@@ -49,12 +49,14 @@ Before doing design work, assess whether design is actually needed.
 
 #### Triage Recall (D+B anchor)
 
+Surface codified decisions that constrain classification before it happens.
+
 ```
 Read plans/<job>/recall-artifact.md
 ```
 
 - This Read is the structural anchor — prevents classification from being skipped or rationalized. When `/requirements` ran, the artifact exists and the Read fires whether or not anything relevant turns up; the files it lists carry the planner's curation.
-- **No artifact** (triage entered without `/requirements`): the anchor is invoking `Skill(skill: "edify:recall", args: "<topic>")`. If nothing matches, state that explicitly in the response — the gate was reached and yielded nothing.
+- **No artifact** (triage entered without `/requirements`): the anchor is invoking `Skill(skill: "edify:recall", args: "<topic covering decisions that constrain triage of this task's domain>")`. If nothing matches, state that explicitly in the response — the gate was reached and yielded nothing.
 
 #### Classification Criteria
 

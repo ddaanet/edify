@@ -105,7 +105,7 @@ Quick scan to ground requirements (runs after extraction, so scan is targeted):
 Discovery via `rg --files`/`rg` (Bash) may surface domains not anticipated during the initial recall pass. Invoke `Skill(skill: "edify:recall")` (no topic).
 
 **Gate anchor (D+B — tool call required):**
-- **New entries found:** Read the matching `memory/*.md` files, then add their paths to the recall artifact
+- **New entries found:** add the paths recall selected to the recall artifact — recall has already Read the bodies
 - **No new entries:** state that explicitly in the response — the gate was reached and yielded nothing
 
 ### 3. Structure Requirements

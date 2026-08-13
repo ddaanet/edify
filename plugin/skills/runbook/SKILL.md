@@ -117,10 +117,9 @@ When uncertain between tiers, prefer the lower tier (less overhead). Ask user on
 
 **Implementation recall (D+B anchor — tool call required):**
 
-1. Select implementation-domain entries from the in-context index — patterns for building this, not classifying it. Do not Read `memory/MEMORY.md`; it is already loaded. Upstream triage recall (from /design) uses different entries and does not satisfy this gate.
-2. If `plans/<job>/recall-artifact.md` exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
-3. Read any further `memory/*.md` or `agents/decisions/*.md` files the artifact does not already list.
-4. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
+1. If `plans/<job>/recall-artifact.md` exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
+2. Invoke `Skill(skill: "edify:recall", args: "<topic covering implementation patterns for this design>")` for whatever the artifact does not already cover — patterns for building this, not classifying it. Upstream triage recall (from /design) uses different entries and does not satisfy this gate.
+3. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
 
 Include relevant entries in each delegation prompt — format per consumer model tier (constraint format for haiku, rationale for sonnet/opus). Include review-relevant entries in corrector prompt.
 

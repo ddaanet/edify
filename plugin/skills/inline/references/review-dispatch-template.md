@@ -23,10 +23,9 @@ Review implementation changes against design specification.
 **Design reference:** plans/<job>/outline.md (or design.md if present)
 
 **Recall context:**
-1. Select review-relevant entries from the in-context index. Do not Read `memory/MEMORY.md`; it is already loaded.
-2. If plans/<job>/recall-artifact.md exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
-3. Read any further `memory/*.md` or `agents/decisions/*.md` files the artifact does not already list.
-4. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
+1. If plans/<job>/recall-artifact.md exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
+2. Invoke `Skill(skill: "edify:recall", args: "<topic covering quality patterns, failure modes for this scope>")` for whatever the artifact does not already cover.
+3. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
 
 **Review criteria:**
 - Implementation matches design decisions

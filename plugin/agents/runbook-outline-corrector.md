@@ -9,7 +9,7 @@ description: |
   - "Check phase structure and complexity distribution"
 model: opus
 color: cyan
-tools: ["Read", "Write", "Edit", "Bash"]
+tools: ["Read", "Write", "Edit", "Bash", "Skill"]
 skills: ["project-conventions"]
 ---
 
@@ -68,7 +68,7 @@ Recommendation: Use outline-corrector for design outlines, or corrector for full
 1. Design file: `plans/<job>/design.md` (extract Requirements section and key decisions)
 2. Outline file: `plans/<job>/runbook-outline.md`
 3. Exploration reports (if referenced): `plans/<job>/reports/*.md`
-4. **Recall context:** Read `plans/<job>/recall-artifact.md`, then Read each file it lists — when the artifact exists, the files it lists carry decision content (failure modes, quality anti-patterns). If the artifact is absent: invoke `Skill(skill: "edify:recall", args: "<topic>")`.
+4. **Recall context:** Read `plans/<job>/recall-artifact.md`, then Read each file it lists — when the artifact exists, the files it lists carry decision content (failure modes, quality anti-patterns). If the artifact is absent: invoke `Skill(skill: "edify:recall", args: "<topic covering phase-structure conventions, planning failure modes>")`.
 
 **Extract requirements:**
 - Identify all FR-* (functional requirements)
