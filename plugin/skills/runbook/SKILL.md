@@ -128,7 +128,7 @@ Include relevant entries in each delegation prompt — format per consumer model
 **Generate runbook outline:**
 
 1. Write `plans/<job>/runbook-outline.md` using Tier 2 outline format (below)
-2. **Review:** Delegate to `runbook-outline-corrector` (fix-all mode). Specify Tier 2 format in prompt — no requirements mapping table required.
+2. **Review:** Delegate to `edify:runbook-outline-corrector` (fix-all mode). Specify Tier 2 format in prompt — no requirements mapping table required.
 3. **Proof:** Invoke `/proof plans/<job>/runbook-outline.md`
 4. **After /proof approval:** follow §Continuation (prepends `/inline plans/<job> execute`)
 
@@ -195,5 +195,5 @@ As the **final action** of this skill:
 
 **CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
 
-**On failure:** Abort remaining continuation. Record in session.md Blockers: which phase failed, error category, remaining continuation orphaned.
+**On failure:** Abort remaining continuation. Record in `.claude/handoff-task.md` Blockers: which phase failed, error category, remaining continuation orphaned.
 

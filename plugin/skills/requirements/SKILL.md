@@ -261,6 +261,34 @@ Next steps (decision criteria):
 /requirements <job> (standalone — capture intent, no immediate follow-up)
 ```
 
+## STOP Conditions
+
+The artifact is a planning input — `/design` and `/runbook` argue from it, and
+`/proof` validates its content, not its preconditions. These conditions abort
+before an artifact is written; a wrong or empty requirements.md is worse than
+none, because downstream phases treat it as settled.
+
+**STOP and report to the user when:**
+- **No job name given.** `plans/<job>/` cannot be derived. Ask for one.
+- **Extract mode with no substantive conversation to extract from.** Mode
+  detection misfired. Switch to elicit mode rather than inventing requirements
+  from an empty transcript.
+- **An existing `plans/<job>/requirements.md` is being overwritten with a
+  narrower scope than it already records.** Confirm with the user first —
+  requirements loss is silent downstream.
+- **Gap detection cannot reduce open questions below the count that blocks
+  every exit path** (3+ open questions AND empty critical sections). Write what
+  exists, mark the artifact incomplete in its header, and route to Standalone
+  rather than to `/design`.
+
+**Failure handling:** these are user-decision points, not retries. Report the
+condition, state what is missing, and wait. Do not fill a gap by inference —
+that is the hallucination risk the Key Principles below name.
+
+**Review:** `/requirements` has no corrector; `/proof` is the sole gate on
+content. That places the burden of a careful read on the user, so do not present
+an artifact as validated when it has only been written.
+
 ## Key Principles
 
 - Extract from conversation, do not infer (hallucination risk)

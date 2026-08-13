@@ -21,9 +21,19 @@ if [[ -d "$reports_dir" ]]; then
     reports_count=$(find "$reports_dir" -maxdepth 1 -type f ! -name "design-review*" ! -name "outline-review*" ! -name "recall-*" | wc -l | tr -d ' ')
 fi
 
-# Detect behavioral code: check for new function/class definitions in git diff
+# Detect behavioral code: new definitions in the diff. Anchored after the `+`
+# so a commented-out line does not match. Covers the keyword-declaration
+# languages plus POSIX shell function syntax; a language that declares
+# behaviour without one of these keywords (C, C++, Java method bodies) reads as
+# "no", which under-reports rather than over-reports.
+# Not `grep -q`: `set -o pipefail` is on, and an early-exiting consumer would
+# kill `git diff` with SIGPIPE and fail the pipeline.
+definition_re='^\+[[:space:]]*((export|public|private|protected|static|async|pub|final)[[:space:]]+)*'
+definition_re+='(def|class|function|func|fn|impl|interface|struct|trait|enum|module)[[:space:]]'
+shell_fn_re='^\+[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\(\)[[:space:]]*\{'
+
 behavioral_code="no"
-if git diff "$baseline_commit" | grep -E "^\+[^#]*(def |class |function )" > /dev/null; then
+if git diff "$baseline_commit" | grep -E "$definition_re|$shell_fn_re" > /dev/null; then
     behavioral_code="yes"
 fi
 
@@ -52,12 +62,24 @@ if [[ -f "$classification_file" ]]; then
     fi
 fi
 
-# Check review artifact existence (defense-in-depth for corrector gate)
+# Check review artifact existence (defense-in-depth for corrector gate).
+# A multi-group review dispatch writes review-<type>.md per group and no
+# plain review.md, so matching only review.md/review-skip.md reported "gate
+# bypassed" on a run that reviewed everything.
 review_artifact="none"
-if [[ -f "$reports_dir/review.md" ]]; then
-    review_artifact="review"
-elif [[ -f "$reports_dir/review-skip.md" ]]; then
-    review_artifact="skip"
+if [[ -d "$reports_dir" ]]; then
+    if [[ -f "$reports_dir/review.md" ]]; then
+        review_artifact="review"
+    elif compgen -G "$reports_dir/review-*.md" > /dev/null; then
+        # review-skip.md is the audited skip; any other review-<group>.md is a
+        # per-group corrector report.
+        if [[ -f "$reports_dir/review-skip.md" ]] &&
+            [[ $(find "$reports_dir" -maxdepth 1 -name 'review-*.md' | wc -l) -eq 1 ]]; then
+            review_artifact="skip"
+        else
+            review_artifact="review"
+        fi
+    fi
 fi
 
 # Output structure

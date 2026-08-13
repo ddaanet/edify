@@ -48,7 +48,7 @@ The workflow automatically detects TDD methodology based on:
 The TDD workflow follows this progression:
 
 ```
-/design (TDD mode) → /runbook → /orchestrate → [corrector] → /review-analysis
+/design (TDD mode) → /runbook → /orchestrate → [corrector] → edify:tdd-auditor
 ```
 
 ### Stage 1: Design Session (TDD Mode)
@@ -191,7 +191,7 @@ This generates:
 
 ### Stage 5: TDD Process Review
 
-**Skill:** `/review-analysis`
+**Agent:** `edify:tdd-auditor`
 **Model:** Sonnet
 
 **Purpose:** Assess TDD compliance and process quality.
@@ -487,7 +487,7 @@ Agent stops and reports when encountering:
 | **Execution focus** | Sequential steps | Test-first development |
 | **Refactoring** | Optional | Mandatory per cycle |
 | **Commit strategy** | Per step or milestone | WIP + amend per cycle |
-| **Post-execution** | corrector | corrector + `/review-analysis` |
+| **Post-execution** | corrector | corrector + `edify:tdd-auditor` |
 
 ### When to Use Each Workflow
 
@@ -547,13 +547,13 @@ This structured format enables:
 
 - **CLAUDE.md**: Agent instructions, communication rules, patterns
 - **docs/general-workflow.md**: General workflow documentation
-- **`.claude/handoff-task.md`**: Current task context and architecture
+- **`.claude/handoff-task.md`**: Current task frame — in-progress task and open decisions
 - **agents/decisions/**: Architectural decisions and rationale
-- **`.claude/handoff-task.md`**: Current session handoff context
-- **agents/test-driver.md**: TDD task agent baseline template
+- **plugin/agents/test-driver.md**: TDD executor agent
 
 ---
 
 ## Change Log
 
 **2026-01-19**: Initial TDD workflow documentation
+**2026-08-13**: Post-execution review routed to `edify:tdd-auditor` (the `/review-analysis` skill it named never existed)

@@ -34,7 +34,7 @@ It is not a default mode for interactive work.
 
 ### Primitive Visibility and Context Curation
 
-**Do NOT load primitives alongside their wrapping skills.** When a skill wraps a primitive (e.g., `_worktree rm` wrapped by worktree skill), exposing both in agent context causes the agent to select the primitive — it reads the skill internals, understands what the skill does, then uses the "simpler" primitive that lacks side effects (session.md updates, validation).
+**Do NOT load primitives alongside their wrapping skills.** When a skill wraps a primitive (e.g., `_worktree rm` wrapped by worktree skill), exposing both in agent context causes the agent to select the primitive — it reads the skill internals, understands what the skill does, then uses the "simpler" primitive that lacks side effects (task-frame updates, validation).
 
 **Correct pattern:** Curate in-context recipe list to essential high-level commands only. Primitives exist as fallback but must not be in the agent's active context.
 

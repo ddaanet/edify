@@ -1,6 +1,6 @@
 ## Review Requirement
 
-**Rule:** After creating any production artifact, delegate to `corrector` for review and fix — unless the change qualifies as trivial (see Proportionality below).
+**Rule:** After creating any production artifact, delegate to `edify:corrector` for review and fix — unless the change qualifies as trivial (see Proportionality below).
 
 ### Proportionality
 
@@ -36,10 +36,14 @@ Not all changes warrant full review delegation. Match review cost to change risk
 
 | Artifact | Reviewer | Why |
 |----------|----------|-----|
-| Code, tests, plans | `corrector` | Default — general quality review |
-| Skill definitions | `skill-reviewer` | Cross-skill consistency (allowed-tools, conventions) |
-| Agent definitions | `agent-creator` | Agent structure, triggering, tool access |
-| Design documents | `design-corrector` (opus) | Architectural completeness and feasibility |
+| Code, tests, plans | `edify:corrector` | Default — general quality review |
+| Skill definitions | `plugin-dev:skill-reviewer` | Cross-skill consistency (allowed-tools, conventions) |
+| Agent definitions | `plugin-dev:agent-creator` | Agent structure, triggering, tool access |
+| Design documents | `edify:design-corrector` (opus) | Architectural completeness and feasibility |
+
+**Dispatch names are namespaced.** `subagent_type` requires `<plugin>:<agent>`; a bare name returns "Agent type not found", including for the dispatching plugin's own agents.
+
+**When plugin-dev is not installed:** the skill- and agent-definition rows fall back to `edify:corrector`. `plugin-dev` is a separate marketplace plugin, not an edify dependency — check availability before routing, and note the fallback in the review report so the weaker routing is visible.
 
 Orchestration-specific extensions (planning artifacts, human docs): `agents/decisions/pipeline-contracts.md` "When routing artifact review."
 
@@ -166,7 +170,7 @@ Return filepath or error.
 **Example:**
 ```
 1. Create: plugin/agents/hooks-tester.md
-2. Correction: Task(subagent_type="corrector") with execution context
+2. Correction: Agent(subagent_type="edify:corrector") with execution context
 3. Read report → grep UNFIXABLE → none found (DEFERRED items present but non-blocking)
 4. Result: All fixable issues resolved, proceed
 ```

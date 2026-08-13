@@ -1,7 +1,7 @@
 ---
 name: runbook-outline-corrector
 description: |
-  Reviews runbook outlines after Point 0.75 (plan-adhoc) or Phase 1.5 (plan-tdd), before full runbook generation. Validates requirements coverage, phase structure, complexity distribution.
+  Reviews runbook outlines after `/runbook` Phase 0.75, before full runbook generation. Validates requirements coverage, phase structure, complexity distribution.
 
   Triggering examples:
   - "Review runbook-outline.md before expanding to full runbook"
@@ -10,7 +10,6 @@ description: |
 model: opus
 color: cyan
 tools: ["Read", "Write", "Edit", "Bash", "Skill"]
-skills: ["project-conventions"]
 ---
 
 # Runbook Outline Review Agent
@@ -58,8 +57,8 @@ Recommendation: Ensure design.md exists before creating runbook outline
 ```
 Error: Wrong artifact type
 Details: Expected runbook-outline.md, found <filename>
-Context: This agent reviews runbook outlines after plan-adhoc Point 0.75 or plan-tdd Phase 1.5
-Recommendation: Use outline-corrector for design outlines, or corrector for full runbooks
+Context: This agent reviews runbook outlines after `/runbook` Phase 0.75
+Recommendation: Use `edify:outline-corrector` for design outlines, or `edify:runbook-corrector` for full runbooks
 ```
 
 ### 2. Load Context
@@ -104,7 +103,7 @@ Analyze outline against these dimensions:
 - Phase progression is logical (foundation → features → polish)
 
 **Complexity Distribution:**
-- No phase is disproportionately large (>40% of total steps)
+- No phase is disproportionately large (>40% of total steps) *(ungrounded — needs calibration)*
 - High-complexity phases are broken down appropriately
 - Complexity assessment is realistic (Low/Medium/High)
 - Load is distributed to enable parallel work when possible
@@ -141,9 +140,9 @@ Analyze outline against these dimensions:
 - **Anchor:** `Bash: wc -l <target-files>` — measure current line counts for all files referenced in outline before projection
 - For each target file, use measured `current_lines` and estimate net new lines added per item from outline descriptions
 - Formula: `current_lines + (items × avg_lines_per_item)` — use outline step descriptions to estimate avg_lines_per_item
-- Flag when projected cumulative size exceeds 350 lines (400-line enforcement threshold minus buffer)
+- Flag when projected cumulative size exceeds 350 lines *(ungrounded — the 400-line figure it derives from is a convention, not an enforced limit: no script or hook checks it)*
 - Flag outlines with >10 items modifying same file but no growth projection in outline
-- Split phases must precede first phase exceeding 350 cumulative lines
+- Split phases must precede first phase exceeding 350 cumulative lines *(same ungrounded threshold)*
 - Fix: Add split recommendation to Expansion Guidance section with split point and projected sizes
 
 **Semantic Propagation:**
@@ -170,7 +169,7 @@ Analyze outline against these dimensions:
 - Step scope is bounded (not too large)
 - Success criteria are implicit or explicit
 
-**Execution Readiness** (terminology: "steps" below applies to both steps in plan-adhoc and cycles in plan-tdd — use the artifact's native terminology):
+**Execution Readiness** (terminology: "steps" below applies to both general steps and TDD cycles — use the artifact's native terminology):
 - **Decision completeness** — Flag "choose" / "decide" / "determine" / "select approach" / "evaluate which" language. Mark UNFIXABLE — design decisions must be resolved by planner, not reviewer.
 - **Step dependency declarations** — For steps that reference output of prior steps (new files, renamed modules, consolidated fixtures), verify explicit dependency is declared. Fix: add `Depends on: Step N.K` declaration.
 - **Code fix specificity** — Steps targeting code must enumerate affected call sites. Flag steps that say "fix function X" without listing where X is called and what changes per call site. Mark UNFIXABLE — requires codebase analysis the outline reviewer lacks.
@@ -483,7 +482,7 @@ Recommendation: [What to do]
 - Check task prompt for inline requirements
 - If truly missing, return error (cannot review without requirements)
 
-**Phase imbalance (one phase >40% of work):**
+**Phase imbalance (one phase >40% of work — ungrounded threshold):**
 - Flag in Major Issues
 - Suggest split points
 - Provide guidance on logical subdivisions

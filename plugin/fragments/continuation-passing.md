@@ -88,7 +88,7 @@ Six cooperative skills chain via tail-calls with zero implicit error handling. A
 
 When a skill fails during a CPS chain (D-1):
 1. **Abort remaining continuation** — do not invoke the next skill in the chain
-2. **Record in session.md Blockers section** — include: which skill failed, error category (from `error-classification.md`), retryable/non-retryable classification, and the remaining continuation that was orphaned
+2. **Record in the `.claude/handoff-task.md` Blockers section** — include: which skill failed, error category (from `error-classification.md`), retryable/non-retryable classification, and the remaining continuation that was orphaned
 3. **Update task state** — mark the task as `[!]` blocked (see `task-failure-lifecycle.md`)
 4. **Manual resume via `r`** — user reviews blocker, resolves, and resumes from recorded context
 
@@ -114,7 +114,7 @@ After a pivot transaction, the chain records the point-of-no-return. Recovery pr
 
 ### Orphaned Continuation Recovery
 
-When a chain aborts, the remaining continuation is recorded in session.md:
+When a chain aborts, the remaining continuation is recorded in `.claude/handoff-task.md`:
 
 ```markdown
 ## Blockers / Gotchas
@@ -134,7 +134,7 @@ Each cooperative skill should handle errors by:
 - Catching failures from its own operations (Agent tool errors, Read/Write failures)
 - Classifying per `error-classification.md` taxonomy (5 categories, retryable/non-retryable)
 - If the error is within the skill's scope to fix: fix and continue
-- If not: abort, record in session.md Blockers, do NOT invoke continuation tail-call
+- If not: abort, record in `.claude/handoff-task.md` Blockers, do NOT invoke continuation tail-call
 
 **Anti-pattern:** Skill catches error, records it, then proceeds to invoke next skill in chain. The chain must stop at the failure point.
 
@@ -144,4 +144,4 @@ Each cooperative skill should handle errors by:
 2. Add `Skill` to `allowed-tools` if not present (needed for tail-call)
 3. Replace hardcoded tail-call with consumption protocol section
 4. Ensure Agent tool prompts exclude continuation metadata
-5. Add error handling: on failure, abort continuation and record in session.md Blockers
+5. Add error handling: on failure, abort continuation and record in `.claude/handoff-task.md` Blockers

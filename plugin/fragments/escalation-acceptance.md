@@ -27,7 +27,7 @@ When escalation fails partway through a step — the fix attempt itself causes n
 
 - Revert to the last clean commit before the failed step: `git revert HEAD` (if fix was committed) or `git checkout -- .` (if uncommitted)
 - This is a simplification of the Saga compensating transaction pattern, enabled by git's atomic snapshot model: reverting a commit restores state (no concurrent modifications within single orchestration)
-- **Assumption:** All relevant state is git-managed. If non-git state is involved (external service calls, session.md edits outside repo), the simple revert model breaks — escalate to user.
+- **Assumption:** All relevant state is git-managed. If non-git state is involved (external service calls, task-frame edits outside repo), the simple revert model breaks — escalate to user.
 - After rollback, re-execute the step from clean state or escalate to user
 
 **Dirty tree recovery:**

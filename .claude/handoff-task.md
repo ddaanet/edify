@@ -1,10 +1,8 @@
 ## Current task
 
-The `edify:recall` rewire is reviewed and closed out — findings and the fixes applied for each are recorded in `plans/edify-recall-skill/reports/deliverable-review.md`. Recall ended up with 15 call sites, not the 9 the design enumerated; the six extra came from grepping the pattern rather than trusting the spec's list.
-
-The open thread is `plans/pilfer-superpowers/`: its requirements capture is written but never user-validated, waiting on `/proof` and then `/design` once the decisions below settle. Comparison analysis and repair backlog are under that plan's `reports/`.
+The plan-agent scheme is retired by decision but not yet by code: `prepare-runbook.py` still generates six bespoke agent definitions into `.claude/agents/`, and `/orchestrate` still dispatches them and cleans them up by name. Next is the rewire to delegation by reference — a standing agent dispatched with a step-file path, the step file carrying a Context block naming design, outline and recall artifacts. The decision and its rationale are in `agents/decisions/orchestration-execution.md` under "When Selecting Agent Type For Orchestrated Steps"; the exact rewire scope — which `prepare-runbook.py` functions and manifest headers to drop, which `/orchestrate` sections to change — is at the end of `plans/pilfer-superpowers/reports/edify-defects.md`, which also records that backlog defects 10 and 11 are subsumed by this work.
 
 ## Open decisions
 
-- Adoption sequencing for pilfer-superpowers: exercise the revived pipeline end-to-end before FR-5/6/7 (they modify orchestration paths that have never been run, and an e2e run would also produce the violation transcripts Q-4 needs), or start with the text-only FRs.
-- pilfer-superpowers Q-1, which blocks FR-13: depend on the installed superpowers plugin and invoke its skills by name, or vendor copies into the edify plugin.
+- pilfer-superpowers Q-1, which blocks FR-13: depend on the installed superpowers plugin and invoke its skills by name, or vendor copies into the edify plugin. The corrector routing fallback added for defect 2 works either way and does not prejudge this.
+- Adoption sequencing for pilfer-superpowers: exercise the revived pipeline end-to-end before FR-5/6/7, since they modify orchestration paths that have never been run and an e2e run would also produce the violation transcripts Q-4 needs — or start with the text-only FRs instead.

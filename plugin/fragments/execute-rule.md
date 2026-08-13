@@ -16,7 +16,7 @@ Display pending tasks with metadata, then wait for instruction.
 
 **Planstate-derived commands:**
 - For tasks with an associated plan directory, derive the command from planstate (shown in CLI output as `→ <command>`)
-- Use the CLI-derived command instead of the static session.md command
+- Use the CLI-derived command instead of the static `.claude/handoff-task.md` command
 - Session.md command is fallback only for tasks without plans
 
 **Session continuation:**
@@ -29,7 +29,7 @@ Display pending tasks with metadata, then wait for instruction.
 When all in-tree tasks are blocked and the first actionable work is a worktree task, "Next" should point to worktree setup (`wt <task-name>` or `wt` for parallel group), not the worktree task's execution command. The execution command belongs inside the worktree session.
 
 **Graceful degradation:**
-- Missing session.md or no In-tree Tasks → "No in-tree tasks." In a worktree (`git rev-parse --git-dir` ≠ `.git`), append: "Branch complete."
+- Missing `.claude/handoff-task.md` or no In-tree Tasks → "No in-tree tasks." In a worktree (`git rev-parse --git-dir` ≠ `.git`), append: "Branch complete."
 - Old format (no metadata) → use defaults (sonnet, no restart)
 - Old section name ("Pending Tasks") → treat as "In-tree Tasks"
 - No unscheduled plans → omit Unscheduled Plans section entirely
@@ -49,7 +49,7 @@ Smart execute: resume in-progress task if exists, otherwise start first in-tree 
 
 **Behavior:**
 Execute task to completion, then chain:
-1. `/handoff:handoff` updates session.md
+1. `/handoff:handoff` updates `.claude/handoff-task.md`
 2. Tail-calls `/commit-commands:commit` which commits changes
 3. `/commit-commands:commit` outputs `Status.`
 
@@ -72,9 +72,9 @@ Set up worktrees for parallel or single-task execution. See `plugin/skills/workt
 
 ### Task Pickup: Context Recovery
 
-**Rule:** Before starting a pending task, run `plugin/bin/task-context.sh '<task-name>'` to recover the session.md where it was introduced.
+**Rule:** Before starting a pending task, run `plugin/bin/task-context.sh '<task-name>'` to recover the `.claude/handoff-task.md` where it was introduced.
 
-The task name serves as the lookup key. The script uses `git log -S` to find the commit where the task was first introduced and outputs the full session.md from that commit.
+The task name serves as the lookup key. The script uses `git log -S` to find the commit where the task was first introduced and outputs the full `.claude/handoff-task.md` from that commit.
 
 **Brief check:** If the task has an associated plan directory, check for `plans/<plan>/brief.md`. If it exists, read it — contains cross-tree context (scope changes, decisions) from other sessions. In worktrees where the plan directory only exists on main: `git show main:plans/<plan>/brief.md 2>/dev/null`.
 
@@ -106,7 +106,7 @@ Shortcuts are mechanical expansions — invoke the expansion directly. Do not pr
 | `x` | #execute | Smart: resume OR start pending |
 | `xc` | #execute --commit | Execute → handoff → commit → status |
 | `r` | #resume | Strict: resume only (error if none) |
-| `h` | /handoff:handoff | Update session.md → status |
+| `h` | /handoff:handoff | Update `.claude/handoff-task.md` → status |
 | `hc` | /handoff:handoff, /commit-commands:commit | Handoff → commit → status |
 | `ci` | /commit-commands:commit | Commit → status |
 | `wt` | #worktree | Set up worktrees for parallel tasks |
@@ -126,7 +126,7 @@ Shortcuts are mechanical expansions — invoke the expansion directly. Do not pr
 
 ## Task Status Notation
 
-**In session.md:**
+**In `.claude/handoff-task.md`:**
 - `- [ ]` = Pending task
 - `- [x]` = Completed task
 - `- [>]` = In-progress task (optional, or use bold/italics)
@@ -147,7 +147,7 @@ Shortcuts are mechanical expansions — invoke the expansion directly. Do not pr
 ```
 
 **Field rules:**
-- Task Name: Prose key serving as identifier (must be unique across session.md and disjoint from learning keys)
+- Task Name: Prose key serving as identifier (must be unique across `.claude/handoff-task.md` and disjoint from learning keys)
 - Command: Backtick-wrapped command to start the task
 - Model: `haiku`, `sonnet`, or `opus` (default: sonnet if omitted)
 - Restart: Optional flag — only include if restart needed (omit = no restart)
@@ -160,7 +160,7 @@ Task commands must include a plan path argument (e.g., `/design plans/foo/requir
 
 Applies to: `p:` directive (must create plan artifact before or during handoff), `/handoff:handoff` (must not write tasks without plan backing).
 
-**Discussion conclusions must survive session boundaries.** When `d:` mode decisions or agreed refinements produce pending work, capture conclusions as task notes in session.md. The handoff is the recovery mechanism — if it's not in session.md, it doesn't survive. `task-context.sh` recovers the introducing commit, but only if the handoff captured the context.
+**Discussion conclusions must survive session boundaries.** When `d:` mode decisions or agreed refinements produce pending work, capture conclusions as task notes in `.claude/handoff-task.md`. The handoff is the recovery mechanism — if it's not in `.claude/handoff-task.md`, it doesn't survive. `task-context.sh` recovers the introducing commit, but only if the handoff captured the context.
 
 **Worktree Tasks section:**
 
@@ -176,12 +176,12 @@ Tasks pre-classified as needing worktree isolation. Classification is static —
 **Rules:**
 - Tasks placed in Worktree Tasks at creation based on classification heuristic (D-9)
 - `→ <slug>` added by `_worktree new [TASK_NAME]` when worktree created, removed by `_worktree rm`
-- `#status` annotates with `→ slug` from `_worktree ls` (filesystem state, not session.md)
+- `#status` annotates with `→ slug` from `_worktree ls` (filesystem state, not `.claude/handoff-task.md`)
 - `x` does not pick up worktree tasks — use `wt` to dispatch
 - Handoff preserves Worktree Tasks section as-is (not trimmed)
 - Main is worktree-tasks-only — only trivial fixes belong in In-tree. Plan absence does not qualify for in-tree
 
-**Worktree-tasks-only scope:** This rule governs task classification (pending tasks in session.md), not interactive skill execution. Maintenance skills (`/claude-md-management:revise-claude-md`, `/commit-commands:commit`, `/handoff:handoff`) run on main regardless.
+**Worktree-tasks-only scope:** This rule governs task classification (pending tasks in `.claude/handoff-task.md`), not interactive skill execution. Maintenance skills (`/claude-md-management:revise-claude-md`, `/commit-commands:commit`, `/handoff:handoff`) run on main regardless.
 
 **Restart triggers:** Session restart is required for structural changes that load at startup:
 - Sub-agent definitions (`.claude/agents/`)

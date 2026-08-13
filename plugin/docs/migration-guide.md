@@ -19,18 +19,18 @@ Guide for projects adding plugin as a submodule or updating to the latest struct
    cd ..
    ```
 
-3. **Copy CLAUDE.md template**
-   ```bash
-   cp plugin/templates/CLAUDE.template.md CLAUDE.md
-   ```
-   Customize the template (see [templates/README.md](../templates/README.md) for guidance).
+3. **Write CLAUDE.md**
+   The plugin ships no CLAUDE.md template. Start from the host project's own
+   conventions and add the sections the pipeline depends on: recipe names
+   (`just precommit` / `test` / `dev`), the memory location, and the
+   error-handling and source-not-generated rules the correctors enforce.
 
 4. **Configure settings.json**
    Add hooks and sandbox configuration from Phase 2 below (steps 2.1-2.4).
 
-5. **Create session.md**
+5. **Create the task frame**
    ```bash
-   touch session.md
+   mkdir -p .claude && touch .claude/handoff-task.md
    ```
    Add initial session header:
    ```markdown
@@ -184,17 +184,18 @@ See [fragments/claude-config-layout.md](../fragments/claude-config-layout.md) fo
 
 ### Phase 3: Directory Structure
 
-**Note:** Steps in this phase are conditional based on your tier (see Tiered Adoption section). Tier 1 projects can skip this entire phase and use root-level session.md.
+**Note:** Steps in this phase are conditional based on your tier (see Tiered Adoption section). Tier 1 projects can skip this entire phase — `.claude/handoff-task.md` is all they need.
 
 - [ ] **3.1** Create `agents/` directory (skip for Tier 1)
   ```bash
   mkdir -p agents/decisions
   ```
 
-- [ ] **3.2** Move session.md to `.claude/handoff-task.md` (skip for Tier 1 or if already at `.claude/handoff-task.md`)
+- [ ] **3.2** Legacy layouts only: move a root-level `session.md` (pre-2026-02 task frame) to `.claude/handoff-task.md`
   ```bash
-  git mv session.md `.claude/handoff-task.md`
+  git mv session.md .claude/handoff-task.md
   ```
+  Skip if the project never had a root-level `session.md`.
 
 - [ ] **3.3** Create `agents/learnings.md` with standard header (Tier 2+)
   ```markdown
@@ -206,10 +207,10 @@ See [fragments/claude-config-layout.md](../fragments/claude-config-layout.md) fo
 
   ---
   ```
-  Skip for Tier 1 (keep learnings inline in session.md).
+  Skip for Tier 1 (keep learnings inline in `.claude/handoff-task.md`).
 
-- [ ] **3.4** Extract existing learnings from session.md (Tier 2+)
-  If session.md has a `## Recent Learnings` section, move its content to `agents/learnings.md` (after the header). Remove the section from session.md.
+- [ ] **3.4** Extract existing learnings from the task frame (Tier 2+)
+  If `.claude/handoff-task.md` has a `## Recent Learnings` section, move its content to `agents/learnings.md` (after the header). Remove the section from the task frame.
   Skip for Tier 1.
 
 - [ ] **3.5** Create `agents/jobs.md` (Tier 3 recommended, optional for Tier 2)
@@ -237,9 +238,9 @@ See [fragments/claude-config-layout.md](../fragments/claude-config-layout.md) fo
 
 ### Phase 4: CLAUDE.md Update
 
-- [ ] **4.1** Update session.md `@` reference path (if moved in Phase 3.2)
+- [ ] **4.1** Update the task-frame `@` reference path (if moved in Phase 3.2)
   Change `@.claude/handoff-task.md` to `@`.claude/handoff-task.md` in the Current Work section.
-  Skip if keeping root-level session.md (Tier 1).
+  Skip if the path did not change (Tier 1).
 
 - [ ] **4.2** Add learnings.md `@` reference (Tier 2+)
   ```markdown
@@ -261,7 +262,7 @@ See [fragments/claude-config-layout.md](../fragments/claude-config-layout.md) fo
   Remove or update any rules that reference the old structure:
   - "When to create agents/ directory" guidance (no longer relevant once agents/ exists)
   - Old learnings inline guidance (if migrated to separate file)
-  - Root-level session.md references (if moved to agents/)
+  - Stale root-level `session.md` references
 
 - [ ] **4.5** (Optional) Add memory index (Tier 3)
   For larger projects with many learnings/decisions, add a memory index file that maps topics to relevant files:
@@ -272,7 +273,7 @@ See [fragments/claude-config-layout.md](../fragments/claude-config-layout.md) fo
 - [ ] **5.1** Restart Claude Code session (hooks require restart)
 - [ ] **5.2** Test hooks work: run a bash command, verify submodule-safety doesn't block at project root
 - [ ] **5.3** Test shortcut expansion: type `s` and verify STATUS format appears
-- [ ] **5.4** Test `/handoff:handoff` writes learnings to `agents/learnings.md` (not session.md) — skip for Tier 1
+- [ ] **5.4** Test `/handoff:handoff` writes learnings to `agents/learnings.md` (not the task frame) — skip for Tier 1
 - [ ] **5.5** Verify `@` references resolve in CLAUDE.md
 
 ---
@@ -308,8 +309,8 @@ Which tier do I need?
 - CLAUDE.md from template (`plugin/templates/CLAUDE.template.md`)
 
 **Structure:**
-- Root-level `session.md` (no agents/ directory)
-- Learnings kept inline in session.md `## Recent Learnings` section
+- `.claude/handoff-task.md` only (no agents/ directory)
+- Learnings kept inline in the `## Recent Learnings` section of `.claude/handoff-task.md`
 - No jobs.md or decision documents
 
 **Skip:** Phase 3, most of Phase 4 (only update @ references if customizing template)
@@ -319,7 +320,7 @@ Which tier do I need?
 **Use case:** Active development, regular handoffs, growing context needs.
 
 **Everything in Tier 1, plus:**
-- Phase 3 steps 3.1–3.4 (create agents/, move session.md, separate learnings)
+- Phase 3 steps 3.1–3.4 (create agents/, relocate a legacy `session.md`, separate learnings)
 - Phase 4 steps 4.1–4.4 (update @ references for new paths)
 
 **Structure:**
@@ -339,7 +340,7 @@ Which tier do I need?
 - Custom fragments (project-specific rules in plugin/fragments/)
 
 **Structure:**
-- Full agents/ directory with session.md, learnings.md, jobs.md, `memory/MEMORY.md`
+- Full agents/ directory with learnings.md, jobs.md, `memory/MEMORY.md`, plus `.claude/handoff-task.md`
 - `agents/decisions/` with architectural documentation
 - `.claude/agents/` with plan-specific agents
 - Potentially custom skills in `.claude/skills/`
@@ -356,7 +357,7 @@ Which tier do I need?
 
 **Symlink-redirect blocks edits:** You're editing a file symlinked to plugin. Edit the source file in `plugin/` directly instead (or the upstream repo).
 
-**Handoff fails to write learnings:** `agents/learnings.md` doesn't exist. Create it with the standard header (Phase 3, step 3.3). Or, if using Tier 1, learnings should remain inline in session.md.
+**Handoff fails to write learnings:** `agents/learnings.md` doesn't exist. Create it with the standard header (Phase 3, step 3.3). Or, if using Tier 1, learnings should remain inline in `.claude/handoff-task.md`.
 
 **`@` references don't resolve:** Ensure paths are relative to project root and files exist. `@`.claude/handoff-task.md` requires `.claude/handoff-task.md` to exist.
 
@@ -365,13 +366,8 @@ Which tier do I need?
 ## Reference
 
 **Setup and configuration:**
-- [templates/CLAUDE.template.md](../templates/CLAUDE.template.md) — Base CLAUDE.md template
-- [templates/README.md](../templates/README.md) — Template customization guide
 - [fragments/claude-config-layout.md](../fragments/claude-config-layout.md) — Hook and config conventions
-- [migrations/001-separate-learnings.md](../migrations/001-separate-learnings.md) — Learnings separation migration
 
 **Workflows and patterns:**
 - [docs/general-workflow.md](general-workflow.md) — General implementation workflow (6 stages)
 - [docs/tdd-workflow.md](tdd-workflow.md) — TDD methodology workflow (RED/GREEN/REFACTOR)
-- [docs/pattern-plan-specific-agent.md](pattern-plan-specific-agent.md) — Plan-specific agent pattern
-- [docs/pattern-weak-orchestrator.md](pattern-weak-orchestrator.md) — Weak orchestrator pattern

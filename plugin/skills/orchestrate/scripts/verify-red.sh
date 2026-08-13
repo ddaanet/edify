@@ -14,8 +14,13 @@ if [[ ! -f "$test_file" ]]; then
     exit 1
 fi
 
-# Run pytest — non-zero exit means test failed (RED state)
-if pytest "$test_file" --no-header -q; then
+# Run the test — non-zero exit means it failed (RED state).
+# Default is pytest; a project with a different runner sets EDIFY_TEST_CMD to a
+# command that takes the test file as its final argument, e.g.
+#   EDIFY_TEST_CMD="go test -run" or EDIFY_TEST_CMD="npx vitest run"
+read -r -a test_cmd <<< "${EDIFY_TEST_CMD:-pytest --no-header -q}"
+
+if "${test_cmd[@]}" "$test_file"; then
     echo "RED REJECTED: test passed unexpectedly"
     exit 1
 else

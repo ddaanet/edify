@@ -1,6 +1,6 @@
 ## Task Failure Lifecycle
 
-Extended task state model for session.md. Complements the base notation in `execute-rule.md` with error-related states.
+Extended task state model for `.claude/handoff-task.md`. Complements the base notation in `execute-rule.md` with error-related states.
 
 ### State Notation
 

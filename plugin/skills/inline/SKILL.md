@@ -22,10 +22,14 @@ Covers Tier 1 (direct) and Tier 2 (delegated) execution — same lifecycle, diff
 
 | Entry | Args pattern | Caller | Pre-work |
 |-------|-------------|--------|----------|
-| Default | `plans/<job>` | Cold start (`x` from session.md) | Full |
+| Default | `plans/<job>` | Cold start (`x` from `.claude/handoff-task.md`) | Full |
 | Execute | `plans/<job> execute` | /design, /runbook (context loaded) | Skip |
 
 Check for `execute` token in args → chained invocation (skip Phase 2). Absent → cold start (full workflow).
+
+**State which entry path was taken, in one line, before Phase 1.** The token is the only signal distinguishing the two, and its absence fails open: a chained call that loses the token silently re-runs a recall pass the caller already did. That costs tokens and is invisible in the output unless the path is named. If the run announces "cold start" immediately after `/design` or `/runbook` chained into it, the token was dropped — treat that as a caller defect, not as a legitimate cold start.
+
+**Why the artifact cannot replace the token:** `plans/<job>/recall-artifact.md` exists on disk in both cases. It records what an upstream phase selected, not whether those files are in *this* session's context — a genuine cold start must still Read them. Presence of the artifact is therefore not evidence that Phase 2 is redundant.
 
 ## Phase 1: Entry Gate
 
@@ -89,7 +93,7 @@ When execution dispatches sub-agents (artisan, test-driver):
 
 **Sub-agent recall:** Curate subset of plan recall-artifact entries relevant to delegation target. Write separate artifact per type (e.g., `plans/<job>/tdd-recall-artifact.md`). Include in each prompt: "Read `plans/<job>/<type>-recall-artifact.md`, then Read each file it lists."
 
-**Piecemeal TDD dispatch:** One cycle per invocation. Resume same agent between cycles (preserves context). Fresh agent when context nears 150k.
+**Piecemeal TDD dispatch:** One cycle per invocation. Resume same agent between cycles (preserves context). Fresh agent when context nears 150k *(ungrounded — needs calibration; note the orchestrator cannot read an agent's context size directly)*.
 
 **Cycle-scoped prompt composition:** Extract only the current cycle's section from the runbook (`## Cycle X.Y:` to next `---` or `## Cycle`). Include the runbook's Common Context section and recall entries alongside the cycle spec. Do NOT include adjacent or future cycles in the test-driver prompt — scope enforced by context absence, not prose instruction. The executing session holds the full runbook for sequencing; test-driver sees only its cycle.
 
@@ -153,7 +157,7 @@ This Read proves reviewer produced output. Without it, Phase 4b cannot proceed.
 
 #### Path B: Review Skip (gated escape hatch)
 
-When review is genuinely unnecessary (trivial session.md-only edits, plan artifact cleanup), skip is permitted — but requires an auditable artifact:
+When review is genuinely unnecessary (trivial task-frame-only edits, plan artifact cleanup), skip is permitted — but requires an auditable artifact:
 
 ```
 Write(plans/<job>/reports/review-skip.md)
@@ -181,18 +185,6 @@ Final phase before continuation. Write the pending task directly to `.claude/han
 
 Write explicitly — do not rely on handoff to capture from conversation context.
 
-## Delegation Protocol Summary
-
-| Aspect | Rule |
-|--------|------|
-| Recall | Parent curates, child resolves |
-| TDD dispatch | Piecemeal — one cycle per invocation, resume between, cycle-scoped prompt |
-| Context | Sub-agents have no parent context |
-| Commits | test-driver commits; caller omits commit instructions |
-| Post-step | `git status --porcelain` clean + `just lint` |
-| Model | opus for skills/fragments/agents/design edits |
-| Checkpoints | None mid-execution; corrector is sole review |
-
 ## Continuation
 
 As the **final action** of this skill:
@@ -204,4 +196,4 @@ As the **final action** of this skill:
 
 **CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
 
-**On failure:** Abort remaining continuation. Record in session.md Blockers: which phase failed, error category, remaining continuation orphaned.
+**On failure:** Abort remaining continuation. Record in `.claude/handoff-task.md` Blockers: which phase failed, error category, remaining continuation orphaned.

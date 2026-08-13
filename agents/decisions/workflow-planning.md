@@ -296,13 +296,13 @@ This is not full test code — it is precise prose that preserves the specificat
 **Architecture:**
 - **Domain validation skill:** `plugin/skills/<domain>-validation/SKILL.md` — structured review criteria (Critical/Major/Minor + examples)
 - **Rules file:** `.claude/rules/<domain>-validation.md` — path-matched context injection for planner
-- **Planner awareness:** plan-adhoc and plan-tdd include "Domain Validation" subsection in vet checkpoint guidance
+- **Planner awareness:** `/runbook` includes a "Domain Validation" subsection in vet checkpoint guidance (was plan-adhoc and plan-tdd, both since merged into `/runbook`)
 - **No agent proliferation:** One corrector, enriched via skill files (not separate domain-specific review agents)
 
 **First use case:** Plugin development validation (skills, agents, hooks, commands, plugin-structure)
 
 **Rationale:**
-- **Planning-time detection:** Intelligent planner (sonnet/opus) detects domain; weak orchestrator (haiku) executes mechanically
+- **Planning-time detection:** Intelligent planner (sonnet/opus) detects domain; the orchestrator executes mechanically
 - **Dunning-Kruger avoidance:** Runtime self-assessment unreliable; planner encodes domain context explicitly
 - **Sub-agents don't receive rules:** Rules files fire in main session only; domain context must be explicitly provided in task prompt
 - **Cost management:** One agent with structured criteria cheaper than multiple specialist agents

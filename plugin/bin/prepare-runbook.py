@@ -54,7 +54,7 @@ STOP IMMEDIATELY if: RED phase test passes (expected failure) • RED phase fail
 Actions when stopped: 1) Document in reports/cycle-{X}-{Y}-notes.md 2) Test passes unexpectedly → Investigate if feature exists 3) Regression → STOP, report broken tests 4) Scope unclear → STOP, document ambiguity
 
 **Conventions:**
-- Use Read/Write/Edit/`rg` (Bash)s (not Bash for file ops)
+- Use Read/Write/Edit and `rg` (Bash) for file operations, not shell redirection
 - Report errors explicitly (never suppress)
 """
 
@@ -96,11 +96,18 @@ def parse_recall_artifact(artifact_path):
 
     shared = []
     phased = {}
+    # Format contract with the producing skills (see the Recall Artifact
+    # section of skills/requirements/SKILL.md): entries are
+    # '<path> — <note>', optionally suffixed '(phase N)'; the empty-result
+    # sentinel is the sole entry 'null — no relevant entries found'.
     phase_tag_re = re.compile(r"\(phase\s+(\d+)\)\s*$", re.IGNORECASE)
+    # `\b` so a real path such as `nullable-handling.md` is not eaten as the
+    # sentinel — startswith("null") silently dropped it.
+    null_entry_re = re.compile(r"^null\b", re.IGNORECASE)
 
     for entry in entries:
-        # Skip null entries
-        if entry.startswith("null"):
+        # Skip the explicit empty-result sentinel
+        if null_entry_re.match(entry):
             continue
 
         phase_match = phase_tag_re.search(entry)

@@ -15,10 +15,6 @@ trace := "false"
 help:
     @just --list --unsorted
 
-# Format and run all checks
-[no-exit-message]
-dev: format precommit
-
 # Remove generated build artifacts
 [no-exit-message]
 clean:
@@ -56,15 +52,6 @@ line-limits:
     sync
     run-line-limits
     report-end-safe "Line limits"
-
-# Verify GREEN: format, lint, test (semantic alias for lint)
-[no-exit-message]
-green *ARGS: format
-    #!{{ bash_prolog }}
-    sync
-    run-lint-checks
-    if [ -n "{{ ARGS }}" ]; then pytest {{ ARGS }}; else run-pytest; fi
-    report-end-safe "Green"
 
 # Create release: tag, build tarball, upload to PyPI and GitHub
 # Use --dry-run to perform local changes and verify external permissions without publishing

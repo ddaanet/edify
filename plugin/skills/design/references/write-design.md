@@ -4,7 +4,7 @@
 
 #### C.1. Create Design Document
 
-**Recall diff:** `Bash: recall diff <job-name>`
+**Recall diff:** re-invoke `Skill(skill: "edify:recall", args: "<topic reflecting what just changed>")` and reconcile its selection against the existing `plans/<job-name>/recall-artifact.md`.
 
 Review the changed files list. Approach commitment, revised scope, or rejected alternatives change which implementation and testing entries are relevant. If files changed that affect which recall entries are relevant, update the artifact: add entries surfaced by the discussion, remove entries for approaches that were rejected. Write updated artifact back.
 
@@ -24,7 +24,7 @@ Review the changed files list. Approach commitment, revised scope, or rejected a
 
 **CRITICAL: Delegate to design-corrector for review.**
 
-Use Agent tool with `subagent_type="design-corrector"`:
+Use Agent tool with `subagent_type="edify:design-corrector"`:
 
 ```
 Review plans/<job-name>/design.md — Critical Design Review (CDR) criteria:

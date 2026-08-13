@@ -28,10 +28,10 @@ The recommended way to start a task:
 The `/design` skill will:
 1. Verify this is a one-off task (not feature development)
 2. Assess complexity (simple/moderate/complex)
-3. Set up workflow stages in `session.md` as pending tasks
+3. Set up workflow stages in `.claude/handoff-task.md` as pending tasks
 4. Begin executing the first stage
 
-**User reads no docs** - the workflow guides itself through `session.md`.
+**User reads no docs** - the workflow guides itself through `.claude/handoff-task.md`.
 
 ---
 
@@ -139,14 +139,14 @@ Determine implementation approach:
 - **>100 lines**: Separate planning required
 
 ### 2. Metadata
-Add weak orchestrator coordination info:
-- Default model (haiku/sonnet)
+Add orchestrator coordination info:
+- Default model per step (haiku/sonnet)
 - Error handling rules
 - Reporting locations
 - Sequencing constraints
 
 ### 3. Review
-Delegate to runbook-corrector agent for validation:
+Delegate to `edify:runbook-corrector` for validation:
 - Completeness check
 - Executability verification
 - Context sufficiency
@@ -155,7 +155,6 @@ Delegate to runbook-corrector agent for validation:
 
 ### 4. Split
 Run `prepare-runbook.py` to create:
-- Plan-specific agent (`.claude/agents/<name>-task.md`)
 - Step files (`plans/<name>/steps/step-*.md`)
 - Orchestrator plan (`plans/<name>/orchestrator-plan.md`)
 
@@ -167,18 +166,17 @@ Run `prepare-runbook.py` to create:
 
 ## Stage 4: Execution
 
-**Model:** Haiku (weak orchestrator)
+**Model:** Sonnet (orchestrator)
 **Skill:** `/orchestrate`
 
 **Purpose:** Execute runbook steps reliably and efficiently.
 
 **Inputs:**
 - Orchestrator plan (from Planning)
-- Plan-specific agent (cached in system prompt)
 - Step files (one per step)
 
 **Orchestrator responsibilities:**
-- Invoke plan-specific agent for each step
+- Dispatch a standing agent per step, passing the step file path
 - Track progress
 - Handle errors per runbook rules:
   - **Simple error** → Delegate to sonnet for fix
@@ -224,7 +222,6 @@ Run `prepare-runbook.py` to create:
 - Update project documentation for changes
 - Record architectural choices in `agents/decisions/`
 - Move relevant decisions OUT of `plans/` to permanent docs
-- Delete plan-specific agent (no use beyond its runbook)
 - Archive or delete plan directory per project convention
 
 ---
@@ -232,29 +229,16 @@ Run `prepare-runbook.py` to create:
 ## Skills Reference
 
 ### `/design`
-**Stage:** Entry point (any)
+**Stage:** Entry point (any), and Stage 2 for complex jobs
 **Model:** Opus (for complex) or Sonnet (delegates to Opus when needed)
-**Use when:** Starting a new task
+**Use when:** Starting a new task; also the design session itself for complex jobs, uncertain requirements, or architectural decisions
 
 **What it does:**
-- Assesses complexity and creates design document
-- Routes to appropriate workflow based on methodology detection
-- Handles both general workflow and TDD workflow
-- Auto-detects methodology based on project context
+- Assesses complexity and routes by tier
+- Auto-detects methodology (general vs TDD) from project context
+- For complex jobs, runs the Opus design session with delegated exploration and produces a dense design document capturing fuzzy requirements and technical constraints
 
 **Why use it:** Single command to start any workflow. Handles complexity triage automatically.
-
----
-
-### `/design`
-**Stage:** 2 (Design Session)
-**Model:** Opus
-**Use when:** Complex jobs, uncertain requirements, architectural decisions
-
-**What it does:**
-- Runs Opus design session with delegated exploration
-- Creates dense design document
-- Captures fuzzy requirements and technical constraints
 
 ---
 
@@ -267,7 +251,7 @@ Run `prepare-runbook.py` to create:
 - Starts with tier assessment (evaluates complexity)
 - **Tier 1** (Direct): Implements directly, vets, commits
 - **Tier 2** (Lightweight): Delegates to artisan agents, reviews, commits
-- **Tier 3** (Full Runbook): Executes 4-point runbook prep process, delegates review to runbook-corrector agent, invokes `prepare-runbook.py` to create execution artifacts, primes session.md for orchestrator handoff
+- **Tier 3** (Full Runbook): Executes 4-point runbook prep process, delegates review to `edify:runbook-corrector`, invokes `prepare-runbook.py` to create execution artifacts, primes `.claude/handoff-task.md` for orchestrator handoff
 
 **Note:** Unified skill supporting both TDD and general workflows via per-phase typing.
 
@@ -275,11 +259,11 @@ Run `prepare-runbook.py` to create:
 
 ### `/orchestrate`
 **Stage:** 4 (Execution)
-**Model:** Haiku
+**Model:** Sonnet
 **Use when:** Executing prepared runbooks only
 
 **What it does:**
-- Executes runbook steps using plan-specific agent
+- Dispatches a standing agent per step, passing the step file path
 - Handles error escalation
 - Tracks progress
 - Reports to specified locations
@@ -330,10 +314,10 @@ The general workflow is designed for natural multi-session execution with model 
 ### How It Works
 
 1. **Start with `/design`** - Creates design document and assesses complexity
-2. **Work continues** - Agent executes stages, updates `session.md`
+2. **Work continues** - Agent executes stages, updates `.claude/handoff-task.md`
 3. **Session break** - Agent calls `/handoff:handoff`, advises on model switch if needed
 4. **User starts new session** - Types `#load` or just describes next step
-5. **Agent continues** - Reads `session.md`, resumes from pending tasks
+5. **Agent continues** - Reads `.claude/handoff-task.md`, resumes from pending tasks
 6. **Repeat** - Until all workflow stages complete
 
 ### Example Multi-Session Flow
@@ -342,10 +326,10 @@ The general workflow is designed for natural multi-session execution with model 
 ```
 User: /design "refactor auth system to support OAuth providers"
 Agent: Assesses as complex task requiring design
-Agent: Sets up workflow in session.md:
+Agent: Sets up workflow in `.claude/handoff-task.md`:
        - [ ] Design - Explore architecture (/design - Opus)
        - [ ] Planning - Create runbook (/runbook)
-       - [ ] Execution - Run steps (/orchestrate - Haiku)
+       - [ ] Execution - Run steps (/orchestrate - Sonnet)
        - [ ] Review - Check changes (corrector)
        - [ ] Completion - Finalize docs
 Agent: "Design stage requires Opus. Switch to Opus model and type #load to continue."
@@ -354,52 +338,52 @@ Agent: "Design stage requires Opus. Switch to Opus model and type #load to conti
 **Session 2 (User switches to Opus):**
 ```
 User: #load
-Agent: Reads session.md, sees Design stage pending
+Agent: Reads `.claude/handoff-task.md`, sees Design stage pending
 Agent: Invokes /design skill
 Agent: Explores codebase, makes architectural decisions
 Agent: Completes design document
-Agent: Updates session.md (Design complete, Planning next)
+Agent: Updates `.claude/handoff-task.md` (Design complete, Planning next)
 Agent: Calls /handoff:handoff: "Switch to Sonnet for Planning stage"
 ```
 
 **Session 3 (User switches to Sonnet):**
 ```
 User: #load
-Agent: Reads session.md, sees Planning stage pending
+Agent: Reads `.claude/handoff-task.md`, sees Planning stage pending
 Agent: Invokes /runbook
 Agent: Creates runbook with implementation steps
 Agent: Runs prepare-runbook.py to generate artifacts
-Agent: Updates session.md (Planning complete, Execution next)
-Agent: Calls /handoff:handoff: "Switch to Haiku for Execution stage"
+Agent: Updates `.claude/handoff-task.md` (Planning complete, Execution next)
+Agent: Calls /handoff:handoff: "Execution stage next"
 ```
 
-**Session 4 (User switches to Haiku):**
+**Session 4 (Execution):**
 ```
 User: #load
-Agent: Reads session.md, sees Execution stage pending
+Agent: Reads `.claude/handoff-task.md`, sees Execution stage pending
 Agent: Invokes /orchestrate
 Agent: Executes runbook steps
-Agent: Updates session.md (Execution complete, Review next)
+Agent: Updates `.claude/handoff-task.md` (Execution complete, Review next)
 Agent: Calls /handoff:handoff: "Switch to Sonnet for Review stage"
 ```
 
 **Session 5 (User switches to Sonnet):**
 ```
 User: #load
-Agent: Reads session.md, sees Review and Completion pending
+Agent: Reads `.claude/handoff-task.md`, sees Review and Completion pending
 Agent: Delegates to corrector to review changes
 Agent: Makes any fixes needed based on review report
 Agent: Updates documentation
-Agent: Updates session.md (all tasks complete)
+Agent: Updates `.claude/handoff-task.md` (all tasks complete)
 Agent: Calls /handoff:handoff: "All workflow tasks complete. Start fresh session for new work."
 ```
 
 ### Key Benefits
 
-- **Zero context overhead** - Each session starts fresh, reads state from `session.md`
-- **Right model for right task** - Design uses Opus, Execution uses Haiku, etc.
+- **Zero context overhead** - Each session starts fresh, reads state from `.claude/handoff-task.md`
+- **Right model for right task** - Design uses Opus, orchestration and review use Sonnet, individual steps may use Haiku
 - **Natural breaks** - Work can pause/resume at any stage
-- **Transparent state** - User sees workflow in `session.md` at any time
+- **Transparent state** - User sees workflow in `.claude/handoff-task.md` at any time
 - **Cost efficient** - Only use expensive models when needed
 
 ---
@@ -462,9 +446,9 @@ Agent: Calls /handoff:handoff: "All workflow tasks complete. Start fresh session
 
 ### Model Selection
 
-- **Haiku**: Execution only (orchestrator in Stage 4)
-- **Sonnet**: Planning, review, most work (Stages 1, 3, 5, 6)
+- **Sonnet**: Orchestration (Stage 4), planning, review, most work (Stages 1, 3, 5, 6)
 - **Opus**: Design and complex architecture only (Stage 2)
+- **Haiku**: individual step agents where a runbook assigns it; not the orchestrator
 
 ### Runbook Changes Mid-Execution
 
@@ -483,7 +467,6 @@ Git tracks all changes to runbook and artifacts.
 
 **After completion:**
 - Move important decisions to `agents/decisions/`
-- Delete plan-specific agent
 - Archive plan directory (or delete per project convention)
 
 ---
@@ -491,9 +474,8 @@ Git tracks all changes to runbook and artifacts.
 ## Related Documentation
 
 - **CLAUDE.md**: Agent instructions, communication rules, patterns
-- **`.claude/handoff-task.md`**: Current task context and architecture
+- **`.claude/handoff-task.md`**: Current task frame — in-progress task and open decisions
 - **agents/decisions/**: Architectural decisions and rationale
-- **`.claude/handoff-task.md`**: Current session handoff context
 
 ---
 
@@ -511,11 +493,10 @@ Git tracks all changes to runbook and artifacts.
 ### 3. Execution
 - Use `/orchestrate` skill for runbook execution
 - Write reports to `plans/<name>/reports/`
-- Update session.md with progress
+- Update `.claude/handoff-task.md` with progress
 
 ### 4. Completion
 - Extract valuable decisions to `agents/decisions/`
-- Delete plan-specific agent
 - Archive or delete plan directory (per project convention)
 
 ---
@@ -532,7 +513,6 @@ prepare-runbook.py plans/foo/runbook.md
 ```
 
 **Creates:**
-- `.claude/agents/foo-task.md` (plan-specific agent)
 - `plans/foo/steps/step-*.md` (individual steps)
 - `plans/foo/orchestrator-plan.md` (orchestrator instructions)
 
@@ -566,3 +546,4 @@ model: sonnet  # default model for steps
 
 **2026-01-19**: Initial workflow documentation (general workflow pattern formalized)
 **2026-01-31**: Renamed from "oneshot workflow" to "general workflow" (oneshot skill superseded by `/design`)
+**2026-08-13**: Merged the duplicated `/design` skill entry; orchestrator model tier stated as Sonnet, matching `/orchestrate`

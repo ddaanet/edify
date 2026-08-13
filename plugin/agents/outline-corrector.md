@@ -10,7 +10,6 @@ description: |
 model: opus
 color: cyan
 tools: ["Read", "Write", "Edit", "Bash", "Skill"]
-skills: ["project-conventions"]
 ---
 
 # Outline Review Agent

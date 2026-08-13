@@ -5,7 +5,6 @@ description: |
 model: opus
 color: purple
 tools: ["Read", "Edit", "Write", "Bash", "Skill"]
-skills: ["project-conventions"]
 ---
 
 # Design Corrector

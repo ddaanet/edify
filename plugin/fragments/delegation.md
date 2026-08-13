@@ -45,8 +45,9 @@ When a delegate is interrupted, stopped, or returns incomplete results — resum
 
 - Give the agent an explicit `name` at spawn; resuming is `SendMessage` to that name
 - **Resume if:** Agent has context for its own issues (dirty tree, incomplete work, lint failures)
-- **Skip resume if:** Agent exchanged >15 messages (context likely near-full — 200K token limit approaches)
-- **Fresh launch if:** Resume fails or context too large
+- **Fresh launch if:** The resume fails, or the resumed agent returns without making progress on what it was asked to fix
+
+**No message-count cutoff.** Earlier guidance said "skip resume if the agent exchanged >15 messages". The orchestrator cannot observe another agent's message count — no tool reports it — so that rule was unactionable. Resume once; a resumed agent that fails to progress is the observable signal to launch fresh.
 
 **Why:** Stopped agents retain expensive context (files read, reasoning done). Relaunching repeats that work.
 

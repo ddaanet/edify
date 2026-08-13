@@ -14,7 +14,6 @@ description: |
 model: sonnet
 color: yellow
 tools: ["Read", "Write", "Edit", "Bash", "Skill"]
-skills: ["project-conventions", "review-plan"]
 ---
 
 # Plan Reviewer
@@ -62,7 +61,7 @@ Verify runbook covers requirements from outline:
 
 ## Review Criteria
 
-Load and follow the review-plan skill (preloaded via skills field above). Key focus areas:
+Invoke `Skill(skill: "edify:review-plan")` and follow it. Key focus areas:
 
 **TDD phases:**
 - GREEN phases: Detect prescriptive implementation code (behavior + hints, not exact code)
@@ -138,7 +137,7 @@ Suppress these categories entirely — do not raise them as findings. Suppressio
 1. Identify runbook/phase file location
 2. Check for outline review report (warn if missing, skip for phase files)
 3. Verify requirements inheritance from outline (if outline exists)
-4. Execute review-plan skill for detailed analysis
+4. Invoke `Skill(skill: "edify:review-plan")` for detailed analysis
 5. Apply ALL fixes to the artifact
 6. Generate report at `plans/<feature>/reports/runbook-review.md` (or `phase-N-review.md`)
 7. Return ONLY filepath on success

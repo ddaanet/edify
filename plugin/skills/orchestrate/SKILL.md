@@ -59,7 +59,7 @@ Read the phase content from the orchestrator plan's `## Phase Files` section (pa
 
 1. Read target files, apply edits (Read → Edit/Write)
 2. `just precommit` — fix failures, escalate if unfixable
-3. Phase boundary review: small changes (heuristic: few net lines across few files) → self-review via `git diff`; larger → delegate to corrector (Section 3.5)
+3. Phase boundary review: apply the Proportionality rule in `plugin/fragments/review-requirement.md` — self-review via `git diff` only when ALL its self-review conditions hold (≤5 net lines across ≤2 files, additive or corrective, no control-flow/contract/behavioral change); otherwise delegate to corrector (Section 3.5). This is the one path where the orchestrator would review its own edits, so the threshold is the fragment's, not the orchestrator's judgment.
 4. Commit inline phase changes
 
 ### 3.1 General Step Dispatch (D-2)
@@ -127,7 +127,7 @@ just test && plugin/skills/orchestrate/scripts/verify-step.sh
 **Step F — Impl corrector:**
 Dispatch `<name>-impl-corrector` with changed files. Review implementation quality. If UNFIXABLE → STOP.
 
-**Agent resume across cycles:** Resume tester for subsequent TEST steps (preserves test context). Resume implementer for subsequent IMPLEMENT steps (preserves codebase context). Fresh agent if >15 messages. Correctors are never resumed — each review is independent.
+**Agent resume across cycles:** Resume tester for subsequent TEST steps (preserves test context). Resume implementer for subsequent IMPLEMENT steps (preserves codebase context). Launch fresh when a resume fails or the resumed agent returns without progress — the orchestrator cannot observe an agent's message count, so there is no turn-based cutoff. Correctors are never resumed — each review is independent.
 
 ### 3.3 Post-Step Verification
 
@@ -150,12 +150,12 @@ A send resumes the agent from its transcript. This requires that the step agent
 was spawned with an explicit `name` — see 3.1. There is no `resume` parameter on
 `Agent`; naming at spawn time is what makes resumption possible.
 
-Skip resume if agent exchanged >15 messages (context near-full).
+Resume once. If the resumed agent returns without fixing the issue, do not resume again — launch fresh.
 
-**If resume fails or skipped** — delegate recovery to fresh sonnet agent:
+**If resume fails or the resumed agent made no progress** — delegate recovery to fresh sonnet agent:
 ```
 Agent tool:
-  subagent_type: "artisan"
+  subagent_type: "edify:artisan"
   model: sonnet
   prompt: "[step file reference, git diff, git status, error output] Fix lint and commit issues."
 ```
@@ -200,7 +200,7 @@ Agent tool:
 
 Read report. If UNFIXABLE → STOP and escalate. Otherwise commit checkpoint, continue.
 
-**Single-phase plans** (corrector = `none`): delegate to generic `corrector` with file references to design, outline (`plans/<name>/outline.md`), and changed files (non-cached, read on demand).
+**Single-phase plans** (corrector = `none`): delegate to generic `edify:corrector` with file references to design, outline (`plans/<name>/outline.md`), and changed files (non-cached, read on demand).
 
 **Final checkpoint** adds lifecycle audit: verify all stateful objects (MERGE_HEAD, staged content, lock files) cleared on success paths.
 
@@ -215,7 +215,7 @@ After any corrector review (phase checkpoint, TDD corrector, or impl-corrector),
 **Dispatch:**
 ```
 Agent tool:
-  subagent_type: "refactor"
+  subagent_type: "edify:refactor"
   model: sonnet
   name: "refactor-phase-P"
   prompt: "Refactor flagged files: [files from corrector report]. Warnings: [quoted warning text]. Design reference: plans/<name>/design.md"
@@ -253,8 +253,8 @@ Log each step: `Step N-M: [name] - completed` or `Step N-M: [name] - failed: [er
 git diff --name-only $(git rev-list --max-parents=0 HEAD | head -1)..HEAD
 ```
 
-1. **Final review:** If multi-phase, phase boundary correctors already ran. Single-phase: delegate to generic `corrector` with design reference, outline (`plans/<name>/outline.md`), and changed files. Report to `plans/<name>/reports/review.md`.
-2. **TDD audit:** If `**Type:** tdd`, delegate to `tdd-auditor`. Report to `plans/<name>/reports/tdd-process-review.md`.
+1. **Final review:** If multi-phase, phase boundary correctors already ran. Single-phase: delegate to generic `edify:corrector` with design reference, outline (`plans/<name>/outline.md`), and changed files. Report to `plans/<name>/reports/review.md`.
+2. **TDD audit:** If `**Type:** tdd`, delegate to `edify:tdd-auditor`. Report to `plans/<name>/reports/tdd-process-review.md`.
 3. **Cleanup:** Delete plan-specific agents:
    ```bash
    rm -f .claude/agents/<name>-task.md .claude/agents/<name>-corrector.md

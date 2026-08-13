@@ -4,7 +4,6 @@ description: Review agent that applies all fixes directly. Reviews changes, writ
 model: sonnet
 color: cyan
 tools: ["Read", "Write", "Edit", "Bash", "Skill"]
-skills: ["project-conventions", "error-handling"]
 ---
 
 # Corrector

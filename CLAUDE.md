@@ -180,8 +180,14 @@ In `plugin/skills/`, invoked via slash command.
 
 The pipeline agents live in `plugin/agents/` (correctors, `artisan`, `scout`,
 `test-driver`, `tdd-auditor`, `refactor`, and friends); its backing scripts are
-`plugin/bin/prepare-runbook.py`, `validate-runbook.py`, and
-`plugin/scripts/create-plan-agent.sh`. Pipeline docs are in `plugin/docs/`.
+`plugin/bin/prepare-runbook.py` and `validate-runbook.py`. Pipeline docs are in
+`plugin/docs/`.
+
+Execution delegates **by reference**: the orchestrator dispatches a standing
+agent with a path to a step file, and the step file names the design, outline,
+and recall artifacts it needs. Bespoke per-plan agent definitions were dropped
+in 2026-08 — they fought the platform (not discoverable until session restart)
+and the runbook system already supplies the flexibility they were built for.
 
 The pipeline was torn down in 2026-05 and revived in 2026-08. On revival it was
 rewired off the retired subsystems: recall now means reading `memory/MEMORY.md`

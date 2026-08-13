@@ -35,12 +35,21 @@ def write_report(
     path: str,
     violations: list[str],
     ambiguous: list[str] | None = None,
-    skipped: bool = False,
+    skipped: str | None = None,
+    not_applicable: str | None = None,
 ) -> Path:
     """Write validation report.
 
     For directory input: report goes to <path>/reports/validation-<subcommand>.md.
     For file input: report goes to plans/<job>/reports/validation-<subcommand>.md.
+
+    Args:
+        skipped: Operator-supplied reason the check was skipped. A SKIPPED
+            report is not evidence the check ran — the reason is recorded so a
+            reader can tell the two apart.
+        not_applicable: Reason the check has no subject matter in this runbook
+            (e.g. a TDD-only check against a general runbook). Distinct from
+            PASS, which asserts the check ran and found nothing.
     """
     p = Path(path)
     report_dir = p / "reports" if p.is_dir() else Path("plans") / p.stem / "reports"
@@ -49,6 +58,8 @@ def write_report(
 
     if skipped:
         result = "SKIPPED"
+    elif not_applicable:
+        result = "NOT-APPLICABLE"
     elif violations:
         result = "FAIL"
     elif ambiguous:
@@ -61,6 +72,16 @@ def write_report(
         f"**Runbook:** {path}\n\n",
         f"**Date:** {date}\n\n",
         f"**Result:** {result}\n\n",
+    ]
+    if skipped:
+        lines.append(f"**Skipped because:** {skipped}\n\n")
+        lines.append(
+            "This check did NOT run. Do not read this report as evidence of "
+            "conformance.\n\n"
+        )
+    if not_applicable:
+        lines.append(f"**Not applicable because:** {not_applicable}\n\n")
+    lines += [
         "## Summary\n\n",
         f"Failed: {len(violations)}\n\n",
     ]
@@ -74,6 +95,33 @@ def write_report(
         lines.extend(f"- {a}\n" for a in ambiguous)
     report_path.write_text("".join(lines))
     return report_path
+
+
+# Checks that read TDD cycle structure. Against a general/inline runbook these
+# find no cycles and would otherwise report PASS — an empty result reported as
+# conformance. They report NOT-APPLICABLE instead.
+CYCLE_BASED = ("model-tags", "lifecycle", "test-counts", "red-plausibility")
+
+
+def _load_content(path: str) -> str:
+    p = Path(path)
+    if p.is_dir():
+        content, _ = assemble_phase_files(path)
+    else:
+        content = p.read_text()
+    return content
+
+
+def _no_cycles_reason(subcommand: str, content: str) -> str | None:
+    """Return a NOT-APPLICABLE reason when a cycle-based check has no subject."""
+    if subcommand not in CYCLE_BASED:
+        return None
+    if extract_cycles(content):
+        return None
+    return (
+        f"`{subcommand}` reads TDD cycle structure; this runbook declares no "
+        f"cycles (general or inline phases only)."
+    )
 
 
 def check_model_tags(content: str, path: str) -> list[str]:
@@ -98,13 +146,12 @@ def check_model_tags(content: str, path: str) -> list[str]:
 def cmd_model_tags(args: argparse.Namespace) -> None:
     path = args.path
     if args.skip_model_tags:
-        write_report("model-tags", path, [], skipped=True)
+        write_report("model-tags", path, [], skipped=args.skip_model_tags)
         sys.exit(0)
-    p = Path(path)
-    if p.is_dir():
-        content, _ = assemble_phase_files(path)
-    else:
-        content = p.read_text()
+    content = _load_content(path)
+    if reason := _no_cycles_reason("model-tags", content):
+        write_report("model-tags", path, [], not_applicable=reason)
+        sys.exit(0)
     violations = check_model_tags(content, path)
     write_report("model-tags", path, violations)
     sys.exit(1 if violations else 0)
@@ -180,13 +227,12 @@ def check_lifecycle(
 def cmd_lifecycle(args: argparse.Namespace) -> None:
     path = args.path
     if args.skip_lifecycle:
-        write_report("lifecycle", path, [], skipped=True)
+        write_report("lifecycle", path, [], skipped=args.skip_lifecycle)
         sys.exit(0)
-    p = Path(path)
-    if p.is_dir():
-        content, _ = assemble_phase_files(path)
-    else:
-        content = p.read_text()
+    content = _load_content(path)
+    if reason := _no_cycles_reason("lifecycle", content):
+        write_report("lifecycle", path, [], not_applicable=reason)
+        sys.exit(0)
     known = set(getattr(args, "known_file", None) or [])
     violations = check_lifecycle(content, path, known_files=known)
     write_report("lifecycle", path, violations)
@@ -225,13 +271,12 @@ def check_test_counts(content: str, path: str) -> list[str]:
 def cmd_test_counts(args: argparse.Namespace) -> None:
     path = args.path
     if args.skip_test_counts:
-        write_report("test-counts", path, [], skipped=True)
+        write_report("test-counts", path, [], skipped=args.skip_test_counts)
         sys.exit(0)
-    p = Path(path)
-    if p.is_dir():
-        content, _ = assemble_phase_files(path)
-    else:
-        content = p.read_text()
+    content = _load_content(path)
+    if reason := _no_cycles_reason("test-counts", content):
+        write_report("test-counts", path, [], not_applicable=reason)
+        sys.exit(0)
     violations = check_test_counts(content, path)
     write_report("test-counts", path, violations)
     sys.exit(1 if violations else 0)
@@ -329,13 +374,12 @@ def check_red_plausibility(content: str, path: str) -> tuple[list[str], list[str
 def cmd_red_plausibility(args: argparse.Namespace) -> None:
     path = args.path
     if args.skip_red_plausibility:
-        write_report("red-plausibility", path, [], skipped=True)
+        write_report("red-plausibility", path, [], skipped=args.skip_red_plausibility)
         sys.exit(0)
-    p = Path(path)
-    if p.is_dir():
-        content, _ = assemble_phase_files(path)
-    else:
-        content = p.read_text()
+    content = _load_content(path)
+    if reason := _no_cycles_reason("red-plausibility", content):
+        write_report("red-plausibility", path, [], not_applicable=reason)
+        sys.exit(0)
     violations, ambiguous = check_red_plausibility(content, path)
     write_report("red-plausibility", path, violations, ambiguous)
     if violations:
@@ -367,16 +411,13 @@ def check_verify_green_paths(content: str, path: str) -> list[str]:
 def cmd_verify_green_paths(args: argparse.Namespace) -> None:
     path = args.path
     if args.skip_verify_green_paths:
-        write_report("verify-green-paths", path, [], skipped=True)
+        write_report(
+            "verify-green-paths", path, [], skipped=args.skip_verify_green_paths
+        )
         sys.exit(0)
-    p = Path(path)
-    if p.is_dir():
-        content, _ = assemble_phase_files(path)
-    else:
-        content = p.read_text()
+    content = _load_content(path)
     violations = check_verify_green_paths(content, path)
     write_report("verify-green-paths", path, violations)
-    sys.exit(1 if violations else 0)
 
 
 def main() -> None:
@@ -393,7 +434,16 @@ def main() -> None:
         p = sub.add_parser(name)
         p.add_argument("path")
         p.add_argument(
-            f"--skip-{name}", dest=skip_dest, action="store_true", default=False
+            f"--skip-{name}",
+            dest=skip_dest,
+            metavar="REASON",
+            default=None,
+            help=(
+                "Skip this check, recording REASON in the report. Legitimate "
+                "only when the check cannot run — not to get past a failure. "
+                "The report is stamped SKIPPED and states it is not evidence "
+                "of conformance."
+            ),
         )
         if name == "lifecycle":
             p.add_argument(

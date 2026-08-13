@@ -4,7 +4,6 @@ description: Execute refactoring escalated from TDD cycles with sonnet-level eva
 model: sonnet
 color: yellow
 tools: ["Read", "Write", "Edit", "Bash"]
-skills: ["project-conventions", "error-handling"]
 ---
 
 # Refactor Agent

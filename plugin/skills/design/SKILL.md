@@ -100,18 +100,21 @@ Assess work type alongside complexity — independent dimension (XP spike/story,
 | **investigation** | `plans/reports/`, `agents/decisions/` | Accuracy, completeness, grounding |
 | **ephemeral** | `tmp/` | None |
 
-#### Composite Task Decomposition
+#### Multi-Item Decomposition
 
-**Before classifying:** If the input artifact contains multiple discrete work items (deliverable review findings, PR review comments, multi-FR implementation list), decompose into per-item classification:
+**Before classifying**, check both triggers. Either one means this invocation covers more than one work item:
 
-1. Enumerate all discrete items from the input artifact
+- **Implicit bundling** — the input artifact contains multiple discrete items (deliverable review findings, PR review comments, multi-FR implementation list).
+- **Explicit bundling** — the task frame or session notes fold additional work into this invocation ("address X during /design").
+
+Both triggers run the same procedure — the source of the item list does not change how the items are handled:
+
+1. Enumerate all discrete items explicitly, naming the trigger for each
 2. Produce a per-item behavioral code check (does this item add functions, change logic paths, or add conditional branches?)
-3. Classify each item individually — any item that is behavioral elevates to Moderate minimum for that item
-4. Route per-item: Simple items can batch, Moderate+ items get their own routing
+3. Classify each item individually, with its own visible output block (Requirements-clarity → Triage Recall → Classification) — any behavioral item elevates to Moderate minimum for that item
+4. Only after every item is classified, route: Simple items can batch, Moderate+ items get their own routing
 
-**Why:** Batch classification averages heterogeneous items. A behavioral code change gets masked by non-behavioral siblings in the same group.
-
-**Distinct from companion tasks** (below). Companion tasks handle explicit user bundling in session notes. Composite tasks handle implicit bundling by the task's nature — multiple items within a single input artifact.
+**Why:** Batch classification averages heterogeneous items — a behavioral change gets masked by non-behavioral siblings. The enumeration is the structural anchor: it forces explicit acknowledgment of each item rather than silently merging them into the primary task's classification.
 
 #### Classification Gate
 
@@ -152,15 +155,9 @@ Produce this classification block before routing (visible output, not internal r
 - **Complex →** Read `references/write-outline.md` for Phase A (research + outline) and Phase B (user validation + outline sufficiency gate). *(Verb-oriented name: action the agent takes, not the artifact produced.)*
 - **Defect →** Route to structured-bugfix workflow: reproduce → root-cause → fix → verify. Skip design — the investigation structure replaces architectural design.
 
-**Companion tasks:** If session notes bundle additional work into this /design invocation ("address X during /design"), enumerate all bundled tasks before processing any:
+**Bundled work:** handled by §Multi-Item Decomposition in Phase 0 — explicit bundling is one of its two triggers.
 
-1. List all bundled tasks explicitly
-2. Each task gets its own Phase 0 pass with visible output block (Requirements-clarity → Triage Recall → Classification → Routing)
-3. Only after all tasks are classified, proceed with execution per routing
-
-The enumeration is the structural anchor — forces explicit acknowledgment of each task rather than silently merging them into the primary task's classification.
-
-**Session state check:** If session has significant pending work (>5 tasks), suggest `/handoff:handoff` before proceeding.
+**Session state check:** If the session has significant pending work (>5 tasks *— ungrounded threshold, needs calibration*), suggest `/handoff:handoff` before proceeding.
 
 ## Author-Corrector Coupling
 
@@ -196,4 +193,4 @@ As the **final action** of this skill:
 
 **CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
 
-**On failure:** Abort remaining continuation. Record in session.md Blockers: which phase failed, error category, remaining continuation orphaned.
+**On failure:** Abort remaining continuation. Record in `.claude/handoff-task.md` Blockers: which phase failed, error category, remaining continuation orphaned.

@@ -76,7 +76,7 @@ memory/<name>.md — <1-line relevance note>
 
 **Delegate exploration when scope is open-ended or spans multiple unknown files.** Read directly when files are known and few (≤3 files). The goal is cost control — opus tokens on open-ended browsing are expensive, but launching an agent to read a known file costs more than reading it directly.
 
-For delegated exploration: Use Agent tool with `subagent_type="scout"`. Specify report path: `plans/<job-name>/reports/explore-<topic>.md`. Agent writes findings to file and returns filepath.
+For delegated exploration: Use Agent tool with `subagent_type="edify:scout"`. Specify report path: `plans/<job-name>/reports/explore-<topic>.md`. Agent writes findings to file and returns filepath.
 
 #### A.2.5. Post-Explore Recall
 
@@ -94,7 +94,7 @@ Exploration surfaces codebase areas not caught by A.1's topic-based recall. Invo
 
 **Research artifact (required when research conducted):** Write findings to `plans/<job>/reports/research-<topic>.md` — frameworks considered, findings per framework, gaps identified. This file is a cascading dependency: A.5 reads it, absence blocks outline generation.
 
-**Recall diff:** `Bash: recall diff <job-name>` — update artifact if codebase findings changed relevance.
+**Recall diff:** re-invoke `Skill(skill: "edify:recall", args: "<topic reflecting what just changed>")` and reconcile its selection against the existing `plans/<job-name>/recall-artifact.md`. Update the artifact if codebase findings changed relevance.
 
 #### A.5. Outline
 
@@ -129,7 +129,7 @@ The outline resolves the architectural uncertainty that justified "complex" clas
 
 **Process:**
 
-Delegate to `outline-corrector` using Agent tool with `subagent_type="outline-corrector"`:
+Delegate to `edify:outline-corrector` using Agent tool with `subagent_type="edify:outline-corrector"`:
 
 ```
 Review plans/<job>/outline.md — Preliminary Design Review (PDR) criteria:

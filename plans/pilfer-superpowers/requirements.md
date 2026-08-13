@@ -107,7 +107,9 @@ pattern; no dead caller names remain.
 Single-source the repeated blocks: recall protocol (~8 restatements),
 continuation block (×4, `fragments/continuation-passing.md` already exists),
 runbook report template (×3), and the ~80%-shared corrector skeleton
-(~10,100 words across four agents). Set per-class length targets for skill
+(~10,100 words across four agents). These are defects 18–21 in
+`reports/edify-defects.md`, parked there for this FR rather than fixed in the
+2026-08-13 backlog clearance — the measured-reduction requirement below is why. Set per-class length targets for skill
 bodies (superpowers: <200 words frequently-loaded, <500 others — treat as
 starting points to calibrate, not established thresholds). Acceptance: each
 protocol has exactly one authoritative statement; measured token reduction
@@ -167,8 +169,8 @@ imports are gated on FR-1's method existing first.
 - Cost/token telemetry — absent from both systems; a separate concern.
 - Fixing the edify defects surfaced by this read (dead references,
   contradictions, validator gaps — comparison report, final section). Real and
-  actionable, but repair work, not pilfering; should feed the existing
-  pipeline-hardening backlog.
+  actionable, but repair work, not pilfering. **Done 2026-08-13** — see
+  `reports/edify-defects.md`, except defects 18–21, which are FR-12's.
 
 ### Dependencies
 

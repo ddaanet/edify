@@ -23,7 +23,7 @@ Required for decisions affecting module boundaries, API contracts, execution mod
 ## Density Checkpoint
 
 Before generating design, validate outline item granularity:
-- **Too granular:** >8 items per phase, or adjacent items with <20 LOC delta each -- collapse into parent item or merge adjacents
+- **Too granular:** >8 items per phase, or adjacent items with <20 LOC delta each -- collapse into parent item or merge adjacents *(both thresholds ungrounded — need calibration)*
 - **Too coarse:** Single item handling >3 unrelated concerns or spanning multiple module boundaries -- split by concern
 - **Heuristic:** items-per-phase x avg-LOC-per-item should fall in the 100-300 range. Below 100 suggests items are trivially small; above 300 suggests items are overloaded.
 - Flag and fix before proceeding to design generation.

@@ -99,7 +99,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Invariant keys use `when invariant: <property>` format for systematic discovery via recall resolve.
 - Until system-property-tracing plan provides a proper home, learnings + recall artifact is the interim vehicle.
 
-## When dispatching plan-specific agents in worktrees
+## When dispatching step agents in worktrees
 - Anti-pattern: Dispatching tester/implementer agents with `git show main:plans/<name>/steps/step-X.md` — worktree doesn't have `main` as a resolvable ref. Agent spends 15+ tool calls searching for step files, then either operates in wrong directory or produces no persisted changes.
 - Correct pattern: When step files exist only in main worktree, either (1) read step content in orchestrator and pass inline, (2) provide absolute path to main worktree copy, or (3) implement RED/GREEN directly in orchestrator. Option 3 proved most efficient for this runbook.
 - Evidence: Tester agent (step 2-1) returned "success" but zero changes persisted. Implementer agent (step 2-1) built full context then wrote to unreachable path. Both wasted ~30K tokens.

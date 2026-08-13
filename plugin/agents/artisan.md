@@ -4,7 +4,6 @@ description: Execute plan steps with quiet execution pattern (reports to files, 
 model: haiku
 color: blue
 tools: ["Read", "Write", "Edit", "Bash", "Skill"]
-skills: ["project-conventions"]
 ---
 
 # Task Agent - Baseline Template

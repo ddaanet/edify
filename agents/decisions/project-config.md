@@ -261,6 +261,8 @@ description: |
 
 **Anti-pattern:** Using plan-specific agents as `subagent_type` values in the same session they were created. They aren't indexed until restart.
 
-**Correct pattern:** Plan-specific agents in `.claude/agents/` are discoverable as Task `subagent_type` values only after session restart. The prepare-runbook.py → restart → orchestrate workflow naturally includes this boundary. Built-in types with prompt injection work as fallback when restart isn't feasible.
+**Correct pattern:** Generated agents in `.claude/agents/` are discoverable as `subagent_type` values only after session restart. Do not generate agents a pipeline then has to dispatch in the same session.
 
 **Evidence:** `hb-p1` through `hb-p5` not discoverable in creating session. Confirmed discoverable in subsequent sessions.
+
+**Consequence:** this constraint is why per-plan generated agents were dropped in favour of delegation by reference — see `orchestration-execution.md`, "When Selecting Agent Type For Orchestrated Steps".

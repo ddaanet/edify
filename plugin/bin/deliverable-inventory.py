@@ -3,7 +3,7 @@
 
 Usage: deliverable-inventory.py [plan-name]
 
-Excludes plan artifacts (plans/, session.md, learnings.md, plan-archive.md, tmp/).
+Excludes plan artifacts (plans/, .claude/handoff-task.md, learnings.md, tmp/).
 Handles submodule diffs by resolving submodule pointer at merge base.
 Outputs markdown table to stdout.
 """

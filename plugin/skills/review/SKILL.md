@@ -179,11 +179,14 @@ git diff HEAD <file1> <file2> ...
 
 ## Integration with General Workflow
 
-**This skill is the protocol used by review/correction agents.** In workflow contexts, prefer agent delegation over direct skill invocation:
+**This skill and the corrector agent share review criteria, not interaction model.** They are not interchangeable:
 
-- `corrector` — review + apply fixes (Tier 3 orchestration)
+- **This skill** runs in the main session with a user present. It may use `AskUserQuestion` to scope the review.
+- **`edify:corrector`** runs delegated, with no user to ask (see `plugin/agents/corrector.md`). Its scope must arrive in the dispatch prompt, and it applies fixes directly.
 
-**Direct `/review` invocation** is still valid when the user explicitly requests a review in conversation.
+So the review *axes* (`references/review-axes.md`) are shared; the scoping step is not. A delegated reviewer that reaches for a question has hit a dispatch-prompt defect, not a decision point.
+
+In workflow contexts, prefer agent delegation. **Direct invocation** is for when the user asks for a review in conversation.
 
 **Workflow stages:**
 1. `/design` — Opus creates design document

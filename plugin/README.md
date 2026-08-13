@@ -26,7 +26,7 @@ conversation. Each lives in `skills/<name>/SKILL.md`.
 | `/requirements` | Capture and document requirements for design and planning |
 | `/design` | Triage complexity, then design the approach; routes simple work straight to `/inline` |
 | `/runbook` | Decompose a design into executable steps, typed per phase (TDD cycles, general, inline) |
-| `/orchestrate` | Execute a prepared runbook with plan-specific agents and mechanical verification gates (Tier 3) |
+| `/orchestrate` | Execute a prepared runbook with mechanical verification gates (Tier 3) |
 | `/inline` | Sequence inline execution — pre-work, execute, post-work (Tier 1/2) |
 | `/review-plan` | Review runbook quality: TDD discipline, step clarity, LLM failure modes |
 | `/review` | Review in-progress changes for quality and correctness |
@@ -64,11 +64,9 @@ Subagent definitions in `agents/`, dispatched by the pipeline skills.
 ## Documentation
 
 Pipeline reference in `docs/`: `general-workflow.md` and `tdd-workflow.md` for
-the two execution modes, `pattern-weak-orchestrator.md` and
-`pattern-plan-specific-agent.md` for the orchestration patterns,
-`@file-pattern.md` for the `@`-reference convention, `shortcuts.md` for the
-slash-command index, and `migration-guide.md` for adopting the pipeline in
-another project.
+the two execution modes, `@file-pattern.md` for the `@`-reference convention,
+`shortcuts.md` for the slash-command index, and `migration-guide.md` for
+adopting the pipeline in another project.
 
 ## Scripts
 
@@ -85,8 +83,7 @@ Utility scripts in `bin/` (Python 3):
 | `task-context.sh` | Recover the commit that introduced a named task from git history |
 | `triage-feedback.sh` | Compare predicted against actual complexity after execution |
 
-Plus `scripts/create-plan-agent.sh` and `scripts/split-execution-plan.py`,
-used by `/runbook` during expansion.
+Plus `scripts/split-execution-plan.py`, used by `/runbook` during expansion.
 
 ## Recipes
 

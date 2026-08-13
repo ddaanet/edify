@@ -24,7 +24,6 @@ description: |
 model: opus
 color: cyan
 tools: ["Read", "Write", "Edit", "Bash"]
-skills: ["project-conventions"]
 ---
 
 # Runbook Simplification Agent

@@ -5,9 +5,9 @@ description: |
   Detects prescriptive code in GREEN phases, validates RED/GREEN
   sequencing, checks prerequisite validation, script evaluation, and step clarity.
 
-  Use when reviewing runbooks after generation by /plan. Use when the user asks to "review runbook",
-  "check runbook for prescriptive code", "validate RED/GREEN discipline", "check for implementation
-  anti-patterns", "check LLM failure modes", or when /plan Phase 1/3 delegates to runbook-corrector agent.
+  Use when the `edify:runbook-corrector` agent reaches its review-criteria step. This skill is the
+  agent-facing review protocol, not a user entry point — for a user-initiated runbook review, dispatch
+  `edify:runbook-corrector`, which invokes this skill.
 user-invocable: false
 model: sonnet
 ---
@@ -278,7 +278,7 @@ Five structural axes that cause execution failures. Apply regardless of phase ty
 
 **11.5 File Growth**
 - Project lines added per item from descriptions
-- Flag when projected size exceeds 350 lines (400-line enforcement threshold minus buffer)
+- Flag when projected size exceeds 350 lines *(ungrounded — the 400-line figure it derives from is a convention, not an enforced limit: no script or hook checks it)*
 - Fix: Insert proactive file split at phase boundary before projected threshold breach
 - *Evidence: 7+ refactor escalations, >1hr wall-clock on line-limit fixes across worktree-update runbook.*
 
@@ -447,8 +447,8 @@ Return filepath only (or with escalation note). Read `references/report-template
 
 ## Invocation
 
-**Automatic:** /plan Phase 1 (per-phase) and Phase 3 (final) delegate to runbook-corrector agent
-**Manual:** Delegate to runbook-corrector agent with runbook/phase file path
+**Automatic:** `/runbook` Phase 1 (per-phase) and Phase 3 (final) delegate to `edify:runbook-corrector`, which invokes this skill
+**Manual:** Dispatch `edify:runbook-corrector` with a runbook/phase file path — this skill is not user-invocable directly
 
 ---
 
@@ -456,10 +456,10 @@ Return filepath only (or with escalation note). Read `references/report-template
 
 **Workflow:**
 ```
-/design → /plan → runbook-corrector agent (fix-all) → [escalate if needed] → prepare-runbook.py → /orchestrate
+/design → /runbook → edify:runbook-corrector (fix-all) → [escalate if needed] → prepare-runbook.py → /orchestrate
 ```
 
-**Automatic review:** /plan Phase 1 triggers per-phase review, Phase 3 triggers final holistic review
+**Automatic review:** `/runbook` Phase 1 triggers per-phase review, Phase 3 triggers final holistic review
 
 **Escalation path:** If ESCALATION noted in return, caller must address unfixable issues before proceeding
 

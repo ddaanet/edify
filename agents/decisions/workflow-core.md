@@ -8,7 +8,7 @@ Workflow-related architectural decisions and patterns.
 
 **Decision:** Implement and validate weak orchestrator pattern with runbook-specific agents for ad-hoc task execution.
 
-**Status:** Complete - All phases delivered, pattern validated
+**Status:** Delivered; partly superseded 2026-08-13. Runbook-specific agents are gone — execution now delegates by reference to standing agents (`orchestration-execution.md`, "When Selecting Agent Type For Orchestrated Steps"), and the orchestrator tier is Sonnet, not Haiku. The step/runbook decomposition and terminology below still hold.
 
 **Key Components:**
 - Baseline task agent (`plugin/agents/artisan.md`)
@@ -18,11 +18,11 @@ Workflow-related architectural decisions and patterns.
 
 **Weak orchestrator pattern:**
 
-**Pattern Validation:**
-- Haiku successfully executes runbook steps using runbook-specific agents
-- Error escalation works (haiku → sonnet → opus)
-- Quiet execution pattern maintains lean orchestrator context
-- Context caching via runbook-specific agents reduces token costs
+**Pattern Validation:** claimed on a single small execution in 2026-01; the
+token-cost and reliability figures that accompanied it were derived from
+estimates, not measurement, and have been removed. The pipeline has not been
+exercised end to end since its 2026-08 revival — treat the pattern as
+unvalidated.
 
 **Terminology Standardization:**
 - Job = user's goal

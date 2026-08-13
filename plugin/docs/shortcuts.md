@@ -12,7 +12,7 @@ Type alone as entire message. Expanded by UserPromptSubmit hook.
 | `x` | Smart execute: resume in-progress or start first pending |
 | `xc` | Execute → handoff → commit → status |
 | `r` | Strict resume (error if nothing in-progress) |
-| `h` | Handoff (update session.md) → status |
+| `h` | Handoff (update `.claude/handoff-task.md`) → status |
 | `hc` | Handoff → commit → status |
 | `ci` | Commit → status |
 | `?` | List shortcuts, keywords, and entry skills |
@@ -24,7 +24,7 @@ Colon prefix with argument. `shortcut: text`
 | Input | Action |
 |-------|--------|
 | `d: <text>` | Discussion mode — analyze only, don't execute |
-| `p: <text>` | Record pending task in session.md, don't execute |
+| `p: <text>` | Record pending task in `.claude/handoff-task.md`, don't execute |
 
 ## Workflow Keywords
 
@@ -42,12 +42,11 @@ Natural language — no hook expansion needed, Claude understands directly.
 |-------|---------|
 | `/design` | Entry point for implementation tasks (triages complexity) |
 | `/commit-commands:commit` | Commit with gitmoji, structured message |
-| `/handoff:handoff` | Update session.md for agent continuation |
+| `/handoff:handoff` | Snapshot the task frame for continuation across a clear or compaction |
 | `/orchestrate` | Execute prepared runbooks |
 | `/runbook` | Create execution runbook (unified — TDD + general phases) |
 | `/claude-md-management:revise-claude-md` | Consolidate learnings into permanent docs |
-| `/handoff:handoff` | Archive session context, reset for new work |
-| `/review` | Review artifacts for quality |
+| `/edify:review` | Review in-progress (uncommitted) changes. **Distinct from Claude Code's built-in `/review`,** which reviews a PR — invoke the plugin's with its `edify:` prefix to disambiguate. |
 
 ## How It Works
 

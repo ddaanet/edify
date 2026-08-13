@@ -53,7 +53,7 @@ If design document includes "Requirements" section:
 
 ## Phase 0.75: Generate Runbook Outline
 
-**Recall diff:** `Bash: recall diff <job-name>`
+**Recall diff:** re-invoke `Skill(skill: "edify:recall", args: "<topic reflecting what just changed>")` and reconcile its selection against the existing `plans/<job-name>/recall-artifact.md`.
 
 Review the changed files list. File locations, existing patterns, and structural constraints make different implementation learnings relevant than what Phase 0.5 initially selected. If files changed that affect which recall entries are relevant, update the artifact: add entries revealed by discovery (e.g., testing patterns for the discovered module structure), remove entries for patterns that don't apply to the actual codebase. Write updated artifact back.
 
@@ -82,7 +82,7 @@ Review the changed files list. File locations, existing patterns, and structural
    - **Inter-item dependencies declared** -- If item N.M depends on item N.K, declare `Depends on: [Cycle|Step] N.K`.
    - **Code fix items enumerate affected sites** -- For items fixing code: list all affected call sites (file:function or file:line).
    - **Later items reference post-phase state** -- Items in Phase N+1 that modify files changed in Phase N must note expected state.
-   - **Phases <= 8 items each** -- Split phases with >8 items or add internal checkpoint.
+   - **Phases <= 8 items each** -- Split phases with >8 items or add internal checkpoint. *(ungrounded — needs calibration)*
    - **Cross-cutting issues scope-bounded** -- Partially addressed issues must note what's in vs out of scope.
    - **No vacuous items** -- Every item must produce a functional outcome. TDD: test a branch point. General: produce a behavioral change. Scaffolding-only items merge into nearest behavioral item.
    - **Foundation-first ordering** -- Order: existence -> structure -> behavior -> refinement. No forward dependencies.
@@ -95,7 +95,7 @@ Review the changed files list. File locations, existing patterns, and structural
    - Review agents operate on filesystem state -- committed state prevents dirty-tree issues
 
 4. **Review outline:**
-   - Delegate to `runbook-outline-corrector` (fix-all mode)
+   - Delegate to `edify:runbook-outline-corrector` (fix-all mode)
    - Include review-relevant entries from `plans/<job>/recall-artifact.md` in delegation prompt (failure modes, quality anti-patterns)
    - Agent fixes all issues (critical, major, minor)
    - Agent returns review report path
@@ -247,13 +247,17 @@ Fix inline before promotion. If unfixable, fall through to Phase 1 expansion (li
 
 **If sufficient -- check for lightweight orchestration exit:**
 
-**Discriminator:** The `## Execution Model` section encodes dispatch protocol (which agents, what context each receives, recall injection method, checkpoint sequencing). Its presence means the outline was designed as an orchestration plan, not as input to the runbook pipeline. Absence means the outline needs promotion to runbook format for prepare-runbook.py to generate step files and plan-specific agents.
+**Discriminator:** The `## Execution Model` section encodes dispatch protocol (which agents, what context each receives, recall injection method, checkpoint sequencing). Its presence means the outline was designed as an orchestration plan, not as input to the runbook pipeline. Absence means the outline needs promotion to runbook format for prepare-runbook.py to generate step files.
+
+**The heading is a contract, not a description.** `## Execution Model` is the literal string that routes this branch — renaming it in an outline silently reroutes the pipeline into promotion. Do not paraphrase it.
+
+**Ambiguity check before routing:** if the outline has no `## Execution Model` heading but its body specifies dispatch protocol anyway — naming agents to dispatch, per-agent context, recall injection, or checkpoint sequencing — STOP and ask the user which route was intended. Do not promote on the strength of a missing heading alone: an outline that describes its own orchestration and gets promoted anyway produces step files nobody asked for, and the mismatch is not visible until execution.
 
 If outline contains `## Execution Model` section with dispatch protocol:
 
 1. Do not promote to runbook format, do not run prepare-runbook.py -- the outline IS the execution plan
 2. Commit outline, then tail-call `/handoff:handoff` → `/commit-commands:commit`
-3. Set task command in session.md: orchestrate from outline + recall artifact per Execution Model and Recall Injection sections
+3. Set task command in `.claude/handoff-task.md`: orchestrate from outline + recall artifact per Execution Model and Recall Injection sections
 
 **Otherwise -- promote outline to runbook:**
 
@@ -303,7 +307,7 @@ If outline contains `## Execution Model` section with dispatch protocol:
    - Review agents operate on filesystem state -- committed state prevents dirty-tree issues
 
 4. **Review phase content:**
-   - Delegate to `runbook-corrector` (fix-all mode)
+   - Delegate to `edify:runbook-corrector` (fix-all mode)
    - Include review-relevant entries from `plans/<job>/recall-artifact.md` in delegation prompt (failure modes, quality anti-patterns)
    - Agent applies type-aware criteria: TDD discipline for TDD phases, step quality for general phases, vacuity/density/ordering for inline phases, LLM failure modes for ALL phases
    - Agent returns review report path
@@ -417,7 +421,7 @@ Every assembled runbook MUST include this metadata section:
 
 **After assembly validation, perform final cross-phase review.**
 
-Delegate to `runbook-corrector` (fix-all mode) for cross-phase consistency:
+Delegate to `edify:runbook-corrector` (fix-all mode) for cross-phase consistency:
 - Include review-relevant entries from `plans/<job>/recall-artifact.md` in delegation prompt (failure modes, quality anti-patterns)
 
 **Review scope:**
@@ -471,6 +475,7 @@ Delegate to `runbook-corrector` (fix-all mode) for cross-phase consistency:
    plugin/bin/validate-runbook.py lifecycle plans/<job>/
    plugin/bin/validate-runbook.py test-counts plans/<job>/
    plugin/bin/validate-runbook.py red-plausibility plans/<job>/
+   plugin/bin/validate-runbook.py verify-green-paths plans/<job>/
    ```
 
    Each subcommand writes a report to `plans/<job>/reports/validation-{subcommand}.md`.
@@ -480,12 +485,30 @@ Delegate to `runbook-corrector` (fix-all mode) for cross-phase consistency:
 2. **Handle results:**
    - All exit 0: proceed to Phase 4
    - Any exit 1: STOP, report violations to user
-   - Any exit 2 (red-plausibility only): optionally delegate semantic analysis to runbook-corrector, then proceed
+   - Any exit 2 (red-plausibility only): optionally delegate semantic analysis to `edify:runbook-corrector`, then proceed
+
+3. **Read the report result line, not just the exit code.** Exit 0 covers three
+   different outcomes:
+   - `PASS` — the check ran and found nothing.
+   - `NOT-APPLICABLE` — the check had no subject matter. The four cycle-based
+     checks (`model-tags`, `lifecycle`, `test-counts`, `red-plausibility`) report
+     this against a general or inline runbook, which declares no TDD cycles. A
+     Tier 3 runbook whose phases are all general is validated by
+     `verify-green-paths` alone — that is expected, not a gap to work around.
+   - `SKIPPED` — the check did not run.
+
+**On `--skip-*`:** each subcommand takes `--skip-<subcommand> REASON`. Skipping
+is legitimate only when the check *cannot* run — the script is unavailable, or
+the runbook is in a form the parser cannot read. It is never legitimate as a way
+past a failing check: that is what exit 1 and the violations list are for. The
+reason is recorded in the report, which is stamped SKIPPED and states that it is
+not evidence of conformance.
 
 **Graceful degradation:** If `validate-runbook.py` doesn't exist, skip Phase 3.5 and proceed to Phase 4 with warning. Supports incremental adoption -- Phase A lands skill references before Phase B implements the script.
 
 **Validation checks:**
-- `model-tags`: File path -> model mapping. Artifact-type files (skills/, fragments/, agents/, workflow-*.md) must have opus tag.
-- `lifecycle`: Create->modify dependency graph. Flags modify-before-create, duplicate creation, future-phase reads.
-- `test-counts`: Checkpoint "All N tests pass" claims vs actual test function count.
-- `red-plausibility`: Prior GREENs vs RED expectations. Flags already-passing states.
+- `model-tags` *(cycle-based)*: File path -> model mapping. Artifact-type files (skills/, fragments/, agents/, workflow-*.md) must have opus tag.
+- `lifecycle` *(cycle-based)*: Create->modify dependency graph. Flags modify-before-create, duplicate creation, future-phase reads.
+- `test-counts` *(cycle-based)*: Checkpoint "All N tests pass" claims vs actual test function count.
+- `red-plausibility` *(cycle-based)*: Prior GREENs vs RED expectations. Flags already-passing states.
+- `verify-green-paths` *(any runbook)*: Flags `**Verify GREEN:**` / `**Verify RED:**` lines carrying specific pytest paths or `::` selectors instead of the universal `just green` recipe. This is the deterministic checker for review-plan §3.5's rule.

@@ -93,7 +93,7 @@ Strict RED-GREEN-REFACTOR: 1) RED: failing test, 2) Verify RED, 3) GREEN: minima
 - Tests: tests/test_auth.py
 
 **Conventions:**
-- Use Read/Write/Edit/`rg` (Bash)s (not Bash for file ops)
+- Use Read/Write/Edit and `rg` (Bash) for file operations, not shell redirection
 - Report errors explicitly
 - Write notes to plans/auth-feature/reports/cycle-{X}-{Y}-notes.md
 
@@ -109,20 +109,28 @@ Strict RED-GREEN-REFACTOR: 1) RED: failing test, 2) Verify RED, 3) GREEN: minima
 
 **Implementation:**
 
+**Bootstrap:** Create `src/auth/providers/__init__.py` with a `ProviderInterface` class whose `authenticate()`, `get_user()`, and `refresh_token()` return `None`. Do not commit.
+
+---
+
 **RED Phase:**
 
-**Test:** Add test in tests/test_auth.py asserting provider interface has required methods
+**Test:** test_provider_interface_authenticate_returns_user
+**Assertions:**
+- `ProviderInterface.authenticate(valid_code)` returns a `User` instance, not `None`
+- The returned user's `email` matches the email in the provider's token response
 
 **Expected failure:**
 ```
-ModuleNotFoundError: No module named 'auth.providers'
+AssertionError: expected User instance, got None
 ```
 
-**Why it fails:** Provider module doesn't exist yet
+**Why it fails:** The bootstrap stub returns `None` — the assertion is behavioral, so it also proves the test catches a trivial implementation.
 
-**Verify RED:** Run pytest tests/test_auth.py::test_provider_interface -v
-- Must fail with ModuleNotFoundError
-- If passes, STOP - module may already exist
+**Verify RED:** `just red`
+- Must fail with AssertionError on the behavioral assertion
+- If it fails with ImportError or ModuleNotFoundError, the bootstrap stub is missing — STOP
+- If it passes, the behavior already exists — STOP
 
 ---
 
@@ -135,10 +143,10 @@ ModuleNotFoundError: No module named 'auth.providers'
   Action: Create directory and file
   Action: Define ProviderInterface class with authenticate(), get_user(), refresh_token() methods
 
-**Verify GREEN:** Run pytest tests/test_auth.py::test_provider_interface -v
+**Verify GREEN:** `just green`
 - Must pass
 
-**Verify no regression:** Run pytest tests/
+**Verify no regression:** `just test`
 - All existing tests must pass
 
 ---
@@ -153,7 +161,7 @@ ModuleNotFoundError: No module named 'auth.providers'
 
 **Actions when stopped:**
 1. Document in plans/auth-feature/reports/cycle-1-1-notes.md
-2. If test passes unexpectedly: Check if interface exists, mark [REGRESSION] or fix test
+2. If test passes unexpectedly: the assertion is not behavioral — strengthen it, or mark [REGRESSION]
 3. If regression: STOP, report broken tests, escalate
 
 **Expected Outcome**: Interface defined, test passes, no regressions
@@ -169,7 +177,7 @@ ModuleNotFoundError: No module named 'auth.providers'
 - No regressions ✓
 
 **Success Criteria**:
-- RED verified (ModuleNotFoundError)
+- RED verified (behavioral AssertionError against the bootstrap stub)
 - GREEN verified (test passes)
 - No regression (all tests pass)
 
@@ -244,7 +252,7 @@ ModuleNotFoundError: No module named 'auth.providers'
 ```markdown
 ## Step 3.1: Create review-taxonomy.md reference file
 
-**Objective**: Extract status taxonomy from corrector into standalone reference file to keep agent under 400-line threshold.
+**Objective**: Extract status taxonomy from corrector into standalone reference file to keep the agent under the 400-line size convention.
 
 **Prerequisites**:
 - Read `plugin/agents/corrector.md` (understand current status handling and report format)

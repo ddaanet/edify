@@ -4,7 +4,7 @@
 - **Questions/research/discussion** → Handle directly (no workflow needed)
 - **Requirements capture** → Use `/requirements` skill (extract from conversation or elicit through questions)
 - **Implementation tasks** → Use `/design` skill (triages complexity, routes to appropriate workflow)
-- **Workflow in progress** (check session.md) → Continue from current state
+- **Workflow in progress** (check `.claude/handoff-task.md`) → Continue from current state
 
 The `/design` skill includes complexity triage: simple tasks execute directly, moderate tasks skip design and route to planning, complex tasks get full design treatment.
 
