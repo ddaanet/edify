@@ -53,135 +53,18 @@ line-limits:
     run-line-limits
     report-end-safe "Line limits"
 
-# Create release: tag, build tarball, upload to PyPI and GitHub
-# Use --dry-run to perform local changes and verify external permissions without publishing
-
-# Use --rollback to revert local changes from a crashed dry-run
+# Create release: bump plugin.json (SOT), sync pyproject.toml, tag, push,
+# publish to PyPI, GitHub release, bump the marketplace entry.
 [no-exit-message]
-release *ARGS: dev
+release BUMP="patch": dev
     #!{{ bash_prolog }}
-    DRY_RUN=false
-    ROLLBACK=false
-    BUMP=patch
-    # Parse flags and positional args
-    for arg in {{ ARGS }}; do
-        case "$arg" in
-            --dry-run) DRY_RUN=true ;;
-            --rollback) ROLLBACK=true ;;
-            --*) fail "Error: unknown option: $arg" ;;
-            *) [[ -n "${positional:-}" ]] && fail "Error: too many arguments"
-               positional=$arg ;;
-        esac
-    done
-    [[ -n "${positional:-}" ]] && BUMP=$positional
+    visible scripts/release.sh "{{ BUMP }}"
 
-    # Cleanup function: revert commit and remove build artifacts
-    cleanup_release() {
-        local initial_head=$1
-        local initial_branch=$2
-        local version=$3
-        visible git reset --hard "$initial_head"
-        if [[ -n "$initial_branch" ]]; then
-            visible git checkout "$initial_branch"
-        else
-            visible git checkout "$initial_head"
-        fi
-
-        # Remove only this version's build artifacts
-        if [[ -n "$version" ]] && [[ -d dist ]]; then
-            find dist -name "*${version}*" -delete
-            [[ -d dist ]] && [[ -z "$(ls -A dist)" ]] && visible rmdir dist
-        fi
-    }
-
-    # Rollback mode
-    if [[ "$ROLLBACK" == "true" ]]; then
-        # Check if there's a release commit at HEAD
-        if git log -1 --format=%s | grep -q "🔖 Release"; then
-            # Verify no permanent changes (commit not pushed to remote)
-            # Skip check if HEAD is detached or has no upstream
-            if git symbolic-ref -q HEAD >/dev/null && git rev-parse --abbrev-ref @{u} >/dev/null 2>&1; then
-                # We're on a branch with upstream - check if release commit is unpushed
-                if ! git log @{u}.. --oneline | grep -q "🔖 Release"; then
-                    fail "Error: release commit already pushed to remote"
-                fi
-            fi
-
-            # Last field is the bare number; the subject carries an emoji and
-            # the package name, neither of which match dist/ filenames.
-            version=$(git log -1 --format=%s | awk '{print $NF}')
-            current_branch=$(git symbolic-ref -q --short HEAD || echo "")
-            cleanup_release "HEAD~1" "$current_branch" "$version"
-            echo "${GREEN}✓${NORMAL} Rollback complete"
-        else
-            fail "No release commit found"
-        fi
-        exit 0
-    fi
-
-    # Check preconditions
-    git diff --quiet HEAD || fail "Error: uncommitted changes"
-    current_branch=$(git symbolic-ref -q --short HEAD || echo "")
-    [[ -z "$current_branch" ]] && fail "Error: not on a branch (HEAD is detached)"
-    main_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
-    [[ "$current_branch" != "$main_branch" ]] && fail "Error: must be on $main_branch branch (currently on $current_branch)"
-    release=$(uv version --bump "$BUMP" --dry-run)
-    tag="v$(echo "$release" | awk '{print $NF}')"
-    git rev-parse "$tag" >/dev/null 2>&1 && fail "Error: tag $tag already exists"
-    # Everything the external phase needs, checked before anything mutates:
-    # it pushes and tags before publishing, so a late failure strands a public
-    # tag with no PyPI artifact.
-    git rev-parse --abbrev-ref @{u} >/dev/null 2>&1 \
-        || fail "Error: no upstream for $current_branch. Run: git push -u origin $current_branch"
-    [[ -z "${UV_PUBLISH_TOKEN:-}" ]] && fail "Error: UV_PUBLISH_TOKEN not set. Get token from https://pypi.org/manage/account/token/"
-    gh auth status >/dev/null 2>&1 || fail "Error: not authenticated with GitHub"
-
-    if [[ "$DRY_RUN" == "true" ]]; then
-        INITIAL_HEAD=$(git rev-parse HEAD)
-        INITIAL_BRANCH=$(git symbolic-ref -q --short HEAD || echo "")
-        trap 'cleanup_release "$INITIAL_HEAD" "$INITIAL_BRANCH" "${version:-}"; exit 1' ERR EXIT
-    fi
-
-    # Perform local changes: version bump, commit, build
-    visible uv version --bump "$BUMP"
-    # --short is the bare number: it must match dist/ filenames and the tag.
-    version=$(uv version --short)
-    release_name=$(uv version)
-    plugin/bin/bump-plugin-version.py "$version"
-    plugin/bin/check-version-consistency.py
-    git add pyproject.toml uv.lock plugin/.claude-plugin/plugin.json
-    visible git commit -m "🔖 Release $release_name"
-    tag="v$version"
-    visible uv build
-
-    if [[ "$DRY_RUN" == "true" ]]; then
-        # Verify external permissions (presence checks already ran above)
-        git push --dry-run || fail "Error: cannot push to git remote"
-        uv publish --dry-run dist/*"$version"* || fail "Error: cannot publish to PyPI"
-
-        echo ""
-        echo "${GREEN}✓${NORMAL} Dry-run complete: $release_name"
-        echo "  ${GREEN}✓${NORMAL} Git push permitted"
-        echo "  ${GREEN}✓${NORMAL} PyPI publish permitted"
-        echo "  ${GREEN}✓${NORMAL} GitHub release permitted"
-
-        # Normal cleanup
-        trap - ERR EXIT
-        cleanup_release "$INITIAL_HEAD" "$INITIAL_BRANCH" "$version"
-        echo ""
-        echo "Run: ${COMMAND}just release $BUMP${NORMAL}"
-        exit 0
-    fi
-
-    # Perform external actions
-    visible git push
-    visible git tag -a "$tag" -m "Release $release_name"
-    visible git push origin "$tag"
-    # Publish only what was just built: bare `uv publish` globs all of dist/,
-    # which would re-upload stale artifacts from earlier versions.
-    visible uv publish dist/*"$version"*
-    visible gh release create "$tag" --title "$release_name" --generate-notes
-    echo "${GREEN}✓${NORMAL} Release $tag complete"
+# Complete a release that landed only partially. Idempotent, no gate.
+[no-exit-message]
+resume-release:
+    #!{{ bash_prolog }}
+    visible scripts/release.sh --resume
 
 # Bash prolog
 [private]
