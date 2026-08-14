@@ -288,7 +288,7 @@ Five structural axes that cause execution failures. Apply regardless of phase ty
 
 **Artifact-type override violations (advisory):**
 - Steps editing skills (`plugin/skills/`), fragments (`plugin/fragments/`),
-  agents (`plugin/agents/`), or workflow decisions (`agents/decisions/workflow-*.md`)
+  agents (`plugin/agents/`), or the living design (`docs/design.md`)
   assigned below opus → flag
 - Pattern: Check `File:` references in `Changes` section against override paths
 

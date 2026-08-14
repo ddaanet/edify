@@ -88,7 +88,7 @@ Review the changed files list. File locations, existing patterns, and structural
    - **Foundation-first ordering** -- Order: existence -> structure -> behavior -> refinement. No forward dependencies.
    - **Collapsible item detection** -- Adjacent items modifying same file or testing edge cases of same function should collapse. Note candidates for Phase 0.85.
    - **Prose atomicity** -- All edits to a single prose artifact (skill, fragment, agent definition) land in one item. No splitting the same file across items or phases. Exception: expand/contract migration (FR-2a pattern).
-   - **Self-modification ordering** -- When the runbook modifies pipeline tools it will later use (skills, review agents, executor), tool-improvement items precede tool-usage items. References `agents/decisions/workflow-advanced.md` "When Bootstrapping Self-Referential Improvements."
+   - **Self-modification ordering** -- When the runbook modifies pipeline tools it will later use (skills, review agents, executor), tool-improvement items precede tool-usage items. See `docs/design.md` D-39, which routes self-modifying work out of the runbook pipeline entirely when the risk cannot be ordered away.
 
 3. **Commit outline before review:**
    - Commit `runbook-outline.md` to create clean checkpoint

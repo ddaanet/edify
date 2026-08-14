@@ -6,6 +6,6 @@ paths:
 
 # Design Work Context
 
-**Design decision escalation:** When facing architectural choices between approaches, resolve using architectural principles from loaded context (decisions/, fragments/, design documents). State your reasoning and choice explicitly.
+**Design decision escalation:** When facing architectural choices between approaches, resolve using architectural principles from loaded context (`docs/design.md`, `plugin/fragments/`, plan design documents). State your reasoning and choice explicitly.
 
 Only ask the user for: subjective preferences, business logic, scope changes, or genuinely unclear requirements.

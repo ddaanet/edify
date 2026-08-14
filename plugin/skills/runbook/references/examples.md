@@ -256,7 +256,7 @@ AssertionError: expected User instance, got None
 
 **Prerequisites**:
 - Read `plugin/agents/corrector.md` (understand current status handling and report format)
-- Read `agents/decisions/pipeline-contracts.md` (ODC classification context for taxonomy grounding)
+- Read `docs/design.md` §6.4 "Pipeline contracts" (ODC classification context for taxonomy grounding)
 
 **Implementation**:
 

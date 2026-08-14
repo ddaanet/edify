@@ -23,11 +23,16 @@ ARTIFACT_PREFIXES = (
     "plugin/agents/",
 )
 
+# The living design record. Design documents are opus work (docs/design.md
+# D-42); before the 2026-08 fold this clause named the four workflow-*.md
+# files under agents/decisions/.
+ARTIFACT_FILES = ("docs/design.md",)
+
 
 def _is_artifact_path(file_path: str) -> bool:
     if any(file_path.startswith(p) for p in ARTIFACT_PREFIXES):
         return file_path.endswith(".md")
-    return bool(re.match(r"agents/decisions/workflow-[^/]+\.md$", file_path))
+    return file_path in ARTIFACT_FILES
 
 
 def write_report(

@@ -149,11 +149,9 @@ Place imports in logical groups:
 
 ## Workflows
 @plugin/fragments/workflows-terminology.md
-@agents/decisions/workflow-core.md
 
 ## Development
-@agents/decisions/testing.md
-@agents/decisions/cli.md
+@docs/design.md
 ```
 
 ### 4. Mix Imported Content with Project-Specific Content

@@ -10,8 +10,7 @@ Execution delegates by reference: the orchestrator dispatches a standing agent
 (`edify:artisan`, `edify:test-driver`, `edify:corrector`) with the path to a
 step file, and the step file's Context block names the design, outline, and
 shared-context artifacts the executor must read. No per-plan agent definitions
-are generated -- see `agents/decisions/orchestration-execution.md`, "When
-Selecting Agent Type For Orchestrated Steps".
+are generated -- see `docs/design.md` D-24.
 
 Supports:
 - General runbooks (## Step N:)

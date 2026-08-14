@@ -50,8 +50,8 @@ authority, replacing the current single-pass fix-all → UNFIXABLE binary: round
 caps, model escalation on late rounds, a re-review contract (per-finding
 ADDRESSED/NOT ADDRESSED; new breakage assessed in the fix diff only), and
 at-cap adjudication with explicitly parked findings — never silent discard.
-Must be reconciled with `agents/decisions/pipeline-contracts.md` fix-all policy
-(see Q-3). Acceptance: pipeline-contracts.md documents the loop; orchestrate/
+Must be reconciled with the fix-all policy in `docs/design.md` §6.4 "Pipeline
+contracts" (see Q-3). Acceptance: §6.4 documents the loop; orchestrate/
 inline escalation paths reference it.
 
 **FR-6: Rulings ledger**
@@ -206,7 +206,7 @@ imports are gated on FR-1's method existing first.
   tree read for this analysis (version-pinned)
 - superpowers `skills/writing-skills/persuasion-principles.md` — Meincke et al.
   (2025) N=28,000 compliance study; Cialdini (2021) — evidence base behind FR-2
-- `agents/decisions/prompt-structure-research.md` — edify's existing grounded
+- `docs/design.md` §6.9 "Prompt and instruction structure" — edify's existing grounded
   prompt research; FR-2 guidance must merge with it, not duplicate it
 
 ### Skill Dependencies (for /design)

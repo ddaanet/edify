@@ -23,7 +23,7 @@ continuation:
 
 Create detailed execution runbooks suitable for weak orchestrator agents. Transforms designs into structured runbooks with per-phase type tagging — behavioral phases get TDD cycles (RED/GREEN), infrastructure phases get general steps, prose/config phases pass through as inline.
 
-**Workflow context:** Part of implementation workflow (see `agents/decisions/pipeline-contracts.md` for full pipeline): `/design` → `/runbook` → [runbook-corrector] → prepare-runbook.py → `/orchestrate`
+**Workflow context:** Part of implementation workflow (see `docs/design.md` §6.4 "Pipeline contracts" for full pipeline): `/design` → `/runbook` → [runbook-corrector] → prepare-runbook.py → `/orchestrate`
 
 ## Per-Phase Type Model
 
@@ -64,7 +64,7 @@ prepare-runbook.py auto-detects per-file via headers (`## Cycle X.Y:` vs `## Ste
 - Skills (`plugin/skills/`)
 - Fragments (`plugin/fragments/`)
 - Agent definitions (`plugin/agents/`)
-- Workflow decisions (`agents/decisions/workflow-*.md`)
+- The living design (`docs/design.md`)
 
 These are prose instructions consumed by LLMs — wording directly determines downstream agent behavior. "Simple" edits to these files require nuanced understanding that haiku/sonnet cannot reliably provide.
 

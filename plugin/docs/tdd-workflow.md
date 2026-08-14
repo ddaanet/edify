@@ -545,7 +545,7 @@ This structured format enables:
 - **CLAUDE.md**: Agent instructions, communication rules, patterns
 - **docs/general-workflow.md**: General workflow documentation
 - **`.claude/handoff-task.md`**: Current task frame — in-progress task and open decisions
-- **agents/decisions/**: Architectural decisions and rationale
+- **docs/design.md**: The living design record — requirements, architecture, decisions, rationale
 - **plugin/agents/test-driver.md**: TDD executor agent
 
 ---

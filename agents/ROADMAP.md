@@ -8,7 +8,7 @@ Future enhancement ideas for edify.
 
 **Decision:** remark-cli selected and migrated
 
-**Reference:** `agents/decisions/architecture.md` - Markdown Formatter Selection section
+**Reference:** `docs/design.md` §6.2 "Markdown and token tooling"
 
 ## Session Summary Extraction
 

@@ -19,7 +19,7 @@ echo -n "/orchestrate {name}" | pbcopy
 
 Default-exit invokes `/handoff:handoff` → `/commit-commands:commit` — hands off session context (marks planning complete, adds orchestration as pending), then commits. Next pending task instructs: "Restart session, paste `/orchestrate {name}` from clipboard."
 
-**Why a fresh session:** planning and execution run at different model tiers, and orchestration is long-running — the boundary keeps the orchestrator off a context already full of planning transcript. See `agents/decisions/orchestration-execution.md`, "When Managing Orchestration Context". Agent discoverability is no longer a reason: `prepare-runbook.py` installs nothing into `.claude/agents/`.
+**Why a fresh session:** planning and execution run at different model tiers, and orchestration is long-running — the boundary keeps the orchestrator off a context already full of planning transcript. See `docs/design.md` D-24. Agent discoverability is no longer a reason: `prepare-runbook.py` installs nothing into `.claude/agents/`.
 
 ---
 
@@ -102,7 +102,7 @@ When production code's primary operation is subprocess calls (git, CLI tools, co
 - Error injection (lock files, permission errors, network timeouts)
 - Cases where the real subprocess is destructive or non-deterministic
 
-Generalizes the project convention in `agents/decisions/testing.md` ("When Preferring E2E Over Mocked Subprocess") from git to all subprocess domains.
+Generalizes the project convention in `docs/design.md` D-19 from git to all subprocess domains.
 
 ### Local Substitutes for External Dependencies
 
@@ -257,4 +257,4 @@ Token budget: ≤1.5K tokens (ungrounded — needs empirical calibration after f
 - **`references/anti-patterns.md`** — Patterns to avoid with corrections
 - **`references/error-handling.md`** — Error catalog, edge cases, recovery protocols
 - **`references/examples.md`** — Complete runbook examples (TDD and general)
-- **`agents/decisions/pipeline-contracts.md`** — I/O contracts for pipeline transformations
+- **`docs/design.md` §6.4 "Pipeline contracts"** — I/O contracts for pipeline transformations

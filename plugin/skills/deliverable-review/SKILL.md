@@ -41,7 +41,7 @@ Before starting, gather:
 
 Universal axes (all types): conformance, functional correctness, functional completeness, vacuity, excess.
 
-Full axis definitions: `agents/decisions/deliverable-review.md`
+Full axis definitions: `docs/design.md` §6.8 "Deliverable review"
 
 ### Phase 2: Gap Analysis
 
@@ -106,7 +106,7 @@ Write consolidated report to `plans/<plan>/reports/deliverable-review.md`.
 # Deliverable Review: <plan-name>
 
 **Date:** <date>
-**Methodology:** agents/decisions/deliverable-review.md
+**Methodology:** docs/design.md §6.8 "Deliverable review"
 
 ## Inventory
 [Table: type, file, lines]
@@ -139,5 +139,5 @@ Report severity counts only. No merge-readiness language — the user reads seve
 
 ## References
 
-- **Methodology** — full axis definitions, ISO/IEEE sources: `agents/decisions/deliverable-review.md`
+- **Methodology** — full axis definitions, ISO/IEEE sources: `docs/design.md` §6.8 "Deliverable review"
 - **Example report** — completed review with all sections: `references/example-report.md`

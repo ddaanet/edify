@@ -9,4 +9,4 @@
 - Example: "Output matches reference: `medal sonnet \033[35m...` with double-space separators"
 - NOT abstracted: "Output contains formatted model with appropriate styling"
 
-**Related:** See `agents/decisions/testing.md` "Conformance Validation for Migrations".
+**Related:** See `docs/design.md` §6.3 "Testing".

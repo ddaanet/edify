@@ -83,7 +83,7 @@ The pipeline writes nothing into `.claude/agents/`. Orchestrated steps dispatch
 standing agents shipped with the plugin (`edify:artisan`, `edify:test-driver`,
 `edify:corrector`), and the plan's own artifacts live under `plans/<name>/`.
 Anything hand-authored in `.claude/agents/` still needs a session restart before
-Claude Code discovers it — see `agents/decisions/project-config.md`.
+Claude Code discovers it — see `docs/design.md` §6.10 "Project configuration".
 
 ### Bash Working Directory
 

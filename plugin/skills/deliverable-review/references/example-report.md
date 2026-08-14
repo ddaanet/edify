@@ -1,7 +1,7 @@
 # Deliverable Review: worktree-update
 
 **Date:** 2026-02-13
-**Methodology:** `agents/decisions/deliverable-review.md` (ISO 25010 / IEEE 1012)
+**Methodology:** `docs/design.md` §6.8 "Deliverable review" (ISO 25010 / IEEE 1012)
 **Design reference:** `plans/worktree-update/design.md`
 
 ---

@@ -204,4 +204,7 @@ and the session task frame is `.claude/handoff-task.md`.
 
 ## Design Decisions
 
-See `agents/decisions/` — `cli`, `markdown-tooling`, `data-processing`, `testing`, `project-config`, `deliverable-review`, `plugin-packaging`.
+See `docs/design.md` — the living design record (requirements, architecture,
+decisions, rejected alternatives). It is rewired when components change, not
+appended to as an ADR archive. `docs/changelog.md` carries the dated
+design-significant entries.

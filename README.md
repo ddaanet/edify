@@ -52,8 +52,8 @@ just precommit  # all checks (CI equivalent)
 ```
 
 Python 3.14+ with [mypy] strict types, [pytest] for tests, [ruff] for linting,
-[uv] for dependencies, and [just] for tasks. Design decisions are recorded in
-`agents/decisions/`.
+[uv] for dependencies, and [just] for tasks. Design is recorded in
+`docs/design.md`.
 
 ## License
 

@@ -97,7 +97,7 @@ Assess work type alongside complexity — independent dimension (XP spike/story,
 | **production** | `src/`, `plugin/bin/`, `plugin/lib/` | Tests, lint, module structure, review |
 | **agentic-prose** | `plugin/skills/`, `plugin/fragments/`, `plugin/agents/`, `agents/` | Wording quality, behavioral verification |
 | **exploration** | `plans/prototypes/`, `plans/spikes/` | Functional, documented purpose, no test mirrors |
-| **investigation** | `plans/reports/`, `agents/decisions/` | Accuracy, completeness, grounding |
+| **investigation** | `plans/reports/`, `docs/design.md` | Accuracy, completeness, grounding |
 | **ephemeral** | `tmp/` | None |
 
 #### Multi-Item Decomposition
@@ -163,7 +163,7 @@ Produce this classification block before routing (visible output, not internal r
 
 When a design modifies an "author" skill (a skill whose output is reviewed by a corrector), check coupled dependencies before completing the design:
 
-1. Identify the corrector from the transformation table (T1-T6.5 in `agents/decisions/pipeline-contracts.md`)
+1. Identify the corrector from the transformation table (T1-T6.5 in `docs/design.md` §6.4 "Pipeline contracts")
 2. Check: does the corrector's review criteria need corresponding update?
 3. Check: does any mechanical validator need update?
 4. Include corrector/validator updates in the same design scope

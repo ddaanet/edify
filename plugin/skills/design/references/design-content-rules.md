@@ -117,14 +117,14 @@ Include this section specifying what the planner should read before starting:
 ## Documentation Perimeter
 
 **Required reading (planner must load before starting):**
-- `agents/decisions/architecture.md` -- module patterns, path handling
+- `docs/design.md` §5 "Architecture" -- module patterns, path handling
 - `plugin/fragments/delegation.md` -- quiet execution pattern
 - `plans/{job-name}/reports/explore-{topic}.md` -- exploration results
 
 **Context7 references:**
 - `/anthropics/claude-code` -- hook configuration patterns (query: "PostToolUse hooks")
 
-**Pipeline contracts:** `agents/decisions/pipeline-contracts.md` (for tasks producing runbooks)
+**Pipeline contracts:** `docs/design.md` §6.4 "Pipeline contracts" (for tasks producing runbooks)
 
 **Additional research allowed:** Planner may do additional Context7 queries or exploration for technical implementation details not covered above.
 ```
@@ -145,7 +145,7 @@ This ensures the planner has domain-specific guidance loaded before creating the
 
 ## Execution Model Directives
 
-When the design involves modifying workflow definitions (`agents/decisions/workflow-*.md`), skill files (`plugin/skills/`), or agent procedures (`plugin/agents/`), include an execution directive in "Next steps":
+When the design involves modifying the living design (`docs/design.md`), skill files (`plugin/skills/`), or agent procedures (`plugin/agents/`), include an execution directive in "Next steps":
 - Workflow/skill/agent edits: opus required
 
 Ensures architectural artifacts get appropriate scrutiny during execution, not just planning.

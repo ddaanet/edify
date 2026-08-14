@@ -186,9 +186,9 @@ See [fragments/claude-config-layout.md](../fragments/claude-config-layout.md) fo
 
 **Note:** Steps in this phase are conditional based on your tier (see Tiered Adoption section). Tier 1 projects can skip this entire phase — `.claude/handoff-task.md` is all they need.
 
-- [ ] **3.1** Create `agents/` directory (skip for Tier 1)
+- [ ] **3.1** Create `agents/` and `docs/` directories (skip for Tier 1)
   ```bash
-  mkdir -p agents/decisions
+  mkdir -p agents docs
   ```
 
 - [ ] **3.2** Legacy layouts only: move a root-level `session.md` (pre-2026-02 task frame) to `.claude/handoff-task.md`
@@ -203,7 +203,7 @@ See [fragments/claude-config-layout.md](../fragments/claude-config-layout.md) fo
 
   Institutional knowledge accumulated across sessions. Append new learnings at the bottom.
 
-  **Soft limit: 80 lines.** When approaching this limit, use `/claude-md-management:revise-claude-md` to consolidate older learnings into permanent documentation (behavioral rules → `plugin/fragments/*.md`, technical details → `agents/decisions/*.md` or `agents/decisions/implementation-notes.md`). Keep the 3-5 most recent learnings for continuity.
+  **Soft limit: 80 lines.** When approaching this limit, use `/claude-md-management:revise-claude-md` to consolidate older learnings into permanent documentation (behavioral rules → `plugin/fragments/*.md`, technical details → `docs/design.md`). Keep the 3-5 most recent learnings for continuity.
 
   ---
   ```
@@ -228,24 +228,23 @@ See [fragments/claude-config-layout.md](../fragments/claude-config-layout.md) fo
   ```
   Skip for Tier 1.
 
-- [ ] **3.6** Migrate decision documents (if applicable)
-  Move project-specific architectural docs to `agents/decisions/`:
-  ```bash
-  git mv dev/architecture.md agents/decisions/architecture.md
-  git mv dev/design-decisions.md agents/decisions/design-decisions.md
-  ```
-  Adjust paths based on your project's existing structure. Skip if no existing decision documents.
+- [ ] **3.6** Fold decision documents into one living design doc (if applicable)
+  Merge project-specific architectural docs into `docs/design.md`, structured as
+  functional requirements, non-functional requirements, architecture, decisions,
+  rejected alternatives, and a changelog. Delete the sources once folded — the
+  design doc is rewired as components change, not an archive of superseded
+  records. Skip if no existing decision documents.
 
 ### Phase 4: CLAUDE.md Update
 
 - [ ] **4.1** Update the task-frame `@` reference path (if moved in Phase 3.2)
-  Change `@.claude/handoff-task.md` to `@`.claude/handoff-task.md` in the Current Work section.
+  Change `@session.md` to `@.claude/handoff-task.md` in the Current Work section.
   Skip if the path did not change (Tier 1).
 
 - [ ] **4.2** Add learnings.md `@` reference (Tier 2+)
   ```markdown
   ### Current Work
-  - @`.claude/handoff-task.md` - Current session handoff context (update only on handoff)
+  - @.claude/handoff-task.md - Current session handoff context (update only on handoff)
   - @agents/learnings.md - Accumulated learnings (append-only, soft limit 80 lines)
   ```
   Skip for Tier 1 (no separate learnings file).
@@ -253,8 +252,7 @@ See [fragments/claude-config-layout.md](../fragments/claude-config-layout.md) fo
 - [ ] **4.3** Update Architecture & Design section (if decision documents migrated)
   ```markdown
   ### Architecture & Design
-  - **agents/decisions/architecture.md** - Module structure, implementation details
-  - **agents/decisions/design-decisions.md** - Design rationale and trade-offs
+  - **docs/design.md** - Requirements, module structure, decisions and rationale
   ```
   Skip if keeping existing paths or no decision documents.
 
@@ -326,7 +324,7 @@ Which tier do I need?
 **Structure:**
 - `.claude/handoff-task.md` with handoff context
 - `agents/learnings.md` for accumulated knowledge
-- Optional `agents/decisions/` for architectural docs
+- Optional `docs/design.md` for the architectural record
 - Optional `agents/jobs.md` if tracking multiple plans
 
 ### Tier 3: Full (complex projects, multi-plan, multi-agent)
@@ -341,7 +339,7 @@ Which tier do I need?
 
 **Structure:**
 - Full agents/ directory with learnings.md, jobs.md, `memory/MEMORY.md`, plus `.claude/handoff-task.md`
-- `agents/decisions/` with architectural documentation
+- `docs/design.md` with the living architectural record
 - Potentially custom skills in `.claude/skills/`
 
 ---
@@ -358,7 +356,7 @@ Which tier do I need?
 
 **Handoff fails to write learnings:** `agents/learnings.md` doesn't exist. Create it with the standard header (Phase 3, step 3.3). Or, if using Tier 1, learnings should remain inline in `.claude/handoff-task.md`.
 
-**`@` references don't resolve:** Ensure paths are relative to project root and files exist. `@`.claude/handoff-task.md` requires `.claude/handoff-task.md` to exist.
+**`@` references don't resolve:** Ensure paths are relative to project root and files exist. `@.claude/handoff-task.md` requires `.claude/handoff-task.md` to exist.
 
 ---
 

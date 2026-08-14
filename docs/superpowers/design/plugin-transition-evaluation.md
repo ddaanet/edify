@@ -349,8 +349,6 @@ Independent of any decision above:
   `if health_sh.exists()`, so the block silently no-ops and its `sys.exit(1)` is
   unreachable.
 - `plugin/bin/deliverable-inventory.py` — referenced nowhere outside `plans/`.
-- `agents/decisions/deliverable-review.md:107` — points at
-  `plugin/fragments/review-requirement.md`, which no longer exists.
 - `agents/README.md:11,15` — claims CLAUDE.md is generated from fragments by
   `agents/compose.sh`. No such script; no `compose` command in `cli.py`. CLAUDE.md
   is hand-written. (Note this one interacts with the `source-not-generated` rule:

@@ -45,7 +45,7 @@ Not all changes warrant full review delegation. Match review cost to change risk
 
 **When plugin-dev is not installed:** the skill- and agent-definition rows fall back to `edify:corrector`. `plugin-dev` is a separate marketplace plugin, not an edify dependency — check availability before routing, and note the fallback in the review report so the weaker routing is visible.
 
-Orchestration-specific extensions (planning artifacts, human docs): `agents/decisions/pipeline-contracts.md` "When routing artifact review."
+Orchestration-specific extensions (planning artifacts, human docs): `docs/design.md` §6.4 "Pipeline contracts."
 
 **Artifacts NOT requiring review:**
 - Execution reports
