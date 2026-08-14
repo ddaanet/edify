@@ -1,5 +1,11 @@
 {
   "name": "edify",
   "version": "0.1.0",
-  "description": "A lean bundle of framework-agnostic Claude Code skills"
+  "description": "A lean bundle of framework-agnostic Claude Code skills",
+  "author": {
+    "name": "David Allouche",
+    "email": "david@ddaa.net"
+  },
+  "repository": "https://github.com/ddaanet/edify",
+  "license": "MIT"
 }
