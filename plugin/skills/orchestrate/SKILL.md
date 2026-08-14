@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: Execute prepared runbooks with plan-specific agents and mechanical verification gates
+description: Execute prepared runbooks by dispatching standing agents against step files, with mechanical verification gates
 user-invocable: true
 continuation:
   cooperative: true
@@ -9,7 +9,9 @@ continuation:
 
 # Execute Runbooks
 
-Execute prepared runbooks through plan-specific agents. Sonnet orchestrator coordinates step dispatch, post-step verification, remediation, and phase boundary reviews. All common context (design, outline) lives in agent definitions — orchestrator provides file references only.
+Execute prepared runbooks by **delegation by reference**: dispatch a standing agent (`edify:artisan`, `edify:test-driver`, `edify:corrector`) with the path to a step file. The step file's `## Context` block names the design, outline, and shared-context artifacts the executor reads; the orchestrator's prompt carries paths, never content. Sonnet orchestrator coordinates step dispatch, post-step verification, remediation, and phase boundary reviews.
+
+No agents are generated per plan. Nothing is installed into `.claude/agents/`, so agent discoverability never requires a session restart — `/runbook` still hands off to a fresh session, but for model tier and context budget, not discovery.
 
 **Prerequisites:** Runbook prepared with `/runbook` (artifacts created by `prepare-runbook.py`)
 
@@ -17,17 +19,16 @@ Execute prepared runbooks through plan-specific agents. Sonnet orchestrator coor
 
 ```bash
 ls -1 plans/<name>/orchestrator-plan.md
-ls -1 .claude/agents/<name>-*.md 2>/dev/null
 ls -1 plans/<name>/steps/step-*.md 2>/dev/null || true
 ```
 
 **Required artifacts:**
-- `plans/<name>/orchestrator-plan.md` — structured step list
-- `.claude/agents/<name>-task.md` — general plans (or `<name>-tester.md` + `<name>-implementer.md` for TDD)
-- `.claude/agents/<name>-corrector.md` — multi-phase plans only
+- `plans/<name>/orchestrator-plan.md` — structured step list and phase-agent mapping
 - `plans/<name>/steps/step-*.md` — absent only for all-inline runbooks
 
 Missing orchestrator plan → STOP. Missing step files with only `INLINE` entries → valid all-inline runbook. Missing step files with step references → STOP.
+
+The artifacts a step file names under `## Context` (`design.md`, `outline.md`, `common-context.md`) are written by `prepare-runbook.py` only when the plan has them. Their absence is not a preflight failure — a step file never names an artifact that does not exist.
 
 ## 2. Read Orchestrator Plan
 
@@ -35,16 +36,16 @@ Missing orchestrator plan → STOP. Missing step files with only `INLINE` entrie
 Read plans/<name>/orchestrator-plan.md
 ```
 
-**Parse header fields:**
-- `**Agent:**` — task agent name (or `none` for TDD)
-- `**Corrector Agent:**` — corrector name (or `none` for single-phase)
+**Parse header field:**
 - `**Type:**` — `tdd` or `general`
-- `**Tester Agent:**` / `**Implementer Agent:**` — TDD only
+
+**Parse `## Phase-Agent Mapping` table:** `| Phase | Agent | Type |`. The Agent column names the standing agent to dispatch for that phase's steps — `edify:artisan`, `edify:test-driver`, or `(orchestrator-direct)` for inline phases. Use this as the `subagent_type`; do not substitute another agent.
 
 **Parse `## Steps` section:** Pipe-delimited entries:
-- General: `- step-N-M.md | Phase P | model | max_turns [| PHASE_BOUNDARY]`
-- TDD: `- step-N-M-test.md | Phase P | model | max_turns | TEST [| PHASE_BOUNDARY]`
-- TDD: `- step-N-M-impl.md | Phase P | model | max_turns | IMPLEMENT [| PHASE_BOUNDARY]`
+- General: `- step-N-M.md | Phase P | model [| PHASE_BOUNDARY]`
+- TDD: `- step-N-M-test.md | Phase P | model | TEST [| PHASE_BOUNDARY]`
+- TDD: `- step-N-M-impl.md | Phase P | model | IMPLEMENT [| PHASE_BOUNDARY]`
+- TDD: `- step-N-M-bootstrap.md | Phase P | model | BOOTSTRAP [| PHASE_BOUNDARY]`
 - Inline: `- INLINE | Phase P | —`
 
 **Execution mode:** STRICT SEQUENTIAL. One Task call per message. Steps modify shared state — parallel dispatch causes race conditions.
@@ -66,7 +67,7 @@ Read the phase content from the orchestrator plan's `## Phase Files` section (pa
 
 ```
 Agent tool:
-  subagent_type: [from **Agent:** header field]
+  subagent_type: [Agent column for this phase in ## Phase-Agent Mapping]
   prompt: "Execute step from: plans/<name>/steps/<step-file>"
   model: [from step entry model field]
   name: "step-N-M"
@@ -75,26 +76,32 @@ Agent tool:
 
 `name` is required for remediation: resuming an agent is a `SendMessage` to its
 name (Section 3.4). Do NOT pass `max_turns` — the `Agent` tool has no such
-parameter and rejects unknown ones. The `max_turns` column in the plan manifest
-is inert metadata; see Section 5.
+parameter and rejects unknown ones (Section 4).
 
-Orchestrator provides file reference only. Agent definition caches design + outline — no inline content in prompt.
+The prompt is the step-file path and nothing else. The step file's `## Context`
+block names design, outline, and shared context; its `## Execution Contract`
+footer carries the scope and clean-tree requirements. Do not paste artifact
+content into the prompt.
 
 After dispatch → Section 3.3 (verification).
 
 ### 3.2 TDD Cycle Dispatch (D-5)
 
-Per TDD cycle (paired TEST + IMPLEMENT entries):
+Per TDD cycle (paired TEST + IMPLEMENT entries, optionally preceded by a BOOTSTRAP entry).
+
+Tester and implementer are two **instances of the same standing agent** (`edify:test-driver`, per the Phase-Agent Mapping). The role separation is the `name` and the step file, not the agent type — the ping-pong is preserved because each instance keeps its own transcript.
 
 **Step A — Dispatch tester:**
 ```
 Agent tool:
-  subagent_type: [from **Tester Agent:** header]
+  subagent_type: [Agent column for this phase — edify:test-driver]
   prompt: "Execute test spec from: plans/<name>/steps/<test-file>"
   model: [from step entry]
   name: "step-N-M-test"
 ```
 The `name` is the resume handle — resume via `SendMessage` to that name.
+
+A BOOTSTRAP entry, when present, dispatches to the same agent type ahead of the TEST entry, named `step-N-M-bootstrap`.
 
 **Step B — RED gate:**
 ```bash
@@ -103,13 +110,31 @@ plugin/skills/orchestrate/scripts/verify-red.sh <test_file_path>
 - Exit 0 (test fails) → RED confirmed, proceed
 - Exit 1 (test passes) → resume tester to fix, or escalate
 
-**Step C — Test corrector:**
-Dispatch `<name>-test-corrector` with changed files. Review test quality. If UNFIXABLE → STOP.
+**Step C — Test review:**
+```
+Agent tool:
+  subagent_type: "edify:corrector"
+  model: sonnet
+  name: "step-N-M-test-review"
+  prompt: |
+    Review test quality for Cycle N.M.
+
+    **Scope:**
+    - IN: the test files listed below — behavioral assertions, RED phase correctness
+    - OUT: implementation details. Do NOT flag them.
+
+    **Step file:** plans/<name>/steps/<test-file>
+    **Changed files:** [git diff --name-only output]
+
+    Fix all issues. Write report to: plans/<name>/reports/cycle-N-M-test-review.md
+    Return filepath or "UNFIXABLE: [description]"
+```
+If UNFIXABLE → STOP.
 
 **Step D — Dispatch implementer:**
 ```
 Agent tool:
-  subagent_type: [from **Implementer Agent:** header]
+  subagent_type: [Agent column for this phase — edify:test-driver]
   prompt: "Execute implementation from: plans/<name>/steps/<impl-file>"
   model: [from step entry]
   name: "step-N-M-impl"
@@ -124,10 +149,10 @@ just test && plugin/skills/orchestrate/scripts/verify-step.sh
 - Test failure → resume implementer to fix, or escalate
 - Dirty tree / precommit failure → remediate (Section 3.4)
 
-**Step F — Impl corrector:**
-Dispatch `<name>-impl-corrector` with changed files. Review implementation quality. If UNFIXABLE → STOP.
+**Step F — Implementation review:**
+Same dispatch as Step C with the scope inverted — IN: correctness, minimal implementation, GREEN phase compliance on the implementation files; OUT: test details. Name it `step-N-M-impl-review`, report to `plans/<name>/reports/cycle-N-M-impl-review.md`. If UNFIXABLE → STOP.
 
-**Agent resume across cycles:** Resume tester for subsequent TEST steps (preserves test context). Resume implementer for subsequent IMPLEMENT steps (preserves codebase context). Launch fresh when a resume fails or the resumed agent returns without progress — the orchestrator cannot observe an agent's message count, so there is no turn-based cutoff. Correctors are never resumed — each review is independent.
+**Agent resume across cycles:** Resume the tester instance for subsequent TEST steps (preserves test context). Resume the implementer instance for subsequent IMPLEMENT steps (preserves codebase context). Launch fresh when a resume fails or the resumed agent returns without progress — the orchestrator cannot observe an agent's message count, so there is no turn-based cutoff. Correctors are never resumed — each review is independent.
 
 ### 3.3 Post-Step Verification
 
@@ -179,7 +204,8 @@ git diff --name-only
 **Delegate checkpoint to corrector:**
 ```
 Agent tool:
-  subagent_type: [from **Corrector Agent:** header]
+  subagent_type: "edify:corrector"
+  model: sonnet
   name: "phase-P-corrector"
   prompt: |
     Phase P Checkpoint
@@ -191,6 +217,8 @@ Agent tool:
     - OUT: [from Phase Summaries section]
 
     **Design reference:** plans/<name>/design.md
+    **Outline:** plans/<name>/outline.md
+    **Shared context:** plans/<name>/common-context.md
     **Review recall:** Read `plans/<name>/recall-artifact.md`, then Read each file it lists — when present, the files it lists carry review-relevant entries. If absent: invoke `Skill(skill: "edify:recall", args: "<topic derived from phase scope>")`.
     **Changed files:** [git diff --name-only output]
 
@@ -198,9 +226,9 @@ Agent tool:
     Return filepath or "UNFIXABLE: [description]"
 ```
 
-Read report. If UNFIXABLE → STOP and escalate. Otherwise commit checkpoint, continue.
+Name only the reference artifacts that exist — the same three a step file's `## Context` block names. Omit a line rather than pointing the corrector at a missing file.
 
-**Single-phase plans** (corrector = `none`): delegate to generic `edify:corrector` with file references to design, outline (`plans/<name>/outline.md`), and changed files (non-cached, read on demand).
+Read report. If UNFIXABLE → STOP and escalate. Otherwise commit checkpoint, continue.
 
 **Final checkpoint** adds lifecycle audit: verify all stateful objects (MERGE_HEAD, staged content, lock files) cleared on success paths.
 
@@ -208,7 +236,7 @@ Read report. If UNFIXABLE → STOP and escalate. Otherwise commit checkpoint, co
 
 ### 3.6 Refactor Dispatch
 
-After any corrector review (phase checkpoint, TDD corrector, or impl-corrector), check the report for refactoring signals:
+After any corrector review (phase checkpoint, test review, or implementation review), check the report for refactoring signals:
 
 **Trigger:** Corrector report contains complexity warnings (e.g., "REFACTOR-NEEDED", file exceeds line limits, high cyclomatic complexity, duplicated patterns across files).
 
@@ -239,7 +267,7 @@ Return: "fixed: [summary]" or "blocked: [what's needed]"
 
 **Acceptance criteria:** Every resolution must pass precommit, leave clean tree, validate against step criteria.
 
-**Execution bounds:** none currently enforceable. The plan manifest still carries a `max_turns` column (emitted by `prepare-runbook.py`), but it is inert — the `Agent` tool has no `max_turns` parameter, and passing one is rejected. Both spinning and hanging guards are platform gaps; see `plugin/fragments/escalation-acceptance.md`.
+**Execution bounds:** none currently enforceable. The `Agent` tool has no `max_turns` parameter and no duration bound, and passing one is rejected. Both spinning and hanging guards are platform gaps; see `plugin/fragments/escalation-acceptance.md`. A runaway agent has no in-band stop — the orchestrator's only recourse is the user.
 
 ## 5. Progress Tracking
 
@@ -253,18 +281,14 @@ Log each step: `Step N-M: [name] - completed` or `Step N-M: [name] - failed: [er
 git diff --name-only $(git rev-list --max-parents=0 HEAD | head -1)..HEAD
 ```
 
-1. **Final review:** If multi-phase, phase boundary correctors already ran. Single-phase: delegate to generic `edify:corrector` with design reference, outline (`plans/<name>/outline.md`), and changed files. Report to `plans/<name>/reports/review.md`.
+1. **Final review:** If multi-phase, phase boundary correctors already ran. Single-phase: delegate to `edify:corrector` with the reference artifacts (design, outline, shared context) and changed files. Report to `plans/<name>/reports/review.md`.
 2. **TDD audit:** If `**Type:** tdd`, delegate to `edify:tdd-auditor`. Report to `plans/<name>/reports/tdd-process-review.md`.
-3. **Cleanup:** Delete plan-specific agents:
-   ```bash
-   rm -f .claude/agents/<name>-task.md .claude/agents/<name>-corrector.md
-   rm -f .claude/agents/<name>-tester.md .claude/agents/<name>-implementer.md
-   rm -f .claude/agents/<name>-test-corrector.md .claude/agents/<name>-impl-corrector.md
-   ```
-4. **Deliverable review:** Write pending task to `.claude/handoff-task.md`:
+3. **Deliverable review:** Write pending task to `.claude/handoff-task.md`:
    `- [ ] **Deliverable review: <name>** — /deliverable-review plans/<name> | opus | restart`
    **Section targeting:** On main → Worktree Tasks. In a worktree → In-tree Tasks. Detect via `git rev-parse --git-dir` (`.git` = main, otherwise worktree).
-5. **Lifecycle entry:** Append `{YYYY-MM-DD} review-pending — /orchestrate` to `plans/<name>/lifecycle.md`.
+4. **Lifecycle entry:** Append `{YYYY-MM-DD} review-pending — /orchestrate` to `plans/<name>/lifecycle.md`.
+
+There is no agent cleanup step. `prepare-runbook.py` installs nothing into `.claude/agents/`; the plan's generated artifacts all live under `plans/<name>/` and are part of the commit history.
 
 ## Continuation
 

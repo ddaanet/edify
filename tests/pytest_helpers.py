@@ -100,26 +100,6 @@ def setup_git_repo(tmp_path: Path) -> None:
     )
 
 
-def setup_baseline_agents(tmp_path: Path) -> None:
-    """Create minimal baseline agent files that prepare-runbook.py reads."""
-    agents_dir = tmp_path / "plugin" / "agents"
-    agents_dir.mkdir(parents=True, exist_ok=True)
-
-    artisan = agents_dir / "artisan.md"
-    artisan.write_text("---\nname: artisan\n---\n# Artisan\nBaseline agent.")
-
-    test_driver = agents_dir / "test-driver.md"
-    test_driver.write_text(
-        "---\nname: test-driver\n---\n"
-        "# TDD Task Agent - Baseline Template\nBaseline TDD agent."
-    )
-
-    corrector = agents_dir / "corrector.md"
-    corrector.write_text(
-        "---\nname: corrector\nmodel: sonnet\n---\n# Corrector\nBaseline corrector."
-    )
-
-
 def create_submodule_origin(base: Path, name: str) -> Path:
     """Create a submodule origin repo for testing."""
     origin = base / f"{name}-origin"

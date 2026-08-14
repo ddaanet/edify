@@ -23,7 +23,7 @@ Before invoking Agent tool, verify:
 
 Dispatch with file reference: `"Execute step from: plans/<name>/steps/step-N.md"` — agent reads step file for full context. Do not inline step content in prompt.
 
-Plan-specific agents (`{name}-task`, `{name}-corrector`) embed design and outline context via agent definition. Prompt needs only the step file reference — Plan Context is baked into the agent definition.
+The dispatched agent is a standing one (`edify:artisan`, `edify:test-driver`, `edify:corrector`) — no agents are generated per plan. The step file's `## Context` block names the design, outline, and shared-context artifacts, so the prompt needs only the step-file path.
 
 ### Quiet Execution Pattern
 

@@ -53,7 +53,7 @@ Error classification responsibility depends on agent model tier:
 ```
 Orchestrator (haiku):
   "Execute step 2.3: Analyze pytest-md AGENTS.md"
-  Invoke plan-specific agent with step 2.3 reference
+  Dispatch edify:artisan with the step 2.3 file path
 
 Agent (haiku):
   Attempts: Read("/Users/david/code/pytest-md/CLAUDE.md")

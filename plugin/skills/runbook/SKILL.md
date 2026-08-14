@@ -156,7 +156,7 @@ When design specifies explicit classifications (tables, rules, decision lists):
 
 **Artifact-type model override:** When delegated work edits architectural artifacts (skills, fragments, agents, workflow decisions), use `model="opus"` in the Task call. See Model Assignment section.
 
-**Key distinction from Tier 3:** No prepare-runbook.py, no orchestrator plan, no plan-specific agent. The planner acts as ad-hoc orchestrator.
+**Key distinction from Tier 3:** No prepare-runbook.py, no step files, no orchestrator plan. The planner acts as ad-hoc orchestrator and composes each delegation prompt itself.
 
 **Handling agent escalations:**
 
@@ -189,7 +189,7 @@ As the **final action** of this skill:
 1. Read continuation from `additionalContext` (first skill in chain) or from `[CONTINUATION: ...]` suffix in Skill args (chained skills)
 2. Prepend entries based on tier:
    - Tier 2: prepend `/inline plans/<job> execute`
-   - Tier 3: no prepend (Phase 4 prepares artifacts; orchestration requires session restart)
+   - Tier 3: no prepend (Phase 4 prepares artifacts; orchestration runs in a fresh session at a different model tier)
 3. If continuation present: peel first entry from (possibly modified) continuation, tail-call with remainder
 4. If no continuation: default-exit — `/handoff:handoff` → `/commit-commands:commit`
 

@@ -77,7 +77,7 @@ Utility scripts in `bin/` (Python 3):
 | `bump-plugin-version.py` | Bump the plugin manifest version |
 | `check-version-consistency.py` | Verify plugin and package versions agree |
 | `deliverable-inventory.py` | Diff merge-base→HEAD, classify changed files, report counts |
-| `prepare-runbook.py` | Expand a runbook into per-step files and plan-specific agent definitions |
+| `prepare-runbook.py` | Expand a runbook into per-step files, shared context, and an orchestrator plan |
 | `validate-runbook.py` | Check a runbook's structure before execution |
 | `assemble-runbook.py` | Reassemble a split runbook directory into a single document |
 | `task-context.sh` | Recover the commit that introduced a named task from git history |

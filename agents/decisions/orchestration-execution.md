@@ -337,7 +337,13 @@ FR-17 documents the three-tier escalation requirement. Concrete detection mechan
 
 **Rationale:** Context reaches the executor through artifacts on disk rather than through generated agent definitions. That keeps deterministic logic out of the agent layer and costs no flexibility — the runbook system already decides what each step needs. The orchestrator token saving that motivated per-plan caching is preserved: a dispatch prompt is one path either way.
 
-**Status:** decided; prepare-runbook.py and `/orchestrate` not yet rewired. Scope of the pending rewire is recorded in `plans/pilfer-superpowers/reports/edify-defects.md`.
+**Status:** implemented 2026-08-13. `prepare-runbook.py` writes `plans/<name>/common-context.md` (Common Context plus resolved recall) and, when the outline lives in the runbook rather than a file, `plans/<name>/outline.md`; each step file opens with a `## Context` block naming whichever of design, outline, and shared context exist, and closes with an `## Execution Contract` carrying the scope and clean-tree requirements the generated agents used to append. The orchestrator plan drops the `**Agent:**`/`**Corrector Agent:**`/`**Tester Agent:**`/`**Implementer Agent:**` headers; the `## Phase-Agent Mapping` table now names standing agents, and `/orchestrate` reads `subagent_type` from it.
+
+**Consequences:**
+
+- The tester/implementer ping-pong survives as two named instances of `edify:test-driver`; per-cycle test and implementation reviews are `edify:corrector` dispatches scoped by prompt.
+- The forced session restart between planning and execution is no longer a discoverability requirement. The boundary is kept for the reason in "When Managing Orchestration Context" — model tier and context budget — not because an agent needs installing.
+- The inert `max_turns` manifest column is gone with the rest. Turn and duration bounds remain platform gaps (`plugin/fragments/escalation-acceptance.md`); dropping the column removes a field that read as a guard while enforcing nothing.
 
 ### When Selecting Model For Discovery And Audit
 

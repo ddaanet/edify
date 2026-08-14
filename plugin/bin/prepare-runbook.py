@@ -2,9 +2,16 @@
 """Prepare execution artifacts from runbook markdown files.
 
 Transforms a runbook markdown file (or phase-grouped directory) into:
-1. Plan-specific agents (.claude/agents/<name>-task.md, <name>-corrector.md)
-2. Step/Cycle files (plans/<runbook-name>/steps/)
+1. Step/Cycle files (plans/<runbook-name>/steps/)
+2. Shared context (plans/<runbook-name>/common-context.md)
 3. Orchestrator plan (plans/<runbook-name>/orchestrator-plan.md)
+
+Execution delegates by reference: the orchestrator dispatches a standing agent
+(`edify:artisan`, `edify:test-driver`, `edify:corrector`) with the path to a
+step file, and the step file's Context block names the design, outline, and
+shared-context artifacts the executor must read. No per-plan agent definitions
+are generated -- see `agents/decisions/orchestration-execution.md`, "When
+Selecting Agent Type For Orchestrated Steps".
 
 Supports:
 - General runbooks (## Step N:)
@@ -18,9 +25,8 @@ Usage:
 Example (File):
     prepare-runbook.py plans/foo/runbook.md
     # Creates:
-    #   .claude/agents/foo-task.md (uses artisan.md baseline)
-    #   .claude/agents/foo-corrector.md (multi-phase plans only)
     #   plans/foo/steps/step-*.md
+    #   plans/foo/common-context.md (when the runbook has a Common Context)
     #   plans/foo/orchestrator-plan.md
 
 Example (Phase Directory):
@@ -30,8 +36,7 @@ Example (Phase Directory):
 Example (TDD):
     prepare-runbook.py plans/tdd-test/runbook.md
     # Creates:
-    #   .claude/agents/tdd-test-task.md (uses test-driver.md baseline)
-    #   plans/tdd-test/steps/cycle-*.md
+    #   plans/tdd-test/steps/step-*-test.md and step-*-impl.md
     #   plans/tdd-test/orchestrator-plan.md
 """
 
@@ -58,8 +63,13 @@ Actions when stopped: 1) Document in reports/cycle-{X}-{Y}-notes.md 2) Test pass
 - Report errors explicitly (never suppress)
 """
 
-# Default max_turns budget per step when not specified in step content.
-_DEFAULT_MAX_TURNS = 30
+# Standing agent dispatched for each phase type. Inline phases are executed by
+# the orchestrator itself.
+_PHASE_AGENTS = {
+    "tdd": "edify:test-driver",
+    "general": "edify:artisan",
+    "inline": "(orchestrator-direct)",
+}
 
 
 def parse_recall_artifact(artifact_path):
@@ -970,179 +980,108 @@ def derive_paths(runbook_path):
     Input: plans/foo/runbook.md
     Returns:
         runbook_name: 'foo' (parent directory)
-        agents_dir: .claude/agents/ (directory for per-phase agent files)
         steps_dir: plans/foo/steps/
         orchestrator_path: plans/foo/orchestrator-plan.md
     """
     path = Path(runbook_path)
     runbook_name = path.parent.name
 
-    agents_dir = Path(".claude/agents")
     steps_dir = path.parent / "steps"
     orchestrator_path = path.parent / "orchestrator-plan.md"
 
-    return runbook_name, agents_dir, steps_dir, orchestrator_path
+    return runbook_name, steps_dir, orchestrator_path
 
 
-def read_baseline_agent(runbook_type="general"):
-    """Read baseline agent template based on runbook type.
+def build_context_block(design_path, outline_path, context_path) -> str:
+    """Assemble the ## Context block naming the artifacts a step executor reads.
 
-    Args:
-        runbook_type: 'tdd' or 'general' (caller maps 'mixed' to 'general')
-
-    Returns:
-        Baseline agent body (without frontmatter)
+    Only artifacts that exist on disk are named -- a step file must never send
+    an executor after a file that is not there. Returns "" when no artifact
+    applies, in which case the step file carries no Context block.
     """
-    if runbook_type == "tdd":
-        baseline_path = Path("plugin/agents/test-driver.md")
-    elif runbook_type == "corrector":
-        baseline_path = Path("plugin/agents/corrector.md")
-    else:
-        baseline_path = Path("plugin/agents/artisan.md")
-
-    if not baseline_path.exists():
-        print(f"ERROR: Baseline agent not found: {baseline_path}", file=sys.stderr)
-        sys.exit(1)
-
-    content = baseline_path.read_text()
-    _, body = parse_frontmatter(content)
-    return body
-
-
-def _build_plan_context_section(
-    design_content=None, outline_content=None, plan_context=""
-) -> str:
-    """Assemble # Plan Context block for agent definitions."""
-    design_text = (
-        design_content if design_content is not None else "No design document found"
-    )
-    outline_text = (
-        outline_content if outline_content is not None else "No outline found"
-    )
-    parts = [
-        f"## Design\n\n{design_text}",
-        f"## Runbook Outline\n\n{outline_text}",
-    ]
-    if plan_context:
-        parts.append(f"## Common Context\n\n{plan_context}")
-    return "\n---\n# Plan Context\n\n" + "\n\n".join(parts)
-
-
-def generate_task_agent(
-    runbook_name,
-    runbook_type="general",
-    plan_context="",
-    design_content=None,
-    outline_content=None,
-    model=None,
-) -> str:
-    """Compose single task agent for the entire runbook.
-
-    Uses artisan.md for general/mixed runbooks, test-driver.md for pure TDD.
-    Embeds design and outline under # Plan Context. Appends scope enforcement
-    and clean tree footers.
-    """
-    baseline_type = "tdd" if runbook_type == "tdd" else "general"
-    name = f"{runbook_name}-task"
-    description = f"Execute steps for {runbook_name}"
-    model_line = f"model: {model}\n" if model is not None else ""
-    frontmatter = f'---\nname: {name}\ndescription: {description}\n{model_line}color: blue\ntools: ["Read", "Write", "Edit", "Bash"]\n---\n'
-
-    result = frontmatter
-    result += read_baseline_agent(baseline_type)
-    result += _build_plan_context_section(design_content, outline_content, plan_context)
-
-    result += "\n\n---\n\n**Scope enforcement:** Execute ONLY the step file assigned by the orchestrator. Do not read ahead in the runbook or execute other step files.\n"
-    result += "\n**Clean tree requirement:** Commit all changes before reporting success. The orchestrator will reject dirty trees — there are no exceptions.\n"
-    return result
-
-
-def generate_corrector_agent(
-    runbook_name,
-    design_content=None,
-    outline_content=None,
-    plan_context="",
-) -> str:
-    """Compose corrector agent for multi-phase runbooks.
-
-    Always uses corrector.md baseline and model: sonnet. Embeds same Plan
-    Context (design + outline) as task agent.
-    """
-    name = f"{runbook_name}-corrector"
-    description = f"Review phase checkpoint for {runbook_name}"
-    frontmatter = f'---\nname: {name}\ndescription: {description}\nmodel: sonnet\ncolor: yellow\ntools: ["Read", "Write", "Edit", "Bash"]\n---\n'
-
-    result = frontmatter
-    result += read_baseline_agent("corrector")
-    result += _build_plan_context_section(design_content, outline_content, plan_context)
-
-    result += "\n\n---\n\n**Scope enforcement:** Review ONLY the phase checkpoint described in your prompt. Focus on changed files provided. Do NOT flag items explicitly listed as OUT of scope.\n"
-    return result
-
-
-_TDD_ROLES = [
-    (
-        "tester",
-        "tdd",
-        "sonnet",
-        "Execute RED phase: write failing tests for {name}",
-        "blue",
-        "\n\n---\n\n**Role: Tester.** Your responsibility is test quality — write precise, behavioral RED phase tests that fail for the right reason and guide implementation.\n",
-    ),
-    (
-        "implementer",
-        "tdd",
-        "sonnet",
-        "Execute GREEN phase: implement code for {name}",
-        "green",
-        "\n\n---\n\n**Role: Implementer.** Your responsibility is implementation — write minimal code to make RED phase tests pass without over-engineering.\n",
-    ),
-    (
-        "test-corrector",
-        "corrector",
-        "sonnet",
-        "Review test quality for {name}",
-        "yellow",
-        "\n\n---\n\n**Scope enforcement:** Review ONLY the test files provided. Focus on test quality, behavioral assertions, and RED phase correctness. Do NOT flag implementation details.\n",
-    ),
-    (
-        "impl-corrector",
-        "corrector",
-        "sonnet",
-        "Review implementation for {name}",
-        "cyan",
-        "\n\n---\n\n**Scope enforcement:** Review ONLY the implementation files provided. Focus on correctness, minimal implementation, and GREEN phase compliance. Do NOT flag test details.\n",
-    ),
-]
-
-
-def generate_tdd_agents(
-    runbook_name,
-    agents_dir,
-    design_content=None,
-    outline_content=None,
-    plan_context="",
-) -> list[str]:
-    """Generate 4 TDD ping-pong agents: tester, implementer, test-corrector, impl-corrector.
-
-    Returns list of created agent file paths.
-    """
-    created = []
-    plan_ctx_section = _build_plan_context_section(
-        design_content, outline_content, plan_context
-    )
-    for role, baseline_type, model, desc_template, color, footer in _TDD_ROLES:
-        name = f"{runbook_name}-{role}"
-        description = desc_template.format(name=runbook_name)
-        frontmatter = f'---\nname: {name}\ndescription: {description}\nmodel: {model}\ncolor: {color}\ntools: ["Read", "Write", "Edit", "Bash"]\n---\n'
-        content = (
-            frontmatter + read_baseline_agent(baseline_type) + plan_ctx_section + footer
+    entries = []
+    if design_path is not None:
+        entries.append(f"- **Design:** `{design_path}`")
+    if outline_path is not None:
+        entries.append(f"- **Outline:** `{outline_path}`")
+    if context_path is not None:
+        entries.append(
+            f"- **Shared context:** `{context_path}` "
+            "(project conventions and resolved recall entries)"
         )
-        agent_file = agents_dir / f"{name}.md"
-        agent_file.write_text(content)
-        print(f"✓ Created agent: {agent_file}")
-        created.append(str(agent_file))
-    return created
+    if not entries:
+        return ""
+
+    return (
+        "## Context\n\nRead these before executing this step:\n\n"
+        + "\n".join(entries)
+        + "\n"
+    )
+
+
+_EXECUTION_CONTRACT = """## Execution Contract
+
+**Scope:** Execute ONLY this step file. Do not read other step files, and do not
+read ahead in the plan beyond the artifacts named under Context.
+
+**Clean tree:** Commit all changes, including any report file this step
+produces, before reporting success. The orchestrator rejects a dirty tree.
+"""
+
+
+def write_common_context(plan_dir, common_context, runbook_path):
+    """Write shared step context to plans/<name>/common-context.md.
+
+    `common_context` already carries any resolved recall appended by the
+    caller. Returns the written path, or None when there is nothing to write.
+    """
+    body = (common_context or "").strip()
+    if not body:
+        return None
+
+    # Drop the source runbook's own '## Common Context' heading -- the file
+    # title states the same thing.
+    lines = body.splitlines()
+    if lines and lines[0].strip() == "## Common Context":
+        body = "\n".join(lines[1:]).strip()
+
+    path = plan_dir / "common-context.md"
+    path.write_text(
+        f"# Common Context\n\n"
+        f"Generated from `{runbook_path}` by prepare-runbook.py. "
+        f"Edit the runbook, not this file.\n\n{body}\n"
+    )
+    print(f"✓ Created shared context: {path}")
+    return path
+
+
+def write_outline(plan_dir, outline_section, runbook_path):
+    """Resolve the outline artifact a step file should name.
+
+    Prefers an existing `outline.md`. Falls back to materialising the
+    runbook's own `## Outline` section so the step file has a path to name.
+    Returns the path, or None when the plan has no outline.
+    """
+    path = plan_dir / "outline.md"
+    if path.exists():
+        return path
+
+    if not outline_section:
+        return None
+
+    # Strip the '## Outline' header line -- content only.
+    lines = outline_section.splitlines()
+    body = "\n".join(lines[1:]).strip() if len(lines) > 1 else ""
+    if not body:
+        return None
+
+    path.write_text(
+        f"# Outline\n\n"
+        f"Generated from the `## Outline` section of `{runbook_path}` by "
+        f"prepare-runbook.py. Edit the runbook, not this file.\n\n{body}\n"
+    )
+    print(f"✓ Created outline: {path}")
+    return path
 
 
 def extract_step_metadata(content, default_model=None):
@@ -1152,7 +1091,7 @@ def extract_step_metadata(content, default_model=None):
     in the step body content. Extracted model is normalized to
     lowercase and validated against known models.
 
-    Returns: dict with extracted metadata (model, report_path, max_turns)
+    Returns: dict with extracted metadata (model, report_path)
     """
     valid_models = {"haiku", "sonnet", "opus"}
     metadata = {}
@@ -1176,13 +1115,6 @@ def extract_step_metadata(content, default_model=None):
     report_match = re.search(r"\*\*Report Path\*\*:\s*`?([^`\n]+)`?", content)
     if report_match:
         metadata["report_path"] = report_match.group(1).strip()
-
-    # Extract Max Turns (case-insensitive)
-    max_turns_match = re.search(r"\*\*Max Turns\*\*:\s*(\d+)", content, re.IGNORECASE)
-    if max_turns_match:
-        metadata["max_turns"] = int(max_turns_match.group(1))
-    else:
-        metadata["max_turns"] = _DEFAULT_MAX_TURNS
 
     return metadata
 
@@ -1271,8 +1203,37 @@ def validate_file_references(sections, cycles=None, runbook_path=""):
     return warnings
 
 
+def _assemble_step_file(title, meta, runbook_path, phase, body, phase_context, context_block):
+    """Assemble a step or cycle file from its header, context, and body."""
+    header_lines = [
+        title,
+        "",
+        f"**Plan**: `{runbook_path}`",
+        f"**Execution Model**: {meta['model']}",
+        f"**Phase**: {phase}",
+    ]
+    if "report_path" in meta:
+        header_lines.append(f"**Report Path**: `{meta['report_path']}`")
+
+    header_lines.extend(["", "---"])
+    if context_block:
+        header_lines.extend(["", context_block.rstrip(), "", "---"])
+    if phase_context and phase_context.strip():
+        header_lines.extend(
+            ["", "## Phase Context", "", phase_context.strip(), "", "---"]
+        )
+    header_lines.extend(["", body, "", "---", "", _EXECUTION_CONTRACT.rstrip(), ""])
+    return "\n".join(header_lines)
+
+
 def generate_step_file(
-    step_num, step_content, runbook_path, default_model=None, phase=1, phase_context=""
+    step_num,
+    step_content,
+    runbook_path,
+    default_model=None,
+    phase=1,
+    phase_context="",
+    context_block="",
 ):
     """Generate step file with references and execution metadata header.
 
@@ -1283,33 +1244,26 @@ def generate_step_file(
         default_model: Default model if not specified in content
         phase: Phase number for this step
         phase_context: Optional preamble text for the phase (injected as ## Phase Context)
+        context_block: Optional ## Context block naming plan-level artifacts
 
     Returns:
         Formatted step file content with phase in frontmatter
     """
     meta = extract_step_metadata(step_content, default_model)
-
-    header_lines = [
+    return _assemble_step_file(
         f"# Step {step_num}",
-        "",
-        f"**Plan**: `{runbook_path}`",
-        f"**Execution Model**: {meta['model']}",
-        f"**Phase**: {phase}",
-    ]
-    if "report_path" in meta:
-        header_lines.append(f"**Report Path**: `{meta['report_path']}`")
-
-    header_lines.append("")
-    header_lines.append("---")
-    if phase_context and phase_context.strip():
-        header_lines.extend(
-            ["", "## Phase Context", "", phase_context.strip(), "", "---"]
-        )
-    header_lines.extend(["", step_content, ""])
-    return "\n".join(header_lines)
+        meta,
+        runbook_path,
+        phase,
+        step_content,
+        phase_context,
+        context_block,
+    )
 
 
-def generate_cycle_file(cycle, runbook_path, default_model=None, phase_context=""):
+def generate_cycle_file(
+    cycle, runbook_path, default_model=None, phase_context="", context_block=""
+):
     """Generate cycle file with references and execution metadata header.
 
     Args:
@@ -1317,30 +1271,21 @@ def generate_cycle_file(cycle, runbook_path, default_model=None, phase_context="
         runbook_path: Path to runbook file
         default_model: Default model if not specified in cycle content
         phase_context: Optional preamble text for the phase (injected as ## Phase Context)
+        context_block: Optional ## Context block naming plan-level artifacts
 
     Returns:
         Formatted cycle file content with phase (major cycle number)
     """
     meta = extract_step_metadata(cycle["content"], default_model)
-
-    header_lines = [
+    return _assemble_step_file(
         f"# Cycle {cycle['number']}",
-        "",
-        f"**Plan**: `{runbook_path}`",
-        f"**Execution Model**: {meta['model']}",
-        f"**Phase**: {cycle['major']}",
-    ]
-    if "report_path" in meta:
-        header_lines.append(f"**Report Path**: `{meta['report_path']}`")
-
-    header_lines.append("")
-    header_lines.append("---")
-    if phase_context and phase_context.strip():
-        header_lines.extend(
-            ["", "## Phase Context", "", phase_context.strip(), "", "---"]
-        )
-    header_lines.extend(["", cycle["content"], ""])
-    return "\n".join(header_lines)
+        meta,
+        runbook_path,
+        cycle["major"],
+        cycle["content"],
+        phase_context,
+        context_block,
+    )
 
 
 def split_cycle_content(content):
@@ -1419,38 +1364,30 @@ def generate_default_orchestrator(
     # Build unified item list: (phase, minor, file_stem, display, execution_mode, role)
     # execution_mode: 'steps' for agent-delegated, 'inline' for orchestrator-direct
     # role: 'TEST' or 'IMPLEMENT' for TDD cycles, None for general steps/inline
-    # Also build lookup for max_turns extraction from content
     items = []
-    max_turns_lookup = {}
     if cycles:
         for cycle in cycles:
             base_stem = f"step-{cycle['major']}-{cycle['minor']}"
-            metadata = extract_step_metadata(cycle.get("content", ""))
-            turns = metadata.get("max_turns", _DEFAULT_MAX_TURNS)
 
             # Check for Bootstrap content in cycle
             bootstrap_content, _, _ = split_cycle_content(cycle.get("content", ""))
             if bootstrap_content:
-                bootstrap_stem = f"{base_stem}-bootstrap"
                 items.append(
                     (
                         cycle["major"],
                         cycle["minor"] - 1.0,
-                        bootstrap_stem,
+                        f"{base_stem}-bootstrap",
                         f"Cycle {cycle['number']} BOOTSTRAP",
                         "steps",
                         "BOOTSTRAP",
                     )
                 )
-                max_turns_lookup[bootstrap_stem] = turns
 
-            test_stem = f"{base_stem}-test"
-            impl_stem = f"{base_stem}-impl"
             items.append(
                 (
                     cycle["major"],
                     cycle["minor"] - 0.5,
-                    test_stem,
+                    f"{base_stem}-test",
                     f"Cycle {cycle['number']} TEST",
                     "steps",
                     "TEST",
@@ -1460,14 +1397,12 @@ def generate_default_orchestrator(
                 (
                     cycle["major"],
                     cycle["minor"],
-                    impl_stem,
+                    f"{base_stem}-impl",
                     f"Cycle {cycle['number']} IMPLEMENT",
                     "steps",
                     "IMPLEMENT",
                 )
             )
-            max_turns_lookup[test_stem] = turns
-            max_turns_lookup[impl_stem] = turns
     if steps:
         step_phases = step_phases or {}
         for step_num in steps:
@@ -1476,12 +1411,6 @@ def generate_default_orchestrator(
             minor = int(parts[1]) if len(parts) > 1 else 0
             file_stem = f"step-{step_num.replace('.', '-')}"
             items.append((phase, minor, file_stem, f"Step {step_num}", "steps", None))
-            metadata = extract_step_metadata(
-                steps[step_num]
-                if isinstance(steps[step_num], str)
-                else str(steps[step_num])
-            )
-            max_turns_lookup[file_stem] = metadata.get("max_turns", _DEFAULT_MAX_TURNS)
     if inline_phases:
         for phase_num in sorted(inline_phases):
             items.append(
@@ -1496,33 +1425,14 @@ def generate_default_orchestrator(
             )
 
     if not items:
-        return (
-            f"# Orchestrator Plan: {runbook_name}\n\n"
-            f"**Agent:** {runbook_name}-task\n"
-            "**Corrector Agent:** none\n"
-            "**Type:** general\n"
-        )
+        return f"# Orchestrator Plan: {runbook_name}\n\n**Type:** general\n"
 
     items.sort(key=lambda x: (x[0], x[1]))
 
     # Determine runbook type: 'tdd' if cycles present, 'general' otherwise
     runbook_type = "tdd" if cycles else "general"
 
-    # Detect number of unique phases for corrector agent field
-    unique_phases = len(set(item[0] for item in items))
-    corrector_agent = f"{runbook_name}-corrector" if unique_phases > 1 else "none"
-
-    # Build structured header
-    agent_field = "none" if runbook_type == "tdd" else f"{runbook_name}-task"
-    content = f"""# Orchestrator Plan: {runbook_name}
-
-**Agent:** {agent_field}
-**Corrector Agent:** {corrector_agent}
-**Type:** {runbook_type}
-"""
-    if runbook_type == "tdd":
-        content += f"**Tester Agent:** {runbook_name}-tester\n"
-        content += f"**Implementer Agent:** {runbook_name}-implementer\n"
+    content = f"# Orchestrator Plan: {runbook_name}\n\n**Type:** {runbook_type}\n"
 
     if phase_agents is not None:
         all_phases = sorted({item[0] for item in items})
@@ -1530,7 +1440,10 @@ def generate_default_orchestrator(
         content += "| Phase | Agent | Type |\n"
         content += "| --- | --- | --- |\n"
         for p in all_phases:
-            agent = (phase_agents or {}).get(p, f"{runbook_name}-task")
+            # A phase with steps but no agent means detect_phase_types and the
+            # item list disagree -- surface it rather than defaulting to a
+            # standing agent that may be wrong for the phase's type.
+            agent = phase_agents.get(p, "MISSING -- phase type not detected")
             ptype = (phase_types or {}).get(p, "")
             content += f"| {p} | {agent} | {ptype} |\n"
         content += "\n"
@@ -1540,7 +1453,6 @@ def generate_default_orchestrator(
     for i, (phase, minor, file_stem, display, exec_mode, role) in enumerate(items):
         is_phase_boundary = (i + 1 == len(items)) or (items[i + 1][0] != phase)
         resolved_model = (phase_models or {}).get(phase, default_model)
-        max_turns = max_turns_lookup.get(file_stem, _DEFAULT_MAX_TURNS)
 
         if exec_mode == "inline":
             # Inline phases: - INLINE | Phase N | —
@@ -1550,7 +1462,7 @@ def generate_default_orchestrator(
                 content += f" | {marker}"
             content += "\n"
         else:
-            entry = f"- {file_stem}.md | Phase {phase} | {resolved_model} | {max_turns}"
+            entry = f"- {file_stem}.md | Phase {phase} | {resolved_model}"
             if role:
                 entry += f" | {role}"
             if is_phase_boundary:
@@ -1596,7 +1508,6 @@ def validate_and_create(
     runbook_path,
     sections,
     runbook_name,
-    agents_dir,
     steps_dir,
     orchestrator_path,
     metadata,
@@ -1674,20 +1585,11 @@ def validate_and_create(
         return False
 
     # Create directories
-    agents_dir.mkdir(parents=True, exist_ok=True)
     steps_dir.mkdir(parents=True, exist_ok=True)
 
     # Clean steps directory to prevent orphaned files from previous runs
-    if steps_dir.exists():
-        for step_file in steps_dir.glob("*.md"):
-            step_file.unlink()
-
-    # Verify writable
-    try:
-        agents_dir.touch(exist_ok=True)
-        steps_dir.touch(exist_ok=True)
-    except OSError, IsADirectoryError:
-        pass
+    for step_file in steps_dir.glob("*.md"):
+        step_file.unlink()
 
     model = metadata.get("model")
 
@@ -1730,74 +1632,25 @@ def validate_and_create(
     full_content = "".join(full_content_parts)
     phase_types = detect_phase_types(full_content)
 
-    # Generate single task agent for all non-inline phases
-    plan_context = sections["common_context"] or ""
+    # Materialise the plan-level artifacts each step file names by reference
     preambles = phase_preambles or {}
-    phase_agents: dict = {}
-    created_agents = []
-
-    task_agent_name = f"{runbook_name}-task"
     plan_dir = Path(runbook_path).parent
+
     design_path = plan_dir / "design.md"
-    design_content = design_path.read_text() if design_path.exists() else None
-    outline_section = sections.get("outline")
-    if outline_section:
-        # Strip the "## Outline" header line — content only
-        outline_lines = outline_section.splitlines()
-        outline_content = (
-            "\n".join(outline_lines[1:]).strip() if len(outline_lines) > 1 else ""
-        )
-    else:
-        outline_path = plan_dir / "outline.md"
-        outline_content = (
-            outline_path.read_text().strip() if outline_path.exists() else None
-        )
-    # Pure TDD runbooks use the 4-agent ping-pong model — no general task agent
-    if runbook_type != "tdd":
-        agent_content = generate_task_agent(
-            runbook_name,
-            runbook_type=runbook_type,
-            plan_context=plan_context,
-            design_content=design_content,
-            outline_content=outline_content,
-            model=model,
-        )
-        agent_file = agents_dir / f"{task_agent_name}.md"
-        agent_file.write_text(agent_content)
-        print(f"✓ Created agent: {agent_file}")
-        created_agents.append(str(agent_file))
+    if not design_path.exists():
+        design_path = None
 
-    non_inline_count = sum(1 for t in phase_types.values() if t != "inline")
-    if runbook_type != "tdd" and non_inline_count > 1:
-        corrector_content = generate_corrector_agent(
-            runbook_name,
-            design_content=design_content,
-            outline_content=outline_content,
-            plan_context=plan_context,
-        )
-        corrector_file = agents_dir / f"{runbook_name}-corrector.md"
-        corrector_file.write_text(corrector_content)
-        print(f"✓ Created agent: {corrector_file}")
-        created_agents.append(str(corrector_file))
+    outline_path = write_outline(plan_dir, sections.get("outline"), runbook_path)
+    context_path = write_common_context(
+        plan_dir, sections["common_context"], runbook_path
+    )
+    context_block = build_context_block(design_path, outline_path, context_path)
 
-    has_tdd_phase = any(t == "tdd" for t in phase_types.values())
-    if has_tdd_phase:
-        tdd_files = generate_tdd_agents(
-            runbook_name,
-            agents_dir,
-            design_content=design_content,
-            outline_content=outline_content,
-            plan_context=plan_context,
-        )
-        created_agents.extend(tdd_files)
+    generated_artifacts = [str(p) for p in (outline_path, context_path) if p]
 
-    for phase_num, ptype in sorted(phase_types.items()):
-        if ptype == "inline":
-            phase_agents[phase_num] = "(orchestrator-direct)"
-        elif ptype == "tdd":
-            phase_agents[phase_num] = f"{runbook_name}-tester"
-        else:
-            phase_agents[phase_num] = task_agent_name
+    phase_agents = {
+        phase_num: _PHASE_AGENTS[ptype] for phase_num, ptype in phase_types.items()
+    }
 
     def _source_for_phase(phase_num: int) -> str:
         """Resolve provenance path to actual phase file or canonical runbook."""
@@ -1822,7 +1675,11 @@ def validate_and_create(
                 bootstrap_path = steps_dir / f"{base}-bootstrap.md"
                 bootstrap_path.write_text(
                     generate_cycle_file(
-                        bootstrap_cycle, source_path, cycle_model, phase_context=pctx
+                        bootstrap_cycle,
+                        source_path,
+                        cycle_model,
+                        phase_context=pctx,
+                        context_block=context_block,
                     )
                 )
                 print(f"✓ Created step: {bootstrap_path}")
@@ -1832,7 +1689,11 @@ def validate_and_create(
             test_path = steps_dir / f"{base}-test.md"
             test_path.write_text(
                 generate_cycle_file(
-                    red_cycle, source_path, cycle_model, phase_context=pctx
+                    red_cycle,
+                    source_path,
+                    cycle_model,
+                    phase_context=pctx,
+                    context_block=context_block,
                 )
             )
             print(f"✓ Created step: {test_path}")
@@ -1842,7 +1703,11 @@ def validate_and_create(
             impl_path = steps_dir / f"{base}-impl.md"
             impl_path.write_text(
                 generate_cycle_file(
-                    green_cycle, source_path, cycle_model, phase_context=pctx
+                    green_cycle,
+                    source_path,
+                    cycle_model,
+                    phase_context=pctx,
+                    context_block=context_block,
                 )
             )
             print(f"✓ Created step: {impl_path}")
@@ -1866,6 +1731,7 @@ def validate_and_create(
                 step_model,
                 phase,
                 phase_context=preambles.get(phase, ""),
+                context_block=context_block,
             )
             step_path.write_text(step_file_content)
             print(f"✓ Created step: {step_path}")
@@ -1900,7 +1766,7 @@ def validate_and_create(
     print(f"  Model: {model}")
 
     # Stage all generated artifacts
-    paths_to_stage = [*created_agents, str(steps_dir), str(orchestrator_path)]
+    paths_to_stage = [*generated_artifacts, str(steps_dir), str(orchestrator_path)]
     result = subprocess.run(
         ["git", "add", *paths_to_stage], check=False, capture_output=True, text=True
     )
@@ -1920,11 +1786,11 @@ def main() -> None:
         )
         print(file=sys.stderr)
         print("Transforms runbook markdown into execution artifacts:", file=sys.stderr)
+        print("  - Step/Cycle files (plans/<runbook-name>/steps/)", file=sys.stderr)
         print(
-            "  - Plan-specific agents (.claude/agents/<name>-task.md, <name>-corrector.md)",
+            "  - Shared context (plans/<runbook-name>/common-context.md)",
             file=sys.stderr,
         )
-        print("  - Step/Cycle files (plans/<runbook-name>/steps/)", file=sys.stderr)
         print(
             "  - Orchestrator plan (plans/<runbook-name>/orchestrator-plan.md)",
             file=sys.stderr,
@@ -2038,7 +1904,7 @@ def main() -> None:
         print(warning, file=sys.stderr)
 
     # Derive paths
-    runbook_name, agents_dir, steps_dir, orchestrator_path = derive_paths(runbook_path)
+    runbook_name, steps_dir, orchestrator_path = derive_paths(runbook_path)
 
     # Extract per-phase model overrides and phase preambles
     phase_models = extract_phase_models(body)
@@ -2069,7 +1935,6 @@ def main() -> None:
         runbook_path,
         sections,
         runbook_name,
-        agents_dir,
         steps_dir,
         orchestrator_path,
         metadata,

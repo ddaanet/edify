@@ -155,7 +155,8 @@ Delegate to `edify:runbook-corrector` for validation:
 
 ### 4. Split
 Run `prepare-runbook.py` to create:
-- Step files (`plans/<name>/steps/step-*.md`)
+- Step files (`plans/<name>/steps/step-*.md`), each naming its design, outline, and shared-context artifacts under `## Context`
+- Shared context (`plans/<name>/common-context.md`)
 - Orchestrator plan (`plans/<name>/orchestrator-plan.md`)
 
 **Special case:** If job is simple enough for single step, offer immediate execution.
@@ -514,7 +515,8 @@ prepare-runbook.py plans/foo/runbook.md
 
 **Creates:**
 - `plans/foo/steps/step-*.md` (individual steps)
-- `plans/foo/orchestrator-plan.md` (orchestrator instructions)
+- `plans/foo/common-context.md` (shared context and resolved recall)
+- `plans/foo/orchestrator-plan.md` (orchestrator instructions and phase-agent mapping)
 
 **Runbook format:**
 ```markdown
@@ -537,8 +539,8 @@ model: sonnet  # default model for steps
 ```
 
 **Validation:**
-- Fails on: missing baseline, missing steps, duplicate numbers
-- Warns on: existing artifacts, missing optional sections
+- Fails on: missing steps, duplicate step numbers, unresolvable models, phase-tagged recall naming a nonexistent or inline phase
+- Warns on: file references that do not exist, gaps in phase or cycle numbering
 
 ---
 

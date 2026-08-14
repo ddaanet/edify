@@ -2,14 +2,13 @@
 
 **CRITICAL: This step is MANDATORY. Use `prepare-runbook.py` to create execution artifacts.**
 
-**Why:** Context isolation. Each step gets a fresh agent with ONLY common context and the specific step — no accumulated transcript.
+**Why:** Context isolation. Each step gets a fresh standing agent dispatched with only that step's file — no accumulated transcript, and no step file naming another step's work.
 
-**Step 1: Run prepare-runbook.py** with sandbox bypass:
+**Step 1: Run prepare-runbook.py**:
 ```bash
 plugin/bin/prepare-runbook.py plans/{name}/runbook.md
-# MUST use dangerouslyDisableSandbox: true (writes to .claude/agents/)
 ```
-If script fails: STOP and report error.
+Every artifact it writes lands under `plans/{name}/`, so no sandbox bypass is needed. If script fails: STOP and report error.
 
 **Step 2: Copy orchestrate command to clipboard:**
 ```bash
@@ -20,7 +19,7 @@ echo -n "/orchestrate {name}" | pbcopy
 
 Default-exit invokes `/handoff:handoff` → `/commit-commands:commit` — hands off session context (marks planning complete, adds orchestration as pending), then commits. Next pending task instructs: "Restart session, paste `/orchestrate {name}` from clipboard."
 
-**Why restart:** prepare-runbook.py creates a new agent in `.claude/agents/`. Claude Code discovers agents at session start.
+**Why a fresh session:** planning and execution run at different model tiers, and orchestration is long-running — the boundary keeps the orchestrator off a context already full of planning transcript. See `agents/decisions/orchestration-execution.md`, "When Managing Orchestration Context". Agent discoverability is no longer a reason: `prepare-runbook.py` installs nothing into `.claude/agents/`.
 
 ---
 

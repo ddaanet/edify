@@ -162,35 +162,35 @@ designs, so they stay with the FR.
 21. Four correctors total ~10,100 words sharing the same skeleton;
     differentiating criteria are ~20% of each file.
 
-## Subsumed by the pending rewire
+## Closed by the rewire (2026-08-13)
 
-Decided 2026-08-13 (`agents/decisions/orchestration-execution.md`, "When
-Selecting Agent Type For Orchestrated Steps"): bespoke per-plan agents are
+Decided and implemented 2026-08-13 (`agents/decisions/orchestration-execution.md`,
+"When Selecting Agent Type For Orchestrated Steps"): bespoke per-plan agents are
 replaced by **delegation by reference** — the orchestrator dispatches a standing
 agent with a step-file path, and the step file carries a Context block naming the
-design, outline, and recall artifacts. Less deterministic logic in the agent, no
-loss of flexibility, since the runbook system already decides what each step
-needs.
+design, outline, and shared-context artifacts.
 
-The script and docs are deleted; the code is not yet rewired. Both remaining
-defects live in the artifacts the rewire replaces, so fixing them first would be
-wasted work.
+10. `/orchestrate` §3.2 dispatched `<name>-test-corrector` and
+    `<name>-impl-corrector` that the §1 preflight artifact list never checked
+    for. Both are gone: per-cycle test and implementation reviews are
+    `edify:corrector` dispatches scoped by prompt, and the preflight list no
+    longer names any agent file.
+11. `max_turns` was emitted into every manifest (`_DEFAULT_MAX_TURNS = 30`) but
+    inert — the `Agent` tool has no such parameter. The column and the constant
+    are removed. Both spinning and hanging guards remain platform gaps; a
+    runaway agent still has no in-band stop, which the rewire does not change.
+    `/orchestrate` §4 now states that gap directly instead of pointing at a
+    column that read like a guard.
 
-10. `/orchestrate` §3.2 dispatches `<name>-test-corrector` and
-    `<name>-impl-corrector`, but the §1 preflight artifact list never checks for
-    them.
-11. `max_turns` is emitted into every manifest (`_DEFAULT_MAX_TURNS = 30`) but
-    inert — the `Agent` tool has no such parameter. Both spinning and hanging
-    guards remain platform gaps; a runaway agent still has no in-band stop, and
-    that does not change with the rewire.
-
-**Rewire scope.** `prepare-runbook.py`: drop `generate_task_agent`,
+**What landed.** `prepare-runbook.py`: dropped `generate_task_agent`,
 `generate_corrector_agent`, `generate_tdd_agents`, `read_baseline_agent`,
-`_build_plan_context_section`, the `agents_dir` in `derive_paths`, the four
-`**Agent:**`-family manifest headers and the inert `max_turns` column; add the
-Context block to step-file generation. `/orchestrate`: §1 preflight, §2 header
-parse, §3.1/3.2 dispatch, §3.5 corrector dispatch, §6.3 cleanup.
+`_build_plan_context_section`, `_TDD_ROLES`, `_DEFAULT_MAX_TURNS`, and the
+`agents_dir` thread through `derive_paths`/`validate_and_create`; added
+`build_context_block`, `write_common_context`, `write_outline`, and the
+`## Execution Contract` footer. `/orchestrate`: §1 preflight, §2 header parse and
+Phase-Agent Mapping, §3.1/3.2 dispatch, §3.5 corrector dispatch, §4 execution
+bounds, §6 cleanup removed.
 
-**Not yet in `.claude/handoff-task.md`** — that file is hook-guarded and written
-only by the handoff checkpoint channel, so this document is the record until a
-handoff runs.
+Common Context had no destination once the agent definitions went, so it is now
+written to `plans/<name>/common-context.md` — with resolved recall under its own
+heading — and named from each step file. Recall resolution itself is unchanged.

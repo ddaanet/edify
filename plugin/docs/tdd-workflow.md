@@ -26,7 +26,7 @@ Both workflows share:
 - `/design` skill (with mode-specific sections)
 - `/orchestrate` execution engine (with runbook type detection)
 - Review/correction process (corrector)
-- Common orchestration patterns (weak orchestrator, plan-specific agents)
+- Common orchestration patterns (weak orchestrator, standing agents dispatched with a step-file path)
 
 **Key difference:** TDD uses cycles (RED/GREEN/REFACTOR) instead of generic steps.
 
@@ -140,9 +140,9 @@ python3 plugin/bin/prepare-runbook.py plans/<feature-name>/runbook.md
 ```
 
 This generates:
-- `.claude/agents/<feature-name>-task.md` (plan-specific agent with TDD baseline)
-- `plans/<feature-name>/steps/cycle-{X}-{Y}.md` (individual cycle files)
-- `plans/<feature-name>/orchestrator-plan.md` (execution index)
+- `plans/<feature-name>/steps/step-{X}-{Y}-test.md` and `-impl.md` (RED and GREEN halves of each cycle)
+- `plans/<feature-name>/common-context.md` (shared context and resolved recall)
+- `plans/<feature-name>/orchestrator-plan.md` (execution index and phase-agent mapping)
 
 ---
 
@@ -151,21 +151,18 @@ This generates:
 **Skill:** `/orchestrate`
 **Model:** Haiku (weak orchestrator)
 
-**Purpose:** Execute TDD cycles using test-driver agent baseline.
+**Purpose:** Execute TDD cycles using the standing `edify:test-driver` agent.
 
 **Execution pattern:**
-1. `prepare-runbook.py` creates plan-specific agent from:
-   - `plugin/agents/test-driver.md` (baseline protocol)
-   - Runbook common context (design decisions, paths)
-2. Orchestrator invokes plan-specific agent for each cycle
-3. Agent executes full RED/GREEN/REFACTOR protocol
+1. `prepare-runbook.py` writes a step file per cycle half, each carrying a `## Context` block naming the design, outline, and `common-context.md`
+2. Orchestrator dispatches `edify:test-driver` with the step-file path — tester and implementer are two named instances of the same agent type
+3. Agent reads the named artifacts, then executes the RED or GREEN protocol
 4. Structured log written to execution report
 
-**Why agent-per-cycle:**
-- Implementation agents benefit from broader context
-- Each cycle gets fresh context (no accumulation)
-- Solves TDD adherence through context isolation
-- Consistent with general orchestration pattern
+**Why context reaches the agent through files:**
+- Each cycle half gets fresh context (no accumulation)
+- Scope is enforced structurally — the agent sees one step file, not the runbook
+- Nothing is installed into `.claude/agents/`, so no session restart sits between planning and execution
 
 ---
 

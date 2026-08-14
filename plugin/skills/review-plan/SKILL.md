@@ -50,8 +50,8 @@ Accept TDD, general, and inline artifacts:
 
 Runbook execution uses three context layers. Review criteria apply to step/cycle content — do NOT flag content present in a higher layer as missing.
 
-- **Baseline agent** (`plugin/agents/artisan.md` or `test-driver.md`) — tool usage, execution protocol, error handling. Combined with all steps via prepare-runbook.py.
-- **Common Context** (`## Common Context` in runbook) — project paths, constraints, cross-step dependencies. Available to all steps.
+- **Standing agent** (`plugin/agents/artisan.md` or `test-driver.md`) — tool usage, execution protocol, error handling. Every dispatched executor carries this, whatever the plan.
+- **Common Context** (`## Common Context` in runbook) — project paths, constraints, cross-step dependencies. Written to `plans/<name>/common-context.md` and named by every step file's `## Context` block.
 - **Step/cycle content** — step-specific instructions, validation, outcomes.
 
 **False positive prevention:** Before flagging "missing tool reminders", "missing project paths", or "missing error escalation" in steps, verify the content isn't in baseline or Common Context. These are the three most common false positives.
