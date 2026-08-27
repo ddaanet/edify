@@ -175,15 +175,9 @@ plugin/bin/triage-feedback.sh plans/<job> $BASELINE
 
 Read script output. On divergence message → surface inline. On match or no-classification → proceed silently.
 
-### 4c: Deliverable-Review Chain
+### 4c: Deliverable-Review Handoff
 
-Final phase before continuation. Write the pending task directly to `.claude/handoff-task.md`:
-
-`- [ ] **Deliverable review: <job>** — /deliverable-review plans/<job> | opus | restart`
-
-**Section targeting:** On main → Worktree Tasks. In a worktree → In-tree Tasks. Detect via `git rev-parse --git-dir` (`.git` = main, otherwise worktree).
-
-Write explicitly — do not rely on handoff to capture from conversation context.
+Final phase before continuation. Name the follow-up in the final report: `/deliverable-review plans/<job>` (opus, fresh session). The default exit (`/handoff:handoff`) captures it into the task frame from context; this skill never writes `.claude/handoff-task.md` itself.
 
 ## Continuation
 
@@ -196,4 +190,4 @@ As the **final action** of this skill:
 
 **CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
 
-**On failure:** Abort remaining continuation. Record in `.claude/handoff-task.md` Blockers: which phase failed, error category, remaining continuation orphaned.
+**On failure:** Abort remaining continuation. Report to the user which phase failed, the error category, and that the remaining continuation is orphaned — the next `/handoff:handoff` carries it into the task frame.

@@ -186,9 +186,7 @@ Agent tool:
 ```
 Recovery is mechanical (lint-clean + git-clean). No design/outline context needed.
 
-**After any remediation** — write RCA pending task to `.claude/handoff-task.md`:
-`- [ ] **RCA: Step N dirty tree** — [brief description] | sonnet`
-**Section targeting:** On main → Worktree Tasks. In a worktree → In-tree Tasks. Detect via `git rev-parse --git-dir` (`.git` = main, otherwise worktree).
+**After any remediation** — note the RCA follow-up (`Step N dirty tree — [brief description]`) in the run summary; the default exit (`/handoff:handoff`) carries it into the task frame.
 
 **If recovery fails** — escalate to user with full context (Section 4).
 
@@ -249,7 +247,7 @@ Agent tool:
   prompt: "Refactor flagged files: [files from corrector report]. Warnings: [quoted warning text]. Design reference: plans/<name>/design.md"
 ```
 
-The refactor agent applies deslop directives (factorization-before-splitting) and returns `success`, `escalated: [reason]`, or `error: [reason]`. On `escalated` → write pending task to `.claude/handoff-task.md` for opus-level refactoring (section targeting: main → Worktree Tasks, worktree → In-tree Tasks). On `error` → log and continue (refactoring is advisory, not blocking).
+The refactor agent applies deslop directives (factorization-before-splitting) and returns `success`, `escalated: [reason]`, or `error: [reason]`. On `escalated` → note the opus-level refactoring follow-up in the run summary. On `error` → log and continue (refactoring is advisory, not blocking).
 
 ## 4. Error Escalation (D-4)
 
@@ -283,10 +281,7 @@ git diff --name-only $(git rev-list --max-parents=0 HEAD | head -1)..HEAD
 
 1. **Final review:** If multi-phase, phase boundary correctors already ran. Single-phase: delegate to `edify:corrector` with the reference artifacts (design, outline, shared context) and changed files. Report to `plans/<name>/reports/review.md`.
 2. **TDD audit:** If `**Type:** tdd`, delegate to `edify:tdd-auditor`. Report to `plans/<name>/reports/tdd-process-review.md`.
-3. **Deliverable review:** Write pending task to `.claude/handoff-task.md`:
-   `- [ ] **Deliverable review: <name>** — /deliverable-review plans/<name> | opus | restart`
-   **Section targeting:** On main → Worktree Tasks. In a worktree → In-tree Tasks. Detect via `git rev-parse --git-dir` (`.git` = main, otherwise worktree).
-4. **Lifecycle entry:** Append `{YYYY-MM-DD} review-pending — /orchestrate` to `plans/<name>/lifecycle.md`.
+3. **Deliverable review:** Name the follow-up in the run summary: `/deliverable-review plans/<name>` (opus, fresh session). The default exit (`/handoff:handoff`) captures it into the task frame from context; this skill never writes `.claude/handoff-task.md` itself.
 
 There is no agent cleanup step. `prepare-runbook.py` installs nothing into `.claude/agents/`; the plan's generated artifacts all live under `plans/<name>/` and are part of the commit history.
 

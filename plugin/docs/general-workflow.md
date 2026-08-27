@@ -28,10 +28,9 @@ The recommended way to start a task:
 The `/design` skill will:
 1. Verify this is a one-off task (not feature development)
 2. Assess complexity (simple/moderate/complex)
-3. Set up workflow stages in `.claude/handoff-task.md` as pending tasks
-4. Begin executing the first stage
+3. Route the work: execute inline, or write the design and hand off to `/runbook`
 
-**User reads no docs** - the workflow guides itself through `.claude/handoff-task.md`.
+**User reads no docs** - each skill names the next stage on exit, and `/handoff:handoff` carries it across sessions.
 
 ---
 
@@ -252,7 +251,7 @@ Run `prepare-runbook.py` to create:
 - Starts with tier assessment (evaluates complexity)
 - **Tier 1** (Direct): Implements directly, vets, commits
 - **Tier 2** (Lightweight): Delegates to artisan agents, reviews, commits
-- **Tier 3** (Full Runbook): Executes 4-point runbook prep process, delegates review to `edify:runbook-corrector`, invokes `prepare-runbook.py` to create execution artifacts, primes `.claude/handoff-task.md` for orchestrator handoff
+- **Tier 3** (Full Runbook): Executes 4-point runbook prep process, delegates review to `edify:runbook-corrector`, invokes `prepare-runbook.py` to create execution artifacts, hands off to a fresh session for `/orchestrate`
 
 **Note:** Unified skill supporting both TDD and general workflows via per-phase typing.
 
@@ -296,7 +295,6 @@ Run `prepare-runbook.py` to create:
 
 **What it does:**
 - Updates CLAUDE.md with new rules/constraints
-- Updates `.claude/handoff-task.md` with pattern learnings
 - Documents workflow improvements
 - Adds constraints after discovering issues
 
@@ -315,76 +313,50 @@ The general workflow is designed for natural multi-session execution with model 
 ### How It Works
 
 1. **Start with `/design`** - Creates design document and assesses complexity
-2. **Work continues** - Agent executes stages, updates `.claude/handoff-task.md`
-3. **Session break** - Agent calls `/handoff:handoff`, advises on model switch if needed
-4. **User starts new session** - Types `#load` or just describes next step
-5. **Agent continues** - Reads `.claude/handoff-task.md`, resumes from pending tasks
+2. **Work continues** - Each skill runs its stage and names the next one in its final report
+3. **Session break** - The skill's default exit calls `/handoff:handoff`, which snapshots the in-progress task and the pending stage into the task frame (`.claude/handoff-task.md`) and advises on a model switch if needed
+4. **User starts new session** - The task frame is injected at session start
+5. **Agent continues** - Resumes from the frame's current task
 6. **Repeat** - Until all workflow stages complete
+
+No pipeline skill writes the task frame itself. Pipeline state lives in `plans/<name>/` (design, runbook, reports); the frame only names the current stage.
 
 ### Example Multi-Session Flow
 
-**Session 1 (Opus or Sonnet):**
+**Session 1 (Opus):**
 ```
 User: /design "refactor auth system to support OAuth providers"
-Agent: Assesses as complex task requiring design
-Agent: Sets up workflow in `.claude/handoff-task.md`:
-       - [ ] Design - Explore architecture (/design - Opus)
-       - [ ] Planning - Create runbook (/runbook)
-       - [ ] Execution - Run steps (/orchestrate - Sonnet)
-       - [ ] Review - Check changes (corrector)
-       - [ ] Completion - Finalize docs
-Agent: "Design stage requires Opus. Switch to Opus model and type #load to continue."
+Agent: Assesses as complex, writes plans/auth-oauth/design.md
+Agent: Default exit → /handoff:handoff: "Next: /runbook plans/auth-oauth (Sonnet)"
 ```
 
-**Session 2 (User switches to Opus):**
+**Session 2 (Sonnet):**
 ```
-User: #load
-Agent: Reads `.claude/handoff-task.md`, sees Design stage pending
-Agent: Invokes /design skill
-Agent: Explores codebase, makes architectural decisions
-Agent: Completes design document
-Agent: Updates `.claude/handoff-task.md` (Design complete, Planning next)
-Agent: Calls /handoff:handoff: "Switch to Sonnet for Planning stage"
+Frame injected: current task = /runbook plans/auth-oauth
+Agent: Invokes /runbook, creates the runbook, runs prepare-runbook.py
+Agent: Default exit → /handoff:handoff: "Next: /orchestrate plans/auth-oauth (Sonnet, fresh session)"
 ```
 
-**Session 3 (User switches to Sonnet):**
+**Session 3 (Sonnet):**
 ```
-User: #load
-Agent: Reads `.claude/handoff-task.md`, sees Planning stage pending
-Agent: Invokes /runbook
-Agent: Creates runbook with implementation steps
-Agent: Runs prepare-runbook.py to generate artifacts
-Agent: Updates `.claude/handoff-task.md` (Planning complete, Execution next)
-Agent: Calls /handoff:handoff: "Execution stage next"
+Frame injected: current task = /orchestrate plans/auth-oauth
+Agent: Executes runbook steps; phase-boundary correctors run
+Agent: Default exit → /handoff:handoff: "Next: /deliverable-review plans/auth-oauth (Opus)"
 ```
 
-**Session 4 (Execution):**
+**Session 4 (Opus):**
 ```
-User: #load
-Agent: Reads `.claude/handoff-task.md`, sees Execution stage pending
-Agent: Invokes /orchestrate
-Agent: Executes runbook steps
-Agent: Updates `.claude/handoff-task.md` (Execution complete, Review next)
-Agent: Calls /handoff:handoff: "Switch to Sonnet for Review stage"
-```
-
-**Session 5 (User switches to Sonnet):**
-```
-User: #load
-Agent: Reads `.claude/handoff-task.md`, sees Review and Completion pending
-Agent: Delegates to corrector to review changes
-Agent: Makes any fixes needed based on review report
-Agent: Updates documentation
-Agent: Updates `.claude/handoff-task.md` (all tasks complete)
-Agent: Calls /handoff:handoff: "All workflow tasks complete. Start fresh session for new work."
+Frame injected: current task = /deliverable-review plans/auth-oauth
+Agent: Reviews deliverables against the design, writes the report to plans/auth-oauth/reports/
+Agent: /handoff:handoff: "All workflow stages complete."
 ```
 
 ### Key Benefits
 
-- **Zero context overhead** - Each session starts fresh, reads state from `.claude/handoff-task.md`
-- **Right model for right task** - Design uses Opus, orchestration and review use Sonnet, individual steps may use Haiku
+- **Zero context overhead** - Each session starts fresh from the injected task frame
+- **Right model for right task** - Design and deliverable review use Opus, orchestration and correctors use Sonnet, individual steps may use Haiku
 - **Natural breaks** - Work can pause/resume at any stage
-- **Transparent state** - User sees workflow in `.claude/handoff-task.md` at any time
+- **Transparent state** - The user sees pipeline state in `plans/<name>/` and the current stage in the task frame
 - **Cost efficient** - Only use expensive models when needed
 
 ---
@@ -489,12 +461,10 @@ Git tracks all changes to runbook and artifacts.
 ### 2. Active Development
 - Update design documents as work progresses
 - Generate execution artifacts via `prepare-runbook.py`
-- Track progress in `.claude/handoff-task.md`
 
 ### 3. Execution
 - Use `/orchestrate` skill for runbook execution
 - Write reports to `plans/<name>/reports/`
-- Update `.claude/handoff-task.md` with progress
 
 ### 4. Completion
 - Extract valuable decisions to `docs/design.md`

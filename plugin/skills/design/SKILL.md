@@ -193,4 +193,4 @@ As the **final action** of this skill:
 
 **CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
 
-**On failure:** Abort remaining continuation. Record in `.claude/handoff-task.md` Blockers: which phase failed, error category, remaining continuation orphaned.
+**On failure:** Abort remaining continuation. Report to the user which phase failed, the error category, and that the remaining continuation is orphaned — the next `/handoff:handoff` carries it into the task frame.

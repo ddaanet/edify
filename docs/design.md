@@ -397,7 +397,13 @@ is worse than none.
 different model tiers, and orchestration is long-running, so the boundary keeps
 the orchestrator off a context already full of planning transcript. Handoff is
 not delegatable — it needs the current agent's session context. Commit is
-mechanical and can be delegated. *Reopen-if:* context budgets grow enough that
+mechanical and can be delegated. The boundary is crossed by `/handoff:handoff`,
+every pipeline skill's default exit: it snapshots the next stage into the task
+frame from context. No pipeline skill writes `.claude/handoff-task.md` itself —
+the file belongs to the handoff plugin and is hook-guarded — and durable
+pipeline state lives under `plans/<name>/` (the task-list writes and the
+worktree-vs-main section targeting that the skills carried from the retired
+`session.md` era were cut 2026-08-27). *Reopen-if:* context budgets grow enough that
 the tier argument stops binding; auto-chaining `/runbook` into `/orchestrate` was
 deliberately not taken during the 2026-08-13 rewire.
 
@@ -944,12 +950,6 @@ on a single small execution in 2026-01, and the token-cost and reliability figur
 that accompanied that claim were estimates, not measurements. It has not been
 exercised end to end since the 2026-08 revival.
 
-**L-7 — `plugin/bin/deliverable-inventory.py` diffs `merge-base HEAD main`.**
-Reviewing work already committed on `main` therefore returns an empty inventory.
-
-**L-8 — Direct `.claude/handoff-task.md` writes are hook-blocked.** `/inline`
-Phase 4c and `/orchestrate` sections 3.4 and 6 still write it directly; they need
-routing through the handoff checkpoint channel.
 
 ## 9. Non-goals
 

@@ -28,8 +28,8 @@ Before starting, gather:
 ### Phase 1: Inventory
 
 1. Read the design's Scope section (IN/OUT) to establish expected deliverables
-2. Run exact command: `plugin/bin/deliverable-inventory.py` (no arguments, no pipes, no redirect). Outputs markdown tables: per-file diff stats and summary by type
-3. Classify each deliverable by artifact type (script auto-classifies, verify):
+2. Establish the review range — the plan's commits, known from context or asked of the user — and run `git diff --numstat <range> -- . ':!plans' ':!tmp' ':!.claude'` for per-file line counts. A submodule that moved in the range is diffed inside the submodule between its two pointers
+3. Classify each deliverable by artifact type:
 
 | Type | Pattern | Review axes |
 |------|---------|-------------|

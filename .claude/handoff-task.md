@@ -1,15 +1,3 @@
 ## Current task
 
-The `agents/decisions` fold is finished and every decision it raised is settled.
-`plans/README.md` carries no inventory — plans are volatile, `ls plans/` is
-authoritative, and each plan states its own status. `Now` keeps its place in the
-design-doc format despite overlapping the task frame, because a plan is not
-always executed in one continuous sequence. The three fold axes stand as
-executed: one project-level `docs/design.md` with `docs/superpowers/` left alone
-(it holds superpowers-shaped docs, including a live subproject design, and is
-not a fossil of the torn-down subsystem); rule-shaped content split three ways
-across memory, `docs/design.md` and CLAUDE.md; and content about torn-down
-subsystems cut rather than tagged, the worktree CLI included, since keeping it
-would fight the embrace-the-platform direction.
-
-The next thread is the `memory/MEMORY.md` consolidation.
+Making the pipeline dogfoodable. The pipeline skills no longer write the task frame (`/handoff:handoff` captures the next stage from context; state lives under `plans/<name>/`), `deliverable-inventory.py` is gone in favour of a context-derived diff range, and the recall, continuation and report-template protocols each have one authoritative statement (`recall/SKILL.md`, `fragments/continuation-passing.md`, `review-plan/references/report-template.md`) with `Skill(edify:recall, "plans/<job> — <topic>")` as the recall reference at every site. Next thread: release the plugin (preflight, memory push, `just release`), then a first end-to-end dogfood run on a branch.
