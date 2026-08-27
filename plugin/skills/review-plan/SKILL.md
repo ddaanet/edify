@@ -62,9 +62,8 @@ Runbook execution uses three context layers. Review criteria apply to step/cycle
 
 Before applying review criteria, load project-specific quality patterns:
 
-1. **Infer plan directory** from the reviewed file path — if reviewing `plans/foo/runbook-phase-1.md` or `plans/foo/runbook.md`, the plan directory is `plans/foo/`. If no `plans/` prefix, skip recall.
-2. **Recall context:** Read `plans/<job>/recall-artifact.md`, then Read each file it lists — when the artifact exists, the files it lists carry decision content (failure modes, quality anti-patterns). Caller-provided entries take precedence; skip if already provided in the delegation prompt.
-3. **If the artifact is absent**: invoke `Skill(skill: "edify:recall", args: "<topic covering quality patterns, failure modes, testing conventions>")`.
+1. **Infer the plan directory** from the reviewed file path — reviewing `plans/foo/runbook-phase-1.md` or `plans/foo/runbook.md` gives `plans/foo`. No `plans/` prefix: skip recall entirely.
+2. `Skill(skill: "edify:recall", args: "plans/<job> — quality patterns, failure modes, testing conventions")`
 
 Recall supplements, does not replace, the review criteria below.
 
@@ -397,51 +396,15 @@ Extract all file paths referenced in the runbook. For each path:
 
 ### Phase 5: Generate Report
 
-**Structure:**
-
-```markdown
-# Runbook Review: {name}
-
-**Artifact**: [path]
-**Date**: [ISO timestamp]
-**Mode**: review + fix-all
-**Phase types**: [TDD | General | Inline | Mixed (N TDD, M general, K inline)]
-
-## Summary
-- Total items: N (cycles: X, steps: Y)
-- Issues found: N critical, N major, N minor
-- Issues fixed: N
-- Unfixable (escalation required): N
-- Overall assessment: Ready | Needs Escalation
-
-## Critical Issues
-
-### Issue 1: [description]
-**Location**: [cycle/step, line range]
-**Problem**: [what's wrong]
-**Fix**: [what was done]
-**Status**: FIXED | UNFIXABLE (reason)
-
-## Major Issues
-[same format]
-
-## Minor Issues
-[same format]
-
-## Fixes Applied
-- [list of all fixes applied]
-
-## Unfixable Issues (Escalation Required)
-[numbered list with rationale, or "None — all issues fixed"]
-```
+Read `plugin/skills/review-plan/references/report-template.md` and write the
+report in the structure it defines, at the location it names.
 
 ---
 
 ## Output Format
 
-**Report file:** `plans/<feature-name>/reports/runbook-review.md` (or `phase-N-review.md` for phase files)
-
-Return filepath only (or with escalation note). Read `references/report-template.md` for full report structure and return format.
+Return the report filepath only, or the filepath plus an escalation note —
+exact wording in `references/report-template.md` §Return Format.
 
 ---
 

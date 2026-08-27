@@ -29,24 +29,46 @@ continuation:
 
 ## Consumption Protocol
 
-Add to cooperative skills (~5-8 lines replacing hardcoded tail-calls):
+This is the protocol itself, not a template to copy. A cooperative skill's own
+`## Continuation` section points here and states only its site-specific
+prepend rule (step 2); everything else below is the same for every skill.
 
-```markdown
-## Continuation
-
-As the **final action** of this skill:
+As the **final action** of a cooperative skill:
 
 1. Read continuation from `additionalContext` (first skill in chain)
    or from `[CONTINUATION: ...]` suffix in Skill args (chained skills)
-2. If skill needs a subroutine before continuing: prepend entries to continuation
+2. If the skill needs a subroutine before continuing: prepend entries to continuation
    - Existing entries remain in original order (append-only invariant)
    - Prepend only — never remove, reorder, or modify existing entries
    - Skills that don't need subroutines skip this step
 3. If continuation present: peel first entry from (possibly modified) continuation, tail-call with remainder
-4. If no continuation: skill implements its own default-exit behavior (standalone/last-in-chain)
+4. If no continuation: use the `continuation.default-exit` chain from the
+   skill's own YAML frontmatter (standalone / last-in-chain). Invoke its first
+   entry, passing the remainder as that skill's continuation.
 
 **CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
-```
+
+### Worked Examples
+
+Incoming: `/orchestrate myplan [CONTINUATION: /commit-commands:commit]`
+- Complete the skill's work
+- Peel first entry: `/commit-commands:commit`
+- No remainder, so invoke: `Skill(/commit-commands:commit)`
+
+Incoming: `/orchestrate myplan [CONTINUATION: /handoff:handoff, /commit-commands:commit]`
+- Peel first: `/handoff:handoff`; remainder: `/commit-commands:commit`
+- Invoke: `Skill(/handoff:handoff args="[CONTINUATION: /commit-commands:commit]")`
+
+Incoming: `/orchestrate myplan` (no continuation)
+- Use frontmatter default-exit: `["/handoff:handoff", "/commit-commands:commit"]`
+- Invoke: `Skill(/handoff:handoff args="[CONTINUATION: /commit-commands:commit]")`
+
+Prepend (subroutine call). Incoming: `/orchestrate myplan [CONTINUATION: /handoff:handoff, /commit-commands:commit]`
+- A `/commit-commands:commit` checkpoint is needed before the chain resumes
+- Prepend: `[/commit-commands:commit, /handoff:handoff, /commit-commands:commit]`
+- Peel first: `/commit-commands:commit`; remainder: `/handoff:handoff, /commit-commands:commit`
+- Invoke: `Skill(/commit-commands:commit args="[CONTINUATION: /handoff:handoff, /commit-commands:commit]")`
+- After it completes, the original chain resumes
 
 ## Transport Format
 

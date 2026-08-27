@@ -71,9 +71,9 @@ Read `plans/<job>/brief.md` if present (cross-tree context from other sessions).
 
 ### 2.3 Recall (D+B anchor — tool call required)
 
-1. If `plans/<job>/recall-artifact.md` exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
-2. Invoke `Skill(skill: "edify:recall", args: "<topic covering execution patterns for this task>")` for whatever the artifact does not already cover — patterns for implementing this, not classifying it.
-3. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
+`Skill(skill: "edify:recall", args: "plans/<job> — execution patterns for this task")`
+
+Patterns for implementing this, not classifying it.
 
 ### 2.4 Reference Loading
 
@@ -138,12 +138,10 @@ Route changed files to the appropriate reviewer per `plugin/fragments/review-req
 **Common fields per dispatch:**
 - **Scope:** uncommitted changes for this artifact group — implementation only
 - **Design context:** `plans/<job>/outline.md` or `design.md`
-- **Recall artifact:** `plans/<job>/recall-artifact.md` (reviewer Reads the listed files)
+- **Recall context:** the plan directory, per `references/review-dispatch-template.md` — the reviewer runs its own recall
 - **Report:** `plans/<job>/reports/review.md` (or `review-<type>.md` when multiple groups)
 
 Planning artifacts → runbook-corrector (not this gate).
-
-If recall artifact absent: lightweight recall fallback (template details in reference file).
 
 **Structural proof (D+B anchor):** After review completes, verify report exists:
 
@@ -181,13 +179,6 @@ Final phase before continuation. Name the follow-up in the final report: `/deliv
 
 ## Continuation
 
-As the **final action** of this skill:
-
-1. Read continuation from `additionalContext` (first skill in chain) or from `[CONTINUATION: ...]` suffix in Skill args (chained skills)
-2. If skill needs a subroutine before continuing: prepend entries to continuation (existing entries stay in original order — append-only invariant)
-3. If continuation present: peel first entry from (possibly modified) continuation, tail-call with remainder
-4. If no continuation: default-exit — `/handoff:handoff` → `/commit-commands:commit`
-
-**CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
-
-**On failure:** Abort remaining continuation. Report to the user which phase failed, the error category, and that the remaining continuation is orphaned — the next `/handoff:handoff` carries it into the task frame.
+Read `plugin/fragments/continuation-passing.md` and follow its §Consumption
+Protocol as the final action of this skill; on failure, its §Error Propagation.
+This skill has no routing-dependent prepend — step 2 applies unmodified.

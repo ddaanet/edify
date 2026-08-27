@@ -20,17 +20,15 @@ If design document includes "Requirements" section:
 - Carry requirements context into runbook Common Context
 
 1. **Implementation recall (D+B anchor — tool call required):**
-   1. If `plans/<job>/recall-artifact.md` exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
-   2. Invoke `Skill(skill: "edify:recall", args: "<topic covering implementation patterns for this design>")` for whatever the artifact does not already cover — patterns for building this, not classifying it.
-   3. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
-   4. Factor known constraints into step design and model selection.
+   - `Skill(skill: "edify:recall", args: "plans/<job> — implementation patterns for this design")` — patterns for building this, not classifying it.
+   - Factor known constraints into step design and model selection.
 
 2. **Augment recall artifact** (`plans/<job>/recall-artifact.md`):
    - If artifact exists (design stage may have generated it via Pass 1): augment with implementation and testing learnings
      - Invoke `Skill(skill: "edify:recall", args: "implementation notes, testing conventions")`
      - Add entries relevant to the planned work -- planning-relevant only: model selection failures, phase typing decisions, checkpoint placement patterns, precommit gotchas
      - Do NOT add execution-level entries (mock patching, test structure details) -- those belong in step files, not recall
-   - If artifact absent: generate the initial artifact (select files from the in-context index by problem-domain matching, Read them, then write the artifact listing their paths -- same process as the `/design` skill's Recall Artifact Generation section, but with implementation focus)
+   - If artifact absent: write the initial artifact listing the paths step 1's recall selected, with implementation focus
    - Write augmented artifact back to `plans/<job>/recall-artifact.md`
    - For multi-session pipelines where design-time artifact may be stale, planner can regenerate from scratch
 

@@ -139,71 +139,11 @@ Suppress these categories entirely — do not raise them as findings. Suppressio
 3. Verify requirements inheritance from outline (if outline exists)
 4. Invoke `Skill(skill: "edify:review-plan")` for detailed analysis
 5. Apply ALL fixes to the artifact
-6. Generate report at `plans/<feature>/reports/runbook-review.md` (or `phase-N-review.md`)
-7. Return ONLY filepath on success
+6. Write the report and return per §Report Structure And Return Protocol
 
-## Report Structure
+## Report Structure And Return Protocol
 
-```markdown
-# Runbook Review: [name]
-
-**Artifact**: [path]
-**Date**: [ISO timestamp]
-**Mode**: review + fix-all
-**Phase types**: [TDD | General | Inline | Mixed (N TDD, M general, K inline)]
-
-## Summary
-
-[2-3 sentence overview]
-
-**Overall Assessment**: [Ready / Needs Escalation]
-
-## Findings
-
-### Critical Issues
-
-1. **[Issue]**
-   - Location: [cycle/step, section]
-   - Problem: [description]
-   - Fix: [what was changed]
-   - **Status**: FIXED | UNFIXABLE (reason)
-
-### Major Issues
-[same format]
-
-### Minor Issues
-[same format]
-
-## Fixes Applied
-
-- [location] — [change]
-
-## Unfixable Issues (Escalation Required)
-
-[List issues or "None — all issues fixed"]
-
----
-
-**Ready for next step**: [Yes / No — escalation needed]
-```
-
-## Return Protocol
-
-**On success (all issues fixed):**
-```
-plans/<feature>/reports/runbook-review.md
-```
-
-**On success with unfixable issues:**
-```
-plans/<feature>/reports/runbook-review.md
-ESCALATION: [count] unfixable issues require attention (see report)
-```
-
-**On failure:**
-```
-Error: [What failed]
-Details: [Error message]
-Context: [What was being attempted]
-Recommendation: [What to do]
-```
+Read `plugin/skills/review-plan/references/report-template.md`. It defines the
+report structure, the report file location, and the exact return strings for
+success, success-with-escalation, and failure. Write the report and return
+according to it.

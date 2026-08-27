@@ -51,12 +51,9 @@ Before doing design work, assess whether design is actually needed.
 
 Surface codified decisions that constrain classification before it happens.
 
-```
-Read plans/<job>/recall-artifact.md
-```
+`Skill(skill: "edify:recall", args: "plans/<job> — decisions that constrain triage of this task's domain")`
 
-- This Read is the structural anchor — prevents classification from being skipped or rationalized. When `/requirements` ran, the artifact exists and the Read fires whether or not anything relevant turns up; the files it lists carry the planner's curation.
-- **No artifact** (triage entered without `/requirements`): the anchor is invoking `Skill(skill: "edify:recall", args: "<topic covering decisions that constrain triage of this task's domain>")`. If nothing matches, state that explicitly in the response — the gate was reached and yielded nothing.
+This invocation is the structural anchor — it prevents classification from being skipped or rationalized. It fires whether or not anything relevant turns up, whether or not `/requirements` already wrote the artifact.
 
 #### Classification Criteria
 
@@ -181,16 +178,10 @@ When a design modifies an "author" skill (a skill whose output is reviewed by a 
 
 ## Continuation
 
-As the **final action** of this skill:
+Read `plugin/fragments/continuation-passing.md` and follow its §Consumption
+Protocol as the final action of this skill; on failure, its §Error Propagation.
 
-1. Read continuation from `additionalContext` (first skill in chain) or from `[CONTINUATION: ...]` suffix in Skill args (chained skills)
-2. Prepend entries based on routing outcome:
-   - Moderate (non-prose): prepend `/runbook plans/<job>`
-   - Simple, Moderate (agentic-prose), or execution-ready (B gate or C.5): prepend `/inline plans/<job> execute`
-   - Not execution-ready: no prepend
-3. If continuation present: peel first entry from (possibly modified) continuation, tail-call with remainder
-4. If no continuation: default-exit — `/handoff:handoff` → `/commit-commands:commit`
-
-**CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
-
-**On failure:** Abort remaining continuation. Report to the user which phase failed, the error category, and that the remaining continuation is orphaned — the next `/handoff:handoff` carries it into the task frame.
+This skill's step-2 prepend, by routing outcome:
+- Moderate (non-prose): prepend `/runbook plans/<job>`
+- Simple, Moderate (agentic-prose), or execution-ready (B gate or C.5): prepend `/inline plans/<job> execute`
+- Not execution-ready: no prepend

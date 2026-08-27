@@ -22,10 +22,8 @@ Review implementation changes against design specification.
 
 **Design reference:** plans/<job>/outline.md (or design.md if present)
 
-**Recall context:**
-1. If plans/<job>/recall-artifact.md exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
-2. Invoke `Skill(skill: "edify:recall", args: "<topic covering quality patterns, failure modes for this scope>")` for whatever the artifact does not already cover.
-3. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
+**Recall context:** `Skill(skill: "edify:recall", args: "plans/<job> — quality patterns, failure modes for this scope")`
+If you have no `Skill` tool: Read `plans/<job>/recall-artifact.md` and Read each file it lists — that is all the recall available to you.
 
 **Review criteria:**
 - Implementation matches design decisions
@@ -43,7 +41,7 @@ Return filepath on success, or "UNFIXABLE: [description]" on failure.
 
 - **Baseline:** `$BASELINE` captured at /inline Phase 1 (`git rev-parse HEAD` before edits). When `/inline execute` follows /design, baseline excludes design-phase artifacts — only execution edits are uncommitted.
 - **Design context:** Always `outline.md` or `design.md` — never `requirements.md`. Requirements are upstream abstractions; design/outline contains the implementation-level decisions the reviewer needs.
-- **Recall artifact:** Reference the file path. Reviewer resolves entries itself — do not pre-resolve and paste content into the prompt. Token economy: reference, never repeat.
+- **Recall context:** Pass the plan directory only. The reviewer resolves entries itself — do not pre-resolve and paste recall content into the prompt. Token economy: reference, never repeat. The `Skill` fallback line matters for report-only reviewers (e.g. `plugin-dev:skill-reviewer`), which have Read but no `Skill` tool.
 - **Scope IN/OUT:** From design or outline, not invented. Prevents reviewer from flagging work explicitly deferred.
 - **Scope completeness:** Reviewer must mechanically diff every Scope IN item against deliverables. Design scope items that aren't mapped to named components are the gap — component+decision validation alone misses standalone scope items (e.g., planstate specified in Scope IN but not part of any C1-C4 component).
 - **Constraint:** This template is for implementation changes only. Planning artifacts (runbooks, outlines, designs) route to runbook-corrector per pipeline contracts.
@@ -69,7 +67,7 @@ Review implementation changes against design specification.
 
 **Design reference:** plans/inline-execute/outline.md
 
-**Recall artifact:** plans/inline-execute/recall-artifact.md
+**Recall context:** `Skill(skill: "edify:recall", args: "plans/inline-execute — quality patterns, failure modes for this scope")`
 
 **Review criteria:**
 - Implementation matches design decisions

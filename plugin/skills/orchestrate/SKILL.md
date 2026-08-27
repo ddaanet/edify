@@ -217,7 +217,7 @@ Agent tool:
     **Design reference:** plans/<name>/design.md
     **Outline:** plans/<name>/outline.md
     **Shared context:** plans/<name>/common-context.md
-    **Review recall:** Read `plans/<name>/recall-artifact.md`, then Read each file it lists — when present, the files it lists carry review-relevant entries. If absent: invoke `Skill(skill: "edify:recall", args: "<topic derived from phase scope>")`.
+    **Review recall:** `Skill(skill: "edify:recall", args: "plans/<name> — <topic derived from phase scope>")`
     **Changed files:** [git diff --name-only output]
 
     Fix all issues. Write report to: plans/<name>/reports/checkpoint-P-review.md
@@ -287,13 +287,13 @@ There is no agent cleanup step. `prepare-runbook.py` installs nothing into `.cla
 
 ## Continuation
 
-This skill is **cooperative** with the continuation passing system. After completion, check Skill args suffix for `[CONTINUATION: ...]` transport. No continuation → use default-exit from frontmatter.
-
-**Full protocol:** Read `references/continuation.md`.
+Read `plugin/fragments/continuation-passing.md` and follow its §Consumption
+Protocol as the final action of this skill; on failure, its §Error Propagation.
+This skill has no routing-dependent prepend — step 2 applies unmodified.
 
 ## References
 
 - **Verification scripts:** `plugin/skills/orchestrate/scripts/verify-step.sh`, `verify-red.sh`
 - **Common scenarios:** `references/common-scenarios.md`
 - **Progress tracking:** `references/progress-tracking.md`
-- **Continuation:** `references/continuation.md`
+- **Continuation:** `plugin/fragments/continuation-passing.md`

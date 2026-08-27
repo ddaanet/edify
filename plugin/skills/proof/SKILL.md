@@ -97,7 +97,7 @@ Recall: [domain-relevant context if any, or omitted if none]
 Verdict? (a)pprove (r)evise (k)ill (s)kip
 ```
 
-**Per-item recall (FR-3):** Before presenting each item, invoke `Skill(skill: "edify:recall", args: "<that item's topic>")`. Null recall is silent — no "no relevant context found" noise.
+**Per-item recall (FR-3):** Before presenting each item, run recall for that item's topic. The first item loads the procedure — `Skill(skill: "edify:recall", args: "<that item's topic>")`; every later item runs the loaded procedure inline, without another `Skill` call. Null recall is silent — no "no relevant context found" noise.
 
 **Verdicts** — 4 explicit, uniform across all artifact types:
 - **approve** (a) — item correct, no changes

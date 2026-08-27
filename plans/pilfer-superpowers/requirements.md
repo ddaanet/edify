@@ -113,7 +113,13 @@ runbook report template (×3), and the ~80%-shared corrector skeleton
 bodies (superpowers: <200 words frequently-loaded, <500 others — treat as
 starting points to calibrate, not established thresholds). Acceptance: each
 protocol has exactly one authoritative statement; measured token reduction
-reported, not estimated.
+reported, not estimated. For the corrector-skeleton dedup specifically
+(defect 21, a cross-agent target): each corrector runs in a fresh, isolated
+context, so single-sourcing only saves tokens if the shared fragment's Read
+is folded into the agent's already-planned initial read batch at dispatch —
+an unbundled extra Read call is a net cost, not a reduction. Same-context
+dedup targets (recall protocol, continuation block, report template, where
+loaded together within one context) aren't affected by this caveat.
 
 **FR-13: Delegate lifecycle gaps to installed superpowers skills**
 Wire the pipeline's missing lifecycle stages to the already-installed

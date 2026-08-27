@@ -117,9 +117,9 @@ When uncertain between tiers, prefer the lower tier (less overhead). Ask user on
 
 **Implementation recall (D+B anchor — tool call required):**
 
-1. If `plans/<job>/recall-artifact.md` exists: Read `plans/<job>/recall-artifact.md`, then Read each file it lists.
-2. Invoke `Skill(skill: "edify:recall", args: "<topic covering implementation patterns for this design>")` for whatever the artifact does not already cover — patterns for building this, not classifying it. Upstream triage recall (from /design) uses different entries and does not satisfy this gate.
-3. Nothing relevant (no artifact, no matching entries): say so explicitly — the gate was reached and yielded nothing.
+`Skill(skill: "edify:recall", args: "plans/<job> — implementation patterns for this design")`
+
+Patterns for building this, not classifying it. Upstream triage recall (from /design) uses different entries and does not satisfy this gate.
 
 Include relevant entries in each delegation prompt — format per consumer model tier (constraint format for haiku, rationale for sonnet/opus). Include review-relevant entries in corrector prompt.
 
@@ -184,16 +184,10 @@ When delegated agent escalates "ambiguity" or "design gap":
 
 ## Continuation
 
-As the **final action** of this skill:
+Read `plugin/fragments/continuation-passing.md` and follow its §Consumption
+Protocol as the final action of this skill; on failure, its §Error Propagation.
 
-1. Read continuation from `additionalContext` (first skill in chain) or from `[CONTINUATION: ...]` suffix in Skill args (chained skills)
-2. Prepend entries based on tier:
-   - Tier 2: prepend `/inline plans/<job> execute`
-   - Tier 3: no prepend (Phase 4 prepares artifacts; orchestration runs in a fresh session at a different model tier)
-3. If continuation present: peel first entry from (possibly modified) continuation, tail-call with remainder
-4. If no continuation: default-exit — `/handoff:handoff` → `/commit-commands:commit`
-
-**CRITICAL:** Do NOT include continuation metadata in Agent tool prompts.
-
-**On failure:** Abort remaining continuation. Report to the user which phase failed, the error category, and that the remaining continuation is orphaned — the next `/handoff:handoff` carries it into the task frame.
+This skill's step-2 prepend, by tier:
+- Tier 2: prepend `/inline plans/<job> execute`
+- Tier 3: no prepend (Phase 4 prepares artifacts; orchestration runs in a fresh session at a different model tier)
 

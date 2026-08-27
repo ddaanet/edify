@@ -179,12 +179,9 @@ Do not try to ask the user. A declared `AskUserQuestion` does not reach this age
 
 ### 1.5. Load Recall Context
 
-**Derive job name:** Extract from first `plans/<name>/` path in task prompt. If no plan path in prompt, skip to lightweight recall.
+**Derive the plan directory:** the first `plans/<name>/` path in the task prompt. Absent: pass no plan directory.
 
-**Recall context:** Read `plans/<job-name>/recall-artifact.md`, then Read each file it lists
-
-When the artifact exists, the files it lists carry decision content — failure modes and quality anti-patterns that augment reviewer awareness of project-specific patterns.
-If the artifact is absent: invoke `Skill(skill: "edify:recall", args: "<topic covering quality patterns, failure modes>")`.
+`Skill(skill: "edify:recall", args: "plans/<name> — quality patterns, failure modes")`
 
 Recall supplements the review criteria below.
 

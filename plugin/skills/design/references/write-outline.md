@@ -36,7 +36,7 @@ If no requirements.md exists:
 
 | Level | Source | How | When |
 |-------|--------|-----|------|
-| 1. Local knowledge | Invoke `Skill(skill: "edify:recall", args: "<topic>")` — it selects from the in-context index and Reads the bodies. Read `plugin/fragments/*.md` directly when referenced. | Skill invocation | Always (core) |
+| 1. Local knowledge | `Skill(skill: "edify:recall", args: "plans/<job> — <topic>")`. Read `plugin/fragments/*.md` directly when referenced. | Skill invocation | Always (core) |
 | 2. Key skills | `plugin-dev:*` skills | Skill invocation | When design touches plugin components (hooks, agents, skills, MCP) |
 | 3. Context7 | Library documentation via Context7 MCP tools | Designer calls directly from main session (MCP tools unavailable in sub-agents), writes results to report file | When design involves external libraries/frameworks |
 | 4. Local explore | Codebase exploration | Delegate to scout agent | Always for complex designs |

@@ -88,10 +88,7 @@ Use Read tool to load the full design document.
 
 ### 1.5. Load Recall Context
 
-**Recall context:** Read `plans/<job-name>/recall-artifact.md`, then Read each file it lists
-
-When the artifact exists, the files it lists carry decision content — failure modes and quality anti-patterns that augment reviewer awareness of project-specific patterns.
-If the artifact is absent: invoke `Skill(skill: "edify:recall", args: "<topic covering architectural conventions, quality patterns>")`.
+`Skill(skill: "edify:recall", args: "plans/<job-name> — architectural conventions, quality patterns")`
 
 Recall supplements the review criteria below.
 
@@ -385,7 +382,7 @@ Before returning filename:
 
 1. **Read design document** from specified path
 2. **Validate requirements** exist (Step 0)
-3. **Load recall context** (Step 1.5) — read recall-artifact or do lightweight recall
+3. **Load recall context** (Step 1.5)
 4. **Analyze design** against all criteria (completeness, clarity, feasibility, consistency)
 5. **Verify references** (`rg --files` for file paths, `rg` for patterns if needed)
 6. **Check plugin topics** for skill-loading directives
