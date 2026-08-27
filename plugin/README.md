@@ -74,6 +74,7 @@ Utility scripts in `bin/` (Python 3):
 
 | Script | Purpose |
 |--------|---------|
+| `bootstrap-venv.sh` | SessionStart hook: provision a venv with the version-matched `edify-cli` via uv |
 | `bump-plugin-version.py` | Bump the plugin manifest version |
 | `check-version-consistency.py` | Verify plugin and package versions agree |
 | `prepare-runbook.py` | Expand a runbook into per-step files, shared context, and an orchestrator plan |

@@ -9,15 +9,12 @@ Direction: Lean-assisted (formal-proof-backed) requirements tracking.
 
 ## Install
 
-Not yet published to PyPI. Install the CLI from source:
-
 ```bash
-git clone https://github.com/ddaanet/edify
-cd edify
-uv tool install .
+uv tool install edify-cli
 ```
 
-Requires Python 3.14+ and [uv].
+Requires Python 3.14+ and [uv]. To work from source instead, clone the repo
+and run `uv tool install .` in it.
 
 ## CLI (`edify-cli`)
 
@@ -39,8 +36,16 @@ Source in `src/edify/`. Six commands in four groups:
 
 The `plugin/` directory is a Claude Code plugin — a plain subdirectory of this
 repo (previously a git submodule). It ships framework-agnostic skills invoked
-as slash commands: `/requirements`, `/proof`, `/deliverable-review`,
-`/ground`, `/formalize`. See [`plugin/README.md`](plugin/README.md).
+as slash commands, in two groups:
+
+- **Pipeline** — `/requirements` → `/design` → `/runbook` → `/orchestrate`
+  (or `/inline` for small work), with `/review-plan` and `/review` as the
+  quality gates.
+- **Standalone** — `/proof`, `/deliverable-review`, `/ground`, `/formalize`,
+  `/recall`.
+
+Plus the agents the pipeline dispatches. See
+[`plugin/README.md`](plugin/README.md).
 
 ## Development
 
