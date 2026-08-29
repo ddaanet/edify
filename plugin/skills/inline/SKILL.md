@@ -22,7 +22,7 @@ Covers Tier 1 (direct) and Tier 2 (delegated) execution — same lifecycle, diff
 
 | Entry | Args pattern | Caller | Pre-work |
 |-------|-------------|--------|----------|
-| Default | `plans/<job>` | Cold start (`x` from `.claude/handoff-task.md`) | Full |
+| Default | `plans/<job>` | Cold start (new session) | Full |
 | Execute | `plans/<job> execute` | /design, /runbook (context loaded) | Skip |
 
 Check for `execute` token in args → chained invocation (skip Phase 2). Absent → cold start (full workflow).
@@ -59,23 +59,17 @@ Store for Phase 4b (triage feedback script input).
 
 Skip entirely when entry point is `execute` — caller has loaded all context.
 
-### 2.1 Task Context Recovery
-
-```bash
-plugin/bin/task-context.sh '<task-name>'
-```
-
-### 2.2 Brief Check
+### 2.1 Brief Check
 
 Read `plans/<job>/brief.md` if present (cross-tree context from other sessions). In worktrees: `git show main:plans/<job>/brief.md 2>/dev/null`.
 
-### 2.3 Recall (D+B anchor — tool call required)
+### 2.2 Recall (D+B anchor — tool call required)
 
 `Skill(skill: "edify:recall", args: "plans/<job> — execution patterns for this task")`
 
 Patterns for implementing this, not classifying it.
 
-### 2.4 Reference Loading
+### 2.3 Reference Loading
 
 Load domain-relevant skills and reference files specified in the task description (e.g., `plugin-dev:skill-development` for skill work, `plugin/fragments/continuation-passing.md` for cooperative skills).
 

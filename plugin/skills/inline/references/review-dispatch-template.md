@@ -56,7 +56,7 @@ Review implementation changes against design specification.
 **Changed files:** `git diff --name-only abc1234`
 
 **Requirements:**
-- FR-2: Pre-work context loading (task-context.sh, brief, recall)
+- FR-2: Pre-work context loading (brief, recall)
 - FR-3: Execute wrapper with delegation protocol
 - FR-4: Corrector dispatch with standardized template
 - FR-8: Deliverable-review chain via handoff continuation

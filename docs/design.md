@@ -138,7 +138,7 @@ Standing agents in `plugin/agents/`: the correctors (`corrector`,
 `design-corrector`, `outline-corrector`, `runbook-corrector`,
 `runbook-outline-corrector`, `runbook-simplifier`), the executors (`artisan`,
 `test-driver`, `refactor`), and the investigators (`scout`, `tdd-auditor`,
-`hooks-tester`, `brainstorm-name`).
+`brainstorm-name`).
 
 Scripts: `plugin/bin/prepare-runbook.py` (runbook → step artifacts) and
 `validate-runbook.py` (deterministic structural checks).

@@ -169,7 +169,7 @@ Return filepath or error.
 
 **Example:**
 ```
-1. Create: plugin/agents/hooks-tester.md
+1. Create: plugin/agents/scout.md
 2. Correction: Agent(subagent_type="edify:corrector") with execution context
 3. Read report → grep UNFIXABLE → none found (DEFERRED items present but non-blocking)
 4. Result: All fixable issues resolved, proceed

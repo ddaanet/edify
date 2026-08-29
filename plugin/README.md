@@ -59,14 +59,11 @@ Subagent definitions in `agents/`, dispatched by the pipeline skills.
 | `runbook-outline-corrector` | Corrector specialized for runbook outlines |
 | `runbook-simplifier` | Simplifies over-decomposed runbooks |
 | `brainstorm-name` | Generates and scores candidate names |
-| `hooks-tester` | Exercises Claude Code hook configurations |
 
 ## Documentation
 
 Pipeline reference in `docs/`: `general-workflow.md` and `tdd-workflow.md` for
-the two execution modes, `@file-pattern.md` for the `@`-reference convention,
-`shortcuts.md` for the slash-command index, and `migration-guide.md` for
-adopting the pipeline in another project.
+the two execution modes.
 
 ## Scripts
 
@@ -80,7 +77,6 @@ Utility scripts in `bin/` (Python 3):
 | `prepare-runbook.py` | Expand a runbook into per-step files, shared context, and an orchestrator plan |
 | `validate-runbook.py` | Check a runbook's structure before execution |
 | `assemble-runbook.py` | Reassemble a split runbook directory into a single document |
-| `task-context.sh` | Recover the commit that introduced a named task from git history |
 | `triage-feedback.sh` | Compare predicted against actual complexity after execution |
 
 Plus `scripts/split-execution-plan.py`, used by `/runbook` during expansion.
