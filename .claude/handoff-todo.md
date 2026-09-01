@@ -1,9 +1,9 @@
 ## Remaining
 
-- Task 8: fix `design-corrector.md:56` markers; resolve `review/SKILL.md:178` `common-scenarios.md` reference; scoped `manifest` grep; `just precommit`; after-measurement (`wc -l` + `edify tokens` over the surviving rewrite set plus the new `runbook-format.md` and `dispatch-composition.md`) appended under `## After` in `plans/pipeline-simplification/reports/measurements.md`; commit.
-- Task 9 = `/inline` Phase 4a: `git diff --name-only a4aad0c8`, group by artifact type, dispatch per `plugin/fragments/review-requirement.md` routing table using `plugin/skills/inline/references/review-dispatch-template.md` (reports `plans/pipeline-simplification/reports/review-<type>.md`), Read each report, grep UNFIXABLE; Phase 4b `plugin/bin/triage-feedback.sh plans/pipeline-simplification a4aad0c8`; Phase 4c name `/deliverable-review plans/pipeline-simplification` as the follow-up; §Continuation per `plugin/fragments/continuation-passing.md`.
-- Re-apply the parked memory edit from `tmp/memory-parked/` and clear the gitlore approval gate (summary blockquote → user approval → `.claude/gitlore-memory-message` → commit).
-- Dogfood the pipeline end-to-end after pipeline-simplification lands.
-- Consolidate `memory/MEMORY.md` (31.4KB vs 24.4KB loader cutoff) via `/gitlore:index-audit` — retire, don't shorten.
-- FR-12 remainder: defect 21 (corrector skeleton, deletion not extraction) and per-class skill-body length targets (no calibration data).
-- `/design plans/pilfer-superpowers/` once Q-1 and Q-3 settle; its FR-9/FR-12/NFR cross-refs were updated in `0bf8cc44`.
+- `/deliverable-review plans/pipeline-simplification` in a fresh opus session.
+- Dogfood the simplified pipeline end to end (`/design` → `/runbook` → `/orchestrate`) on a real plan; L-6 in `docs/design.md` records it as unexercised, and FR-5's slice-batching claims stay unvalidated until it supplies counts.
+- Consolidate `memory/MEMORY.md` (32,346 bytes vs the 24.4KB loader cutoff) via `/gitlore:index-audit` — retire, don't shorten; update `docs/design.md` L-5's stale "~28.9 KB" figure in the same pass.
+- Pilfer defect 21 (corrector-skeleton dedup) now also carries two observations from `reports/review-agents.md`: `corrector.md` lines ~293–304 hold "when reviewing runbooks/plans" criteria its Step 0 runbook-rejection makes unreachable, and the corrector family resolves recall via `Skill(edify:recall)` while `delegation.md` and `dispatch-composition.md` hand dispatched agents a flat-list Read.
+- FR-12 remainder beyond defect 21: per-class skill-body length targets (no calibration data).
+- `/design plans/pilfer-superpowers/` once Q-1 and Q-3 settle.
+- Report-only reviewers (`plugin-dev:skill-reviewer`, no Write) return their report in the reply, which the harness truncates at roughly 4,000 characters; the skills review took five SendMessage round-trips to recover. Either give `plugin/skills/inline/references/review-dispatch-template.md` a chunked-return instruction for report-only reviewers or route skill definitions to a Write-capable reviewer.
