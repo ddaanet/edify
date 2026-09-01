@@ -1,3 +1,7 @@
 ## Current task
 
-`/design` on `plans/pipeline-simplification/` (requirements /proof-validated 2026-08-29). Phase A is complete: `outline.md` holds 15 decisions and an NFR-1 verdict, the outline-corrector applied 1 critical + 7 major + 8 minor fixes (`reports/outline-review.md`), and `reports/explore-inbound-refs.md` carries the mechanical inbound-reference map. `/proof outline.md` is open at the orientation checkpoint — 19 items enumerated, awaiting the user's proceed/reorder response before item 1. After /proof approval the outline sufficiency gate decides whether it is the terminal design artifact or Phase C generates `design.md`; either way execution is an inline task sequence on a branch (C-5), never through the pipeline it changes.
+Executing `plans/pipeline-simplification/outline.md` — the terminal design
+artifact, `/proof`-validated 2026-09-01 with all decisions applied in the
+file. Run its Execution shape: inline task sequence on `main`, tasks 0-9,
+each task Reading its targets fresh and never invoking `/runbook`,
+`/orchestrate` or their agents (they are the artifacts under change).
