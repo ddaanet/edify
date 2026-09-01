@@ -2,9 +2,9 @@
 name: inline
 description: >-
   Sequence inline execution lifecycle: pre-work, execute, post-work.
-  Triggers on /inline, "execute inline", "run task", or when /design and
-  /runbook route Tier 1/2 execution-ready work. Wraps corrector dispatch,
-  triage feedback, and deliverable-review chaining.
+  Triggers on /inline, "execute inline", "run task", or when /design
+  routes execution-ready work. Wraps corrector dispatch, triage feedback,
+  and deliverable-review chaining.
 allowed-tools: Agent, Read, Write, Edit, Bash, Skill
 user-invocable: true
 continuation:
@@ -14,20 +14,20 @@ continuation:
 
 # Inline Execution Lifecycle
 
-Sequence the lifecycle for execution-ready work: context loading, implementation, corrector review, triage feedback, deliverable-review chaining. Replaces ad-hoc execution sequences in /design Phase B/C.5 and /runbook Tier 1/2.
+Sequence the lifecycle for execution-ready work: context loading, implementation, corrector review, triage feedback, deliverable-review chaining. Replaces ad-hoc execution sequences in /design Phase B/C.5.
 
-Covers Tier 1 (direct) and Tier 2 (delegated) execution — same lifecycle, different scale. Tier 3 uses /orchestrate.
+Covers direct and delegated execution — same lifecycle, different scale. Work that has a runbook uses /orchestrate; this skill never consumes a runbook.
 
 ## Entry Points
 
 | Entry | Args pattern | Caller | Pre-work |
 |-------|-------------|--------|----------|
 | Default | `plans/<job>` | Cold start (new session) | Full |
-| Execute | `plans/<job> execute` | /design, /runbook (context loaded) | Skip |
+| Execute | `plans/<job> execute` | /design (context loaded) | Skip |
 
 Check for `execute` token in args → chained invocation (skip Phase 2). Absent → cold start (full workflow).
 
-**State which entry path was taken, in one line, before Phase 1.** The token is the only signal distinguishing the two, and its absence fails open: a chained call that loses the token silently re-runs a recall pass the caller already did. That costs tokens and is invisible in the output unless the path is named. If the run announces "cold start" immediately after `/design` or `/runbook` chained into it, the token was dropped — treat that as a caller defect, not as a legitimate cold start.
+**State which entry path was taken, in one line, before Phase 1.** The token is the only signal distinguishing the two, and its absence fails open: a chained call that loses the token silently re-runs a recall pass the caller already did. That costs tokens and is invisible in the output unless the path is named. If the run announces "cold start" immediately after `/design` chained into it, the token was dropped — treat that as a caller defect, not as a legitimate cold start.
 
 **Why the artifact cannot replace the token:** `plans/<job>/recall-artifact.md` exists on disk in both cases. It records what an upstream phase selected, not whether those files are in *this* session's context — a genuine cold start must still Read them. Presence of the artifact is therefore not evidence that Phase 2 is redundant.
 
@@ -75,25 +75,15 @@ Load domain-relevant skills and reference files specified in the task descriptio
 
 ## Phase 3: Execute
 
-Perform implementation: edits, TDD cycles for behavioral code, prose changes. This skill provides lifecycle wrapper only — execution approach comes from caller's design/plan.
+Perform implementation: edits, TDD for behavioral code, prose changes. This skill provides lifecycle wrapper only — execution approach comes from caller's design/plan.
 
-### Direct Execution (Tier 1)
+### Direct Execution
 
 Edits performed in current session. No delegation.
 
-### Delegated Execution (Tier 2)
+### Delegated Execution
 
-When execution dispatches sub-agents (artisan, test-driver):
-
-**Sub-agent recall:** Curate subset of plan recall-artifact entries relevant to delegation target. Write separate artifact per type (e.g., `plans/<job>/tdd-recall-artifact.md`). Include in each prompt: "Read `plans/<job>/<type>-recall-artifact.md`, then Read each file it lists."
-
-**Piecemeal TDD dispatch:** One cycle per invocation. Resume same agent between cycles (preserves context). Fresh agent when context nears 150k *(ungrounded — needs calibration; note the orchestrator cannot read an agent's context size directly)*.
-
-**Cycle-scoped prompt composition:** Extract only the current cycle's section from the runbook (`## Cycle X.Y:` to next `---` or `## Cycle`). Include the runbook's Common Context section and recall entries alongside the cycle spec. Do NOT include adjacent or future cycles in the test-driver prompt — scope enforced by context absence, not prose instruction. The executing session holds the full runbook for sequencing; test-driver sees only its cycle.
-
-**Context isolation:** Parent does cognitive work (selecting entries, curating context). Child does mechanical work (resolving entries, executing). Sub-agents have no parent context.
-
-**test-driver commit contract:** test-driver commits each cycle. Caller does not add commit instructions. Expect clean tree on resume.
+When a task needs a sub-agent (self-modifying work with behavioural code, D-39), compose each dispatch per `plugin/skills/orchestrate/references/dispatch-composition.md` — task text inline, design and recall artifact by path, scope IN/OUT, done criteria, report path, a `name`, and the model assignment with its artifact-type override. Parent does the cognitive work (curating what the dispatch sees); child does the mechanical work — sub-agents have no parent context.
 
 **Post-step verification (single compound command — do not split):**
 
@@ -103,11 +93,7 @@ git status --porcelain && just lint
 
 After each delegated step. Dirty tree or lint failure → diagnose before continuing.
 
-**Design constraints non-negotiable:** When design specifies explicit classifications or patterns, include LITERALLY in delegation prompt. Agents apply design rules, not invent alternatives.
-
-**Artifact-type model override:** opus for edits to skills, fragments, agents, design documents — regardless of task complexity.
-
-**No mid-execution checkpoints.** Corrector (Phase 4a) is the sole semantic review. Post-step lint catches mechanical issues. Triage feedback (Phase 4b) collects uninterrupted execution data. Revisit after 10+ Tier 2 executions show compounding drift.
+**No mid-execution checkpoints.** Corrector (Phase 4a) is the sole semantic review. Post-step lint catches mechanical issues. Triage feedback (Phase 4b) collects uninterrupted execution data. Revisit after 10+ delegated executions show compounding drift.
 
 ## Phase 4: Post-Work
 

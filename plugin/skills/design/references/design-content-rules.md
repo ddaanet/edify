@@ -38,7 +38,7 @@ Before finalizing design, verify all referenced agent names exist on disk:
 - `rg --files` (Bash) over `plugin/agents/*.md`, `.claude/agents/*.md`, and `.claude/plugins/*/agents/*.md`
 - Every agent name in the design must resolve to an actual file
 - If an agent name doesn't exist: flag as design error, not an implementation detail to defer
-- Prevention: catches naming mismatches (e.g., `outline-corrector` vs `runbook-outline-corrector`) before they propagate to planning and execution
+- Prevention: catches naming mismatches (e.g., `outline-corrector` vs `runbook-corrector`) before they propagate to planning and execution
 
 ## Late-Addition Completeness Check
 
@@ -92,7 +92,7 @@ Each requirement should map to a design element for downstream validation.
 
 ## TDD Mode Additions
 
-For designs with behavioral phases, include spike test strategy, confirmation markers for uncertain decisions, "what might already work" analysis. Reference the Diamond Shape integration-first strategy (defined in `/runbook` skill) -- note when integration-first ordering applies (external boundaries -> internal logic, not bottom-up by module).
+For designs with behavioral phases, include spike test strategy, confirmation markers for uncertain decisions, "what might already work" analysis. Reference the integration-first ordering (defined in `plugin/skills/runbook/references/runbook-format.md`) -- note when integration-first ordering applies (external boundaries -> internal logic, not bottom-up by module).
 
 ## References Section
 

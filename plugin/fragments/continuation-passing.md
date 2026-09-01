@@ -94,8 +94,8 @@ Continuation metadata must never reach sub-agents:
 |-------|-------------|-------|
 | `/design` | `["/handoff:handoff", "/commit-commands:commit"]` | Planning entry point |
 | `/runbook` | `["/handoff:handoff", "/commit-commands:commit"]` | Runbook planning (unified) |
-| `/inline` | `["/handoff:handoff", "/commit-commands:commit"]` | Inline execution lifecycle (Tier 1/2) |
-| `/orchestrate` | `["/handoff:handoff", "/commit-commands:commit"]` | Runbook execution (Tier 3) |
+| `/inline` | `["/handoff:handoff", "/commit-commands:commit"]` | Inline execution lifecycle (no runbook) |
+| `/orchestrate` | `["/handoff:handoff", "/commit-commands:commit"]` | Runbook execution |
 | `/handoff:handoff` | `[]` | Context preservation (terminal) |
 | `/superpowers:using-git-worktrees` | `[]` | Terminal skill (parallel task setup) |
 | `/commit-commands:commit` | `[]` | Terminal skill |
@@ -125,7 +125,7 @@ Points of no return in the chain where compensation is impractical (Saga pattern
 |---------------|--------|--------|
 | `/design` completes | No | Outline/design is additive, can be revised |
 | `/runbook` completes | No | Runbook artifacts can be regenerated |
-| `/inline` completes (delegated) | **Yes** | Sub-agents commit per cycle — multiple commits, compensation impractical |
+| `/inline` completes (delegated) | **Yes** | Sub-agents commit per dispatch — multiple commits, compensation impractical |
 | `/inline` completes (direct) | No | No intermediate commits — single session, revertible |
 | `/orchestrate` completes execution | **Yes** | Multiple commits, file changes, reports — compensating transactions impractical |
 | `/handoff:handoff` completes | **Yes** | Session state updated, learnings written — reversion loses institutional knowledge |

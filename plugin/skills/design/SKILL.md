@@ -160,7 +160,7 @@ Produce this classification block before routing (visible output, not internal r
 
 When a design modifies an "author" skill (a skill whose output is reviewed by a corrector), check coupled dependencies before completing the design:
 
-1. Identify the corrector from the transformation table (T1-T6.5 in `docs/design.md` §6.4 "Pipeline contracts")
+1. Identify the corrector from the transformation table (T1–T5 in `docs/design.md` §6.4 "Pipeline contracts")
 2. Check: does the corrector's review criteria need corresponding update?
 3. Check: does any mechanical validator need update?
 4. Include corrector/validator updates in the same design scope
@@ -170,8 +170,7 @@ When a design modifies an "author" skill (a skill whose output is reviewed by a 
 | Author Skill/Artifact | Corrector | Validator |
 |----------------------|-----------|-----------|
 | /design (outline format) | outline-corrector | -- |
-| /runbook (tdd-cycle-planning.md) | runbook-corrector (/review-plan) | validate-runbook.py |
-| /runbook (general-patterns.md) | runbook-corrector (/review-plan) | validate-runbook.py |
+| /runbook (runbook-format.md) | runbook-corrector | -- |
 | /requirements (standard format) | -- (user-reviewed) | -- |
 
 **Visible output (mandatory):** "Author change: X. Coupled corrector: Y. Update needed: yes/no." This block forces awareness of coupling — designers check the table, not silently skip it.

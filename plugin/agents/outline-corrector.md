@@ -140,7 +140,7 @@ Analyze outline against these dimensions:
 
 Flag orphan items as Major issues — they have no structural home in the implementation and will be missed by component-focused correctors.
 
-**Cross-component interface check:** For each component that consumes another's output, verify the interface is compatible. Example: if C2 feeds `runbook-phase-*.md` (glob) to C1 which expects a single artifact, flag the mismatch.
+**Cross-component interface check:** For each component that consumes another's output, verify the interface is compatible. Example: if C2 feeds a directory of per-file reports (glob) to C1 which expects a single artifact, flag the mismatch.
 
 **Fix missing coverage:**
 - Add placeholder sections with TODO markers

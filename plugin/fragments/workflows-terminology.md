@@ -19,9 +19,9 @@ The `/design` skill includes complexity triage: simple tasks execute directly, m
 | **Job** | What the user wants to accomplish |
 | **Design** | Architectural specification from Opus design session |
 | **Phase** | Design-level segmentation for complex work |
-| **Runbook** | Step-by-step implementation instructions (previously called "plan") |
-| **Phase type** | `tdd` or `general` — determines expansion format and review criteria for that phase |
-| **Step** | Individual unit of work within a runbook |
-| **Runbook prep** | 4-point process: Evaluate, Metadata, Review, Split |
+| **Runbook** | Phased implementation plan `/orchestrate` dispatches from (previously called "plan") |
+| **Phase type** | `tdd`, `general` or `inline` — determines item format, review criteria and dispatch for that phase |
+| **Item** | Individual unit of work within a runbook phase |
+| **Slice** | One behaviour of a tdd item: the unit of RED → review → GREEN → review dispatch |
 
-**Note on directory naming:** The `plans/` directory is a historical convention and remains unchanged. It contains runbooks, step files, and execution artifacts.
+**Note on directory naming:** The `plans/` directory is a historical convention and remains unchanged. It contains runbooks, reports, and execution artifacts.

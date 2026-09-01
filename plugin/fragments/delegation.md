@@ -2,9 +2,9 @@
 
 When executing runbooks via `/orchestrate`, the orchestrator coordinates but does not implement:
 
-1. **Dispatch** each step to a task agent
+1. **Dispatch** each item (or slice) to a standing agent
 2. **Monitor** progress and handle exceptions
-3. **Synthesize** results between steps
+3. **Synthesize** results between dispatches
 
 ### Model Selection
 
@@ -19,11 +19,9 @@ Before invoking Agent tool, verify:
 - Model matches stated plan (sonnet/opus)
 - If changing model, state reason explicitly
 
-### File Reference Dispatch
+### Prompt Composition
 
-Dispatch with file reference: `"Execute step from: plans/<name>/steps/step-N.md"` — agent reads step file for full context. Do not inline step content in prompt.
-
-The dispatched agent is a standing one (`edify:artisan`, `edify:test-driver`, `edify:corrector`) — no agents are generated per plan. The step file's `## Context` block names the design, outline, and shared-context artifacts, so the prompt needs only the step-file path.
+The dispatcher composes each prompt per `plugin/skills/orchestrate/references/dispatch-composition.md`: item text inline, design and recall artifact by path. The dispatched agent is a standing one (`edify:artisan`, `edify:test-driver`, `edify:corrector`, `edify:refactor`) — no agents are generated per plan.
 
 ### Quiet Execution Pattern
 

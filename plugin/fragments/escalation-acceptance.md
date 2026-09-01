@@ -15,7 +15,7 @@ When an error is escalated and a fix is attempted (by Sonnet diagnostic, refacto
    - If fails: fix issues, re-run (loop until pass or give up)
 3. Check `git status --porcelain`
    - If dirty: commit fix, verify clean
-4. Validate step output against acceptance criteria from step file
+4. Validate the output against the acceptance criteria in the dispatch prompt
    - If criteria undefined: escalate as ambiguity error
 5. All three pass → step resolved, resume execution
    Any fails after reasonable attempts → escalate to next level

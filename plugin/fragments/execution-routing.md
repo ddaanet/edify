@@ -13,7 +13,7 @@ It is not a default mode for interactive work.
 
 ### When to Delegate
 
-- Runbook step execution (isolated context per step)
+- Runbook item execution (isolated context per dispatch)
 - Parallel independent tasks (multiple Task calls)
 - Work requiring a different model tier than current session
 - Tasks benefiting from agent specialization (review, design review)

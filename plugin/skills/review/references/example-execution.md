@@ -18,7 +18,7 @@
 
 Found changes in 5 files:
 - plugin/agents/artisan.md (new file)
-- plugin/bin/prepare-runbook.py (new file)
+- plugin/bin/triage-feedback.sh (new file)
 - CLAUDE.md (modified)
 - plans/general-workflow/design.md (modified)
 - .claude/agents/unification-task.md (new file)
@@ -39,7 +39,7 @@ Review complete.
 Full review written to: scratch/reviews/review-report-2026-01-19-142530.md
 
 **Minor issues:**
-1. prepare-runbook.py: Consider adding --help flag example to docstring
+1. triage-feedback.sh: Consider adding a usage line to the header comment
 2. artisan.md: Typo in line 87 \"specificed\" -> \"specified\"
 
 **Recommendations:**

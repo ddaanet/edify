@@ -30,7 +30,7 @@
 - Appropriate dependencies
 
 ## Runbook File References (when reviewing runbooks/plans)
-- Extract all file paths referenced in steps/cycles
+- Extract all file paths referenced in items
 - Use `rg --files` (Bash) to verify each path exists in the codebase
 - Flag missing files as CRITICAL issues (runbooks with wrong paths fail immediately)
 - Check test function names exist in referenced test files (use `rg` via Bash)
