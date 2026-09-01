@@ -61,8 +61,8 @@ Verify the document is a design document:
 ```
 Error: Wrong agent type
 Details: design-corrector reviews design documents, not runbooks
-Context: File appears to be a runbook (contains Step/Cycle headers or type: tdd)
-Recommendation: Use corrector for runbook review, or runbook-corrector for runbook phase review
+Context: File appears to be a runbook (contains `## Phase N:` headers with type tags or `Item N.M:` entries)
+Recommendation: Use runbook-corrector for runbook review
 ```
 
 **Validate requirements exist:**
@@ -141,7 +141,7 @@ Review the design document for:
 `rg --files` (Bash) over `plugin/agents/` and `.claude/agents/` to verify all agent names referenced in the design resolve to actual files on disk.
 
 - Check deliverables tables, phase specifications, and any prose mentioning agents by name
-- Flag mismatches: agent referenced but file doesn't exist, or name is a near-miss typo (e.g., `outline-corrector` vs `runbook-outline-corrector` — two distinct agents)
+- Flag mismatches: agent referenced but file doesn't exist, or name is a near-miss typo (e.g., `outline-corrector` vs `runbook-corrector` — two distinct agents)
 - Include `rg --files` output showing what exists in the directory so the designer can correct the reference
 - Severity: critical if deliverable targets wrong agent, major if prose reference is ambiguous
 

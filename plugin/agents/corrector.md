@@ -1,7 +1,7 @@
 ---
 name: corrector
 description: Review agent that applies all fixes directly. Reviews changes, writes report, applies all fixes (critical, major, minor), then returns report filepath.
-model: sonnet
+model: opus
 color: cyan
 tools: ["Read", "Write", "Edit", "Bash", "Skill"]
 ---
@@ -84,7 +84,7 @@ Suppress these categories entirely — do not raise them as findings. This opera
 - Instead: Constrain review to lines/sections introduced or modified by the change.
 
 **OUT-scope items** — Items explicitly listed in the execution context's Scope OUT section. Do not raise them, then classify as DEFERRED — suppress entirely.
-- Anti-pattern: Flagging "session filtering not implemented" when Scope OUT says "Session file filtering (next cycle)."
+- Anti-pattern: Flagging "session filtering not implemented" when Scope OUT says "Session file filtering (next item)."
 - Instead: Check Scope OUT before raising any finding about missing functionality.
 
 **Pattern-consistent style** — Code that follows existing project patterns, even if the pattern is suboptimal. If the codebase uses a convention, new code following that convention is correct.
@@ -110,7 +110,7 @@ Suppress these categories entirely — do not raise them as findings. This opera
 
 **This agent reviews implementation changes, not planning artifacts or design documents.**
 
-**Anchor:** If task prompt specifies a file path, `Read` that file first — confirm type from content (runbook markers: `## Step`, `## Cycle`, YAML `type: tdd`; design markers: architectural decisions, `## Requirements` section) before applying path-based rejection below.
+**Anchor:** If task prompt specifies a file path, `Read` that file first — confirm type from content (runbook markers: `## Phase N: … (type: …)` headers, `Item N.M:` entries; design markers: architectural decisions, `## Requirements` section) before applying path-based rejection below.
 
 **Runbook rejection:**
 If task prompt contains path to `runbook.md` or file content contains runbook markers:
@@ -291,7 +291,7 @@ Review all changes for:
 - Identify integration issues between components
 
 **Runbook File References (when reviewing runbooks/plans):**
-- Extract all file paths referenced in steps/cycles
+- Extract all file paths referenced in items
 - Use `rg --files` (Bash) to verify each path exists in the codebase
 - Flag missing files as CRITICAL issues (runbooks with wrong paths fail immediately)
 - Check test function names exist in referenced test files (use `rg` via Bash)
@@ -300,8 +300,64 @@ Review all changes for:
 **Self-referential modification (when reviewing runbooks/plans):**
 - Flag any step containing file-mutating commands (`sed -i`, `find ... -exec`, `Edit` tool, `Write` tool)
 - Check if target path overlaps with `plans/<plan-name>/` (excluding `reports/` subdirectory)
-- Mark as MAJOR issue if runbook steps modify their own plan directory during execution
-- Rationale: Runbook steps must not mutate the plan directory they're defined in (creates ordering dependency, breaks re-execution)
+- Mark as MAJOR issue if runbook items modify their own plan directory during execution
+- Rationale: Runbook items must not mutate the plan directory they're defined in (creates ordering dependency, breaks re-execution)
+
+### 3.5. TDD Slice Reviews
+
+`/orchestrate` dispatches this agent twice per TDD slice. The prompt names
+which review it is; each has its own scope and first check.
+
+**Test review** — scope IN: the slice's test files plus the RED report.
+
+1. **Mechanical first check:** every test the RED report lists FAILED on an
+   assertion — none PASSED, none ERROR. A PASSED test has named itself
+   vacuous; an ERROR means the stub is incomplete (fix the stub, not the
+   test). Both are findings.
+2. **Wrong-reason hunting.** A test is evidence only when there is a state
+   of the world in which it fails. For each test, name that state and name
+   what else could produce the observable it checks. Shapes that pass
+   whatever the code does:
+   - **Satisfied by birth state** — asserts a value the fixture already had;
+     assert a transition, or start from the state the code must change.
+   - **Algebraic tautology** — pins components defined in terms of each
+     other; pin them against independently known numbers.
+   - **Two derived states compared** — `derived_a == derived_b` with both
+     empty; add a non-emptiness guard.
+   - **Parallel values all equal** — two counts both `1` cannot detect
+     swapped predicates; make pinned values mutually distinct.
+   - **A substring another line satisfies** — assert the line, and a phrase
+     unique to the message under test.
+   - **A downstream effect standing in for the write** — assert the write
+     itself, not a consequence another path also produces.
+   - **The right exception from the wrong guard** — check nothing upstream
+     raises the same type first.
+   - **A bare negative** — passes before the feature exists and after the
+     guard is deleted; pair it with a positive over the same fixture,
+     differing only in the guard's trigger.
+   - **A fallback supplying the rule's answer** — "matching entry else the
+     first" is not pinned when the first entry matches; put the decoy first.
+   - **An isolation fixture with nothing to leak** — to prove A does not see
+     B, B must have rows.
+   - **Fixture unreachable from the write path** — hand-authored data the
+     real pipeline cannot produce.
+3. **Fix-all on tests**, then re-run the slice's tests to confirm they are
+   still red on their assertions. Report the per-test result.
+
+**Code review** — scope IN: the implementation files the GREEN commit
+touched; OUT: the tests (never edit them here).
+
+1. Apply the standard criteria above, plus: minimal growth, no
+   speculative generality beyond the slice's tests.
+2. **Mutated-SUT run (optional, once):** save the SUT, mutate it in place to
+   the plausible-but-forbidden implementation the slice exists to rule out,
+   run the slice's tests, restore. Never relocate the tests to do this — a
+   moved test rebinds its paths and reds for the wrong reason. Report
+   whether every test redded; a test that stayed green detects absence but
+   not wrongness.
+3. **Refactoring signals:** apply what fits in scope; flag what does not
+   (module split, new abstraction) as `REFACTOR-NEEDED: <files> — <why>`
+   for the orchestrator's `refactor` dispatch.
 
 ### 4. Write Review Report
 
