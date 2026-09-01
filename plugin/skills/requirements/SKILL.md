@@ -61,7 +61,7 @@ Read each file listed below — do not rely on inline summaries.
 memory/<name>.md — <1-line relevance note>
 ```
 
-**Null artifact (nothing relevant):** Write `null — no relevant entries found` as the sole entry. Downstream consumers still Read the artifact and find the null marker, so the gate is anchored without consumer-side empty-section handling. Augmenting consumers (/design A.1, /runbook Phase 0.5) remove the null entry when adding real ones.
+**Null artifact (nothing relevant):** Write `null — no relevant entries found` as the sole entry. Downstream consumers still Read the artifact and find the null marker, so the gate is anchored without consumer-side empty-section handling. Augmenting consumers (/design A.1, /runbook §1 Recall and Discovery) remove the null entry when adding real ones.
 
 **Selection criteria:** Include files that informed requirements or constrain implementation. Exclude files read but proved irrelevant — the artifact is curated, not exhaustive.
 
@@ -257,7 +257,6 @@ Next steps (decision criteria):
 ```
 /requirements <job> → /design plans/<job>/ (seeds A.0)
 /requirements <job> → /handoff:handoff (document intent for later)
-/requirements <job> → /runbook plans/<job>/requirements.md (direct to planning)
 /requirements <job> (standalone — capture intent, no immediate follow-up)
 ```
 

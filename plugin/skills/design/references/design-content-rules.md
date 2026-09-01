@@ -30,7 +30,7 @@ Before generating design, validate outline item granularity:
 
 ## Repetition Helper Prescription
 
-When design specifies 5+ operations following the same pattern (e.g., "update field X in files A, B, C, D, E, F"), recommend extracting a helper function or script. Rationale: repeated manual operations multiply both token cost (each repetition consumes expansion + execution budget) and error rate (drift between repetitions increases with count). The 5-repetition threshold balances extraction overhead against repetition cost.
+When design specifies 5+ operations following the same pattern (e.g., "update field X in files A, B, C, D, E, F"), recommend extracting a helper function or script. Rationale: repeated manual operations multiply both token cost (each repetition consumes planning + execution budget) and error rate (drift between repetitions increases with count). The 5-repetition threshold balances extraction overhead against repetition cost.
 
 ## Agent-Name Validation
 

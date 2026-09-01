@@ -50,11 +50,10 @@ When you receive warnings, evaluate:
 - Return success to orchestrator
 
 **If architectural refactoring (new abstraction, multi-module):**
-- Document the architectural need
-- Escalate to opus with context
-- Opus designs approach
-- Execute opus-designed refactoring
-- Verify and return
+- Document the architectural need and scope
+- Return `escalated: <reason and scope>` — the orchestrator notes the opus
+  follow-up in the run summary; this dispatch does not wait for or execute
+  an opus-designed change
 
 ## Execution Modes
 
@@ -87,10 +86,9 @@ Determine handler (self vs opus) using escalation table.
 
 **For architectural refactoring (opus):**
 - Document architectural need
-- Provide context (design doc, current state, warnings)
-- Escalate to opus
-- Await opus design
-- Execute opus-designed approach
+- Provide context (design doc, current state, warnings) in the return
+- Return `escalated: <reason and scope>` and stop — no in-dispatch opus
+  round-trip
 
 ### Step 2b: Deslop Pass
 

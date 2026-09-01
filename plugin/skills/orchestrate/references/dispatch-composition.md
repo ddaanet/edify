@@ -19,8 +19,11 @@ Every dispatch prompt carries:
 4. **Done criteria:** `just precommit` green, clean tree, and the commit
    subject to use. (RED dispatches override this: no commit, stop after the
    red run.)
-5. **Report path** under `plans/<job>/reports/` and the return contract:
-   the report path on success, or `blocked: <reason>`.
+5. **Report path** — `plans/<job>/reports/<dispatch name>.md` (the `name`
+   from §Naming) — and the return contract: the report path on success, or
+   `blocked: <reason>`.
+6. **Mode**, for `edify:test-driver` only: `RED` or `GREEN`, named
+   explicitly — the agent refuses a prompt that names neither.
 
 When the design specifies explicit classifications or patterns, include them
 LITERALLY — executors apply design rules, they do not invent alternatives.
@@ -41,9 +44,7 @@ LITERALLY — executors apply design rules, they do not invent alternatives.
 Give every dispatch a `name`: `item-N-M` for a general item,
 `item-N-M-s<k>-red` / `-test-review` / `-green` / `-code-review` for slice
 dispatches, `phase-P-corrector` for checkpoints. Resumption is `SendMessage`
-to that name — the `Agent` tool has no `resume` parameter, so an unnamed
-agent cannot be resumed. Do not pass `max_turns`; the tool has no such
-parameter and rejects unknown ones.
+to that name; an unnamed agent cannot be resumed.
 
 A child's own reply is the only authoritative result for its task. A late
 task-notification on an already-reported task id may be answering something

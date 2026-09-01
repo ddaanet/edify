@@ -37,10 +37,10 @@
 - Suggest correct paths when similar files are found
 
 ## Self-Referential Modification (when reviewing runbooks/plans)
-- Flag any step containing file-mutating commands (`sed -i`, `find ... -exec`, `Edit` tool, `Write` tool)
+- Flag any item containing file-mutating commands (`sed -i`, `find ... -exec`, `Edit` tool, `Write` tool)
 - Check if target path overlaps with `plans/<plan-name>/` (excluding `reports/` subdirectory)
-- Mark as MAJOR issue if runbook steps modify their own plan directory during execution
-- Rationale: Runbook steps must not mutate the plan directory they're defined in (creates ordering dependency, breaks re-execution)
+- Mark as MAJOR issue if runbook items modify their own plan directory during execution
+- Rationale: Runbook items must not mutate the plan directory they're defined in (creates ordering dependency, breaks re-execution)
 
 ## Security
 - No hardcoded secrets or credentials

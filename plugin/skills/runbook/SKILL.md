@@ -4,7 +4,7 @@ description: |
   Decompose a design into an executable runbook — phases of typed items
   (tdd / general / inline) that /orchestrate composes dispatch prompts from.
   Triggers on /runbook or when a design needs step-by-step planning.
-allowed-tools: Agent, Read, Write, Edit, Skill, Bash(mkdir:*, echo:*|pbcopy)
+allowed-tools: Agent, Read, Write, Edit, Skill, Bash(mkdir:*, rg:*, git:*, echo:*|pbcopy)
 requires:
   - Design document from /design
   - CLAUDE.md for project conventions (if exists)
@@ -16,7 +16,7 @@ continuation:
   default-exit: ["/handoff:handoff", "/commit-commands:commit"]
 ---
 
-# Plan Implementation Steps
+# Write the Runbook
 
 **Usage:** `/runbook plans/<job-name>/design.md`
 
@@ -27,7 +27,7 @@ slice format: `references/runbook-format.md`. Pipeline context (see
 fresh session.
 
 **Prerequisites check (D+B anchor):** Check the plan directory for a
-design-stage artifact: `outline.md`, `inline-plan.md`, or `design.md`. Absent
+design-stage artifact: `outline.md` or `design.md`. Absent
 → STOP. `/runbook` without prior `/design` gating is an error — scope was not
 user-validated.
 
@@ -89,6 +89,16 @@ Before review, verify:
   approach.
 - **Inter-item dependencies declared** — `Depends on: Item N.K` wherever an
   item consumes another's output.
+- **Requirement IDs on every item** — `Requirements: FR-x` present; no
+  item without one.
+- **Interfaces on cross-item dependencies** — every `Depends on:` target
+  carries an `Interfaces:` block, one contract per line with full signature
+  and return type.
+- **Slices on tdd items** — `Slices:` present, slice 1 pins the external
+  contract, each later slice one behaviour, each test named with its
+  assertion stated.
+- **No code blocks in items** — behaviour, targets and tests in prose;
+  `Interfaces:` is the only formal element.
 - **Code-fix items enumerate affected call sites** (file:function or
   file:line).
 - **Later items reference post-phase state** — an item modifying a file a

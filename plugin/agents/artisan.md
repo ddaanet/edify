@@ -3,7 +3,7 @@ name: artisan
 description: Execute a dispatched task with quiet execution pattern (reports to files, terse returns).
 model: sonnet
 color: blue
-tools: ["Read", "Write", "Edit", "Bash", "Skill"]
+tools: ["Read", "Write", "Edit", "Bash"]
 ---
 
 # Task Agent - Baseline Template

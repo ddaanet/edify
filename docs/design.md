@@ -1,9 +1,10 @@
 # Edify — Living Design
 
 **Status:** Partial. The CLI is implemented and pinned by tests. The skills
-pipeline is prose, revived 2026-08 and not yet exercised end to end.
+pipeline is prose, revived 2026-08, simplified to one runbook stage 2026-09,
+and not yet exercised end to end.
 
-**Verified against:** `0eb3cdc2` (2026-08-14).
+**Verified against:** `06a431ec` (2026-09-01).
 
 Edify is two artifacts in one git tree: the `edify-cli` PyPI package (source in
 `src/edify/`) and the `edify` Claude Code plugin (`plugin/`). Direction:
@@ -19,9 +20,10 @@ dispatch and slice-batched TDD have not yet run against a real plan (L-6).
 
 **Do not re-litigate** — the planning-to-execution session boundary (D-25
 keeps it on context-budget grounds, not discoverability); the publication
-postponement (D-9); the one-stage runbook (D-34 — a strong orchestrator
-composes prompts live; pre-written step files were the weak-orchestrator
-premise, rejected in §7).
+postponement (D-9); the one-stage runbook — it is the terminal planning
+artifact (§5.3, FR-9) and a strong orchestrator composes every dispatch
+prompt from it live (D-24), which retired the three-tier structure (D-34).
+Pre-written step files were the weak-orchestrator premise, rejected in §7.
 
 ## 2. Status legend
 
@@ -96,7 +98,7 @@ copies exactly `plugin/` and never the sibling `src/` tree.
 The plugin does not ship the CLI's code. It obtains the CLI at runtime through a
 `SessionStart` hook that builds a venv with uv (§5.4). The two are locked to one
 version by `plugin/bin/check-version-consistency.py`, which requires
-`plugin.json` version == `pyproject.toml` version — currently `0.0.3`.
+`plugin.json` version == `pyproject.toml` version — currently `0.1.1`.
 
 `memory/` is a separate submodule, gated by gitlore. It is unaffected by the
 plugin de-submodule and stays a submodule.
@@ -109,8 +111,9 @@ agent-file enumeration), `parsing` (content extraction and filtering),
 `extraction` (recursive feedback collection), `paths` (project-path encoding),
 `models` (Pydantic types), `markdown*` (the postprocessor, split across
 `markdown`, `markdown_parsing`, `markdown_block_fixes`, `markdown_inline_fixes`,
-`markdown_list_fixes`), `tokens` + `token_cache` + `user_config`, `check` +
-`check_cli`, `exceptions`, and `cli` as the Click entry point
+`markdown_list_fixes`), `tokens` + `tokens_cli` + `token_cache` +
+`user_config`, `check` + `check_cli`, `exceptions`, and `cli` as the Click
+entry point
 (`edify = "edify.cli:main"`).
 
 `__init__.py` stays empty: callers import from the specific module rather than
@@ -152,7 +155,8 @@ Standing agents in `plugin/agents/`: the correctors (`corrector`,
 and the investigators (`scout`, `tdd-auditor`, `brainstorm-name`).
 
 Script: `plugin/skills/orchestrate/scripts/verify-step.sh` (clean tree +
-precommit after each dispatch).
+precommit after every committing dispatch — GREEN, code review and general
+items, never after a RED whose tests are uncommitted by design).
 
 **Delegation is by reference.** The orchestrator's prompt carries the item
 text and the paths of the design and recall artifacts, never their content
@@ -443,6 +447,12 @@ their own work.** This is policy, not capability. It was previously justified by
 now technically able to review its own work and must not. Implementer bias is
 the reason.
 
+One path is bounded rather than delegated: when the orchestrator executes an
+`inline` item itself there is no execution agent to dispatch a review to, so
+review follows the proportionality rule in
+`plugin/fragments/review-requirement.md` — `git diff` self-review only while
+every trivial-change condition holds, an `edify:corrector` dispatch otherwise.
+
 **D-29 — Every review delegation carries execution context.** Required: scope IN
 (what was produced), scope OUT (what is not yet done, which the reviewer must not
 flag), the explicit changed-file list, and the requirements the output should
@@ -470,11 +480,11 @@ plus target file state: no runtime feedback loop, all decisions pre-resolved in
 design.
 
 **D-31 — LLM failure-mode checks at every planning level.** *Superseded
-2026-09-01:* there is one planning level now — the runbook is terminal (D-34)
-— so the check runs once, in `runbook-corrector`. The grounding incident (an
-expanded plan re-introducing three vacuous cycles and a missing requirement
-that outline review had removed) is recorded in §7 as a reason expansion was
-dropped.
+2026-09-01:* there is one planning level now — the runbook is terminal
+(§5.3, FR-9) — so the check runs once, in `runbook-corrector`. The grounding
+incident (an expanded plan re-introducing three vacuous cycles and a missing
+requirement that outline review had removed) is recorded in §7 as a reason
+expansion was dropped.
 
 **D-32 — Runbook review runs at opus.** A sonnet reviewer's fix-all policy
 generates plausible but ungrounded corrections: confabulated operation sequences,

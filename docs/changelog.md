@@ -36,9 +36,13 @@ tests, `assemble-runbook.py`, `split-execution-plan.py`, `verify-red.sh`,
 runbook references — 7,029 lines / 97,724 tokens measured before deletion
 (`plans/pipeline-simplification/reports/measurements.md`). Deterministic
 runbook validation does not survive (D-51). FR-19, FR-20 and L-1 closed;
-D-31 superseded; D-24, D-26, D-30, D-32 to D-35, D-39, D-49, D-69, L-2 and
+D-31 superseded; D-24 to D-26, D-30, D-32 to D-35, D-39, D-49, D-69, L-2 and
 L-6 rewired; §7 records the rejected two-stage model, per-test dispatch and
 RED-less whole-task batching.
+
+The planning/execution session boundary lost one of its two grounds. It was
+kept on model-tier and context-budget grounds in 2026-08-13; orchestration no
+longer runs a tier below planning, so D-25 now rests on context budget alone.
 
 ## 2026-08-14 — Decision records folded into one living design doc
 

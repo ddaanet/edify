@@ -31,7 +31,8 @@ A tdd item adds `Slices:` — a numbered list. Slice 1 pins the external
 contract with the degenerate or naive happy-path case; each later slice adds
 exactly one behaviour (an error path, an edge, a second feature). Each slice
 names its tests in prose with the assertion stated, specific enough that two
-executors would write the same test.
+executors would write the same test. Slice k of Item N.M is `N.M/k` — the
+id `/orchestrate` uses in dispatch names and slice commit subjects.
 
 ### Interfaces blocks
 

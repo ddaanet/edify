@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: Execute a runbook by composing dispatch prompts per item — RED/review/GREEN/review per tdd slice — with verification gates
+description: Execute a proofed runbook (plans/<job>/runbook.md) by dispatching standing agents per item. Triggers on /orchestrate or when /runbook hands off in a fresh session.
 user-invocable: true
 continuation:
   cooperative: true
@@ -10,7 +10,8 @@ continuation:
 # Execute Runbooks
 
 Execute `plans/<job>/runbook.md` by dispatching standing agents
-(`edify:artisan`, `edify:test-driver`, `edify:corrector`, `edify:refactor`).
+(`edify:artisan`, `edify:test-driver`, `edify:corrector`, `edify:refactor`,
+`edify:tdd-auditor`).
 The orchestrator reads the runbook and composes every dispatch prompt itself,
 live, per `references/dispatch-composition.md` — item text inline, design and
 recall artifact by path. Plan deviation is handled by re-composing the next
@@ -41,7 +42,7 @@ The orchestrator executes the item itself — Read targets, apply edits,
 Review follows the Proportionality rule in
 `plugin/fragments/review-requirement.md`: self-review via `git diff` only
 when ALL of that fragment's self-review conditions hold; otherwise dispatch
-`edify:corrector` (Section 2.4 checkpoint form). This is the one path where
+`edify:corrector` (Section 4 checkpoint form). This is the one path where
 the orchestrator would review its own edits, so the threshold is the
 fragment's, not the orchestrator's judgement.
 

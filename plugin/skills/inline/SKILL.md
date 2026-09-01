@@ -1,10 +1,9 @@
 ---
 name: inline
 description: >-
-  Sequence inline execution lifecycle: pre-work, execute, post-work.
-  Triggers on /inline, "execute inline", "run task", or when /design
-  routes execution-ready work. Wraps corrector dispatch, triage feedback,
-  and deliverable-review chaining.
+  Run the execution lifecycle for execution-ready work that has no
+  runbook. Triggers on /inline, "execute inline", "run task", or when
+  /design routes execution-ready work.
 allowed-tools: Agent, Read, Write, Edit, Bash, Skill
 user-invocable: true
 continuation:
@@ -85,15 +84,15 @@ Edits performed in current session. No delegation.
 
 When a task needs a sub-agent (self-modifying work with behavioural code, D-39), compose each dispatch per `plugin/skills/orchestrate/references/dispatch-composition.md` — task text inline, design and recall artifact by path, scope IN/OUT, done criteria, report path, a `name`, and the model assignment with its artifact-type override. Parent does the cognitive work (curating what the dispatch sees); child does the mechanical work — sub-agents have no parent context.
 
-**Post-step verification (single compound command — do not split):**
+**Post-dispatch verification (single compound command — do not split):**
 
 ```bash
 git status --porcelain && just lint
 ```
 
-After each delegated step. Dirty tree or lint failure → diagnose before continuing.
+After each dispatch. Dirty tree or lint failure → diagnose before continuing.
 
-**No mid-execution checkpoints.** Corrector (Phase 4a) is the sole semantic review. Post-step lint catches mechanical issues. Triage feedback (Phase 4b) collects uninterrupted execution data. Revisit after 10+ delegated executions show compounding drift.
+**No mid-execution checkpoints.** Corrector (Phase 4a) is the sole semantic review. Post-dispatch lint catches mechanical issues. Triage feedback (Phase 4b) collects uninterrupted execution data. Revisit after 10+ delegated executions show compounding drift.
 
 ## Phase 4: Post-Work
 
@@ -148,8 +147,10 @@ Content must include: what was changed, why review adds no value for this specif
 ### 4b: Triage Feedback
 
 ```bash
-plugin/bin/triage-feedback.sh plans/<job> $BASELINE
+plugin/bin/triage-feedback.sh <job> $BASELINE
 ```
+
+The script prepends `plans/` itself — pass the bare job name, not the plan path.
 
 Read script output. On divergence message → surface inline. On match or no-classification → proceed silently.
 

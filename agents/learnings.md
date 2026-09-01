@@ -38,7 +38,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 ## When chained skills share recall context
 - Anti-pattern: /design loads triage-scoped recall entries → /runbook skips its mandatory recall gate because entries are "already in context." Agent conflates triage-scoped recall (how to classify) with implementation-scoped recall (what patterns apply when building). Gate's artifact-exists/fallback branching makes the no-artifact path feel skippable.
 - Correct pattern: Each skill's recall gate serves a different scope. Triage recall ≠ implementation recall — different triggers, different domain entries. The D+B anchor (tool call) must fire regardless of what's in context. Same-conversation visibility of upstream recall does not satisfy downstream gates.
-- Root cause: Gate structure frames memory-index scan as "fallback" when it's the primary path for moderate tasks. Artifact-existence branching is a Tier 3 concern (cross-session persistence) leaking into Tier 1/2 (same-session, same-context).
+- Root cause: Gate structure frames memory-index scan as "fallback" when it's the primary path for moderate tasks. Artifact-existence branching is a cross-session-persistence concern leaking into a same-session, same-context path.
 
 ## When placing correctional instructions in workflows
 - Anti-pattern: Adding a trim/cleanup step downstream of the generation step that creates the defect. "Generate Completed content (append everything) → Step 6: trim stale content." The downstream step competes with the generation instruction and can be forgotten or rationalized away.
@@ -63,7 +63,6 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 ## When calling triage-feedback.sh
 - Anti-pattern: Calling `triage-feedback.sh plans/outline-proofing baseline` — the script prepends `plans/` to `$1`, so the reports dir becomes `plans/plans/outline-proofing/reports` (double-prefixed).
 - Correct pattern: Pass just the job name: `triage-feedback.sh outline-proofing baseline`. The script constructs `plans/outline-proofing/reports` internally.
-- Note: The inline skill's documented invocation is `triage-feedback.sh plans/<job>` — this is incorrect. The script implementation uses the arg as a suffix to `plans/`.
 ## When referencing format files in skill steps
 - Anti-pattern: "Generate X using format from `references/foo.md`" — implies reading but doesn't require it. Agent may rationalize from memory rather than reading the file, producing format drift.
 - Correct pattern: Explicit Read instruction: "Read `references/foo.md`. Generate X using that format." Matches Complex path convention ("Read `references/write-outline.md`") and removes ambiguity.
@@ -123,7 +122,7 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Correct pattern: Use `PurePath.full_match()` (Python 3.13+) which handles `**` matching zero or more directory levels. `PurePath("src/foo.py").full_match("src/**/*.py")` returns `True`.
 
 ## When reusing plan names for rework
-- Anti-pattern: Reusing a plan name for rework (e.g., `handoff-cli-tool` for both original implementation and rework). `prepare-runbook.py` regenerates agents with same names → CLI caches agents by name at startup → name match prevents reload → dispatched agents run stale context from the original implementation. Agent told to implement features that already exist → model simulates workflow instead of using tools.
+- Anti-pattern: Reusing a plan name for rework (e.g., `handoff-cli-tool` for both original implementation and rework). Regenerating agents with the same names → CLI caches agents by name at startup → name match prevents reload → dispatched agents run stale context from the original implementation. Agent told to implement features that already exist → model simulates workflow instead of using tools.
 - Correct pattern: Iterate plan names for rework (e.g., `handoff-cli-tool-v2`). New agent names don't match cache → "agent not found" → forces restart, making the stale cache visible. Alternatively, restart session after regenerating agents with same names.
 - Evidence: 3/3 repros showed 0 tool uses. Binary search of plan context content was ineffective — all tests hit the same cached agent (duration ~2.6s for ~19K reported tokens = physically impossible without cache). test-driver worked because it had no stale plan context, not because plan context inherently triggers hallucination.
 

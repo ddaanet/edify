@@ -14,11 +14,11 @@ continuation:
 
 # Design Implementation Approach
 
-Produce dense design documents that guide implementation by downstream agents (Sonnet/Haiku).
+Produce dense design documents that guide implementation by downstream agents (sonnet executors, opus reviewers).
 
 ## Downstream Consumers
 
-- **Planning:** `/runbook` (unified — handles both TDD and general phases). Note which phases are behavioral (TDD) vs infrastructure (general) to guide per-phase type tagging.
+- **Planning:** `/runbook` — phases typed tdd / general / inline. Note which phases are behavioural (tdd), infrastructure (general), or prose/config the orchestrator applies itself (inline) to guide per-phase typing.
 - **Execution:** `/inline` when work is execution-ready (Phase B sufficiency gate, Phase C.5 execution readiness). Handles execution lifecycle: corrector, triage feedback, deliverable-review chain.
 
 ## Process
