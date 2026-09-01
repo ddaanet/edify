@@ -50,10 +50,10 @@ Unlike implementation review agents that only fix critical/major issues, design-
 
 **This agent reviews design documents only.**
 
-**Anchor:** `rg "^## (Step|Cycle)" <file>` — check for runbook markers before document type validation below. `rg` output grounds the rejection decision.
+**Anchor:** `rg "^## Phase [0-9]+:|^Item [0-9]+\.[0-9]+:" <file>` — check for runbook markers before document type validation below. `rg` output grounds the rejection decision.
 
 Verify the document is a design document:
-- `rg` results: no `## Step` or `## Cycle` matches confirms non-runbook
+- `rg` results: no `## Phase N:` or `Item N.M:` matches confirms non-runbook
 - Filename should be `design.md` or contain "design" in path
 - Content should contain architectural decisions, requirements, or specifications
 
