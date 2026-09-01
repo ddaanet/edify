@@ -1,16 +1,15 @@
 ---
 name: runbook
 description: |
-  Decompose a design into executable implementation steps. Triggers on /runbook or when
-  a design needs step-by-step planning. Creates runbooks with per-phase typing
-  (TDD cycles, general steps, or inline pass-through) for weak orchestrator execution.
-allowed-tools: Agent, Read, Write, Edit, Skill, Bash(mkdir:*, plugin/bin/prepare-runbook.py, echo:*|pbcopy)
+  Decompose a design into an executable runbook — phases of typed items
+  (tdd / general / inline) that /orchestrate composes dispatch prompts from.
+  Triggers on /runbook or when a design needs step-by-step planning.
+allowed-tools: Agent, Read, Write, Edit, Skill, Bash(mkdir:*, echo:*|pbcopy)
 requires:
   - Design document from /design
   - CLAUDE.md for project conventions (if exists)
 outputs:
-  - Tier 2: Approved runbook outline at plans/<job-name>/runbook-outline.md
-  - Tier 3: Execution runbook at plans/<job-name>/runbook.md, ready for prepare-runbook.py
+  - Execution runbook at plans/<job-name>/runbook.md
 user-invocable: true
 continuation:
   cooperative: true
@@ -21,173 +20,122 @@ continuation:
 
 **Usage:** `/runbook plans/<job-name>/design.md`
 
-Create detailed execution runbooks suitable for weak orchestrator agents. Transforms designs into structured runbooks with per-phase type tagging — behavioral phases get TDD cycles (RED/GREEN), infrastructure phases get general steps, prose/config phases pass through as inline.
+Produce `plans/<job>/runbook.md` — the terminal planning artifact. Item and
+slice format: `references/runbook-format.md`. Pipeline context (see
+`docs/design.md` §6.4 "Pipeline contracts"): `/design` → `/runbook` →
+`runbook-corrector` → `runbook-simplifier` → `/proof` → `/orchestrate` in a
+fresh session.
 
-**Workflow context:** Part of implementation workflow (see `docs/design.md` §6.4 "Pipeline contracts" for full pipeline): `/design` → `/runbook` → [runbook-corrector] → prepare-runbook.py → `/orchestrate`
+**Prerequisites check (D+B anchor):** Check the plan directory for a
+design-stage artifact: `outline.md`, `inline-plan.md`, or `design.md`. Absent
+→ STOP. `/runbook` without prior `/design` gating is an error — scope was not
+user-validated.
 
-## Per-Phase Type Model
+## Phase Type Model
 
-Each phase in a runbook declares its type: `type: tdd`, `type: general` (default), or `type: inline`.
+Each phase declares `type: tdd`, `type: general` (default), or
+`type: inline`. Type determines:
 
-**Type determines:**
-- **Expansion format:** TDD → RED/GREEN cycles. General → task steps with script evaluation. Inline → pass-through (no decomposition, no step files).
-- **Review criteria:** TDD → TDD discipline. General → step quality. Inline → vacuity, density, dependency ordering (no step/script/TDD checks). LLM failure modes for ALL phases.
-- **Orchestration:** TDD/general → per-step agent delegation. Inline → orchestrator-direct (no Task dispatch).
+- **Item format:** tdd → `Slices:` with per-slice test lists; general →
+  concrete action against a named target; inline → same, executed by the
+  orchestrator itself. All per `references/runbook-format.md`.
+- **Review criteria:** `runbook-corrector` applies slice rules to tdd items,
+  clarity and readiness rules to all.
+- **Dispatch:** tdd → four dispatches per slice (RED → test review → GREEN →
+  code review); general → one dispatch; inline → no dispatch.
 
-**Type does NOT affect:** Tier assessment, outline generation, consolidation gates, assembly (prepare-runbook.py auto-detects), checkpoints.
+## Process
 
-**Phase type tagging format in outlines:**
-```markdown
-### Phase 1: Core behavior (type: tdd)
-- Cycle 1.1: Load configuration
-- Cycle 1.2: Parse entries
+### 1. Recall and Discovery
 
-### Phase 2: Skill definition updates (type: general)
-- Step 2.1: Update SKILL.md frontmatter
-- Step 2.2: Add new section
+0. **Documentation perimeter and requirements (if present):** If the design
+   includes a "Documentation Perimeter" section, Read the files under
+   "Required reading" and invoke any listed skill-loading directives. If it
+   includes a "Requirements" section, note requirements and scope boundaries.
 
-### Phase 3: Contract updates (type: inline)
-- Add inline type row to pipeline-contracts.md type table
-- Update eligibility criteria in workflow-optimization.md
-```
+1. **Implementation recall (D+B anchor — tool call required):**
+   `Skill(skill: "edify:recall", args: "plans/<job> — implementation patterns
+   for this design")`. Patterns for building this, not classifying it.
+   Upstream triage recall (from /design) does not satisfy this gate.
 
-prepare-runbook.py auto-detects per-file via headers (`## Cycle X.Y:` vs `## Step N.M:`). Inline phases have no step/cycle headers — detected by `(type: inline)` tag in phase heading. prepare-runbook.py skips step-file generation for inline phases and marks them `Execution: inline` in orchestrator-plan.md.
+2. **Augment the recall artifact** (`plans/<job>/recall-artifact.md`): add
+   the paths recall selected, with implementation focus — planning-relevant
+   entries only (model selection failures, phase typing decisions, precommit
+   gotchas). Execution-level detail reaches executors through dispatch
+   prompts, not the artifact. If absent, write the initial artifact.
 
-## Model Assignment
+3. **Verify actual file locations:** `rg --files` / `rg` (Bash) for every
+   source and test file the design references. Never assume paths from
+   conventions. STOP if expected files are not found.
 
-**Default heuristic:** Match model to task complexity.
-- **Haiku:** File operations, scripted tasks, mechanical edits
-- **Sonnet:** Semantic analysis, judgment, standard implementation
-- **Opus:** Architecture, complex design decisions
+4. **Post-explore recall gate (D+B anchor):** exploration may surface domains
+   step 1 did not anticipate. Invoke `Skill(skill: "edify:recall")` (no topic
+   — selection runs against what exploration surfaced). New entries → add
+   their paths to the artifact. None → state that explicitly.
 
-**Artifact-type override:** Steps editing architectural artifacts require opus regardless of task complexity:
-- Skills (`plugin/skills/`)
-- Fragments (`plugin/fragments/`)
-- Agent definitions (`plugin/agents/`)
-- The living design (`docs/design.md`)
+### 2. Write the Runbook
 
-These are prose instructions consumed by LLMs — wording directly determines downstream agent behavior. "Simple" edits to these files require nuanced understanding that haiku/sonnet cannot reliably provide.
+Write `plans/<job>/runbook.md` per `references/runbook-format.md`:
+requirements mapping table, typed phases, items with requirement IDs,
+`Slices:` on tdd items, `Interfaces:` where one item's output is another's
+input.
 
-This override applies to Tier 2 delegation (model parameter), Tier 3 step assignment (Execution Model field), and the Execution Model in Weak Orchestrator Metadata.
+### 3. Self-Check
 
----
+Before review, verify:
 
-## Two-Tier Assessment
+- **All implementation choices resolved** — no "choose" / "decide" /
+  "determine" / "select approach" language; each item commits to one
+  approach.
+- **Inter-item dependencies declared** — `Depends on: Item N.K` wherever an
+  item consumes another's output.
+- **Code-fix items enumerate affected call sites** (file:function or
+  file:line).
+- **Later items reference post-phase state** — an item modifying a file a
+  prior phase changed notes the expected state.
+- **Phase size** — a phase over 8 items is a split signal: prefer splitting
+  the phase at a clean boundary. Not a count gate.
+- **Cross-cutting issues scope-bounded** — "addressed by items X, Y" / "out
+  of scope: Z".
+- **No vacuous items** — every item produces a functional outcome;
+  scaffolding merges into the nearest behavioural item.
+- **Foundation-first ordering** — existence → structure → behaviour →
+  refinement; no forward dependencies.
+- **Prose atomicity** — all edits to one prose artifact in one item.
+- **Self-modification ordering** — when the runbook modifies pipeline tools
+  it will later use, tool-improvement items precede tool-usage items; see
+  `docs/design.md` D-39, which routes self-modifying work out of the runbook
+  pipeline entirely when the risk cannot be ordered away.
 
-**Evaluate implementation complexity before proceeding. Assessment runs first, before any other work.**
+### 4. Commit
 
-### Assessment Criteria
+Commit `runbook.md` before review — review agents operate on filesystem
+state, and a committed checkpoint keeps their fixes diffable.
 
-Analyze the task and produce explicit assessment output:
+### 5. Review
 
-```
-**Tier Assessment:**
-- Files affected: ~N
-- Artifact destination: [production / agentic-prose / exploration / investigation / ephemeral]
-- Open decisions: none / [list]
-- Components: N (sequential / parallel / mixed)
-- Cycles/steps estimated: ~N (rough count from design)
-- Model requirements: single / multiple
-- Session span: single / multi
+Delegate to `edify:runbook-corrector` (fix-all mode); include
+review-relevant entries from `plans/<job>/recall-artifact.md` in the
+delegation prompt. Read the returned report. Critical issues remaining →
+STOP and escalate to user.
 
-**Tier: [2/3] — [Lightweight Delegation / Full Runbook]**
-**Rationale:** [1-2 sentences]
-```
+### 6. Consolidate
 
-**Destination-aware file counting:** Artifact destination (from Phase 0 classification or design) determines which convention set applies to file counting:
+Merge trivial work into adjacent items directly (single-constant changes,
+setup that batches with feature work), then delegate to
+`edify:runbook-simplifier` for pattern-level consolidation
+(identical-pattern items → parametrized, same-module batches, sequential
+additions). Read its report; verify requirements mapping survived.
 
-| Destination | File Count Basis | Cycle Conventions |
-|-------------|-----------------|-------------------|
-| Production (`src/`) | Include test mirrors, lint, module split | Full TDD cycles |
-| Exploration (`plans/prototypes/`) | Script files only, no test mirrors | General steps (write, verify, iterate) |
-| Agentic-prose (`plugin/skills/`, `plugin/fragments/`, `agents/`) | Skill files + behavior verification | Prose review cycles |
-| Investigation (`plans/reports/`) | Report files only | General steps |
+### 7. Proof
 
-A single-file prototype assessed against exploration conventions → minimal scope (Tier 2 may suffice). Same script assessed against production conventions → inflated count from test mirrors, lint setup, module structure.
-
-When uncertain between tiers, prefer the lower tier (less overhead). Ask user only if genuinely ambiguous.
-
-### Tier 2: Lightweight Delegation
-
-**Criteria:**
-- Design complete, scope moderate (6-15 files or 2-4 logical components) *(file thresholds ungrounded — needs calibration)*
-- Work benefits from agent isolation but not full orchestration
-- Components are sequential (no parallelization benefit)
-- No model switching needed
-
-**Implementation recall (D+B anchor — tool call required):**
-
-`Skill(skill: "edify:recall", args: "plans/<job> — implementation patterns for this design")`
-
-Patterns for building this, not classifying it. Upstream triage recall (from /design) uses different entries and does not satisfy this gate.
-
-Include relevant entries in each delegation prompt — format per consumer model tier (constraint format for haiku, rationale for sonnet/opus). Include review-relevant entries in corrector prompt.
-
-**Prerequisites check (D+B anchor):** Check plan directory for design-stage artifact: `outline.md`, `inline-plan.md`, or `design.md`. Absent → STOP. `/runbook` without prior `/design` gating is an error — scope was not user-validated.
-
-**Generate runbook outline:**
-
-1. Write `plans/<job>/runbook-outline.md` using Tier 2 outline format (below)
-2. **Review:** Delegate to `edify:runbook-outline-corrector` (fix-all mode). Specify Tier 2 format in prompt — no requirements mapping table required.
-3. **Proof:** Invoke `/proof plans/<job>/runbook-outline.md`
-4. **After /proof approval:** follow §Continuation (prepends `/inline plans/<job> execute`)
-
-**Tier 2 outline format:**
-
-```markdown
-## Phase N: [title] (type: [tdd|general|inline])
-- Item N.1: [target file] — [concrete action]
-- Item N.2: [target file] — [concrete action]
-  Depends on: Item N.1
-```
-
-No requirements mapping table (scope too small for traceability). Type tags required. Per-item: concrete action + target file. Dependencies noted where relevant.
-
-**Execution:** `/inline` executes from the approved `runbook-outline.md`. No `runbook.md` generated.
-
-**Sequence:** Follow §Continuation (prepends `/inline plans/<job> execute`).
-
-**Design constraints are non-negotiable:**
-
-When design specifies explicit classifications (tables, rules, decision lists):
-1. Include them LITERALLY in the delegation prompt
-2. Delegated agents must NOT invent alternative heuristics
-3. Agent "judgment" means applying design rules to specific cases, not creating new rules
-
-**Artifact-type model override:** When delegated work edits architectural artifacts (skills, fragments, agents, workflow decisions), use `model="opus"` in the Task call. See Model Assignment section.
-
-**Key distinction from Tier 3:** No prepare-runbook.py, no step files, no orchestrator plan. The planner acts as ad-hoc orchestrator and composes each delegation prompt itself.
-
-**Handling agent escalations:**
-
-When delegated agent escalates "ambiguity" or "design gap":
-1. **Verify against design source** — Re-read the design document section
-2. **If design provides explicit rules:** Resolve using those rules, do not accept the escalation
-3. **If genuinely ambiguous:** Resolve using architectural principles from design context, or ask user
-4. **Re-delegate with clarification** if agent misread design
-
-### Tier 3: Full Runbook
-
-**Criteria:**
-- Multiple independent steps (parallelizable)
-- Steps need different models
-- Long-running / multi-session execution
-- Complex error recovery
-- >15 files or complex coordination *(file threshold ungrounded — needs calibration)*
-- >10 TDD cycles with cross-component dependencies *(cycle threshold ungrounded — needs calibration)*
-
-**Prerequisites check (D+B anchor):** Check plan directory for design-stage artifact: `outline.md`, `inline-plan.md`, or `design.md`. Absent → STOP. `/runbook` without prior `/design` gating is an error — scope was not user-validated.
-
-**Sequence:** Read `references/tier3-outline-process.md` for the planning process overview and outline generation (Phases 0.5-0.95). *(Verb-oriented name: action the agent takes, not the plan artifact produced.)*
-
----
+Invoke `/proof plans/<job>/runbook.md` — the user validates the runbook
+item by item. This is the human gate on the artifact execution will read.
 
 ## Continuation
 
 Read `plugin/fragments/continuation-passing.md` and follow its §Consumption
-Protocol as the final action of this skill; on failure, its §Error Propagation.
-
-This skill's step-2 prepend, by tier:
-- Tier 2: prepend `/inline plans/<job> execute`
-- Tier 3: no prepend (Phase 4 prepares artifacts; orchestration runs in a fresh session at a different model tier)
-
+Protocol as the final action of this skill; on failure, its §Error
+Propagation. No prepend: orchestration runs in a fresh session via
+`/handoff:handoff` — planning has consumed most of this session's context
+budget, and the orchestrator needs its own.
