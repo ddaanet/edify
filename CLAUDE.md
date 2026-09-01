@@ -54,7 +54,7 @@ Distinct from no-estimates (which covers predictions). This covers fabricated me
 
 ### Source Not Generated
 
-**Always edit source files, never generated output.** When a file is produced by a generator (prepare-runbook.py, skill expansion, template rendering), edit the source that produces it. Changes to generated files are overwritten on next generation.
+**Always edit source files, never generated output.** When a file is produced by a generator (template rendering, a build step), edit the source that produces it. Changes to generated files are overwritten on next generation.
 
 **If unsure which is source:** Ask before editing.
 
@@ -175,19 +175,22 @@ Source in `src/edify/`. Four tools:
 
 In `plugin/skills/`, invoked via slash command.
 
-- **Workflow pipeline:** `requirements` → `design` → `runbook` → `orchestrate` (Tier 3) or `inline` (Tier 1/2), with `review-plan` and `review` as the quality gates.
+- **Workflow pipeline:** `requirements` → `design` → `runbook` → `orchestrate`, or `design` → `inline` for work that needs no runbook, with `review` as the in-progress quality gate.
 - **Standalone:** `proof`, `ground`, `deliverable-review`, `formalize`, `recall`.
 
 The pipeline agents live in `plugin/agents/` (correctors, `artisan`, `scout`,
-`test-driver`, `tdd-auditor`, `refactor`, and friends); its backing scripts are
-`plugin/bin/prepare-runbook.py` and `validate-runbook.py`. Pipeline docs are in
-`plugin/docs/`.
+`test-driver`, `tdd-auditor`, `refactor`, and friends). The runbook is one
+artifact, `plans/<job>/runbook.md` — typed phases of prose items with
+requirement IDs, interface blocks, and behaviour slices on tdd items
+(`plugin/skills/runbook/references/runbook-format.md`); nothing expands it.
 
-Execution delegates **by reference**: the orchestrator dispatches a standing
-agent with a path to a step file, and the step file names the design, outline,
-and recall artifacts it needs. Bespoke per-plan agent definitions were dropped
-in 2026-08 — they fought the platform (not discoverable until session restart)
-and the runbook system already supplies the flexibility they were built for.
+Execution delegates **by reference**: the orchestrator composes each dispatch
+prompt from the runbook item (`plugin/skills/orchestrate/references/dispatch-composition.md`)
+— item text inline, design and recall artifacts by path. A tdd slice is four
+dispatches: RED, test review, GREEN, code review. Bespoke per-plan agent
+definitions were dropped in 2026-08 — they fought the platform (not
+discoverable until session restart); pre-generated step files were dropped in
+2026-09 — a strong orchestrator composes prompts live.
 
 The pipeline was torn down in 2026-05 and revived in 2026-08. On revival it was
 rewired off the retired subsystems: recall now means reading `memory/MEMORY.md`

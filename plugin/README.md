@@ -25,10 +25,9 @@ conversation. Each lives in `skills/<name>/SKILL.md`.
 |-------|---------|
 | `/requirements` | Capture and document requirements for design and planning |
 | `/design` | Triage complexity, then design the approach; routes simple work straight to `/inline` |
-| `/runbook` | Decompose a design into executable steps, typed per phase (TDD cycles, general, inline) |
-| `/orchestrate` | Execute a prepared runbook with mechanical verification gates (Tier 3) |
-| `/inline` | Sequence inline execution — pre-work, execute, post-work (Tier 1/2) |
-| `/review-plan` | Review runbook quality: TDD discipline, step clarity, LLM failure modes |
+| `/runbook` | Decompose a design into a runbook of typed items (tdd slices, general, inline) |
+| `/orchestrate` | Execute a runbook by composing dispatch prompts per item, with verification gates |
+| `/inline` | Sequence inline execution — pre-work, execute, post-work — for work without a runbook |
 | `/review` | Review in-progress changes for quality and correctness |
 
 **Standalone** — usable on their own, no pipeline required.
@@ -48,22 +47,16 @@ Subagent definitions in `agents/`, dispatched by the pipeline skills.
 | Agent | Role |
 |-------|------|
 | `scout` | Open-ended codebase exploration; writes findings to a report file |
-| `artisan` | General implementation work within a runbook step |
-| `test-driver` | Drives TDD cycles (RED → GREEN) for a runbook phase |
+| `artisan` | General implementation work for a dispatched runbook item |
+| `test-driver` | Executes one TDD slice dispatch in RED or GREEN mode |
 | `tdd-auditor` | Audits TDD discipline after execution |
 | `refactor` | Applies deslop directives; escalates what needs a stronger model |
 | `corrector` | Reviews produced artifacts against domain criteria |
 | `design-corrector` | Corrector specialized for design documents |
 | `outline-corrector` | Corrector specialized for design outlines |
 | `runbook-corrector` | Corrector specialized for runbooks |
-| `runbook-outline-corrector` | Corrector specialized for runbook outlines |
-| `runbook-simplifier` | Simplifies over-decomposed runbooks |
+| `runbook-simplifier` | Consolidates redundant patterns in a runbook before `/proof` |
 | `brainstorm-name` | Generates and scores candidate names |
-
-## Documentation
-
-Pipeline reference in `docs/`: `general-workflow.md` and `tdd-workflow.md` for
-the two execution modes.
 
 ## Scripts
 
@@ -74,12 +67,10 @@ Utility scripts in `bin/` (Python 3):
 | `bootstrap-venv.sh` | SessionStart hook: provision a venv with the version-matched `edify-cli` via uv |
 | `bump-plugin-version.py` | Bump the plugin manifest version |
 | `check-version-consistency.py` | Verify plugin and package versions agree |
-| `prepare-runbook.py` | Expand a runbook into per-step files, shared context, and an orchestrator plan |
-| `validate-runbook.py` | Check a runbook's structure before execution |
-| `assemble-runbook.py` | Reassemble a split runbook directory into a single document |
 | `triage-feedback.sh` | Compare predicted against actual complexity after execution |
 
-Plus `scripts/split-execution-plan.py`, used by `/runbook` during expansion.
+Plus `skills/orchestrate/scripts/verify-step.sh`, the clean-tree and precommit
+gate `/orchestrate` runs after each dispatch.
 
 ## Recipes
 

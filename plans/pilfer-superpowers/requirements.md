@@ -79,20 +79,22 @@ fixed). Acceptance: shared reviewer fragment carries these clauses once;
 corrector agents reference rather than restate them.
 
 **FR-9: Interfaces block in runbook format**
-Add a `Consumes:`/`Produces:` interfaces block (exact names, signatures, types)
-to runbook step/cycle format — the authoring-side complement to
-runbook-outline-corrector's semantic-propagation check, and the only way a
-context-isolated executor learns neighbor steps' names. Add cross-step type
-consistency to the outline self-verification list. Acceptance: format documented
-in `/runbook` references; prepare-runbook.py carries the block into step files.
+**Satisfied 2026-09-01 by `plans/pipeline-simplification/` FR-6.** Runbook
+items carry an `Interfaces:` block (one line per method/dataclass/exception/file
+contract, full signature and return type) wherever another item consumes their
+output — the authoring-side complement to runbook-corrector's
+semantic-propagation check, and the only way a context-isolated executor learns
+neighbor items' names. Format in
+`plugin/skills/runbook/references/runbook-format.md`; `/orchestrate` carries
+the block into each dispatch prompt.
 
 **FR-10: No-placeholders authoring rules**
-Import the "plan failures" list into runbook expansion guidance: no TBD/TODO,
-no "add appropriate error handling"-class vagueness, no "similar to step N"
-(repeat the content), no references to names defined in no step. Complements
-review-plan's detection-side vacuity criteria with authoring-side prohibition.
-Acceptance: expansion guidance lists the prohibitions; review-plan cross-refs
-them.
+Import the "plan failures" list into the runbook format rules
+(`runbook-format.md`): no TBD/TODO, no "add appropriate error
+handling"-class vagueness, no "similar to item N" (repeat the content), no
+references to names defined in no item. Complements runbook-corrector's
+detection-side vacuity criteria with authoring-side prohibition. Acceptance:
+the format rules list the prohibitions; runbook-corrector cross-refs them.
 
 **FR-11: Description policy reconciliation and sweep**
 Reconcile superpowers SDO with the purpose-first user rule: every edify skill
@@ -107,7 +109,8 @@ pattern; no dead caller names remain.
 Single-source the repeated blocks: recall protocol (~8 restatements),
 continuation block (×4, `fragments/continuation-passing.md` already exists),
 runbook report template (×3), and the ~80%-shared corrector skeleton
-(~10,100 words across four agents). These are defects 18–21 in
+(~10,100 words across four agents when measured; the corrector count dropped
+by one with `pipeline-simplification` FR-3 on 2026-09-01). These are defects 18–21 in
 `reports/edify-defects.md`, parked there for this FR rather than fixed in the
 2026-08-13 backlog clearance — the measured-reduction requirement below is why. Set per-class length targets for skill
 bodies (superpowers: <200 words frequently-loaded, <500 others — treat as
@@ -133,10 +136,13 @@ subject to Q-1 (dependency direction).
 ### Non-Functional Requirements
 
 **NFR-1: Preserve edify's structural advantages**
-No adoption may weaken the deterministic-validation layer, artifact
-traceability, pinned model tiers, independent test execution between agent
-hand-offs, or `/proof` human gates on planning artifacts. Superpowers
-mechanisms are additive to structure, not replacements for it.
+No adoption may weaken artifact traceability, pinned model tiers, independent
+test execution between agent hand-offs (RED and GREEN as separate dispatches),
+or `/proof` human gates on planning artifacts. Superpowers mechanisms are
+additive to structure, not replacements for it. The deterministic-validation
+layer is no longer on this list: `plans/pipeline-simplification/` NFR-1
+retired it 2026-09-01 (`validate-runbook.py` had nothing downstream to fail
+for).
 
 **NFR-2: Provenance on imported heuristics**
 Every imported rule carries its evidence class: measured (superpowers
@@ -184,8 +190,8 @@ imports are gated on FR-1's method existing first.
   argues from; keep with the plan (grounding reports are reusable).
 - Superpowers 6.3.0 installed from `superpowers-marketplace` — FR-13 and any
   direct skill chaining depend on it remaining installed (Q-1).
-- The revived pipeline is untested end-to-end
-  (`memory/workflow-pipeline-revival.md`); the planned e2e exercise will
+- The simplified pipeline (`plans/pipeline-simplification/`, landed
+  2026-09-01) is untested end-to-end; the planned dogfood run will
   re-prioritize this list with observed failure data.
 
 ### Open Questions

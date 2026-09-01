@@ -11,17 +11,17 @@ Lean-assisted, formal-proof-backed requirements tracking.
 
 ## 1. Now
 
-**Focus** — exercise the revived pipeline end to end (`/design` → `/runbook` →
-`/orchestrate`). It is the first real exercise of the rewired step-file and
-manifest shapes.
+**Focus** — dogfood the one-stage pipeline end to end (`/design` → `/runbook`
+→ `/orchestrate`). The one-stage runbook landed 2026-09-01; the composed-prompt
+dispatch and slice-batched TDD have not yet run against a real plan (L-6).
 
-**Next** — test coverage for `plugin/bin/prepare-runbook.py`; the suite reaches
-it only indirectly through `validate-runbook.py`'s imports.
+**Next** — consolidate `memory/MEMORY.md` under the loader cutoff (L-5).
 
-**Do not re-litigate** — the planning-to-execution session boundary (D-24 keeps
-it on model-tier and context-budget grounds, not discoverability); the
-publication postponement (D-9); the three-tier execution structure (D-15, whose
-*thresholds* are separately open as L-2).
+**Do not re-litigate** — the planning-to-execution session boundary (D-25
+keeps it on context-budget grounds, not discoverability); the publication
+postponement (D-9); the one-stage runbook (D-34 — a strong orchestrator
+composes prompts live; pre-written step files were the weak-orchestrator
+premise, rejected in §7).
 
 ## 2. Status legend
 
@@ -54,19 +54,21 @@ positional arguments.
 | # | Requirement | Status | Where · pinned by |
 |---|---|---|---|
 | FR-7 | Capture requirements from conversation into `requirements.md` | Done (prose) | `skills/requirements/` |
-| FR-8 | Triage complexity, produce design artifacts, route by tier | Done (prose) | `skills/design/` |
-| FR-9 | Decompose a design into a typed runbook | Done (prose) | `skills/runbook/` |
-| FR-10 | Execute a prepared runbook by dispatching standing agents at step files | Done (prose) | `skills/orchestrate/` |
-| FR-11 | Wrap Tier 1/2 work in a lifecycle: pre-work → execute → corrector → triage → deliverable-review | Done (prose) | `skills/inline/` |
-| FR-12 | Review every pipeline transformation at a typed gate | Done (prose) | `skills/review-plan/`, `agents/*corrector*.md` |
+| FR-8 | Triage complexity, produce design artifacts, route to `/inline` or `/runbook` | Done (prose) | `skills/design/` |
+| FR-9 | Decompose a design into a one-stage runbook: typed phases of prose items, interface blocks, behaviour slices | Done (prose) | `skills/runbook/`, `references/runbook-format.md` |
+| FR-10 | Execute a runbook by composing each dispatch prompt from its items, four dispatches per TDD slice | Done (prose) | `skills/orchestrate/`, `references/dispatch-composition.md` |
+| FR-11 | Wrap runbook-less work in a lifecycle: pre-work → execute → corrector → triage → deliverable-review | Done (prose) | `skills/inline/` |
+| FR-12 | Review every pipeline transformation at a typed gate | Done (prose) | `agents/*corrector*.md`, `agents/runbook-simplifier.md` |
 | FR-13 | Review production artifacts against ISO 25010 / IEEE 1012 axes | Done (prose) | `skills/deliverable-review/` |
 | FR-14 | Select and read relevant memory entries at pipeline recall checkpoints | Done (prose) | `skills/recall/` |
 | FR-15 | Ground methodology claims in external research before asserting them | Done (prose) | `skills/ground/` |
 | FR-16 | Validate an artifact item-by-item with forced verdicts | Done (prose) | `skills/proof/` |
 | FR-17 | Write an icontract contract for a function and repair it against CrossHair | Done (prose) | `skills/formalize/` |
 | FR-18 | Provide the version-matched CLI to the plugin at session start | Done | `bin/bootstrap-venv.sh`, `hooks/hooks.json` · `tests/bootstrap-venv.bats` via `test_bootstrap_hook.py` |
-| FR-19 | Generate step artifacts and an orchestrator manifest from a runbook | Partial | `bin/prepare-runbook.py` · **no test coverage** (L-1) |
-| FR-20 | Check runbook structure deterministically | Done | `bin/validate-runbook.py` · `test_validate_runbook_reporting.py` |
+
+FR-19 (step artifacts from a runbook) and FR-20 (deterministic runbook
+structure checks) were dropped 2026-09-01 with the two-stage runbook (§7); the
+IDs are not reused.
 
 ## 4. Non-functional requirements
 
@@ -87,8 +89,8 @@ positional arguments.
 The repo root *is* the `edify-cli` package: `pyproject.toml` at root, source in
 `src/edify/`, hatchling build, uv for dependency management, Python ≥3.14. The
 Claude Code plugin is a plain tracked subdirectory `plugin/`, holding
-`.claude-plugin/plugin.json`, `skills/`, `agents/`, `bin/`, `fragments/`,
-`hooks/` and `docs/`. `plugin/` is the plugin root, so a subdir-sourced install
+`.claude-plugin/plugin.json`, `skills/`, `agents/`, `bin/`, `fragments/` and
+`hooks/`. `plugin/` is the plugin root, so a subdir-sourced install
 copies exactly `plugin/` and never the sibling `src/` tree.
 
 The plugin does not ship the CLI's code. It obtains the CLI at runtime through a
@@ -127,25 +129,33 @@ collection is plain tree recursion with no special tracking.
 
 ### 5.3 Pipeline structure
 
-The plugin is a skills bundle plus standing agents plus two backing scripts.
+The plugin is a skills bundle plus standing agents plus one verification
+script.
 
-Pipeline skills: `requirements` → `design` → `runbook` → `orchestrate` (Tier 3)
-or `inline` (Tier 1/2), with `review-plan` and `review` as quality gates.
-Standalone skills: `proof`, `ground`, `deliverable-review`, `formalize`,
-`recall`.
+Pipeline skills: `requirements` → `design` → `runbook` → `orchestrate`, or
+`design` → `inline` for work that needs no runbook, with `review` as the
+in-progress quality gate. Standalone skills: `proof`, `ground`,
+`deliverable-review`, `formalize`, `recall`.
+
+The runbook is one artifact, `plans/<job>/runbook.md`: typed phases
+(`tdd` / `general` / `inline`) of prose items against named targets, each
+carrying requirement IDs, an `Interfaces:` block where another item consumes
+its output, and — for tdd items — behaviour slices with per-slice test lists
+(`plugin/skills/runbook/references/runbook-format.md`). Nothing expands it:
+`runbook-corrector` and `runbook-simplifier` gate it, `/proof` validates it,
+and `/orchestrate` reads it and composes every dispatch prompt live
+(`plugin/skills/orchestrate/references/dispatch-composition.md`).
 
 Standing agents in `plugin/agents/`: the correctors (`corrector`,
 `design-corrector`, `outline-corrector`, `runbook-corrector`,
-`runbook-outline-corrector`, `runbook-simplifier`), the executors (`artisan`,
-`test-driver`, `refactor`), and the investigators (`scout`, `tdd-auditor`,
-`brainstorm-name`).
+`runbook-simplifier`), the executors (`artisan`, `test-driver`, `refactor`),
+and the investigators (`scout`, `tdd-auditor`, `brainstorm-name`).
 
-Scripts: `plugin/bin/prepare-runbook.py` (runbook → step artifacts) and
-`validate-runbook.py` (deterministic structural checks).
+Script: `plugin/skills/orchestrate/scripts/verify-step.sh` (clean tree +
+precommit after each dispatch).
 
-**Delegation is by reference.** The orchestrator dispatches a standing agent
-with the path to a step file; the step file names the design, outline and recall
-artifacts it needs. The orchestrator's prompt carries paths, never content
+**Delegation is by reference.** The orchestrator's prompt carries the item
+text and the paths of the design and recall artifacts, never their content
 (D-24).
 
 ### 5.4 Runtime bootstrap
@@ -348,7 +358,7 @@ makes every later failure dismissible.
 
 **Presentation is not TDD'd.** Help text wording and error phrasing are brittle
 as test targets and self-evident on reading; they get handled in batch at review
-checkpoints instead of RED/GREEN cycles.
+checkpoints instead of a slice of their own.
 
 **Conformance work bakes exact strings into assertions.** When implementation
 follows an external reference — shell prototype, API spec, exact output format —
@@ -360,8 +370,10 @@ precise prose. Abstracting the string introduces translation loss and makes
 ### 6.4 Pipeline contracts
 
 **D-24 — Execution delegates by reference to standing agents.** The orchestrator
-dispatches `artisan`, `test-driver` or `corrector` with the path to a step file;
-the step file names the design, outline and recall artifacts the executor needs.
+dispatches `artisan`, `test-driver`, `corrector` or `refactor` with a prompt it
+composes live from the runbook item: the item text inline, the design and
+recall artifacts by path (`dispatch-composition.md`). Context reaches the
+executor through artifacts on disk, never through pasted content.
 
 *Supersedes* bespoke per-plan agent definitions (`<plan>-task`,
 `<plan>-corrector`, `<plan>-tester`, `<plan>-implementer`) generated into
@@ -370,32 +382,27 @@ discoverable as `subagent_type` values until session restart, which forced a
 restart boundary into the middle of the pipeline and made agent-type substitution
 a live failure mode.
 
-Context reaches the executor through artifacts on disk rather than generated
-agent definitions, which keeps deterministic logic out of the agent layer and
-costs no flexibility — the runbook system already decides what each step needs. A
-dispatch prompt is one path either way, so the orchestrator token saving that
-motivated per-plan caching survives.
+Composing the prompt live rather than reading a pre-generated step file is
+what lets the orchestrator handle plan deviation: the next prompt is written
+from what the last report said, and a list revision is an edit to
+`runbook.md` the orchestrator commits, so plan-as-executed against
+plan-as-written stays a `git diff`. Step files generated by
+`prepare-runbook.py` carried the same by-reference principle from 2026-08-13
+to 2026-09-01; they were the weak-orchestrator premise's artifact and went
+with it (§7). The principle — design and recall artifacts by path — is
+unchanged.
 
-*Implemented 2026-08-13.* `prepare-runbook.py` writes
-`plans/<name>/common-context.md` and, when the outline lives in the runbook
-rather than a file, `plans/<name>/outline.md`. Each step file opens with a
-`## Context` block naming whichever of design, outline and shared context exist,
-and closes with an `## Execution Contract` carrying the scope and clean-tree
-requirements the generated agents used to append. The orchestrator plan's
-`## Phase-Agent Mapping` table names standing agents and `/orchestrate` reads
-`subagent_type` from it.
+*Consequences:* the tester/implementer separation is two dispatches of
+`edify:test-driver`, RED mode and GREEN mode, with an `edify:corrector` test
+review between them and a code review after (D-30). The forced session
+restart between planning and execution is no longer a discoverability
+requirement — it is kept for context budget (D-25). Turn and duration bounds
+remain platform gaps (L-4).
 
-*Consequences:* the tester/implementer ping-pong survives as two named instances
-of `edify:test-driver`; per-cycle reviews are `edify:corrector` dispatches scoped
-by prompt. The forced session restart between planning and execution is no longer
-a discoverability requirement — it is kept for model tier and context budget
-(D-25). The inert `max_turns` manifest column is gone; turn and duration bounds
-remain platform gaps, and a column that reads as a guard while enforcing nothing
-is worse than none.
-
-**D-25 — Planning and execution run in different sessions.** They run at
-different model tiers, and orchestration is long-running, so the boundary keeps
-the orchestrator off a context already full of planning transcript. Handoff is
+**D-25 — Planning and execution run in different sessions.** Orchestration is
+long-running and its context carries the whole runbook and design, so the
+boundary keeps the orchestrator off a context already full of planning
+transcript. Handoff is
 not delegatable — it needs the current agent's session context. Commit is
 mechanical and can be delegated. The boundary is crossed by `/handoff:handoff`,
 every pipeline skill's default exit: it snapshots the next stage into the task
@@ -404,22 +411,18 @@ the file belongs to the handoff plugin and is hook-guarded — and durable
 pipeline state lives under `plans/<name>/` (the task-list writes and the
 worktree-vs-main section targeting that the skills carried from the retired
 `session.md` era were cut 2026-08-27). *Reopen-if:* context budgets grow enough that
-the tier argument stops binding; auto-chaining `/runbook` into `/orchestrate` was
-deliberately not taken during the 2026-08-13 rewire.
+the context argument stops binding; auto-chaining `/runbook` into `/orchestrate` was
+deliberately not taken during the 2026-08-13 rewire nor the 2026-09-01 simplification.
 
 **D-26 — Every transformation has a typed review gate.**
 
 | # | Transformation | Input | Output | Gate |
 |---|---|---|---|---|
 | T1 | Requirements → Design | `requirements.md` or inline | `design.md`, recall artifact | `design-corrector` (opus) |
-| T2 | Design → Outline | `design.md`, recall artifact | `runbook-outline.md` | `runbook-outline-corrector` (opus) |
-| T2.5 | Outline → Simplified outline | `runbook-outline.md` | consolidated outline | `runbook-simplifier` (opus) |
-| T3 | Outline → Phase files | `runbook-outline.md` | `runbook-phase-N.md` | `runbook-corrector` (type-aware) |
-| T4 | Phase files → Runbook | `runbook-phase-*.md` | `runbook.md` | `runbook-corrector` (holistic) |
-| T4.5 | Runbook → Validated runbook | phase files or runbook | validation reports | `validate-runbook.py` |
-| T5 | Runbook → Step artifacts | `runbook.md` | `steps/step-*.md` | `prepare-runbook.py` |
-| T6 | Steps → Implementation | `step-*.md` | code, artifacts | `corrector` at checkpoints |
-| T6.5 | Design/Outline → Implementation (inline) | `design.md` or outline, classification | code, review report | `corrector` + `triage-feedback.sh` |
+| T2 | Design → Runbook | `design.md`, recall artifact | `runbook.md` | `runbook-corrector` (opus) |
+| T3 | Runbook → Simplified runbook | `runbook.md` | consolidated `runbook.md` | `runbook-simplifier` (opus), then `/proof` |
+| T4 | Runbook → Implementation | `runbook.md` | code, artifacts | `corrector` per slice (test review, code review) and at phase boundaries |
+| T5 | Design/Outline → Implementation (inline) | `design.md` or outline, classification | code, review report | `corrector` + `triage-feedback.sh` |
 
 **D-27 — Reviewers fix everything and escalate the rest.** Every gate follows the
 same protocol: fix all issues directly (critical, major, minor), label genuinely
@@ -453,22 +456,27 @@ wrong scope. Add a verification scope naming every file participating in the
 invariant, identified by grepping for the invariant's pattern.
 
 **D-30 — Phases declare a type: `tdd`, `general` (default), or `inline`.** Type
-determines expansion format (RED/GREEN cycles; task steps with script evaluation;
-pass-through), review criteria (TDD discipline; step quality; vacuity and density
-only), and delegation model (per-step agent dispatch; orchestrator-direct). LLM
-failure-mode checks apply regardless of type. Type does not affect tier
-assessment, outline generation, consolidation gates, assembly or checkpoints.
+determines item format (tdd items carry behaviour slices with per-slice test
+lists; general and inline items a concrete action against a named target —
+`runbook-format.md`), review criteria (`runbook-corrector` applies slice rules
+to tdd items and clarity and readiness rules to all), and dispatch (tdd → four
+dispatches per slice: RED, test review, GREEN, code review, then `refactor` on
+review signal and a list-revision step; general → one dispatch; inline → the
+orchestrator executes it itself). LLM failure-mode checks apply regardless of
+type.
 
 A phase qualifies as `inline` when its outcome is fully determined by instruction
 plus target file state: no runtime feedback loop, all decisions pre-resolved in
-design. `prepare-runbook.py` skips step-file generation for those.
+design.
 
-**D-31 — LLM failure-mode checks run at both outline and expanded-phase level.**
-Expansion re-introduces vacuous cycles and density problems that outline review
-already removed. *Grounding:* an outline was fixed, then its expanded phases
-contained three vacuous cycles and a missing requirement.
+**D-31 — LLM failure-mode checks at every planning level.** *Superseded
+2026-09-01:* there is one planning level now — the runbook is terminal (D-34)
+— so the check runs once, in `runbook-corrector`. The grounding incident (an
+expanded plan re-introducing three vacuous cycles and a missing requirement
+that outline review had removed) is recorded in §7 as a reason expansion was
+dropped.
 
-**D-32 — Outline review runs at opus.** A sonnet reviewer's fix-all policy
+**D-32 — Runbook review runs at opus.** A sonnet reviewer's fix-all policy
 generates plausible but ungrounded corrections: confabulated operation sequences,
 removed design-specified features, fabricated file sizes. Established by a 2×2
 controlled experiment over generator × reviewer model with structurally
@@ -476,41 +484,41 @@ equivalent delegation prompts — sonnet review confabulated on both sonnet- and
 opus-generated outlines, opus review stayed grounded on both. Root cause: sonnet
 identifies non-problems as problems, then confabulates fixes, treating a
 structural document that references the design as if it were standalone. Paired
-fix: expansion guidance references design sections rather than reproducing
-implementation detail. This runs once per plan and its errors propagate to every
-execution step.
+fix: runbook items are prose plus interface blocks that reference design
+sections, never reproduced implementation detail (`runbook-format.md`). The
+review runs once per plan and its errors propagate to every dispatch.
 
-**D-33 — Consolidate identical patterns at the outline, not after expansion.**
-Four cycles that each add one artifact check to the same function differ only in
-fixture data, and that is visible from outline titles — expanded RED/GREEN detail
-is not needed to detect it. A parametrized cycle with a table of inputs replaces
-N separate rounds. Consolidating at the earliest detectable point saves the
-expansion cost; post-hoc optimization of ~12 items cost five parallel agents plus
-a holistic re-review.
+**D-33 — Consolidate identical patterns before `/proof`.** Four items that
+each add one artifact check to the same function differ only in fixture data,
+and that is visible from item titles. A parametrized item with a table of
+inputs replaces N separate dispatch sequences. `runbook-simplifier` runs after
+`runbook-corrector` and before `/proof`, so the user validates the
+consolidated runbook and execution never sees the redundancy.
 
 ### 6.5 Execution routing
 
-**D-34 — Three execution tiers, grounded in environment constraints.** Tier 1
-(inline): the work fits the current session's context and the agent that designed
-it can execute it. Tier 2 (delegated): work exceeds inline capacity but prompt
-generation is straightforward, so the orchestrator writes prompts ad hoc and
-dispatches. Tier 3 (orchestrated): prompt generation itself is expensive — many
-steps, layered context, cross-step dependencies — so pre-generating a runbook
-amortizes it.
+**D-34 — Two execution routes, split by whether a runbook exists.** `/inline`
+executes in-session — directly, or with ad-hoc dispatches composed per
+`dispatch-composition.md` — when `/design`'s execution-readiness gate says the
+work needs no runbook. `/orchestrate` executes by dispatch from `runbook.md`
+when `/design` routed the work to `/runbook`. The boundary is decided at
+`/design` C.5; `/inline` never consumes a runbook, and a small all-inline
+runbook still goes through `/orchestrate`.
 
-The Tier 1/2 boundary is **capacity**; the Tier 2/3 boundary is **orchestration
-complexity**. External methodology frameworks (Cynefin, XP, Lean Startup)
-validate the principle — match process weight to uncertainty — but the specific
-structure derives from how this system executes, not from them. Operational
-structure grounded in execution-environment constraints is grounded; the absence
-of an external framework prescribing three tiers is not evidence against it.
+*Supersedes* (2026-09-01) the three-tier structure — inline, delegated,
+orchestrated — whose third tier rested on the weak-orchestrator premise
+rejected in §7: pre-generating prompts to amortize an expensive orchestrator
+is unnecessary for a strong one and harmful once implementation deviates. The
+inline-versus-delegated distinction survives inside `/inline` as an
+execution-level choice, not a route. External methodology frameworks
+(Cynefin, XP, Lean Startup) validate the principle — match process weight to
+uncertainty — but the structure derives from how this system executes.
 
-**D-35 — Complexity, work type and tier are three independent decisions.**
+**D-35 — Complexity, work type and route are three independent decisions.**
 Complexity (Stacey axes) determines design ceremony. Work type
-(production/exploration/investigation) determines quality obligations. Tier
+(production/exploration/investigation) determines quality obligations. Route
 determines execution mechanics. They are decided at different pipeline stages:
-complexity and work type at `/design` Phase 0, tier at Phase B or `/runbook`
-entry.
+complexity and work type at `/design` Phase 0, route at `/design` C.5.
 
 **D-36 — Artifact destination determines ceremony, not behavioral-code presence
 alone.** Prototype scripts, one-off analysis and spikes do not need runbooks, TDD
@@ -534,7 +542,7 @@ edits pipeline skills or pipeline contracts, a runbook step that edits the runbo
 skill creates stale-instruction risk for later steps. Structure it as an inline
 task sequence instead, each task executing with fresh instruction loads. TDD
 discipline is preserved — the executing session dispatches `test-driver` per
-cycle. Also applies when there is no parallelization benefit or when coordination
+slice. Also applies when there is no parallelization benefit or when coordination
 cost exceeds error-recovery value.
 
 **D-40 — Escalation has three tiers.** *Item-level:* a single `UNFIXABLE` item
@@ -630,8 +638,9 @@ nothing.
 
 **D-49 — Split validation into mechanical and semantic.** A script handles
 deterministic checks — blocking, zero false positives. An agent enriches an
-existing review for semantic checks — advisory. Bundling "does this file path map
-to the right model?" with "is this task synthesis?" in one agent pass loses both
+existing review for semantic checks — advisory. `verify-step.sh` (clean tree,
+precommit — blocking) beside `corrector` (semantic review — fix-all, flagging
+what it cannot fix) is the split; bundling both in one agent pass loses both
 properties.
 
 **D-50 — Fix the environment, not the prose.** Strengthening language ("no
@@ -788,7 +797,7 @@ splitting to a new file to satisfy the counter degrades output clarity or module
 cohesion without addressing the cause. Splitting a module by functional
 responsibility is mechanical, so `refactor` (sonnet) may do it without opus
 escalation. Runbook planning should project file growth and insert split points
-rather than react per cycle.
+rather than react per slice.
 
 **D-70 — Fix the design problem a lint rule points at.** "No hardcoded exception
 messages" answered by `msg = "..."; raise ValueError(msg)` preserves the real
@@ -887,6 +896,36 @@ classes match the Pydantic convention.
 **Per-plan generated agent definitions** — superseded by delegation by reference
 (D-24).
 
+**A two-stage runbook expanded into step files for a weak orchestrator** —
+rejected 2026-08-28 (`plans/pipeline-simplification/`). The expanded stage
+existed so a haiku orchestrator could dispatch pre-written sub-agent prompts.
+A strong orchestrator does not need them, and pre-written prompts become
+harmful the moment implementation deviates from the plan; the context-economy
+argument only shifted the burden to runbook generation, and an orchestrator
+whose context overflows is the symptom of a runbook too large to begin with.
+Expansion also re-introduced defects outline review had already removed —
+three vacuous cycles and a missing requirement in one expanded plan. The
+old model's deliberate limiting of executor context survives in a different
+form: the orchestrator composes exactly what each dispatch sees.
+
+**Per-test RED/GREEN dispatch** — four dispatches per test never delivered a
+practitioner's continuity, since executors saw limited context by design; its
+benefit was the per-test genuine red, which one inert-stub run preserves for a
+whole slice. Slices batch per behaviour (D-30). Per-test dispatch is the
+recorded fallback if the dogfood counts show slices losing reviews.
+
+**Whole-task batching without a separate RED dispatch** — superpowers' shape,
+reported adequate in its own usage. Rejected because a test that came back
+green has named itself vacuous only if someone watched it fail: one
+wrong-reason test per task was observed when RED and GREEN ran in one context
+(ghmem B1, 2026-07-21), invisible without a separate red to review.
+
+**A deterministic runbook validator** — `validate-runbook.py` was the only
+pipeline script with tests. Its consumer, an orchestrator that crashed on
+malformed input, is gone, and a validator with nothing downstream to fail for
+is ceremony (D-51). Deterministic validation does not survive the
+simplification; that is stated, not papered over.
+
 **A combined time-OR-tool-count timeout signal** — OR-logic is the union of two
 kill zones, so it *increases* false positives against either threshold alone.
 Spinning (high activity, no convergence) needs a turn bound; hanging (no activity,
@@ -920,13 +959,12 @@ as documentation.
 
 ## 8. Limitations
 
-**L-1 — `prepare-runbook.py` has no test coverage.** The suite reaches it only
-indirectly through `validate-runbook.py`'s imports. The rewired step-file and
-manifest shapes are verified only by manual runs against three runbook shapes.
+L-1 (`prepare-runbook.py` test coverage) closed 2026-09-01 by deletion of the
+script; the ID is not reused.
 
-**L-2 — The tier thresholds are ungrounded operational parameters.** Tier 1 <6
-files, Tier 2 6-15, Tier 3 >15 or >10 TDD cycles, and the "every 3-5 cycles"
-mid-execution checkpoint frequency, have no empirical calibration. The tier
+**L-2 — The routing thresholds are ungrounded operational parameters.** The
+file-count and component-count figures `/design` uses to triage complexity and
+decide execution readiness have no empirical calibration. The route
 *structure* is justified (D-34); the numbers inside it are not.
 `plans/reports/triage-feedback-log.md` collects per-execution evidence — files
 changed, agent count, behavioral code, classification verdict — for eventual
@@ -945,10 +983,14 @@ no enforcement. See `plugin/fragments/escalation-acceptance.md`.
 against a 24.4 KB limit, tail entries never reach a session. The fix is retiring
 and relocating entries, not rewording them.
 
-**L-6 — The pipeline is unvalidated.** The weak-orchestrator pattern was claimed
-on a single small execution in 2026-01, and the token-cost and reliability figures
-that accompanied that claim were estimates, not measurements. It has not been
-exercised end to end since the 2026-08 revival.
+**L-6 — The pipeline is unvalidated.** The one-stage runbook and slice-batched
+TDD landed 2026-09-01 and have not been exercised end to end. Slice-batching
+cost and the test review's catch rate are unvalidated until the dogfood run
+supplies counts (dispatches per item, wrong-reason tests caught, slices whose
+GREEN revised the list); the implementation-shortcut risk from an executor
+seeing a whole slice's tests is detected by `tdd-auditor` and likewise
+unmeasured. The earlier weak-orchestrator claim rested on a single small
+execution in 2026-01 with estimated, not measured, figures.
 
 
 ## 9. Non-goals

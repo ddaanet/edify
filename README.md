@@ -39,8 +39,8 @@ repo (previously a git submodule). It ships framework-agnostic skills invoked
 as slash commands, in two groups:
 
 - **Pipeline** — `/requirements` → `/design` → `/runbook` → `/orchestrate`
-  (or `/inline` for small work), with `/review-plan` and `/review` as the
-  quality gates.
+  (or `/design` → `/inline` for work that needs no runbook), with `/review`
+  as the in-progress quality gate.
 - **Standalone** — `/proof`, `/deliverable-review`, `/ground`, `/formalize`,
   `/recall`.
 
