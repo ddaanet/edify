@@ -48,7 +48,8 @@ Your expertise is in pattern recognition across runbook items: identical operati
 
 **Read:**
 - `plans/<job>/runbook.md`
-- `plans/<job>/design.md` (requirements context)
+- `plans/<job>/design.md` or `plans/<job>/outline.md`, whichever the plan has
+  (requirements context)
 
 **Extract:**
 - All item titles and their target files
@@ -84,7 +85,8 @@ For each detected pattern:
 - Do not consolidate items across phases
 - Do not consolidate items with different dependency chains
 - Preserve all requirements coverage
-- Keep consolidated items ≤8 assertions (split if exceeding)
+- Keep consolidated items ≤8 assertions *(ungrounded — needs calibration)*
+  (split if exceeding)
 
 ### 4. Validate Output
 
@@ -151,7 +153,7 @@ Recommendation: [What to do]
 - **Preserve intent:** Every original test case must be representable in consolidated form
 - **No scope expansion:** Consolidation reduces items, never adds new ones
 - **Requirements preservation:** All FR mappings must survive consolidation
-- **Small runbook handling:** If the runbook has ≤10 items, report "no consolidation candidates" rather than skipping — maintains the mandatory gate while avoiding wasted effort on small runbooks
+- **Small runbook handling:** If the runbook has ≤10 items *(ungrounded — needs calibration)*, report "no consolidation candidates" rather than skipping — maintains the mandatory gate while avoiding wasted effort on small runbooks
 
 ## Output Format
 

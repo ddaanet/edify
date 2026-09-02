@@ -153,7 +153,7 @@ Requirements context:
 Task prompt SHOULD include execution context for phased or multi-step work. This prevents reviewing against stale state or confabulating issues from future work.
 
 **Execution context fields:**
-- **Scope IN:** What was implemented in this step/phase
+- **Scope IN:** What was implemented in this item/phase
 - **Scope OUT:** What is NOT yet implemented — do NOT flag these as issues
 - **Changed files:** Explicit file list to review
 - **Prior state:** What earlier phases established (if applicable)
@@ -298,7 +298,7 @@ Review all changes for:
 - Suggest correct paths when similar files are found
 
 **Self-referential modification (when reviewing runbooks/plans):**
-- Flag any step containing file-mutating commands (`sed -i`, `find ... -exec`, `Edit` tool, `Write` tool)
+- Flag any item containing file-mutating commands (`sed -i`, `find ... -exec`, `Edit` tool, `Write` tool)
 - Check if target path overlaps with `plans/<plan-name>/` (excluding `reports/` subdirectory)
 - Mark as MAJOR issue if runbook items modify their own plan directory during execution
 - Rationale: Runbook items must not mutate the plan directory they're defined in (creates ordering dependency, breaks re-execution)
@@ -361,11 +361,13 @@ touched; OUT: the tests (never edit them here).
 
 ### 4. Write Review Report
 
-**Create review file** at:
-- `tmp/review-[timestamp].md` (for ad-hoc work), OR
-- `plans/[plan-name]/reports/review.md` (if task specifies plan context)
+**Create the review file at the path the dispatch prompt assigns.** That path
+governs, whatever default this definition carries — per-dispatch paths are
+what keep a slice's test review and code review from overwriting each other.
 
-Use timestamp format: `YYYY-MM-DD-HHMMSS`
+Only when the prompt assigns no path: `plans/[plan-name]/reports/review.md`
+if the task names a plan, otherwise `tmp/review-[timestamp].md` with
+timestamp format `YYYY-MM-DD-HHMMSS`.
 
 **Review structure:**
 

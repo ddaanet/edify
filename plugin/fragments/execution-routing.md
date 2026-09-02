@@ -2,7 +2,7 @@
 
 When the user asks for work, route by understanding first:
 
-1. **Check loaded context** — Session.md, @-referenced files, and prior conversation are already available. If they answer the question, respond directly — no tool call needed.
+1. **Check loaded context** — the task frame (`.claude/handoff-task.md`), @-referenced files, and prior conversation are already available. If they answer the question, respond directly — no tool call needed.
 2. **Examine the work** — Read relevant files before choosing an approach
 3. **Do it directly** if feasible (Read, Edit, Write, Bash)
 4. **Use a project recipe** if one exists (`just --list`)
@@ -14,7 +14,7 @@ It is not a default mode for interactive work.
 ### When to Delegate
 
 - Runbook item execution (isolated context per dispatch)
-- Parallel independent tasks (multiple Task calls)
+- Parallel independent tasks (multiple Agent calls)
 - Work requiring a different model tier than current session
 - Tasks benefiting from agent specialization (review, design review)
 

@@ -1,6 +1,7 @@
 ---
 name: orchestrate
 description: Execute a proofed runbook (plans/<job>/runbook.md) by dispatching standing agents per item. Triggers on /orchestrate or when /runbook hands off in a fresh session.
+allowed-tools: Agent, Read, Edit, Bash, SendMessage, TaskOutput
 user-invocable: true
 continuation:
   cooperative: true
@@ -71,8 +72,11 @@ red. UNFIXABLE → STOP.
 
 **(c) GREEN** — `edify:test-driver`, GREEN mode named in the prompt. Makes
 the tests pass one at a time, full suite at the end; commits once per slice,
-`feat: Item N.M/k — <title>`, carrying tests and implementation together
-with the suite green. No commit ever leaves the suite red.
+`<type>: Item N.M/k — <title>`, carrying tests and implementation together
+with the suite green. The type is the executor's choice (see
+`references/dispatch-composition.md` §Prompt contents) — nothing keys on it.
+No commit ever leaves the suite red. The GREEN report names the slice
+commit's hash.
 
 **(d) Code review** — `edify:corrector` (opus). Scope IN: the
 implementation files. May run the slice's tests once against an in-place
@@ -82,20 +86,28 @@ refactorings (module split, new abstraction). UNFIXABLE → STOP.
 
 **After the slice:**
 
-1. **Refactor on signal:** if (d) flagged a refactoring, dispatch
+1. **Commit the review fixes:** the corrector never commits. If (d) changed
+   anything, the orchestrator commits it — `<type>: Item N.M/k —
+   code-review fixes` — before the post-item verification of Section 3, the
+   same step §4 takes at a phase boundary. Nothing to commit → go straight
+   to verification.
+2. **Refactor on signal:** if (d) flagged a refactoring, dispatch
    `edify:refactor` before the next slice's RED, so later tests target the
-   refactored shape. It commits its own `refactor:` commit on a clean tree.
-   On `escalated` → note the opus follow-up in the run summary; on `error` →
-   log and continue.
-2. **List revision:** revise the remaining slices' test lists in
+   refactored shape. It commits its own refactoring commit on a clean tree.
+   On `escalated: <reason>` → re-dispatch `edify:refactor` once with model
+   opus (the Agent tool's `model` override) and the reason quoted in the
+   prompt; a second `escalated` goes in the run summary and execution
+   continues. On `error` → log and continue.
+3. **List revision:** revise the remaining slices' test lists in
    `runbook.md` from what this slice revealed, or record "List revision:
    none" in the run summary. The orchestrator commits `runbook.md` edits
    after the slice — plan-as-executed vs plan-as-written stays a `git diff`.
 
 ## 3. Post-Item Verification
 
-After GREEN (c), code review (d), and any general item — not after (a)/(b),
-where uncommitted tests are the designed state:
+After every dispatch whose work is committed — GREEN (c), code review (d)
+once the orchestrator has committed its fixes, and any general item. Not
+after (a)/(b), where uncommitted tests are the designed state:
 
 ```bash
 plugin/skills/orchestrate/scripts/verify-step.sh
@@ -121,10 +133,10 @@ git diff --name-only
 
 Dispatch `edify:corrector` (checkpoint form, composed per
 `references/dispatch-composition.md`): scope IN/OUT from the phase's items,
-design and recall artifact by path, changed-files list, report to
-`plans/<job>/reports/checkpoint-P-review.md`. IN/OUT lists must be
-non-empty and the changed-files list present — empty fields → STOP before
-delegating. UNFIXABLE → STOP and escalate. Otherwise commit and continue.
+design and recall artifact by path, changed-files list, report path from that
+reference's §Prompt contents rule under the dispatch name
+`phase-P-corrector`. IN/OUT lists must be non-empty and the changed-files
+list present — empty fields → STOP before delegating. UNFIXABLE → STOP and escalate. Otherwise commit and continue.
 
 The **final checkpoint** adds a lifecycle audit: verify all stateful objects
 (MERGE_HEAD, staged content, lock files) cleared on success paths.
@@ -156,9 +168,12 @@ the item's own criteria.
 
 1. **Final review:** single-phase runs get one `edify:corrector` dispatch
    over the whole diff (phase-boundary checkpoints already covered
-   multi-phase runs). Report to `plans/<job>/reports/review.md`.
-2. **TDD audit:** if any tdd item ran, dispatch `edify:tdd-auditor`. Report
-   to `plans/<job>/reports/tdd-process-review.md`.
+   multi-phase runs), dispatch name `final-review`.
+2. **TDD audit:** if any tdd item ran, dispatch `edify:tdd-auditor`,
+   dispatch name `tdd-audit`. Its inputs are the RED, GREEN and review
+   reports of every slice, with the session's `subagents/` transcripts as
+   fallback where a report is missing; git serves only to confirm and diff
+   the commit a report names.
 3. **Run summary:** close with the run summary in context — per item its
    dispatches (`item-N-M`, `item-N-M-s<k>-red`, …), each report path, each
    remediation RCA, the list revisions, and the follow-up:

@@ -36,7 +36,8 @@ Writes the slice's tests and proves each one red. Writes no implementation.
    stub, not the test.
 4. **A test that passes has named itself vacuous.** Report it as such; do
    not delete or weaken it — the test review decides.
-5. **Write the report** to the path from the prompt, carrying the per-test
+5. **Write the report** to the path from the prompt
+   (`plans/<job>/reports/item-N-M-s<k>-red.md`), carrying the per-test
    output: each test id with its failure line.
 6. **Stop.** No commit — the uncommitted tests in the tree are the designed
    end state of this dispatch. Return the report path.
@@ -51,15 +52,25 @@ Receives the failing batch as its contract and grows the implementation.
 2. **One test at a time.** Pick one failing test, implement the minimal
    growth that passes it, run it, move to the next. Grow the implementation
    rather than writing it in one lump.
-3. **Full suite at the end**, plus `just lint`. Fix regressions one at a
-   time, re-running after each — never batch regression fixes.
-4. **Precommit warnings go into the report**, not into refactoring —
-   complexity and line-limit warnings are the code review's judgement call,
+3. **Full suite at the end**, plus `just lint`, then `just precommit`. Fix
+   regressions one at a time, re-running after each — never batch regression
+   fixes.
+4. **The precommit run's warnings go into the report**, not into refactoring
+   — complexity and line-limit warnings are the code review's judgement call,
    not yours.
-5. **Commit once for the slice:** subject `feat: Item N.M/k — <title>`
-   (from the prompt), carrying tests and implementation together with the
-   suite green. No commit ever leaves the suite red.
-6. **Write the report** and return its path.
+5. **Commit once for the slice:** subject `<type>: Item N.M/k — <title>`,
+   the title from the prompt. The type is yours to pick — `feat`, `fix`,
+   `docs`, `perf`, `test`, `build`, `chore` all legitimate; the commit-msg
+   hook rewrites the prefix to an emoji before the commit is written, so
+   nothing downstream keys on it. What identifies the slice commit is the
+   hash you record in the report. The commit carries tests and
+   implementation together with the suite green. No commit ever leaves the
+   suite red.
+6. **Write the report** to the path from the prompt
+   (`plans/<job>/reports/item-N-M-s<k>-green.md`) and return its path. It
+   carries the commit hash, the tests run with their results, and the order
+   they were made to pass — one at a time. The audit reads that sequence
+   from here, not from the commit history.
 
 ## Stop Conditions
 

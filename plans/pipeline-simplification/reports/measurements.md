@@ -96,5 +96,5 @@ rewrite created (`runbook-format.md`, `dispatch-composition.md`);
 | Rewrite set | 3247 | 2435 | 48081 | 37562 |
 | **Both** | **10276** | **2435** | **145805** | **37562** |
 
-`corrector.md` grew (539 → 595 lines, 7981 → 9049 tokens): D12 added the
+`corrector.md` grew (539 → 595 lines, 7981 → 9049 tokens): D5 added the
 TDD slice-review protocols and the vacuous-green catalogue to it.

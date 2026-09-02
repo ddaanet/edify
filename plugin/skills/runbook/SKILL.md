@@ -4,7 +4,7 @@ description: |
   Decompose a design into an executable runbook — phases of typed items
   (tdd / general / inline) that /orchestrate composes dispatch prompts from.
   Triggers on /runbook or when a design needs step-by-step planning.
-allowed-tools: Agent, Read, Write, Edit, Skill, Bash(mkdir:*, rg:*, git:*, echo:*|pbcopy)
+allowed-tools: Agent, Read, Write, Edit, Skill, Bash(rg:*, git:*)
 requires:
   - Design document from /design
   - CLAUDE.md for project conventions (if exists)
@@ -124,10 +124,10 @@ state, and a committed checkpoint keeps their fixes diffable.
 
 ### 5. Review
 
-Delegate to `edify:runbook-corrector` (fix-all mode); include
-review-relevant entries from `plans/<job>/recall-artifact.md` in the
-delegation prompt. Read the returned report. Critical issues remaining →
-STOP and escalate to user.
+Delegate to `edify:runbook-corrector` (fix-all mode); pass
+`plans/<job>/recall-artifact.md` by path — the corrector Reads the artifact
+and the files it lists. Never inline recall content in the prompt. Read the
+returned report. Critical issues remaining → STOP and escalate to user.
 
 ### 6. Consolidate
 

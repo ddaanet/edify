@@ -121,12 +121,22 @@ vacuous-green catalogue written into the corrector's own criteria (agent and
 skill text never references memory files); fix-all on tests, re-run to
 confirm still red.
 (c) GREEN — `test-driver` GREEN mode: one test at a time, full suite at the
-end; one commit per slice, `feat: Item N.M/k — <title>`, carrying tests +
-implementation with the suite green — no commit ever leaves the suite red.
+end; one GREEN commit per slice, `<type>: Item N.M/k — <title>` with the type
+the executor's choice (`feat`, `fix`, `docs`, `perf`, `test`, `build`, `chore`
+all legitimate — a slice that pins an error path is not a feature), carrying
+tests + implementation with the suite green — no commit ever leaves the suite red.
+Nothing keys on the type: the gitmoji `commit-msg` hook rewrites the prefix to
+an emoji before the commit is written, so the `Item N.M/k` marker, which the
+hook preserves, is the only thing an auditor may match in a subject. A
+reviewed slice carries two commits with that marker — this one and the
+orchestrator's commit of (d)'s fixes.
 (d) Code review — `corrector` (opus), scope IN = implementation files; may
 run the slice's tests once against an in-place mutated SUT (save, mutate,
-run, restore — never relocate the tests) and report whether they redded.
-After (c), (d) and any general item — not after (a)/(b), where uncommitted
+run, restore — never relocate the tests) and report whether they redded. The
+corrector applies fix-all and never commits; the orchestrator commits its
+fixes, the same step it takes at a phase boundary.
+After (c), after the orchestrator's commit of (d)'s fixes, and after any
+general item — not after (a)/(b), where uncommitted
 tests are the designed state: `verify-step.sh` — clean tree (tolerating the
 resting ` M memory`), precommit; exit 1 → resume the named agent once, then a
 fresh `artisan` recovery, then escalate. This is the caller D6 keeps.
@@ -342,12 +352,18 @@ plan's `## Phase Files` section).
 **D14 — `tdd-auditor` criteria (FR-5 acceptance 4).** Rewritten against
 reports and slice diffs rather than planned-vs-executed cycle counts: per
 slice, the RED report shows every test failing on its assertion and the test
-review confirms still-red; exactly one green `feat:` commit per slice
-(`feat: Item N.M/k — <title>`) carries both tests and implementation — no
-commit leaves the suite red; and GREEN modified no reviewed test — auditable
-by diffing the slice commit's test files against the RED report's test list.
-D5's report and commit-subject conventions exist to make these checks
-mechanical. The
+review confirms still-red; exactly one GREEN commit per slice
+(`<type>: Item N.M/k — <title>`) carries both tests and implementation — no
+commit leaves the suite red — plus the orchestrator's review-fix commit where
+the code review changed anything; and GREEN modified no reviewed test —
+auditable by diffing the GREEN commit's test files against the RED report's
+test list. The auditor keys on the hash the GREEN report names; that report
+also records the tests run and the one-at-a-time sequence, with
+the session's `subagents/` transcripts as the fallback where a report is
+missing, and git only confirms the named commit and diffs it. The commit type
+is the executor's choice and the auditor never keys on it — `Item N.M/k` is the
+only subject content it may match. D5's report convention and that marker
+exist to make these checks mechanical. The
 REFACTOR-mandatory-per-cycle check goes (D3 makes refactor conditional);
 "planned cycles completed" goes (the list is revised during execution by
 design, so plan-vs-execution divergence is expected — the `runbook.md` diff

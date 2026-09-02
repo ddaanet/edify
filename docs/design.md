@@ -4,7 +4,7 @@
 pipeline is prose, revived 2026-08, simplified to one runbook stage 2026-09,
 and not yet exercised end to end.
 
-**Verified against:** `06a431ec` (2026-09-01).
+**Verified against:** `f50ed025` (2026-09-02).
 
 Edify is two artifacts in one git tree: the `edify-cli` PyPI package (source in
 `src/edify/`) and the `edify` Claude Code plugin (`plugin/`). Direction:
@@ -132,8 +132,8 @@ collection is plain tree recursion with no special tracking.
 
 ### 5.3 Pipeline structure
 
-The plugin is a skills bundle plus standing agents plus one verification
-script.
+The plugin is a skills bundle plus standing agents plus two verification
+scripts.
 
 Pipeline skills: `requirements` → `design` → `runbook` → `orchestrate`, or
 `design` → `inline` for work that needs no runbook, with `review` as the
@@ -154,9 +154,31 @@ Standing agents in `plugin/agents/`: the correctors (`corrector`,
 `runbook-simplifier`), the executors (`artisan`, `test-driver`, `refactor`),
 and the investigators (`scout`, `tdd-auditor`, `brainstorm-name`).
 
-Script: `plugin/skills/orchestrate/scripts/verify-step.sh` (clean tree +
+Scripts: `plugin/skills/orchestrate/scripts/verify-step.sh` (clean tree +
 precommit after every committing dispatch — GREEN, code review and general
-items, never after a RED whose tests are uncommitted by design).
+items, never after a RED or a test review whose tests are uncommitted by
+design) and `plugin/bin/triage-feedback.sh` (the inline route's post-execution
+gate, D-26 T5).
+
+The orchestrator owns every commit a review produces. A corrector applies
+fix-all and never commits; after the per-slice code review the orchestrator
+commits the corrector's fixes, the same step it takes at a phase boundary, and
+`verify-step.sh` runs after that commit. A slice's own commit is the
+implementer's, made in GREEN mode.
+
+**Slice commits carry `Item N.M/k` in the subject.** The convention is
+`<type>: Item N.M/k — <title>`, and the type is the executor's choice —
+`feat`, `fix`, `docs`, `perf`, `test`, `build` and `chore` are all legitimate,
+since a slice that pins an error path is not a feature. Nothing keys on it: the
+installed gitmoji `commit-msg` hook rewrites the prefix to an emoji before the
+commit is written, so the `Item N.M/k` marker, which the hook preserves, is the
+only thing `tdd-auditor` may match in a subject. A reviewed slice carries two
+commits with that marker — the implementer's GREEN commit and the
+orchestrator's review-fix commit — so subject matching alone cannot pick the
+slice out. The auditor keys on the hash the GREEN report names; the report
+also records the tests run and the one-at-a-time sequence, and the session's
+`subagents/` transcripts are the fallback where a report is missing. Git
+serves only to confirm the named commit exists and to diff it.
 
 **Delegation is by reference.** The orchestrator's prompt carries the item
 text and the paths of the design and recall artifacts, never their content
@@ -427,6 +449,7 @@ deliberately not taken during the 2026-08-13 rewire nor the 2026-09-01 simplific
 | T3 | Runbook → Simplified runbook | `runbook.md` | consolidated `runbook.md` | `runbook-simplifier` (opus), then `/proof` |
 | T4 | Runbook → Implementation | `runbook.md` | code, artifacts | `corrector` per slice (test review, code review) and at phase boundaries |
 | T5 | Design/Outline → Implementation (inline) | `design.md` or outline, classification | code, review report | `corrector` + `triage-feedback.sh` |
+| T6 | Requirements → Design outline | `requirements.md` or inline | `outline.md` | `outline-corrector` (opus), then `/proof` |
 
 **D-27 — Reviewers fix everything and escalate the rest.** Every gate follows the
 same protocol: fix all issues directly (critical, major, minor), label genuinely
@@ -474,6 +497,11 @@ dispatches per slice: RED, test review, GREEN, code review, then `refactor` on
 review signal and a list-revision step; general → one dispatch; inline → the
 orchestrator executes it itself). LLM failure-mode checks apply regardless of
 type.
+
+`edify:refactor` runs at sonnet and returns `escalated: <reason>` for a
+refactoring that needs architectural judgement. The orchestrator consumes that
+return by re-dispatching `edify:refactor` once with model opus; the escalation
+is a dispatch, not a line in the run summary.
 
 A phase qualifies as `inline` when its outcome is fully determined by instruction
 plus target file state: no runtime feedback loop, all decisions pre-resolved in

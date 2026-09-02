@@ -44,7 +44,7 @@ Return filepath on success, or "UNFIXABLE: [description]" on failure.
 - **Recall context:** Pass the plan directory only. The reviewer resolves entries itself — do not pre-resolve and paste recall content into the prompt. Token economy: reference, never repeat. The `Skill` fallback line matters for report-only reviewers (e.g. `plugin-dev:skill-reviewer`), which have Read but no `Skill` tool.
 - **Scope IN/OUT:** From design or outline, not invented. Prevents reviewer from flagging work explicitly deferred.
 - **Scope completeness:** Reviewer must mechanically diff every Scope IN item against deliverables. Design scope items that aren't mapped to named components are the gap — component+decision validation alone misses standalone scope items (e.g., planstate specified in Scope IN but not part of any C1-C4 component).
-- **Constraint:** This template is for implementation changes only. Planning artifacts (runbooks, outlines, designs) route to runbook-corrector per pipeline contracts.
+- **Constraint:** This template is for implementation changes only. Planning artifacts route by artifact per `docs/design.md` §6.4 D-26: `design.md` → `edify:design-corrector`, `outline.md` → `edify:outline-corrector`, `runbook.md` → `edify:runbook-corrector`. `runbook-corrector` rejects anything that is not `runbook.md`.
 
 ## Example: Skill Creation Task
 

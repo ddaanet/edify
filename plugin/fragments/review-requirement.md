@@ -38,12 +38,12 @@ Not all changes warrant full review delegation. Match review cost to change risk
 |----------|----------|-----|
 | Code, tests, plans | `edify:corrector` | Default — general quality review |
 | Skill definitions | `plugin-dev:skill-reviewer` | Cross-skill consistency (allowed-tools, conventions) |
-| Agent definitions | `plugin-dev:agent-creator` | Agent structure, triggering, tool access |
+| Agent definitions | `edify:corrector` | Agent structure, triggering, tool access — criteria from the `plugin-dev:agent-development` skill, named in the dispatch prompt |
 | Design documents | `edify:design-corrector` (opus) | Architectural completeness and feasibility |
 
 **Dispatch names are namespaced.** `subagent_type` requires `<plugin>:<agent>`; a bare name returns "Agent type not found", including for the dispatching plugin's own agents.
 
-**When plugin-dev is not installed:** the skill- and agent-definition rows fall back to `edify:corrector`. `plugin-dev` is a separate marketplace plugin, not an edify dependency — check availability before routing, and note the fallback in the review report so the weaker routing is visible.
+**When plugin-dev is not installed:** the skill-definition row falls back to `edify:corrector`, and the agent-definition row loses its criteria source — review against the agent definitions already in `plugin/agents/` instead. `plugin-dev` is a separate marketplace plugin, not an edify dependency — check availability before routing, and note the fallback in the review report so the weaker routing is visible.
 
 Orchestration-specific extensions (planning artifacts, human docs): `docs/design.md` §6.4 "Pipeline contracts."
 

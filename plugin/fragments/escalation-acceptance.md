@@ -1,11 +1,11 @@
 ## Escalation Acceptance Criteria
 
-When an error is escalated and a fix is attempted (by Sonnet diagnostic, refactor agent, or manual intervention), all three criteria must pass before the step is considered resolved:
+When an error is escalated and a fix is attempted (by Sonnet diagnostic, refactor agent, or manual intervention), all three criteria must pass before the item is considered resolved:
 
 **Required (all three):**
 - `just precommit` passes — mechanical validation (lint, format, type checks)
 - Git tree clean — no uncommitted changes (`git status --porcelain` returns empty)
-- Output validates against step acceptance criteria — the step's stated objective is met
+- Output validates against item acceptance criteria — the item's stated objective is met
 
 **Verification sequence:**
 
@@ -17,24 +17,24 @@ When an error is escalated and a fix is attempted (by Sonnet diagnostic, refacto
    - If dirty: commit fix, verify clean
 4. Validate the output against the acceptance criteria in the dispatch prompt
    - If criteria undefined: escalate as ambiguity error
-5. All three pass → step resolved, resume execution
+5. All three pass → item resolved, resume execution
    Any fails after reasonable attempts → escalate to next level
 ```
 
-**Rollback protocol (D-5):**
+**Rollback protocol:**
 
-When escalation fails partway through a step — the fix attempt itself causes new issues or acceptance criteria cannot be met:
+When escalation fails partway through an item — the fix attempt itself causes new issues or acceptance criteria cannot be met:
 
-- Revert to the last clean commit before the failed step: `git revert HEAD` (if fix was committed) or `git checkout -- .` (if uncommitted)
+- Revert to the last clean commit before the failed item: `git revert HEAD` (if fix was committed) or `git checkout -- .` (if uncommitted)
 - This is a simplification of the Saga compensating transaction pattern, enabled by git's atomic snapshot model: reverting a commit restores state (no concurrent modifications within single orchestration)
 - **Assumption:** All relevant state is git-managed. If non-git state is involved (external service calls, task-frame edits outside repo), the simple revert model breaks — escalate to user.
-- After rollback, re-execute the step from clean state or escalate to user
+- After rollback, re-execute the item from clean state or escalate to user
 
 **Dirty tree recovery:**
 
-When a step leaves the tree dirty (uncommitted changes detected by post-step verification):
+When an item leaves the tree dirty (uncommitted changes detected by post-dispatch verification):
 - Do NOT proceed regardless of whether changes look expected
-- Do NOT clean up on behalf of the step
+- Do NOT clean up on behalf of the item
 - Revert to last clean commit: `git checkout -- . && git clean -fd`
 - Report the dirty tree and escalate
 

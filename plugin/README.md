@@ -60,7 +60,7 @@ Subagent definitions in `agents/`, dispatched by the pipeline skills.
 
 ## Scripts
 
-Utility scripts in `bin/` (Python 3):
+Utility scripts in `bin/` (POSIX shell and Python 3):
 
 | Script | Purpose |
 |--------|---------|
@@ -70,7 +70,9 @@ Utility scripts in `bin/` (Python 3):
 | `triage-feedback.sh` | Compare predicted against actual complexity after execution |
 
 Plus `skills/orchestrate/scripts/verify-step.sh`, the clean-tree and precommit
-gate `/orchestrate` runs after each dispatch.
+gate `/orchestrate` runs after each committing dispatch — GREEN, code review
+and general items — never after a RED or a test review, whose tests are
+uncommitted by design.
 
 ## Recipes
 

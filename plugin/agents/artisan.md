@@ -62,7 +62,7 @@ Do not provide summary, explanation, or commentary in return message. Report fil
 
 1. **Use specialized tools over Bash for file operations:**
    - Use **Read** instead of `cat`, `head`, `tail`
-   - Use **Bash `rg`** instead of `grep` or `rg` commands
+   - Use **Bash `rg`** instead of `grep`
    - Use **Bash `rg --files`** instead of `find`
    - Use **Edit** instead of `sed` or `awk`
    - Use **Write** instead of `echo >` or `cat <<EOF`

@@ -8,10 +8,14 @@ When executing runbooks via `/orchestrate`, the orchestrator coordinates but doe
 
 ### Model Selection
 
-Match model cost to task complexity:
+`plugin/skills/orchestrate/references/dispatch-composition.md` §Model assignment
+is the authoritative rule. In summary:
 
-- **Sonnet:** Default for all execution tasks
-- **Opus:** Architecture, complex design decisions, prose artifacts (skills, fragments, agents)
+- **Type default:** `artisan` and `test-driver` dispatches run sonnet;
+  `corrector` dispatches run opus, a tier above the implementers (D-32)
+- **Artifact-type override (D-42):** opus for any dispatch editing
+  `plugin/skills/`, `plugin/fragments/`, `plugin/agents/` or `docs/design.md`
+- **Per-item override:** a `Model:` line on the runbook item overrides both
 
 ### Pre-Delegation Checkpoint
 
@@ -68,15 +72,13 @@ paths.
 
 ### Recall Artifacts For Sub-Agents
 
-Two distinct artifact models: pipeline recall (grouped entries with relevance notes, selective resolution by consuming skill) vs sub-agent injection (flat trigger list, resolve-all, no selection judgment). Sub-agents have no parent context — they can't judge which entries are relevant, making selective resolution circular.
+One artifact model: `plans/<job>/recall-artifact.md` — grouped entries with relevance notes, curated by the dispatching skill. The dispatch prompt hands the sub-agent that path, and the sub-agent Reads the artifact then Reads every file it lists. `plugin/skills/orchestrate/references/dispatch-composition.md` §Prompt contents is the authoritative rule. The per-type flat artifacts an earlier model kept for sub-agent injection no longer exist.
 
-**Anti-pattern:** Using pipeline-model artifacts (grouped, relevance notes) when the consumer is a delegated agent.
-
-**Correct pattern:** Flat list for sub-agent injection. Delegation prompt says "resolve ALL entries." Pipeline model for skills/orchestrators that have topic context for selection.
+**Selection is the parent's job.** A sub-agent has no parent context and cannot judge which entries are relevant, so it resolves all of them. The dispatching skill narrows the artifact to what the work needs; the child does not re-select.
 
 ### Multi-Step Verification
 
-**Anti-pattern:** Splitting post-step verification into separate tool calls. First check (git status) returns clean → exit momentum suppresses second check (just lint). The sub-agent "already linted" rationalization makes the skip feel safe.
+**Anti-pattern:** Splitting post-dispatch verification into separate tool calls. First check (git status) returns clean → exit momentum suppresses second check (just lint). The sub-agent "already linted" rationalization makes the skip feel safe.
 
 **Correct pattern:** Single compound command (`git status --porcelain && just lint`). Compound commands can't be partially executed — both run or neither.
 

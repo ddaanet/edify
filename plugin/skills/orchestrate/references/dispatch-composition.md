@@ -17,11 +17,22 @@ Every dispatch prompt carries:
 3. **Scope:** IN — this item (or slice); OUT — the next items' targets,
    named explicitly so the executor does not wander into them.
 4. **Done criteria:** `just precommit` green, clean tree, and the commit
-   subject to use. (RED dispatches override this: no commit, stop after the
-   red run.)
-5. **Report path** — `plans/<job>/reports/<dispatch name>.md` (the `name`
-   from §Naming) — and the return contract: the report path on success, or
-   `blocked: <reason>`.
+   subject to use. A slice commit's subject is `<type>: Item N.M/k —
+   <title>`; `<type>` is the executor's choice — `feat`, `fix`, `docs`,
+   `perf`, `test`, `build` and `chore` are all legitimate, since a slice may
+   pin an error path or change a build surface rather than add a feature.
+   The `commit-msg` hook rewrites the prefix to an emoji before the commit is
+   written, so no check may key on the type; the `Item N.M/k` marker is the
+   only part of a subject anything may match. Overrides: a RED dispatch
+   commits nothing and stops after the red run; a review dispatch commits
+   nothing either — the orchestrator commits the fixes a corrector applied.
+5. **Report path** — `plans/<job>/reports/<dispatch name>.md`, the `name`
+   from §Naming and nothing else. This is the only rule for report paths:
+   the prompt assigns the path and the agent writes exactly there, whatever
+   default its own definition carries. Per-dispatch names are what keep a
+   slice's test review and code review from overwriting each other, and what
+   let `tdd-auditor` find them. Return contract: the report path on success,
+   or `blocked: <reason>`.
 6. **Mode**, for `edify:test-driver` only: `RED` or `GREEN`, named
    explicitly — the agent refuses a prompt that names neither.
 
@@ -39,12 +50,20 @@ LITERALLY — executors apply design rules, they do not invent alternatives.
   behaviour. The dispatcher applies this override itself.
 - **Per-item override:** a `Model:` line on the runbook item overrides both.
 
+The three rules are exhaustive and strictly ordered: a `Model:` line wins;
+absent one, the artifact-type override wins wherever the dispatch edits those
+paths; absent both, the type default applies. No other consideration changes
+the model.
+
 ## Naming and resumption
 
 Give every dispatch a `name`: `item-N-M` for a general item,
 `item-N-M-s<k>-red` / `-test-review` / `-green` / `-code-review` for slice
-dispatches, `phase-P-corrector` for checkpoints. Resumption is `SendMessage`
-to that name; an unnamed agent cannot be resumed.
+dispatches, `item-N-M-s<k>-refactor` for a refactor the code review flagged
+(the opus re-dispatch reuses the name), `phase-P-corrector` for checkpoints,
+`final-review` for a
+single-phase run's closing corrector, `tdd-audit` for the auditor. Resumption
+is `SendMessage` to that name; an unnamed agent cannot be resumed.
 
 A child's own reply is the only authoritative result for its task. A late
 task-notification on an already-reported task id may be answering something

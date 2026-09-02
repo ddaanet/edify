@@ -1,18 +1,22 @@
 # Continuation Passing Protocol
 
-Skills chain through continuation passing — a hook-based system that replaces hardcoded tail-calls with composable chains.
+Skills chain through continuation passing — composable chains that replace hardcoded tail-calls.
 
 ## How It Works
 
+A continuation reaches a skill from one of two places, never from a hook. No hook parses input or injects continuation context.
+
+- **The invoking prompt** — a `[CONTINUATION: ...]` suffix in the user's message, or in the `args` a calling skill passes on its tail-call.
+- **The task frame** (`.claude/handoff-task.md`) — a chain a prior session's `/handoff:handoff` recorded, read back when the work resumes.
+
 ```
-User: "/design plans/foo, /runbook and /orchestrate"
-  → Hook parses multi-skill input, injects continuation via additionalContext
+User: "/design plans/foo [CONTINUATION: /runbook, /orchestrate]"
   → /design executes, peels /runbook, tail-calls with remainder
   → /runbook executes, peels /orchestrate, tail-calls with remainder
   → /orchestrate executes, no continuation → uses own default-exit
 ```
 
-**Single skills** pass through unchanged — the hook only activates for multi-skill chains. Skills manage their own default-exit behavior when standalone.
+**Single skills** pass through unchanged — a skill invoked with no continuation manages its own default-exit behavior.
 
 ## Frontmatter Schema
 
@@ -35,8 +39,8 @@ prepend rule (step 2); everything else below is the same for every skill.
 
 As the **final action** of a cooperative skill:
 
-1. Read continuation from `additionalContext` (first skill in chain)
-   or from `[CONTINUATION: ...]` suffix in Skill args (chained skills)
+1. Read the continuation from the `[CONTINUATION: ...]` suffix in the invoking
+   prompt or Skill args, or from the task frame if the invocation resumed one
 2. If the skill needs a subroutine before continuing: prepend entries to continuation
    - Existing entries remain in original order (append-only invariant)
    - Prepend only — never remove, reorder, or modify existing entries
@@ -72,9 +76,8 @@ Prepend (subroutine call). Incoming: `/orchestrate myplan [CONTINUATION: /handof
 
 ## Transport Format
 
-**First invocation** (hook → skill): JSON `additionalContext` with `[CONTINUATION-PASSING]` marker.
-
-**Subsequent invocations** (skill → skill): Suffix in Skill args parameter:
+One format throughout, whether the continuation arrives in a user message, in
+the task frame, or in a Skill `args` parameter on a tail-call:
 ```
 [CONTINUATION: /runbook, /orchestrate, /handoff:handoff, /commit-commands:commit]
 ```
@@ -86,7 +89,7 @@ Bracket-delimited, comma-separated entries. Each entry: `/skill optional-args`.
 Continuation metadata must never reach sub-agents:
 - Do NOT include `[CONTINUATION: ...]` in Agent tool prompts
 - Continuation lives in main conversation context only
-- Skills construct Task prompts explicitly — no accidental inclusion path
+- Skills construct Agent prompts explicitly — no accidental inclusion path
 
 ## Cooperative Skills
 
@@ -100,15 +103,15 @@ Continuation metadata must never reach sub-agents:
 | `/superpowers:using-git-worktrees` | `[]` | Terminal skill (parallel task setup) |
 | `/commit-commands:commit` | `[]` | Terminal skill |
 
-**Note**: Default Exit column documents each skill's standalone behavior (implemented by skill, not enforced by hook).
+**Note**: Default Exit column documents each skill's standalone behavior, implemented by the skill itself. Nothing enforces it from outside.
 
 ## Error Propagation
 
-Six cooperative skills chain via tail-calls with zero implicit error handling. A failure mid-chain orphans the remaining continuation.
+Four skills declare `cooperative: true` and chain via tail-calls with zero implicit error handling. A failure mid-chain orphans the remaining continuation.
 
 ### Default Behavior: Abort and Report
 
-When a skill fails during a CPS chain (D-1):
+When a skill fails during a CPS chain:
 1. **Abort remaining continuation** — do not invoke the next skill in the chain
 2. **Report the failure to the user** — which skill failed, error category (from `error-classification.md`), retryable/non-retryable classification, and the remaining continuation that was orphaned. No pipeline skill writes the task frame; the next `/handoff:handoff` carries the report into it from context
 3. **Manual resume** — user resolves the blocker, then re-invokes the failed skill with the remaining continuation in its args

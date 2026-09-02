@@ -111,7 +111,7 @@ Route changed files to the appropriate reviewer per `plugin/fragments/review-req
 4. Dispatch each group to its reviewer using `references/review-dispatch-template.md` for prompt structure
 
 **Two dispatch patterns:**
-- **Fix-capable reviewers** (corrector, agent-creator, design-corrector): Delegate, read report, grep UNFIXABLE. Agent applies fixes directly.
+- **Fix-capable reviewers** (corrector, design-corrector, outline-corrector, runbook-corrector): Delegate, read report, grep UNFIXABLE. Agent applies fixes directly.
 - **Report-only reviewers** (skill-reviewer): Delegate, read report, apply fixes in calling session. Agent has Read plus Bash `rg` only.
 
 **Common fields per dispatch:**
@@ -120,7 +120,11 @@ Route changed files to the appropriate reviewer per `plugin/fragments/review-req
 - **Recall context:** the plan directory, per `references/review-dispatch-template.md` — the reviewer runs its own recall
 - **Report:** `plans/<job>/reports/review.md` (or `review-<type>.md` when multiple groups)
 
-Planning artifacts → runbook-corrector (not this gate).
+Planning artifacts do not route through this gate. They route by artifact per
+`docs/design.md` §6.4 D-26: `design.md` → `edify:design-corrector`,
+`outline.md` → `edify:outline-corrector`, `runbook.md` →
+`edify:runbook-corrector`. `runbook-corrector` rejects anything that is not
+`runbook.md`.
 
 **Structural proof (D+B anchor):** After review completes, verify report exists:
 
