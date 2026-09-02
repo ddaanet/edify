@@ -29,6 +29,12 @@ cd "$repo_root"
 manifest="plugin/.claude-plugin/plugin.json"
 pypi_name="edify-cli"
 
+# The plugin root relative to the repo root — "." when the manifest sits at the
+# top level. A marketplace `github` source resolves the repo root and takes no
+# path, so a plugin living in a subdirectory needs a `git-subdir` source or the
+# install silently yields nothing.
+plugin_subdir=$(dirname "$(dirname "$manifest")")
+
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 note() { printf '%s\n' "$*"; }
 
@@ -66,6 +72,10 @@ common_preflight() {
     plugin_name=$(jq -r .name "$manifest")
     if jq -e --arg n "$plugin_name" 'any(.plugins[]; .name == $n)' "$marketplace_json" >/dev/null; then
         marketplace_entry_exists=1
+        [ "$plugin_subdir" = "." ] \
+            || jq -e --arg n "$plugin_name" --arg p "$plugin_subdir" \
+                'any(.plugins[]; .name == $n and .source.path == $p)' "$marketplace_json" >/dev/null \
+            || die "$plugin_name's entry in $marketplace_json does not point at the '$plugin_subdir' subdirectory, so installing it yields no plugin at all. Expected a source of {\"source\": \"git-subdir\", \"url\": \"<owner/repo>\", \"path\": \"$plugin_subdir\"}"
     else
         marketplace_entry_exists=0
         git remote get-url origin >/dev/null 2>&1 \
@@ -184,10 +194,11 @@ bump_marketplace() {
             "$marketplace_json" > "$mp_tmp"
     else
         repo_slug=$(git remote get-url origin | sed -E 's#\.git$##; s#^.*[:/]([^/]+/[^/]+)$#\1#')
-        jq --arg v "$V" --arg repo "$repo_slug" --slurpfile m "$manifest" '
+        jq --arg v "$V" --arg repo "$repo_slug" --arg subdir "$plugin_subdir" --slurpfile m "$manifest" '
           .plugins += [{
             name: $m[0].name,
-            source: { source: "github", repo: $repo },
+            source: (if $subdir == "." then { source: "github", repo: $repo }
+                     else { source: "git-subdir", url: $repo, path: $subdir } end),
             description: ($m[0].description // ""),
             version: $v,
             author: ($m[0].author // { name: "" }),
