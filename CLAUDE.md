@@ -2,6 +2,10 @@
 
 Edify is a lean Claude Code skills bundle plus a small CLI toolkit. Direction: Lean-assisted (formal-proof-backed) requirements tracking.
 
+Conventions shared across every repository mounting the `ddaanet` memory tier:
+
+@memory/ddaanet/shared-claude.md
+
 ## Communication Rules
 
 ### Observable State Reporting

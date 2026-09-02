@@ -16,7 +16,7 @@ Lean-assisted, formal-proof-backed requirements tracking.
 → `/orchestrate`). The one-stage runbook landed 2026-09-01; the composed-prompt
 dispatch and slice-batched TDD have not yet run against a real plan (L-6).
 
-**Next** — consolidate `memory/MEMORY.md` under the loader cutoff (L-5).
+**Next** — a `/gitlore:index-audit` pass over the memory store.
 
 **Do not re-litigate** — the planning-to-execution session boundary (D-25
 keeps it on context-budget grounds, not discoverability); the publication
@@ -991,8 +991,9 @@ inlining is worse than both.
 growth. Each entry is a keyword-rich discovery surface, consolidation into domain
 summaries kills keyword matching, and soft limits get treated as hard caps and
 provoke aggressive pruning. (Superseded in mechanism: gitlore now owns the memory
-store, and its index budget is a real loader cutoff rather than a soft limit —
-see L-5.)
+store, and its index budget is a real loader cutoff rather than a soft limit, so
+retiring and relocating entries is a periodic pass — `/gitlore:index-audit` —
+rather than a rejected idea.)
 
 **Skill-description optimization for this project** — matters only where automatic
 triggering operates. Every skill here is invoked explicitly, so descriptions serve
@@ -1019,10 +1020,6 @@ method behind it.
 **L-4 — Turn and duration bounds do not exist.** The `Agent` tool has no
 `max_turns` parameter and no duration bound, so the spinning/hanging taxonomy has
 no enforcement. See `plugin/fragments/escalation-acceptance.md`.
-
-**L-5 — `memory/MEMORY.md` exceeds Claude Code's loader cutoff.** At ~28.9 KB
-against a 24.4 KB limit, tail entries never reach a session. The fix is retiring
-and relocating entries, not rewording them.
 
 **L-6 — The pipeline is unvalidated.** The one-stage runbook and slice-batched
 TDD landed 2026-09-01 and have not been exercised end to end. Slice-batching
