@@ -11,8 +11,10 @@ if status=$(grep -vx ' M memory' <<<"$porcelain"); then
 elif [[ $? -eq 1 ]]; then
     status=""
 else
+    # Exit 2, never 1: 1 is the DIRTY verdict, and a script failure is not a
+    # verdict the caller may remediate against.
     echo "ERROR: filtering git status failed"
-    exit 1
+    exit 2
 fi
 
 if [[ -n "$status" ]]; then

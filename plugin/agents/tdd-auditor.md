@@ -83,15 +83,25 @@ For each slice `N.M/k` of each tdd item:
    report's suite result; flag any commit whose message or report indicates a
    red suite.
 
-3. **GREEN modified no reviewed test.** Diff the slice commit's test files
-   against the RED report's test list: the tests the review approved must
-   arrive in the commit unmodified. A changed assertion between review and
-   commit is a critical violation — it is the shortcut this audit exists to
-   detect (an implementer weakening a test instead of satisfying it).
+3. **GREEN dropped no reviewed test.** The reviewed tests are never committed
+   before the GREEN commit, and the RED report carries per-test failure output
+   rather than test source, so there is no earlier revision to diff against —
+   audit at test-id granularity instead. Every test id the **test-review**
+   report lists must appear in the slice commit's test files, under the same
+   name and in the same file. A missing, renamed or relocated test is a
+   critical violation: it is the shortcut this audit exists to detect (an
+   implementer dropping a test instead of satisfying it). Take the id list
+   from the test-review report, not the RED report — the review applies
+   fix-all to the tests, so tests legitimately differ from their RED state,
+   and a RED-based comparison would flag every reviewed slice.
 
-   One commit per slice makes FR-5's "test-at-a-time from the commit
-   sequence" unauditable from git. Audit it instead from the GREEN report's
-   recorded sequence, together with this tests-unmodified diff check (D14).
+   Where the GREEN report records that it edited a test file, that is a
+   violation on its own: GREEN's prohibition on editing tests is absolute, and
+   a test it could not satisfy should have come back as `blocked:`.
+
+   One commit per slice also puts the test-at-a-time discipline out of git's
+   reach — a single commit shows no intermediate steps. Audit it from the
+   GREEN report's recorded per-test sequence instead.
 
 4. **Refactoring separation.** Where the code review flagged a refactoring,
    the refactor report names its own commit, landing after the slice commit;

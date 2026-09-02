@@ -126,7 +126,7 @@ Produce this classification block before routing (visible output, not internal r
 - **Artifact destination:** [production / agentic-prose / exploration / investigation / ephemeral]
 - **Evidence:** Which criteria and recall entries informed the decision
 
-**Classification persistence (C-2):** Write the classification block verbatim to `plans/<job>/classification.md`. This file is consumed by `triage-feedback.sh` for post-execution comparison (FR-5/FR-6).
+**Classification persistence (C-2):** Write the classification block verbatim to `plans/<job>/classification.md`. This file is consumed by `triage-feedback.sh` for post-execution comparison.
 
 #### Routing
 
@@ -160,7 +160,7 @@ Produce this classification block before routing (visible output, not internal r
 
 When a design modifies an "author" skill (a skill whose output is reviewed by a corrector), check coupled dependencies before completing the design:
 
-1. Identify the corrector from the transformation table (T1–T5 in `docs/design.md` §6.4 "Pipeline contracts")
+1. Identify the corrector from the transformation table (T1–T6 in `docs/design.md` §6.4 "Pipeline contracts")
 2. Check: does the corrector's review criteria need corresponding update?
 3. Check: does any mechanical validator need update?
 4. Include corrector/validator updates in the same design scope

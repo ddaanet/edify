@@ -122,8 +122,13 @@ Recommendation: runbook-corrector is designed for document review with full fix-
 ```
 
 **Design document rejection:**
-If task prompt specifies a file path to review (not git diff scope):
-- Check if file is `design.md` or in a `design` path
+Key this on the review *target* — the file the prompt puts in scope — never on
+any design path the prompt happens to mention. A well-formed dispatch always
+carries `Read plans/<job>/design.md` as context; that is the design record to
+review against, not the thing under review.
+
+If the prompt's scope names a single file to review (not a git diff scope):
+- Check if that file is `design.md` or in a `design` path
 - Design documents should go to `design-corrector` (opus model, architectural analysis)
 
 **If given a design document:**
@@ -308,12 +313,15 @@ Review all changes for:
 `/orchestrate` dispatches this agent twice per TDD slice. The prompt names
 which review it is; each has its own scope and first check.
 
-**Test review** — scope IN: the slice's test files plus the RED report.
+**Test review** — scope IN: the slice's test files plus the RED report, and
+the SUT stub for stub completion only. Implementation stays out: extending a
+stub to make a symbol importable and inert is in scope; giving it behaviour is
+not.
 
 1. **Mechanical first check:** every test the RED report lists FAILED on an
    assertion — none PASSED, none ERROR. A PASSED test has named itself
-   vacuous; an ERROR means the stub is incomplete (fix the stub, not the
-   test). Both are findings.
+   vacuous; an ERROR means the stub is incomplete — extend the stub, not the
+   test, which is why the stub is in scope. Both are findings.
 2. **Wrong-reason hunting.** A test is evidence only when there is a state
    of the world in which it fails. For each test, name that state and name
    what else could produce the observable it checks. Shapes that pass

@@ -9,9 +9,9 @@ Delegate to selected reviewer agent (Agent tool, `subagent_type` per routing tab
 ```
 Review implementation changes against design specification.
 
-**Baseline:** <$BASELINE commit hash>
+**Baseline:** <baseline commit hash>
 
-**Changed files:** `git diff --name-only $BASELINE`
+**Changed files:** `git diff --name-only <baseline commit hash>`
 
 **Requirements:**
 <FR/NFR items relevant to this execution, from outline or design>
@@ -39,7 +39,7 @@ Return filepath on success, or "UNFIXABLE: [description]" on failure.
 
 ## Field Rules
 
-- **Baseline:** `$BASELINE` captured at /inline Phase 1 (`git rev-parse HEAD` before edits). When `/inline execute` follows /design, baseline excludes design-phase artifacts — only execution edits are uncommitted.
+- **Baseline:** substitute the hash itself, read back from `tmp/inline-baseline` (written at /inline Phase 1 by `git rev-parse HEAD` before edits) — the reviewer's shell is not the dispatcher's, so no variable survives into the prompt. When `/inline execute` follows /design, baseline excludes design-phase artifacts — only execution edits are uncommitted.
 - **Design context:** Always `outline.md` or `design.md` — never `requirements.md`. Requirements are upstream abstractions; design/outline contains the implementation-level decisions the reviewer needs.
 - **Recall context:** Pass the plan directory only. The reviewer resolves entries itself — do not pre-resolve and paste recall content into the prompt. Token economy: reference, never repeat. The `Skill` fallback line matters for report-only reviewers (e.g. `plugin-dev:skill-reviewer`), which have Read but no `Skill` tool.
 - **Scope IN/OUT:** From design or outline, not invented. Prevents reviewer from flagging work explicitly deferred.

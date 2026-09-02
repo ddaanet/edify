@@ -32,7 +32,9 @@ Every dispatch prompt carries:
    default its own definition carries. Per-dispatch names are what keep a
    slice's test review and code review from overwriting each other, and what
    let `tdd-auditor` find them. Return contract: the report path on success,
-   or `blocked: <reason>`.
+   or `blocked: <reason>` — except `edify:refactor`, whose own protocol
+   returns `success` / `escalated: <reason>` / `error: <reason>` and still
+   writes its report at the assigned path.
 6. **Mode**, for `edify:test-driver` only: `RED` or `GREEN`, named
    explicitly — the agent refuses a prompt that names neither.
 

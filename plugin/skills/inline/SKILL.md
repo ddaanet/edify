@@ -49,10 +49,13 @@ Failure → STOP: "Precommit failing. Fix before /inline."
 **Capture baseline** — before any edits:
 
 ```bash
-BASELINE=$(git rev-parse HEAD)
+mkdir -p tmp && git rev-parse HEAD > tmp/inline-baseline
 ```
 
-Store for Phase 4b (triage feedback script input).
+A file, not a shell variable: each Bash call is its own shell, so a `BASELINE=`
+assignment here is gone by Phase 4. `tmp/` is gitignored, so the baseline never
+enters the diff it defines. Phases 4a and 4b read it back with
+`$(cat tmp/inline-baseline)`.
 
 ## Phase 2: Pre-Work (cold start only)
 
@@ -105,7 +108,7 @@ After each dispatch. Dirty tree or lint failure → diagnose before continuing.
 Route changed files to the appropriate reviewer per `plugin/fragments/review-requirement.md` routing table.
 
 **Dispatch process:**
-1. List changed files: `git diff --name-only $BASELINE`
+1. List changed files: `git diff --name-only "$(cat tmp/inline-baseline)"`
 2. Group by artifact type (code/tests/plans, skill definitions, agent definitions, design documents)
 3. Look up reviewer per group from routing table
 4. Dispatch each group to its reviewer using `references/review-dispatch-template.md` for prompt structure
@@ -151,10 +154,12 @@ Content must include: what was changed, why review adds no value for this specif
 ### 4b: Triage Feedback
 
 ```bash
-plugin/bin/triage-feedback.sh <job> $BASELINE
+plugin/bin/triage-feedback.sh <job> "$(cat tmp/inline-baseline)"
 ```
 
-The script prepends `plans/` itself — pass the bare job name, not the plan path.
+The script prepends `plans/` itself — pass the bare job name, not the plan
+path. It rejects an empty baseline with its usage line, so read the commit
+back from the Phase 1 file rather than from a variable.
 
 Read script output. On divergence message → surface inline. On match or no-classification → proceed silently.
 

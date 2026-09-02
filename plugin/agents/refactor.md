@@ -144,10 +144,12 @@ Update all references to refactored code:
    - Skip if refactoring is purely structural
    - Update only if agent behavior rules changed
 
-Never write into `plans/`. You run inside a slice, where `runbook.md` is the
-orchestrator's artifact — a second writer collides with it. Record every
-rename in your report; the orchestrator carries the reference update into the
-remaining items.
+Never write into a plan's own sources — `runbook.md`, `design.md`,
+`outline.md`, `requirements.md`. You run inside a slice, where `runbook.md` is
+the orchestrator's artifact and a second writer collides with it. Your report
+under `plans/<job>/reports/` is the one exception, and it is required (Step
+6). Record every rename in your report; the orchestrator carries the reference
+update into the remaining items.
 
 Verification:
 - Use `rg` (Bash) to search for `old_reference` across `docs/` and `CLAUDE.md`

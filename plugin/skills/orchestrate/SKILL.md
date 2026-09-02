@@ -1,7 +1,7 @@
 ---
 name: orchestrate
 description: Execute a proofed runbook (plans/<job>/runbook.md) by dispatching standing agents per item. Triggers on /orchestrate or when /runbook hands off in a fresh session.
-allowed-tools: Agent, Read, Edit, Bash, SendMessage, TaskOutput
+allowed-tools: Agent, Read, Write, Edit, Bash, Skill, SendMessage, TaskOutput, TaskStop
 user-invocable: true
 continuation:
   cooperative: true
@@ -65,7 +65,9 @@ SUT. No commit — the tests stay uncommitted in the tree; the report carries
 the per-test output, and the dispatch ends there.
 
 **(b) Test review** — `edify:corrector` (opus). Scope IN: this slice's test
-files plus the RED report. First check is mechanical: every listed test
+files plus the RED report, and the SUT stub for stub completion only — an
+ERROR is a stub gap, and the fix belongs to the stub, not the test. Implementation
+stays out. First check is mechanical: every listed test
 FAILED on an assertion — none PASSED, none ERROR. Then wrong-reason hunting
 per the corrector's own criteria. Fix-all on tests, re-run to confirm still
 red. UNFIXABLE → STOP.
@@ -95,9 +97,11 @@ refactorings (module split, new abstraction). UNFIXABLE → STOP.
    `edify:refactor` before the next slice's RED, so later tests target the
    refactored shape. It commits its own refactoring commit on a clean tree.
    On `escalated: <reason>` → re-dispatch `edify:refactor` once with model
-   opus (the Agent tool's `model` override) and the reason quoted in the
-   prompt; a second `escalated` goes in the run summary and execution
-   continues. On `error` → log and continue.
+   opus (the Agent tool's `model` override). The prompt must state, in those
+   words, that **this run is the opus escalation** — the agent cannot see its
+   own model and branches on that sentence, so quoting the reason alone makes
+   it escalate again — and carry the reason. A second `escalated` goes in the
+   run summary and execution continues. On `error` → log and continue.
 3. **List revision:** revise the remaining slices' test lists in
    `runbook.md` from what this slice revealed, or record "List revision:
    none" in the run summary. The orchestrator commits `runbook.md` edits
@@ -114,6 +118,8 @@ plugin/skills/orchestrate/scripts/verify-step.sh
 ```
 
 - Exit 0 (CLEAN) → proceed
+- Exit 2 → the script itself failed, not the dispatch. Stop and report; do
+  not remediate, since there is no established verdict to remediate against.
 - Exit 1 → remediate: resume the named agent once
   (`SendMessage to: <name>`, "Your dispatch left uncommitted changes or
   precommit failures. Fix and commit."). If the resume fails or returns

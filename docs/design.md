@@ -501,7 +501,10 @@ type.
 `edify:refactor` runs at sonnet and returns `escalated: <reason>` for a
 refactoring that needs architectural judgement. The orchestrator consumes that
 return by re-dispatching `edify:refactor` once with model opus; the escalation
-is a dispatch, not a line in the run summary.
+is a dispatch, not a line in the run summary. An agent cannot see its own
+model, so the re-dispatch prompt must say that this run is the opus
+escalation — that sentence, not the `model` override, is what stops the agent
+escalating a second time.
 
 A phase qualifies as `inline` when its outcome is fully determined by instruction
 plus target file state: no runtime feedback loop, all decisions pre-resolved in
