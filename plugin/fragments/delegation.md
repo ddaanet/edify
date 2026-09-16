@@ -13,9 +13,14 @@ is the authoritative rule. In summary:
 
 - **Type default:** `artisan` and `test-driver` dispatches run sonnet;
   `corrector` dispatches run opus, a tier above the implementers (D-32)
-- **Artifact-type override (D-42):** opus for any dispatch editing
-  `plugin/skills/`, `plugin/fragments/`, `plugin/agents/` or `docs/design.md`
-- **Per-item override:** a `Model:` line on the runbook item overrides both
+- **Artifact-type override (D-42):** opus for any dispatch whose deliverable is
+  prose consumed by a reader or an LLM — skills, fragments, agent definitions,
+  design documents, changelog entries, decision nodes. Judged by artifact kind,
+  not by path; a consumer repository's own prose qualifies too
+- **Fixed, overriding both:** `test-driver` runs sonnet in RED and GREEN; a
+  dispatch whose deliverable is prose runs opus. Nothing overrides these
+- **No per-item model.** Runbook items carry no `Model:` line — the dispatcher
+  assigns from the dispatch, and an agent needing more escalates at runtime
 
 ### Pre-Delegation Checkpoint
 

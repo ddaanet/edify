@@ -15,27 +15,33 @@ Review in-progress work for quality, correctness, and adherence to project stand
 
 ### 1. Determine Scope
 
-**Ask user what to review:**
+Infer the scope, state it in one line, and proceed. Do not open with a question —
+the tree answers it in most cases:
 
-Use AskUserQuestion tool:
+| State | Scope |
+|---|---|
+| User named files, a commit range or a design document | What they named |
+| Dirty tree | Uncommitted changes (staged + unstaged) — **the default** |
+| Clean tree, commits ahead of `main` | Those commits |
+| Clean tree, nothing ahead | Ask (below) |
+
+State the inference before gathering — "Reviewing uncommitted changes, 4 files" —
+so a wrong guess costs one correction instead of a whole review.
+
+When the scope is genuinely undetermined, ask inline in numbered prose with a
+stated default, in one turn:
 
 ```
-What should I review?
-
-Options:
-1. "Uncommitted changes" - Review git diff (staged + unstaged)
-2. "Recent commits" - Review last N commits on current branch
-3. "Current branch" - Review all commits since branched from main
-4. "Specific files" - Review only specified files
-5. "Everything" - Uncommitted + recent commits
-6. "Design conformity" - Review changes against design document
+Nothing uncommitted and nothing ahead of main. What should I review?
+1. The last N commits (default: 5)
+2. Specific files — name them
+3. Changes against a design document — name it
 ```
 
-**Common patterns:**
-- After runbook execution: "Uncommitted changes"
-- After series of commits: "Recent commits" (ask how many)
-- Before creating PR: "Current branch"
-- Targeted review: "Specific files"
+Never reach for `AskUserQuestion`. It renders the exchange as a picker, which
+hides the user's own prompting from the transcript; numbered prose keeps the
+question and the answer readable in the thread and lets the default carry the
+turn when the user does not care.
 
 ### 2. Gather Changes
 
@@ -181,7 +187,7 @@ git diff HEAD <file1> <file2> ...
 
 **This skill and the corrector agent share review criteria, not interaction model.** They are not interchangeable:
 
-- **This skill** runs in the main session with a user present. It may use `AskUserQuestion` to scope the review.
+- **This skill** runs in the main session with a user present, so it can infer scope from the tree and ask inline when it cannot.
 - **`edify:corrector`** runs delegated, with no user to ask (see `plugin/agents/corrector.md`). Its scope must arrive in the dispatch prompt, and it applies fixes directly.
 
 So the review *axes* (`references/review-axes.md`) are shared; the scoping step is not. A delegated reviewer that reaches for a question has hit a dispatch-prompt defect, not a decision point.

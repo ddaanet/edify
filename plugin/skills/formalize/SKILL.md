@@ -12,7 +12,6 @@ allowed-tools:
   - Edit
   - Write
   - Bash
-  - AskUserQuestion
 user-invocable: true
 ---
 
@@ -28,8 +27,26 @@ yours, and when intent is genuinely ambiguous you ASK rather than guess.
 
 1. **Establish intent.** Derive what the target function should guarantee from
    the conversation and the surrounding code. If the intended behavior is
-   genuinely ambiguous (edge cases, error handling, empty inputs), use
-   `AskUserQuestion` — do not invent a specification.
+   genuinely ambiguous (edge cases, error handling, empty inputs), ask — do not
+   invent a specification.
+
+   Ask inline, in numbered prose, naming the contract clause you would write for
+   each case so the user confirms or corrects a concrete guarantee rather than
+   discussing behaviour in the abstract:
+
+   ```
+   Two cases the code does not settle. Proposed clauses below.
+
+   1. Empty input — `@require(lambda xs: len(xs) > 0)`, i.e. empty is a caller
+      error rather than a case returning a default.
+   2. Duplicate keys — `@ensure` says last wins. The dict build implies it, but
+      nothing states it.
+   ```
+
+   Never reach for `AskUserQuestion`. A picker hides the exchange from the
+   transcript, and the contract that lands is the *only* durable record of what
+   was decided — the reasoning behind it should stay readable in the thread
+   beside it.
 
 2. **Write the contract.** Add `icontract` decorators to the function:
    `@require(lambda <args>: <precondition>)` and

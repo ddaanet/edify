@@ -15,15 +15,18 @@ mapping table (`| Requirement | Phase | Items | Notes |`), then the phases:
 
 - Item N.M: <target path> — <concrete action>. Requirements: FR-x[, FR-y].
   Depends on: Item N.K
-  Model: opus
 ```
 
 - `Requirements:` — required on every item; requirement IDs trace planning to
   execution.
 - `Depends on:` — optional; declare whenever the item consumes another item's
   output.
-- `Model:` — optional; overrides the orchestrator's model assignment for this
-  item.
+
+An item does **not** carry a model. The dispatcher assigns the model from the
+dispatch itself (`dispatch-composition.md` §Model assignment), which is the only
+point that knows the agent type and the deliverable. A planner naming a model is
+guessing at difficulty before anyone has read the code; where an item turns out to
+need a stronger model, the agent escalates and the dispatcher re-dispatches.
 
 ### tdd items: Slices
 

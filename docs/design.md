@@ -606,9 +606,32 @@ sonnet reviews it") and blanket-opus inheritance from the orchestrator are both
 wrong. Haiku writes state-machine code that looks plausible and has subtle wiring
 errors; opus reviewing grep-and-replace is waste.
 
+**D-79 — Two dispatches are fixed, and a runbook item carries no model.** A
+`test-driver` dispatch runs sonnet in RED and in GREEN; a dispatch whose
+deliverable is prose runs opus. Nothing overrides either — they sit above the
+artifact-type override and the type default alike.
+
+The `Model:` line on a runbook item is removed rather than demoted. It is written
+at planning time by a skill that knows neither which agent type the dispatcher
+will pick nor what the work turns out to involve, so it cannot be right by
+construction; the observed failure was a blanket `Model: opus` copied from
+`runbook-format.md`'s own worked example onto three tdd items, sending every
+test-driver dispatch to opus while the type default said sonnet. A field whose
+main effect is teaching a habit through its example is a field to delete.
+
+What replaces it is escalation on demand — the agent returns `escalated: <reason>`
+and the dispatcher re-dispatches at the higher model, the mechanism D-30 already
+specifies for `edify:refactor`. Predicting an item's difficulty before anyone has
+read the code is an estimate, and this project does not take estimates. The cost
+is one failed dispatch on a genuinely hard item; the benefit is that no planner
+guesses.
+
 **D-42 — Prose artifacts consumed by LLMs are opus work.** Skills, fragments,
 agent definitions and design documents are instructions whose wording determines
-downstream agent behavior. Assigning by "edit complexity" rather than artifact
+downstream agent behavior. The rule is stated by **artifact kind, not by path** —
+a path list enumerating edify's own directories does not reach a consumer
+repository's prose, which is how a changelog entry under a consumer's `docs/`
+came to be dispatched at sonnet. Assigning by "edit complexity" rather than artifact
 type is the anti-pattern. The rule targets cases where design decisions happen
 *during* editing — when an outline pre-resolves every decision and specifies exact
 insertion points, execution is mechanical and delegation ceremony exceeds the edit
@@ -665,8 +688,11 @@ check at the commit chokepoint blocks mechanically with no judgment at the gate.
 **D-48 — Anchor a gate with a tool call that proves work happened.** "Read X (skip
 if already in context)" is not a gate — the escape hatch *is* the failure mode,
 and the agent rationalizes the skip without verifying. The canonical anchor is the
-recall pass: a Read of `memory/MEMORY.md` followed by Reads of the files it names.
-The index Read is unskippable and the per-file Reads require knowing which entries
+recall pass, and its anchoring call is the Read of `<plan-dir>/recall-artifact.md`
+followed by Reads of the files selected from the index — *not* a Read of the index
+itself. The index is already in context (D-72), so instructing a Read of it buys a
+redundant tool call rather than evidence of selection. The artifact Read is
+unskippable and the per-file Reads require knowing which entries
 matter, so the pair proves selection happened. One anchor suffices — passphrase
 and proof-of-Read mechanisms are redundant when the anchor proves both. The
 negative path must cost the same: a null recall artifact still gets Read, so the
@@ -808,6 +834,26 @@ sends the agent to retry the wrong command.
 **D-66 — Contents are only present if explicitly loaded.** There is no implicit
 file loading. Each Read appends a new content block; "caching" is prompt-prefix
 matching at the API level, not application-level deduplication.
+
+**D-78 — Skills ask inline in numbered prose, never through `AskUserQuestion`.**
+The picker is shiny and costs nothing to reach for, which is the problem: it
+hides a user turn. The exchange does not read back as prompting in the
+transcript, so the record of how a decision was settled is lost to the next
+session and to the user rereading the thread — and for `requirements` and
+`formalize`, that record is the justification for the artifact they produce.
+The option list also silently bounds what the user can say, which defeats
+elicitation.
+
+The replacement form: numbered plain prose, one turn, each question carrying a
+**proposed answer** inferred from context, with silence taken as agreement. The
+user corrects a draft instead of filling a blank, and the thread proceeds
+without a round-trip. Rewritten at four call sites (`review`, `requirements`,
+`formalize`; `proof` declared the tool without calling it). Enforced
+structurally by omission from `allowed-tools` per D-50 — `review` had already
+dropped the declaration while still instructing the call, so the instruction was
+unsatisfiable. Delegated reviewers are a separate case already covered: they
+have no user at all (`plugin/agents/corrector.md`), and a reviewer reaching for
+a question has hit a dispatch-prompt defect.
 
 ### 6.10 Project configuration
 

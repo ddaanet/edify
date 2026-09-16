@@ -1,5 +1,8 @@
 ## Current task
 
-Every edify skill now has a quality review on disk under `plans/skill-reviews/`, one file per skill plus an index, produced by `plugin-dev:skill-reviewer` four agents at a time. Nothing has been acted on: the reports are input, the fixes and the five decisions the index names are the work that follows.
-
-A combined brief for the gitlore repo sits in that repo's `inbox/`, covering one open doc gap in its index-audit command and one fix already on its main branch but unreleased. That brief is the end of this repo's involvement, not an open thread.
+The `/build` merge — `/inline` and `/orchestrate` collapsing into one
+execution skill — is planned in `plans/build-skill/inline-plan.md` and paused
+at its `/proof` orientation checkpoint: 14 items detected, none reviewed yet,
+awaiting a reorder/cut/proceed answer before item 1. The plan is grounded in
+`plans/build-skill/inventory.md`, a whole-repo inventory of every affected
+site with each cite verified by direct read.

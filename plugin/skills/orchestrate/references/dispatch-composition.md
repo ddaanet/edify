@@ -45,17 +45,31 @@ LITERALLY — executors apply design rules, they do not invent alternatives.
 
 - **Type default:** `artisan` / `test-driver` → sonnet; `corrector` → opus —
   the reviewer runs a tier above the implementers (D-32).
-- **Artifact-type override (D-42):** opus for any dispatch editing skills
+- **Artifact-type override (D-42):** opus for any dispatch whose deliverable is
+  **prose consumed by a reader or an LLM** — wording there determines downstream
+  agent behaviour or a human's understanding, so the judgement is the work. The
+  test is the artifact kind, not the path. In this repo that covers skills
   (`plugin/skills/`), fragments (`plugin/fragments/`), agent definitions
-  (`plugin/agents/`), or the living design (`docs/design.md`) — prose
-  instructions consumed by LLMs, where wording determines downstream agent
-  behaviour. The dispatcher applies this override itself.
-- **Per-item override:** a `Model:` line on the runbook item overrides both.
+  (`plugin/agents/`), the living design (`docs/design.md`), changelog entries and
+  decision nodes — but those are examples, not the definition: a consumer
+  repository's `docs/` prose qualifies just as much, and no path list reaches it.
+  The dispatcher applies this override itself.
+- **Fixed assignments, overriding both:** a `test-driver` dispatch runs **sonnet**
+  in RED and in GREEN; a dispatch whose deliverable is prose runs **opus**. These
+  are not defaults — nothing overrides them.
 
-The three rules are exhaustive and strictly ordered: a `Model:` line wins;
-absent one, the artifact-type override wins wherever the dispatch edits those
-paths; absent both, the type default applies. No other consideration changes
-the model.
+The rules are exhaustive and strictly ordered: the two fixed assignments win;
+absent either, the artifact-type override wins where the deliverable is prose;
+absent all three, the type default applies. No other consideration changes the
+model.
+
+**A runbook item does not carry a model.** There is no `Model:` line to consult:
+the field was removed because it is written at planning time, by a skill that
+knows neither which agent type the dispatcher will pick nor what the work turns
+out to involve. Where an item needs a stronger model than the rules give it, the
+agent escalates and the dispatcher re-dispatches — the same mechanism D-30 already
+specifies for `edify:refactor`. Escalation on demand, never prediction at plan
+time.
 
 ## Naming and resumption
 

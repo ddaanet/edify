@@ -62,7 +62,11 @@ unsure means exclude. An empty selection is legitimate; say so rather than
 force a match. Match on what the task is about, not surface keyword overlap.
 Do not re-select a body already pulled this conversation.
 
-**5. Batch-Read.** Issue every selected Read in a single message.
+**5. Batch-Read.** Issue every selected Read in a single message. Index links are
+store-relative, so join each to the corpus root resolved in step 3 — a link reading
+`ddaanet/foo.md` is `<root>/ddaanet/foo.md`. Never hardcode the root: the same index
+resolves against whatever path this session's context names, and a Read of the bare
+link fails.
 
 **6. Report.** State what was selected and why. When nothing matched and the
 artifact was absent or added nothing, say that explicitly — the checkpoint was

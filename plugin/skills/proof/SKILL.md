@@ -5,7 +5,7 @@ description: >-
   validation. Triggers on "proof", "validate artifact", "review loop", or
   when an artifact needs a careful item-by-item read before it ships.
   Replaces ad-hoc single-turn validation with item-by-item review protocol.
-allowed-tools: Read, Write, Edit, Bash, Agent, AskUserQuestion, Skill
+allowed-tools: Read, Write, Edit, Bash, Agent, Skill
 user-invocable: true
 ---
 

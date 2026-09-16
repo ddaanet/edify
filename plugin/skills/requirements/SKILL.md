@@ -1,7 +1,7 @@
 ---
 name: requirements
 description: Capture and document requirements for implementation. Triggers on "capture requirements", "document requirements", "what do I want to build", or feature discussions without clear documentation. Produces requirements.md artifact for design and planning phases.
-allowed-tools: Read, Write, Bash, AskUserQuestion, Skill
+allowed-tools: Read, Write, Bash, Skill
 user-invocable: true
 ---
 
@@ -131,24 +131,29 @@ Check for empty critical sections:
 - Extract mode: Maximum 3 gap-fill questions for empty critical sections
 - Elicit mode: 4-6 total questions (section questions + adaptive follow-ups)
 
-Use `AskUserQuestion` tool for gap-fill:
+Ask gap-fill questions inline, as numbered prose in a single turn. Each question
+carries a **proposed answer** drawn from the job name and the conversation, so the
+user corrects a draft rather than filling a blank — and silence on a question is
+agreement with its proposal.
+
 ```
-questions: [
-  {
-    question: "What should the system do? (Functional requirements)",
-    header: "Functional",
-    options: [
-      // Generate context-relevant options from job name and conversation
-      // Example for job "git-hook-validator":
-      {label: "Validate hook scripts before commit", description: "Parse and check hooks for common errors"},
-      {label: "Block commits with invalid hooks", description: "Fail commit if hooks malformed"},
-      {label: "Report hook validation errors", description: "Show clear error messages for failures"},
-      ...
-    ],
-    multiSelect: true
-  }
-]
+Three gaps in the requirements. Proposed answers below; correct the ones I got
+wrong and I'll take the rest as agreed.
+
+1. Functional — the validator parses hook scripts before commit, blocks the
+   commit when one is malformed, and reports which hook failed and why.
+2. Scope — hook scripts under `.git/hooks/` only; not the hooks Claude Code
+   configures in settings.json.
+3. Constraints — runs inside the commit path, so it must finish well under a
+   second and must not need network.
 ```
+
+Never reach for `AskUserQuestion`. A picker hides the exchange from the transcript,
+so the requirements artifact ends up with no readable record of how its content was
+settled — and the option list silently bounds what the user can say, which is the
+opposite of elicitation. Numbered prose keeps both the question and the user's own
+words in the thread, and a stated default lets the turn proceed without a
+round-trip.
 
 ### 5. User Validation
 
@@ -169,7 +174,16 @@ When conversation lacks requirements context:
 
 ### 1. Semi-Structured Elicitation
 
-Use `AskUserQuestion` for each critical section (Functional Requirements, Scope Boundaries) with domain-relevant options. Add optional Constraints/Dependencies questions if job suggests them. Adaptive follow-ups: 1-2 clarifying questions based on responses. Total budget: 4-6 questions.
+Ask inline, in numbered prose, one turn per round — same form as the gap-fill block
+above, and for the same reason. Cover the critical sections (Functional
+Requirements, Scope Boundaries), adding Constraints/Dependencies where the job
+suggests them. Each question states a proposed answer inferred from the job name
+and the conversation; the user corrects what is wrong and silence carries the rest.
+Then 1-2 adaptive follow-ups based on what came back. Total budget: 4-6 questions.
+
+Elicit mode has less to infer from than Extract mode, so its proposals will be
+weaker — say so, rather than presenting a guess with the confidence of a
+derivation.
 
 ### 2-6. Shared Steps
 
