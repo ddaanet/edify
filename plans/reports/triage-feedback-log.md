@@ -5,3 +5,4 @@
 | 2026-03-20 | outline-proofing | Moderate | 3 | 2 | yes | match |
 | 2026-03-21 | outline-proofing | Moderate | 1 | 4 | no | match |
 | 2026-09-01 | pipeline-simplification | Complex | 62 | 6 | no | match |
+| 2026-09-17 | design-routing-and-provenance | Moderate | 16 | 3 | no | match |
