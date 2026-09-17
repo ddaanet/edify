@@ -24,7 +24,7 @@ lifecycle and conventions those directories follow; it does not inventory them â
 - Track progress in `.claude/handoff-task.md`
 
 ### 3. Execution
-- Use `/orchestrate` skill for runbook execution
+- Use `/build` skill to execute the runbook
 - Write reports to `plans/<name>/reports/`
 - Update `.claude/handoff-task.md` with progress
 

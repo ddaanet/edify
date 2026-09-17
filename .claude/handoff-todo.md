@@ -1,12 +1,8 @@
 ## Open decisions
 
-- `plans/build-skill/outline.md` is 589 lines against the 400-line soft cap -- hard-wrapped, so the count is honest, and stripping the proof pass's provenance into `inventory.md` §0 only bought 25 lines. The rest is execution content. Split or accept the overage? The seam is **build the new skill** (~250 lines, now executed) versus **update everything that pointed at the old ones** (~300 lines, still to run); a reader doing one does not need the other open.
+None.
 
 ## Remaining
-
-- Another pass on `plugin/skills/build/SKILL.md` (217 lines). The hub now routes to opt-in nodes for the once-firing steps, each routing line naming its trigger.
-- Finish `plans/build-skill/outline.md` -- the reference sweep across /design, /runbook, `plugin/fragments/`, `plugin/README.md`, `README.md`, `CLAUDE.md`, `docs/design.md`, `docs/changelog.md` and `memory/workflow-pipeline-revival.md`, in the plan's order. Cite by string, never by line: inventory §0 records where its own line cites were wrong, and report claims need verifying against the file before acting.
-- **Retire continuation-passing entirely** -- settled 2026-09-17, no longer deferred. The `continuation:` frontmatter blocks and `## Continuation` sections in /design and /runbook, and `plugin/fragments/continuation-passing.md` itself. /build already omits it, including from its `§References` index.
 
 ### /design skill work
 

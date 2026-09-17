@@ -2,7 +2,7 @@
 name: runbook
 description: |
   Decompose a design into an executable runbook — phases of typed items
-  (tdd / general / inline) that /orchestrate composes dispatch prompts from.
+  (tdd / general) that /build composes dispatch prompts from.
   Triggers on /runbook or when a design needs step-by-step planning.
 allowed-tools: Agent, Read, Write, Edit, Skill, Bash(rg:*, git:*)
 requires:
@@ -11,9 +11,6 @@ requires:
 outputs:
   - Execution runbook at plans/<job-name>/runbook.md
 user-invocable: true
-continuation:
-  cooperative: true
-  default-exit: ["/handoff:handoff", "/commit-commands:commit"]
 ---
 
 # Write the Runbook
@@ -23,7 +20,7 @@ continuation:
 Produce `plans/<job>/runbook.md` — the terminal planning artifact. Item and
 slice format: `references/runbook-format.md`. Pipeline context (see
 `docs/design.md` §6.4 "Pipeline contracts"): `/design` → `/runbook` →
-`runbook-corrector` → `runbook-simplifier` → `/proof` → `/orchestrate` in a
+`runbook-corrector` → `runbook-simplifier` → `/proof` → `/build` in a
 fresh session.
 
 **Prerequisites check (D+B anchor):** Check the plan directory for a
@@ -33,16 +30,19 @@ user-validated.
 
 ## Phase Type Model
 
-Each phase declares `type: tdd`, `type: general` (default), or
-`type: inline`. Type determines:
+Each phase declares `type: tdd` or `type: general` (default). Type determines:
 
 - **Item format:** tdd → `Slices:` with per-slice test lists; general →
-  concrete action against a named target; inline → same, executed by the
-  orchestrator itself. All per `references/runbook-format.md`.
+  concrete action against a named target. Both per
+  `references/runbook-format.md`.
 - **Review criteria:** `runbook-corrector` applies slice rules to tdd items,
   clarity and readiness rules to all.
-- **Dispatch:** tdd → four dispatches per slice (RED → test review → GREEN →
-  code review); general → one dispatch; inline → no dispatch.
+- **Dispatch structure:** tdd → four dispatches per slice (RED → test review →
+  GREEN → code review).
+
+Type does **not** decide whether an item is delegated. `/build` makes that
+call per item at dispatch time, by the batching rule — so do not type a phase
+to steer it, and do not write an item that presumes either answer.
 
 ## Process
 
@@ -142,10 +142,9 @@ additions). Read its report; verify requirements mapping survived.
 Invoke `/proof plans/<job>/runbook.md` — the user validates the runbook
 item by item. This is the human gate on the artifact execution will read.
 
-## Continuation
+## Routing out
 
-Read `plugin/fragments/continuation-passing.md` and follow its §Consumption
-Protocol as the final action of this skill; on failure, its §Error
-Propagation. No prepend: orchestration runs in a fresh session via
-`/handoff:handoff` — planning has consumed most of this session's context
-budget, and the orchestrator needs its own.
+Name `/handoff:handoff` as the next command and stop. Execution runs in a
+fresh session: planning has consumed most of this session's context budget,
+and `/build` needs its own. No tail-call — this skill states the command, it
+does not invoke the chain.

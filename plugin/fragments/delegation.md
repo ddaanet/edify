@@ -1,6 +1,6 @@
 ## Delegation in Orchestration
 
-When executing runbooks via `/orchestrate`, the orchestrator coordinates but does not implement:
+When executing planned work via `/build`, the orchestrator coordinates but does not implement:
 
 1. **Dispatch** each item (or slice) to a standing agent
 2. **Monitor** progress and handle exceptions
@@ -8,7 +8,7 @@ When executing runbooks via `/orchestrate`, the orchestrator coordinates but doe
 
 ### Model Selection
 
-`plugin/skills/orchestrate/references/dispatch-composition.md` §Model assignment
+`plugin/skills/build/references/dispatch-composition.md` §Model assignment
 is the authoritative rule. In summary:
 
 - **Type default:** `artisan` and `test-driver` dispatches run sonnet;
@@ -30,7 +30,7 @@ Before invoking Agent tool, verify:
 
 ### Prompt Composition
 
-The dispatcher composes each prompt per `plugin/skills/orchestrate/references/dispatch-composition.md`: item text inline, design and recall artifact by path. The dispatched agent is a standing one (`edify:artisan`, `edify:test-driver`, `edify:corrector`, `edify:refactor`) — no agents are generated per plan.
+The dispatcher composes each prompt per `plugin/skills/build/references/dispatch-composition.md`: item text inline, design and recall artifact by path. The dispatched agent is a standing one (`edify:artisan`, `edify:test-driver`, `edify:corrector`, `edify:refactor`) — no agents are generated per plan.
 
 ### Quiet Execution Pattern
 
@@ -77,7 +77,7 @@ paths.
 
 ### Recall Artifacts For Sub-Agents
 
-One artifact model: `plans/<job>/recall-artifact.md` — grouped entries with relevance notes, curated by the dispatching skill. The dispatch prompt hands the sub-agent that path, and the sub-agent Reads the artifact then Reads every file it lists. `plugin/skills/orchestrate/references/dispatch-composition.md` §Prompt contents is the authoritative rule. The per-type flat artifacts an earlier model kept for sub-agent injection no longer exist.
+One artifact model: `plans/<job>/recall-artifact.md` — grouped entries with relevance notes, curated by the dispatching skill. The dispatch prompt hands the sub-agent that path, and the sub-agent Reads the artifact then Reads every file it lists. `plugin/skills/build/references/dispatch-composition.md` §Prompt contents is the authoritative rule. The per-type flat artifacts an earlier model kept for sub-agent injection no longer exist.
 
 **Selection is the parent's job.** A sub-agent has no parent context and cannot judge which entries are relevant, so it resolves all of them. The dispatching skill narrows the artifact to what the work needs; the child does not re-select.
 

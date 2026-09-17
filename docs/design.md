@@ -13,8 +13,9 @@ Lean-assisted, formal-proof-backed requirements tracking.
 ## 1. Now
 
 **Focus** — dogfood the one-stage pipeline end to end (`/design` → `/runbook`
-→ `/orchestrate`). The one-stage runbook landed 2026-09-01; the composed-prompt
-dispatch and slice-batched TDD have not yet run against a real plan (L-6).
+→ `/build`). The one-stage runbook landed 2026-09-01 and `/build` replaced the
+`/inline` + `/orchestrate` split on 2026-09-17; the composed-prompt dispatch
+and slice-batched TDD have not yet run against a real plan (L-6).
 
 **Next** — a `/gitlore:index-audit` pass over the memory store.
 
@@ -56,10 +57,10 @@ positional arguments.
 | # | Requirement | Status | Where · pinned by |
 |---|---|---|---|
 | FR-7 | Capture requirements from conversation into `requirements.md` | Done (prose) | `skills/requirements/` |
-| FR-8 | Triage complexity, produce design artifacts, route to `/inline` or `/runbook` | Done (prose) | `skills/design/` |
+| FR-8 | Triage complexity, produce design artifacts, route to `/build` or `/runbook` | Done (prose) | `skills/design/` |
 | FR-9 | Decompose a design into a one-stage runbook: typed phases of prose items, interface blocks, behaviour slices | Done (prose) | `skills/runbook/`, `references/runbook-format.md` |
-| FR-10 | Execute a runbook by composing each dispatch prompt from its items, four dispatches per TDD slice | Done (prose) | `skills/orchestrate/`, `references/dispatch-composition.md` |
-| FR-11 | Wrap runbook-less work in a lifecycle: pre-work → execute → corrector → triage → deliverable-review | Done (prose) | `skills/inline/` |
+| FR-10 | Execute a runbook by composing each dispatch prompt from its items, four dispatches per TDD slice | Done (prose) | `skills/build/`, `references/dispatch-composition.md` |
+| FR-11 | Wrap runbook-less work in a lifecycle: pre-work → execute → corrector → triage → deliverable-review | Done (prose) | `skills/build/` |
 | FR-12 | Review every pipeline transformation at a typed gate | Done (prose) | `agents/*corrector*.md`, `agents/runbook-simplifier.md` |
 | FR-13 | Review production artifacts against ISO 25010 / IEEE 1012 axes | Done (prose) | `skills/deliverable-review/` |
 | FR-14 | Select and read relevant memory entries at pipeline recall checkpoints | Done (prose) | `skills/recall/` |
@@ -135,30 +136,30 @@ collection is plain tree recursion with no special tracking.
 The plugin is a skills bundle plus standing agents plus two verification
 scripts.
 
-Pipeline skills: `requirements` → `design` → `runbook` → `orchestrate`, or
-`design` → `inline` for work that needs no runbook, with `review` as the
+Pipeline skills: `requirements` → `design` → `runbook` → `build`, or
+`design` → `build` for work that needs no runbook, with `review` as the
 in-progress quality gate. Standalone skills: `proof`, `ground`,
 `deliverable-review`, `formalize`, `recall`.
 
 The runbook is one artifact, `plans/<job>/runbook.md`: typed phases
-(`tdd` / `general` / `inline`) of prose items against named targets, each
+(`tdd` / `general`) of prose items against named targets, each
 carrying requirement IDs, an `Interfaces:` block where another item consumes
 its output, and — for tdd items — behaviour slices with per-slice test lists
 (`plugin/skills/runbook/references/runbook-format.md`). Nothing expands it:
 `runbook-corrector` and `runbook-simplifier` gate it, `/proof` validates it,
-and `/orchestrate` reads it and composes every dispatch prompt live
-(`plugin/skills/orchestrate/references/dispatch-composition.md`).
+and `/build` reads it and composes every dispatch prompt live
+(`plugin/skills/build/references/dispatch-composition.md`).
 
 Standing agents in `plugin/agents/`: the correctors (`corrector`,
 `design-corrector`, `outline-corrector`, `runbook-corrector`,
 `runbook-simplifier`), the executors (`artisan`, `test-driver`, `refactor`),
 and the investigators (`scout`, `tdd-auditor`, `brainstorm-name`).
 
-Scripts: `plugin/skills/orchestrate/scripts/verify-step.sh` (clean tree +
+Scripts: `plugin/skills/build/scripts/verify-step.sh` (clean tree +
 precommit after every committing dispatch — GREEN, code review and general
 items, never after a RED or a test review whose tests are uncommitted by
-design) and `plugin/bin/triage-feedback.sh` (the inline route's post-execution
-gate, D-26 T5).
+design) and `plugin/bin/triage-feedback.sh` (the post-execution gate `/build`
+runs when the work is done, D-26 T5).
 
 The orchestrator owns every commit a review produces. A corrector applies
 fix-all and never commits; after the per-slice code review the orchestrator
@@ -437,7 +438,7 @@ the file belongs to the handoff plugin and is hook-guarded — and durable
 pipeline state lives under `plans/<name>/` (the task-list writes and the
 worktree-vs-main section targeting that the skills carried from the retired
 `session.md` era were cut 2026-08-27). *Reopen-if:* context budgets grow enough that
-the context argument stops binding; auto-chaining `/runbook` into `/orchestrate` was
+the context argument stops binding; auto-chaining `/runbook` into `/build` was
 deliberately not taken during the 2026-08-13 rewire nor the 2026-09-01 simplification.
 
 **D-26 — Every transformation has a typed review gate.**
@@ -448,7 +449,7 @@ deliberately not taken during the 2026-08-13 rewire nor the 2026-09-01 simplific
 | T2 | Design → Runbook | `design.md`, recall artifact | `runbook.md` | `runbook-corrector` (opus) |
 | T3 | Runbook → Simplified runbook | `runbook.md` | consolidated `runbook.md` | `runbook-simplifier` (opus), then `/proof` |
 | T4 | Runbook → Implementation | `runbook.md` | code, artifacts | `corrector` per slice (test review, code review) and at phase boundaries |
-| T5 | Design/Outline → Implementation (inline) | `design.md` or outline, classification | code, review report | `corrector` + `triage-feedback.sh` |
+| T5 | Design/Outline → Implementation (no runbook) | `design.md` or outline, classification | code, review report | `corrector` + `triage-feedback.sh` |
 | T6 | Requirements → Design outline | `requirements.md` or inline | `outline.md` | `outline-corrector` (opus), then `/proof` |
 
 **D-27 — Reviewers fix everything and escalate the rest.** Every gate follows the
@@ -470,11 +471,15 @@ their own work.** This is policy, not capability. It was previously justified by
 now technically able to review its own work and must not. Implementer bias is
 the reason.
 
-One path is bounded rather than delegated: when the orchestrator executes an
-`inline` item itself there is no execution agent to dispatch a review to, so
-review follows the proportionality rule in
-`plugin/fragments/review-requirement.md` — `git diff` self-review only while
-every trivial-change condition holds, an `edify:corrector` dispatch otherwise.
+One path is bounded rather than delegated: when the executor does an item
+itself there is no execution agent to dispatch a review to, so review follows
+the proportionality rule in `plugin/fragments/review-requirement.md` —
+`git diff` self-review only while every trivial-change condition holds, an
+`edify:corrector` dispatch otherwise. *Widened 2026-09-17:* this used to
+trigger on the `inline` phase type. That type is abolished and `/build`
+decides delegation per item, so the rule now binds on any item the executor
+does directly — a more common case, which is why the threshold is the
+fragment's and not the executor's judgement.
 
 **D-29 — Every review delegation carries execution context.** Required: scope IN
 (what was produced), scope OUT (what is not yet done, which the reviewer must not
@@ -488,15 +493,21 @@ stdout", "no data loss across all code paths" — the changed-files list is the
 wrong scope. Add a verification scope naming every file participating in the
 invariant, identified by grepping for the invariant's pattern.
 
-**D-30 — Phases declare a type: `tdd`, `general` (default), or `inline`.** Type
+**D-30 — Phases declare a type: `tdd` or `general` (default).** Type
 determines item format (tdd items carry behaviour slices with per-slice test
-lists; general and inline items a concrete action against a named target —
+lists; general items a concrete action against a named target —
 `runbook-format.md`), review criteria (`runbook-corrector` applies slice rules
-to tdd items and clarity and readiness rules to all), and dispatch (tdd → four
-dispatches per slice: RED, test review, GREEN, code review, then `refactor` on
-review signal and a list-revision step; general → one dispatch; inline → the
-orchestrator executes it itself). LLM failure-mode checks apply regardless of
-type.
+to tdd items and clarity and readiness rules to all), and for tdd the dispatch
+structure (four dispatches per slice: RED, test review, GREEN, code review,
+then `refactor` on review signal and a list-revision step). LLM failure-mode
+checks apply regardless of type.
+
+Type does **not** determine whether an item is delegated. *Amended
+2026-09-17:* the third type, `inline`, meant "the executor does this one
+itself" and was abolished with the `/build` merge (D-34). Delegation is now a
+per-item decision `/build` takes at dispatch time by the batching rule, which
+is where the information to take it exists; a planner typing a phase was
+guessing at it a stage early.
 
 `edify:refactor` runs at sonnet and returns `escalated: <reason>` for a
 refactoring that needs architectural judgement. The orchestrator consumes that
@@ -505,10 +516,6 @@ is a dispatch, not a line in the run summary. An agent cannot see its own
 model, so the re-dispatch prompt must say that this run is the opus
 escalation — that sentence, not the `model` override, is what stops the agent
 escalating a second time.
-
-A phase qualifies as `inline` when its outcome is fully determined by instruction
-plus target file state: no runtime feedback loop, all decisions pre-resolved in
-design.
 
 **D-31 — LLM failure-mode checks at every planning level.** *Superseded
 2026-09-01:* there is one planning level now — the runbook is terminal
@@ -538,22 +545,49 @@ consolidated runbook and execution never sees the redundancy.
 
 ### 6.5 Execution routing
 
-**D-34 — Two execution routes, split by whether a runbook exists.** `/inline`
-executes in-session — directly, or with ad-hoc dispatches composed per
-`dispatch-composition.md` — when `/design`'s execution-readiness gate says the
-work needs no runbook. `/orchestrate` executes by dispatch from `runbook.md`
-when `/design` routed the work to `/runbook`. The boundary is decided at
-`/design` C.5; `/inline` never consumes a runbook, and a small all-inline
-runbook still goes through `/orchestrate`.
+**D-34 — One execution skill, `/build`, whatever the work arrived as.** It
+takes a proofed `runbook.md`, or a `design.md` / `outline.md` with no runbook,
+or a task from its own invocation, and runs one lifecycle over all three:
+entry gate, pre-work, item walk, review gate, triage feedback, completion.
 
-*Supersedes* (2026-09-01) the three-tier structure — inline, delegated,
-orchestrated — whose third tier rested on the weak-orchestrator premise
-rejected in §7: pre-generating prompts to amortize an expensive orchestrator
-is unnecessary for a strong one and harmful once implementation deviates. The
-inline-versus-delegated distinction survives inside `/inline` as an
-execution-level choice, not a route. External methodology frameworks
-(Cynefin, XP, Lean Startup) validate the principle — match process weight to
-uncertainty — but the structure derives from how this system executes.
+*Supersedes* (2026-09-17) the split into `/inline` and `/orchestrate`, which
+partitioned on whether a runbook existed. The cost was paid twice over: two
+skills carrying one lifecycle drifted — three different definitions of a clean
+tree between them, two descriptions of the same reviewer's tool list, both
+wrong in different ways — and the seam invited the belief that "simple work"
+needs a different *skill* rather than a lighter path through one. `/build` is
+a lean hub instead: it reaches for subagent ceremony only where the work needs
+it, so the simple case is fast without being special-cased.
+
+*Carried forward* from the 2026-09-01 supersession of the three-tier structure
+— inline, delegated, orchestrated — whose third tier rested on the
+weak-orchestrator premise rejected in §7: "the inline-versus-delegated
+distinction survives … as an execution-level choice, not a route." This merge
+completes that sentence rather than contradicting it, and §4 of `/build` is
+built on it: delegation is decided per item at dispatch time. External
+methodology frameworks (Cynefin, XP, Lean Startup) validate the principle —
+match process weight to uncertainty — but the structure derives from how this
+system executes.
+
+**D-79 — Three planning artifacts, two design routes, one execution skill.**
+
+| Artifact | Means | Goes to |
+|---|---|---|
+| `design.md` | architecture was uncertain and needed full resolution | `/runbook` |
+| `outline.md` | architecture known, or resolved within the outline | `/runbook` or `/build` |
+| `runbook.md` | decomposed into typed phases | `/build` |
+
+`outline.md` keeps both consumers: `/design`'s Moderate non-prose route sends
+it to `/runbook`, its Simple and agentic-prose route to `/build`. Those two
+were separate branches producing separate artifacts and now produce the same
+one, so they are one branch.
+
+`inline-plan.md` is **removed as a kind, not renamed.** It was an `outline.md`
+with the architecture section left empty — every field it had, a sufficient
+outline has, and `write-outline.md` already says "The outline IS the design"
+when its sufficiency criteria hold. The artifact had no identity of its own,
+only a consumer, which is how it came to be named after one; `build-plan.md`
+would have carried that defect forward under a cleaner name.
 
 **D-35 — Complexity, work type and route are three independent decisions.**
 Complexity (Stacey axes) determines design ceremony. Work type
@@ -566,10 +600,13 @@ alone.** Prototype scripts, one-off analysis and spikes do not need runbooks, TD
 or test files even though they contain behavioral code. Design resolves the
 complexity; after design a prototype is direct implementation.
 
-**D-37 — Simple classification still routes through `/inline`.** "Direct
+**D-37 — Simple classification still routes through `/build`.** "Direct
 execution" — recall, explore, edit, done — bypasses the integration-test gate,
 review dispatch, triage feedback and the deliverable-review chain. Classification
-determines *design* ceremony, not *execution* ceremony.
+determines *design* ceremony, not *execution* ceremony. Simple therefore gets
+the same four steps as Moderate agentic-prose — outline, proof, commit, route
+to `/build` — which is why those two `/design` branches collapsed into one
+(D-79).
 
 **D-38 — Composite tasks are decomposed before classification.** Batch-classifying
 an input holding N discrete work items averages heterogeneous items, so a

@@ -310,7 +310,7 @@ Review all changes for:
 
 ### 3.5. TDD Slice Reviews
 
-`/orchestrate` dispatches this agent twice per TDD slice. The prompt names
+`/build` dispatches this agent twice per TDD slice. The prompt names
 which review it is; each has its own scope and first check.
 
 **Test review** — scope IN: the slice's test files plus the RED report, and

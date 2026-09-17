@@ -263,7 +263,7 @@ Requirements written to: plans/<job>/requirements.md
 Next steps (decision criteria):
 - 0-2 open questions, all critical sections populated → `/design plans/<job>/`
 - 3+ open questions or empty critical sections → Standalone (revisit when clearer)
-- Very clear scope + simple → `/design plans/<job>/` (its triage routes small work to `/inline`)
+- Very clear scope + simple → `/design plans/<job>/` (its triage routes small work straight to `/build`)
 - User stated explicit next step → Use that path
 ```
 

@@ -81,12 +81,12 @@ ELSE (work type = Production AND behavioral code) → /runbook
 - Insertion points or edit targets are identified (line-level or section-level)
 - No cross-file coordination requiring sequencing
 - No implementation loops (no test/build feedback required)
-- Scope fits inline capacity (single session, single model)
+- Scope fits single-session capacity (one session, one model)
 
 Direct execution bypasses `/runbook` — this gate must assess both coordination complexity and capacity.
 
-- **If execution-ready:** Follow §Continuation (prepends `/inline plans/<job> execute`).
-- **If not execution-ready:** Commit design artifact, then follow §Continuation.
+- **If execution-ready:** commit the design artifact, then name `/build plans/<job>` as the next command and stop. No tail-call: `/build` consumes no continuation.
+- **If not execution-ready:** commit the design artifact and stop.
 
 ## Constraints
 

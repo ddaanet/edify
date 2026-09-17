@@ -7,9 +7,6 @@ description: >-
   documents for complex jobs, routes moderate to /runbook.
 allowed-tools: Agent, Read, Write, Bash, WebSearch, WebFetch, Skill
 user-invocable: true
-continuation:
-  cooperative: true
-  default-exit: ["/handoff:handoff", "/commit-commands:commit"]
 ---
 
 # Design Implementation Approach
@@ -18,8 +15,8 @@ Produce dense design documents that guide implementation by downstream agents (s
 
 ## Downstream Consumers
 
-- **Planning:** `/runbook` — phases typed tdd / general / inline. Note which phases are behavioural (tdd), infrastructure (general), or prose/config the orchestrator applies itself (inline) to guide per-phase typing.
-- **Execution:** `/inline` when work is execution-ready (Phase B sufficiency gate, Phase C.5 execution readiness). Handles execution lifecycle: corrector, triage feedback, deliverable-review chain.
+- **Planning:** `/runbook` — phases typed tdd or general. Note which phases are behavioural (tdd) and which are infrastructure or prose (general) to guide per-phase typing. Whether an item is delegated is not a phase property; `/build` decides that per item.
+- **Execution:** `/build` when work is execution-ready (Phase B sufficiency gate, Phase C.5 execution readiness). Handles the execution lifecycle: entry gate, item walk, review gate, triage feedback, deliverable-review handoff.
 
 ## Process
 
@@ -130,25 +127,18 @@ Produce this classification block before routing (visible output, not internal r
 
 #### Routing
 
-- **Simple →** Lightweight recall-explore, then chain to `/inline`:
-  1. Recall: from the in-context index, Read the memory and decision files matching the task's domain keywords
-  2. Explore: if affected files not already known, `rg --files`/`rg` (Bash) to identify targets
-  3. Execute: check for applicable skills and project recipes first, then implement directly
-  4. Follow §Continuation (prepends `/inline plans/<job> execute`)
+- **Simple, or Moderate agentic-prose** (artifact destination = `agentic-prose`) **→ one route.** Both produce an `outline.md` and hand it to `/build`; a branch that differs from another only in ceremony neither has is not a decision.
+  1. **Recall:** from the in-context index, Read the memory and decision files matching the task's domain keywords.
+  2. **Code reading:** Read the affected files the brief enumerates — the ones the work will actually change, not a summary of them — and resolve gaps between the brief's assumptions and actual codebase state. Where the brief does not enumerate them, `rg --files`/`rg` (Bash) to identify targets.
+  3. **Generate** `plans/<job>/outline.md` per `references/write-outline.md`. For agentic prose, record **what changes** rather than why the approach was chosen: the approach is not in question, so the outline's value is the change list.
+  4. **Proof:** Invoke `/proof plans/<job>/outline.md` (outline-corrector dispatched by /proof on revise/kill).
+  5. **Route (after /proof approval):** commit the outline, then name `/build plans/<job>` as the next command and stop. `/build` consumes no continuation, so this is a named handoff and not a tail-call.
   Skip design — all other operational rules (skills, project tooling, communication) remain in effect.
-- **Moderate →** Read affected files to ground brief against actual codebase state, then generate execution artifact:
-
-  **Agentic-prose path** (artifact destination = `agentic-prose`):
-  1. **Code reading:** Read affected files enumerated in the brief. Resolve gaps between brief assumptions and actual codebase state.
-  2. Read `references/write-inline-plan.md`. **Generate** `plans/<job>/inline-plan.md` using that format.
-  3. **Proof:** Invoke `/proof plans/<job>/inline-plan.md` (no corrector — scope completeness is domain knowledge, not structural checking)
-  4. **Route (after /proof approval):** follow §Continuation (prepends `/inline plans/<job> execute`)
-
-  **Non-prose path** (all other artifact destinations):
+- **Moderate, non-prose** (all other artifact destinations) **→** ground the brief against the codebase, then plan:
   1. **Code reading:** Read affected files enumerated in the brief. Resolve gaps between brief assumptions and actual codebase state.
   2. **Generate** `plans/<job>/outline.md` using lightweight format (scope, per-file changes, dependencies, IN/OUT boundaries)
   3. **Proof:** Invoke `/proof plans/<job>/outline.md` (outline-corrector dispatched by /proof on revise/kill)
-  4. **Route (after /proof approval):** follow §Continuation (prepends `/runbook plans/<job>`)
+  4. **Route (after /proof approval):** commit the outline, then name `/runbook plans/<job>` as the next command and stop.
 - **Complex →** Read `references/write-outline.md` for Phase A (research + outline) and Phase B (user validation + outline sufficiency gate). *(Verb-oriented name: action the agent takes, not the artifact produced.)*
 - **Defect →** Route to structured-bugfix workflow: reproduce → root-cause → fix → verify. Skip design — the investigation structure replaces architectural design.
 
@@ -175,12 +165,11 @@ When a design modifies an "author" skill (a skill whose output is reviewed by a 
 
 **Visible output (mandatory):** "Author change: X. Coupled corrector: Y. Update needed: yes/no." This block forces awareness of coupling — designers check the table, not silently skip it.
 
-## Continuation
+## Routing out
 
-Read `plugin/fragments/continuation-passing.md` and follow its §Consumption
-Protocol as the final action of this skill; on failure, its §Error Propagation.
+Each branch above names its own next command and stops there. There is no
+tail-call: `/design` states the command, the user or the session runs it.
 
-This skill's step-2 prepend, by routing outcome:
-- Moderate (non-prose): prepend `/runbook plans/<job>`
-- Simple, Moderate (agentic-prose), or execution-ready (B gate or C.5): prepend `/inline plans/<job> execute`
-- Not execution-ready: no prepend
+- Moderate non-prose → `/runbook plans/<job>`
+- Simple, Moderate agentic-prose, or execution-ready (B gate or C.5) → `/build plans/<job>`
+- Not execution-ready → commit the artifact and stop; no next command

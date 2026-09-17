@@ -149,8 +149,10 @@ plugin/skills/build/scripts/verify-step.sh
   escalate to the user. After any remediation, note the RCA follow-up in the
   run summary.
 
-**No mid-execution checkpoints beyond these.** Section 5's review gate is the
-sole semantic review; post-item verification catches the mechanical failures.
+**Invent no further checkpoints.** A run's semantic reviews are exactly two —
+the phase-boundary corrector below, where the work is a phased runbook, and
+Section 5's review gate. Post-item verification catches everything mechanical
+between them.
 
 ### 4.5 Phase boundary
 
@@ -164,8 +166,8 @@ phases and skips this.
 several sessions reaches this once, in its last one.
 
 Read `references/finishing.md` and follow it: review gate, triage feedback,
-completion. **Not skippable** — both branches below require a tool call on
-`plans/<job>/reports/`.
+completion. **Not skippable** — whichever way the branch below goes, it ends
+in a tool call on `plans/<job>/reports/`.
 
 The one branch this hub owns is the review gate's. Where review is genuinely
 unnecessary — trivial task-frame-only edits, plan artifact cleanup — the

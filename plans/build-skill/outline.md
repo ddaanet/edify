@@ -8,6 +8,12 @@ This file is an `outline.md` because the `inline-plan.md` artifact kind is
 removed by this merge (below) and the agentic-prose route now produces an
 outline like every other design route.
 
+At 589 hard-wrapped lines this plan runs over the 400-line soft cap. Split
+considered and declined 2026-09-17, after execution: the seam was building
+the new skill versus repointing everything that named the old ones, and both
+halves are now executed. Splitting a finished plan buys its next reader
+nothing and costs the cross-referencing.
+
 ## Scope
 
 ### New skill

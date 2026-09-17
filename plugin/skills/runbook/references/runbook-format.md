@@ -2,8 +2,8 @@
 
 The runbook (`plans/<job>/runbook.md`) is the terminal planning artifact:
 `/runbook` writes it, `runbook-corrector` and `runbook-simplifier` gate it,
-`/proof` validates it, and `/orchestrate` reads it and composes each dispatch
-prompt from it live. Nothing expands it.
+`/proof` validates it, and `/build` reads it and composes each dispatch prompt
+from it live. Nothing expands it.
 
 ## Structure
 
@@ -11,7 +11,7 @@ Open with a pointer to the design and requirements, then a requirements
 mapping table (`| Requirement | Phase | Items | Notes |`), then the phases:
 
 ```markdown
-## Phase N: <title> (type: tdd|general|inline)
+## Phase N: <title> (type: tdd|general)
 
 - Item N.M: <target path> — <concrete action>. Requirements: FR-x[, FR-y].
   Depends on: Item N.K
@@ -23,10 +23,11 @@ mapping table (`| Requirement | Phase | Items | Notes |`), then the phases:
   output.
 
 An item does **not** carry a model. The dispatcher assigns the model from the
-dispatch itself (`dispatch-composition.md` §Model assignment), which is the only
-point that knows the agent type and the deliverable. A planner naming a model is
-guessing at difficulty before anyone has read the code; where an item turns out to
-need a stronger model, the agent escalates and the dispatcher re-dispatches.
+dispatch itself (`plugin/skills/build/references/dispatch-composition.md`
+§Model assignment), which is the only point that knows the agent type and the
+deliverable. A planner naming a model is guessing at difficulty before anyone
+has read the code; where an item turns out to need a stronger model, the agent
+escalates and the dispatcher re-dispatches.
 
 ### tdd items: Slices
 
@@ -35,7 +36,7 @@ contract with the degenerate or naive happy-path case; each later slice adds
 exactly one behaviour (an error path, an edge, a second feature). Each slice
 names its tests in prose with the assertion stated, specific enough that two
 executors would write the same test. Slice k of Item N.M is `N.M/k` — the
-id `/orchestrate` uses in dispatch names and slice commit subjects.
+id `/build` uses in dispatch names and slice commit subjects.
 
 ### Interfaces blocks
 
@@ -66,6 +67,16 @@ explicit contract.
   Requirements: FR-3. Depends on: Item 2.1
 ```
 
+A general phase uses the base item shape with no `Slices:`:
+
+```markdown
+## Phase 3: Documentation (type: general)
+
+- Item 3.1: README.md — document the `edify extract` subcommand in the CLI
+  table: one row naming its argument and what it writes. Requirements: FR-3.
+  Depends on: Item 2.2
+```
+
 ## Prose plus interfaces, never code
 
 Items describe behaviour, target files, and tests in prose. No implementation
@@ -73,7 +84,7 @@ or test code blocks anywhere in an item: a code block turns the executor into
 a copier and goes stale against the moving implementation. `Interfaces:`
 blocks are the one formal element.
 
-## Assertion quality
+## Assertion quality (tdd items)
 
 | Weak (vague) | Strong (specific) |
 |---|---|
@@ -84,7 +95,7 @@ blocks are the one formal element.
 Prose must state exact expected values, patterns, or behaviours. An assertion
 satisfiable by multiple implementations is too vague.
 
-## Ordering
+## Ordering (tdd items)
 
 - **Integration-first.** Default to tests that exercise production call
   paths; add unit-level tests only where integration coverage is insufficient
@@ -106,19 +117,22 @@ separators", never "output contains appropriate styling".
 
 ## Item-level rules
 
+Rules tagged *(tdd)* concern tests and bind only on tdd items; *(general)*
+tags the one rule specific to general items. The untagged rules bind on both.
+
 - **No setup-only items.** An item that only creates scaffolding or fixtures
   with no behavioural outcome merges into the nearest behavioural item.
 - **No god items.** An item covering several behaviours splits: one behaviour
   per slice, and an item whose slices span a subsystem splits into items.
-- **No presentation tests.** Test that the flag works, not that help text
-  mentions it; output shape is presentation, not behaviour.
-- **No weak assertions.** Exit-code-only checks pass with a stub; assert
-  output content.
-- **No split prose edits.** All edits to one prose artifact (skill, fragment,
-  agent definition) land in one item — fragmenting the file across items
-  degrades editor context, the only quality lever prose has.
-- **No unit-only coverage.** Every phase building behaviour has at least one
-  test through the production call path.
-- **No mocked subprocess when real is fast.** Use real subprocesses in
+- **No presentation tests.** *(tdd)* Test that the flag works, not that help
+  text mentions it; output shape is presentation, not behaviour.
+- **No weak assertions.** *(tdd)* Exit-code-only checks pass with a stub;
+  assert output content.
+- **No split prose edits.** *(general)* All edits to one prose artifact (skill,
+  fragment, agent definition) land in one item — fragmenting the file across
+  items degrades editor context, the only quality lever prose has.
+- **No unit-only coverage.** *(tdd)* Every phase building behaviour has at
+  least one test through the production call path.
+- **No mocked subprocess when real is fast.** *(tdd)* Use real subprocesses in
   `tmp_path` for git/CLI operations completing in milliseconds; mock only for
   error injection.

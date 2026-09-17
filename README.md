@@ -38,8 +38,8 @@ The `plugin/` directory is a Claude Code plugin — a plain subdirectory of this
 repo (previously a git submodule). It ships framework-agnostic skills invoked
 as slash commands, in two groups:
 
-- **Pipeline** — `/requirements` → `/design` → `/runbook` → `/orchestrate`
-  (or `/design` → `/inline` for work that needs no runbook), with `/review`
+- **Pipeline** — `/requirements` → `/design` → `/runbook` → `/build`
+  (or `/design` → `/build` for work that needs no runbook), with `/review`
   as the in-progress quality gate.
 - **Standalone** — `/proof`, `/deliverable-review`, `/ground`, `/formalize`,
   `/recall`.

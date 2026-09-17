@@ -1,7 +1,7 @@
 # edify plugin
 
 A [Claude Code][claude-code] bundle of framework-agnostic skills and agents,
-built around a `requirements → design → runbook → orchestrate` planning and
+built around a `requirements → design → runbook → build` planning and
 execution pipeline.
 
 The pipeline was torn down in 2026-05, when the ecosystem (superpowers, native
@@ -19,15 +19,14 @@ are invoked as slash commands.
 Slash-command procedures that inject instructions into the current
 conversation. Each lives in `skills/<name>/SKILL.md`.
 
-**Pipeline** — run in sequence; each stage hands to the next via continuation.
+**Pipeline** — run in sequence; each stage names the next command and stops there.
 
 | Skill | Purpose |
 |-------|---------|
 | `/requirements` | Capture and document requirements for design and planning |
-| `/design` | Triage complexity, then design the approach; routes simple work straight to `/inline` |
-| `/runbook` | Decompose a design into a runbook of typed items (tdd slices, general, inline) |
-| `/orchestrate` | Execute a runbook by composing dispatch prompts per item, with verification gates |
-| `/inline` | Sequence inline execution — pre-work, execute, post-work — for work without a runbook |
+| `/design` | Triage complexity, then design the approach; routes simple work straight to `/build` |
+| `/runbook` | Decompose a design into a runbook of typed items (tdd slices, general) |
+| `/build` | Execute planned work — a runbook, or a design with none — composing a dispatch prompt per item, with verification gates |
 | `/review` | Review in-progress changes for quality and correctness |
 
 **Standalone** — usable on their own, no pipeline required.
@@ -69,8 +68,8 @@ Utility scripts in `bin/` (POSIX shell and Python 3):
 | `check-version-consistency.py` | Verify plugin and package versions agree |
 | `triage-feedback.sh` | Compare predicted against actual complexity after execution |
 
-Plus `skills/orchestrate/scripts/verify-step.sh`, the clean-tree and precommit
-gate `/orchestrate` runs after each committing dispatch — GREEN, code review
+Plus `skills/build/scripts/verify-step.sh`, the clean-tree and precommit
+gate `/build` runs after each committing dispatch — GREEN, code review
 and general items — never after a RED or a test review, whose tests are
 uncommitted by design.
 

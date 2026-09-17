@@ -197,7 +197,7 @@ In workflow contexts, prefer agent delegation. **Direct invocation** is for when
 **Workflow stages:**
 1. `/design` — Opus creates design document
 2. `/runbook` — Sonnet creates runbook (per-phase typing: TDD + general)
-3. `/orchestrate` — Executes runbook
+3. `/build` — Executes the planned work
 4. corrector — Review and fix changes before commit
 5. `/commit-commands:commit` — Commit changes
 6. Complete job

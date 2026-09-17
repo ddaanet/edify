@@ -180,7 +180,7 @@ Python >=3.14, hatchling build, uv package manager. Entry point
 
 In `plugin/skills/`, invoked via slash command.
 
-- **Workflow pipeline:** `requirements` → `design` → `runbook` → `orchestrate`, or `design` → `inline` for work that needs no runbook, with `review` as the in-progress quality gate.
+- **Workflow pipeline:** `requirements` → `design` → `runbook` → `build`, or `design` → `build` for work that needs no runbook, with `review` as the in-progress quality gate.
 - **Standalone:** `proof`, `ground`, `deliverable-review`, `formalize`, `recall`.
 
 The pipeline agents live in `plugin/agents/` (correctors, `artisan`, `scout`,
@@ -190,7 +190,7 @@ requirement IDs, interface blocks, and behaviour slices on tdd items
 (`plugin/skills/runbook/references/runbook-format.md`); nothing expands it.
 
 Execution delegates **by reference**: the orchestrator composes each dispatch
-prompt from the runbook item (`plugin/skills/orchestrate/references/dispatch-composition.md`)
+prompt from the runbook item (`plugin/skills/build/references/dispatch-composition.md`)
 — item text inline, design and recall artifacts by path. A tdd slice is four
 dispatches: RED, test review, GREEN, code review. Bespoke per-plan agent
 definitions were dropped in 2026-08 — they fought the platform (not
