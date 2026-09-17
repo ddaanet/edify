@@ -1,9 +1,11 @@
-# Open items
+## Open decisions
+
+- **`memory/MEMORY.md` is at 105% of its 25600-byte budget.** Past 24.4KB Claude Code's loader silently truncates the tail, so index lines beyond the cutoff never reach a session — including ones added this session. Decide whether to compress existing hooks, move facts into tier carriers, or raise the budget.
 
 ## Remaining
 
 - `/proof`'s verdict prompting is too formal. Replace the `(a)pprove (r)evise (k)ill (s)kip` prompt in `plugin/skills/proof/SKILL.md` §Item Iteration with: propose a verdict conversationally, show the amended item, capture the verdict from the reply. Couples to `references/item-review.md`; route through `/design`.
-- deliverable-review follow-up (skill-review decision 2, second half): Criticals route to a fresh design-to-deliverable round, Majors and Minors to a direct /build flow. Depends on /build accepting work with no runbook. `inbox/brief-review-feeds-back-into-design.md` (arrived 2026-09-17 from the handoff plugin repo) is a brief on this same seam and should be read first.
+- deliverable-review follow-up (skill-review decision 2, second half): Criticals route to a fresh design-to-deliverable round, Majors and Minors to a direct /build flow. `inbox/brief-review-feeds-back-into-design.md` (arrived 2026-09-17 from the handoff plugin repo) is a brief on this same seam and should be read first.
 - The remaining `plans/skill-reviews/` findings beyond the five settled decisions — 24 critical / 74 major / 91 minor across eleven skills, none actioned. The proof pass found at least one already fixed in source, so verify each against the file before acting.
 - Pilfer defect 21 (corrector-skeleton dedup), carrying: the unreachable 'when reviewing runbooks/plans' criteria in `corrector.md` ~293-304; the corrector family's `Skill(edify:recall)` (`corrector.md:184`, `runbook-corrector.md:59`) against the by-path recall rule; `review-requirement.md`'s routing table still routing 'plans' to `edify:corrector` with no outline/runbook rows (defers to D-26).
 - FR-12 remainder beyond defect 21: per-class skill-body length targets, which have no calibration data.
