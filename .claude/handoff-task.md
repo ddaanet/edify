@@ -1,13 +1,22 @@
 ## Current task
 
-`/build plans/design-routing-and-provenance` is **complete** — both items executed, all three review groups dispatched and their findings applied, triage verdict `match`, tree clean. The job's remaining step is its named follow-up: `/deliverable-review plans/design-routing-and-provenance`, opus, in a fresh session.
+Second pass on `design-routing-and-provenance`, working its deliverable
+review's findings. `/edify:deliverable-review` ran on that job and reported 0
+critical / 4 major / 3 minor to
+`plans/design-routing-and-provenance/reports/deliverable-review.md`; the
+`/edify:design` pass that followed classified the findings Simple / Moderate
+agentic-prose (one route) and wrote `plans/provenance-reach-and-sweep/` —
+`outline.md`, `classification.md`, `recall-artifact.md`.
 
-The review range that command needs is `926e372d02a0366202b2bb6a684551128d1f2a66..HEAD`, read from the outline's own `## Provenance` section — that outline is the first artefact written under the provenance contract this job introduced, so the follow-up is also the contract's first dogfooding. The design artefact is `plans/design-routing-and-provenance/outline.md` (no `design.md`); `deliverable-review` now takes whichever exists.
+The outline is written and unproofed. Next step is `/edify:proof` on
+`plans/provenance-reach-and-sweep/outline.md`, then `/edify:build` on that
+job directory.
 
-Three reviewer reports sit in `plans/design-routing-and-provenance/reports/` — `review-skills.md`, `review-agents.md`, `review-docs.md`. They are inputs to the deliverable review, not substitutes for it: each saw one artifact group against the baseline, none saw the whole diff.
+The outline's `Base:` is `926e372d02a0366202b2bb6a684551128d1f2a66`, copied
+verbatim from the superseded outline rather than recomputed — the first real
+exercise of D-80's inheritance rule, so a wrong value here would silently
+narrow the next deliverable-review's range.
 
-This run was also the first exercise of the merged `/build` skill, so anything awkward in its lifecycle is a finding about the skill, not just about this job.
-
-### Operational note
-
-`plugin/skills/build/scripts/verify-step.sh` and `just precommit` must run with `dangerouslyDisableSandbox: true`. Sandboxed, `git status` invents untracked `.claude/` phantoms and the gate returns a false `DIRTY`.
+The job is five edit regions, ordered by region rather than by severity
+because three of the five carry findings from both tiers. Every line citation
+in the outline was verified against the files before proofing.
