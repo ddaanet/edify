@@ -55,6 +55,9 @@ plugin/skills/build/scripts/verify-step.sh
 - Exit 1 with `PRECOMMIT:` → STOP: "Precommit failing. Fix before /build."
 - Exit 2 → STOP: the script itself failed, so there is no verdict.
 
+Run it with `dangerouslyDisableSandbox: true`, here and at every other call
+site; a sandboxed run yields no verdict.
+
 This script is the skill's single definition of a clean tree; Section 4 and
 `references/phase-boundary.md` call the same one. A bare
 `git status --porcelain` here would refuse states the later gates are

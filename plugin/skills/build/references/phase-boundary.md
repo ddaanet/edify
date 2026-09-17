@@ -9,6 +9,8 @@ plugin/skills/build/scripts/verify-step.sh
 git diff --name-only
 ```
 
+Run `verify-step.sh` with `dangerouslyDisableSandbox: true`.
+
 Dispatch `edify:corrector` (checkpoint form, composed per
 `dispatch-composition.md`): scope IN/OUT from the phase's items, design and
 recall artifact by path, changed-files list, report path from that reference's
