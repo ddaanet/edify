@@ -165,8 +165,10 @@ If design includes "Documentation Perimeter" section:
 
 Every `/design` artifact carries a `## Provenance` section with `Derived from:` and `Base:`:
 - Section missing → Major: `/edify:deliverable-review` has no way to establish its review range
-- `Derived from:` names a prior artifact → `Base:` must match that artifact's `Base:` verbatim. A recomputed base → Critical: the range then starts after the prior pass's work, and the resulting narrow diff reads as a clean review
-- `Derived from:` is `none` → `Base:` is a full sha reachable from HEAD (`git merge-base --is-ancestor <base> HEAD` via Bash)
+- `Derived from:` is `none`, or names **both** the review report that motivated the design and the artifact it supersedes — naming only the report → Major, since the superseded artifact is a later pass's only route to `Base:`
+- `Derived from:` names a prior artifact → Read that artifact and check `Base:` matches it verbatim. A recomputed base → Critical: the range then starts after the prior pass's work, and the resulting narrow diff reads as a clean review. A `Derived from:` path that does not resolve → Major; report it rather than accept the base unchecked
+- `Derived from:` is `none` → `Base:` is a full 40-character sha reachable from HEAD (`git merge-base --is-ancestor <base> HEAD` via Bash, exit 0)
+- **Never fill in `Base:` yourself.** Repair a missing or unverifiable base with a `TODO` placeholder in both fields, and name in the report what the author must supply. A base you compute is the recomputation the Critical bullet names, and it fails silently
 
 ### 4. Assess Plugin Topics
 
@@ -332,7 +334,7 @@ Recommendation: [What to do]
 - Use **Bash `rg --files`** to verify file paths referenced in design
 - Use **Bash `rg`** to search for patterns/conventions in codebase
 - Use **Write** to create review report
-- Use **Bash** for git commands if needed (check recent commit context)
+- Use **Bash** for git commands — `git merge-base --is-ancestor` for Provenance reachability, plus recent commit context. Never `git rev-parse HEAD` to supply a `Base:`
 
 **Output Protocol:**
 - Write detailed review to file
@@ -392,7 +394,7 @@ Before returning filename:
 3. **Load recall context** (Step 1.5)
 4. **Analyze design** against all criteria (completeness, clarity, feasibility, consistency)
 5. **Verify references** (`rg --files` for file paths, `rg` for patterns if needed)
-6. **Check plugin topics** for skill-loading directives
+6. **Check provenance** (Step 3.5) and **plugin topics** for skill-loading directives
 7. **Apply ALL fixes** (critical, major, minor) directly to design document using Edit tool
 8. **Write review** to file with complete structure documenting fixes applied
 9. **Verify** review file created

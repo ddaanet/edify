@@ -111,8 +111,10 @@ Analyze outline against these dimensions:
 
 **Provenance:**
 - A `## Provenance` section is present, carrying both `Derived from:` and `Base:`. Missing → Major: `/edify:deliverable-review` has no way to establish its review range.
-- When `Derived from:` names a prior artifact, `Base:` matches that artifact's `Base:` verbatim. A recomputed base → Critical: the range then starts after the prior pass's work, and the resulting narrow diff reads as a clean review.
-- When `Derived from:` is `none`, `Base:` is a full sha reachable from HEAD (`git merge-base --is-ancestor <base> HEAD` via Bash).
+- `Derived from:` is `none`, or names **both** the review report that motivated the outline and the artifact it supersedes. Naming only the report → Major: the superseded artifact is a later pass's only route to `Base:`.
+- When `Derived from:` names a prior artifact, Read that artifact and check `Base:` matches it verbatim. A recomputed base → Critical: the range then starts after the prior pass's work, and the resulting narrow diff reads as a clean review. A `Derived from:` path that does not resolve → Major; report it rather than accept the base unchecked.
+- When `Derived from:` is `none`, `Base:` is a full 40-character sha reachable from HEAD (`git merge-base --is-ancestor <base> HEAD` via Bash, exit 0).
+- **Never fill in `Base:` yourself.** Repair a missing or unverifiable base with a `TODO` placeholder in both fields, and name in the report what the author must supply. A base you compute is the recomputation the Critical bullet names, and it fails silently.
 
 **Resume Completeness (for agent/state machine designs):**
 - All non-terminal states have a defined resume path
@@ -317,6 +319,7 @@ Recommendation: [What to do]
 - Use **Write** to create review report
 - Use **Bash `rg`** to find requirement references if needed
 - Use **Bash `rg --files`** to discover exploration reports
+- Use **Bash `git`** for the Provenance checks — `git merge-base --is-ancestor <base> HEAD` to test reachability. Never `git rev-parse HEAD` to supply a base
 
 **Output Protocol:**
 - Write detailed review to file
@@ -383,7 +386,7 @@ Before returning filename:
 1. **Validate inputs** (requirements exist, artifact is outline.md)
 2. **Load context** (requirements, outline, reports, recall context per Step 2 item 4)
 3. **Build traceability matrices** (FR-* → outline sections; Scope IN items → components)
-4. **Review against criteria** (soundness, completeness, feasibility, clarity, scope, scope-to-component traceability, cross-component interface compatibility)
+4. **Review against criteria** (soundness, completeness, feasibility, clarity, scope, provenance, scope-to-component traceability, cross-component interface compatibility)
 5. **Apply all fixes** (critical, major, AND minor)
 6. **Write review report** with complete structure
 7. **Update outline.md** with all fixes applied
