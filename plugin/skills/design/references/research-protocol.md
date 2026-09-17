@@ -27,6 +27,7 @@ Review the changed files list. Codebase findings, external research, and Context
 
 **Example outline** (for reference -- adapt to task):
 ```
+Provenance: Derived from: none. Base: <full sha from git rev-parse HEAD>.
 Approach: Add rate limiting middleware to API gateway using token bucket algorithm.
 Key decisions: Per-user limits (not global), Redis-backed counters, 429 response with Retry-After header.
 Open questions: Should rate limits vary by endpoint? Should admin users be exempt?

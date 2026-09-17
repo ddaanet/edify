@@ -45,7 +45,7 @@ Full axis definitions: `docs/design.md` §6.8 "Deliverable review"
 
 ### Phase 2: Gap Analysis
 
-Compare inventory against design In-scope items:
+Compare inventory against the design artifact's In-scope items:
 - **Missing deliverables** — specified but not produced
 - **Unspecified deliverables** — produced but not in design scope
 - **Excess** in unspecified is acceptable if justified (edge case coverage, defensive tests)

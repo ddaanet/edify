@@ -1,6 +1,6 @@
 # Design Content Rules
 
-Content principles and structure guidance for Phase C.1 design document generation, plus the Provenance section every `/design` artefact carries.
+Content principles and structure guidance for Phase C.1 design document generation, plus the Provenance section every `/design` artifact carries.
 
 ## Content Principles
 
@@ -59,6 +59,7 @@ Format classification tables with explicit scope:
 
 ## Structure Guidance (adapt as needed)
 
+- Provenance (see below)
 - Problem statement
 - Requirements (functional, non-functional, out of scope)
 - Architecture/approach
@@ -106,7 +107,7 @@ Every `/design` artifact carries one -- `outline.md` and `design.md` alike, sinc
 ```
 
 - **Derived from:** the review report that motivated this design *and* the artifact it supersedes, or `none`. Naming both is what makes the base copyable -- a second pass in a new job directory has no other route to it.
-- **Base:** a first-pass artifact takes `git rev-parse HEAD` at generation time. A second-pass artifact **copies `Base:` verbatim** from the artifact named in `Derived from:`, and never recomputes it. Recomputing makes the range start after the first pass's work, so the review sees the fixes instead of the deliverable -- and a too-narrow diff reads as a clean review, so nothing surfaces the error.
+- **Base:** on a first pass, run `git rev-parse HEAD` and record the full sha. On a second pass, open the artifact named in `Derived from:` and **copy its `Base:` verbatim**; never recompute it. Recomputing makes the range start after the first pass's work, so the review sees the fixes instead of the deliverable -- and a too-narrow diff reads as a clean review, so nothing surfaces the error.
 
 Taking `HEAD` at generation time is correct: `plans/` is excluded from the review diff, so the artifact's own commit cannot pollute the range it defines.
 

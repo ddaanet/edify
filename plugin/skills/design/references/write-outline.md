@@ -102,7 +102,7 @@ Exploration surfaces codebase areas not caught by A.1's topic-based recall. Invo
 
 Read `references/research-protocol.md` for outline content/format guidance.
 
-**Output:** Write outline to `plans/<job>/outline.md` — approach, key decisions, open questions, scope boundaries.
+**Output:** Write outline to `plans/<job>/outline.md` — provenance, approach, key decisions, open questions, scope boundaries.
 
 **Escape hatch:** If user input already specifies approach, decisions, and scope (e.g., detailed brief.md), compress A+B by presenting outline and asking for validation in a single message.
 

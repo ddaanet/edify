@@ -1,24 +1,23 @@
 # Route to Execution
 
 Read at the end of a sufficiency gate, once the user has confirmed the
-artefact — `outline.md` or `design.md` — as this job's terminal design
-artefact.
+artifact — `outline.md` or `design.md` — as this job's terminal design
+artifact.
 
 The question is **does this work need a runbook?** Not whether this session
 can execute it: a `/build` run may span several sessions. The decision stays
-here because `/build` §1 takes whichever artefact exists and never routes
+here because `/build` §1 takes whichever artifact exists and never routes
 back to `/runbook`.
 
 ## Preconditions
 
-Both bind every branch, prose included. A failure sends the work back to
-design — not to a different route.
+Both bind every branch, prose included.
 
 - Every decision **the executor would otherwise have to make** is resolved.
   This is not "no open questions": an Exploration job exists to answer one,
   and that question is its deliverable rather than a blocker.
 - Edit targets are named, section-level or line-level. With no runbook the
-  artefact **is** the item list, so `/build` walks what the artefact names.
+  artifact **is** the item list, so `/build` walks what the artifact names.
 
 ## Route
 
@@ -46,6 +45,11 @@ Either one holding sends the work to `/runbook` rather than `/build`:
 
 ## Terminal action
 
-- **`/build`** — commit the artefact, then name `/build plans/<job>` as the
+- **`/build`** — commit the artifact, then name `/build plans/<job>` as the
   next command and stop. No tail-call: `/build` consumes no continuation.
-- **`/runbook`** — commit the artefact and stop.
+- **`/runbook`** — commit the artifact and stop.
+- **A precondition failed** — name it, then resume from A.5 to revise the
+  outline or from C.1 to revise the design. Do not route.
+
+Read per sub-problem from the multi-sub-problem gate: record the route in that
+sub-problem's readiness summary and name no command — the caller dispatches.

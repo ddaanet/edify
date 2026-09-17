@@ -10,7 +10,7 @@ Review the changed files list. Approach commitment, revised scope, or rejected a
 
 **Output:** `plans/<job-name>/design.md`
 
-**Content rules:** Read `references/design-content-rules.md` for content principles, density checkpoint, agent-name validation, classification table format, structure guidance, requirements section format, TDD additions, references/documentation perimeter sections, and skill-loading/execution model directives.
+**Content rules:** Read `references/design-content-rules.md` for content principles, density checkpoint, agent-name validation, classification table format, structure guidance, requirements section format, TDD additions, provenance/references/documentation perimeter sections, and skill-loading/execution model directives.
 
 #### C.2. Checkpoint Commit
 
