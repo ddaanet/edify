@@ -1,7 +1,3 @@
-## Open decisions
-
-None.
-
 ## Remaining
 
 ### /design skill work
@@ -17,4 +13,3 @@ None.
 - FR-12 remainder beyond defect 21: per-class skill-body length targets, which have no calibration data.
 - `/design plans/pilfer-superpowers/` once Q-1 and Q-3 settle.
 - Extend /recall to load skills (`craft`, `plugin-craft`, `sandbox-lies`) as well as memory files; the recall artifact format must allow naming them. Rationale in `inbox/recall-skill.md`.
-- `memory/MEMORY.md` needs a `/gitlore:index-audit` pass. Measured 2026-09-17: 26661 bytes against the 25600-byte loader cap, cutoff falling at line 86 of 88 -- so two entries are silently dropped from every session, not the whole tail.
