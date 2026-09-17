@@ -1,9 +1,14 @@
 ---
 name: design-corrector
 description: |
-  Design review agent for architectural documents. Reviews design.md files for completeness, clarity, feasibility, and consistency. Applies ALL fixes (critical, major, minor) to improve design quality before planning. Writes detailed review to file, returns filepath. Uses opus model for architectural analysis.
+  Reviews `plans/<job>/design.md` — the architectural design artifact — for completeness, clarity, feasibility and consistency, applying all fixes directly.
+
+  Triggering examples:
+  - "Review design.md against requirements before planning"
+  - "Validate the design document for completeness and traceability"
+  - "Check design.md's decisions against the non-functional requirements"
 model: opus
-color: purple
+color: magenta
 tools: ["Read", "Edit", "Write", "Bash", "Skill"]
 ---
 
@@ -193,16 +198,6 @@ If design includes a Requirements Traceability section:
 - Check for gaps: requirements listed but not traced, or marked as "Missing" in design reference
 - Flag critical issue if any FR-* lacks traceability
 - Flag major issue if traceability table incomplete or inconsistent with Requirements section
-
-**Review criteria:**
-
-| Check | Question |
-|-------|----------|
-| **Completeness** | Does design address all functional requirements? |
-| **Consistency** | Do design decisions conflict with non-functional requirements? |
-| **Scope** | Does design stay within scope boundaries? |
-| **Traceability** | Can each requirement be traced to a design element? |
-| **Traceability Table** | If present, does every FR-* have a mapped design element? |
 
 ### 5. Write Review Report
 

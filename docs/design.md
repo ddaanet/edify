@@ -4,8 +4,6 @@
 pipeline is prose, revived 2026-08, simplified to one runbook stage 2026-09,
 and not yet exercised end to end.
 
-**Verified against:** `f50ed025` (2026-09-02).
-
 Edify is two artifacts in one git tree: the `edify-cli` PyPI package (source in
 `src/edify/`) and the `edify` Claude Code plugin (`plugin/`). Direction:
 Lean-assisted, formal-proof-backed requirements tracking.

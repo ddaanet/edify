@@ -1,11 +1,5 @@
 # Open items
 
-## Open decisions
-
-- **`plugin/agents/design-corrector.md` is now 401 lines**, one over the 400 soft cap, pushed there by Item B's 7-line Provenance criterion. Per `memory/line-caps.md` a file parked at its cap has stopped signalling and prose must not be shaved to fit — so this is a split-or-accept call, not a trim. Not acted on.
-- **Scope deviation in Item A, applied and needing confirmation.** The outline's §Scope said `write-design.md`'s C.5 heading and lines :66/:68 "stay", while Item A's §3 said the name "execution readiness" is stale and should be renamed. Read the scope line's rationale as being about *retention* (the node does not carry those lines), the heading became "C.5. Execution Route and Handoff" and :66/:68 were reworded off "execution-readiness". The `C.5` label itself was kept — it is a phase id in a C.1–C.5 sequence and `write-design.md:53` depends on it.
-- **`design/SKILL.md:133` was left unchanged**, though the outline listed it alongside :139 for Item B. That route says "per `references/write-outline.md`", which reaches `research-protocol.md` §A.5, so Provenance arrives transitively; the outline's own stated reason for touching SKILL.md applied only to :139, and the hub is at 175 lines against a ~200 guideline.
-
 ## Remaining
 
 - `/proof`'s verdict prompting is too formal. Replace the `(a)pprove (r)evise (k)ill (s)kip` prompt in `plugin/skills/proof/SKILL.md` §Item Iteration with: propose a verdict conversationally, show the amended item, capture the verdict from the reply. Couples to `references/item-review.md`; route through `/design`.
