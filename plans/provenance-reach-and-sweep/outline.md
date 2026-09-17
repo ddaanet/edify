@@ -19,7 +19,8 @@ would have seen these fixes instead of the deliverable they repair.)*
 ## Requirements
 
 The review report is the requirement. Each finding names its file, its line and
-the defect; six of seven named their own fix.
+the defect; five of seven named their own fix, and M-1 and M-4 each offered
+two.
 
 | # | Finding | Settled as |
 |---|---|---|
@@ -30,6 +31,18 @@ the defect; six of seven named their own fix.
 | m-1 | Two independent fallback triggers joined by `and` in two places | `or` |
 | m-2 | The precondition-failure action is unscoped for the multi-sub-problem caller | scope it |
 | m-3 | "execution-ready" survives in `/build`'s description and §1 | subsumed into M-3 |
+
+**Found during `/proof`, not in the report.** Its whole-tree verification of
+the M-4 and M-3 claims turned up two further defects of the same class, both
+in scope:
+
+| # | Finding | Settled as |
+|---|---|---|
+| P-1 | `write-outline.md:185` points at `route-to-execution.md` with "per", the non-imperative form M-2 removes, on the very caller m-2 scopes | imperative Read, matching its two sibling sites |
+| P-2 | `design/SKILL.md:19` enumerates the node's callers as two; there are three | name both `write-outline.md` gates |
+
+So the next deliverable-review checks coverage against seven report findings
+plus these two.
 
 **Decisions taken before this outline** (my human partner, this session):
 
@@ -49,20 +62,21 @@ the defect; six of seven named their own fix.
 
 ## Scope
 
-**IN** — five edit regions. Ordered by region rather than by severity: three of
-the five carry findings from both tiers, and working the severity sort would
+**IN** — six edit regions. Ordered by region rather than by severity: two of
+the six carry findings from both tiers, and working the severity sort would
 re-enter the same paragraph twice.
 
 - `plugin/skills/design/references/research-protocol.md` — `:22` (M-2) and the
-  example block at `:28-34` (M-1)
-- `plugin/skills/design/SKILL.md` — `:133` and `:144` (M-2). Line-neutral
-  rewordings; the hub is 175 lines against the ~200 guideline
+  example block at `:28-35` (M-1)
+- `plugin/skills/design/SKILL.md` — `:133`, `:139` (M-2) and `:19` (P-2).
+  Line-neutral rewordings; the hub is 175 lines against the ~200 guideline
 - `plugin/skills/design/references/route-to-execution.md` — `:14` (M-4) and
   `:51-55` (m-2)
 - `plugin/skills/build/SKILL.md` — `:5` frontmatter description and `:35`
   (M-3, m-3)
 - `plugin/skills/deliverable-review/SKILL.md:31` and `docs/design.md:549`
   (m-1) — the same defect in the skill and in the decision that specifies it
+- `plugin/skills/design/references/write-outline.md` — `:185` (P-1)
 
 **OUT**
 
@@ -93,9 +107,10 @@ re-enter the same paragraph twice.
 a flat line with no `## Provenance` heading, which is what both correctors
 match on. The rest of the example is deliberately compressed (`Approach:`,
 `Key decisions:`), and that stays; provenance becomes the one block shown
-verbatim, followed by a line saying why it is the exception: the heading and
-both bold labels are what `outline-corrector` and `/edify:deliverable-review`
-key on, so this block is copied rather than adapted.
+verbatim, followed by one imperative clause marking it as the exception — copy
+this block verbatim, adapt the rest. No consumer is named: per
+`craft:directive-writing`'s five cuts, which system keys on the heading is
+mechanism the producer does nothing with.
 
 **M-2.** `:22` reads "- Provenance -- two fields, per
 `references/design-content-rules.md` §Provenance Section". "Two fields, per X"
@@ -107,9 +122,16 @@ removed.
 ### Region 2 — `design/SKILL.md`
 
 **M-2**, same defect at two sites, same fix: `:133` ("including a Provenance
-section per …") and `:144` ("(provenance per …, scope, per-file changes, …)")
+section per …") and `:139` ("(provenance per …, scope, per-file changes, …)")
 become imperative Reads of `references/design-content-rules.md` §Provenance
 Section. Both stay on one line; the hub gains no lines.
+
+**P-2.** `:19` describes the routing node as "reached from the Phase B
+sufficiency gate and from Phase C.5" — two callers, where there are three:
+`write-outline.md` has two gates. `docs/design.md:617-618` already states it
+correctly ("both of `write-outline.md`'s sufficiency gates and
+`write-design.md`'s C.5"), so the hub is the one surface that is wrong, and
+the correct form is there to copy.
 
 `:174`'s routing line already distinguishes Simple / Moderate-agentic-prose
 from work routed by the node, so it is consistent with M-4's narrowing and
@@ -146,8 +168,8 @@ The description edit removes a word and adds none; `design`, `outline`,
 
 ### Region 5 — `deliverable-review/SKILL.md` and `docs/design.md`
 
-**m-1.** Both sites join two independent fallback triggers with `and`, so a
-literal reader never fires either:
+**m-1.** Both sites join two independent fallback triggers with `and`, so
+neither fires on its own:
 
 - `deliverable-review/SKILL.md:31` — "Ask the user for the range when the
   artifact carries no Provenance section, **and** when `git rev-parse
@@ -159,12 +181,28 @@ literal reader never fires either:
 into an unrepairable Provenance block: that path reaches the second trigger
 only.
 
+### Region 6 — `write-outline.md`
+
+**P-1.** `:185` reads "Each sub-problem's readiness names its route per
+`references/route-to-execution.md`; dispatch remains the caller's
+responsibility". An agent cannot name a route without opening the node, so
+"per X" is exactly the form M-2 removes — here on the pointer belonging to the
+multi-sub-problem caller that Region 3's m-2 fix is written to serve. It
+becomes an imperative Read, matching the node's two other call sites
+(`:204` and `write-design.md:70`), which already say "Read … and route by it".
+
+Same defect class as M-2, a different rule: this pointer targets the routing
+node, not the inheritance rule.
+
 ## Key decisions
 
 - **D — The inheritance rule keeps one home.** M-2 makes three pointers
   imperative rather than inlining the rule at each producer. *Accepted
   tradeoff:* an agent still has to follow a pointer to reach the rule that
   matters most, and the imperative form is the only thing making it do so.
+  The same imperative-form fix applies to `write-outline.md:185`'s pointer at
+  `route-to-execution.md` (P-1) — found during proof, same defect class, a
+  different rule.
 - **D — Narrow the node's claim rather than widen its reach (M-4).** *Accepted
   tradeoff:* the argument the first pass made for the precondition — with no
   runbook the artifact **is** the item list — remains unenforced on the route
@@ -173,7 +211,8 @@ only.
   accepted gap and an undiscovered one.
 - **D — Provenance is the one verbatim block in a compressed example (M-1).**
   *Accepted tradeoff:* the example block becomes visually inconsistent with
-  itself, and the inconsistency has to be explained in a line of prose.
+  itself, and the inconsistency has to be marked with one imperative clause,
+  which is a line the compressed form does not need.
 - **D — D-80 is corrected in place, with no changelog entry.** Per
   `memory/feedback-decision-docs-are-living.md` the design doc is current
   truth; the `and`/`or` defect is a defect in the decision's text, not a new
@@ -182,8 +221,8 @@ only.
 
 ## Risks and open questions
 
-**Open questions:** none. The one fork (M-4) was settled before this outline
-was written.
+**Open questions:** none. Both forks (M-1, M-4) were settled before this
+outline was written.
 
 **Risks:**
 
@@ -194,11 +233,16 @@ was written.
   future pass would follow — *prefer a check phrased as "produce the right
   answer" over "judge this answer"* — and notes that the fixer caught all three
   misses where two reviewers did not, because writing a correction forces
-  naming the symbol's real home. Recorded, not acted on.
+  naming the symbol's real home. Recorded, not acted on. This pass's own
+  `/proof` then found two further reach defects the deliverable-review missed
+  — P-1 and P-2 — which is the same under-coverage one pass later, and the
+  strongest evidence yet for the mechanism this decision descopes.
 - **M-2's fix is a wording change against a habit.** "Read X" versus "per X" is
   a one-word difference in the artifact and a whole behaviour in the agent, and
-  nothing mechanical distinguishes them. The evidence that the imperative form
-  works is `write-design.md:13`, which is the site the review found clean.
+  no linter distinguishes them. The rule itself is written down —
+  `craft:directive-writing` requires imperative wording in directive channels —
+  and `write-design.md:13` is the site the review found clean, so the gap is
+  enforcement, not grounding.
 - **This outline is its own second test of the contract.** If `Base:` here is
   wrong, the review that checks this job inherits the error silently — a
   too-narrow diff reads as a clean review. It is copied from
@@ -209,10 +253,13 @@ was written.
 
 Load `craft:directive-writing` (M-2's imperative-form rule) and
 `plugin-craft:skill-authoring` (the `build/SKILL.md:5` description edit) before
-executing. Five regions, no ordering dependency between them — prose edits
+executing. Six regions, no ordering dependency between them — prose edits
 commute.
 
 **Session restart required before `/build`.** The `/edify:design` body loaded
 in this session is the pre-change version: it reads "execution-ready (B gate or
 C.5)" at §Routing out and carries no Provenance clause at `:133`. The on-disk
-file has the shipped text. Any skill body this job edits has the same exposure.
+file has the shipped text. Any skill body this job edits has the same exposure;
+the reference files it edits do not, since those are Read at runtime. Load
+`plugin-craft:verifying-plugin-changes` and confirm the loaded bodies match the
+repo before trusting any verification of these edits.
