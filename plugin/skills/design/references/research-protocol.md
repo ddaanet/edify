@@ -19,6 +19,7 @@ Review the changed files list. Codebase findings, external research, and Context
 **Output:** Write outline to `plans/<job>/outline.md` (create directory if needed).
 
 **Content:**
+- Provenance -- two fields, per `references/design-content-rules.md` §Provenance Section
 - Approach summary
 - Key decisions
 - Open questions

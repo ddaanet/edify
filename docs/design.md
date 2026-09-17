@@ -543,6 +543,25 @@ inputs replaces N separate dispatch sequences. `runbook-simplifier` runs after
 `runbook-corrector` and before `/proof`, so the user validates the
 consolidated runbook and execution never sees the redundancy.
 
+**D-80 — Every `/design` artifact records the base commit its deliverable
+starts from.** A `## Provenance` section carries `Derived from:` — the review
+report that motivated the design and the artifact it supersedes, or `none` —
+and `Base:`, the commit the work starts at. `/edify:deliverable-review` builds
+its range as `<Base>..HEAD` and asks the user only when the section is absent.
+A first-pass artifact takes `git rev-parse HEAD` at generation time, which is
+safe because `plans/` is excluded from the review diff; a second-pass artifact
+copies `Base:` verbatim from the artifact named in `Derived from:` rather than
+recomputing it. Recomputing is the failure the clause exists to prevent: a
+fresh `HEAD` starts the range after the first pass's work, so the second review
+sees the fixes rather than the deliverable, and a too-narrow diff reads as a
+clean review. *Accepted tradeoffs:* two lines and one `git rev-parse` on every
+design artifact, including the many that no review ever opens; the clause is
+prose with no mechanical validator, enforced by the outline- and
+design-correctors only after the artifact is written. Commits landing between
+artifact generation and the work fall inside the range and surface as
+unspecified deliverables — bounded and visible, where a narrower base would
+silently drop the job's own first commit.
+
 ### 6.5 Execution routing
 
 **D-34 — One execution skill, `/build`, whatever the work arrived as.** It
@@ -781,10 +800,12 @@ external visibility — agents asked the user instead of consulting it.
 ### 6.8 Deliverable review
 
 **D-55 — A deliverable is a production artifact that persists after execution and
-affects system behavior.** Identify by comparing the plan outline's in-scope
-section against the repository diff: every created or modified file that is not a
-planning or execution artifact is a deliverable. The outline specifies what should
-exist; the diff shows what was produced; the gap between them is findings —
+affects system behavior.** Identify by comparing the in-scope section of the
+job's design artifact — `design.md`, else `outline.md` — against the repository
+diff over the range D-80's Provenance defines: every created or modified file
+that is not a planning or execution artifact is a deliverable. The artifact
+specifies what should exist; the diff shows what was produced; the gap between
+them is findings —
 missing deliverables (incompleteness) or unspecified ones (excess).
 
 **D-56 — Each deliverable is classified into exactly one type, and the type

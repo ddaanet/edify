@@ -1,6 +1,6 @@
 # Design Content Rules
 
-Content principles and structure guidance for Phase C.1 design document generation.
+Content principles and structure guidance for Phase C.1 design document generation, plus the Provenance section every `/design` artefact carries.
 
 ## Content Principles
 
@@ -94,9 +94,27 @@ Each requirement should map to a design element for downstream validation.
 
 For designs with behavioral phases, include spike test strategy, confirmation markers for uncertain decisions, "what might already work" analysis. Reference the integration-first ordering (defined in `plugin/skills/runbook/references/runbook-format.md`) -- note when integration-first ordering applies (external boundaries -> internal logic, not bottom-up by module).
 
+## Provenance Section
+
+Every `/design` artifact carries one -- `outline.md` and `design.md` alike, since the agentic-prose route produces only an outline. `/edify:deliverable-review` reads it to build its review range.
+
+```markdown
+## Provenance
+
+- **Derived from:** `plans/<prior-job>/reports/deliverable-review.md`, superseding `plans/<prior-job>/outline.md`
+- **Base:** `<full sha>` -- the commit the deliverable started from
+```
+
+- **Derived from:** the review report that motivated this design *and* the artifact it supersedes, or `none`. Naming both is what makes the base copyable -- a second pass in a new job directory has no other route to it.
+- **Base:** a first-pass artifact takes `git rev-parse HEAD` at generation time. A second-pass artifact **copies `Base:` verbatim** from the artifact named in `Derived from:`, and never recomputes it. Recomputing makes the range start after the first pass's work, so the review sees the fixes instead of the deliverable -- and a too-narrow diff reads as a clean review, so nothing surfaces the error.
+
+Taking `HEAD` at generation time is correct: `plans/` is excluded from the review diff, so the artifact's own commit cannot pollute the range it defines.
+
+Distinct from §References, which is a reading list. Provenance carries a git ref a later command substitutes into `git diff`.
+
 ## References Section
 
-Track research artifacts and external references that informed the design. Backward-looking provenance (what shaped this design), distinct from Documentation Perimeter (forward-looking -- what the planner should read).
+Track research artifacts and external references that informed the design -- what shaped it, distinct from Documentation Perimeter (forward-looking -- what the planner should read).
 
 ```markdown
 ## References

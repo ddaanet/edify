@@ -136,7 +136,7 @@ Produce this classification block before routing (visible output, not internal r
   Skip design — all other operational rules (skills, project tooling, communication) remain in effect.
 - **Moderate, non-prose** (all other artifact destinations) **→** ground the brief against the codebase, then plan:
   1. **Code reading:** Read affected files enumerated in the brief. Resolve gaps between brief assumptions and actual codebase state.
-  2. **Generate** `plans/<job>/outline.md` using lightweight format (scope, per-file changes, dependencies, IN/OUT boundaries)
+  2. **Generate** `plans/<job>/outline.md` using lightweight format (provenance per `references/design-content-rules.md` §Provenance Section, scope, per-file changes, dependencies, IN/OUT boundaries)
   3. **Proof:** Invoke `/proof plans/<job>/outline.md` (outline-corrector dispatched by /proof on revise/kill)
   4. **Route (after /proof approval):** commit the outline, then name `/runbook plans/<job>` as the next command and stop.
 - **Complex →** Read `references/write-outline.md` for Phase A (research + outline) and Phase B (user validation + outline sufficiency gate). *(Verb-oriented name: action the agent takes, not the artifact produced.)*

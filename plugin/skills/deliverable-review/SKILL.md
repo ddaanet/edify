@@ -20,15 +20,15 @@ Review production artifacts against a design specification to identify conforman
 ## Prerequisites
 
 Before starting, gather:
-- **Design document** — the conformance baseline (`plans/<plan>/design.md`)
+- **Design artifact** — the conformance baseline. Take the first that exists: `plans/<plan>/design.md`, else `plans/<plan>/outline.md`. The agentic-prose route produces only an outline, so a `design.md`-only prerequisite leaves that route's work unreviewable
 - **Plan directory** — for report output (`plans/<plan>/reports/`)
 
 ## Process
 
 ### Phase 1: Inventory
 
-1. Read the design's Scope section (IN/OUT) to establish expected deliverables
-2. Establish the review range — the plan's commits, known from context or asked of the user — and run `git diff --numstat <range> -- . ':!plans' ':!tmp' ':!.claude'` for per-file line counts. A submodule that moved in the range is diffed inside the submodule between its two pointers
+1. Read the design artifact's Scope section (IN/OUT) to establish expected deliverables
+2. Establish the review range as `<Base>..HEAD`, reading `<Base>` from the artifact's §Provenance. Ask the user for the range only when the artifact carries no Provenance section. Run `git diff --numstat <range> -- . ':!plans' ':!tmp' ':!.claude'` for per-file line counts. A submodule that moved in the range is diffed inside the submodule between its two pointers
 3. Classify each deliverable by artifact type:
 
 | Type | Pattern | Review axes |

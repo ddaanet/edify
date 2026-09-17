@@ -161,6 +161,13 @@ If design includes "Documentation Perimeter" section:
 - Verify Context7 references are specific (library IDs, not vague topics)
 - Check if additional research is overly broad or well-scoped
 
+### 3.5. Check Provenance
+
+Every `/design` artifact carries a `## Provenance` section with `Derived from:` and `Base:`:
+- Section missing → Major: `/edify:deliverable-review` has no way to establish its review range
+- `Derived from:` names a prior artifact → `Base:` must match that artifact's `Base:` verbatim. A recomputed base → Critical: the range then starts after the prior pass's work, and the resulting narrow diff reads as a clean review
+- `Derived from:` is `none` → `Base:` is a full sha reachable from HEAD (`git merge-base --is-ancestor <base> HEAD` via Bash)
+
 ### 4. Assess Plugin Topics
 
 If design involves Claude Code plugin components (hooks, agents, skills, MCP):

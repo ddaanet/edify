@@ -109,6 +109,11 @@ Analyze outline against these dimensions:
 - Check: glob patterns vs single-file, list vs scalar, multi-artifact vs single-artifact
 - Flag any interface mismatch as a Major issue — mismatches cause implementation errors that are only caught at integration time
 
+**Provenance:**
+- A `## Provenance` section is present, carrying both `Derived from:` and `Base:`. Missing → Major: `/edify:deliverable-review` has no way to establish its review range.
+- When `Derived from:` names a prior artifact, `Base:` matches that artifact's `Base:` verbatim. A recomputed base → Critical: the range then starts after the prior pass's work, and the resulting narrow diff reads as a clean review.
+- When `Derived from:` is `none`, `Base:` is a full sha reachable from HEAD (`git merge-base --is-ancestor <base> HEAD` via Bash).
+
 **Resume Completeness (for agent/state machine designs):**
 - All non-terminal states have a defined resume path
 - Interrupted or restarted agents can recover from intermediate states

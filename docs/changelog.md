@@ -11,6 +11,37 @@ place by answering a question a future reader would otherwise ask of
 `docs/design.md` holds the present-tense answer to *what the system is and why*.
 This file is the write-time record of how it got that way.
 
+## 2026-09-17 — one routing node in `/design`; artifacts record their base commit
+
+`/design` stated the execution-routing decision twice — once in
+`write-outline.md`'s Outline Sufficiency Gate, once in `write-design.md`'s C.5
+— and the copies had drifted. Wording differed; the prose branch's hard-gate
+qualifier existed in only one; and, substantively, one copy exempted the prose
+path from the readiness criteria while the other bound it. The two copies
+routed differently on the same input, which is what a second copy costs.
+`references/route-to-execution.md` now states the decision once, and the
+`/design`-local name goes with the duplication: the question is **does this
+work need a runbook?**, not whether the session can execute it. Single-session
+capacity was a criterion on both copies and had been false since `/build`
+gained multi-session runs — the residue of the retired in-session execution
+path. The surviving criteria split in two, because the flat list was hiding
+that: preconditions, which bind every branch including prose and send a
+failure back to *design*; and runbook discriminators, which send it to
+`/runbook`. The Exploration branch drops its "and design resolved all
+questions" conjunct — read literally it bounced every spike back to design,
+since a spike exists to answer a question.
+
+Separately, every `/design` artifact now carries a `## Provenance` section
+naming the review it derives from and the commit its deliverable starts at
+(D-80). `/edify:deliverable-review` built its range from context or by asking,
+so a second design-to-deliverable pass reviewed only the fixes — the original
+base was gone by then, and a too-narrow diff reads as a clean review. The
+inheritance rule is the whole mechanism: a second-pass artifact copies `Base:`
+from the artifact it supersedes and never recomputes it. The same change makes
+that consumer take `design.md` *or* `outline.md`, whichever exists; it had
+named `design.md` alone, so nothing from the agentic-prose route — which
+produces only an outline — was reviewable at all.
+
 ## 2026-09-17 — `/inline` and `/orchestrate` merge into `/build`; continuation passing retires
 
 One execution skill now takes whatever planning produced — a proofed
