@@ -1,8 +1,5 @@
 ## Current task
 
-The `/build` merge — `/inline` and `/orchestrate` collapsing into one
-execution skill — is planned in `plans/build-skill/inline-plan.md` and paused
-at its `/proof` orientation checkpoint: 14 items detected, none reviewed yet,
-awaiting a reorder/cut/proceed answer before item 1. The plan is grounded in
-`plans/build-skill/inventory.md`, a whole-repo inventory of every affected
-site with each cite verified by direct read.
+The /inline + /orchestrate -> /build merge is mid-execution against `plans/build-skill/outline.md`. `plugin/skills/build/` is composed: the hub SKILL.md plus reference nodes `tdd-slice.md`, `resuming.md`, `phase-boundary.md` and `finishing.md`, alongside the moved `dispatch-composition.md`, `review-dispatch-template.md` and `scripts/verify-step.sh`. Both source skill directories are gone.
+
+Two threads remain. The hub SKILL.md wants a further pass -- it was restructured this session so that every step firing once (phase boundary, finishing the job) is an opt-in node reached by a stated trigger, which keeps the hub lean for the sessions of a multi-session run that never reach the end. Then the reference sweep across /design, /runbook, the fragments, the docs and memory, in the order the plan gives; its exit condition is the plan's Dependency 2 whole-tree grep with every hit classified accurate-or-stale, never a reading of the diff. /build is not invocable until a `handoff:restart`, since skill listings resolve at startup.

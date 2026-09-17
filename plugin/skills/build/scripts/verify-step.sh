@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 exec 2>&1
-set -xeuo pipefail
+set -euo pipefail
 
 # Clean tree; ` M memory` is the submodule's resting state, not dirt.
 # `git status` must succeed; only grep's exit 1 (every line filtered out) is

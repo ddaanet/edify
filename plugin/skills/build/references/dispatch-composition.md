@@ -1,7 +1,7 @@
 # Dispatch Prompt Composition
 
-The single source for composing a delegation prompt from a runbook item (or
-from an ad-hoc task in `/inline`'s delegated path). The dispatcher writes the
+The single source for composing a delegation prompt from a runbook item, or
+from an ad-hoc task where the work has no runbook. The dispatcher writes the
 prompt itself, live — there are no prepared prompts to reuse.
 
 ## Prompt contents
