@@ -28,7 +28,7 @@ Before starting, gather:
 ### Phase 1: Inventory
 
 1. Read the design artifact's Scope section (IN/OUT) to establish expected deliverables
-2. Establish the review range as `<Base>..HEAD`, reading `<Base>` from the artifact's §Provenance. Ask the user for the range when the artifact carries no Provenance section, and when `git rev-parse <Base>^{commit}` does not resolve. Run `git diff --numstat <range> -- . ':!plans' ':!tmp' ':!.claude'` for per-file line counts. A submodule that moved in the range is diffed inside the submodule between its two pointers
+2. Establish the review range as `<Base>..HEAD`, reading `<Base>` from the artifact's §Provenance. Ask the user for the range when the artifact carries no Provenance section, or when `git rev-parse <Base>^{commit}` does not resolve. Run `git diff --numstat <range> -- . ':!plans' ':!tmp' ':!.claude'` for per-file line counts. A submodule that moved in the range is diffed inside the submodule between its two pointers
 3. Classify each deliverable by artifact type:
 
 | Type | Pattern | Review axes |

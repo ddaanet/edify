@@ -11,7 +11,9 @@ back to `/runbook`.
 
 ## Preconditions
 
-Both bind every branch, prose included.
+Both bind every branch this node routes, prose included. Phase 0's Simple and
+Moderate-agentic-prose routes reach `/build` without reading this node, so
+neither precondition binds them.
 
 - Every decision **the executor would otherwise have to make** is resolved.
   This is not "no open questions": an Exploration job exists to answer one,
@@ -51,5 +53,8 @@ Either one holding sends the work to `/runbook` rather than `/build`:
 - **A precondition failed** — name it, then resume from A.5 to revise the
   outline or from C.1 to revise the design. Do not route.
 
-Read per sub-problem from the multi-sub-problem gate: record the route in that
-sub-problem's readiness summary and name no command — the caller dispatches.
+Read per sub-problem from the multi-sub-problem gate: record the outcome in that
+sub-problem's readiness summary — the route, or the failed precondition and
+not-routable — and name no command. Resume neither A.5 nor C.1: the caller
+dispatches, and the gate decides what a not-routable sub-problem does to the
+outline.

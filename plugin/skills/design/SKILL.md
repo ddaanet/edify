@@ -16,7 +16,7 @@ Produce dense design documents that guide implementation by downstream agents (s
 ## Downstream Consumers
 
 - **Planning:** `/runbook` — phases typed tdd or general. Note which phases are behavioural (tdd) and which are infrastructure or prose (general) to guide per-phase typing. Whether an item is delegated is not a phase property; `/build` decides that per item.
-- **Execution:** `/build` when the work needs no runbook (`references/route-to-execution.md`, reached from the Phase B sufficiency gate and from Phase C.5). Handles the execution lifecycle: entry gate, item walk, review gate, triage feedback, deliverable-review handoff.
+- **Execution:** `/build` when the work needs no runbook (`references/route-to-execution.md`, reached from both of `references/write-outline.md`'s sufficiency gates and from `references/write-design.md`'s C.5). Handles the execution lifecycle: entry gate, item walk, review gate, triage feedback, deliverable-review handoff.
 
 ## Process
 
@@ -130,13 +130,13 @@ Produce this classification block before routing (visible output, not internal r
 - **Simple, or Moderate agentic-prose** (artifact destination = `agentic-prose`) **→ one route.** Both produce an `outline.md` and hand it to `/build`; a branch that differs from another only in ceremony neither has is not a decision.
   1. **Recall:** from the in-context index, Read the memory and decision files matching the task's domain keywords.
   2. **Code reading:** Read the affected files the brief enumerates — the ones the work will actually change, not a summary of them — and resolve gaps between the brief's assumptions and actual codebase state. Where the brief does not enumerate them, `rg --files`/`rg` (Bash) to identify targets.
-  3. **Generate** `plans/<job>/outline.md` per `references/write-outline.md`, including a Provenance section per `references/design-content-rules.md` §Provenance Section. For agentic prose, record **what changes** rather than why the approach was chosen: the approach is not in question, so the outline's value is the change list.
+  3. **Generate** `plans/<job>/outline.md` per `references/write-outline.md`; Read `references/design-content-rules.md` §Provenance Section and write the Provenance section it specifies. For agentic prose, record **what changes** rather than why the approach was chosen: the approach is not in question, so the outline's value is the change list.
   4. **Proof:** Invoke `/proof plans/<job>/outline.md` (outline-corrector dispatched by /proof on revise/kill).
   5. **Route (after /proof approval):** commit the outline, then name `/build plans/<job>` as the next command and stop. `/build` consumes no continuation, so this is a named handoff and not a tail-call.
   Skip design — all other operational rules (skills, project tooling, communication) remain in effect.
 - **Moderate, non-prose** (all other artifact destinations) **→** ground the brief against the codebase, then plan:
   1. **Code reading:** Read affected files enumerated in the brief. Resolve gaps between brief assumptions and actual codebase state.
-  2. **Generate** `plans/<job>/outline.md` using lightweight format (provenance per `references/design-content-rules.md` §Provenance Section, scope, per-file changes, dependencies, IN/OUT boundaries)
+  2. **Generate** `plans/<job>/outline.md` using lightweight format (scope, per-file changes, dependencies, IN/OUT boundaries); Read `references/design-content-rules.md` §Provenance Section and write the Provenance section it specifies
   3. **Proof:** Invoke `/proof plans/<job>/outline.md` (outline-corrector dispatched by /proof on revise/kill)
   4. **Route (after /proof approval):** commit the outline, then name `/runbook plans/<job>` as the next command and stop.
 - **Complex →** Read `references/write-outline.md` for Phase A (research + outline) and Phase B (user validation + outline sufficiency gate). *(Verb-oriented name: action the agent takes, not the artifact produced.)*

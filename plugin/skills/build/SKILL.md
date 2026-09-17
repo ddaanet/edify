@@ -1,8 +1,8 @@
 ---
 name: build
 description: >-
-  Execute planned work — a proofed runbook (plans/<job>/runbook.md), or an
-  execution-ready design or outline that has no runbook. Triggers on /build,
+  Execute planned work — a proofed runbook (plans/<job>/runbook.md), or a
+  design or outline that has no runbook. Triggers on /build,
   "execute the runbook", "execute this plan", or when /design or /runbook
   hands work off for execution.
 allowed-tools: Agent, Read, Write, Edit, Bash, Skill, SendMessage, TaskOutput, TaskStop
@@ -32,8 +32,8 @@ Take the first that exists:
 
 1. `plans/<job>/runbook.md` — phased, typed items. Also Read
    `plans/<job>/design.md` or `outline.md`, whichever the plan has.
-2. `plans/<job>/design.md` or `plans/<job>/outline.md` — execution-ready
-   work with no runbook. The design itself is the work.
+2. `plans/<job>/design.md` or `plans/<job>/outline.md` — work with no
+   runbook. The design itself is the work.
 3. Neither — take the task from the invocation.
 
 Existence is tested, not discovered by a failing Read: a missing runbook is a

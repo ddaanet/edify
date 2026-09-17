@@ -182,7 +182,7 @@ When an outline decomposes the job into individually-scoped sub-problems (each w
 - The outline is the terminal design artifact for this job
 - Individual sub-problems enter the pipeline via their readiness-specified route (from the readiness summary)
 - The caller (session task management) dispatches sub-problems as independent pending tasks
-- Each sub-problem's readiness names its route per `references/route-to-execution.md`; dispatch remains the caller's responsibility
+- Each sub-problem's readiness names its route: Read `references/route-to-execution.md` and route by it, per sub-problem; dispatch remains the caller's responsibility
 
 **If insufficient** — identify which criteria failed. Resume from A.5 (revise outline) or present gaps for discussion.
 

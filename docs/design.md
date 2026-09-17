@@ -546,7 +546,7 @@ starts from.** A `## Provenance` section carries `Derived from:` — the review
 report that motivated the design and the artifact it supersedes, or `none` —
 and `Base:`, the commit the work starts at. *Consumer:*
 `/edify:deliverable-review` builds its range as `<Base>..HEAD`, and asks the
-user for the range when the section is absent and when `<Base>` does not
+user for the range when the section is absent or when `<Base>` does not
 resolve to a commit. A first-pass artifact takes `git rev-parse HEAD` at
 generation time, which is safe because `plans/` is excluded from the review
 diff; a second-pass artifact copies `Base:` verbatim from the artifact named in

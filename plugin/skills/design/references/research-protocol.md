@@ -19,7 +19,7 @@ Review the changed files list. Codebase findings, external research, and Context
 **Output:** Write outline to `plans/<job>/outline.md` (create directory if needed).
 
 **Content:**
-- Provenance -- two fields, per `references/design-content-rules.md` §Provenance Section
+- Provenance -- Read `references/design-content-rules.md` §Provenance Section and write the section it specifies
 - Approach summary
 - Key decisions
 - Open questions
@@ -27,11 +27,17 @@ Review the changed files list. Codebase findings, external research, and Context
 
 **Example outline** (for reference -- adapt to task):
 ```
-Provenance: Derived from: none. Base: <full sha from git rev-parse HEAD>.
+## Provenance
+
+- **Derived from:** none
+- **Base:** `<full sha from git rev-parse HEAD>`
+
 Approach: Add rate limiting middleware to API gateway using token bucket algorithm.
 Key decisions: Per-user limits (not global), Redis-backed counters, 429 response with Retry-After header.
 Open questions: Should rate limits vary by endpoint? Should admin users be exempt?
 Scope: API gateway only. Dashboard/monitoring out of scope.
 ```
+
+Write the Provenance heading and its two fields as shown; adapt the rest.
 
 **Escape hatch:** If user input already specifies approach, decisions, and scope (e.g., detailed brief.md), compress A+B by presenting outline and asking for validation in a single message.
