@@ -6,6 +6,42 @@ excluded per instructions. `__pycache__/` excluded: it is gitignored and
 contains stale `.pyc` for dozens of tests with no tracked `.py` source (a
 leftover from another checkout) — irrelevant to this merge.
 
+## 0. Corrections from the 2026-09-17 proof pass
+
+The proof of the merge plan re-read every claim below against source. Six
+were wrong; all are corrected **in place** above rather than appended, so
+this document stays usable as the grounding record. Listed here so a reader
+knows which way the errors ran.
+
+- **`write-outline.md` had seven sites, not four.** Missing were 209 (the
+  prose hard gate, `→ INLINE`), 217 (the `**Inline criteria**` heading) and
+  224 (`Inline execution bypasses /runbook`). The hard gate is the first
+  routing branch in the file.
+- **`delegation.md` line numbers drifted** — 28→33, 75→80. The count (one
+  framing sentence, three hardcoded `dispatch-composition.md` paths) was
+  right.
+- **`runbook-format.md` drifted in text, not only in line number** — 35→38,
+  and the line-25 quote (`` `Model:` — optional ``) is text that no longer
+  exists; the file now says an item does not carry a model. The drift is
+  from this session's own D-42 edits, so a cite verified on 2026-09-16 could
+  already be stale by the time the plan was written.
+- **`runbook-format.md` does specify the general item format.** §Structure's
+  base item shape *is* it, and `### tdd items: Slices` adds `Slices:` on
+  top. The plan asserted the opposite and attributed it to "inventory C1" —
+  **there is no C1 in this document** (sections are 1–9 plus 2b) and no
+  section of it makes that claim. The real gap is signposting: no phase is
+  headed `(type: general)`, and the tdd-only sections are unlabelled.
+- **`plans/skill-reviews/` was excluded per instructions**, as stated above —
+  not an oversight. But the merge plan's frozen-plans list inherited the
+  omission and also missed `plans/dispatch-model-precedence/` and
+  `plans/prototypes/`. Measured 2026-09-17: **380 stale-name hits across 9
+  directories under `plans/`**, all out of scope as frozen records.
+- **A report claim cited during the proof was itself stale.**
+  `plans/skill-reviews/review-skills.md:73` records
+  `runbook/SKILL.md:30` accepting `inline-plan.md` as a runbook
+  prerequisite; read against source, the line names only `outline.md` or
+  `design.md`. Fixed some time before this pass.
+
 ## 1. Skill-body content
 
 ### `plugin/skills/inline/` (174-line SKILL.md + 82-line reference)
@@ -86,8 +122,8 @@ routing prose to either; false positives from generic English "inline"/
 | `plugin/fragments/continuation-passing.md` | 13,15,16,57,62,66,70,82,100,101,131,132,133,145,146,148 | 16 literal `/inline`/`/orchestrate` citations forming the continuation-chain examples and the default-exit table rows (e.g. line 100: `` \| `/inline` \| `["/handoff:handoff", "/commit-commands:commit"]` \| Inline execution lifecycle (no runbook) \| ``; line 101 the `/orchestrate` row). Full file is continuation-protocol reference material for both skills — needs a single merged row/example set. |
 | `plugin/fragments/delegation.md` | 3 | `` When executing runbooks via `/orchestrate`, the orchestrator coordinates but does not implement: `` |
 | `plugin/fragments/delegation.md` | 11 | `` `plugin/skills/orchestrate/references/dispatch-composition.md` §Model assignment `` |
-| `plugin/fragments/delegation.md` | 28 | `The dispatcher composes each prompt per \`plugin/skills/orchestrate/references/dispatch-composition.md\`: item text inline, design and recall artifact by path...` |
-| `plugin/fragments/delegation.md` | 75 | `` ...`plugin/skills/orchestrate/references/dispatch-composition.md` §Prompt contents is the authoritative rule. `` |
+| `plugin/fragments/delegation.md` | 33 | `The dispatcher composes each prompt per \`plugin/skills/orchestrate/references/dispatch-composition.md\`: item text inline, design and recall artifact by path...` |
+| `plugin/fragments/delegation.md` | 80 | `` ...`plugin/skills/orchestrate/references/dispatch-composition.md` §Prompt contents is the authoritative rule. `` |
 | `plugin/fragments/workflows-terminology.md` | 22 | `` \| **Runbook** \| Phased implementation plan `/orchestrate` dispatches from (previously called "plan") \| `` |
 | `plugin/fragments/workflows-terminology.md` | 23 | `` \| **Phase type** \| `tdd`, `general` or `inline` — determines item format, review criteria and dispatch for that phase \| `` (also §3 phase-type) |
 | `plugin/skills/design/SKILL.md` | 21 | `` - **Planning:** `/runbook` — phases typed tdd / general / inline. Note which phases are behavioural (tdd), infrastructure (general), or prose/config the orchestrator applies itself (inline) to guide per-phase typing. `` |
@@ -95,11 +131,11 @@ routing prose to either; false positives from generic English "inline"/
 | `plugin/skills/design/SKILL.md` | 133,137,143-145,185 | Simple-route steps: `chain to \`/inline\``, `Read \`references/write-inline-plan.md\`. **Generate** \`plans/<job>/inline-plan.md\``, `Invoke \`/proof plans/<job>/inline-plan.md\``, `prepend \`/inline plans/<job> execute\`` (x2) |
 | `plugin/skills/design/references/write-design.md` | 88 | `` - **If execution-ready:** Follow §Continuation (prepends `/inline plans/<job> execute`). `` |
 | `plugin/skills/design/references/write-inline-plan.md` | 3,25,31,32 | Whole file is the `inline-plan.md` format reference for the Simple/Moderate agentic-prose route: `` Reference for `plans/<job>/inline-plan.md` — execution plan for direct inline implementation... ``; `/proof` corrector-dispatch table row `inline-plan.md → -- (no corrector)`; status transition `` `inline-planned` → `/inline plans/{plan}` (parallel to `planned` → `/orchestrate`) ``. |
-| `plugin/skills/design/references/write-outline.md` | 210,211,222,226 | Phase-type routing logic: `` ELSE IF work type = Investigation → inline (criteria below) ``; `` ELSE IF work type = Exploration AND design resolved all questions → inline (criteria below) ``; `Scope fits inline capacity (single session, single model)`; `` follow §Continuation (prepends `/inline plans/<job> execute`). `` |
+| `plugin/skills/design/references/write-outline.md` | 209,210,211,217,222,224,226 | Execution-routing block and its criteria: `` IF all prose edits, no implementation loops → INLINE (hard gate — file count irrelevant) `` (the prose hard gate — the first routing branch, and the one §Prose path rationale exists to defend); `` ELSE IF work type = Investigation → inline (criteria below) ``; `` ELSE IF work type = Exploration AND design resolved all questions → inline (criteria below) ``; `` **Inline criteria (non-prose paths only — prose path bypasses these):** ``; `Scope fits inline capacity (single session, single model)`; `` Inline execution bypasses `/runbook` — this gate assesses coordination complexity and capacity. ``; `` follow §Continuation (prepends `/inline plans/<job> execute`). `` |
 | `plugin/skills/requirements/SKILL.md` | 266 | `` - Very clear scope + simple → `/design plans/<job>/` (its triage routes small work to `/inline`) `` |
 | `plugin/skills/review/SKILL.md` | 200 | `` 3. `/orchestrate` — Executes runbook `` |
 | `plugin/skills/runbook/SKILL.md` | 5,26,37,40-41,45,149,151 | `` (tdd / general / inline) that /orchestrate composes dispatch prompts from. ``; `` `runbook-corrector` → `runbook-simplifier` → `/proof` → `/orchestrate` in a ``; `` `type: inline`. Type determines: ``; `` concrete action against a named target; inline → same, executed by the / orchestrator itself. ``; `` code review); general → one dispatch; inline → no dispatch. ``; `` Propagation. No prepend: orchestration runs in a fresh session via ``; `` budget, and the orchestrator needs its own. `` |
-| `plugin/skills/runbook/references/runbook-format.md` | 5,14,25,35 | `` `/proof` validates it, and `/orchestrate` reads it and composes each dispatch ``; `` ## Phase N: <title> (type: tdd|general|inline) `` (the phase-type header format itself); `` `Model:` — optional; overrides the orchestrator's model assignment for this ``; `` id `/orchestrate` uses in dispatch names and slice commit subjects. `` |
+| `plugin/skills/runbook/references/runbook-format.md` | 5,14,25,38 | `` `/proof` validates it, and `/orchestrate` reads it and composes each dispatch ``; `` ## Phase N: <title> (type: tdd|general|inline) `` (the phase-type header format itself); line 25 is now `` the dispatch itself (`dispatch-composition.md` §Model assignment) `` — a bare filename that does not resolve from `runbook/references/`, replacing the `` `Model:` — optional `` text this inventory quoted; `` id `/orchestrate` uses in dispatch names and slice commit subjects. `` |
 | `docs/design.md` | 16,24,26,59,61,62,138-139,144,149-150,157,160,163-164,177,183,398,400,412,414,417,430,440,447,451-452,465,473-474,491,493,497-498,502,509,541,544,546-547,549-553,569,583,591,605,629,963,965-966,968,973,988,1053 | See §3 — D-30, D-34, D-37 own the phase-type/route decisions; FR-8/FR-10/FR-11 map requirements to `skills/design/`, `skills/orchestrate/`, `skills/inline/` paths (59,61,62). Full list of 58 grep hits verified; most are the generic-role word "orchestrator" describing the dispatching skill (see §2b), but the FR table and D-30/D-34/D-37 decision text are literal and load-bearing. |
 | `docs/changelog.md` | 33-36,44,60,84,93,153,155 | Historical changelog entries describing the 2026-09-01 one-stage-runbook landing and the weak-orchestrator retirement — literal `/orchestrate` at 44 (`` gate it, `/proof` validates it, and `/orchestrate` composes every dispatch ``), rest is "orchestrator"/"orchestration" as role word describing that same landed change. Dated entries — see §8 on whether changelog entries get edited retroactively. |
 | `CLAUDE.md` (project root) | 183 | `` - **Workflow pipeline:** `requirements` → `design` → `runbook` → `orchestrate`, or `design` → `inline` for work that needs no runbook, with `review` as the in-progress quality gate. `` |
