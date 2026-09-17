@@ -1,13 +1,7 @@
 ## Remaining
 
-### /design skill work
-
-- **Remove /design's direct-execution path** -- the Phase B / C.5 execution-ready branch that bypasses /runbook and implements inside the design session. /build is now the lean hub that routes to subagent ceremony only when needed, so the simple case is fast there instead of being special-cased in /design. This is the same seam that wrongly justified the /inline vs /orchestrate split. Anything coming out of /design has requirements, so it should be checked by /edify:deliverable-review.
-- **Design artefacts derived from a deliverable-review should record the review and the initial commit base.** A second pass and its own deliverable-review then know to review the complete diff from the original base, not just the changes since the last commit. Without it, pass 2's review sees only the fixes and cannot judge whether the whole deliverable satisfies its requirements.
-
-### Other
-
-- deliverable-review follow-up (skill-review decision 2, second half): Criticals route to a fresh design-to-deliverable round, Majors and Minors to a direct /build flow. Depends on /build accepting work with no runbook.
+- `/proof`'s verdict prompting is too formal. Replace the `(a)pprove (r)evise (k)ill (s)kip` prompt in `plugin/skills/proof/SKILL.md` §Item Iteration with: propose a verdict conversationally, show the amended item, capture the verdict from the reply. Couples to `references/item-review.md`; route through `/design`.
+- deliverable-review follow-up (skill-review decision 2, second half): Criticals route to a fresh design-to-deliverable round, Majors and Minors to a direct /build flow. Depends on /build accepting work with no runbook. `inbox/brief-review-feeds-back-into-design.md` (arrived 2026-09-17 from the handoff plugin repo) is a brief on this same seam and should be read first.
 - The remaining `plans/skill-reviews/` findings beyond the five settled decisions -- 24 critical / 74 major / 91 minor across eleven skills, none actioned. The proof pass found at least one already fixed in source, so verify each against the file before acting.
 - Pilfer defect 21 (corrector-skeleton dedup), carrying: the unreachable 'when reviewing runbooks/plans' criteria in `corrector.md` ~293-304; the corrector family's `Skill(edify:recall)` (`corrector.md:184`, `runbook-corrector.md:59`) against the by-path recall rule; `review-requirement.md`'s routing table still routing 'plans' to `edify:corrector` with no outline/runbook rows (defers to D-26).
 - FR-12 remainder beyond defect 21: per-class skill-body length targets, which have no calibration data.
