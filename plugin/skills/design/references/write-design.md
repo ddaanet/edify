@@ -61,32 +61,13 @@ Invoke `/proof plans/<job-name>/design.md` — structured validation loop on the
 
 This is the user's first review of the full design document. The corrector review (C.3) checked mechanical quality; /proof validates design decisions and completeness with the user.
 
-#### C.5. Execution Readiness and Handoff
+#### C.5. Execution Route and Handoff
 
-`Read plans/<job>/design.md` — load the design to ground execution-readiness assessment.
+`Read plans/<job>/design.md` — load the design to ground the routing decision.
 
-Design can resolve complexity — a job correctly classified as Complex may produce Simple execution. Assess whether the completed design can be executed directly or needs runbook planning.
+Design can resolve complexity — a job correctly classified as Complex may produce Simple execution. Assess whether the completed design needs runbook planning or goes straight to `/build`.
 
-**Execution routing (work-type-aware):**
-
-```
-IF all prose edits, no implementation loops → direct execution
-ELSE IF work type = Investigation → direct execution
-ELSE IF work type = Exploration AND design resolved all questions → direct execution
-ELSE (work type = Production AND behavioral code) → /runbook
-```
-
-**Direct execution criteria (all must hold for prose/investigation/exploration paths):**
-- All decisions pre-resolved (no open questions requiring feedback)
-- Insertion points or edit targets are identified (line-level or section-level)
-- No cross-file coordination requiring sequencing
-- No implementation loops (no test/build feedback required)
-- Scope fits single-session capacity (one session, one model)
-
-Direct execution bypasses `/runbook` — this gate must assess both coordination complexity and capacity.
-
-- **If execution-ready:** commit the design artifact, then name `/build plans/<job>` as the next command and stop. No tail-call: `/build` consumes no continuation.
-- **If not execution-ready:** commit the design artifact and stop.
+Read `references/route-to-execution.md` and route by it.
 
 ## Constraints
 

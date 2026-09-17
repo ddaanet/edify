@@ -593,7 +593,8 @@ would have carried that defect forward under a cleaner name.
 Complexity (Stacey axes) determines design ceremony. Work type
 (production/exploration/investigation) determines quality obligations. Route
 determines execution mechanics. They are decided at different pipeline stages:
-complexity and work type at `/design` Phase 0, route at `/design` C.5.
+complexity and work type at `/design` Phase 0, route at `/design`'s
+`references/route-to-execution.md`, which both sufficiency gates read.
 
 **D-36 — Artifact destination determines ceremony, not behavioral-code presence
 alone.** Prototype scripts, one-off analysis and spikes do not need runbooks, TDD
@@ -1089,7 +1090,7 @@ script; the ID is not reused.
 
 **L-2 — The routing thresholds are ungrounded operational parameters.** The
 file-count and component-count figures `/design` uses to triage complexity and
-decide execution readiness have no empirical calibration. The route
+decide whether work needs a runbook have no empirical calibration. The route
 *structure* is justified (D-34); the numbers inside it are not.
 `plans/reports/triage-feedback-log.md` collects per-execution evidence — files
 changed, agent count, behavioral code, classification verdict — for eventual

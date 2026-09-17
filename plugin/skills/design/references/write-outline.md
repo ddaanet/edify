@@ -182,7 +182,7 @@ When an outline decomposes the job into individually-scoped sub-problems (each w
 - The outline is the terminal design artifact for this job
 - Individual sub-problems enter the pipeline via their readiness-specified route (from the readiness summary)
 - The caller (session task management) dispatches sub-problems as independent pending tasks
-- Follow §Continuation (no prepend — dispatch is the caller's responsibility)
+- Each sub-problem's readiness names its route per `references/route-to-execution.md`; dispatch remains the caller's responsibility
 
 **If insufficient** — identify which criteria failed. Resume from A.5 (revise outline) or present gaps for discussion.
 
@@ -201,31 +201,7 @@ After user validates the outline, assess whether it already contains enough spec
 - Affected files are identified
 - No architectural uncertainty remains
 
-**If sufficient** — present sufficiency assessment to user. The outline IS the design; confirm user agrees to skip design generation. On confirmation, assess execution readiness:
-
-**Execution routing (work-type-aware):**
-
-```
-IF all prose edits, no implementation loops → /build (hard gate — file count irrelevant)
-ELSE IF work type = Investigation → /build (criteria below)
-ELSE IF work type = Exploration AND design resolved all questions → /build (criteria below)
-ELSE (work type = Production AND behavioral code) → /runbook
-```
-
-**Prose path rationale:** Prose edits are commutative — editing file A before or after file B produces the same result. Multi-file prose does not constitute cross-file coordination. Coordination complexity arises from runtime ordering dependencies (test↔implementation, build↔verify), not from editing multiple files.
-
-**Execution-readiness criteria (non-prose paths only — prose path bypasses these):**
-- All decisions pre-resolved (no open questions requiring feedback)
-- Insertion points or edit targets are identified (line-level or section-level)
-- No runtime ordering dependencies between files
-- No implementation loops (no test/build feedback required)
-- Scope fits single-session capacity (one session, one model)
-
-Going straight to `/build` bypasses `/runbook` — this gate assesses coordination complexity and capacity. For prose, the first routing branch already decided.
-
-**If execution-ready** — commit the outline, then name `/build plans/<job>` as the next command and stop. No tail-call: `/build` consumes no continuation.
-
-**If not execution-ready** — commit the design artifact and stop.
+**If sufficient** — present sufficiency assessment to user. The outline IS the design; confirm user agrees to skip design generation. On confirmation, Read `references/route-to-execution.md` and route by it.
 
 **If insufficient** — Read `references/write-design.md` for Phase C (full design generation) and design constraints.
 

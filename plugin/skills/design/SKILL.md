@@ -16,7 +16,7 @@ Produce dense design documents that guide implementation by downstream agents (s
 ## Downstream Consumers
 
 - **Planning:** `/runbook` — phases typed tdd or general. Note which phases are behavioural (tdd) and which are infrastructure or prose (general) to guide per-phase typing. Whether an item is delegated is not a phase property; `/build` decides that per item.
-- **Execution:** `/build` when work is execution-ready (Phase B sufficiency gate, Phase C.5 execution readiness). Handles the execution lifecycle: entry gate, item walk, review gate, triage feedback, deliverable-review handoff.
+- **Execution:** `/build` when the work needs no runbook (`references/route-to-execution.md`, reached from the Phase B sufficiency gate and from Phase C.5). Handles the execution lifecycle: entry gate, item walk, review gate, triage feedback, deliverable-review handoff.
 
 ## Process
 
@@ -171,5 +171,5 @@ Each branch above names its own next command and stops there. There is no
 tail-call: `/design` states the command, the user or the session runs it.
 
 - Moderate non-prose → `/runbook plans/<job>`
-- Simple, Moderate agentic-prose, or execution-ready (B gate or C.5) → `/build plans/<job>`
-- Not execution-ready → commit the artifact and stop; no next command
+- Simple, Moderate agentic-prose, or routed to `/build` by `references/route-to-execution.md` (B gate or C.5) → `/build plans/<job>`
+- Routed to `/runbook` by that node → commit the artifact and stop; no next command
