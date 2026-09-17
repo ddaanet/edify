@@ -546,21 +546,23 @@ consolidated runbook and execution never sees the redundancy.
 **D-80 — Every `/design` artifact records the base commit its deliverable
 starts from.** A `## Provenance` section carries `Derived from:` — the review
 report that motivated the design and the artifact it supersedes, or `none` —
-and `Base:`, the commit the work starts at. `/edify:deliverable-review` builds
-its range as `<Base>..HEAD` and asks the user only when the section is absent.
-A first-pass artifact takes `git rev-parse HEAD` at generation time, which is
-safe because `plans/` is excluded from the review diff; a second-pass artifact
-copies `Base:` verbatim from the artifact named in `Derived from:` rather than
-recomputing it. Recomputing is the failure the clause exists to prevent: a
-fresh `HEAD` starts the range after the first pass's work, so the second review
-sees the fixes rather than the deliverable, and a too-narrow diff reads as a
-clean review. *Accepted tradeoffs:* two lines and one `git rev-parse` on every
-design artifact, including the many that no review ever opens; the clause is
-prose with no mechanical validator, enforced by the outline- and
-design-correctors only after the artifact is written. Commits landing between
-artifact generation and the work fall inside the range and surface as
-unspecified deliverables — bounded and visible, where a narrower base would
-silently drop the job's own first commit.
+and `Base:`, the commit the work starts at. *Consumer:*
+`/edify:deliverable-review` builds its range as `<Base>..HEAD`, and asks the
+user for the range when the section is absent and when `<Base>` does not
+resolve to a commit. A first-pass artifact takes `git rev-parse HEAD` at
+generation time, which is safe because `plans/` is excluded from the review
+diff; a second-pass artifact copies `Base:` verbatim from the artifact named in
+`Derived from:` rather than recomputing it, because a fresh `HEAD` would start
+the range after the first pass's work and the second review would see the fixes
+instead of the deliverable. *Accepted tradeoffs:* two lines and one
+`git rev-parse` on every design artifact, including the many that no review
+ever opens; the clause is prose with no mechanical validator, so the outline-
+and design-correctors check it only after the artifact is written, and they
+cannot repair it — a base they supplied would be the same recomputation, so
+they leave a `TODO` for the author instead. Commits landing between artifact
+generation and the work fall inside the range and surface as unspecified
+deliverables — bounded and visible, where a narrower base would silently drop
+the job's own first commit.
 
 ### 6.5 Execution routing
 
@@ -588,7 +590,7 @@ methodology frameworks (Cynefin, XP, Lean Startup) validate the principle —
 match process weight to uncertainty — but the structure derives from how this
 system executes.
 
-**D-79 — Three planning artifacts, two design routes, one execution skill.**
+**D-81 — Three planning artifacts, two design routes, one execution skill.**
 
 | Artifact | Means | Goes to |
 |---|---|---|
@@ -612,21 +614,25 @@ would have carried that defect forward under a cleaner name.
 Complexity (Stacey axes) determines design ceremony. Work type
 (production/exploration/investigation) determines quality obligations. Route
 determines execution mechanics. They are decided at different pipeline stages:
-complexity and work type at `/design` Phase 0, route at `/design`'s
-`references/route-to-execution.md`, which both sufficiency gates read.
+complexity and work type at `/design` Phase 0, which also fixes the route for
+Simple and Moderate work; Complex work decides its route later, at whichever
+gate confirms its terminal artifact — both of `write-outline.md`'s sufficiency
+gates and `write-design.md`'s C.5 read `references/route-to-execution.md`.
 
 **D-36 — Artifact destination determines ceremony, not behavioral-code presence
 alone.** Prototype scripts, one-off analysis and spikes do not need runbooks, TDD
 or test files even though they contain behavioral code. Design resolves the
 complexity; after design a prototype is direct implementation.
 
-**D-37 — Simple classification still routes through `/build`.** "Direct
-execution" — recall, explore, edit, done — bypasses the integration-test gate,
-review dispatch, triage feedback and the deliverable-review chain. Classification
-determines *design* ceremony, not *execution* ceremony. Simple therefore gets
-the same four steps as Moderate agentic-prose — outline, proof, commit, route
-to `/build` — which is why those two `/design` branches collapsed into one
-(D-79).
+**D-37 — Simple classification still routes through `/build`.** Doing the work
+in the design session instead — recall, explore, edit, done — bypasses the
+integration-test gate, review dispatch, triage feedback and the
+deliverable-review chain. That path is retired and so is its name: "direct
+execution" survives only in `/build` §4.1, where it means inline rather than
+delegated dispatch. Classification determines *design* ceremony, not
+*execution* ceremony. Simple therefore gets the same four steps as Moderate
+agentic-prose — outline, proof, commit, route to `/build` — which is why those
+two `/design` branches collapsed into one (D-81).
 
 **D-38 — Composite tasks are decomposed before classification.** Batch-classifying
 an input holding N discrete work items averages heterogeneous items, so a
@@ -805,8 +811,8 @@ job's design artifact — `design.md`, else `outline.md` — against the reposit
 diff over the range D-80's Provenance defines: every created or modified file
 that is not a planning or execution artifact is a deliverable. The artifact
 specifies what should exist; the diff shows what was produced; the gap between
-them is findings —
-missing deliverables (incompleteness) or unspecified ones (excess).
+them is findings — missing deliverables (incompleteness) or unspecified ones
+(excess).
 
 **D-56 — Each deliverable is classified into exactly one type, and the type
 selects the axes.** Types: code, test, agentic prose, human documentation,
