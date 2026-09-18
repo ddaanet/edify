@@ -68,11 +68,13 @@ was also 222 and this pass added no lines. `design/SKILL.md` 175,
 `deliverable-review/SKILL.md` 143. References: `research-protocol.md` 43,
 `route-to-execution.md` 60, `write-outline.md` 208, all under 400.
 
-## Out-of-scope observations — not applied, carried as follow-ups
+## Out-of-scope observations
 
-Deliberately unapplied: the outline's Scope is the contract for this pass, and
-an edit it does not name reads as an undeclared deliverable to the next
-deliverable-review.
+Held back on first pass — the outline's Scope is the contract, and an edit it
+does not name reads as an undeclared deliverable to the next
+deliverable-review. **B and C were then applied on my human partner's
+instruction**, in a follow-up commit that names them as an authorised scope
+extension. A and D remain open.
 
 - **A. `write-outline.md:170-187`'s multi-sub-problem gate has no not-routable
   branch.** The m-2 fix defers to "the gate above", and that gate carries no
@@ -83,12 +85,13 @@ deliverable-review.
 - **B. `design/SKILL.md:133`** — "**Generate** … per `references/write-outline.md`",
   the surviving "per X" pointer on the very line M-2 fixed. The agent must open
   that node for the outline format; Phase 0 `:42-44` and Complex `:142` all say
-  "Read". Same defect class as M-2, different target. Line-neutral fix
-  available.
+  "Read". Same defect class as M-2, different target. **Applied:** the step now
+  reads "Read `references/write-outline.md` for the outline format", line-neutral.
 - **C. `build/SKILL.md:122`** — "One dispatch composed per
   `references/dispatch-composition.md`", a pointer that must be opened to
   compose any dispatch, in "per" form. No site says "Read"; `:214` only indexes
-  it.
+  it. **Applied:** "One dispatch: Read `references/dispatch-composition.md` and
+  compose by it", line-neutral.
 - **D. `design/SKILL.md:174`** — "(B gate or C.5)", singular where `:19` now
   says both of `write-outline.md`'s gates. Readable as the Phase B gate
   collectively, and the outline judged `:174` needs no edit for M-4 — it did not

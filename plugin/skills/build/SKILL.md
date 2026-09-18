@@ -119,7 +119,7 @@ per-item choice makes it common — so the threshold is the fragment's.
 
 ### 4.2 Delegated execution
 
-One dispatch composed per `references/dispatch-composition.md` —
+One dispatch: Read `references/dispatch-composition.md` and compose by it —
 `edify:artisan`, or `edify:corrector` where the item is itself a review. The
 parent does the cognitive work (curating what the dispatch sees); the child
 does the mechanical work, since subagents have no parent context.
