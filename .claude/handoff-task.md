@@ -1,15 +1,12 @@
 ## Current task
 
-`/edify:build plans/provenance-reach-and-sweep` is finished: the outline's six
-regions, plus observations B and C from its skill review, which my human
-partner authorised past the outline's Scope. Both review reports are under
-`plans/provenance-reach-and-sweep/reports/`; triage feedback matched.
+`/edify:deliverable-review plans/provenance-reach-and-sweep` is finished — 0
+critical, 6 major, 5 minor, report at
+`plans/provenance-reach-and-sweep/reports/deliverable-review.md`. All nine
+findings the outline worked, plus observations B and C, are confirmed at their
+sites; the majors are new, found by reading the Provenance contract's three
+surfaces against each other rather than from the finding list.
 
-Next is `/edify:deliverable-review plans/provenance-reach-and-sweep` (opus). It
-needs a fresh process first, not only a `/clear`: the build edited the
-`deliverable-review`, `design` and `build` skill bodies, and a cleared process
-keeps the pre-change bodies it loaded at start. `/handoff:restart` does it.
-Coverage is the report's seven findings plus P-1 and P-2, and B and C, which the
-outline does not name — the commit that carries them declares them as an
-authorised extension, so the review should not read them as undeclared
-deliverables.
+Next is an `/edify:design` pass over those findings. M-1, M-2 and M-4 are one
+cluster — the contract's enforcement across the two correctors, D-80 and the
+consumer — and want designing together rather than fixing site by site.
