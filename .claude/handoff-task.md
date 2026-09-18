@@ -1,17 +1,15 @@
 ## Current task
 
-`plans/provenance-reach-and-sweep/outline.md` is proofed — eleven items
-reviewed, two approved and nine revised. The job grew from five edit regions to
-six: `/proof`'s own whole-tree verification found two defects the
-deliverable-review missed, now carried in the outline as P-1
-(`write-outline.md:185` reaches the routing node with "per", M-2's exact
-defect, on the caller m-2 scopes) and P-2 (`design/SKILL.md:19` counts the
-node's callers as two; there are three). It also corrected a wrong line
-citation inherited from the report — `design/SKILL.md:144` is blank, the M-2
-site is `:139` — and reversed half of M-1's fix on evidence from
-`craft:directive-writing`.
+`/edify:build plans/provenance-reach-and-sweep` is finished: the outline's six
+regions, plus observations B and C from its skill review, which my human
+partner authorised past the outline's Scope. Both review reports are under
+`plans/provenance-reach-and-sweep/reports/`; triage feedback matched.
 
-Next step is `/edify:build plans/provenance-reach-and-sweep`. It needs a fresh
-process first, not a `/clear`: this job edits three skill bodies, and a
-`/clear`ed process keeps the pre-change bodies it loaded at start.
-`/handoff:restart` does it.
+Next is `/edify:deliverable-review plans/provenance-reach-and-sweep` (opus). It
+needs a fresh process first, not only a `/clear`: the build edited the
+`deliverable-review`, `design` and `build` skill bodies, and a cleared process
+keeps the pre-change bodies it loaded at start. `/handoff:restart` does it.
+Coverage is the report's seven findings plus P-1 and P-2, and B and C, which the
+outline does not name — the commit that carries them declares them as an
+authorised extension, so the review should not read them as undeclared
+deliverables.

@@ -6,3 +6,4 @@
 | 2026-03-21 | outline-proofing | Moderate | 1 | 4 | no | match |
 | 2026-09-01 | pipeline-simplification | Complex | 62 | 6 | no | match |
 | 2026-09-17 | design-routing-and-provenance | Moderate | 16 | 3 | no | match |
+| 2026-09-17 | provenance-reach-and-sweep | Simple / Moderate agentic-prose (one route) | 9 | 2 | no | match |
