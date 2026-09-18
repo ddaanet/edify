@@ -1,12 +1,7 @@
 ## Current task
 
-`/edify:deliverable-review plans/provenance-reach-and-sweep` is finished — 0
-critical, 6 major, 5 minor, report at
-`plans/provenance-reach-and-sweep/reports/deliverable-review.md`. All nine
-findings the outline worked, plus observations B and C, are confirmed at their
-sites; the majors are new, found by reading the Provenance contract's three
-surfaces against each other rather than from the finding list.
+`/edify:design` over the `provenance-reach-and-sweep` deliverable review is at its proof step: `plans/provenance-enforcement-and-routing/outline.md` is drafted, with `classification.md`, and has not been through `/proof`. After approval the route is `/build plans/provenance-enforcement-and-routing` — not `/runbook`, on D-39 and my human partner's instruction.
 
-Next is an `/edify:design` pass over those findings. M-1, M-2 and M-4 are one
-cluster — the contract's enforcement across the two correctors, D-80 and the
-consumer — and want designing together rather than fixing site by site.
+Four calls were taken by my human partner during drafting and are recorded in the outline: `/build` from an outline is not reserved for prose — the route asks whether the work needs the runbook layer, and a simple plan with a TDD loop qualifies; `/edify:deliverable-review` detects a `Base:` conflict by script and stops on it, no substitution; the five stale "per X" pointers are fixed in this job; the formatter and line guard ride this job. Two outline decisions were accepted in conversation and still go through `/proof` with the rest: a not-routable sub-problem reopens only its own entry, and the formatter's scope is `plugin/`, `docs/` and root `*.md`.
+
+The outline reverses one recommendation made earlier in the session: the correctors' duplicated Provenance block is fixed in both places rather than extracted to a fragment, because neither corrector Reads an external file today and the dedup is pilfer defect 21's.
