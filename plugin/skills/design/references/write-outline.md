@@ -184,6 +184,13 @@ When an outline decomposes the job into individually-scoped sub-problems (each w
 - The caller (session task management) dispatches sub-problems as independent pending tasks
 - Each sub-problem's readiness names its route: Read `references/route-to-execution.md` and route by it, per sub-problem; dispatch remains the caller's responsibility
 
+**If a sub-problem is not routable** — the node records not-routable in that sub-problem's readiness summary instead of a route. Resume A.5 for that entry alone:
+- Siblings with no dependency path through the not-routable entry stay dispatchable
+- Its dependents are held; the readiness summary names which ones are held and on what
+- Only the revised entry goes back through `references/route-to-execution.md` — the rest of the outline is not reopened
+- The user confirms that entry, not the whole outline
+- Held dependents release once the entry routes
+
 **If insufficient** — identify which criteria failed. Resume from A.5 (revise outline) or present gaps for discussion.
 
 ---
