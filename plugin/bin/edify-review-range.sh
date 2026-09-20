@@ -96,8 +96,10 @@ if [[ -z "$base_line" ]] || [[ -z "$derived_line" ]]; then
 fi
 
 base=$(base_value_of "$base_line")
-# Take the `Derived from:` value's first word — it may carry an optional
-# trailing rationale clause after the value.
+# The whole `Derived from:` value, label stripped: unlike `Base:`, it is not
+# a single word — the prescribed shape names the motivating report and the
+# superseded artifact, and either form may carry a trailing rationale clause.
+# The two readers below take what each needs out of it.
 derived_from=$(sed -E 's/^- \*\*Derived from:\*\* *//' <<<"$derived_line")
 
 if [[ ! "$base" =~ ^[0-9a-fA-F]{40}$ ]]; then
