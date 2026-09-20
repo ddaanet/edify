@@ -171,7 +171,11 @@ run-pytest() {
 }
 
 run-line-limits() {
-    ./scripts/check_line_limits.sh
+    # Wrapped like every other check: `safe` so an overage reaches
+    # `report-end-safe` instead of aborting the recipe under `set -e`, and a
+    # header so the `oversized-file:` lines an allowlisted file prints on
+    # every green run say what produced them.
+    report "line limits" ./scripts/check_line_limits.sh
 }
 
 report-end-safe() {

@@ -1,11 +1,10 @@
 ---
 name: design
 description: >-
-  Triage complexity and design implementation approach: classifies
-  simple/moderate/complex, produces design documents for complex jobs, and
-  routes by whether the work needs a runbook. Triggers on /design,
-  architecture or implementation planning requests, or tasks needing
-  complexity assessment.
+  Triage complexity and design implementation approach: classify
+  simple/moderate/complex, produce design documents for complex jobs, and
+  route by whether the work needs a runbook. Triggers on /design, planning
+  requests, or tasks needing complexity assessment.
 allowed-tools: Agent, Read, Write, Bash, WebSearch, WebFetch, Skill
 user-invocable: true
 ---

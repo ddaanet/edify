@@ -19,6 +19,8 @@
 #   exit 0   RANGE: <base>..HEAD                          proceed with it
 #   exit 1   CONFLICT: base <a> != <b> inherited from <path>   STOP, report both
 #   exit 1   NO-PROVENANCE: / UNRESOLVED: <base> / NO-PRIOR: <path>  ask the user
+#            (NO-PROVENANCE also covers a `Derived from:` that is neither
+#            `none` nor names a `superseding` artifact: no range follows)
 #   other    (nothing on stdout)                            STOP: script failed
 set -euo pipefail
 

@@ -98,7 +98,10 @@ line on stdout:
 | any other | — | STOP: the script failed, no verdict |
 
 `NO-PRIOR:` covers a prior artifact that is missing or carries no full-sha
-`Base:`. Phase 1 step 2 shrinks to the call and this table; the parsing prose
+`Base:`. `NO-PROVENANCE:` also covers a `Derived from:` that is neither
+`none` nor names a `superseding` artifact — the report-only shape KD-1
+repairs — since no range can be established from it (ruled at the review
+gate; pinned by `tests/test_review_range.py`). Phase 1 step 2 shrinks to the call and this table; the parsing prose
 it carries today is deleted. No substitution: a conflict means one of two
 artifacts is wrong, and the script cannot know which. One hop only — each
 artifact in a chain was compared against its predecessor at its own review.
