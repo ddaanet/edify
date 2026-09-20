@@ -100,12 +100,12 @@ Load the domain-relevant skills and reference files the work names — e.g.
 
 ## 4. Execute
 
-Walk the work in order: a runbook's phases and items, or the design's changes.
-Per item, decide **at dispatch time** whether to do it in session or delegate.
-The decision is the batching rule — an agent offsets context churn in this
-session, so one agent owning a run of mechanical edits is right where one
-agent per edit is not. A runbook item's type plays no part in it: type
-determines item format, and for `tdd` the dispatch structure, nothing else.
+Walk the work in order: a runbook's phases and items, or an outline's or
+design's items. Per item, decide **at dispatch time** whether to do it in
+session or delegate — the batching rule: an agent offsets context churn in
+this session, so one agent owning a run of mechanical edits is right where one
+agent per edit is not. No type plays a part: §4.3 fires on the item carrying
+`Slices:`, whether a runbook, an outline or a design holds it.
 
 ### 4.1 Direct execution
 
@@ -126,9 +126,8 @@ does the mechanical work, since subagents have no parent context.
 
 ### 4.3 TDD items
 
-**When the item's type is `tdd`:** it lists behaviour slices. Read
-`references/tdd-slice.md` and execute each slice by it — four dispatches and
-the after-the-slice steps.
+**When the item carries `Slices:`** it carries nothing else to execute: Read
+`references/tdd-slice.md` and execute each slice by it.
 
 ### 4.4 Post-item verification
 
@@ -212,7 +211,7 @@ criteria.
 Each node names the condition that reaches it; none is loaded unconditionally.
 
 - **`references/dispatch-composition.md`** — composing any dispatch prompt
-- **`references/tdd-slice.md`** — §4.3, a `tdd` item's slices
+- **`references/tdd-slice.md`** — §4.3, an item carrying `Slices:`
 - **`references/phase-boundary.md`** — §4.5, end of a runbook phase
 - **`references/finishing.md`** — §5, every item done
 - **`references/review-dispatch-template.md`** — reviewer prompts, from
