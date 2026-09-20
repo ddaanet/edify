@@ -11,8 +11,8 @@ git diff --name-only
 
 Run `verify-step.sh` with `dangerouslyDisableSandbox: true`.
 
-Dispatch `edify:corrector` (checkpoint form, composed per
-`dispatch-composition.md`): scope IN/OUT from the phase's items, design and
+Read `dispatch-composition.md` and compose by it a checkpoint-form dispatch of
+`edify:corrector`: scope IN/OUT from the phase's items, design and
 recall artifact by path, changed-files list, report path from that reference's
 §Prompt contents rule under the dispatch name `phase-P-corrector`. IN/OUT
 lists must be non-empty and the changed-files list present — empty fields →

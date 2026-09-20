@@ -204,7 +204,7 @@ In workflow contexts, prefer agent delegation. **Direct invocation** is for when
 
 ## Execution Context for Review Delegations
 
-When delegating to corrector, include scope context per `plugin/fragments/review-requirement.md`:
+When delegating to corrector, Read `../../fragments/review-requirement.md` and include the scope context it specifies:
 
 **Required:** Scope IN, Scope OUT, Changed files, Requirements summary
 **Optional:** Prior state, Design reference

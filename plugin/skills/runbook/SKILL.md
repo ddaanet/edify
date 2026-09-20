@@ -33,8 +33,8 @@ user-validated.
 Each phase declares `type: tdd` or `type: general` (default). Type determines:
 
 - **Item format:** tdd → `Slices:` with per-slice test lists; general →
-  concrete action against a named target. Both per
-  `references/runbook-format.md`.
+  concrete action against a named target. Read
+  `references/runbook-format.md` and write both by it.
 - **Review criteria:** `runbook-corrector` applies slice rules to tdd items,
   clarity and readiness rules to all.
 - **Dispatch structure:** tdd → four dispatches per slice (RED → test review →
@@ -75,7 +75,7 @@ to steer it, and do not write an item that presumes either answer.
 
 ### 2. Write the Runbook
 
-Write `plans/<job>/runbook.md` per `references/runbook-format.md`:
+Read `references/runbook-format.md` and write `plans/<job>/runbook.md` by it:
 requirements mapping table, typed phases, items with requirement IDs,
 `Slices:` on tdd items, `Interfaces:` where one item's output is another's
 input.

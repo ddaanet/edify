@@ -30,7 +30,7 @@ Before invoking Agent tool, verify:
 
 ### Prompt Composition
 
-The dispatcher composes each prompt per `plugin/skills/build/references/dispatch-composition.md`: item text inline, design and recall artifact by path. The dispatched agent is a standing one (`edify:artisan`, `edify:test-driver`, `edify:corrector`, `edify:refactor`) — no agents are generated per plan.
+Read `plugin/skills/build/references/dispatch-composition.md` and compose each prompt by it: item text inline, design and recall artifact by path. The dispatched agent is a standing one (`edify:artisan`, `edify:test-driver`, `edify:corrector`, `edify:refactor`) — no agents are generated per plan.
 
 ### Quiet Execution Pattern
 

@@ -7,15 +7,15 @@ and a skipped review still runs §2 and §3 here.
 
 ## 1. Review gate
 
-Route changed files to the appropriate reviewer per
-`plugin/fragments/review-requirement.md` routing table.
+Read `../../fragments/review-requirement.md` and route changed files to the
+appropriate reviewer by its routing table.
 
 1. List changed files: `git diff --name-only "$(cat tmp/build-baseline)"`
 2. Group by artifact type (code/tests/plans, skill definitions, agent
    definitions, design documents)
 3. Look up the reviewer per group from the routing table
-4. Dispatch each group to its reviewer, structuring the prompt per
-   `review-dispatch-template.md`
+4. Read `review-dispatch-template.md` and dispatch each group to its
+   reviewer, structuring the prompt by it
 
 **Two dispatch patterns:**
 
@@ -32,8 +32,8 @@ Route changed files to the appropriate reviewer per
 Scope per dispatch is the uncommitted changes for that artifact group,
 implementation only; the template's §Field Rules set every other field.
 
-Planning artifacts do not route through this gate. They route by artifact per
-`docs/design.md` §6.4 D-26: `design.md` → `edify:design-corrector`,
+Planning artifacts do not route through this gate. They route by artifact, as
+`docs/design.md` §6.4 D-26 records: `design.md` → `edify:design-corrector`,
 `outline.md` → `edify:outline-corrector`, `runbook.md` →
 `edify:runbook-corrector`. `runbook-corrector` rejects anything that is not
 `runbook.md`.
