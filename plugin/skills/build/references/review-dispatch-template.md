@@ -1,8 +1,8 @@
 # Review Dispatch Template
 
-Prompt template for reviewer delegation from `/build` §6. Reviewer selection
-happens upstream (§6 routing logic) — this template structures the prompt for
-the selected reviewer.
+Prompt template for reviewer delegation from `finishing.md` §1. Reviewer
+selection happens upstream (`finishing.md` §1 routing) — this template
+structures the prompt for the selected reviewer.
 
 Two variants. Use §Template for a fix-capable reviewer, §Report-only variant for
 a reviewer that can neither write nor edit.
@@ -65,8 +65,8 @@ change you would make. Mark a blocker "UNFIXABLE: [description]".
 
 The **calling session** then writes the returned findings to
 `plans/<job>/reports/review-<group>.md` and applies the fixes itself. The
-structural-proof Read in `/build` §6 then finds a file that exists, so the gate
-stops blocking on skill-definition groups.
+structural-proof Read in `finishing.md` §1 then finds a file that exists, so the
+gate stops blocking on skill-definition groups.
 
 ## Field Rules
 
@@ -87,8 +87,9 @@ stops blocking on skill-definition groups.
   resolves recall by path and moves writing and fixing to the caller. `Grep` and
   `Glob` are its search tools; a prompt instructing it to run `rg` fails.
 - **Report path:** one rule — `plans/<job>/reports/review-<group>.md`, `<group>`
-  being the artifact group §6 routed. The structural proof reads the path
-  actually dispatched, so the prompt and the proof must name the same file.
+  being the artifact group `finishing.md` §1 routed. The structural proof reads
+  the path actually dispatched, so the prompt and the proof must name the same
+  file.
 - **Scope IN/OUT:** From design or outline, not invented. Prevents reviewer from
   flagging work explicitly deferred.
 - **Scope completeness:** Reviewer must mechanically diff every Scope IN item

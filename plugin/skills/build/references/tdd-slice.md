@@ -2,9 +2,9 @@
 
 An item carrying `Slices:` lists behaviour slices and carries nothing else to
 execute. It reaches here from a runbook, or from an outline or design routed to
-`/build`. Read `dispatch-composition.md` and compose by it each of the four
-dispatches that execute slice `N.M/k`, then take the after-the-slice steps. Only
-such an item reaches this file.
+`/build`. Read `references/dispatch-composition.md` and compose by it each of
+the four dispatches that execute slice `N.M/k`, then take the after-the-slice
+steps. Only such an item reaches this file.
 
 ## The four dispatches
 

@@ -14,8 +14,8 @@ appropriate reviewer by its routing table.
 2. Group by artifact type (code/tests/plans, skill definitions, agent
    definitions, design documents)
 3. Look up the reviewer per group from the routing table
-4. Read `review-dispatch-template.md` and dispatch each group to its reviewer,
-   structuring the prompt by it
+4. Read `references/review-dispatch-template.md` and dispatch each group to its
+   reviewer, structuring the prompt by it
 
 **Two dispatch patterns:**
 
