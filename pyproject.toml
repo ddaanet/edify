@@ -31,6 +31,7 @@ dev = [
     "pytest-mock>=3.15.1",
     "pytest-markdown-report>=0.0.2",
     "types-pyyaml>=6.0",
+    "rumdl>=0.2.74",
 ]
 
 [build-system]

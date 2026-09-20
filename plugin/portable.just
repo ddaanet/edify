@@ -102,6 +102,11 @@ precommit:
     run-checks
     report "version consistency" python3 plugin/bin/check-version-consistency.py
     run-pytest
+    # Non-fixing: `fmt --check` exits 1 exactly when `fmt` would rewrite a
+    # file, and `-q` drops the summary so a clean run prints nothing. Plain
+    # `rumdl check` is not equivalent — it also reports the over-column lines
+    # MD013 cannot reflow, which no `fmt` pass can clear.
+    report "rumdl" rumdl fmt --check -q --no-cache
     run-line-limits
     report-end-safe "Precommit"
 
@@ -124,6 +129,10 @@ format:
     ruff check -q --fix-only --diff | patch-and-print >> "$tmpfile" || true
     ruff format -q --diff | patch-and-print >> "$tmpfile" || true
     docformatter --diff src tests | patch-and-print -Rp1 >> "$tmpfile" || true
+    # `-q` leaves one `path:line:col: … [fixed]` diagnostic per fix and drops
+    # the summary; keep the path so the listing below names the file. Several
+    # fixes in one file repeat it — `sort --unique` collapses them.
+    rumdl fmt -q --no-cache | sed -Ene '/\[fixed\]$/s/^([^:]+):.*$/\1/p' >> "$tmpfile"
     modified=$(sort --unique < "$tmpfile")
     if [ -n "$modified" ] ; then
         bold=$'\033[1m'; nobold=$'\033[22m'
