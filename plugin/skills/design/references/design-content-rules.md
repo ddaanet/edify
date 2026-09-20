@@ -190,7 +190,7 @@ Include this section specifying what the planner should read before starting:
 **Context7 references:**
 - `/anthropics/claude-code` -- hook configuration patterns (query: "PostToolUse hooks")
 
-**Pipeline contracts:** `docs/design.md` §6.4 "Pipeline contracts" (for tasks producing runbooks)
+**Pipeline contracts:** `docs/references/pipeline-contracts.md` (for tasks producing runbooks)
 
 **Additional research allowed:** Planner may do additional Context7 queries or exploration for technical implementation details not covered above.
 ```
@@ -215,9 +215,10 @@ runbook.
 
 ## Execution Model Directives
 
-When the design involves modifying the living design (`docs/design.md`), skill
-files (`plugin/skills/`), or agent procedures (`plugin/agents/`), include an
-execution directive in "Next steps":
+When the design involves modifying the living design (`docs/design.md`,
+`docs/decisions.md`, `docs/references/`), skill files (`plugin/skills/`), or
+agent procedures (`plugin/agents/`), include an execution directive in "Next
+steps":
 - Workflow/skill/agent edits: opus required
 
 Ensures architectural artifacts get appropriate scrutiny during execution, not

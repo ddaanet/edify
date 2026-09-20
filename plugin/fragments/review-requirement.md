@@ -65,7 +65,7 @@ availability before routing, and note the fallback in the review report so the
 weaker routing is visible.
 
 Orchestration-specific extensions (planning artifacts, human docs):
-`docs/design.md` §6.4 "Pipeline contracts."
+`docs/references/pipeline-contracts.md`.
 
 **Artifacts NOT requiring review:**
 - Execution reports

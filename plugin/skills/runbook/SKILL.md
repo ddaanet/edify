@@ -19,7 +19,7 @@ user-invocable: true
 
 Produce `plans/<job>/runbook.md` — the terminal planning artifact. Item and
 slice format: `references/runbook-format.md`. Pipeline context (see
-`docs/design.md` §6.4 "Pipeline contracts"): `/design` → `/runbook` →
+`docs/references/pipeline-contracts.md`): `/design` → `/runbook` →
 `runbook-corrector` → `runbook-simplifier` → `/proof` → `/build` in a fresh
 session.
 
@@ -110,8 +110,8 @@ Before review, verify:
 - **Prose atomicity** — all edits to one prose artifact in one item.
 - **Self-modification ordering** — when the runbook modifies pipeline tools it
   will later use, tool-improvement items precede tool-usage items; see
-  `docs/design.md` D-39, which routes self-modifying work out of the runbook
-  pipeline entirely when the risk cannot be ordered away.
+  `docs/references/execution-routing.md` D-39, which routes self-modifying work
+  out of the runbook pipeline entirely when the risk cannot be ordered away.
 
 ### 4. Commit
 

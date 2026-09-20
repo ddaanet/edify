@@ -290,7 +290,22 @@ and the session task frame is `.claude/handoff-task.md`.
 
 ## Design Decisions
 
-See `docs/design.md` — the living design record (requirements, architecture,
-decisions, rejected alternatives). It is rewired when components change, not
-appended to as an ADR archive. `docs/changelog.md` carries the dated
-design-significant entries.
+The living design is a graph, rewired when components change rather than
+appended to as an ADR archive. `docs/design.md` is the hub — requirements,
+architecture, limitations, non-goals. `docs/decisions.md` indexes every decision
+as one conclusion line and names every rejected alternative. `docs/references/`
+holds the arguments, one node per decision group; read the node before making a
+claim about, or changing, the mechanism it argues:
+
+- `cli-and-package.md` — `src/edify/`, the plugin/package split, the bootstrap,
+  markdown and token tooling
+- `testing.md` — `tests/`
+- `pipeline-contracts.md` — dispatch, review gates, phase types
+- `execution-routing.md` — `/design`, `/runbook`, `/build` routing
+- `agent-instructions.md` — model choice, instruction structure
+- `quality-gates.md` — gates, hooks, validating scripts
+- `deliverable-review.md` — review axes and findings
+- `project-configuration.md` — `.claude/`, agent frontmatter, line caps
+
+A hub conclusion and its node's argument change together. `docs/changelog.md`
+carries the dated design-significant entries.

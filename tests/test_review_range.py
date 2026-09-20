@@ -22,7 +22,7 @@ def _run_git(repo: Path, *args: str) -> str:
     """Run git in ``repo`` insulated from user and system config; return stdout.
 
     Failures assert with stderr attached rather than raising a bare
-    ``CalledProcessError`` (docs/design.md D-21).
+    ``CalledProcessError`` (docs/references/testing.md D-21).
     """
     env = dict(os.environ)
     env["GIT_CONFIG_GLOBAL"] = os.devnull

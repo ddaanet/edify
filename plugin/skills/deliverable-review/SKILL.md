@@ -61,7 +61,7 @@ Before starting, gather:
 Universal axes (all types): conformance, functional correctness, functional
 completeness, vacuity, excess.
 
-Full axis definitions: `docs/design.md` §6.8 "Deliverable review"
+Full axis definitions: `docs/references/deliverable-review.md`
 
 ### Phase 2: Gap Analysis
 
@@ -132,7 +132,7 @@ Write consolidated report to `plans/<plan>/reports/deliverable-review.md`.
 # Deliverable Review: <plan-name>
 
 **Date:** <date>
-**Methodology:** docs/design.md §6.8 "Deliverable review"
+**Methodology:** docs/references/deliverable-review.md
 
 ## Inventory
 [Table: type, file, lines]
@@ -169,7 +169,7 @@ skill does not queue follow-up work or record lifecycle state.
 
 ## References
 
-- **Methodology** — full axis definitions, ISO/IEEE sources: `docs/design.md`
-  §6.8 "Deliverable review"
+- **Methodology** — full axis definitions, ISO/IEEE sources:
+  `docs/references/deliverable-review.md`
 - **Example report** — completed review with all sections:
   `references/example-report.md`

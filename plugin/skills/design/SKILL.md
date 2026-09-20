@@ -253,7 +253,7 @@ When a design modifies an "author" skill (a skill whose output is reviewed by a
 corrector), check coupled dependencies before completing the design:
 
 1. Identify the corrector from the transformation table (T1–T6 in
-   `docs/design.md` §6.4 "Pipeline contracts")
+   `docs/references/pipeline-contracts.md`)
 2. Check: does the corrector's review criteria need corresponding update?
 3. Check: does any mechanical validator need update?
 4. Include corrector/validator updates in the same design scope

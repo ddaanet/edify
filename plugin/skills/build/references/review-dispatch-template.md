@@ -98,8 +98,8 @@ gate stops blocking on skill-definition groups.
   scope items (e.g., planstate specified in Scope IN but not part of any C1-C4
   component).
 - **Constraint:** This template is for implementation changes only. Planning
-  artifacts route by artifact, as `docs/design.md` §6.4 D-26 records:
-  `design.md` → `edify:design-corrector`, `outline.md` →
+  artifacts route by artifact, as `docs/references/pipeline-contracts.md` D-26
+  records: `design.md` → `edify:design-corrector`, `outline.md` →
   `edify:outline-corrector`, `runbook.md` → `edify:runbook-corrector`.
   `runbook-corrector` rejects anything that is not `runbook.md`.
 

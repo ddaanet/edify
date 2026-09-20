@@ -396,8 +396,8 @@ No mechanical validator exists.
   landed unverified.
 - **The allowlist ceiling turns the gate red on first growth of a listed
   file** — `docs/design.md` and `corrector.md` among them — until the file is
-  trimmed or the ceiling raised by hand. By design; the first red is not a
-  regression.
+  trimmed or split; a ceiling is never raised. By design; the first red is
+  not a regression.
 - **This job routes itself by the rule it writes.** Under today's Phase 0
   text a job containing Items 1.10 and 1.11 is Moderate non-prose and goes to
   `/runbook`. It goes to `/build` on both of D-39's grounds — it edits

@@ -32,9 +32,9 @@ Scope per dispatch is the uncommitted changes for that artifact group,
 implementation only; the template's §Field Rules set every other field.
 
 Planning artifacts do not route through this gate. They route by artifact, as
-`docs/design.md` §6.4 D-26 records: `design.md` → `edify:design-corrector`,
-`outline.md` → `edify:outline-corrector`, `runbook.md` →
-`edify:runbook-corrector`. `runbook-corrector` rejects anything that is not
+`docs/references/pipeline-contracts.md` D-26 records: `design.md` →
+`edify:design-corrector`, `outline.md` → `edify:outline-corrector`, `runbook.md`
+→ `edify:runbook-corrector`. `runbook-corrector` rejects anything that is not
 `runbook.md`.
 
 **Structural proof (D+B anchor):** once review completes, Read each report path
