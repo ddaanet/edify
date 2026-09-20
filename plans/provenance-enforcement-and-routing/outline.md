@@ -232,7 +232,10 @@ cite. Every pointer an item writes into a skill body is skill-relative
      `test_wrapped_derived_from_with_spaced_path` — `Derived from:` value on
      continuation lines, prior artifact under `plans/my job/`, script run
      from a directory outside the repo with the artifact given as an absolute
-     path; asserts the inherited compare still runs (exit 0).
+     path; asserts the inherited compare still runs (exit 0). Also a
+     first-pass artifact whose `Derived from:` reads `none — <rationale>`,
+     the idiom the tree's real artifacts use; asserts `RANGE:` (added after
+     slice 1's code review, which found the bare-`none` match rejecting it).
   Interfaces:
   - `edify-review-range.sh <artifact-path>` — repo located from the
     artifact's directory, `Derived from:` paths resolved against the repo
