@@ -12,6 +12,8 @@
 # clause after the value — real artifacts write both. The base
 # sha comes only from the artifact text — never from `HEAD`, `git log`, or
 # `merge-base` — so a script that recomputes it cannot pass this contract.
+# Where `Derived from:` names a prior artifact, that artifact's own
+# `Base:` is read the same way and compared against this one's.
 #
 # One verdict line on stdout, per KD-2's table:
 #   exit 0   RANGE: <base>..HEAD                          proceed with it
@@ -19,6 +21,46 @@
 #   exit 1   NO-PROVENANCE: / UNRESOLVED: <base> / NO-PRIOR: <path>  ask the user
 #   other    (nothing on stdout)                            STOP: script failed
 set -euo pipefail
+
+# Reads $1's `## Provenance` section, joining each `- **Field:**` bullet with
+# its indented continuation lines so a hard-wrapped value (the artifact may
+# wrap at 80 columns) reads as one logical line. Only the `## Provenance`
+# section is in scope: stop joining at the next `## ` heading. Trailing
+# whitespace is stripped per line so the join cannot manufacture a double
+# space or leave the last field value with a trailing blank. `[ \t]` rather
+# than `[[:space:]]`: the one-true-awk shipped on older macOS reads the
+# POSIX class as a plain bracket set of its own characters.
+provenance_of() {
+    awk '
+        /^## Provenance/ { in_section = 1; next }
+        in_section && /^## / { in_section = 0 }
+        in_section {
+            sub(/[ \t]+$/, "")
+            if ($0 ~ /^- \*\*/) {
+                if (bullet != "") print bullet
+                bullet = $0
+            } else if (bullet != "" && $0 ~ /^[ \t]+[^ \t]/) {
+                sub(/^[ \t]+/, "")
+                bullet = bullet " " $0
+            } else {
+                if (bullet != "") { print bullet; bullet = "" }
+            }
+        }
+        END { if (bullet != "") print bullet }
+    ' "$1"
+}
+
+# Takes a `- **Base:** ...` bullet line (as `provenance_of` joins it) and
+# prints its value's first word, backticks stripped — the value may carry an
+# optional trailing rationale clause after the sha. Prints nothing if $1 is
+# empty (no such bullet).
+base_value_of() {
+    [[ -z "$1" ]] && return 0
+    local base
+    base=$(sed -E 's/^- \*\*Base:\*\* *//' <<<"$1")
+    base=${base%% *}
+    printf '%s' "${base//\`/}"
+}
 
 artifact="${1:-}"
 if [[ -z "$artifact" ]]; then
@@ -38,31 +80,7 @@ if ! root=$(git -C "$artifact_dir" rev-parse --show-toplevel); then
     exit 2
 fi
 
-# Join each `- **Field:**` bullet with its indented continuation lines, so a
-# hard-wrapped value (the artifact may wrap at 80 columns) reads as one
-# logical line before it is matched. Only the `## Provenance` section is in
-# scope: stop joining at the next `## ` heading. Trailing whitespace is
-# stripped per line so the join cannot manufacture a double space or leave
-# the last field value with a trailing blank. `[ \t]` rather than
-# `[[:space:]]`: the one-true-awk shipped on older macOS reads the POSIX
-# class as a plain bracket set of its own characters.
-provenance=$(awk '
-    /^## Provenance/ { in_section = 1; next }
-    in_section && /^## / { in_section = 0 }
-    in_section {
-        sub(/[ \t]+$/, "")
-        if ($0 ~ /^- \*\*/) {
-            if (bullet != "") print bullet
-            bullet = $0
-        } else if (bullet != "" && $0 ~ /^[ \t]+[^ \t]/) {
-            sub(/^[ \t]+/, "")
-            bullet = bullet " " $0
-        } else {
-            if (bullet != "") { print bullet; bullet = "" }
-        }
-    }
-    END { if (bullet != "") print bullet }
-' "$artifact")
+provenance=$(provenance_of "$artifact")
 
 if [[ -z "$provenance" ]]; then
     echo "NO-PROVENANCE:"
@@ -77,11 +95,9 @@ if [[ -z "$base_line" ]] || [[ -z "$derived_line" ]]; then
     exit 1
 fi
 
-# Take each field's value, then its first word — both fields may carry an
-# optional trailing rationale clause after the value.
-base=$(sed -E 's/^- \*\*Base:\*\* *//' <<<"$base_line")
-base=${base%% *}
-base=${base//\`/}
+base=$(base_value_of "$base_line")
+# Take the `Derived from:` value's first word — it may carry an optional
+# trailing rationale clause after the value.
 derived_from=$(sed -E 's/^- \*\*Derived from:\*\* *//' <<<"$derived_line")
 
 if [[ ! "$base" =~ ^[0-9a-fA-F]{40}$ ]]; then
@@ -111,12 +127,30 @@ superseding_quoted='superseding[[:space:]]+`([^`]+)`'
 superseding_bare='superseding[[:space:]]+([^[:space:]]+)'
 if [[ "$derived_from" =~ $superseding_quoted ]] ||
     [[ "$derived_from" =~ $superseding_bare ]]; then
-    # TODO(slices 2-8): resolve the prior artifact's path against $root,
-    # read its own `**Base:**`, and compare — matching base emits RANGE,
-    # differing base emits CONFLICT, missing/base-less prior emits
-    # NO-PRIOR. Not implemented; this slice covers only `Derived from:
-    # none`.
-    echo "NO-PRIOR: ${BASH_REMATCH[1]}"
+    prior_path="${BASH_REMATCH[1]}"
+    prior="$root/$prior_path"
+
+    if [[ ! -f "$prior" ]]; then
+        echo "NO-PRIOR: $prior_path"
+        exit 1
+    fi
+
+    prior_provenance=$(provenance_of "$prior")
+    prior_base_line=$(grep -m1 -- '\*\*Base:\*\*' <<<"$prior_provenance" || true)
+    prior_base=$(base_value_of "$prior_base_line")
+
+    if [[ ! "$prior_base" =~ ^[0-9a-fA-F]{40}$ ]]; then
+        echo "NO-PRIOR: $prior_path"
+        exit 1
+    fi
+
+    if [[ "$resolved_base" == "$prior_base" ]]; then
+        printf 'RANGE: %s..HEAD\n' "$resolved_base"
+        exit 0
+    fi
+
+    printf 'CONFLICT: base %s != %s inherited from %s\n' \
+        "$resolved_base" "$prior_base" "$prior_path"
     exit 1
 fi
 

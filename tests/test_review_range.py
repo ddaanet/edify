@@ -61,16 +61,38 @@ def _write_artifact(path: Path, derived_from: str, base: str) -> None:
     """Write an artifact in the prescribed §Provenance shape.
 
     The shape is the one ``design-content-rules.md`` §Provenance Section
-    prescribes for every ``/design`` artifact.
+    prescribes for every ``/design`` artifact. ``derived_from`` may itself
+    span lines with a leading-space continuation (the real second-pass
+    shape below) — this writer interpolates it verbatim, then strips
+    trailing whitespace line by line so a value that starts on a
+    continuation line leaves no trailing blank on the bullet line, exactly
+    as a real artifact is written.
     """
+    derived_bullet = "\n".join(
+        line.rstrip() for line in f"- **Derived from:** {derived_from}".splitlines()
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         "# Outline\n\n"
         "## Provenance\n\n"
-        f"- **Derived from:** {derived_from}\n"
+        f"{derived_bullet}\n"
         f"- **Base:** `{base}`\n\n"
         "## Requirements\n",
         encoding="utf-8",
+    )
+
+
+def _second_pass_derived_from(prior_path: str) -> str:
+    """Build a `Derived from:` value in the real wrapped second-pass shape.
+
+    Nothing after the label, the motivating report on the first indented
+    continuation line, ``superseding `<prior_path>` `` on the second — the
+    shape ``plans/provenance-enforcement-and-routing/outline.md``'s own
+    ``## Provenance`` section uses, verbatim.
+    """
+    return (
+        "\n  `plans/prior-job/reports/deliverable-review.md`,\n"
+        f"  superseding `{prior_path}`"
     )
 
 
@@ -94,6 +116,28 @@ def test_first_pass_emits_range(tmp_path: Path) -> None:
     sha = _init_repo(repo)
     artifact = repo / "plans" / "job" / "outline.md"
     _write_artifact(artifact, "none", sha)
+
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+
+    result = _run_review_range(artifact, elsewhere)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout == f"RANGE: {sha}..HEAD\n"
+
+
+def test_second_pass_matching_base_emits_range(tmp_path: Path) -> None:
+    """A prior artifact with the same `Base:` emits `RANGE: <base>..HEAD`."""
+    repo = tmp_path / "repo"
+    sha = _init_repo(repo)
+    prior = repo / "plans" / "prior-job" / "outline.md"
+    _write_artifact(prior, "none", sha)
+    artifact = repo / "plans" / "job" / "outline.md"
+    _write_artifact(
+        artifact,
+        _second_pass_derived_from("plans/prior-job/outline.md"),
+        sha,
+    )
 
     elsewhere = tmp_path / "elsewhere"
     elsewhere.mkdir()
