@@ -311,6 +311,10 @@ cite. Every pointer an item writes into a skill body is skill-relative
      `docs/superpowers/plans/`; asserts exit 0 and no `oversized-file:` line.
   7. Spaced path: `test_line_limits_handles_spaced_path` — asserts the
      reported path is intact for `my notes.md` over the cap.
+  8. Partial walk is a failure: `test_line_limits_fails_when_find_cannot_walk`
+     — an unreadable directory under `docs/`; asserts exit 2 and no
+     `oversized-file:` line (added after slices 3–7's code review found
+     `find` failing inside process substitution left the gate green).
   List revision before slice 1: today's script ignores a `ROOT` argument and
   exits 0 on any tree, so slice 1 alone cannot red. Slices 1 and 2 run as
   one RED dispatch — 2 supplies the genuine red, the review proves 1 by
