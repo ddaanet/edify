@@ -241,7 +241,10 @@ cite. Every pointer an item writes into a skill body is skill-relative
   table verbatim. For those three, RED writes the test, the test review
   proves it by mutation (mutate the SUT, the test reds, restore), the test is
   committed as `test: Item 1.2/k — …`, and no GREEN or code-review dispatch
-  runs since the implementation does not change.
+  runs since the implementation does not change. After slice 3: slices 4
+  and 5 were implemented by slice 1's GREEN and slice 8's cases were probed
+  by the reviews, so 4–8 take the same form, batched into one RED dispatch
+  and one test review.
   Interfaces:
   - `edify-review-range.sh <artifact-path>` — repo located from the
     artifact's directory, `Derived from:` paths resolved against the repo
