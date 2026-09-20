@@ -130,18 +130,38 @@ check_cap() {
     fi
 }
 
+# Run `find "$@" -print0`, spooling into a temp file so its exit status
+# survives — a process substitution (`< <(find ...)`) discards it, which is
+# how a partial walk (e.g. a directory `find` cannot read) used to leave the
+# gate green: `find` failed, but nothing downstream ever saw it. The list
+# file is read by the caller's own `while` loop, since a helper cannot yield
+# a NUL-delimited stream back to its caller other than through a file.
+# `find`'s own diagnostic (e.g. "Permission denied") passes through to
+# stderr unredirected.
+walk() {
+    find "$@" -print0 >"$WALK_LIST" || {
+        echo "check_line_limits: find failed under $1" >&2
+        exit 2
+    }
+}
+
+WALK_LIST="$(mktemp)"
+trap 'rm -f "$WALK_LIST"' EXIT
+
 # Python source under src/ and tests/, cap 400.
 for dir in src tests; do
     [ -d "$dir" ] || continue
+    walk "$dir" -type f -name "*.py"
     while IFS= read -r -d '' file; do
         check_cap "$file" 400
-    done < <(find "$dir" -type f -name "*.py" -print0)
+    done <"$WALK_LIST"
 done
 
 # Markdown under plugin/, docs/, and root-level *.md; cap 200 for SKILL.md,
 # 400 otherwise; docs/superpowers/plans and docs/superpowers/specs excluded.
 for dir in plugin docs; do
     [ -d "$dir" ] || continue
+    walk "$dir" -type f -name "*.md"
     while IFS= read -r -d '' file; do
         case "$file" in
         docs/superpowers/plans/* | docs/superpowers/specs/*) continue ;;
@@ -149,11 +169,12 @@ for dir in plugin docs; do
         cap=400
         [ "$(basename "$file")" = "SKILL.md" ] && cap=200
         check_cap "$file" "$cap"
-    done < <(find "$dir" -type f -name "*.md" -print0)
+    done <"$WALK_LIST"
 done
 
+walk . -maxdepth 1 -type f -name "*.md"
 while IFS= read -r -d '' file; do
     check_cap "${file#./}" 400
-done < <(find . -maxdepth 1 -type f -name "*.md" -print0)
+done <"$WALK_LIST"
 
 exit "$EXIT_CODE"

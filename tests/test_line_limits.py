@@ -7,8 +7,11 @@ the checkout — the script must honour ``ROOT`` rather than walking the repo
 it happens to run from).
 """
 
+import os
 import subprocess
 from pathlib import Path
+
+import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "check_line_limits.sh"
@@ -205,26 +208,26 @@ def test_line_limits_allowlists_a_spaced_path(tmp_path: Path) -> None:
 
 
 def test_line_limits_matches_allowlist_paths_exactly(tmp_path: Path) -> None:
-    """An allowlist entry covers its own path and no path containing it.
+    """An allowlist entry covers its own path and no path sharing its basename.
 
-    Three 401-line files; only ``docs/notes.md`` is allowlisted.
-    ``docs/my-notes.md`` and ``docs/sub/notes.md`` both contain the entry as
-    a substring — the first would be caught by an unanchored ``case
-    "$file" in *$entry*)``, the second by a basename comparison. Both must
-    still fail, so the run exits 1 and reports all three.
+    Both files are 401 lines and ``docs/notes.md`` is allowlisted at ceiling
+    500 — strictly above 401, which is what makes the two implementations
+    diverge. ``docs/sub/notes.md`` shares the entry's basename: under a
+    basename comparison it inherits ceiling 500, stays under it and stops
+    failing the run; under exact-path matching it is not allowlisted at all
+    and must still fail. Either way both files are over cap and reported, so
+    the exit code carries the whole signal — 1 here, 0 under the mutant.
     """
     root = tmp_path / "root"
     _write_lines(root / "docs" / "notes.md", 401)
-    _write_lines(root / "docs" / "my-notes.md", 401)
     _write_lines(root / "docs" / "sub" / "notes.md", 401)
     allowlist = tmp_path / "allowlist.txt"
-    _write_allowlist(allowlist, [("docs/notes.md", 401, "no job yet")])
+    _write_allowlist(allowlist, [("docs/notes.md", 500, "no job yet")])
 
     result = _run_check_line_limits(root, allowlist=allowlist)
 
     assert result.returncode == 1, result.stdout + result.stderr
     assert sorted(result.stdout.splitlines()) == [
-        "oversized-file: docs/my-notes.md: 401 lines > 400",
         "oversized-file: docs/notes.md: 401 lines > 400",
         "oversized-file: docs/sub/notes.md: 401 lines > 400",
     ], result.stdout
@@ -263,6 +266,39 @@ def test_line_limits_checks_living_superpowers_docs(tmp_path: Path) -> None:
     assert result.stdout.splitlines() == [
         "oversized-file: docs/superpowers/design/living.md: 401 lines > 400"
     ], result.stdout
+
+
+def test_line_limits_fails_when_find_cannot_walk(tmp_path: Path) -> None:
+    """A directory ``find`` cannot read is a failure to run, not a clean pass.
+
+    ``docs/locked/`` is chmod 0o000 and holds the tree's only over-cap file:
+    ``find`` hits the directory mid-walk, prints ``Permission denied`` to
+    stderr and exits non-zero — but the script reads that ``find`` from a
+    process substitution, whose exit status ``set -e`` cannot see. Slices
+    3-7's code review (Finding 3) found this leaves the gate green: exit 0,
+    the 401-line file never checked and never reported.
+
+    Exit 2 is the contract asserted here, with ``find``'s own diagnostic
+    reaching stderr. What a partial walk printed before it failed is
+    deliberately not asserted: a fix that reports already-walked files before
+    exiting 2 is as acceptable as one that reports nothing, and this fixture
+    could not tell them apart anyway — the only readable file is under cap.
+    """
+    if os.geteuid() == 0:
+        pytest.skip("root ignores directory permissions; chmod 0o000 has no effect")
+
+    root = tmp_path / "root"
+    _write_lines(root / "docs" / "notes.md", 10)
+    locked_dir = root / "docs" / "locked"
+    _write_lines(locked_dir / "hidden.md", 401)
+    locked_dir.chmod(0o000)
+    try:
+        result = _run_check_line_limits(root)
+    finally:
+        locked_dir.chmod(0o700)
+
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert "docs/locked" in result.stderr, result.stderr
 
 
 def test_line_limits_handles_spaced_path(tmp_path: Path) -> None:
