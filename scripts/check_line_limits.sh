@@ -130,14 +130,14 @@ check_cap() {
     fi
 }
 
-# Run `find "$@" -print0`, spooling into a temp file so its exit status
-# survives — a process substitution (`< <(find ...)`) discards it, which is
-# how a partial walk (e.g. a directory `find` cannot read) used to leave the
-# gate green: `find` failed, but nothing downstream ever saw it. The list
-# file is read by the caller's own `while` loop, since a helper cannot yield
-# a NUL-delimited stream back to its caller other than through a file.
-# `find`'s own diagnostic (e.g. "Permission denied") passes through to
-# stderr unredirected.
+# Run `find "$@" -print0`, spooling into a temp file so its exit status is
+# observable: a process substitution (`< <(find …)`) discards it, and a
+# partial walk — a directory `find` cannot read — then passes for a complete
+# one. A pipeline into the loop loses `EXIT_CODE` to the subshell, and
+# `mapfile -d ''` is bash 4.4; a temp file is the bash-3.2-safe form, read by
+# the caller's own `while` loop since a helper cannot hand a NUL-delimited
+# stream back any other way. `find`'s own diagnostic (e.g. "Permission
+# denied") passes through to stderr unredirected.
 walk() {
     find "$@" -print0 >"$WALK_LIST" || {
         echo "check_line_limits: find failed under $1" >&2
@@ -145,7 +145,12 @@ walk() {
     }
 }
 
-WALK_LIST="$(mktemp)"
+# A failed `mktemp` leaves the tree unchecked: exit 2, since a bare `set -e`
+# abort on the assignment would surface as 1 and read as an overage.
+if ! WALK_LIST="$(mktemp)"; then
+    echo "check_line_limits: cannot create the walk list temp file" >&2
+    exit 2
+fi
 trap 'rm -f "$WALK_LIST"' EXIT
 
 # Python source under src/ and tests/, cap 400.
