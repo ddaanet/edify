@@ -75,7 +75,7 @@ reused.
 
 | # | Requirement | Status | Where · pinned by |
 |---|---|---|---|
-| NFR-1 | No source module exceeds 400 lines | Done | `scripts/check_line_limits.sh` (`MAX_LINES=400`), run by `just precommit` |
+| NFR-1 | No source or prose file exceeds the cap its path picks — 400 lines, 200 for a `SKILL.md` hub | Done | `scripts/check_line_limits.sh` and its allowlist sidecar, run by `just precommit` behind `rumdl fmt --check` · `tests/test_line_limits.py` |
 | NFR-2 | Errors never pass silently — no `\|\| true`, no `2>/dev/null`, no ignored exit codes | Done (prose) | `CLAUDE.md` "Error Handling" |
 | NFR-3 | Agent-consumed commands emit structured markdown on stdout and signal via exit code | Done | D-1 |
 | NFR-4 | Plugin and package versions move in lockstep | Done | `bin/check-version-consistency.py` |
@@ -569,10 +569,10 @@ copy that value verbatim, which is the author's own rule rather than a
 computation; where nothing can be copied they leave a `TODO` in `Base:` for the
 author. They never overwrite a `Derived from:` that is present, and never write
 a base obtained any way other than the verbatim copy — `git log`,
-`git merge-base` and `HEAD` are all the recomputation the Critical case names.
-Commits landing between artifact generation and the work fall inside the range
-and surface as unspecified deliverables — bounded and visible, where a narrower
-base would silently drop the job's own first commit.
+`git merge-base` and `HEAD` all recompute what the rule says to inherit. Commits
+landing between artifact generation and the work fall inside the range and
+surface as unspecified deliverables — bounded and visible, where a narrower base
+would silently drop the job's own first commit.
 
 ### 6.5 Execution routing
 
@@ -774,14 +774,14 @@ on an external signal.
 
 **D-46 — Quality gates are layered; no single gate is trusted alone.** Four
 layers, outer to inner: execution flow (the gate is anchored by a tool call so
-it cannot be optimized away as prose), automated checks (`just precommit` — line
-limits, lint, tests), semantic review (a corrector catches logic, integration
-and design-deviation issues), and conformance (comparison against an external
-reference). Each prevents a distinct failure mode. *Grounding:* a parity failure
-cascade where unit tests passed 385/385 while 8 visual parity issues survived,
-the review missed systemic conformance gaps because its mandate excluded
-reference comparison, and the 400-line constraint was bypassed — each layer
-failed independently.
+it cannot be optimized away as prose), automated checks (`just precommit` —
+formatting, line limits, lint, tests), semantic review (a corrector catches
+logic, integration and design-deviation issues), and conformance (comparison
+against an external reference). Each prevents a distinct failure mode.
+*Grounding:* a parity failure cascade where unit tests passed 385/385 while 8
+visual parity issues survived, the review missed systemic conformance gaps
+because its mandate excluded reference comparison, and the 400-line constraint
+was bypassed — each layer failed independently.
 
 Checklist when designing a new gate: is there an outer execution-flow defense, a
 middle automated check, an inner semantic review, and — for external-reference
@@ -985,14 +985,26 @@ prompt.
 subdirectories carry their own `agents/` folders (`plugin/agents/`), so a script
 walking upward stops at the wrong level.
 
-**D-69 — 400 lines is a hard per-module limit, enforced by precommit.** Review
-effectiveness drops faster than linearly past ~400 LOC — reviews under 300 lines
-get architectural feedback, past 600 only style comments
+**D-69 — A file's line cap is picked from its path, enforced by precommit.** 400
+lines for a Python module and for prose, 200 for a `SKILL.md` hub, which is paid
+on every invocation while a reference node is opt-in. Review effectiveness drops
+faster than linearly past ~400 LOC — reviews under 300 lines get architectural
+feedback, past 600 only style comments
 ([Baldawa 2024](https://rishi.baldawa.com/posts/pr-throughput/cognitive-load-cliff/));
 the AI-assisted sweet spot is 150-500 lines
 ([Faherty 2025](https://medium.com/@eamonn.faherty_58176/right-sizing-your-python-files-the-150-500-line-sweet-spot-for-ai-code-editors-340d550dcea4));
 PyLint's default of 1000 is too permissive for an agent's context. The limit
 provides backpressure against slop.
+
+The check covers prose as well as Python — `plugin/`, `docs/` and the root
+`*.md`, the frozen `docs/superpowers/` trees excluded. A count is honest only
+once a hard-wrapping formatter has run, so `just precommit` runs a non-fixing
+`rumdl fmt --check` (MD013, reflow at 80 columns) ahead of the guard. Files
+already over their cap are carried in an allowlist sidecar recording each one's
+ceiling and the job that retires it: still reported, failing only above the
+ceiling, which ratchets down only. That ratchet is what makes the check
+enforceable from the day it lands — a hard gate is red on its first run, and a
+warn-only gate never turns red at all.
 
 When a file hits the limit, look for code-quality improvements first — redundant
 calls, dead code, extraction candidates. Compressing user-facing output strings
@@ -1170,9 +1182,10 @@ L-1 (`prepare-runbook.py` test coverage) closed 2026-09-01 by deletion of the
 script; the ID is not reused.
 
 **L-2 — The routing thresholds are ungrounded operational parameters.** The
-file-count and component-count figures `/design` uses to triage complexity and
-decide whether work needs a runbook have no empirical calibration. The route
-*structure* is justified (D-34); the numbers inside it are not.
+file-count and component-count figures `/design` uses to triage complexity have
+no empirical calibration, and the runbook decision carries no numbers at all —
+its second discriminator is judgement with no item count behind it (D-82). The
+route *structure* is justified (D-34, D-82); the parameters inside it are not.
 `plans/reports/triage-feedback-log.md` collects per-execution evidence — files
 changed, agent count, behavioral code, classification verdict — for eventual
 calibration.

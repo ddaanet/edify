@@ -12,7 +12,7 @@
 # the number.
 #
 # Counts measured after the 80-column reflow (Item 1.11).
-docs/design.md	1221	no job yet
+docs/design.md	1234	no job yet — raised once at the review gate of provenance-enforcement-and-routing, to record KD-7/KD-8 in NFR-1, D-69, D-46; a split is due
 docs/superpowers/design/plugin-transition-evaluation.md	403	no job yet
 plugin/agents/corrector.md	682	pilfer defect 21 (corrector-family dedup)
 plugin/agents/design-corrector.md	460	pilfer defect 21 (corrector-family dedup)

@@ -7,3 +7,4 @@
 | 2026-09-01 | pipeline-simplification | Complex | 62 | 6 | no | match |
 | 2026-09-17 | design-routing-and-provenance | Moderate | 16 | 3 | no | match |
 | 2026-09-17 | provenance-reach-and-sweep | Simple / Moderate agentic-prose (one route) | 9 | 2 | no | match |
+| 2026-09-20 | provenance-enforcement-and-routing | Simple / Moderate agentic-prose (one route) | 102 | 37 | yes | match |
