@@ -93,6 +93,7 @@ Analyze outline against these dimensions:
 - Trade-offs are documented
 - Rationale provided for non-obvious choices
 - Structure is logical and navigable
+- An item carrying `Slices:` states each test's assertion in prose — the exact expected value, pattern or behaviour, specific enough that two executors would write the same test. Read `runbook-format.md` in the `runbook` skill's `references/` for the item shape and its §"Assertion quality". A slice whose assertion is unstated or vague → Major: it cannot be dispatched RED.
 
 **Requirements Traceability:**
 - Every FR-* maps to outline section
@@ -114,7 +115,22 @@ Analyze outline against these dimensions:
 - `Derived from:` is `none`, or names **both** the review report that motivated the outline and the artifact it supersedes. Naming only the report → Major: the superseded artifact is a later pass's only route to `Base:`.
 - When `Derived from:` names a prior artifact, Read that artifact and check `Base:` matches it verbatim. A recomputed base → Critical: the range then starts after the prior pass's work, and the resulting narrow diff reads as a clean review. A `Derived from:` path that does not resolve → Major; report it rather than accept the base unchecked.
 - When `Derived from:` is `none`, `Base:` is a full 40-character sha reachable from HEAD (`git merge-base --is-ancestor <base> HEAD` via Bash, exit 0).
-- **Never fill in `Base:` yourself.** Repair a missing or unverifiable base with a `TODO` placeholder in both fields, and name in the report what the author must supply. A base you compute is the recomputation the Critical bullet names, and it fails silently.
+- **Repair by what you found**, and only by that:
+
+  | Found | Repair |
+  |---|---|
+  | Section absent | add it, `TODO` in both fields |
+  | `Derived from:` absent, `Base:` present | `TODO` in `Derived from:` only |
+  | `Derived from:` names a prior artifact that resolves and carries a full-sha `Base:`; this `Base:` differs or is missing | copy the prior `Base:` verbatim; report Critical if it differed |
+  | `Derived from:` resolves, prior artifact has no usable `Base:` | `TODO` in `Base:` only |
+  | `Derived from:` path does not resolve | `TODO` in `Base:` only; leave `Derived from:` as found |
+  | `Derived from:` names only the report | `TODO` in `Base:` only; leave `Derived from:` as found |
+  | `Derived from:` is `none`; `Base:` missing, not a full sha, or not reachable from HEAD | `TODO` in `Base:` only |
+
+  Never write a `Base:` obtained any way other than the verbatim copy — `git
+  log`, `git merge-base` and `HEAD` are all the recomputation. Never overwrite
+  a `Derived from:` that is present. Every value a `TODO` replaces is quoted in
+  the report.
 
 **Resume Completeness (for agent/state machine designs):**
 - All non-terminal states have a defined resume path
