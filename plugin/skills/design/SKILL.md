@@ -38,7 +38,7 @@ Assessment rules:
 Before doing design work, assess whether design is actually needed.
 
 **Artifact check:** Read plan directory (`plans/<job-name>/`) for existing artifacts:
-- `design.md` exists → route to `/runbook`
+- `design.md` exists → Read `references/write-design.md`, skip to C.5, which routes by `references/route-to-execution.md`
 - `outline.md` is multi-sub-problem (contains individually-scoped sub-problems with dependency graph and per-sub-problem readiness routing) → Read `references/write-outline.md`, skip to multi-sub-problem sufficiency gate
 - `outline.md` sufficient (concrete approach, no open questions, explicit scope, low coordination complexity) → Read `references/write-outline.md`, skip to outline sufficiency gate
 - `outline.md` insufficient → Read `references/write-outline.md`, resume from A.5 (revise) or A.6 (review)
