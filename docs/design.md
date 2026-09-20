@@ -545,19 +545,32 @@ consolidated runbook and execution never sees the redundancy.
 starts from.** A `## Provenance` section carries `Derived from:` — the review
 report that motivated the design and the artifact it supersedes, or `none` —
 and `Base:`, the commit the work starts at. *Consumer:*
-`/edify:deliverable-review` builds its range as `<Base>..HEAD`, and asks the
-user for the range when the section is absent or when `<Base>` does not
-resolve to a commit. A first-pass artifact takes `git rev-parse HEAD` at
+`/edify:deliverable-review` establishes its range by `edify-review-range.sh`,
+a script in the plugin's `bin/` invoked by bare name, which parses §Provenance
+and emits one verdict line: the range `<Base>..HEAD`, or a verdict with no
+range — section absent, `<Base>` unresolvable, or the prior artifact missing
+or carrying no full-sha base — on which the skill asks the user for the range.
+Where `Derived from:` names a prior artifact, the script reads that artifact's
+`Base:` and compares, and **stops on a conflict**: it substitutes neither
+value, because a conflict means one of the two artifacts is wrong and the
+script cannot know which. One hop only — each artifact in a chain was compared
+against its predecessor at its own review. A first-pass artifact takes `git rev-parse HEAD` at
 generation time, which is safe because `plans/` is excluded from the review
 diff; a second-pass artifact copies `Base:` verbatim from the artifact named in
 `Derived from:` rather than recomputing it, because a fresh `HEAD` would start
 the range after the first pass's work and the second review would see the fixes
 instead of the deliverable. *Accepted tradeoffs:* two lines and one
 `git rev-parse` on every design artifact, including the many that no review
-ever opens; the clause is prose with no mechanical validator, so the outline-
-and design-correctors check it only after the artifact is written, and they
-cannot repair it — a base they supplied would be the same recomputation, so
-they leave a `TODO` for the author instead. Commits landing between artifact
+ever opens; nothing validates a `Base:` at the moment the author writes it —
+the write side is prose, and only the read side is mechanically checked. The
+outline- and design-correctors check the clause after the artifact is written
+and repair it in two halves: where `Derived from:` resolves to a prior
+artifact carrying a full-sha `Base:`, they copy that value verbatim, which is
+the author's own rule rather than a computation; where nothing can be copied
+they leave a `TODO` in `Base:` for the author. They never overwrite a
+`Derived from:` that is present, and never write a base obtained any way other
+than the verbatim copy — `git log`, `git merge-base` and `HEAD` are all the
+recomputation the Critical case names. Commits landing between artifact
 generation and the work fall inside the range and surface as unspecified
 deliverables — bounded and visible, where a narrower base would silently drop
 the job's own first commit.
@@ -596,10 +609,11 @@ system executes.
 | `outline.md` | architecture known, or resolved within the outline | `/runbook` or `/build` |
 | `runbook.md` | decomposed into typed phases | `/build` |
 
-`outline.md` keeps both consumers: `/design`'s Moderate non-prose route sends
-it to `/runbook`, its Simple and agentic-prose route to `/build`. Those two
-were separate branches producing separate artifacts and now produce the same
-one, so they are one branch.
+`outline.md` keeps both consumers: `/design`'s Moderate non-prose route reads
+`references/route-to-execution.md` and routes by it, to `/runbook` or to
+`/build`; its Simple and agentic-prose route goes to `/build` directly. Those
+two were separate branches producing separate artifacts and now produce the
+same one, so they are one branch.
 
 `inline-plan.md` is **removed as a kind, not renamed.** It was an `outline.md`
 with the architecture section left empty — every field it had, a sufficient
@@ -613,9 +627,42 @@ Complexity (Stacey axes) determines design ceremony. Work type
 (production/exploration/investigation) determines quality obligations. Route
 determines execution mechanics. They are decided at different pipeline stages:
 complexity and work type at `/design` Phase 0, which also fixes the route for
-Simple and Moderate work; Complex work decides its route later, at whichever
-gate confirms its terminal artifact — both of `write-outline.md`'s sufficiency
-gates and `write-design.md`'s C.5 read `references/route-to-execution.md`.
+Simple and Moderate agentic-prose work — both go straight to `/build`. Moderate
+non-prose and Complex work decide the route at the node instead, once the
+terminal artifact exists. `references/route-to-execution.md` has four callers:
+both of `write-outline.md`'s sufficiency gates, `write-design.md`'s C.5, and
+Phase 0's Moderate non-prose route, which generates and `/proof`s its outline
+and then reads the node like the rest.
+
+**D-82 — The route asks whether the work needs the runbook layer, not whether
+it is prose.** What `/runbook` adds is phases with boundaries
+(`build/references/phase-boundary.md`) and a corrector, simplifier and
+`/proof` pass over the decomposition itself, so the route turns on whether the
+work needs that layer. Three branches: Investigation or Exploration goes to
+`/build`; a runbook discriminator holding sends the work to `/runbook`;
+everything else goes to `/build`. Two discriminators, either sufficient —
+cross-file coordination requiring sequencing, and a decomposition the author
+judges needs its own review before execution. The second is **ungrounded** and
+offers no threshold: no data exists on the item count at which an unreviewed
+decomposition fails, so it is applied unevenly until `triage-feedback.sh`
+comparisons give data. Prose edits are commutative — editing file A before or
+after file B gives the same result — so multi-file prose is not cross-file
+coordination; coordination arises from runtime ordering dependencies such as
+build↔verify, and a TDD loop alone is not one. Routing on the material
+instead — a branch of its own for prose, "implementation loops" among the
+discriminators — described the work rather than what `/runbook` adds, and sent
+a simple plan with a TDD loop through a layer it had no use for.
+
+**D-83 — A behavioural change is a tdd item wherever it is written, and
+`/build` fires on `Slices:`.** `/build` §4.3 and
+`build/references/tdd-slice.md` key on the item carrying `Slices:`, not on a
+phase attribute, which only a runbook has (D-30). An outline or design routed
+to `/build` writes each behavioural change in the item shape of
+`runbook/references/runbook-format.md` — `Item 1.M`, `Slices:`, `Interfaces:`
+where consumed — by Reading that file rather than restating it. An item
+carrying `Slices:` carries nothing else to execute; general work goes in its
+own item. The route's second precondition follows: a behavioural change has
+its slices written.
 
 **D-36 — Artifact destination determines ceremony, not behavioral-code presence
 alone.** Prototype scripts, one-off analysis and spikes do not need runbooks, TDD
@@ -644,8 +691,9 @@ edits pipeline skills or pipeline contracts, a runbook step that edits the runbo
 skill creates stale-instruction risk for later steps. Structure it as an inline
 task sequence instead, each task executing with fresh instruction loads. TDD
 discipline is preserved — the executing session dispatches `test-driver` per
-slice. Also applies when there is no parallelization benefit or when coordination
-cost exceeds error-recovery value.
+slice. That is one instance of the general route (D-82): the question is whether
+the work needs what `/runbook` adds, and a plan that does not — prose or not —
+is built directly, with TDD run per slice from the executing session.
 
 **D-40 — Escalation has three tiers.** *Item-level:* a single `UNFIXABLE` item
 blocks execution on a missing design decision, ambiguous requirement or external
