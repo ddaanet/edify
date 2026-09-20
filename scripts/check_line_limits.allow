@@ -1,0 +1,24 @@
+# Per-file line-count ceilings for scripts/check_line_limits.sh.
+#
+# Format: <path><TAB><ceiling><TAB><note>. Blank lines and lines starting
+# with `#` are ignored; the path is root-relative and matched exactly. A
+# listed file is still reported when it is over its path-picked cap, but
+# only fails the run when it exceeds the ceiling here.
+#
+# Ceilings are the file's measured line count and only ratchet down: when a
+# listed file shrinks, lower its ceiling to the new count, and delete the
+# entry once the file is back under its cap. When a listed file grows past
+# its ceiling the gate is red by design — trim the file rather than raising
+# the number.
+#
+# Counts measured after the 80-column reflow (Item 1.11).
+docs/design.md	1221	no job yet
+docs/superpowers/design/plugin-transition-evaluation.md	403	no job yet
+plugin/agents/corrector.md	682	pilfer defect 21 (corrector-family dedup)
+plugin/agents/design-corrector.md	460	pilfer defect 21 (corrector-family dedup)
+plugin/agents/outline-corrector.md	450	pilfer defect 21 (corrector-family dedup)
+plugin/skills/build/SKILL.md	218	no job yet
+plugin/skills/design/SKILL.md	285	no job yet
+plugin/skills/proof/SKILL.md	203	no job yet
+plugin/skills/requirements/SKILL.md	357	no job yet
+plugin/skills/review/SKILL.md	231	no job yet
