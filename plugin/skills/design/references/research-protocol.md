@@ -38,6 +38,6 @@ Open questions: Should rate limits vary by endpoint? Should admin users be exemp
 Scope: API gateway only. Dashboard/monitoring out of scope.
 ```
 
-Write the Provenance heading and its two fields as shown; adapt the rest.
+Only the `## Provenance` heading and the two field labels are as shown; both values come from `references/design-content-rules.md` §Provenance Section, which the Content list above routes through. The example's `none` and its `Base:` are one first-pass case, not values to copy. Adapt the rest.
 
 **Escape hatch:** If user input already specifies approach, decisions, and scope (e.g., detailed brief.md), compress A+B by presenting outline and asking for validation in a single message.
