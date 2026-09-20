@@ -28,7 +28,16 @@ Before starting, gather:
 ### Phase 1: Inventory
 
 1. Read the design artifact's Scope section (IN/OUT) to establish expected deliverables
-2. Establish the review range as `<Base>..HEAD`, reading `<Base>` from the artifact's §Provenance. Ask the user for the range when the artifact carries no Provenance section, or when `git rev-parse <Base>^{commit}` does not resolve. Run `git diff --numstat <range> -- . ':!plans' ':!tmp' ':!.claude'` for per-file line counts. A submodule that moved in the range is diffed inside the submodule between its two pointers
+2. Establish the review range: run `edify-review-range.sh <artifact-path>`, by bare name — Claude Code puts every enabled plugin's `bin/` on PATH, so no path is needed. Act on the one verdict line it prints:
+
+   | Exit | Line | Do |
+   |------|------|----|
+   | 0 | `RANGE: <base>..HEAD` | proceed with it |
+   | 1 | `CONFLICT: base <a> != <b> inherited from <path>` | **STOP** — report both bases and the path. One of the two artifacts is wrong and the script cannot know which; do not substitute a range |
+   | 1 | `NO-PROVENANCE:`, `UNRESOLVED: <base>`, `NO-PRIOR: <path>` | ask the user for the range |
+   | any other | — | STOP: the script failed, no verdict |
+
+   With the range established, run `git diff --numstat <range> -- . ':!plans' ':!tmp' ':!.claude'` for per-file line counts. A submodule that moved in the range is diffed inside the submodule between its two pointers
 3. Classify each deliverable by artifact type:
 
 | Type | Pattern | Review axes |
