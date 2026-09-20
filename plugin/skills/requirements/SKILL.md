@@ -7,11 +7,14 @@ user-invocable: true
 
 # Capture Requirements
 
-Dual-mode requirements capture: extract from conversation or elicit through semi-structured questions. Produces `plans/<job>/requirements.md` artifact consumed by `/design` and `/runbook`.
+Dual-mode requirements capture: extract from conversation or elicit through
+semi-structured questions. Produces `plans/<job>/requirements.md` artifact
+consumed by `/design` and `/runbook`.
 
 ## Target Model
 
-**Opus required.** Extract mode requires synthesizing nuanced conversation context; sonnet misses implicit requirements.
+**Opus required.** Extract mode requires synthesizing nuanced conversation
+context; sonnet misses implicit requirements.
 
 ## Usage
 
@@ -23,31 +26,48 @@ Skill automatically detects appropriate mode based on conversation history.
 
 ## Mode Detection
 
-**Primary signal:** `rg --files plans/<job>/requirements.md` — if file exists, Read it and use as base for update/refinement (extract mode with existing artifact). If absent, fall through to conversation heuristic.
+**Primary signal:** `rg --files plans/<job>/requirements.md` — if file exists,
+Read it and use as base for update/refinement (extract mode with existing
+artifact). If absent, fall through to conversation heuristic.
 
 **Conversation heuristic (fallback):**
-- **Extract mode** — conversation contains substantive discussion (feature descriptions, constraints, scope)
-- **Elicit mode** — fresh conversation or minimal context (no prior feature discussion, cold-start)
+- **Extract mode** — conversation contains substantive discussion (feature
+  descriptions, constraints, scope)
+- **Elicit mode** — fresh conversation or minimal context (no prior feature
+  discussion, cold-start)
 
 ## Recall Pass
 
-**Runs after mode detection, before either procedure.** Ground extraction in existing infrastructure, patterns, and decisions — prevents naive requirements.
+**Runs after mode detection, before either procedure.** Ground extraction in
+existing infrastructure, patterns, and decisions — prevents naive requirements.
 
 ### Process
 
-Invoke `Skill(skill: "edify:recall", args: "<topic derived from job name and conversation>")`.
+Invoke
+`Skill(skill: "edify:recall", args: "<topic derived from job name and conversation>")`.
 
-**Gate anchor:** The recall artifact **write** is the structural anchor — a tool call that fires whether or not anything relevant turns up. When nothing relevant is found, write the artifact with an explicit null entry (see format below), so downstream consumers hit a file that exists on both paths and need no conditional logic of their own.
+**Gate anchor:** The recall artifact **write** is the structural anchor — a tool
+call that fires whether or not anything relevant turns up. When nothing relevant
+is found, write the artifact with an explicit null entry (see format below), so
+downstream consumers hit a file that exists on both paths and need no
+conditional logic of their own.
 
 **Boundaries:**
-- No agent delegation, no Context7, no web research — those belong to /design A.1
+- No agent delegation, no Context7, no web research — those belong to /design
+  A.1
 - Purpose: ground the extraction, not exhaustive documentation loading
 
 ### Recall Artifact
 
-After recall completes, write `plans/<job>/recall-artifact.md`. File paths only — downstream consumers Read them fresh at consumption time, so the artifact never goes stale.
+After recall completes, write `plans/<job>/recall-artifact.md`. File paths only
+— downstream consumers Read them fresh at consumption time, so the artifact
+never goes stale.
 
-The artifact carries planning-stage **curation** into execution. Subagents do receive the memory index, but nothing is fetched for them automatically — auto-recall does not run below the main session. The artifact records which files the planner judged relevant, so no downstream agent has to re-derive that selection, and it covers corpora the index does not reach.
+The artifact carries planning-stage **curation** into execution. Subagents do
+receive the memory index, but nothing is fetched for them automatically —
+auto-recall does not run below the main session. The artifact records which
+files the planner judged relevant, so no downstream agent has to re-derive that
+selection, and it covers corpora the index does not reach.
 
 **Format:**
 
@@ -61,9 +81,15 @@ Read each file listed below — do not rely on inline summaries.
 memory/<name>.md — <1-line relevance note>
 ```
 
-**Null artifact (nothing relevant):** Write `null — no relevant entries found` as the sole entry. Downstream consumers still Read the artifact and find the null marker, so the gate is anchored without consumer-side empty-section handling. Augmenting consumers (/design A.1, /runbook §1 Recall and Discovery) remove the null entry when adding real ones.
+**Null artifact (nothing relevant):** Write `null — no relevant entries found`
+as the sole entry. Downstream consumers still Read the artifact and find the
+null marker, so the gate is anchored without consumer-side empty-section
+handling. Augmenting consumers (/design A.1, /runbook §1 Recall and Discovery)
+remove the null entry when adding real ones.
 
-**Selection criteria:** Include files that informed requirements or constrain implementation. Exclude files read but proved irrelevant — the artifact is curated, not exhaustive.
+**Selection criteria:** Include files that informed requirements or constrain
+implementation. Exclude files read but proved irrelevant — the artifact is
+curated, not exhaustive.
 
 **Output:** `plans/<job>/recall-artifact.md`
 
@@ -81,14 +107,17 @@ Extract from conversation history:
 - **Dependencies:** Blocking work, prerequisites
 - **Open questions:** Unresolved items mentioned
 
-**Critical rule:** Extract from what was said, do NOT infer unstated requirements. Hallucination risk — if not discussed, flag as Open Question rather than inventing.
+**Critical rule:** Extract from what was said, do NOT infer unstated
+requirements. Hallucination risk — if not discussed, flag as Open Question
+rather than inventing.
 
 ### 2. Lightweight Codebase Discovery
 
 Quick scan to ground requirements (runs after extraction, so scan is targeted):
 
 **Discovery actions** (guideline: ~5 tool calls, flexible based on complexity):
-1. `rg --files` (Bash) for `plans/*/requirements.md` and `plans/*/design.md` — find related work
+1. `rg --files` (Bash) for `plans/*/requirements.md` and `plans/*/design.md` —
+   find related work
 2. `rg` (Bash) for key terms from extracted requirements — check what exists
 3. `Read` existing patterns in relevant area — inform constraints
 
@@ -98,15 +127,20 @@ Quick scan to ground requirements (runs after extraction, so scan is targeted):
 - No Context7, no web research, no scout
 - Purpose: prevent naive requirements (e.g., "add X" when X exists)
 - Tool count is a guideline, not a hard limit — use judgment for complex domains
-- Save exploration prototypes to `plans/prototypes/` (not `tmp/`) — they are referenced artifacts, not ephemera
+- Save exploration prototypes to `plans/prototypes/` (not `tmp/`) — they are
+  referenced artifacts, not ephemera
 
 ### Post-Explore Recall Gate
 
-Discovery via `rg --files`/`rg` (Bash) may surface domains not anticipated during the initial recall pass. Invoke `Skill(skill: "edify:recall")` (no topic).
+Discovery via `rg --files`/`rg` (Bash) may surface domains not anticipated
+during the initial recall pass. Invoke `Skill(skill: "edify:recall")` (no
+topic).
 
 **Gate anchor (D+B — tool call required):**
-- **New entries found:** add the paths recall selected to the recall artifact — recall has already Read the bodies
-- **No new entries:** state that explicitly in the response — the gate was reached and yielded nothing
+- **New entries found:** add the paths recall selected to the recall artifact —
+  recall has already Read the bodies
+- **No new entries:** state that explicitly in the response — the gate was
+  reached and yielded nothing
 
 ### 3. Structure Requirements
 
@@ -132,9 +166,9 @@ Check for empty critical sections:
 - Elicit mode: 4-6 total questions (section questions + adaptive follow-ups)
 
 Ask gap-fill questions inline, as numbered prose in a single turn. Each question
-carries a **proposed answer** drawn from the job name and the conversation, so the
-user corrects a draft rather than filling a blank — and silence on a question is
-agreement with its proposal.
+carries a **proposed answer** drawn from the job name and the conversation, so
+the user corrects a draft rather than filling a blank — and silence on a
+question is agreement with its proposal.
 
 ```
 Three gaps in the requirements. Proposed answers below; correct the ones I got
@@ -148,18 +182,22 @@ wrong and I'll take the rest as agreed.
    second and must not need network.
 ```
 
-Never reach for `AskUserQuestion`. A picker hides the exchange from the transcript,
-so the requirements artifact ends up with no readable record of how its content was
-settled — and the option list silently bounds what the user can say, which is the
-opposite of elicitation. Numbered prose keeps both the question and the user's own
-words in the thread, and a stated default lets the turn proceed without a
-round-trip.
+Never reach for `AskUserQuestion`. A picker hides the exchange from the
+transcript, so the requirements artifact ends up with no readable record of how
+its content was settled — and the option list silently bounds what the user can
+say, which is the opposite of elicitation. Numbered prose keeps both the
+question and the user's own words in the thread, and a stated default lets the
+turn proceed without a round-trip.
 
 ### 5. User Validation
 
-Invoke `/proof plans/<job>/requirements.md` — structured reword-accumulate-sync loop on the requirements draft. Present artifact path, summarize sections populated, note Open Questions.
+Invoke `/proof plans/<job>/requirements.md` — structured reword-accumulate-sync
+loop on the requirements draft. Present artifact path, summarize sections
+populated, note Open Questions.
 
-/proof handles the iterative validation loop. No corrector dispatch for requirements (user-validated directly). On terminal action "apply", accumulated decisions are applied to the artifact.
+/proof handles the iterative validation loop. No corrector dispatch for
+requirements (user-validated directly). On terminal action "apply", accumulated
+decisions are applied to the artifact.
 
 ### 6. Write Artifact
 
@@ -174,12 +212,13 @@ When conversation lacks requirements context:
 
 ### 1. Semi-Structured Elicitation
 
-Ask inline, in numbered prose, one turn per round — same form as the gap-fill block
-above, and for the same reason. Cover the critical sections (Functional
+Ask inline, in numbered prose, one turn per round — same form as the gap-fill
+block above, and for the same reason. Cover the critical sections (Functional
 Requirements, Scope Boundaries), adding Constraints/Dependencies where the job
 suggests them. Each question states a proposed answer inferred from the job name
-and the conversation; the user corrects what is wrong and silence carries the rest.
-Then 1-2 adaptive follow-ups based on what came back. Total budget: 4-6 questions.
+and the conversation; the user corrects what is wrong and silence carries the
+rest. Then 1-2 adaptive follow-ups based on what came back. Total budget: 4-6
+questions.
 
 Elicit mode has less to infer from than Extract mode, so its proposals will be
 weaker — say so, rather than presenting a guess with the confidence of a
@@ -187,7 +226,8 @@ derivation.
 
 ### 2-6. Shared Steps
 
-After elicitation, follow Extract mode steps 2-6 (Codebase Discovery, Structure, Gap Detection, Present Draft, Write Artifact).
+After elicitation, follow Extract mode steps 2-6 (Codebase Discovery, Structure,
+Gap Detection, Present Draft, Write Artifact).
 
 ## Standard Format
 
@@ -228,10 +268,15 @@ After elicitation, follow Extract mode steps 2-6 (Codebase Discovery, Structure,
 
 **Section rules:**
 - Omit empty sections entirely (don't scaffold structure)
-- Number identifiers sequentially within each section (FR-1, FR-2, ... not FR-1, FR-3)
-- Open Questions captures items conversation didn't resolve → become Design Phase A research targets
+- Number identifiers sequentially within each section (FR-1, FR-2, ... not FR-1,
+  FR-3)
+- Open Questions captures items conversation didn't resolve → become Design
+  Phase A research targets
 - Dependencies flags blocking work, prerequisite plans, or external dependencies
-- References track provenance — what research, external sources, or project artifacts informed the requirements. Include exploration reports, grounding research, external papers, prior plan reports. Omit if requirements came entirely from conversation.
+- References track provenance — what research, external sources, or project
+  artifacts informed the requirements. Include exploration reports, grounding
+  research, external papers, prior plan reports. Omit if requirements came
+  entirely from conversation.
 
 ## Skill Dependency Scanning
 
@@ -251,7 +296,9 @@ If indicators found, append to artifact:
 - Load `plugin-dev:hook-development` before design (hooks mentioned in FR-2)
 ```
 
-**Rationale:** Artifact-scoped scanning reduces A.0 scan time — planner reads requirements.md first, loads indicated skills immediately rather than scanning entire codebase.
+**Rationale:** Artifact-scoped scanning reduces A.0 scan time — planner reads
+requirements.md first, loads indicated skills immediately rather than scanning
+entire codebase.
 
 ## Default Exit
 
@@ -289,8 +336,8 @@ none, because downstream phases treat it as settled.
 - **An existing `plans/<job>/requirements.md` is being overwritten with a
   narrower scope than it already records.** Confirm with the user first —
   requirements loss is silent downstream.
-- **Gap detection cannot reduce open questions below the count that blocks
-  every exit path** (3+ open questions AND empty critical sections). Write what
+- **Gap detection cannot reduce open questions below the count that blocks every
+  exit path** (3+ open questions AND empty critical sections). Write what
   exists, mark the artifact incomplete in its header, and route to Standalone
   rather than to `/design`.
 

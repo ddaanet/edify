@@ -1,25 +1,41 @@
 # Research Protocol
 
-Phases A.3-A.5 of the design process: external research, grounding, and outline production.
+Phases A.3-A.5 of the design process: external research, grounding, and outline
+production.
 
 ## A.3-4. External Research (if needed)
 
-**Context7:** Call MCP tools directly from main session (unavailable in sub-agents). Write results to report file: `plans/<job-name>/reports/context7-<topic>.md`.
+**Context7:** Call MCP tools directly from main session (unavailable in
+sub-agents). Write results to report file:
+`plans/<job-name>/reports/context7-<topic>.md`.
 
-**Web research:** WebSearch/WebFetch for external patterns, prior art, or specifications.
+**Web research:** WebSearch/WebFetch for external patterns, prior art, or
+specifications.
 
-**Grounding:** When the design will produce a methodology, framework, scoring system, or taxonomy, invoke `/ground` to prevent confabulated structures. The ground skill runs parallel internal+external research branches and produces a grounded reference document in `plans/reports/`.
+**Grounding:** When the design will produce a methodology, framework, scoring
+system, or taxonomy, invoke `/ground` to prevent confabulated structures. The
+ground skill runs parallel internal+external research branches and produces a
+grounded reference document in `plans/reports/`.
 
 ## A.5. Produce Plan Outline
 
-**Recall diff:** re-invoke `Skill(skill: "edify:recall", args: "<topic reflecting what just changed>")` and reconcile its selection against the existing `plans/<job-name>/recall-artifact.md`.
+**Recall diff:** re-invoke
+`Skill(skill: "edify:recall", args: "<topic reflecting what just changed>")` and
+reconcile its selection against the existing
+`plans/<job-name>/recall-artifact.md`.
 
-Review the changed files list. Codebase findings, external research, and Context7 results make different recall entries relevant than what A.1 selected from the initial problem description. If files changed that affect which recall entries are relevant, update the artifact: add entries surfaced by changes, remove entries that proved irrelevant. Write updated artifact back.
+Review the changed files list. Codebase findings, external research, and
+Context7 results make different recall entries relevant than what A.1 selected
+from the initial problem description. If files changed that affect which recall
+entries are relevant, update the artifact: add entries surfaced by changes,
+remove entries that proved irrelevant. Write updated artifact back.
 
-**Output:** Write outline to `plans/<job>/outline.md` (create directory if needed).
+**Output:** Write outline to `plans/<job>/outline.md` (create directory if
+needed).
 
 **Content:**
-- Provenance -- Read `references/design-content-rules.md` §Provenance Section and write the section it specifies
+- Provenance -- Read `references/design-content-rules.md` §Provenance Section
+  and write the section it specifies
 - Approach summary
 - Key decisions
 - Open questions
@@ -38,6 +54,11 @@ Open questions: Should rate limits vary by endpoint? Should admin users be exemp
 Scope: API gateway only. Dashboard/monitoring out of scope.
 ```
 
-Only the `## Provenance` heading and the two field labels are as shown; both values come from `references/design-content-rules.md` §Provenance Section, which the Content list above routes through. The example's `none` and its `Base:` are one first-pass case, not values to copy. Adapt the rest.
+Only the `## Provenance` heading and the two field labels are as shown; both
+values come from `references/design-content-rules.md` §Provenance Section, which
+the Content list above routes through. The example's `none` and its `Base:` are
+one first-pass case, not values to copy. Adapt the rest.
 
-**Escape hatch:** If user input already specifies approach, decisions, and scope (e.g., detailed brief.md), compress A+B by presenting outline and asking for validation in a single message.
+**Escape hatch:** If user input already specifies approach, decisions, and scope
+(e.g., detailed brief.md), compress A+B by presenting outline and asking for
+validation in a single message.

@@ -27,7 +27,8 @@ tools: ["Read"]
 
 # Artifact Naming Specialist
 
-You are a naming specialist. You generate candidate names for software artifacts (skills, agents, commands, plans, modules, concepts).
+You are a naming specialist. You generate candidate names for software artifacts
+(skills, agents, commands, plans, modules, concepts).
 
 **Input:** A functional description of what needs naming, plus any constraints.
 

@@ -38,7 +38,8 @@
 ```
 
 **Project-local hooks:**
-- Location: `.claude/hooks/` directory (scripts directly, no separate config file)
+- Location: `.claude/hooks/` directory (scripts directly, no separate config
+  file)
 - Format: Direct `{event: [...]}` structure (same as settings)
 - NOT read from `.claude/hooks/hooks.json` — use settings.json instead
 
@@ -56,15 +57,18 @@
 **UserPromptSubmit hooks:**
 - Cannot rewrite prompts (original passes through unchanged)
 - Can only add `additionalContext` or block (exit 2)
-- No `matcher` support — fires on every prompt (all filtering must be script-internal)
-- Use `hookSpecificOutput.additionalContext` for discrete context injection (not shown in transcript)
+- No `matcher` support — fires on every prompt (all filtering must be
+  script-internal)
+- Use `hookSpecificOutput.additionalContext` for discrete context injection (not
+  shown in transcript)
 - Plain text stdout also works but is visible in transcript
 
 **Hook output visibility:**
 - `additionalContext` → Claude sees (injected context)
 - `systemMessage` → User sees (UI message)
 - stderr + exit 2 → Claude sees as error (blocking)
-- **Pattern:** Use dual output (both `additionalContext` and `systemMessage`) for user+agent visibility
+- **Pattern:** Use dual output (both `additionalContext` and `systemMessage`)
+  for user+agent visibility
 
 **Hook execution scope:**
 - Hooks only active in main agent session
@@ -73,7 +77,8 @@
 - Test hooks manually in main session, not via delegated agents
 
 **Security patterns:**
-- Use exact match (`command in patterns`) for restore operations, not `startswith()`
+- Use exact match (`command in patterns`) for restore operations, not
+  `startswith()`
 - Rationale: Shell operators (&&, ;, ||) can chain additional commands
 - Prevents exploitation via command continuation
 
@@ -98,5 +103,7 @@ Claude Code discovers it — see `docs/design.md` §6.10 "Project configuration"
 
 **Hook enforcement:**
 - `submodule-safety` hook blocks commands when cwd != project root
-- Exception: `cd <project_root> && <command>` is allowed (restores cwd before executing)
-- Only `&&` separator permitted (not `;` or `||`) — guarantees cd-first invariant
+- Exception: `cd <project_root> && <command>` is allowed (restores cwd before
+  executing)
+- Only `&&` separator permitted (not `;` or `||`) — guarantees cd-first
+  invariant

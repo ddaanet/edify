@@ -1,14 +1,21 @@
 ## Prerequisite Validation (Error Handling Layer 0)
 
-Prerequisite validation is the foundation of the error handling framework — prevention is the most cost-effective strategy (Avižienis: prevention is cheapest of the four means to attain dependability). Catches ~80% of escalation-triggering errors before execution starts.
+Prerequisite validation is the foundation of the error handling framework —
+prevention is the most cost-effective strategy (Avižienis: prevention is
+cheapest of the four means to attain dependability). Catches ~80% of
+escalation-triggering errors before execution starts.
 
 **Cross-system prevention points:**
-- **Runbook orchestration:** Plan-reviewer validates prerequisites during review; orchestrator verifies clean git tree before each step
-- **Task lifecycle:** Commit skill checks session freshness (Gate A) before committing
+- **Runbook orchestration:** Plan-reviewer validates prerequisites during
+  review; orchestrator verifies clean git tree before each step
+- **Task lifecycle:** Commit skill checks session freshness (Gate A) before
+  committing
 - **CPS skill chains:** Hook validates skill availability before chain injection
-- **General execution:** File/directory existence, external dependencies, environment state
+- **General execution:** File/directory existence, external dependencies,
+  environment state
 
-Validation happens in two phases: during planning (recommended) and during execution (defensive).
+Validation happens in two phases: during planning (recommended) and during
+execution (defensive).
 
 ### When to Validate
 
@@ -19,7 +26,8 @@ Validation happens in two phases: during planning (recommended) and during execu
 - **Impact:** Prevents ~80% of execution-time prerequisite failures
 
 **Execution Phase (DEFENSIVE):**
-- **When:** If planning validation missed an issue, or if prerequisites are dynamic
+- **When:** If planning validation missed an issue, or if prerequisites are
+  dynamic
 - **Benefit:** Final safety check before expensive operations
 - **Cost:** Agent reports error, orchestrator escalates to sonnet
 - **Impact:** Limits damage, forces escalation for recovery
@@ -245,9 +253,11 @@ test -f /Users/david/code/pytest-md/CLAUDE.md || \
 **When task agents validate prerequisites:**
 
 1. **Read phase:** Use Read tool to verify files exist and are readable
-2. **Discovery phase:** Use `rg --files` (Bash) to verify directory structure matches expectations
+2. **Discovery phase:** Use `rg --files` (Bash) to verify directory structure
+   matches expectations
 3. **Plan context:** Re-read plan prerequisites section before starting step
-4. **Stop on validation failure:** If prerequisite check fails, report immediately (don't continue)
+4. **Stop on validation failure:** If prerequisite check fails, report
+   immediately (don't continue)
 
 **Task agent error message format:**
 ```

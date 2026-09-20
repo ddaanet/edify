@@ -1,14 +1,24 @@
 ## Error Classification for Weak Orchestrator
 
-When agents execute steps, errors fall into distinct categories that determine escalation path and recovery strategy. This classification prevents silent failures and enables appropriate escalation timing.
+When agents execute steps, errors fall into distinct categories that determine
+escalation path and recovery strategy. This classification prevents silent
+failures and enables appropriate escalation timing.
 
-**Framework grounding:** Classification adapted from Avižienis Fundamental Error Framework (fault/failure chain), Temporal retry semantics (retryable vs non-retryable), and MASFT FC2 (inter-agent misalignment). See `plans/reports/error-handling-grounding.md` for full grounding analysis.
+**Framework grounding:** Classification adapted from Avižienis Fundamental Error
+Framework (fault/failure chain), Temporal retry semantics (retryable vs
+non-retryable), and MASFT FC2 (inter-agent misalignment). See
+`plans/reports/error-handling-grounding.md` for full grounding analysis.
 
 ### Fault vs Failure Vocabulary
 
-Categories 1 and 4 are **faults** (causes): prerequisite = environment fault, ambiguity = specification fault. Response: prevention-oriented (validate, clarify).
+Categories 1 and 4 are **faults** (causes): prerequisite = environment fault,
+ambiguity = specification fault. Response: prevention-oriented (validate,
+clarify).
 
-Categories 2, 3, and 5 are **failures** (observations): execution error = service deviation, unexpected result = output deviation, misalignment = agent behavioral deviation. Response: tolerance-oriented (retry, escalate, compensate).
+Categories 2, 3, and 5 are **failures** (observations): execution error =
+service deviation, unexpected result = output deviation, misalignment = agent
+behavioral deviation. Response: tolerance-oriented (retry, escalate,
+compensate).
 
 ### Error Category Taxonomy
 
@@ -22,7 +32,8 @@ Categories 2, 3, and 5 are **failures** (observations): execution error = servic
 
 ### Retryable vs Non-Retryable (Temporal Pattern)
 
-Each failure is classified as retryable or non-retryable. This informs recovery strategy per subsystem.
+Each failure is classified as retryable or non-retryable. This informs recovery
+strategy per subsystem.
 
 | Category | Retryable | Non-Retryable |
 |----------|-----------|---------------|
@@ -33,18 +44,27 @@ Each failure is classified as retryable or non-retryable. This informs recovery 
 | Inter-Agent Misalignment | Context window overflow (retry with less context) | Systematic: model limitation, contradictory instructions |
 
 **Subsystem response varies:**
-- **Orchestration (Layer 2):** Retries retryable failures via Sonnet diagnostic before escalating. Non-retryable escalate immediately.
-- **CPS chains (Layer 4):** Records classification but aborts regardless (0 retries by default). Classification informs the recorded error context for manual resume.
-- **Task lifecycle (Layer 3):** Retryable → `[!]` blocked (waiting on fix). Non-retryable → `[†]` failed (requires user decision).
+- **Orchestration (Layer 2):** Retries retryable failures via Sonnet diagnostic
+  before escalating. Non-retryable escalate immediately.
+- **CPS chains (Layer 4):** Records classification but aborts regardless (0
+  retries by default). Classification informs the recorded error context for
+  manual resume.
+- **Task lifecycle (Layer 3):** Retryable → `[!]` blocked (waiting on fix).
+  Non-retryable → `[†]` failed (requires user decision).
 
 ### Tier-Aware Classification
 
 Error classification responsibility depends on agent model tier:
 
-- **Sonnet/Opus execution agents:** Self-classify using the 5-category taxonomy and report the classified error with category label
-- **Haiku execution agents:** Report raw error with diagnostic details. Orchestrator classifies on their behalf.
+- **Sonnet/Opus execution agents:** Self-classify using the 5-category taxonomy
+  and report the classified error with category label
+- **Haiku execution agents:** Report raw error with diagnostic details.
+  Orchestrator classifies on their behalf.
 
-**Rationale:** Execution agent has full error context (stack trace, file state). Sonnet/Opus can classify reliably. Transmitting raw errors to orchestrator for haiku agents preserves fidelity without requiring haiku to make nuanced classification judgments.
+**Rationale:** Execution agent has full error context (stack trace, file state).
+Sonnet/Opus can classify reliably. Transmitting raw errors to orchestrator for
+haiku agents preserves fidelity without requiring haiku to make nuanced
+classification judgments.
 
 ### Escalation Flow Walkthrough
 
@@ -81,7 +101,8 @@ Orchestrator:
   Step 2.3 complete → Continue to next step
 ```
 
-**Key insight:** Prerequisite validation during planning phase would have caught this before execution. Prevention impact: ~80% of escalation-triggering errors.
+**Key insight:** Prerequisite validation during planning phase would have caught
+this before execution. Prevention impact: ~80% of escalation-triggering errors.
 
 ### Integration with Weak Orchestrator Pattern
 
@@ -89,20 +110,25 @@ Orchestrator:
 - Sonnet reviews plan before execution
 - Includes prerequisite validation checklist
 - Verifies all referenced files, directories, external resources exist
-- Documents verification method (Bash check, Read tool, `rg --files` (Bash), etc.)
+- Documents verification method (Bash check, Read tool, `rg --files` (Bash),
+  etc.)
 - Catches prerequisite failures ~80% of time before orchestration starts
 
 **During Execution (Agent Detection):**
 - Agent executes step and validates results
 - If error occurs, agent stops immediately (no retries without escalation)
-- Sonnet/Opus agents self-classify into one of 5 categories; haiku agents report raw error
-- Agent returns clear error message with category (or raw details for haiku) and retryable/non-retryable classification
-- Orchestrator classifies on behalf of haiku agents, then makes escalation decision
+- Sonnet/Opus agents self-classify into one of 5 categories; haiku agents report
+  raw error
+- Agent returns clear error message with category (or raw details for haiku) and
+  retryable/non-retryable classification
+- Orchestrator classifies on behalf of haiku agents, then makes escalation
+  decision
 
 **During Escalation (Sonnet Recovery):**
 - Sonnet receives error context from orchestrator
 - Sonnet reads plan step and error details
-- Sonnet determines if error is fixable (simple) or requires plan revision (complex)
+- Sonnet determines if error is fixable (simple) or requires plan revision
+  (complex)
 - Simple errors: Sonnet fixes and re-executes
 - Complex errors: Sonnet reports to orchestrator, escalates to user
 

@@ -1,25 +1,26 @@
 # edify plugin
 
 A [Claude Code][claude-code] bundle of framework-agnostic skills and agents,
-built around a `requirements → design → runbook → build` planning and
-execution pipeline.
+built around a `requirements → design → runbook → build` planning and execution
+pipeline.
 
 The pipeline was torn down in 2026-05, when the ecosystem (superpowers, native
 memory) was judged to have caught up, and revived in 2026-08. On revival it was
 rewired off the subsystems that did not come back: recall reads
 `memory/MEMORY.md` and the memory files it indexes instead of the removed
-`edify _recall` CLI, `/commit` and `/handoff` defer to the `commit-commands`
-and `handoff` plugins, and the session task frame is `.claude/handoff-task.md`.
+`edify _recall` CLI, `/commit` and `/handoff` defer to the `commit-commands` and
+`handoff` plugins, and the session task frame is `.claude/handoff-task.md`.
 
 A plain subdirectory of the `edify` repo (previously a git submodule). Skills
 are invoked as slash commands.
 
 ## Skills
 
-Slash-command procedures that inject instructions into the current
-conversation. Each lives in `skills/<name>/SKILL.md`.
+Slash-command procedures that inject instructions into the current conversation.
+Each lives in `skills/<name>/SKILL.md`.
 
-**Pipeline** — run in sequence; each stage names the next command and stops there.
+**Pipeline** — run in sequence; each stage names the next command and stops
+there.
 
 | Skill | Purpose |
 |-------|---------|
@@ -68,10 +69,10 @@ Utility scripts in `bin/` (POSIX shell and Python 3):
 | `check-version-consistency.py` | Verify plugin and package versions agree |
 | `triage-feedback.sh` | Compare predicted against actual complexity after execution |
 
-Plus `skills/build/scripts/verify-step.sh`, the clean-tree and precommit
-gate `/build` runs after each committing dispatch — GREEN, code review
-and general items — never after a RED or a test review, whose tests are
-uncommitted by design.
+Plus `skills/build/scripts/verify-step.sh`, the clean-tree and precommit gate
+`/build` runs after each committing dispatch — GREEN, code review and general
+items — never after a RED or a test review, whose tests are uncommitted by
+design.
 
 ## Recipes
 

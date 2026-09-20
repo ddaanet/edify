@@ -1,9 +1,8 @@
 # edify
 
 A lean [Claude Code][claude-code] toolkit in one tree: a Python CLI
-(`edify-cli`) for working with session data, tokens, and markdown, plus a
-Claude Code plugin (`plugin/`) that ships a handful of framework-agnostic
-skills.
+(`edify-cli`) for working with session data, tokens, and markdown, plus a Claude
+Code plugin (`plugin/`) that ships a handful of framework-agnostic skills.
 
 Direction: Lean-assisted (formal-proof-backed) requirements tracking.
 
@@ -13,34 +12,34 @@ Direction: Lean-assisted (formal-proof-backed) requirements tracking.
 uv tool install edify-cli
 ```
 
-Requires Python 3.14+ and [uv]. To work from source instead, clone the repo
-and run `uv tool install .` in it.
+Requires Python 3.14+ and [uv]. To work from source instead, clone the repo and
+run `uv tool install .` in it.
 
 ## CLI (`edify-cli`)
 
 Source in `src/edify/`. Six commands in four groups:
 
-- **Session scraping** — `edify list`, `edify extract <prefix>`, `edify
-  collect`. Parse the JSONL under `~/.claude/projects/` to pull your own
+- **Session scraping** — `edify list`, `edify extract <prefix>`,
+  `edify collect`. Parse the JSONL under `~/.claude/projects/` to pull your own
   messages back out, per session or across all of them.
 - **Token counting** — `edify tokens FILE...`. Count tokens via the Anthropic
   API (needs `ANTHROPIC_API_KEY`); the `haiku`/`sonnet`/`opus` aliases resolve
   to the latest model.
 - **Markdown postprocessing** — `edify markdown`. Reads file paths from stdin
-  and fixes structural issues formatters can't, in place. Pair with [dprint]
-  for formatting.
+  and fixes structural issues formatters can't, in place. Pair with [dprint] for
+  formatting.
 - **Contract checking** — `edify check <target>`. Verify a Python function
   against its icontract contract with CrossHair.
 
 ## Plugin
 
 The `plugin/` directory is a Claude Code plugin — a plain subdirectory of this
-repo (previously a git submodule). It ships framework-agnostic skills invoked
-as slash commands, in two groups:
+repo (previously a git submodule). It ships framework-agnostic skills invoked as
+slash commands, in two groups:
 
-- **Pipeline** — `/requirements` → `/design` → `/runbook` → `/build`
-  (or `/design` → `/build` for work that needs no runbook), with `/review`
-  as the in-progress quality gate.
+- **Pipeline** — `/requirements` → `/design` → `/runbook` → `/build` (or
+  `/design` → `/build` for work that needs no runbook), with `/review` as the
+  in-progress quality gate.
 - **Standalone** — `/proof`, `/deliverable-review`, `/ground`, `/formalize`,
   `/recall`.
 

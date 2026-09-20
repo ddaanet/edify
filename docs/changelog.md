@@ -14,33 +14,33 @@ This file is the write-time record of how it got that way.
 ## 2026-09-20 — the route asks whether the work needs a runbook, not whether it is prose
 
 `route-to-execution.md` routed by material: a prose path of its own, and
-"implementation loops" among the runbook discriminators. Both described the
-work rather than what `/runbook` adds, which is phases with boundaries and a
-corrector, simplifier and `/proof` pass over the decomposition itself. The
-route is now three branches — Investigation or Exploration to `/build`, a
-runbook discriminator to `/runbook`, everything else to `/build` — so a plan
-simple enough not to need that layer is built directly whether it is prose or
-not. Two discriminators remain: cross-file coordination requiring sequencing,
-and a decomposition the author judges needs its own review before execution.
-The second is **ungrounded** and offers no threshold; no data exists on the
-item count at which an unreviewed decomposition fails. The prose path's own
+"implementation loops" among the runbook discriminators. Both described the work
+rather than what `/runbook` adds, which is phases with boundaries and a
+corrector, simplifier and `/proof` pass over the decomposition itself. The route
+is now three branches — Investigation or Exploration to `/build`, a runbook
+discriminator to `/runbook`, everything else to `/build` — so a plan simple
+enough not to need that layer is built directly whether it is prose or not. Two
+discriminators remain: cross-file coordination requiring sequencing, and a
+decomposition the author judges needs its own review before execution. The
+second is **ungrounded** and offers no threshold; no data exists on the item
+count at which an unreviewed decomposition fails. The prose path's own
 contribution survives as a definition under the first — prose edits are
 commutative, so multi-file prose is not cross-file coordination.
 
-An outline routed to `/build` therefore carries behavioural changes, which
-only a runbook carried before. It writes each one in the item shape of
+An outline routed to `/build` therefore carries behavioural changes, which only
+a runbook carried before. It writes each one in the item shape of
 `runbook-format.md`, and `/build` §4.3 and `tdd-slice.md` now fire on an item
 carrying `Slices:` rather than on a phase attribute no outline has. Phase 0's
 Moderate non-prose route stops hard-coding `/runbook`: it generates, `/proof`s,
-then reads the routing node like the other callers, which go from three to
-four. The multi-sub-problem gate gains the branch the node had been deferring
-to: a sub-problem recorded not-routable reopens its own entry alone — siblings
-with no dependency path through it stay dispatchable, its dependents are held,
-and the user confirms the revised entry rather than the whole outline.
+then reads the routing node like the other callers, which go from three to four.
+The multi-sub-problem gate gains the branch the node had been deferring to: a
+sub-problem recorded not-routable reopens its own entry alone — siblings with no
+dependency path through it stay dispatchable, its dependents are held, and the
+user confirms the revised entry rather than the whole outline.
 
-This narrows the 2026-09-17 routing-node entry below. Its "preconditions,
-which bind every branch including prose" was already wider than what shipped:
-the first precondition — every decision the executor would otherwise make is
+This narrows the 2026-09-17 routing-node entry below. Its "preconditions, which
+bind every branch including prose" was already wider than what shipped: the
+first precondition — every decision the executor would otherwise make is
 resolved — binds every branch the node routes, while the second — edit targets
 named — binds the `/build` branches only, since on the `/runbook` branch naming
 targets is `/runbook`'s job.
@@ -48,25 +48,25 @@ targets is `/runbook`'s job.
 ## 2026-09-17 — one routing node in `/design`; artifacts record their base commit
 
 `/design` stated the execution-routing decision twice — once in
-`write-outline.md`'s Outline Sufficiency Gate, once in `write-design.md`'s C.5
-— and the copies had drifted. Wording differed; the prose branch's hard-gate
+`write-outline.md`'s Outline Sufficiency Gate, once in `write-design.md`'s C.5 —
+and the copies had drifted. Wording differed; the prose branch's hard-gate
 qualifier existed in only one; and, substantively, one copy exempted the prose
-path from the readiness criteria while the other bound it. The two copies
-routed differently on the same input, which is what a second copy costs.
+path from the readiness criteria while the other bound it. The two copies routed
+differently on the same input, which is what a second copy costs.
 `references/route-to-execution.md` now states the decision once, under a name
 that says what it decides: **does this work need a runbook?**, not whether the
-session can execute it. "Execution readiness" and "direct execution" are
-retired from `/design` with the branch they named; `/build` §4.1 keeps the
-second phrase for a different thing, inline rather than delegated dispatch.
-Single-session capacity was a criterion on both copies and contradicted
-`/build` §5, which provides for a run spanning several sessions — the residue
-of the retired in-session execution path, true only while the design session
-did the work. The surviving criteria split in two, because the flat list was
-hiding that: preconditions, which bind every branch including prose and send a
-failure back to *design*; and runbook discriminators, which send it to
-`/runbook`. The Exploration branch drops its "and design resolved all
-questions" conjunct — read literally it bounced every spike back to design,
-since a spike exists to answer a question.
+session can execute it. "Execution readiness" and "direct execution" are retired
+from `/design` with the branch they named; `/build` §4.1 keeps the second phrase
+for a different thing, inline rather than delegated dispatch. Single-session
+capacity was a criterion on both copies and contradicted `/build` §5, which
+provides for a run spanning several sessions — the residue of the retired
+in-session execution path, true only while the design session did the work. The
+surviving criteria split in two, because the flat list was hiding that:
+preconditions, which bind every branch including prose and send a failure back
+to *design*; and runbook discriminators, which send it to `/runbook`. The
+Exploration branch drops its "and design resolved all questions" conjunct — read
+literally it bounced every spike back to design, since a spike exists to answer
+a question.
 
 Separately, every `/design` artifact now carries a `## Provenance` section
 naming the review it derives from and the commit its deliverable starts at
@@ -77,9 +77,9 @@ wrong. The inheritance rule is the whole mechanism: a second-pass artifact
 copies `Base:` from the artifact it supersedes and never recomputes it. The
 correctors enforce it after the fact and are barred from supplying a base
 themselves, since a computed one is the recomputation. The same change makes
-that consumer take `design.md` *or* `outline.md`, whichever exists; it had
-named `design.md` alone, so nothing from the agentic-prose route — which
-produces only an outline — was reviewable at all.
+that consumer take `design.md` *or* `outline.md`, whichever exists; it had named
+`design.md` alone, so nothing from the agentic-prose route — which produces only
+an outline — was reviewable at all.
 
 ## 2026-09-17 — `/inline` and `/orchestrate` merge into `/build`; continuation passing retires
 
@@ -115,31 +115,32 @@ Continuation passing retires in the same pass. Skills chained through a
 declaration; the machinery over-compensated for agents that could not chain
 unaided, which is no longer the failure mode. `/design` and `/runbook` now name
 the next command and stop, and `plugin/fragments/continuation-passing.md` is
-deleted. Its successor — handoff-and-continue, conditioned on context usage —
-is a different mechanism and is not preserved as an extension point here.
+deleted. Its successor — handoff-and-continue, conditioned on context usage — is
+a different mechanism and is not preserved as an extension point here.
 
 ## 2026-09-16 — The runbook stops naming models
 
 `Model:` is gone from the runbook item format. Two dispatches are now fixed and
-unoverridable — `test-driver` at sonnet in both RED and GREEN, prose deliverables
-at opus — and D-42's artifact-type override is stated by artifact kind instead of
-by a list of edify's own paths.
+unoverridable — `test-driver` at sonnet in both RED and GREEN, prose
+deliverables at opus — and D-42's artifact-type override is stated by artifact
+kind instead of by a list of edify's own paths.
 
-The defect that surfaced it was precedence, not defaults. `delegation.md` already
-had the right type defaults; what defeated them was the third rule on the same
-list, that a `Model:` line wins. A live run over a consumer repository's runbook
-had `Model: opus` on all three tdd items — copied from the worked example in
-`runbook-format.md` — so every test-driver dispatch was headed for opus. The same
-run dispatched a changelog entry under the consumer's `docs/` at sonnet, because
-D-42's path list named only edify's directories and nothing matched.
+The defect that surfaced it was precedence, not defaults. `delegation.md`
+already had the right type defaults; what defeated them was the third rule on
+the same list, that a `Model:` line wins. A live run over a consumer
+repository's runbook had `Model: opus` on all three tdd items — copied from the
+worked example in `runbook-format.md` — so every test-driver dispatch was headed
+for opus. The same run dispatched a changelog entry under the consumer's `docs/`
+at sonnet, because D-42's path list named only edify's directories and nothing
+matched.
 
 Demoting `Model:` below the new rules would have left the field that taught the
 habit. It is removed instead: a planner cannot know the agent type or the real
-shape of the work, so a model named at plan time is a guess. Escalation on demand
-replaces it — the agent returns `escalated:`, the dispatcher re-dispatches higher,
-which is what D-30 already did for `edify:refactor`. The rule had been carried as
-a stopgap sentence in the shared `ddaanet` conventions since 2026-09-07; that
-sentence is deleted here, now that the tooling states it.
+shape of the work, so a model named at plan time is a guess. Escalation on
+demand replaces it — the agent returns `escalated:`, the dispatcher
+re-dispatches higher, which is what D-30 already did for `edify:refactor`. The
+rule had been carried as a stopgap sentence in the shared `ddaanet` conventions
+since 2026-09-07; that sentence is deleted here, now that the tooling states it.
 
 ## 2026-09-02 — Shared ddaanet conventions load in every session; the design record sheds situational state
 
@@ -159,36 +160,36 @@ stands rather than renumbering L-6.
 
 ## 2026-09-01 — One-stage runbook replaces the two-stage expansion pipeline
 
-The expanded-runbook stage — outline → phase files → assembled runbook →
-step files and an orchestrator manifest — existed so a weak (haiku)
-orchestrator could dispatch pre-written sub-agent prompts. The user's
-diagnosis from operating the pre-teardown pipeline was that a strong
-orchestrator does not need them and that pre-written prompts turn harmful the
-moment implementation deviates; the revived two-stage pipeline had also never
-been run end to end (`plans/pipeline-simplification/requirements.md`, C-1).
+The expanded-runbook stage — outline → phase files → assembled runbook → step
+files and an orchestrator manifest — existed so a weak (haiku) orchestrator
+could dispatch pre-written sub-agent prompts. The user's diagnosis from
+operating the pre-teardown pipeline was that a strong orchestrator does not need
+them and that pre-written prompts turn harmful the moment implementation
+deviates; the revived two-stage pipeline had also never been run end to end
+(`plans/pipeline-simplification/requirements.md`, C-1).
 
 `/runbook` now writes `plans/<job>/runbook.md` as the terminal planning
-artifact: typed phases of prose items with requirement IDs, `Interfaces:`
-blocks where one item feeds another, and behaviour slices on tdd items.
+artifact: typed phases of prose items with requirement IDs, `Interfaces:` blocks
+where one item feeds another, and behaviour slices on tdd items.
 `runbook-corrector` (the renamed outline corrector) and `runbook-simplifier`
 gate it, `/proof` validates it, and `/orchestrate` composes every dispatch
 prompt from it live. TDD runs four dispatches per slice — RED, test review,
 GREEN, code review — with `refactor` on review signal and a list-revision step
 after each slice; `test-driver` owns RED and GREEN as two named modes.
 
-Deleted in one pass: `prepare-runbook.py`, `validate-runbook.py` and its
-tests, `assemble-runbook.py`, `split-execution-plan.py`, `verify-red.sh`,
+Deleted in one pass: `prepare-runbook.py`, `validate-runbook.py` and its tests,
+`assemble-runbook.py`, `split-execution-plan.py`, `verify-red.sh`,
 `/review-plan`, the old `runbook-corrector`, `plugin/docs/`, and the tier-3
 runbook references — 7,029 lines / 97,724 tokens measured before deletion
-(`plans/pipeline-simplification/reports/measurements.md`). Deterministic
-runbook validation does not survive (D-51). FR-19, FR-20 and L-1 closed;
-D-31 superseded; D-24 to D-26, D-30, D-32 to D-35, D-39, D-49, D-69, L-2 and
-L-6 rewired; §7 records the rejected two-stage model, per-test dispatch and
-RED-less whole-task batching.
+(`plans/pipeline-simplification/reports/measurements.md`). Deterministic runbook
+validation does not survive (D-51). FR-19, FR-20 and L-1 closed; D-31
+superseded; D-24 to D-26, D-30, D-32 to D-35, D-39, D-49, D-69, L-2 and L-6
+rewired; §7 records the rejected two-stage model, per-test dispatch and RED-less
+whole-task batching.
 
-The planning/execution session boundary lost one of its two grounds. It was
-kept on model-tier and context-budget grounds in 2026-08-13; orchestration no
-longer runs a tier below planning, so D-25 now rests on context budget alone.
+The planning/execution session boundary lost one of its two grounds. It was kept
+on model-tier and context-budget grounds in 2026-08-13; orchestration no longer
+runs a tier below planning, so D-25 now rests on context budget alone.
 
 ## 2026-08-14 — Decision records folded into one living design doc
 

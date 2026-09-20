@@ -15,20 +15,27 @@ user-invocable: true
 
 # Review Production Artifacts
 
-Review production artifacts against a design specification to identify conformance gaps, correctness issues, coverage holes, and excess artifacts.
+Review production artifacts against a design specification to identify
+conformance gaps, correctness issues, coverage holes, and excess artifacts.
 
 ## Prerequisites
 
 Before starting, gather:
-- **Design artifact** — the conformance baseline. Take the first that exists: `plans/<plan>/design.md`, else `plans/<plan>/outline.md`. The agentic-prose route produces only an outline, so a `design.md`-only prerequisite leaves that route's work unreviewable
+- **Design artifact** — the conformance baseline. Take the first that exists:
+  `plans/<plan>/design.md`, else `plans/<plan>/outline.md`. The agentic-prose
+  route produces only an outline, so a `design.md`-only prerequisite leaves that
+  route's work unreviewable
 - **Plan directory** — for report output (`plans/<plan>/reports/`)
 
 ## Process
 
 ### Phase 1: Inventory
 
-1. Read the design artifact's Scope section (IN/OUT) to establish expected deliverables
-2. Establish the review range: run `edify-review-range.sh <artifact-path>`, by bare name — Claude Code puts every enabled plugin's `bin/` on PATH, so no path is needed. Act on the one verdict line it prints:
+1. Read the design artifact's Scope section (IN/OUT) to establish expected
+   deliverables
+2. Establish the review range: run `edify-review-range.sh <artifact-path>`, by
+   bare name — Claude Code puts every enabled plugin's `bin/` on PATH, so no
+   path is needed. Act on the one verdict line it prints:
 
    | Exit | Line | Do |
    |------|------|----|
@@ -37,7 +44,10 @@ Before starting, gather:
    | 1 | `NO-PROVENANCE:`, `UNRESOLVED: <base>`, `NO-PRIOR: <path>` | ask the user for the range |
    | any other | — | STOP: the script failed, no verdict |
 
-   With the range established, run `git diff --numstat <range> -- . ':!plans' ':!tmp' ':!.claude'` for per-file line counts. A submodule that moved in the range is diffed inside the submodule between its two pointers
+   With the range established, run
+   `git diff --numstat <range> -- . ':!plans' ':!tmp' ':!.claude'` for per-file
+   line counts. A submodule that moved in the range is diffed inside the
+   submodule between its two pointers
 3. Classify each deliverable by artifact type:
 
 | Type | Pattern | Review axes |
@@ -48,7 +58,8 @@ Before starting, gather:
 | Human docs | Fragments, references | Universal + accuracy, consistency, completeness, usability |
 | Configuration | Justfile, pyproject | Universal only |
 
-Universal axes (all types): conformance, functional correctness, functional completeness, vacuity, excess.
+Universal axes (all types): conformance, functional correctness, functional
+completeness, vacuity, excess.
 
 Full axis definitions: `docs/design.md` §6.8 "Deliverable review"
 
@@ -57,11 +68,13 @@ Full axis definitions: `docs/design.md` §6.8 "Deliverable review"
 Compare inventory against the design artifact's In-scope items:
 - **Missing deliverables** — specified but not produced
 - **Unspecified deliverables** — produced but not in design scope
-- **Excess** in unspecified is acceptable if justified (edge case coverage, defensive tests)
+- **Excess** in unspecified is acceptable if justified (edge case coverage,
+  defensive tests)
 
 ### Phase 3: Per-Deliverable Review
 
-Two-layer review. Layer 1 is optional (scales to large deliverable sets). Layer 2 is mandatory (catches what delegation cannot).
+Two-layer review. Layer 1 is optional (scales to large deliverable sets). Layer
+2 is mandatory (catches what delegation cannot).
 
 #### Layer 1: Delegated Per-File Review (optional)
 
@@ -73,7 +86,8 @@ Gate on total deliverable lines from Phase 1 inventory:
 | 500–2000 | Two opus agents: code+test, prose+config |
 | > 2000 | Three opus agents: code, test, prose+config |
 
-When Layer 1 applies, partition deliverables by type and launch parallel review agents. Each agent receives:
+When Layer 1 applies, partition deliverables by type and launch parallel review
+agents. Each agent receives:
 - Files to review (with line counts)
 - Design reference path
 - Applicable review axes for its artifact types
@@ -103,7 +117,10 @@ Always runs in main session with full cross-project context.
 - Read each deliverable and evaluate against type-specific axes
 - Record findings with: file:line, axis violated, severity, description
 
-**Why interactive is mandatory:** Delegated agents lack cross-project context — fragment conventions, other skills' configurations, inter-file consistency. Layer 2 reads deliverables directly against the design spec, not delegation reports. The two layers are independent.
+**Why interactive is mandatory:** Delegated agents lack cross-project context —
+fragment conventions, other skills' configurations, inter-file consistency.
+Layer 2 reads deliverables directly against the design spec, not delegation
+reports. The two layers are independent.
 
 ### Phase 4: Report
 
@@ -138,15 +155,21 @@ Write consolidated report to `plans/<plan>/reports/deliverable-review.md`.
 ```
 
 **Severity classification:**
-- **Critical** — incorrect behavior, data loss, security, unimplemented design requirement
-- **Major** — missing functionality, broken references, vacuous artifact, test gap for specified scenario
+- **Critical** — incorrect behavior, data loss, security, unimplemented design
+  requirement
+- **Major** — missing functionality, broken references, vacuous artifact, test
+  gap for specified scenario
 - **Minor** — style, clarity, naming, robustness edge case
 
 **Next steps:**
 
-Report severity counts only. No merge-readiness language — the user reads severity counts and decides what to act on. The report is the deliverable; the skill does not queue follow-up work or record lifecycle state.
+Report severity counts only. No merge-readiness language — the user reads
+severity counts and decides what to act on. The report is the deliverable; the
+skill does not queue follow-up work or record lifecycle state.
 
 ## References
 
-- **Methodology** — full axis definitions, ISO/IEEE sources: `docs/design.md` §6.8 "Deliverable review"
-- **Example report** — completed review with all sections: `references/example-report.md`
+- **Methodology** — full axis definitions, ISO/IEEE sources: `docs/design.md`
+  §6.8 "Deliverable review"
+- **Example report** — completed review with all sections:
+  `references/example-report.md`

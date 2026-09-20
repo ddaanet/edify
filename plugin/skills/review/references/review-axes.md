@@ -20,7 +20,8 @@
 - CLI commands produce meaningful output (not just "OK" or empty)
 - Functions return computed values (not empty strings or hardcoded constants)
 - Components that should read external state actually do so
-- Check: look for stub patterns: `return ""`, `return {}`, hardcoded constructors
+- Check: look for stub patterns: `return ""`, `return {}`, hardcoded
+  constructors
 - Integration: components that exist separately are wired together
 
 ## Project Standards
@@ -32,15 +33,20 @@
 ## Runbook File References (when reviewing runbooks/plans)
 - Extract all file paths referenced in items
 - Use `rg --files` (Bash) to verify each path exists in the codebase
-- Flag missing files as CRITICAL issues (runbooks with wrong paths fail immediately)
+- Flag missing files as CRITICAL issues (runbooks with wrong paths fail
+  immediately)
 - Check test function names exist in referenced test files (use `rg` via Bash)
 - Suggest correct paths when similar files are found
 
 ## Self-Referential Modification (when reviewing runbooks/plans)
-- Flag any item containing file-mutating commands (`sed -i`, `find ... -exec`, `Edit` tool, `Write` tool)
-- Check if target path overlaps with `plans/<plan-name>/` (excluding `reports/` subdirectory)
-- Mark as MAJOR issue if runbook items modify their own plan directory during execution
-- Rationale: Runbook items must not mutate the plan directory they're defined in (creates ordering dependency, breaks re-execution)
+- Flag any item containing file-mutating commands (`sed -i`, `find ... -exec`,
+  `Edit` tool, `Write` tool)
+- Check if target path overlaps with `plans/<plan-name>/` (excluding `reports/`
+  subdirectory)
+- Mark as MAJOR issue if runbook items modify their own plan directory during
+  execution
+- Rationale: Runbook items must not mutate the plan directory they're defined in
+  (creates ordering dependency, breaks re-execution)
 
 ## Security
 - No hardcoded secrets or credentials

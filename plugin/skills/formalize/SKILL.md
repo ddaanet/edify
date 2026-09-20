@@ -17,11 +17,11 @@ user-invocable: true
 
 # Formalize and Check a Function
 
-Drive a propose-contract -> check -> repair loop around one Python function.
-The verifier (`edify check`, backed by CrossHair) owns deduction. You own
-*intent*: what the function should guarantee. Verification proves code meets a
-contract; it does NOT prove the contract is the right one. That judgment is
-yours, and when intent is genuinely ambiguous you ASK rather than guess.
+Drive a propose-contract -> check -> repair loop around one Python function. The
+verifier (`edify check`, backed by CrossHair) owns deduction. You own *intent*:
+what the function should guarantee. Verification proves code meets a contract;
+it does NOT prove the contract is the right one. That judgment is yours, and
+when intent is genuinely ambiguous you ASK rather than guess.
 
 ## Procedure
 
@@ -72,8 +72,9 @@ yours, and when intent is genuinely ambiguous you ASK rather than guess.
      - **intent ambiguity** — the counterexample exposes a case the user has not
        decided (e.g. "what should this do on an empty list?"): STOP and ask.
      Then loop back to step 3.
-   - `error` — surface it. A common cause is a target with no contract (CrossHair
-     analyzed nothing); add a contract. Never report `error` as success.
+   - `error` — surface it. A common cause is a target with no contract
+     (CrossHair analyzed nothing); add a contract. Never report `error` as
+     success.
 
 5. **Loop with a cap.** Do at most a small fixed number of repair iterations
    (e.g. 5). If you hit the cap, STOP and report the honest state: the last

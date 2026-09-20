@@ -7,16 +7,19 @@ user-invocable: true
 
 # Review Changes for Quality
 
-Review in-progress work for quality, correctness, and adherence to project standards. This skill examines uncommitted changes, recent commits, or partial branch work to identify issues and suggest improvements.
+Review in-progress work for quality, correctness, and adherence to project
+standards. This skill examines uncommitted changes, recent commits, or partial
+branch work to identify issues and suggest improvements.
 
-**Distinction:** This skill reviews work-in-progress. The built-in `/review` is for PR-focused reviews.
+**Distinction:** This skill reviews work-in-progress. The built-in `/review` is
+for PR-focused reviews.
 
 ## Review Process
 
 ### 1. Determine Scope
 
-Infer the scope, state it in one line, and proceed. Do not open with a question —
-the tree answers it in most cases:
+Infer the scope, state it in one line, and proceed. Do not open with a question
+— the tree answers it in most cases:
 
 | State | Scope |
 |---|---|
@@ -25,8 +28,8 @@ the tree answers it in most cases:
 | Clean tree, commits ahead of `main` | Those commits |
 | Clean tree, nothing ahead | Ask (below) |
 
-State the inference before gathering — "Reviewing uncommitted changes, 4 files" —
-so a wrong guess costs one correction instead of a whole review.
+State the inference before gathering — "Reviewing uncommitted changes, 4 files"
+— so a wrong guess costs one correction instead of a whole review.
 
 When the scope is genuinely undetermined, ask inline in numbered prose with a
 stated default, in one turn:
@@ -71,7 +74,10 @@ git diff HEAD <file1> <file2> ...
 
 ### 3. Analyze Changes
 
-**Review axes:** Read `references/review-axes.md` for the full 10-category checklist (code quality, design conformity, functional completeness, project standards, runbook file references, self-referential modification, security, testing, documentation, completeness).
+**Review axes:** Read `references/review-axes.md` for the full 10-category
+checklist (code quality, design conformity, functional completeness, project
+standards, runbook file references, self-referential modification, security,
+testing, documentation, completeness).
 
 ### 4. Provide Feedback
 
@@ -173,26 +179,37 @@ git diff HEAD <file1> <file2> ...
 
 ## Constraints
 
-- **Bash** for git commands only, **Read** for examining files, **Write** for review output
+- **Bash** for git commands only, **Read** for examining files, **Write** for
+  review output
 - Do NOT use Edit to fix issues (review only)
 - Review exactly what user requested — do not expand scope
 - Be specific, actionable, constructive
 - Flag secrets as CRITICAL — never log or output secret values
 
-**Example execution:** Read `references/example-execution.md` for a complete review interaction flow.
+**Example execution:** Read `references/example-execution.md` for a complete
+review interaction flow.
 
-**Common scenarios:** Read `references/common-scenarios.md` for handling secrets, multi-concern changes, pattern violations, already-committed work, and large changesets.
+**Common scenarios:** Read `references/common-scenarios.md` for handling
+secrets, multi-concern changes, pattern violations, already-committed work, and
+large changesets.
 
 ## Integration with General Workflow
 
-**This skill and the corrector agent share review criteria, not interaction model.** They are not interchangeable:
+**This skill and the corrector agent share review criteria, not interaction
+model.** They are not interchangeable:
 
-- **This skill** runs in the main session with a user present, so it can infer scope from the tree and ask inline when it cannot.
-- **`edify:corrector`** runs delegated, with no user to ask (see `plugin/agents/corrector.md`). Its scope must arrive in the dispatch prompt, and it applies fixes directly.
+- **This skill** runs in the main session with a user present, so it can infer
+  scope from the tree and ask inline when it cannot.
+- **`edify:corrector`** runs delegated, with no user to ask (see
+  `plugin/agents/corrector.md`). Its scope must arrive in the dispatch prompt,
+  and it applies fixes directly.
 
-So the review *axes* (`references/review-axes.md`) are shared; the scoping step is not. A delegated reviewer that reaches for a question has hit a dispatch-prompt defect, not a decision point.
+So the review *axes* (`references/review-axes.md`) are shared; the scoping step
+is not. A delegated reviewer that reaches for a question has hit a
+dispatch-prompt defect, not a decision point.
 
-In workflow contexts, prefer agent delegation. **Direct invocation** is for when the user asks for a review in conversation.
+In workflow contexts, prefer agent delegation. **Direct invocation** is for when
+the user asks for a review in conversation.
 
 **Workflow stages:**
 1. `/design` — Opus creates design document
@@ -204,7 +221,8 @@ In workflow contexts, prefer agent delegation. **Direct invocation** is for when
 
 ## Execution Context for Review Delegations
 
-When delegating to corrector, Read `../../fragments/review-requirement.md` and include the scope context it specifies:
+When delegating to corrector, Read `../../fragments/review-requirement.md` and
+include the scope context it specifies:
 
 **Required:** Scope IN, Scope OUT, Changed files, Requirements summary
 **Optional:** Prior state, Design reference

@@ -4,9 +4,11 @@ Research findings informing the dual-mode design and interaction patterns.
 
 ## Human-AI Collaboration Pattern (HAIC)
 
-**Finding:** 58% of practitioners use AI in requirements engineering, but only 2% believe AI can handle elicitation independently.
+**Finding:** 58% of practitioners use AI in requirements engineering, but only
+2% believe AI can handle elicitation independently.
 
-**Implication:** Extract + human validation model, not autonomous generation. The skill captures and structures but always presents draft for user validation.
+**Implication:** Extract + human validation model, not autonomous generation.
+The skill captures and structures but always presents draft for user validation.
 
 ## AI Strengths in Requirements Engineering
 
@@ -16,7 +18,8 @@ Research identifies where AI adds value:
 - **Routine drafting** and documentation generation
 - **Providing clarifying questions** and research augmentation
 
-**Implication:** Extract mode is the primary value proposition — AI structures conversation into standard format.
+**Implication:** Extract mode is the primary value proposition — AI structures
+conversation into standard format.
 
 ## AI Weaknesses in Requirements Engineering
 
@@ -33,13 +36,17 @@ Known limitations:
 
 ## Semi-Structured Elicitation
 
-**Finding:** Semi-structured interviews (predetermined framework + freedom to explore tangents) most effective technique. Balances consistency of structured interviews with novel requirement capture of unstructured.
+**Finding:** Semi-structured interviews (predetermined framework + freedom to
+explore tangents) most effective technique. Balances consistency of structured
+interviews with novel requirement capture of unstructured.
 
-**Implication:** Elicit mode uses standard sections as framework, adaptive follow-ups based on responses (not rigid template-fill).
+**Implication:** Elicit mode uses standard sections as framework, adaptive
+follow-ups based on responses (not rigid template-fill).
 
 ## Hallucination Risk
 
-**Finding:** Hallucinations remain problematic in multi-agent RE systems. Human feedback rated LLM outputs between satisfactory and good — not excellent.
+**Finding:** Hallucinations remain problematic in multi-agent RE systems. Human
+feedback rated LLM outputs between satisfactory and good — not excellent.
 
 **Implication:**
 - Ground extraction in actual conversation content
@@ -51,7 +58,8 @@ Known limitations:
 
 **Finding:** 81% use human review of AI suggestions; 72% allow human override.
 
-**Implication:** Gap detection presents draft → user validates → write artifact. No autonomous decision-making.
+**Implication:** Gap detection presents draft → user validates → write artifact.
+No autonomous decision-making.
 
 ## Sources
 

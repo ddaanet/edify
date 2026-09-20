@@ -17,68 +17,67 @@ mode is a dispatch defect — do not guess; stop and report
 
 **Context handling:** the prompt carries the item and slice text inline
 (including `Interfaces:` blocks) and names the design and recall artifact by
-path. Read the design (or outline), then Read the recall artifact and each
-file it lists, before executing. Read nothing else from the plan.
+path. Read the design (or outline), then Read the recall artifact and each file
+it lists, before executing. Read nothing else from the plan.
 
 ## RED Mode
 
 Writes the slice's tests and proves each one red. Writes no implementation.
 
-1. **Slice 1 only:** if the SUT does not exist, create it importable but
-   inert — stub functions returning `None`, `""`, `[]`, or no-op. Never
-   real behaviour. **Later slices:** do not touch the SUT at all.
-2. **Write the slice's tests** exactly as the slice describes — test names
-   and assertions from the slice text, project testing conventions from the
-   design context.
-3. **Run the tests.** Verify every test fails on its assertion — a wrong
-   value or an absent raise, never `ImportError` or `AttributeError`. A test
-   failing on a missing symbol means the stub is incomplete: extend the
-   stub, not the test.
-4. **A test that passes has named itself vacuous.** Report it as such; do
-   not delete or weaken it — the test review decides.
+1. **Slice 1 only:** if the SUT does not exist, create it importable but inert —
+   stub functions returning `None`, `""`, `[]`, or no-op. Never real behaviour.
+   **Later slices:** do not touch the SUT at all.
+2. **Write the slice's tests** exactly as the slice describes — test names and
+   assertions from the slice text, project testing conventions from the design
+   context.
+3. **Run the tests.** Verify every test fails on its assertion — a wrong value
+   or an absent raise, never `ImportError` or `AttributeError`. A test failing
+   on a missing symbol means the stub is incomplete: extend the stub, not the
+   test.
+4. **A test that passes has named itself vacuous.** Report it as such; do not
+   delete or weaken it — the test review decides.
 5. **Write the report** to the path from the prompt
-   (`plans/<job>/reports/item-N-M-s<k>-red.md`), carrying the per-test
-   output: each test id with its failure line.
-6. **Stop.** No commit — the uncommitted tests in the tree are the designed
-   end state of this dispatch. Return the report path.
+   (`plans/<job>/reports/item-N-M-s<k>-red.md`), carrying the per-test output:
+   each test id with its failure line.
+6. **Stop.** No commit — the uncommitted tests in the tree are the designed end
+   state of this dispatch. Return the report path.
 
 ## GREEN Mode
 
 Receives the failing batch as its contract and grows the implementation.
 
-1. **Never edit a test file.** The prohibition is absolute for this mode. If
-   a test looks wrong — asserts behaviour the design contradicts, or cannot
-   be satisfied — stop and report `blocked: test <id> — <why>`.
-2. **One test at a time.** Pick one failing test, implement the minimal
-   growth that passes it, run it, move to the next. Grow the implementation
-   rather than writing it in one lump.
+1. **Never edit a test file.** The prohibition is absolute for this mode. If a
+   test looks wrong — asserts behaviour the design contradicts, or cannot be
+   satisfied — stop and report `blocked: test <id> — <why>`.
+2. **One test at a time.** Pick one failing test, implement the minimal growth
+   that passes it, run it, move to the next. Grow the implementation rather than
+   writing it in one lump.
 3. **Full suite at the end**, plus `just lint`, then `just precommit`. Fix
    regressions one at a time, re-running after each — never batch regression
    fixes.
-4. **The precommit run's warnings go into the report**, not into refactoring
-   — complexity and line-limit warnings are the code review's judgement call,
-   not yours.
-5. **Commit once for the slice:** subject `<type>: Item N.M/k — <title>`,
-   the title from the prompt. The type is yours to pick — `feat`, `fix`,
-   `docs`, `perf`, `test`, `build`, `chore` all legitimate; the commit-msg
-   hook rewrites the prefix to an emoji before the commit is written, so
-   nothing downstream keys on it. What identifies the slice commit is the
-   hash you record in the report. The commit carries tests and
-   implementation together with the suite green. No commit ever leaves the
-   suite red.
+4. **The precommit run's warnings go into the report**, not into refactoring —
+   complexity and line-limit warnings are the code review's judgement call, not
+   yours.
+5. **Commit once for the slice:** subject `<type>: Item N.M/k — <title>`, the
+   title from the prompt. The type is yours to pick — `feat`, `fix`, `docs`,
+   `perf`, `test`, `build`, `chore` all legitimate; the commit-msg hook rewrites
+   the prefix to an emoji before the commit is written, so nothing downstream
+   keys on it. What identifies the slice commit is the hash you record in the
+   report. The commit carries tests and implementation together with the suite
+   green. No commit ever leaves the suite red.
 6. **Write the report** to the path from the prompt
    (`plans/<job>/reports/item-N-M-s<k>-green.md`) and return its path. It
-   carries the commit hash, the tests run with their results, and the order
-   they were made to pass — one at a time. The audit reads that sequence
-   from here, not from the commit history.
+   carries the commit hash, the tests run with their results, and the order they
+   were made to pass — one at a time. The audit reads that sequence from here,
+   not from the commit history.
 
 ## Stop Conditions
 
 Stop and report instead of improvising when:
 
 - The prompt names no mode → `blocked: no mode named in dispatch prompt`
-- RED: a test cannot be made to fail on its assertion after fixing the stub
-  → `blocked: test <id> — <diagnosis>`
+- RED: a test cannot be made to fail on its assertion after fixing the stub →
+  `blocked: test <id> — <diagnosis>`
 - GREEN: a test still fails after 2 implementation attempts →
   `blocked: test <id> — <failure summary>`
 - GREEN: a test looks wrong → `blocked: test <id> — <why>`
@@ -102,8 +101,8 @@ Stop and report instead of improvising when:
 - Abstractions only when a second use exists
 - Guard only against states that can occur at trust boundaries
 - Build for current requirements
-- **Deletion test** — remove the construct; keep it only if behaviour or
-  safety is lost
+- **Deletion test** — remove the construct; keep it only if behaviour or safety
+  is lost
 
 ## Response Protocol
 

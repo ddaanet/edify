@@ -1,8 +1,7 @@
 # Deliverable Review: worktree-update
 
-**Date:** 2026-02-13
-**Methodology:** `docs/design.md` §6.8 "Deliverable review" (ISO 25010 / IEEE 1012)
-**Design reference:** `plans/worktree-update/design.md`
+**Date:** 2026-02-13 **Methodology:** `docs/design.md` §6.8 "Deliverable review"
+(ISO 25010 / IEEE 1012) **Design reference:** `plans/worktree-update/design.md`
 
 ---
 
@@ -19,7 +18,9 @@
 | Configuration | `justfile` (wt-* recipes) | ~200 |
 | Configuration | `plugin/justfile` | ~20 |
 
-**Design conformance:** All 8 design decisions (D1-D8) structurally satisfied. 4-phase merge ceremony complete. Exit codes match spec. 22/27 design test requirements covered.
+**Design conformance:** All 8 design decisions (D1-D8) structurally satisfied.
+4-phase merge ceremony complete. Exit codes match spec. 22/27 design test
+requirements covered.
 
 ---
 
@@ -34,7 +35,8 @@
 ### C2. `wt-merge` lacks THEIRS clean tree check (D8 violation)
 - **Source:** Prose review #13
 - **File:** `justfile:209-222`
-- **Design:** D8 — "Both Python merge and justfile `wt-merge` must check both sides"
+- **Design:** D8 — "Both Python merge and justfile `wt-merge` must check both
+  sides"
 - **Impact:** Uncommitted worktree changes silently lost on merge
 
 ### C3. Missing `setup` recipe in plugin justfile (D5 violation)
@@ -47,13 +49,15 @@
 - **Source:** Test review F-01
 - **File:** `tests/test_worktree_merge_parent.py`
 - **Design:** Phase 4 — "exit 1 with message 'Precommit failed after merge'"
-- **Impact:** Specified behavior path with zero coverage. Docstring claims behavior the test body doesn't exercise.
+- **Impact:** Specified behavior path with zero coverage. Docstring claims
+  behavior the test body doesn't exercise.
 
 ### C5. No merge idempotency test
 - **Source:** Test review F-02
 - **File:** All merge test files
 - **Design:** "Idempotency: re-running after manual fix resumes correctly"
-- **Impact:** Recovery workflow untested — the only way to verify merge is safe to retry
+- **Impact:** Recovery workflow untested — the only way to verify merge is safe
+  to retry
 
 ---
 
@@ -63,49 +67,63 @@
 - **Source:** Code review F2
 - **File:** `cli.py:55-60`
 - **Axis:** Functional correctness
-- **Detail:** Non-bullet continuation lines of irrelevant entries leak into filtered output. Focused sessions may include irrelevant blocker sub-entries.
+- **Detail:** Non-bullet continuation lines of irrelevant entries leak into
+  filtered output. Focused sessions may include irrelevant blocker sub-entries.
 
 ### M2. `plan_dir` regex case-sensitive but session.md uses title case
 - **Source:** Code review F13
 - **File:** `cli.py:73`
 - **Axis:** Functional correctness
-- **Detail:** `plan:\s*(\S+)` won't match `Plan:` (title case). Falls back to task-name-only filtering, missing plan-directory-referenced entries.
+- **Detail:** `plan:\s*(\S+)` won't match `Plan:` (title case). Falls back to
+  task-name-only filtering, missing plan-directory-referenced entries.
 
 ### M3. Mode B dependency analysis too cognitive
 - **Source:** Prose review #8
 - **File:** `SKILL.md:50-61`
 - **Axis:** Determinism
-- **Detail:** "mentions" and "ordering hints" are judgment words. Different agents produce different results. Duplicates `#status` parallel detection logic.
+- **Detail:** "mentions" and "ordering hints" are judgment words. Different
+  agents produce different results. Duplicates `#status` parallel detection
+  logic.
 
 ### M4. False idempotency claim in SKILL.md
 - **Source:** Prose review #11
 - **File:** `SKILL.md:119`
 - **Axis:** Functional correctness
-- **Detail:** Claims merge "detects partial completion and resumes from appropriate phase." No resume logic exists — it's incidental idempotency from git operations.
+- **Detail:** Claims merge "detects partial completion and resumes from
+  appropriate phase." No resume logic exists — it's incidental idempotency from
+  git operations.
 
 ### M5. No exit code 2 for submodule failure
 - **Source:** Test review F-03
 - **File:** `tests/test_worktree_merge_validation.py`
 - **Axis:** Coverage gap
-- **Detail:** Exit code 2 tested for branch-not-found but not submodule failure scenarios.
+- **Detail:** Exit code 2 tested for branch-not-found but not submodule failure
+  scenarios.
 
 ### M6. test_merge_submodule_ancestry mocks away tested behavior
 - **Source:** Test review F-04
 - **File:** `tests/test_worktree_merge_submodule.py:15-96`
 - **Axis:** Vacuity
-- **Detail:** Sets up real git state then replaces `_git` with MagicMock. Assertions check function was called, not that ancestry checking works correctly.
+- **Detail:** Sets up real git state then replaces `_git` with MagicMock.
+  Assertions check function was called, not that ancestry checking works
+  correctly.
 
 ### M7. test_merge_submodule_fetch implementation-coupled
 - **Source:** Test review F-05
 - **File:** `tests/test_worktree_merge_submodule.py:163-232`
 - **Axis:** Independence
-- **Detail:** Patches `subprocess.run` globally, tracks specific command patterns. Tests implementation details (specific git commands) not behavioral outcomes.
+- **Detail:** Patches `subprocess.run` globally, tracks specific command
+  patterns. Tests implementation details (specific git commands) not behavioral
+  outcomes.
 
 ### M8. commit_file helper duplicated in 3 test files
 - **Source:** Test review F-06
-- **File:** `test_worktree_merge_parent.py:162`, `test_worktree_merge_conflicts.py:394`, `test_worktree_merge_jobs_conflict.py:141`
+- **File:** `test_worktree_merge_parent.py:162`,
+  `test_worktree_merge_conflicts.py:394`,
+  `test_worktree_merge_jobs_conflict.py:141`
 - **Axis:** Excess/duplication
-- **Detail:** Identical function in 3 files despite existing as fixture in `fixtures_worktree.py`. Maintenance risk from divergent copies.
+- **Detail:** Identical function in 3 files despite existing as fixture in
+  `fixtures_worktree.py`. Maintenance risk from divergent copies.
 
 ### M9. No source file conflict cleanup test
 - **Source:** Test review F-08
@@ -117,7 +135,8 @@
 - **Source:** Test review F-13
 - **File:** `tests/test_worktree_merge_parent.py:89-159`
 - **Axis:** Vacuity
-- **Detail:** Docstring specifies 6 behavioral conditions including failure path. Test body only exercises happy path. Misleading coverage.
+- **Detail:** Docstring specifies 6 behavioral conditions including failure
+  path. Test body only exercises happy path. Misleading coverage.
 
 ---
 
@@ -125,19 +144,28 @@
 
 ### Code (14)
 - `_git()` duplicated across cli.py and merge.py (modularity)
-- THEIRS clean check runs on non-existent directory path (robustness — correct by accident)
-- `_resolve_learnings_md_conflict` set-based dedup loses ordering context (correctness — matches design literally)
+- THEIRS clean check runs on non-existent directory path (robustness — correct
+  by accident)
+- `_resolve_learnings_md_conflict` set-based dedup loses ordering context
+  (correctness — matches design literally)
 - `_probe_registrations` substring containment vs path matching (robustness)
 - `_check_clean_for_merge` exempt_paths substring matching (robustness)
-- `clean_tree` vs `_check_clean_for_merge` different parsing strategies (modularity)
+- `clean_tree` vs `_check_clean_for_merge` different parsing strategies
+  (modularity)
 - `add_sandbox_dir` no trailing newline (cosmetic)
 - `initialize_environment` no warning when `just` unavailable (D5 conformance)
-- `_phase4` exit code doesn't distinguish precommit failure from just-not-found (error signaling)
-- `_phase3` `git clean -fd` may remove user's untracked files (robustness — F15/F16 interaction)
-- `_check_clean_for_merge` uses `--untracked-files=no` inconsistent with `clean_tree` (robustness)
-- No test for `focus_session` with continuation-line plan directory (testability)
-- `_create_session_commit` tempfile context manager misleading scope (robustness)
-- `rm` doesn't delete submodule branch — stale branches accumulate (completeness)
+- `_phase4` exit code doesn't distinguish precommit failure from just-not-found
+  (error signaling)
+- `_phase3` `git clean -fd` may remove user's untracked files (robustness —
+  F15/F16 interaction)
+- `_check_clean_for_merge` uses `--untracked-files=no` inconsistent with
+  `clean_tree` (robustness)
+- No test for `focus_session` with continuation-line plan directory
+  (testability)
+- `_create_session_commit` tempfile context manager misleading scope
+  (robustness)
+- `rm` doesn't delete submodule branch — stale branches accumulate
+  (completeness)
 
 ### Tests (5)
 - Conditional submodule test silently passes if initialization fails
@@ -185,11 +213,17 @@
 | Major | 10 |
 | Minor | 24 |
 
-The core Python implementation (cli.py, merge.py, utils.py) is structurally sound — all 8 design decisions satisfied. The 4-phase merge ceremony works correctly for the tested paths. The `focus_session` function has two correctness bugs (M1, M2) affecting filtering quality.
+The core Python implementation (cli.py, merge.py, utils.py) is structurally
+sound — all 8 design decisions satisfied. The 4-phase merge ceremony works
+correctly for the tested paths. The `focus_session` function has two correctness
+bugs (M1, M2) affecting filtering quality.
 
-**Three unimplemented design requirements** (C1-C3) are all in Phase 8 non-code artifacts (justfile/config). These are the most straightforward to fix.
+**Three unimplemented design requirements** (C1-C3) are all in Phase 8 non-code
+artifacts (justfile/config). These are the most straightforward to fix.
 
-**Test gaps** concentrate in merge edge cases — precommit failure, idempotency, submodule exit code 2, and cleanup verification. The submodule merge tests (M6, M7) rely on mocking that defeats their purpose.
+**Test gaps** concentrate in merge edge cases — precommit failure, idempotency,
+submodule exit code 2, and cleanup verification. The submodule merge tests (M6,
+M7) rely on mocking that defeats their purpose.
 
 **Sub-reports:**
 - `plans/worktree-update/reports/deliverable-review-code.md`

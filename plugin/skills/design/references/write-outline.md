@@ -1,36 +1,47 @@
 ### Phase A: Research + Outline
 
-**Objective:** Load context, explore codebase, research external resources, produce plan outline.
+**Objective:** Load context, explore codebase, research external resources,
+produce plan outline.
 
 #### A.0. Requirements Checkpoint
 
-If `requirements.md` exists in job directory (`plans/<job-name>/requirements.md`):
+If `requirements.md` exists in job directory
+(`plans/<job-name>/requirements.md`):
 - Read and summarize functional/non-functional requirements
 - Note scope boundaries (in/out of scope)
 - Carry requirements context into outline and design
-- **Skill dependency scan:** Check if requirements mention creating agents, skills, hooks, or plugins → load corresponding `plugin-dev:*` skill immediately (don't defer to A.1)
+- **Skill dependency scan:** Check if requirements mention creating agents,
+  skills, hooks, or plugins → load corresponding `plugin-dev:*` skill
+  immediately (don't defer to A.1)
 
 If no requirements.md exists:
 - Document requirements discovered during research
 - Can be inline in design.md or separate requirements.md (designer's judgment)
 
 **Skill dependency indicators:**
-- "sub-agent", "delegate to agent", "agent definition" → `plugin-dev:agent-development`
+- "sub-agent", "delegate to agent", "agent definition" →
+  `plugin-dev:agent-development`
 - "skill", "invoke skill", "skill preloaded" → `plugin-dev:skill-development`
 - "hook", "PreToolUse", "PostToolUse" → `plugin-dev:hook-development`
-- "plugin", "MCP server" → `plugin-dev:plugin-structure`, `plugin-dev:mcp-integration`
+- "plugin", "MCP server" → `plugin-dev:plugin-structure`,
+  `plugin-dev:mcp-integration`
 
-**Anti-pattern:** Deferring skill loading to A.1 judgment when requirements explicitly mention agent/skill creation.
+**Anti-pattern:** Deferring skill loading to A.1 judgment when requirements
+explicitly mention agent/skill creation.
 
-**Correct pattern:** Scan requirements for skill dependency indicators during A.0, load immediately.
+**Correct pattern:** Scan requirements for skill dependency indicators during
+A.0, load immediately.
 
-**Rationale:** Skill content must be available for outline (A.5) and design (C.1) phases. Late loading causes missing context.
+**Rationale:** Skill content must be available for outline (A.5) and design
+(C.1) phases. Late loading causes missing context.
 
-**Output:** Requirements summary + skill dependencies loaded, available for Phase A.5 (outline) and Phase C.1 (design).
+**Output:** Requirements summary + skill dependencies loaded, available for
+Phase A.5 (outline) and Phase C.1 (design).
 
 #### A.1. Documentation Checkpoint
 
-**Purpose:** Systematic documentation loading — replaces ad-hoc memory discovery.
+**Purpose:** Systematic documentation loading — replaces ad-hoc memory
+discovery.
 
 **Hierarchy (each level is fallback when previous didn't answer):**
 
@@ -42,17 +53,28 @@ If no requirements.md exists:
 | 4. Local explore | Codebase exploration | Delegate to scout agent | Always for complex designs |
 | 5. Web research | External patterns, prior art, specifications | WebSearch/WebFetch (direct in main session) | When local sources insufficient |
 
-**Not all levels needed for every task.** Level 1's index is always loaded (its bodies are not). Levels 2-5 are conditional on task domain.
+**Not all levels needed for every task.** Level 1's index is always loaded (its
+bodies are not). Levels 2-5 are conditional on task domain.
 
-**No-requirements case:** When no requirements.md exists, derive domain keywords from user request. The one-line hooks in `memory/MEMORY.md` and the `[[wiki-links]]` between memory files amplify thin user input through cross-references. Cast a wider net on Level 1 to compensate for weaker signal.
+**No-requirements case:** When no requirements.md exists, derive domain keywords
+from user request. The one-line hooks in `memory/MEMORY.md` and the
+`[[wiki-links]]` between memory files amplify thin user input through
+cross-references. Cast a wider net on Level 1 to compensate for weaker signal.
 
-**Design decision escalation does NOT apply here.** Design sessions exist to make architectural decisions directly.
+**Design decision escalation does NOT apply here.** Design sessions exist to
+make architectural decisions directly.
 
 **Recall Artifact Generation**
 
-Documentation findings from A.1 exist only in the current context window — they do not survive to downstream pipeline stages (runbook planning, orchestration, execution, review), and nothing fetches them for a subagent, which receives the memory index but never a body it has not Read. Persist them as a recall artifact so all downstream consumers Read fresh content at consumption time.
+Documentation findings from A.1 exist only in the current context window — they
+do not survive to downstream pipeline stages (runbook planning, orchestration,
+execution, review), and nothing fetches them for a subagent, which receives the
+memory index but never a body it has not Read. Persist them as a recall artifact
+so all downstream consumers Read fresh content at consumption time.
 
-**Process:** After documentation loading completes, write `plans/<job>/recall-artifact.md`. File paths only — no excerpts, no summaries. Downstream consumers Read the listed files to get current content.
+**Process:** After documentation loading completes, write
+`plans/<job>/recall-artifact.md`. File paths only — no excerpts, no summaries.
+Downstream consumers Read the listed files to get current content.
 
 **Artifact format:**
 
@@ -66,58 +88,90 @@ Read each file listed below — do not rely on inline summaries.
 memory/<name>.md — <1-line relevance note>
 ```
 
-**Null artifact (nothing relevant):** Write `null — no relevant entries found` as the sole entry. Downstream consumers still Read the artifact and find the null marker, so the gate is anchored without consumer-side empty-section handling. Augmenting consumers (/runbook Phase 0.5) remove the null entry when adding real ones.
+**Null artifact (nothing relevant):** Write `null — no relevant entries found`
+as the sole entry. Downstream consumers still Read the artifact and find the
+null marker, so the gate is anchored without consumer-side empty-section
+handling. Augmenting consumers (/runbook Phase 0.5) remove the null entry when
+adding real ones.
 
-**Selection criteria:** Include files that informed design decisions or constrain implementation. Exclude files read but proved irrelevant — the artifact is curated, not exhaustive.
+**Selection criteria:** Include files that informed design decisions or
+constrain implementation. Exclude files read but proved irrelevant — the
+artifact is curated, not exhaustive.
 
-**Output:** `plans/<job>/recall-artifact.md`, alongside other design artifacts in the job directory.
+**Output:** `plans/<job>/recall-artifact.md`, alongside other design artifacts
+in the job directory.
 
 #### A.2. Explore Codebase
 
-**Delegate exploration when scope is open-ended or spans multiple unknown files.** Read directly when files are known and few (≤3 files). The goal is cost control — opus tokens on open-ended browsing are expensive, but launching an agent to read a known file costs more than reading it directly.
+**Delegate exploration when scope is open-ended or spans multiple unknown
+files.** Read directly when files are known and few (≤3 files). The goal is cost
+control — opus tokens on open-ended browsing are expensive, but launching an
+agent to read a known file costs more than reading it directly.
 
-For delegated exploration: Use Agent tool with `subagent_type="edify:scout"`. Specify report path: `plans/<job-name>/reports/explore-<topic>.md`. Agent writes findings to file and returns filepath.
+For delegated exploration: Use Agent tool with `subagent_type="edify:scout"`.
+Specify report path: `plans/<job-name>/reports/explore-<topic>.md`. Agent writes
+findings to file and returns filepath.
 
 #### A.2.5. Post-Explore Recall
 
-Exploration surfaces codebase areas not caught by A.1's topic-based recall. Invoke `Skill(skill: "edify:recall")` (no topic — selection runs against what the exploration just surfaced).
+Exploration surfaces codebase areas not caught by A.1's topic-based recall.
+Invoke `Skill(skill: "edify:recall")` (no topic — selection runs against what
+the exploration just surfaced).
 
 **Gate anchor (D+B — tool call required):**
-- **New entries found:** append the paths recall selected to the recall artifact via Edit if they have forward value for downstream consumers (runbook planning, execution, review) — recall has already Read the bodies
-- **No new entries:** state that explicitly in the response — the gate was reached and yielded nothing
+- **New entries found:** append the paths recall selected to the recall artifact
+  via Edit if they have forward value for downstream consumers (runbook
+  planning, execution, review) — recall has already Read the bodies
+- **No new entries:** state that explicitly in the response — the gate was
+  reached and yielded nothing
 
 #### A.3-4. Research
 
-**When external research needed** (Context7, web, grounding): Read `references/research-protocol.md` for Context7 usage, web research, grounding invocation, and recall diff guidance.
+**When external research needed** (Context7, web, grounding): Read
+`references/research-protocol.md` for Context7 usage, web research, grounding
+invocation, and recall diff guidance.
 
 **When no external research needed:** Skip to A.5.
 
-**Research artifact (required when research conducted):** Write findings to `plans/<job>/reports/research-<topic>.md` — frameworks considered, findings per framework, gaps identified. This file is a cascading dependency: A.5 reads it, absence blocks outline generation.
+**Research artifact (required when research conducted):** Write findings to
+`plans/<job>/reports/research-<topic>.md` — frameworks considered, findings per
+framework, gaps identified. This file is a cascading dependency: A.5 reads it,
+absence blocks outline generation.
 
-**Recall diff:** re-invoke `Skill(skill: "edify:recall", args: "<topic reflecting what just changed>")` and reconcile its selection against the existing `plans/<job-name>/recall-artifact.md`. Update the artifact if codebase findings changed relevance.
+**Recall diff:** re-invoke
+`Skill(skill: "edify:recall", args: "<topic reflecting what just changed>")` and
+reconcile its selection against the existing
+`plans/<job-name>/recall-artifact.md`. Update the artifact if codebase findings
+changed relevance.
 
 #### A.5. Outline
 
-**Gate:** If research was conducted (A.3-4), verify `plans/<job>/reports/research-*.md` exists before proceeding.
+**Gate:** If research was conducted (A.3-4), verify
+`plans/<job>/reports/research-*.md` exists before proceeding.
 
 Read `references/research-protocol.md` for outline content/format guidance.
 
-**Output:** Write outline to `plans/<job>/outline.md` — provenance, approach, key decisions, open questions, scope boundaries.
+**Output:** Write outline to `plans/<job>/outline.md` — provenance, approach,
+key decisions, open questions, scope boundaries.
 
-**Escape hatch:** If user input already specifies approach, decisions, and scope (e.g., detailed brief.md), compress A+B by presenting outline and asking for validation in a single message.
+**Escape hatch:** If user input already specifies approach, decisions, and scope
+(e.g., detailed brief.md), compress A+B by presenting outline and asking for
+validation in a single message.
 
 #### Post-Outline Complexity Re-check
 
 `Read plans/<job>/outline.md` — load the outline to ground re-assessment.
 
-The outline resolves the architectural uncertainty that justified "complex" classification. Re-assess before continuing ceremony.
+The outline resolves the architectural uncertainty that justified "complex"
+classification. Re-assess before continuing ceremony.
 
 **Downgrade criteria (all must hold):**
 - Changes additive, no implementation loops
 - No open questions remain
 - Scope boundaries explicit (IN/OUT enumerated)
 - No cross-file coordination requiring sequencing
-- ≤3 decisions AND no risks section (ungrounded threshold — adjust with evidence)
+- ≤3 decisions AND no risks section (ungrounded threshold — adjust with
+  evidence)
 
 **If met:** Skip A.6. Proceed to Phase B with sufficiency assessment.
 
@@ -129,7 +183,8 @@ The outline resolves the architectural uncertainty that justified "complex" clas
 
 **Process:**
 
-Delegate to `edify:outline-corrector` using Agent tool with `subagent_type="edify:outline-corrector"`:
+Delegate to `edify:outline-corrector` using Agent tool with
+`subagent_type="edify:outline-corrector"`:
 
 ```
 Review plans/<job>/outline.md — Preliminary Design Review (PDR) criteria:
@@ -149,26 +204,39 @@ Return only the filepath on success (with ESCALATION note if unfixable issues), 
 
 **Handle review outcome:**
 - Read the review report from the returned filepath
-- If ESCALATION noted: Address unfixable issues before proceeding to user presentation
+- If ESCALATION noted: Address unfixable issues before proceeding to user
+  presentation
 - If all issues fixed: Proceed to Phase B (report is audit trail)
 
 ---
 
 ### Phase B: User Validation
 
-**Protocol:** Invoke `/proof plans/<job>/outline.md` — structured reword-accumulate-sync loop on the outline. On terminal action "apply", /proof dispatches outline-corrector automatically and presents findings before returning control.
+**Protocol:** Invoke `/proof plans/<job>/outline.md` — structured
+reword-accumulate-sync loop on the outline. On terminal action "apply", /proof
+dispatches outline-corrector automatically and presents findings before
+returning control.
 
-**Convergence guidance:** If after 3 rounds the outline is not converging, ask user whether to proceed with current state or restart with different constraints.
+**Convergence guidance:** If after 3 rounds the outline is not converging, ask
+user whether to proceed with current state or restart with different
+constraints.
 
-**Termination:** If user feedback fundamentally changes the approach (not refining it), restart Phase A with updated understanding. Phase B is for convergence, not exploration of new directions.
+**Termination:** If user feedback fundamentally changes the approach (not
+refining it), restart Phase A with updated understanding. Phase B is for
+convergence, not exploration of new directions.
 
 ### Multi-Sub-Problem Sufficiency Gate
 
-`Read plans/<job>/outline.md` — load the outline to ground sufficiency assessment.
+`Read plans/<job>/outline.md` — load the outline to ground sufficiency
+assessment.
 
-When an outline decomposes the job into individually-scoped sub-problems (each with readiness level and pipeline routing), the outline IS the design artifact. Do not generate a single `design.md`.
+When an outline decomposes the job into individually-scoped sub-problems (each
+with readiness level and pipeline routing), the outline IS the design artifact.
+Do not generate a single `design.md`.
 
-**Detection:** Outline contains a sub-problems section where each entry specifies: scope (what/how), readiness level, pipeline routing, dependencies, and file sets.
+**Detection:** Outline contains a sub-problems section where each entry
+specifies: scope (what/how), readiness level, pipeline routing, dependencies,
+and file sets.
 
 **Multi-sub-problem sufficiency criteria (all must hold):**
 - Each sub-problem has concrete scope (what/how specified, not "explore")
@@ -180,36 +248,54 @@ When an outline decomposes the job into individually-scoped sub-problems (each w
 
 **If sufficient** — present assessment to user. On confirmation:
 - The outline is the terminal design artifact for this job
-- Individual sub-problems enter the pipeline via their readiness-specified route (from the readiness summary)
-- The caller (session task management) dispatches sub-problems as independent pending tasks
-- Each sub-problem's readiness names its route: Read `references/route-to-execution.md` and route by it, per sub-problem; dispatch remains the caller's responsibility
+- Individual sub-problems enter the pipeline via their readiness-specified route
+  (from the readiness summary)
+- The caller (session task management) dispatches sub-problems as independent
+  pending tasks
+- Each sub-problem's readiness names its route: Read
+  `references/route-to-execution.md` and route by it, per sub-problem; dispatch
+  remains the caller's responsibility
 
-**If a sub-problem is not routable** — the node records not-routable in that sub-problem's readiness summary instead of a route. Resume A.5 for that entry alone:
-- Siblings with no dependency path through the not-routable entry stay dispatchable
-- Its dependents are held; the readiness summary names which ones are held and on what
-- Only the revised entry goes back through `references/route-to-execution.md` — the rest of the outline is not reopened
+**If a sub-problem is not routable** — the node records not-routable in that
+sub-problem's readiness summary instead of a route. Resume A.5 for that entry
+alone:
+- Siblings with no dependency path through the not-routable entry stay
+  dispatchable
+- Its dependents are held; the readiness summary names which ones are held and
+  on what
+- Only the revised entry goes back through `references/route-to-execution.md` —
+  the rest of the outline is not reopened
 - The user confirms that entry, not the whole outline
 - Held dependents release once the entry routes
 
-**If insufficient** — identify which criteria failed. Resume from A.5 (revise outline) or present gaps for discussion.
+**If insufficient** — identify which criteria failed. Resume from A.5 (revise
+outline) or present gaps for discussion.
 
 ---
 
 ### Outline Sufficiency Gate
 
-`Read plans/<job>/outline.md` — load the outline to ground sufficiency assessment.
+`Read plans/<job>/outline.md` — load the outline to ground sufficiency
+assessment.
 
-After user validates the outline, assess whether it already contains enough specificity to skip design generation.
+After user validates the outline, assess whether it already contains enough
+specificity to skip design generation.
 
 **Sufficiency criteria (all must hold):**
-- Approach is concrete (specific algorithm/pattern chosen, not "explore options")
+- Approach is concrete (specific algorithm/pattern chosen, not "explore
+  options")
 - Key decisions are resolved (no open questions remaining)
 - Scope boundaries are explicit (IN/OUT enumerated)
 - Affected files are identified
 - No architectural uncertainty remains
 
-**If sufficient** — present sufficiency assessment to user. The outline IS the design; confirm user agrees to skip design generation. On confirmation, Read `references/route-to-execution.md` and route by it.
+**If sufficient** — present sufficiency assessment to user. The outline IS the
+design; confirm user agrees to skip design generation. On confirmation, Read
+`references/route-to-execution.md` and route by it.
 
-**If insufficient** — Read `references/write-design.md` for Phase C (full design generation) and design constraints.
+**If insufficient** — Read `references/write-design.md` for Phase C (full design
+generation) and design constraints.
 
-**When to apply:** Small-to-moderate jobs where research (Phase A) fully resolved the approach and user discussion (Phase B) confirmed without introducing new complexity.
+**When to apply:** Small-to-moderate jobs where research (Phase A) fully
+resolved the approach and user discussion (Phase B) confirmed without
+introducing new complexity.

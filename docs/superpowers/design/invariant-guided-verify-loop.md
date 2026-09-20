@@ -1,10 +1,9 @@
 # Invariant-Guided Verify Loop — Living Design
 
 **Status:** Living. Updated as the design evolves; supersedes the frozen spec
-where they diverge.
-**Verified against:** `a26bf0a0` (2026-06-15). FR/NFR states below were true at
-this commit (`just precommit` green: 299/300 pass, 1 known xfail) —
-`git diff a26bf0a0 -- src/edify tests` to find drift.
+where they diverge. **Verified against:** `a26bf0a0` (2026-06-15). FR/NFR states
+below were true at this commit (`just precommit` green: 299/300 pass, 1 known
+xfail) — `git diff a26bf0a0 -- src/edify tests` to find drift.
 
 **Origin artifacts (frozen):**
 - Spec: `../specs/2026-06-08-invariant-guided-verify-loop-design.md`
@@ -20,18 +19,19 @@ open claim — see L5, L6.
 - **Focus:** thesis unproven (L5/L6), but both *qualitative* halves of the loop
   are now exercised on real code: verify path (D9, `parse_crosshair_output`) and
   catch-a-bug path (D10, `find_inline_code_spans` — refuted → code-bug triage →
-  fix → verified). D10 also surfaced L7: default-budget `verified` can be vacuous
-  (the planted bug passed at default budget, refuted only at `--timeout 30`).
+  fix → verified). D10 also surfaced L7: default-budget `verified` can be
+  vacuous (the planted bug passed at default budget, refuted only at
+  `--timeout 30`).
 - **Next:** the only open lever for L5 is the **D8 eval harness** (quantitative,
   plan credits) — the qualitative anecdotes are done. Before that, the cheap
-  follow-up is L7 hardening: re-verify existing `verified` claims at a non-default
-  budget and consider a CLI minimum-budget floor / vacuity guard.
+  follow-up is L7 hardening: re-verify existing `verified` claims at a
+  non-default budget and consider a CLI minimum-budget floor / vacuity guard.
 - **Do not:** re-litigate the backend (D1) or the four-state→three-state output
   (D4) — both settled. Check each decision's *Reopen-if* before reviving it.
 
 **Status legend.** FR/NFR: `Done` = implemented + pinned by a test;
-`Done (prose)` = implemented as skill instructions, not code/tested;
-`Partial` = some of it; `Planned` = not built.
+`Done (prose)` = implemented as skill instructions, not code/tested; `Partial` =
+some of it; `Planned` = not built.
 
 ---
 

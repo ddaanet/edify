@@ -7,8 +7,8 @@ from it live. Nothing expands it.
 
 ## Structure
 
-Open with a pointer to the design and requirements, then a requirements
-mapping table (`| Requirement | Phase | Items | Notes |`), then the phases:
+Open with a pointer to the design and requirements, then a requirements mapping
+table (`| Requirement | Phase | Items | Notes |`), then the phases:
 
 ```markdown
 ## Phase N: <title> (type: tdd|general)
@@ -23,28 +23,28 @@ mapping table (`| Requirement | Phase | Items | Notes |`), then the phases:
   output.
 
 An item does **not** carry a model. The dispatcher assigns the model from the
-dispatch itself (`plugin/skills/build/references/dispatch-composition.md`
-§Model assignment), which is the only point that knows the agent type and the
+dispatch itself (`plugin/skills/build/references/dispatch-composition.md` §Model
+assignment), which is the only point that knows the agent type and the
 deliverable. A planner naming a model is guessing at difficulty before anyone
 has read the code; where an item turns out to need a stronger model, the agent
 escalates and the dispatcher re-dispatches.
 
 ### tdd items: Slices
 
-A tdd item adds `Slices:` — a numbered list. Slice 1 pins the external
-contract with the degenerate or naive happy-path case; each later slice adds
-exactly one behaviour (an error path, an edge, a second feature). Each slice
-names its tests in prose with the assertion stated, specific enough that two
-executors would write the same test. Slice k of Item N.M is `N.M/k` — the
-id `/build` uses in dispatch names and slice commit subjects.
+A tdd item adds `Slices:` — a numbered list. Slice 1 pins the external contract
+with the degenerate or naive happy-path case; each later slice adds exactly one
+behaviour (an error path, an edge, a second feature). Each slice names its tests
+in prose with the assertion stated, specific enough that two executors would
+write the same test. Slice k of Item N.M is `N.M/k` — the id `/build` uses in
+dispatch names and slice commit subjects.
 
 ### Interfaces blocks
 
 Any item whose output another item consumes adds `Interfaces:` — one line per
-method, dataclass, exception, or file contract, each with its full signature
-and return type. Never a run-on paragraph: cramming hides elided return types,
-and two fresh subagents translating prose independently diverge without the
-explicit contract.
+method, dataclass, exception, or file contract, each with its full signature and
+return type. Never a run-on paragraph: cramming hides elided return types, and
+two fresh subagents translating prose independently diverge without the explicit
+contract.
 
 ### Example
 
@@ -79,10 +79,10 @@ A general phase uses the base item shape with no `Slices:`:
 
 ## Prose plus interfaces, never code
 
-Items describe behaviour, target files, and tests in prose. No implementation
-or test code blocks anywhere in an item: a code block turns the executor into
-a copier and goes stale against the moving implementation. `Interfaces:`
-blocks are the one formal element.
+Items describe behaviour, target files, and tests in prose. No implementation or
+test code blocks anywhere in an item: a code block turns the executor into a
+copier and goes stale against the moving implementation. `Interfaces:` blocks
+are the one formal element.
 
 ## Assertion quality (tdd items)
 
@@ -97,13 +97,13 @@ satisfiable by multiple implementations is too vague.
 
 ## Ordering (tdd items)
 
-- **Integration-first.** Default to tests that exercise production call
-  paths; add unit-level tests only where integration coverage is insufficient
+- **Integration-first.** Default to tests that exercise production call paths;
+  add unit-level tests only where integration coverage is insufficient
   (combinatorial cases, fault injection, internal contracts). Within a phase,
   plan integration items before or alongside unit items.
-- **Wire-then-isolate.** The first testable slice of a new component verifies
-  it through its production entry point; later slices isolate specific
-  behaviours where edge-case coverage requires it.
+- **Wire-then-isolate.** The first testable slice of a new component verifies it
+  through its production entry point; later slices isolate specific behaviours
+  where edge-case coverage requires it.
 - **Foundation-first within a phase.** Existence → structure → behaviour →
   refinement; no forward dependencies.
 
@@ -111,14 +111,14 @@ satisfiable by multiple implementations is too vague.
 
 When the design cites an external reference (shell prototype, API spec) in a
 `Reference:` field, the runbook includes validation items verifying the
-implementation conforms to the reference, with exact expected strings from
-the reference — "output matches `medal sonnet \033[35m…` with double-space
+implementation conforms to the reference, with exact expected strings from the
+reference — "output matches `medal sonnet \033[35m…` with double-space
 separators", never "output contains appropriate styling".
 
 ## Item-level rules
 
-Rules tagged *(tdd)* concern tests and bind only on tdd items; *(general)*
-tags the one rule specific to general items. The untagged rules bind on both.
+Rules tagged *(tdd)* concern tests and bind only on tdd items; *(general)* tags
+the one rule specific to general items. The untagged rules bind on both.
 
 - **No setup-only items.** An item that only creates scaffolding or fixtures
   with no behavioural outcome merges into the nearest behavioural item.
@@ -126,13 +126,13 @@ tags the one rule specific to general items. The untagged rules bind on both.
   per slice, and an item whose slices span a subsystem splits into items.
 - **No presentation tests.** *(tdd)* Test that the flag works, not that help
   text mentions it; output shape is presentation, not behaviour.
-- **No weak assertions.** *(tdd)* Exit-code-only checks pass with a stub;
-  assert output content.
+- **No weak assertions.** *(tdd)* Exit-code-only checks pass with a stub; assert
+  output content.
 - **No split prose edits.** *(general)* All edits to one prose artifact (skill,
   fragment, agent definition) land in one item — fragmenting the file across
   items degrades editor context, the only quality lever prose has.
-- **No unit-only coverage.** *(tdd)* Every phase building behaviour has at
-  least one test through the production call path.
+- **No unit-only coverage.** *(tdd)* Every phase building behaviour has at least
+  one test through the production call path.
 - **No mocked subprocess when real is fast.** *(tdd)* Use real subprocesses in
   `tmp_path` for git/CLI operations completing in milliseconds; mock only for
   error injection.
