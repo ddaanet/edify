@@ -236,6 +236,12 @@ cite. Every pointer an item writes into a skill body is skill-relative
      first-pass artifact whose `Derived from:` reads `none — <rationale>`,
      the idiom the tree's real artifacts use; asserts `RANGE:` (added after
      slice 1's code review, which found the bare-`none` match rejecting it).
+  List revision after slice 2: its GREEN implemented the compare, and the
+  code review probed slices 3, 6 and 7's verdicts already matching KD-2's
+  table verbatim. For those three, RED writes the test, the test review
+  proves it by mutation (mutate the SUT, the test reds, restore), the test is
+  committed as `test: Item 1.2/k — …`, and no GREEN or code-review dispatch
+  runs since the implementation does not change.
   Interfaces:
   - `edify-review-range.sh <artifact-path>` — repo located from the
     artifact's directory, `Derived from:` paths resolved against the repo
