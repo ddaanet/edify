@@ -318,6 +318,14 @@ cite. Every pointer an item writes into a skill body is skill-relative
      — an unreadable directory under `docs/`; asserts exit 2 and no
      `oversized-file:` line (added after slices 3–7's code review found
      `find` failing inside process substitution left the gate green).
+  Final list revision (TDD audit): the landed suites carry seven tests the
+  reviews added beyond the slice lists — in `test_review_range.py` the
+  `Base:`-only and report-only Provenance shapes and a `Base:` with a
+  trailing rationale; in `test_line_limits.py` a comment-and-blank allowlist
+  fixture, `docs/superpowers/specs/` excluded and `docs/superpowers/design/`
+  in scope, and an exact-path allowlist match. Slice 1.10/8's "no
+  `oversized-file:` line" assertion was dropped as vacuous (nothing in its
+  fixture is printable); the contract is exit 2.
   List revision before slice 1: today's script ignores a `ROOT` argument and
   exits 0 on any tree, so slice 1 alone cannot red. Slices 1 and 2 run as
   one RED dispatch — 2 supplies the genuine red, the review proves 1 by
