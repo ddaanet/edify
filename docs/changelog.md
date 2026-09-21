@@ -11,6 +11,77 @@ place by answering a question a future reader would otherwise ask of
 `docs/design.md` holds the present-tense answer to *what the system is and why*.
 This file is the write-time record of how it got that way.
 
+## 2026-09-21 — the design graph's crosslinks are checked mechanically
+
+Splitting `docs/design.md` into a hub, an index and eight nodes made two
+invariants hand-breakable: a `D-<n>` with no index line, and an index conclusion
+drifting from its node's. `scripts/check_design_links.sh` pins both, plus
+`Argued in` resolution, in the root `justfile` only — a consuming project has no
+`docs/decisions.md`. The hub stays unpinned: its conclusions carry no ID.
+
+## 2026-09-21 — what the TDD audit changed: slice-scoped GREEN, mutation proof, report commits
+
+The TDD audit of `plans/provenance-enforcement-and-routing/` found the
+over-implementing GREEN: each dispatch was handed the whole item contract "for
+structure" and implemented all of it, so six later slices — 1.2/3, 1.2/4–8,
+1.10/3, /6, /7 — had no behaviour left to red against, and nothing forbade it.
+The contract legitimately goes into the prompt, and once it is there an agent
+told to make one test pass has no reason to stop at the test. So the prompt now
+names the rest of it out of scope in all three places it has to act —
+`dispatch-composition.md` §Prompt contents (where the prompt is composed),
+`tdd-slice.md` §(c) (where the dispatch is described) and `test-driver.md` GREEN
+mode (where the agent reads it); the first two alone would have been rules the
+agent never sees.
+
+The recovery those six slices actually used is now the recorded fallback, D-84's
+second half: a mutation proof, per named test and never per batch. The audit
+rates it *stronger* evidence than an ordinary red, which is why it is kept
+rather than counted as a failure — and not a reason to plan for it. It also
+reconciles three statements that each read as absolute: a passing RED test has
+named itself vacuous, the test review's first check is that every listed test
+FAILED, and a slice whose behaviour exists cannot fail.
+
+The same audit's other hole, D-86: GREEN committed the slice and then wrote its
+report, leaving it untracked for `verify-step.sh` to call every GREEN dispatch
+dirty — as were the RED, test-review and code-review reports whenever their
+review changed no file. A report now rides the commit whose work it reports and
+names no hash; the commit is the one that adds it, `git log --diff-filter=A`.
+
+## 2026-09-21 — recall resolves skills, and stops assuming the index is in context
+
+Two groups of memory facts had already migrated into the `craft` and
+`plugin-craft` skills — how index-size pressure is relieved once a group grows
+large and stable, since a skill gives progressive disclosure an index line
+cannot. Recall did not follow: nothing read the
+`## Skills to load before executing` section its artifact had carried for a
+while. That section is now part of step 1's resolution, with the read path for
+the two agents that resolve an artifact without holding `Skill` — `artisan` and
+`test-driver` carry it in their own definitions, because no agent definition
+reads a fragment.
+
+The second half is a premise that turned out false. The skill's step 2 said the
+memory index "is injected at session start and is never Read", degrading only
+where the index is "structurally absent". A prior session found it absent at
+*every* recall checkpoint and grepped `memory/MEMORY.md` instead — the case the
+step called impossible. The Read is now conditional on the index's lines not
+being in context. D-48's anchoring argument survives unchanged: the anchor is
+still the artifact Read plus the per-file Reads, never the index.
+
+## 2026-09-21 — `ruff format --check` joins the precommit gate
+
+`just precommit` ran `ruff check` but never `ruff format --check`, so
+format-dirty code passed the gate — and `just format` could not have cleaned it
+either: both its `ruff`-sourced pipelines piped diffs into a bare `patch` that
+cannot guess the strip level from ruff's prefix-free headers, and the helper
+meant to print the reformatted files matched a quoted filename that `patch` does
+not emit. Two independent defects, each masking the other's symptom. The check
+now runs in `run-checks` in both the root `justfile` and `plugin/portable.just`,
+since the root file carries its own copy and executes here.
+
+`verify-step.sh` stopped signing off with a bare `CLEAN`, which is
+indistinguishable from a check that never ran, and now prints
+`CLEAN: tree clean, just precommit passed`. Exit codes are unchanged.
+
 ## 2026-09-20 — the living design becomes a hub, an index and eight nodes
 
 `docs/design.md` had reached 1234 lines against a 400-line cap, carried on the
@@ -35,8 +106,9 @@ protect, under that node's own heading.
 
 Nothing was renumbered and nothing was cut: the 112 identifier definitions
 before the split are the 112 after, and the only tokens that left the moved text
-are four `§7`/`§5.3` cross-references that became paths. The hub is 288 lines,
-the index 175, the largest node 224. `docs/design.md` left the allowlist.
+are four `§7`/`§5.3` cross-references that became paths, with two more repointed
+in the retained hub. The hub is 288 lines, the index 175, the largest node 224.
+`docs/design.md` left the allowlist.
 
 What the split does not buy on its own is the read: nothing in Claude Code loads
 a node, so the hub's opening states the shape and `CLAUDE.md` carries a routing

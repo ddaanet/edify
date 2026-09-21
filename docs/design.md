@@ -40,16 +40,31 @@ weak-orchestrator premise, rejected in `docs/references/pipeline-contracts.md`.
 
 ## 3. Functional requirements
 
+Each requirement carries its id, the statement, a §2 status, and where it lives
+— with what pins it after a `·` where a test pins it.
+
 ### 3.1 CLI
 
-| # | Requirement | Status | Where · pinned by |
-|---|---|---|---|
-| FR-1 | List top-level sessions for a project | Done | `cli.py:list_sessions`, `discovery.py` · `test_cli_list.py`, `test_discovery.py` |
-| FR-2 | Extract feedback from one session, recursing through its agent tree | Done | `cli.py:extract`, `extraction.py` · `test_cli_extract_basic.py`, `test_cli_extract_output.py`, `test_extraction.py`, `test_agent_files.py` |
-| FR-3 | Batch-collect feedback across all sessions | Done | `cli.py:collect` · `test_cli_collect.py` |
-| FR-4 | Count tokens per file via the Anthropic API, resolving model aliases | Done | `tokens.py`, `tokens_cli.py`, `token_cache.py` · `test_cli_tokens*.py`, `test_tokens_*.py`, `test_token_cache*.py` |
-| FR-5 | Postprocess Claude-authored markdown into valid CommonMark | Done | `markdown*.py` · `test_cli_markdown.py`, `test_markdown_*.py` |
-| FR-6 | Verify a Python target against its icontract contract (CrossHair) | Done | `check.py`, `check_cli.py` · `test_cli_check.py`, `test_check_e2e.py`, `test_check_parse.py`, `test_check_argv.py` |
+**FR-1 — List top-level sessions for a project.** Done; `cli.py:list_sessions`,
+`discovery.py` · `test_cli_list.py`, `test_discovery.py`.
+
+**FR-2 — Extract feedback from one session, recursing through its agent tree.**
+Done; `cli.py:extract`, `extraction.py` · `test_cli_extract_basic.py`,
+`test_cli_extract_output.py`, `test_extraction.py`, `test_agent_files.py`.
+
+**FR-3 — Batch-collect feedback across all sessions.** Done; `cli.py:collect` ·
+`test_cli_collect.py`.
+
+**FR-4 — Count tokens per file via the Anthropic API, resolving model aliases.**
+Done; `tokens.py`, `tokens_cli.py`, `token_cache.py` · `test_cli_tokens*.py`,
+`test_tokens_*.py`, `test_token_cache*.py`.
+
+**FR-5 — Postprocess Claude-authored markdown into valid CommonMark.** Done;
+`markdown*.py` · `test_cli_markdown.py`, `test_markdown_*.py`.
+
+**FR-6 — Verify a Python target against its icontract contract (CrossHair).**
+Done; `check.py`, `check_cli.py` · `test_cli_check.py`, `test_check_e2e.py`,
+`test_check_parse.py`, `test_check_argv.py`.
 
 `extract` and `collect` read paths from the project history dir; `markdown`
 reads paths from stdin. `tokens` takes the model as an option and files as
@@ -57,20 +72,44 @@ positional arguments.
 
 ### 3.2 Plugin
 
-| # | Requirement | Status | Where · pinned by |
-|---|---|---|---|
-| FR-7 | Capture requirements from conversation into `requirements.md` | Done (prose) | `skills/requirements/` |
-| FR-8 | Triage complexity, produce design artifacts, route to `/build` or `/runbook` | Done (prose) | `skills/design/` |
-| FR-9 | Decompose a design into a one-stage runbook: typed phases of prose items, interface blocks, behaviour slices | Done (prose) | `skills/runbook/`, `references/runbook-format.md` |
-| FR-10 | Execute a runbook by composing each dispatch prompt from its items, four dispatches per TDD slice | Done (prose) | `skills/build/`, `references/dispatch-composition.md` |
-| FR-11 | Wrap runbook-less work in a lifecycle: pre-work → execute → corrector → triage → deliverable-review | Done (prose) | `skills/build/` |
-| FR-12 | Review every pipeline transformation at a typed gate | Done (prose) | `agents/*corrector*.md`, `agents/runbook-simplifier.md` |
-| FR-13 | Review production artifacts against ISO 25010 / IEEE 1012 axes | Done (prose) | `skills/deliverable-review/` |
-| FR-14 | Select and read relevant memory entries at pipeline recall checkpoints | Done (prose) | `skills/recall/` |
-| FR-15 | Ground methodology claims in external research before asserting them | Done (prose) | `skills/ground/` |
-| FR-16 | Validate an artifact item-by-item with forced verdicts | Done (prose) | `skills/proof/` |
-| FR-17 | Write an icontract contract for a function and repair it against CrossHair | Done (prose) | `skills/formalize/` |
-| FR-18 | Provide the version-matched CLI to the plugin at session start | Done | `bin/bootstrap-venv.sh`, `hooks/hooks.json` · `tests/bootstrap-venv.bats` via `test_bootstrap_hook.py` |
+**FR-7 — Capture requirements from conversation into `requirements.md`.** Done
+(prose); `skills/requirements/`.
+
+**FR-8 — Triage complexity, produce design artifacts, route to `/build` or
+`/runbook`.** Done (prose); `skills/design/`.
+
+**FR-9 — Decompose a design into a one-stage runbook: typed phases of prose
+items, interface blocks, behaviour slices.** Done (prose); `skills/runbook/`,
+`references/runbook-format.md`.
+
+**FR-10 — Execute a runbook by composing each dispatch prompt from its items,
+four dispatches per TDD slice.** Done (prose); `skills/build/`,
+`references/dispatch-composition.md`.
+
+**FR-11 — Wrap runbook-less work in a lifecycle: pre-work → execute → corrector
+→ triage → deliverable-review.** Done (prose); `skills/build/`.
+
+**FR-12 — Review every pipeline transformation at a typed gate.** Done (prose);
+`agents/*corrector*.md`, `agents/runbook-simplifier.md`.
+
+**FR-13 — Review production artifacts against ISO 25010 / IEEE 1012 axes.** Done
+(prose); `skills/deliverable-review/`.
+
+**FR-14 — Select and read relevant memory entries at pipeline recall
+checkpoints.** Done (prose); `skills/recall/`.
+
+**FR-15 — Ground methodology claims in external research before asserting
+them.** Done (prose); `skills/ground/`.
+
+**FR-16 — Validate an artifact item-by-item with forced verdicts.** Done
+(prose); `skills/proof/`.
+
+**FR-17 — Write an icontract contract for a function and repair it against
+CrossHair.** Done (prose); `skills/formalize/`.
+
+**FR-18 — Provide the version-matched CLI to the plugin at session start.**
+Done; `bin/bootstrap-venv.sh`, `hooks/hooks.json` · `tests/bootstrap-venv.bats`
+via `test_bootstrap_hook.py`.
 
 FR-19 (step artifacts from a runbook) and FR-20 (deterministic runbook structure
 checks) were dropped 2026-09-01 with the two-stage runbook
@@ -78,15 +117,27 @@ checks) were dropped 2026-09-01 with the two-stage runbook
 
 ## 4. Non-functional requirements
 
-| # | Requirement | Status | Where · pinned by |
-|---|---|---|---|
-| NFR-1 | No source or prose file exceeds the cap its path picks — 400 lines, 200 for a `SKILL.md` hub | Done | `scripts/check_line_limits.sh` and its allowlist sidecar, run by `just precommit` behind `rumdl fmt --check` · `tests/test_line_limits.py` |
-| NFR-2 | Errors never pass silently — no `\|\| true`, no `2>/dev/null`, no ignored exit codes | Done (prose) | `CLAUDE.md` "Error Handling" |
-| NFR-3 | Agent-consumed commands emit structured markdown on stdout and signal via exit code | Done | D-1 |
-| NFR-4 | Plugin and package versions move in lockstep | Done | `bin/check-version-consistency.py` |
-| NFR-5 | A missing `uv` degrades to an informative message, never a blocked session | Done | `bin/bootstrap-venv.sh` · `tests/bootstrap-venv.bats` |
-| NFR-6 | The markdown pipeline is idempotent: `(preprocessor → remark)²` is a fixed point | Done | `test_markdown_fixtures.py` |
-| NFR-7 | Full type annotations under strict mypy | Done | `just lint` |
+**NFR-1 — No source or prose file exceeds the cap its path picks — 400 lines,
+200 for a `SKILL.md` hub.** Done; `scripts/check_line_limits.sh` and its
+allowlist sidecar, run by `just precommit` behind `rumdl fmt --check` ·
+`tests/test_line_limits.py`.
+
+**NFR-2 — Errors never pass silently — no `|| true`, no `2>/dev/null`, no
+ignored exit codes.** Done (prose); `CLAUDE.md` "Error Handling".
+
+**NFR-3 — Agent-consumed commands emit structured markdown on stdout and signal
+via exit code.** Done; D-1.
+
+**NFR-4 — Plugin and package versions move in lockstep.** Done;
+`bin/check-version-consistency.py`.
+
+**NFR-5 — A missing `uv` degrades to an informative message, never a blocked
+session.** Done; `bin/bootstrap-venv.sh` · `tests/bootstrap-venv.bats`.
+
+**NFR-6 — The markdown pipeline is idempotent: `(preprocessor → remark)²` is a
+fixed point.** Done; `test_markdown_fixtures.py`.
+
+**NFR-7 — Full type annotations under strict mypy.** Done; `just lint`.
 
 ## 5. Architecture
 
@@ -102,7 +153,7 @@ exactly `plugin/` and never the sibling `src/` tree.
 The plugin does not ship the CLI's code. It obtains the CLI at runtime through a
 `SessionStart` hook that builds a venv with uv (§5.4). The two are locked to one
 version by `plugin/bin/check-version-consistency.py`, which requires
-`plugin.json` version == `pyproject.toml` version — currently `0.1.1`.
+`plugin.json` version == `pyproject.toml` version.
 
 `memory/` is a separate submodule, gated by gitlore. It is unaffected by the
 plugin de-submodule and stays a submodule.
@@ -165,9 +216,12 @@ work is done, D-26 T5).
 
 The orchestrator owns every commit a review produces. A corrector applies
 fix-all and never commits; after the per-slice code review the orchestrator
-commits the corrector's fixes, the same step it takes at a phase boundary, and
-`verify-step.sh` runs after that commit. A slice's own commit is the
-implementer's, made in GREEN mode.
+commits the corrector's report and whatever fixes it applied, the same step it
+takes at a phase boundary, and `verify-step.sh` runs after that commit. That
+commit therefore always happens, even where the review changed nothing. A
+slice's own commit is the implementer's, made in GREEN mode, and it carries the
+slice's RED, test-review and GREEN reports along with the tests and the
+implementation (D-86).
 
 **Slice commits carry `Item N.M/k` in the subject.** The convention is
 `<type>: Item N.M/k — <title>`, and the type is the executor's choice — `feat`,
@@ -177,11 +231,13 @@ installed gitmoji `commit-msg` hook rewrites the prefix to an emoji before the
 commit is written, so the `Item N.M/k` marker, which the hook preserves, is the
 only thing `tdd-auditor` may match in a subject. A reviewed slice carries two
 commits with that marker — the implementer's GREEN commit and the orchestrator's
-review-fix commit — so subject matching alone cannot pick the slice out. The
-auditor keys on the hash the GREEN report names; the report also records the
-tests run and the one-at-a-time sequence, and the session's `subagents/`
-transcripts are the fallback where a report is missing. Git serves only to
-confirm the named commit exists and to diff it.
+review-fix commit — so subject matching alone cannot pick the slice out. No
+report names a hash, since each rides the commit it would name; the auditor
+resolves a commit as the one that **adds** its report
+(`git log --diff-filter=A`). The GREEN report also records the tests run and the
+one-at-a-time sequence, and the session's `subagents/` transcripts are the
+fallback where a report is missing. Git serves only to resolve a report to its
+adding commit and to diff that commit.
 
 **Delegation is by reference.** The orchestrator's prompt carries the item text
 and the paths of the design and recall artifacts, never their content (D-24).

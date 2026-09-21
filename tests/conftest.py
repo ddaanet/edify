@@ -52,9 +52,7 @@ def temp_project_dir(
         return history_dir
 
     # Patch for discovery module (used in test_discovery and test_agent_files)
-    monkeypatch.setattr(
-        "edify.discovery.get_project_history_dir", mock_get_history
-    )
+    monkeypatch.setattr("edify.discovery.get_project_history_dir", mock_get_history)
 
     return project, history_dir
 
@@ -78,12 +76,8 @@ def temp_history_dir(
         return history_dir
 
     # Patch both modules for recursive extraction testing
-    monkeypatch.setattr(
-        "edify.extraction.get_project_history_dir", mock_get_history
-    )
-    monkeypatch.setattr(
-        "edify.discovery.get_project_history_dir", mock_get_history
-    )
+    monkeypatch.setattr("edify.extraction.get_project_history_dir", mock_get_history)
+    monkeypatch.setattr("edify.discovery.get_project_history_dir", mock_get_history)
 
     return tmp_path / "project", history_dir
 
@@ -114,9 +108,7 @@ def mock_anthropic_client(mocker: MockerFixture) -> Callable[..., Mock]:
             mock_response.input_tokens = token_count
             mock_client.messages.count_tokens.return_value = mock_response
 
-        mocker.patch(
-            "edify.tokens.Anthropic", return_value=mock_client, autospec=True
-        )
+        mocker.patch("edify.tokens.Anthropic", return_value=mock_client, autospec=True)
         return mock_client
 
     return factory
@@ -264,9 +256,7 @@ def cli_base_mocks(
 
     return {
         "anthropic": mocker.patch("edify.tokens_cli.make_client", autospec=True),
-        "resolve": mocker.patch(
-            "edify.tokens_cli.resolve_model_alias", autospec=True
-        ),
+        "resolve": mocker.patch("edify.tokens_cli.resolve_model_alias", autospec=True),
     }
 
 

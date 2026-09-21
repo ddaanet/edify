@@ -59,16 +59,14 @@ _FINDING_RE = re.compile(r"^(?P<location>.+?:\d+): error: (?P<message>.*)$")
 
 @ensure(lambda target, result: result.target == target)
 @ensure(
-    lambda exit_code, result: (result.status is CheckStatus.VERIFIED)
-    == (exit_code == 0)
+    lambda exit_code, result: (
+        (result.status is CheckStatus.VERIFIED) == (exit_code == 0)
+    )
 )
 @ensure(
-    lambda exit_code, result: (result.status is CheckStatus.REFUTED)
-    == (exit_code == 1)
+    lambda exit_code, result: (result.status is CheckStatus.REFUTED) == (exit_code == 1)
 )
-@ensure(
-    lambda result: not result.findings or result.status is CheckStatus.REFUTED
-)
+@ensure(lambda result: not result.findings or result.status is CheckStatus.REFUTED)
 def parse_crosshair_output(
     exit_code: int,
     stdout: str,

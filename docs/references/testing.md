@@ -57,4 +57,3 @@ the test assertions carry the exact expected output from that reference, and RED
 prose descriptions carry the exact strings too. This is not full test code; it
 is precise prose. Abstracting the string introduces translation loss and makes
 "visual parity validated" claims undetectable when false.
-

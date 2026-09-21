@@ -1,8 +1,7 @@
 # edify plugin
 
-A [Claude Code][claude-code] bundle of framework-agnostic skills and agents,
-built around a `requirements → design → runbook → build` planning and execution
-pipeline.
+A [Claude Code][claude-code] bundle of skills and agents built around a
+`requirements → design → runbook → build` planning and execution pipeline.
 
 The pipeline was torn down in 2026-05, when the ecosystem (superpowers, native
 memory) was judged to have caught up, and revived in 2026-08. On revival it was

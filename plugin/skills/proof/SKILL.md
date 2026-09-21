@@ -1,8 +1,8 @@
 ---
 name: proof
 description: >-
-  This skill should be used when an artifact needs structured user
-  validation. Triggers on "proof", "validate artifact", "review loop", or
+  Validate an artifact item by item with the user, forcing a verdict per
+  item. Triggers on "proof", "validate artifact", "review loop", or
   when an artifact needs a careful item-by-item read before it ships.
   Replaces ad-hoc single-turn validation with item-by-item review protocol.
 allowed-tools: Read, Write, Edit, Bash, Agent, Skill
@@ -54,8 +54,8 @@ line forces the agent to know which state it's in and what actions are available
 
 | Transition | State | Actions shown |
 |-----------|-------|---------------|
-| Entry (after summary) | `reviewing` | Full: `feedback, proceed, learn, suspend, sync` |
-| After accumulate | `reviewing` | Compact: omit actions (user has seen them) |
+| Entry (after summary) | `reviewing` | Full: `proceed, sync, learn, pending, brief` |
+| After a verdict or accumulate | `reviewing` | Compact: omit actions |
 | After sync | `reviewing` | Compact |
 | Terminal apply | `applying N decisions` | None |
 | Terminal no-change | `complete — no changes` | None |
@@ -63,7 +63,7 @@ line forces the agent to know which state it's in and what actions are available
 **Example (entry):**
 
 ```
-[proof: reviewing outline.md | decisions: 0 | actions: feedback, proceed, learn, suspend, sync]
+[proof: reviewing outline.md | decisions: 0 | actions: proceed, sync, learn, pending, brief]
 ```
 
 **Example (after 2 decisions accumulated):**
@@ -83,8 +83,8 @@ segments:
 ### Entry
 
 **Read the artifact under review.** If the artifact path contains a glob pattern
-(e.g., `section-*.md`), expand via `rg --files` (Bash) and read all matching
-files — present as a single composite review target.
+(e.g., `section-*.md`), expand via `rg --files -g '<pattern>' <dir>` (Bash) and
+read all matching files — present as a single composite review target.
 
 **Detect items.** Parse artifact structure to identify reviewable items. See
 `references/item-review.md` for granularity detection table and splitting
@@ -98,8 +98,8 @@ Before item iteration, present:
 - **Preamble:** Artifact under review, total item count, detected granularity
 - **Item list:** Numbered list with per-item title + agent-generated one-line
   summary
-- **Checkpoint:** Wait for user response before first item. User may: reorder
-  items, skip sections, adjust scope, or proceed as-is
+- **Checkpoint:** Emit the entry state line, then wait for a response. May:
+  reorder items, skip sections, adjust scope, or proceed as-is
 
 ### Item Iteration
 
@@ -115,10 +115,10 @@ Recall: [domain-relevant context if any, or omitted if none]
 Verdict? (a)pprove (r)evise (k)ill (s)kip
 ```
 
-**Per-item recall (FR-3):** Before presenting each item, run recall for that
-item's topic. The first item loads the procedure —
-`Skill(skill: "edify:recall", args: "<that item's topic>")`; every later item
-runs the loaded procedure inline, without another `Skill` call. Null recall is
+**Per-item recall:** Before presenting each item, run recall for that item's
+topic. The first item loads the procedure —
+`Skill(skill: "edify:recall", args: "<plan-dir> — <item topic>")`; later items
+run the loaded procedure inline, without another `Skill` call. Null recall is
 silent — no "no relevant context found" noise.
 
 **Verdicts** — 4 explicit, uniform across all artifact types:
@@ -151,19 +151,14 @@ accumulated verdict list across all items.
 ### Iteration Guards
 
 **No direct edits during iteration.** Refuse execution-oriented requests (file
-edits, skill chains to other skills or external plugins). This gate prevents
-bare-directive bypass of the review loop.
+edits, execution or planning skill chains) — `learn`, `pending` and `brief`
+below are the named exceptions. This gate prevents bare-directive bypass of the
+review loop.
 
 **Normal loop actions** available throughout iteration, resume review after:
 - **learn** — capture insight to `agents/learnings.md`
 - **pending** — capture task for handoff (`p:` semantics)
 - **brief** — transfer context to a follow-up task
-
-**Emit state line** after showing decisions:
-
-```
-[proof: reviewing <artifact> | decisions: <N>]
-```
 
 ### Terminal Actions
 
@@ -184,11 +179,10 @@ skipped items do not carry forward as open items or generate pending tasks.
 
 ### Loop Actions
 
-Available during and after item iteration (non-terminal — resume review after):
+Available after item iteration completes (non-terminal — resume review after):
 
-**"revisit":** Change verdict for a previously-reviewed item. Identification is
-flexible — by number, title, or content. Re-enter verdict prompt. Returns to
-post-iteration state (not back into the linear sequence).
+**"revisit":** Change verdict for a previously-reviewed item. See
+`references/item-review.md` §Revisit.
 
 ## Anti-Patterns
 

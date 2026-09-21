@@ -8,68 +8,11 @@ it happens to run from).
 """
 
 import os
-import subprocess
 from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = REPO_ROOT / "scripts" / "check_line_limits.sh"
-
-
-def _write_lines(path: Path, count: int) -> None:
-    """Write ``count`` newline-terminated filler lines to ``path``.
-
-    The file always ends in a newline, so ``wc -l`` — what the script counts
-    — reports exactly ``count`` for ``count >= 1``. Parent directories are
-    created; ``path`` may contain spaces (it is never split).
-    """
-    path.parent.mkdir(parents=True, exist_ok=True)
-    text = "\n".join(f"line {i}" for i in range(count)) + "\n"
-    path.write_text(text, encoding="utf-8")
-
-
-def _run_check_line_limits(
-    root: Path, allowlist: Path | None = None
-) -> subprocess.CompletedProcess[str]:
-    """Invoke ``check_line_limits.sh`` by absolute path against ``root``.
-
-    ``--allowlist`` precedes ``ROOT`` on the command line when given, per
-    the script's ``[--allowlist FILE] [ROOT]`` usage.
-    """
-    args = [str(SCRIPT)]
-    if allowlist is not None:
-        args += ["--allowlist", str(allowlist)]
-    args.append(str(root))
-    return subprocess.run(
-        args,
-        cwd=root.parent,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-
-
-def _write_allowlist(path: Path, entries: list[tuple[str, int, str]]) -> None:
-    """Write an allowlist file in the format KD-7 pins for this job.
-
-    One entry per line: ``<path><TAB><ceiling><TAB><note>``. ``path`` is
-    root-relative and may contain spaces (never split on whitespace);
-    ``ceiling`` is the entry's line-count ceiling, which only ratchets
-    down; ``note`` names the job that retires the entry, or ``"no job
-    yet"``.
-
-    Every fixture opens with a ``#`` comment line and a blank line, so the
-    script must skip both to pass any allowlist test — a reader treating
-    them as entries would look for a file literally named ``#`` and one
-    named ``""``.
-    """
-    path.parent.mkdir(parents=True, exist_ok=True)
-    lines = ["# path\tceiling\tnote", ""]
-    lines += [
-        f"{entry_path}\t{ceiling}\t{note}" for entry_path, ceiling, note in entries
-    ]
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+from .line_limits_helpers import _run_check_line_limits, _write_allowlist, _write_lines
 
 
 def test_line_limits_passes_clean_tree(tmp_path: Path) -> None:
@@ -299,6 +242,72 @@ def test_line_limits_fails_when_find_cannot_walk(tmp_path: Path) -> None:
 
     assert result.returncode == 2, result.stdout + result.stderr
     assert "docs/locked" in result.stderr, result.stderr
+
+
+def test_line_limits_rejects_crlf_on_full_entry_line(tmp_path: Path) -> None:
+    """A CRLF-terminated three-field entry line is a malformed-allowlist error.
+
+    The carriage return lands in the (unused) ``note`` field — ``read``'s
+    last named variable absorbs it — so today's integer regex on
+    ``ceiling`` never sees it and the line is silently accepted, masking a
+    genuine encoding problem instead of reporting one. The required
+    behaviour treats any CR in an allowlist line as malformed: exit 2 (the
+    script's other malformed-allowlist exit status), a diagnostic naming
+    the allowlist line number and a CRLF/carriage-return line ending, and
+    never the misleading ``ceiling is not an integer`` message.
+    """
+    root = tmp_path / "root"
+    _write_lines(root / "docs" / "notes.md", 10)
+    allowlist = tmp_path / "allowlist.txt"
+    allowlist.write_bytes(b"docs/notes.md\t401\tno job yet\r\n")
+
+    result = _run_check_line_limits(root, allowlist=allowlist)
+
+    # The allowlist's own tmp_path is embedded in the script's diagnostic
+    # (it names $ALLOWLIST) and pytest derives that tmp_path directory name
+    # from this test's own name — which contains "crlf". Stripped out
+    # before the wording check below, or that substring would make the
+    # check pass on the path, not on the script's diagnostic text.
+    diagnostic = result.stderr.replace(str(allowlist), "<allowlist>")
+
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert "line 1" in diagnostic, diagnostic
+    assert "carriage return" in diagnostic.lower() or "crlf" in diagnostic.lower(), (
+        diagnostic
+    )
+    assert "ceiling is not an integer" not in diagnostic, diagnostic
+
+
+def test_line_limits_rejects_crlf_on_two_field_entry_line(tmp_path: Path) -> None:
+    """A CRLF-terminated two-field line (missing ``note``) is also malformed.
+
+    The script's format comment names three fields, but its read loop
+    leaves ``_note`` empty without error when a line has only ``path`` and
+    ``ceiling`` — so a real-world entry can omit the note, and here the
+    carriage return lands directly on the ``ceiling`` field instead. Today
+    this already exits 2, but via the misleading ``ceiling is not an
+    integer: 401<CR>`` message; the required diagnostic names the CRLF
+    instead of blaming the ceiling.
+    """
+    root = tmp_path / "root"
+    _write_lines(root / "docs" / "notes.md", 10)
+    allowlist = tmp_path / "allowlist.txt"
+    allowlist.write_bytes(b"docs/notes.md\t401\r\n")
+
+    result = _run_check_line_limits(root, allowlist=allowlist)
+
+    # See the sibling three-field test above: strip the allowlist's own
+    # tmp_path out of stderr before the wording check, since pytest's
+    # tmp_path directory name is derived from this test's name (which
+    # contains "crlf") and would otherwise make the check pass on the path.
+    diagnostic = result.stderr.replace(str(allowlist), "<allowlist>")
+
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert "line 1" in diagnostic, diagnostic
+    assert "carriage return" in diagnostic.lower() or "crlf" in diagnostic.lower(), (
+        diagnostic
+    )
+    assert "ceiling is not an integer" not in diagnostic, diagnostic
 
 
 def test_line_limits_handles_spaced_path(tmp_path: Path) -> None:

@@ -91,9 +91,12 @@ at all on a native build, and must be dispatched with explicit file paths.
 One artifact model: `plans/<job>/recall-artifact.md` — grouped entries with
 relevance notes, curated by the dispatching skill. The dispatch prompt hands the
 sub-agent that path, and the sub-agent Reads the artifact then Reads every file
-it lists. `plugin/skills/build/references/dispatch-composition.md` §Prompt
-contents is the authoritative rule. The per-type flat artifacts an earlier model
-kept for sub-agent injection no longer exist.
+it lists. A `## Skills to load before executing` section resolves the same way:
+a sub-agent holding `Skill` invokes each entry, one without it Reads the body
+under `~/.claude/plugins/cache/`.
+`plugin/skills/build/references/dispatch-composition.md` §Prompt contents is the
+authoritative rule. The per-type flat artifacts an earlier model kept for
+sub-agent injection no longer exist.
 
 **Selection is the parent's job.** A sub-agent has no parent context and cannot
 judge which entries are relevant, so it resolves all of them. The dispatching

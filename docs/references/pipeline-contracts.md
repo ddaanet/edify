@@ -188,6 +188,96 @@ landing between artifact generation and the work fall inside the range and
 surface as unspecified deliverables — bounded and visible, where a narrower base
 would silently drop the job's own first commit.
 
+**D-84 — A GREEN dispatch carries one slice's behaviour; a slice already
+implemented is proven by mutation.** The prompt names the rest of the item's
+contract out of scope and the GREEN agent implements nothing the slice's tests
+do not demand (`dispatch-composition.md` §Prompt contents, `tdd-slice.md` §(c),
+`test-driver.md` GREEN mode). *Grounding:*
+`plans/provenance-enforcement-and-routing/` handed GREEN the whole item contract
+"for structure" and got the whole item implemented, leaving six later slices —
+1.2/3, 1.2/4–8, 1.10/3, /6, /7 — with no behaviour left to red against.
+
+*The fallback, which the audit counts.* Where a later slice's behaviour is
+already present, RED mutates the SUT in place so the behaviour is absent, shows
+**each named test** red on its own assertion, restores, and verifies the
+restore; the RED report records it under a `Mutation proof` heading and the
+slice enters the list revision. The test review reproduces it with a different
+mutation, also per named test, and `tdd-auditor` takes the pair as that slice's
+evidence. Per test and never per batch: the one gap the audit found (1.2/8 case 1) is exactly what a per-batch reading lets through. The audit rates such a
+proof *stronger* than an ordinary red — a red against absent code proves only
+absence, while a mutation proves which line of the SUT the test holds — which is
+why it is kept as the fallback rather than treated as a failure. It is not a
+route to plan for: a GREEN that over-implements still costs every later slice
+two mutations.
+
+This is also what reconciles the three statements that would otherwise
+contradict: a passing RED test has named itself vacuous (`test-driver.md` RED
+step 4), the test review's first mechanical check is that every listed test
+FAILED on an assertion (`tdd-slice.md` §(b)), and a slice whose behaviour exists
+cannot fail on its assertion. A mutation proof is the single substitute for the
+red, and a passing test carrying neither it nor a test-review disposition is a
+violation.
+
+**D-85 — The recall checkpoint resolves skills alongside memory files, and Reads
+the index when the index is not in context.** A recall artifact's
+`## Skills to load before executing` section resolves at the same step as its
+file list: a caller holding `Skill` invokes each entry; a sub-agent without it
+Reads the body under
+`~/.claude/plugins/cache/<owner>/<plugin>/<version>/skills/<name>/SKILL.md`,
+newest installed version, and reports a name that resolves to nothing rather
+than reconstructing one from a description. Both the owner and the version
+segment vary — a version directory may be a content hash rather than a semver —
+so the resolution is a glob over both. *Why:* once a group of related facts
+grows large and stable, migrating it into a skill relieves index-size pressure
+and buys progressive disclosure, which two groups (`craft`, `plugin-craft`)
+already did; an index-only recall no longer reaches what recall used to reach.
+The write side is `plugin/skills/design/references/write-outline.md` §Artifact
+format, and the two agents that resolve an artifact without holding `Skill` —
+`artisan` and `test-driver` — carry the path form in their own definitions,
+since no agent definition reads a fragment.
+
+*Second half.* The index's injection is not guaranteed. A prior session found it
+absent at every recall checkpoint and degraded to grepping `memory/MEMORY.md`,
+which the recall skill's own step called structurally impossible. The Read is
+conditional on the index's lines not being in this context, and it is still not
+the gate's anchor (D-48).
+
+**D-86 — A report rides the commit whose work it reports, and names no hash.**
+The GREEN commit carries the slice's RED, test-review and GREEN reports along
+with the tests and the implementation; the orchestrator's after-the-slice commit
+always happens and carries the code-review report, with that review's fixes
+where there are any. The same holds one level out: `edify:refactor` commits its
+report with its refactoring, and the phase-boundary and review-gate commits
+carry their corrector's report. Every committing dispatch stages the paths it
+names, never `git add -A`. *Consequence:* a report inside a commit cannot
+contain that commit's hash, so it contains none and nothing keys on one. The
+slice commit is resolved mechanically instead, from the commit that **adds** the
+report:
+
+```bash
+git log --diff-filter=A --format=%H \
+    -- plans/<job>/reports/item-N-M-s<k>-green.md
+```
+
+Where a slice has no GREEN report — behaviour already present, proven by
+mutation (D-84), with no implementation to write — the same query over its RED
+report resolves it. *The defect this settles:* GREEN committed at one step and
+wrote its report at the next, so the report was left untracked and
+`verify-step.sh`, which tolerates nothing but ` M memory`, reported every GREEN
+dispatch DIRTY; the same hole left the RED, test-review and code-review reports
+untracked whenever the review that produced them changed no file. *Grounding:*
+the `provenance-enforcement-and-routing` run had already done this by hand —
+`78206a83` carries `item-1-2-s1-{red,test-review,green}.md` with
+`edify-review-range.sh` and its tests, `c30b7bc1` carries
+`item-1-2-s1-code-review.md` with its fixes, and `45ad1184` and `f8d1e254`, the
+two mutation-proven slices with no GREEN dispatch, carry their RED and
+test-review reports with the tests. *Rejected:* a commit of its own for each
+report, which would double the commit count and still need the auditor told
+which commit to key on. *Accepted tradeoff:* resolving a commit costs a
+`git log` where reading a hash out of prose cost nothing, and a report amended
+after its commit lands needs a second commit that `--diff-filter=A` will not
+return.
+
 ## Rejected alternatives
 
 **Per-plan generated agent definitions** — superseded by delegation by reference

@@ -42,6 +42,9 @@ this gate actually dispatched. The Read proves the report exists; without it, §
 cannot proceed. UNFIXABLE in any report → STOP and surface it to the user with
 the path. Do not proceed to §2 until every issue is resolved or accepted.
 
+A corrector commits nothing, so commit each group's report yourself — with the
+fixes that reviewer applied where it applied any — staging those paths by name.
+
 ## 2. Triage feedback
 
 ```bash
@@ -64,8 +67,10 @@ no-classification → proceed silently.
    was skipped, and one whose routing left a group of changed files unreviewed.
 2. **TDD audit:** if any tdd item ran, dispatch `edify:tdd-auditor`, dispatch
    name `tdd-audit`. Its inputs are the RED, GREEN and review reports of every
-   slice, with the session's `subagents/` transcripts as fallback where a report
-   is missing; git serves only to confirm and diff the commit a report names.
+   slice; git serves only to resolve a report to its adding commit and to diff
+   that commit. Where a report is missing, resume the agent named for that
+   dispatch and get it (`references/dispatch-composition.md` §Naming and
+   resumption).
 3. **Run summary:** close with the run summary in context — per item its
    dispatches (`item-N-M`, `item-N-M-s<k>-red`, …), each report path, each
    remediation RCA, the list revisions, and the follow-up

@@ -63,14 +63,9 @@ SKILL.md.
 
 ## Batch-Apply Execution
 
-On terminal action "apply" after user confirms the verdict summary:
-
-- **approve** — no edit needed (item unchanged)
-- **revise** — apply the stated fix to the item in the artifact file
-- **kill (delete)** — remove the item from the artifact
-- **kill (absorb)** — remove from source artifact, append to named target
-  artifact
-- **skip** — no edit needed (item unchanged, explicitly deferred)
+On terminal action "apply" after user confirms the verdict summary, apply each
+accumulated verdict per §Verdicts in SKILL.md — approve and skip need no edit,
+revise applies the stated fix, kill deletes or absorbs.
 
 For multi-file composites (glob-matched artifacts), apply edits per-file
 independently.

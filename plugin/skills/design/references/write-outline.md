@@ -47,7 +47,7 @@ discovery.
 
 | Level | Source | How | When |
 |-------|--------|-----|------|
-| 1. Local knowledge | `Skill(skill: "edify:recall", args: "plans/<job> — <topic>")`. Read `plugin/fragments/*.md` directly when referenced. | Skill invocation | Always (core) |
+| 1. Local knowledge | `Skill(skill: "edify:recall", args: "plans/<job> — <topic>")`. Read the named fragment under `plugin/fragments/` when a step references one. | Skill invocation | Always (core) |
 | 2. Key skills | `plugin-dev:*` skills | Skill invocation | When design touches plugin components (hooks, agents, skills, MCP) |
 | 3. Context7 | Library documentation via Context7 MCP tools | Designer calls directly from main session (MCP tools unavailable in sub-agents), writes results to report file | When design involves external libraries/frameworks |
 | 4. Local explore | Codebase exploration | Delegate to scout agent | Always for complex designs |
@@ -86,7 +86,15 @@ Read each file listed below — do not rely on inline summaries.
 ## Entries
 
 memory/<name>.md — <1-line relevance note>
+
+## Skills to load before executing
+
+<plugin>:<name> — <1-line relevance note>
 ```
+
+The skills section is optional and omitted when nothing applies. List a skill
+here rather than a memory entry whenever the fact has migrated into one — the
+`/recall` checkpoint loads the listed skills alongside the listed files.
 
 **Null artifact (nothing relevant):** Write `null — no relevant entries found`
 as the sole entry. Downstream consumers still Read the artifact and find the
@@ -138,11 +146,8 @@ invocation, and recall diff guidance.
 framework, gaps identified. This file is a cascading dependency: A.5 reads it,
 absence blocks outline generation.
 
-**Recall diff:** re-invoke
-`Skill(skill: "edify:recall", args: "<topic reflecting what just changed>")` and
-reconcile its selection against the existing
-`plans/<job-name>/recall-artifact.md`. Update the artifact if codebase findings
-changed relevance.
+**Recall diff:** per `references/research-protocol.md` §A.5 — re-invoke recall
+on what just changed and reconcile the artifact.
 
 #### A.5. Outline
 
@@ -212,7 +217,7 @@ Return only the filepath on success (with ESCALATION note if unfixable issues), 
 
 ### Phase B: User Validation
 
-**Protocol:** Invoke `/proof plans/<job>/outline.md` — structured
+**Protocol:** Invoke `/edify:proof plans/<job>/outline.md` — structured
 reword-accumulate-sync loop on the outline. On terminal action "apply", /proof
 dispatches outline-corrector automatically and presents findings before
 returning control.

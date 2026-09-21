@@ -11,11 +11,19 @@ Every dispatch prompt carries:
 1. **Item id and text, verbatim** — including the `Interfaces:` blocks the item
    consumes and produces. For a tdd slice, the slice's own numbered entry with
    its test list, plus the item's `Interfaces:` block.
-2. **Context by path, never by content:**
+2. **Context by path, never by content**, for any dispatch that executes or
+   reviews the plan's work:
    - `Read plans/<job>/design.md` (or `outline.md`, whichever the plan has)
    - `Read plans/<job>/recall-artifact.md, then Read each file it lists`
+
+   The `tdd-audit` dispatch is the exception: its inputs are the slice reports
+   and the commit range, and nothing else (`finishing.md` §3).
 3. **Scope:** IN — this item (or slice); OUT — the next items' targets, named
-   explicitly so the executor does not wander into them.
+   explicitly so the executor does not wander into them. For a GREEN dispatch,
+   OUT also names the rest of the item's own contract: the `Interfaces:` block
+   goes in for structure, and every part of it this slice's tests do not reach
+   is out of scope for this dispatch. A GREEN that implements the whole item
+   leaves the later slices unable to red.
 4. **Done criteria:** `just precommit` green, clean tree, and the commit subject
    to use. A slice commit's subject is `<type>: Item N.M/k — <title>`; `<type>`
    is the executor's choice — `feat`, `fix`, `docs`, `perf`, `test`, `build` and
@@ -23,15 +31,19 @@ Every dispatch prompt carries:
    build surface rather than add a feature. The `commit-msg` hook rewrites the
    prefix to an emoji before the commit is written, so no check may key on the
    type; the `Item N.M/k` marker is the only part of a subject anything may
-   match. Overrides: a RED dispatch commits nothing and stops after the red run;
-   a review dispatch commits nothing either — the orchestrator commits the fixes
-   a corrector applied.
+   match. A committing dispatch stages the paths it names — its own report among
+   them — and never `git add -A`. Overrides: a RED dispatch commits nothing and
+   stops after the red run; a review dispatch commits nothing either — the
+   orchestrator commits the corrector's report, with the fixes it applied where
+   there are any.
 5. **Report path** — `plans/<job>/reports/<dispatch name>.md`, the `name` from
    §Naming and nothing else. This is the only rule for report paths: the prompt
    assigns the path and the agent writes exactly there, whatever default its own
    definition carries. Per-dispatch names are what keep a slice's test review
    and code review from overwriting each other, and what let `tdd-auditor` find
-   them. Return contract: the report path on success, or `blocked: <reason>` —
+   them. A report names no hash of the commit that carries it; whoever needs
+   that commit resolves it with `git log --diff-filter=A` over the report's
+   path. Return contract: the report path on success, or `blocked: <reason>` —
    except `edify:refactor`, whose own protocol returns `success` /
    `escalated: <reason>` / `error: <reason>` and still writes its report at the
    assigned path.

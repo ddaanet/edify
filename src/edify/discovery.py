@@ -45,7 +45,7 @@ def list_top_level_sessions(project_dir: str) -> list[SessionInfo]:
                 if not first_line:
                     continue
                 data = json.loads(first_line)
-        except (json.JSONDecodeError, OSError):
+        except json.JSONDecodeError, OSError:
             continue
 
         # Extract content and format title

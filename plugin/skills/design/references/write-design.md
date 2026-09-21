@@ -4,16 +4,8 @@
 
 #### C.1. Create Design Document
 
-**Recall diff:** re-invoke
-`Skill(skill: "edify:recall", args: "<topic reflecting what just changed>")` and
-reconcile its selection against the existing
-`plans/<job-name>/recall-artifact.md`.
-
-Review the changed files list. Approach commitment, revised scope, or rejected
-alternatives change which implementation and testing entries are relevant. If
-files changed that affect which recall entries are relevant, update the
-artifact: add entries surfaced by the discussion, remove entries for approaches
-that were rejected. Write updated artifact back.
+**Recall diff:** per `references/research-protocol.md` §A.5 — re-invoke recall
+on what just changed and reconcile the artifact.
 
 **Output:** `plans/<job-name>/design.md`
 
@@ -73,8 +65,8 @@ re-delegate to design-corrector for verification.
 
 #### C.4.5. User Validation
 
-Invoke `/proof plans/<job-name>/design.md` — structured validation loop on the
-completed design before routing to execution or /runbook. On terminal action
+Invoke `/edify:proof plans/<job-name>/design.md` — structured validation loop on
+the completed design before routing to execution or /runbook. On terminal action
 "apply", /proof dispatches design-corrector automatically.
 
 This is the user's first review of the full design document. The corrector

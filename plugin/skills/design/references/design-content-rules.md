@@ -35,7 +35,7 @@ Before generating design, validate outline item granularity:
   multiple module boundaries -- split by concern
 - **Heuristic:** items-per-phase x avg-LOC-per-item should fall in the 100-300
   range. Below 100 suggests items are trivially small; above 300 suggests items
-  are overloaded.
+  are overloaded. *(ungrounded — needs calibration)*
 - Flag and fix before proceeding to design generation.
 
 ## Repetition Helper Prescription
@@ -44,8 +44,8 @@ When design specifies 5+ operations following the same pattern (e.g., "update
 field X in files A, B, C, D, E, F"), recommend extracting a helper function or
 script. Rationale: repeated manual operations multiply both token cost (each
 repetition consumes planning + execution budget) and error rate (drift between
-repetitions increases with count). The 5-repetition threshold balances
-extraction overhead against repetition cost.
+repetitions increases with count). Five is an arbitrary trigger point, not
+calibrated against measured extraction or repetition cost.
 
 ## Agent-Name Validation
 
@@ -166,7 +166,8 @@ the planner should read).
 ## References
 
 - `plans/<job-name>/reports/explore-<topic>.md` -- codebase exploration findings
-- `plans/reports/<topic>.md` -- grounding research (if `/ground` invoked)
+- `plans/reports/<topic>-grounding.md` -- grounding research (if `/ground`
+  invoked)
 - [External Paper Title](url) -- informed decision D-3
 - Context7: `/org/project` -- queried for hook configuration patterns
 ```

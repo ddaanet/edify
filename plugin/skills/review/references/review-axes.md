@@ -9,7 +9,7 @@
 - Code clarity and readability
 - Appropriate abstractions (not over/under-engineered)
 
-## Design Conformity (when design doc available)
+## Design Conformity (when the caller named a design doc, or step 2 located one)
 - Implementation matches design specifications
 - All design-specified behaviors actually implemented (not stubbed)
 - Integration between components matches design architecture

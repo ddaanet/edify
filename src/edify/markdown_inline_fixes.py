@@ -20,14 +20,10 @@ def fix_dunder_references(line: str) -> str:
 
 @ensure(lambda line, result: all(0 <= s < e <= len(line) for s, e in result))
 @ensure(
-    lambda line, result: all(
-        line[s] == "`" and line[e - 1] == "`" for s, e in result
-    )
+    lambda line, result: all(line[s] == "`" and line[e - 1] == "`" for s, e in result)
 )
 @ensure(
-    lambda result: all(
-        result[k][1] <= result[k + 1][0] for k in range(len(result) - 1)
-    )
+    lambda result: all(result[k][1] <= result[k + 1][0] for k in range(len(result) - 1))
 )
 def find_inline_code_spans(line: str) -> list[tuple[int, int]]:
     """Find all inline code spans according to CommonMark specification.

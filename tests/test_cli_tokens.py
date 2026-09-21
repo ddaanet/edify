@@ -174,7 +174,6 @@ def test_cli_json_format_with_multiple_files(
     assert result["total"] == 30
 
 
-
 def test_cli_permission_error_propagates(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
@@ -255,9 +254,7 @@ def test_cli_detects_empty_api_key_before_sdk(
     mocker.patch("edify.tokens_cli.get_api_key", return_value=None)
     # Mock SDK components - should NOT be called
     mock_make_client = mocker.patch("edify.tokens_cli.make_client", autospec=True)
-    mock_resolve = mocker.patch(
-        "edify.tokens_cli.resolve_model_alias", autospec=True
-    )
+    mock_resolve = mocker.patch("edify.tokens_cli.resolve_model_alias", autospec=True)
 
     with pytest.raises(SystemExit) as exc_info:
         handle_tokens("sonnet", [str(test_file)])
@@ -293,9 +290,7 @@ def test_cli_detects_missing_api_key_before_sdk(
     mocker.patch("edify.tokens_cli.get_api_key", return_value=None)
     # Mock SDK components - should NOT be called
     mock_make_client = mocker.patch("edify.tokens_cli.make_client", autospec=True)
-    mock_resolve = mocker.patch(
-        "edify.tokens_cli.resolve_model_alias", autospec=True
-    )
+    mock_resolve = mocker.patch("edify.tokens_cli.resolve_model_alias", autospec=True)
 
     with pytest.raises(SystemExit) as exc_info:
         handle_tokens("haiku", [str(test_file)])

@@ -4,7 +4,7 @@ description: >-
   Ground claims with external research before asserting methodology. Triggers on
   "ground", "create a scoring
   system", "design a methodology", "build a framework", or "synthesize best
-  practices". Parallel diverge-converge research preventing confabulated structures.
+  practices".
 allowed-tools: Read, Write, Bash, WebSearch, WebFetch, Agent
 user-invocable: true
 ---
@@ -29,7 +29,7 @@ Frame the research question before searching.
 - Set inclusion criteria: relevance to project context, actionable methodology,
   procedural (not pure theory)
 - Set exclusion criteria: wrong domain, no procedure, outdated
-- Select parameters (consult `references/grounding-criteria.md` for guidance):
+- Select parameters — Read `references/grounding-criteria.md` and select by it:
   - Internal scope: **codebase** (descriptive — "what patterns exist for X") or
     **conceptual** (generative — "what dimensions/constraints apply to X")
   - Model tier for internal branch: codebase → sonnet; conceptual → opus
@@ -39,20 +39,23 @@ Frame the research question before searching.
 
 ### Phase 2: Diverge
 
-Execute two branches as parallel Task agents. Launch both in a single message.
-Neither is optional — both are required.
+Execute two branches as parallel Agent dispatches. Launch both in a single
+message. Neither is optional — both are required.
 
 **Branch A — Internal explore:** Scope determines agent type and model:
-- **Codebase scope:** Delegate to a Task agent (subagent_type: general-purpose,
-  model: sonnet). Surface existing codebase patterns, prior decisions, current
-  conventions. Output: inventory of existing patterns with file references.
-  Write to `plans/reports/<topic>-internal-codebase.md`.
-- **Conceptual scope:** Delegate to Task agent (subagent_type: general-purpose,
-  model: opus). Generate project-specific dimensions, constraints, desiderata,
-  evaluation axes. Focus on what no external source would surface. Write to
-  `plans/reports/<topic>-internal-conceptual.md`.
+- **Codebase scope:** Delegate via the Agent tool (subagent_type:
+  general-purpose, model: sonnet). Surface existing codebase patterns, prior
+  decisions, current conventions. Output: inventory of existing patterns with
+  file references. Write to `plans/reports/<topic>-internal-codebase.md`. Where
+  the topic is a process skill, grounding-criteria.md §Process Skill Internal
+  Sources binds: git history mining and session-log scraping are required
+  alongside file inspection.
+- **Conceptual scope:** Delegate via the Agent tool (subagent_type:
+  general-purpose, model: opus). Generate project-specific dimensions,
+  constraints, desiderata, evaluation axes. Focus on what no external source
+  would surface. Write to `plans/reports/<topic>-internal-conceptual.md`.
 
-**Branch B — External research:** Delegate to Task agent (subagent_type:
+**Branch B — External research:** Delegate via the Agent tool (subagent_type:
 general-purpose, model: sonnet). Model is always sonnet. Agent prompt includes:
 - Research topic and framing question from Phase 1
 - Search query templates from `references/grounding-criteria.md`
@@ -63,7 +66,8 @@ general-purpose, model: sonnet). Model is always sonnet. Agent prompt includes:
 
 Write to `plans/reports/<topic>-external-research.md`.
 
-Both agents write reports and return filepath only (quiet execution pattern).
+Both agents write reports and return filepath only — the quiet execution pattern
+at `plugin/fragments/delegation.md` §Quiet Execution Pattern.
 
 ### Phase 3: Converge
 
@@ -88,14 +92,14 @@ confirms the principle applies locally; it does not define the principle.
 
 ### Phase 4: Output
 
-Write the grounded reference document to `plans/reports/<topic>.md` (persistent,
-tracked).
+Write the grounded reference document to `plans/reports/<topic>-grounding.md`
+(persistent, tracked).
 
 Required sections:
+- Grounding quality label with evidence basis
 - Research foundation (named sources with links)
 - Adapted methodology — general principle per item, then project implementation
   as instance
-- Grounding quality label with evidence basis
 - Sources section with retrieval context
 
 **Branch artifacts:** Both branch reports in `plans/reports/` are retained as

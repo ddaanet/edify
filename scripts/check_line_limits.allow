@@ -17,7 +17,5 @@ plugin/agents/corrector.md	682	pilfer defect 21 (corrector-family dedup)
 plugin/agents/design-corrector.md	460	pilfer defect 21 (corrector-family dedup)
 plugin/agents/outline-corrector.md	450	pilfer defect 21 (corrector-family dedup)
 plugin/skills/build/SKILL.md	218	no job yet
-plugin/skills/design/SKILL.md	285	no job yet
-plugin/skills/proof/SKILL.md	203	no job yet
-plugin/skills/requirements/SKILL.md	357	no job yet
-plugin/skills/review/SKILL.md	231	no job yet
+plugin/skills/design/SKILL.md	277	no job yet
+plugin/skills/requirements/SKILL.md	354	no job yet

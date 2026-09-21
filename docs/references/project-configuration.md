@@ -42,6 +42,14 @@ ceiling, which ratchets down only. That ratchet is what makes the check
 enforceable from the day it lands — a hard gate is red on its first run, and a
 warn-only gate never turns red at all.
 
+The sidecar's entry format is argued only where it is implemented — the header
+comment of `scripts/check_line_limits.sh`, restated in the sidecar's own header:
+one `<path><TAB><ceiling><TAB><note>` per line, the path root-relative and
+matched exactly, no globbing and no basename comparison. A carriage return
+anywhere in an entry is a failure to run (exit 2), not a silently unmatched
+path, because a CRLF sidecar would make every entry miss while the gate still
+reported success.
+
 When a file hits the limit, look for code-quality improvements first — redundant
 calls, dead code, extraction candidates. Compressing user-facing output strings
 or splitting to a new file to satisfy the counter degrades output clarity or

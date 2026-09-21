@@ -44,16 +44,15 @@ commits, and diffs; identify violations; produce actionable recommendations.
   `plans/<job>/reports/`: `item-N-M-s<k>-red.md`,
   `item-N-M-s<k>-test-review.md`, `item-N-M-s<k>-green.md`,
   `item-N-M-s<k>-code-review.md`. A report path is mechanically the dispatch
-  name, so the slice a report belongs to is readable from its filename. Each
-  report names the commit it concerns; the reports are the authority on what
-  happened.
+  name, so the slice a report belongs to is readable from its filename. No
+  report names a commit hash — each rides the commit it concerns, so you
+  identify that commit as the one that **adds** the report file. The reports are
+  the authority on what happened.
 - Phase checkpoints: `phase-P-corrector.md`; the closing review:
   `final-review.md`.
-- Fallback where a report is missing: the dispatch's transcript under the
-  session's `subagents/` directory.
-- Git history, used only to confirm a commit a report names exists and to diff
-  it: `git show`, `git diff`. Never to discover slice commits by searching
-  subjects.
+- Git history, used only to resolve a report to its adding commit and to diff
+  that commit: `git log --diff-filter=A`, `git show`, `git diff`. Never to
+  discover slice commits by searching subjects.
 
 ## Per-Slice Checks
 
@@ -65,19 +64,41 @@ For each slice `N.M/k` of each tdd item:
    RED report showing a passing test with no test-review disposition, is a
    violation.
 
-2. **One green commit per slice.** The GREEN report names exactly one commit,
-   and that commit carries both the slice's tests and the implementation.
-   Multiple slices in one commit, or a slice split across commits, is a
-   violation. Identify the commit from the hash the GREEN report names, never by
-   subject search: the commit type is the executor's choice and the commit-msg
-   hook rewrites the prefix, so `Item N.M/k` is the only thing you may match in
-   a subject.
+   **A mutation proof is the one substitute.** Where an earlier GREEN already
+   implemented the behaviour, the RED report's `Mutation proof` heading stands
+   in for the red: it names one mutation per test, each shown red on its own
+   assertion, with the restore verified. The test review must reproduce it with
+   a different mutation, also per named test. Count the proofs against the named
+   tests, not against the slice — one mutation covering a batch leaves every
+   other test in it unproven, and that is the violation. A passing test with
+   neither a mutation proof nor a test-review disposition is a violation.
+
+2. **One green commit per slice.** Resolve the slice commit to the commit that
+   adds the GREEN report:
+
+   ```bash
+   git log --diff-filter=A --format=%H \
+       -- plans/<job>/reports/item-N-M-s<k>-green.md
+   ```
+
+   More than one hash back, or none, is a violation. Never search subjects: the
+   commit type is the executor's choice and the commit-msg hook rewrites the
+   prefix, so `Item N.M/k` is the only thing you may match in a subject. Where a
+   slice has no GREEN report at all — its behaviour already present, proven by
+   mutation, with no implementation to write — resolve it from the RED report
+   the same way.
+
+   That commit carries the slice's tests, its implementation, and the slice's
+   RED, test-review and GREEN reports. Multiple slices in one commit, a slice
+   split across commits, or a report of another slice riding along, is a
+   violation.
 
    A reviewed slice carries **two** commits bearing the `Item N.M/k` marker: the
-   GREEN commit, and the orchestrator's commit of the code-review fixes. That
-   second one is expected wherever the code-review report accounts for it — do
-   not report it as a slice split across commits. A marker-bearing commit no
-   report accounts for is the violation.
+   GREEN commit, and the orchestrator's commit of the code review — which always
+   happens, since it carries the code-review report whether or not the review
+   changed anything. Do not report that second one as a slice split across
+   commits. A marker-bearing commit no report accounts for is the violation, and
+   so is a code-review report that no commit adds.
 
    No commit in the range may leave the suite red — confirm from each GREEN
    report's suite result; flag any commit whose message or report indicates a
@@ -104,16 +125,19 @@ For each slice `N.M/k` of each tdd item:
    report's recorded per-test sequence instead.
 
 4. **Refactoring separation.** Where the code review flagged a refactoring, the
-   refactor report names its own commit, landing after the slice commit; the
-   slice commit was not amended. Identify that commit from the refactor report
-   (`item-N-M-s<k>-refactor.md`), not from a subject prefix.
+   refactor has its own commit, landing after the slice commit; the slice commit
+   was not amended. Resolve it as the commit that adds
+   `item-N-M-s<k>-refactor.md`, not from a subject prefix.
 
 ## Cross-Slice Checks
 
 - **Scope compliance:** each dispatch touched only its slice's targets. Compare
   commit diffs against the item's stated targets; work products belonging to
   later items in earlier commits are critical violations — the orchestrator lost
-  dispatch control.
+  dispatch control. Within one item the same check applies per slice: a GREEN
+  commit implementing parts of the item's contract its slice's tests do not
+  reach is a violation, and it is what strands the item's later slices with no
+  behaviour left to red against.
 - **List revisions recorded:** where execution diverged from the initial slice
   lists, the runbook's git history shows the orchestrator's revision commits (or
   the run summary records "List revision: none"). Divergence without a recorded
@@ -180,9 +204,10 @@ Return the filepath only. No summary in the return message.
 
 ## Edge Cases
 
-- **Missing reports:** fall back to the dispatch's transcript under the
-  session's `subagents/` directory, then to git history alone; say which source
-  you used in the report.
+- **Missing reports:** return `blocked: report missing for <dispatch name>`. The
+  orchestrator resumes the named dispatch for it before invoking the audit
+  (`plugin/skills/build/references/finishing.md` §3); git history alone is not
+  evidence of a slice's RED.
 - **Unclear commit range:** return `blocked: <what is missing>`. You are a
   one-shot dispatch with no caller to ask.
 - **Squashed history:** note that per-slice analysis is limited.

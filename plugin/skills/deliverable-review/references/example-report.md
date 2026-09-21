@@ -15,8 +15,8 @@
 | Code | `src/edify/worktree/__init__.py` | 1 |
 | Test | 12 test files | 2854 |
 | Agentic prose | `plugin/skills/worktree/SKILL.md` | 123 |
-| Configuration | `justfile` (wt-* recipes) | ~200 |
-| Configuration | `plugin/justfile` | ~20 |
+| Configuration | `justfile` (wt-* recipes) | not recorded |
+| Configuration | `plugin/justfile` | not recorded |
 
 **Design conformance:** All 8 design decisions (D1-D8) structurally satisfied.
 4-phase merge ceremony complete. Exit codes match spec. 22/27 design test
@@ -225,7 +225,7 @@ artifacts (justfile/config). These are the most straightforward to fix.
 submodule exit code 2, and cleanup verification. The submodule merge tests (M6,
 M7) rely on mocking that defeats their purpose.
 
-**Sub-reports:**
+## Sub-reports
 - `plans/worktree-update/reports/deliverable-review-code.md`
 - `plans/worktree-update/reports/deliverable-review-tests.md`
 - `plans/worktree-update/reports/deliverable-review-prose.md`

@@ -2,7 +2,8 @@
 
 A lean [Claude Code][claude-code] toolkit in one tree: a Python CLI
 (`edify-cli`) for working with session data, tokens, and markdown, plus a Claude
-Code plugin (`plugin/`) that ships a handful of framework-agnostic skills.
+Code plugin (`plugin/`) that ships skills and agents built around a requirements
+→ design → runbook → build planning pipeline.
 
 Direction: Lean-assisted (formal-proof-backed) requirements tracking.
 
@@ -34,14 +35,14 @@ Source in `src/edify/`. Six commands in four groups:
 ## Plugin
 
 The `plugin/` directory is a Claude Code plugin — a plain subdirectory of this
-repo (previously a git submodule). It ships framework-agnostic skills invoked as
-slash commands, in two groups:
+repo (previously a git submodule). It ships skills and agents invoked as slash
+commands, in two groups:
 
 - **Pipeline** — `/requirements` → `/design` → `/runbook` → `/build` (or
   `/design` → `/build` for work that needs no runbook), with `/review` as the
   in-progress quality gate.
-- **Standalone** — `/proof`, `/deliverable-review`, `/ground`, `/formalize`,
-  `/recall`.
+- **Standalone** — `/proof`, `/deliverable-review`, `/ground`, `/formalize`
+  (Python only: icontract contracts checked with CrossHair), `/recall`.
 
 Plus the agents the pipeline dispatches. See
 [`plugin/README.md`](plugin/README.md).

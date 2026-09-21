@@ -53,6 +53,38 @@ line-limits:
     run-line-limits
     report-end-safe "Line limits"
 
+# Check docs/decisions.md and docs/references/*.md crosslink invariants
+[no-exit-message]
+design-links:
+    #!{{ bash_prolog }}
+    sync
+    run-design-links
+    report-end-safe "Design links"
+
+# `precommit` and `dev` are defined in plugin/portable.just, which ships to
+# other projects that have no docs/decisions.md or docs/references/ — the
+# design-links check does not belong there. This overrides portable.just's
+# `precommit` (via `set allow-duplicate-recipes`, same mechanism this file
+# already uses to override its shared `bash_prolog`) to add `run-design-links`
+# for this repo only; `dev: format precommit` picks it up automatically, since
+# `just` resolves a recipe dependency by name against the final recipe set.
+# Run all checks
+[no-exit-message]
+precommit:
+    #!{{ bash_prolog }}
+    sync
+    run-checks
+    report "version consistency" python3 plugin/bin/check-version-consistency.py
+    run-pytest
+    # Non-fixing: `fmt --check` exits 1 exactly when `fmt` would rewrite a
+    # file, and `-q` drops the summary so a clean run prints nothing. Plain
+    # `rumdl check` is not equivalent — it also reports the over-column lines
+    # MD013 cannot reflow, which no `fmt` pass can clear.
+    report "rumdl" rumdl fmt --check -q --no-cache
+    run-line-limits
+    run-design-links
+    report-end-safe "Precommit"
+
 # Create release: bump plugin.json (SOT), sync pyproject.toml, tag, push,
 # publish to PyPI, GitHub release, bump the marketplace entry.
 [no-exit-message]
@@ -134,6 +166,7 @@ report () {
 
 run-checks() {
     report "ruff check" ruff check -q
+    report "ruff format --check" ruff format --check -q
     report "docformatter -c" docformatter -c src tests
     report "mypy" mypy
 }
@@ -141,6 +174,10 @@ run-checks() {
 run-lint-checks() {
     ruff_ignores=C901,PLR0904,PLR0911,PLR0912,PLR0913,PLR0914,PLR0915,PLR0916,PLR0917,PLR1701,PLR1702
     report "ruff check" ruff check -q --ignore=$ruff_ignores
+    # `check` has no `format` dependency, so without this `just check` is the
+    # one checking recipe that never notices unformatted code. Redundant but
+    # free under `lint`/`green`/`red-lint`, which all run `format` first.
+    report "ruff format --check" ruff format --check -q
     report "docformatter -c" docformatter -c src tests
     report "mypy" mypy
 }
@@ -152,7 +189,11 @@ run-pytest() {
     local current_hash
     current_hash=$( {
         python3 --version 2>&1
-        git ls-files -z src/ tests/ plugin/hooks/ plugin/bin/ | sort -z | xargs -0 cat
+        # Untracked files count: a new test module is an input before its
+        # first commit. scripts/ and the design docs are read by the suite.
+        git ls-files -z --cached --others --exclude-standard \
+            src/ tests/ scripts/ plugin/hooks/ plugin/bin/ \
+            docs/decisions.md docs/references/ | sort -z | xargs -0 cat
         cat pyproject.toml
     } | cksum )
     if [ -f "$sentinel" ] && [ "$(cat "$sentinel")" = "$current_hash" ]; then
@@ -176,6 +217,10 @@ run-line-limits() {
     # header so the `oversized-file:` lines an allowlisted file prints on
     # every green run say what produced them.
     report "line limits" ./scripts/check_line_limits.sh
+}
+
+run-design-links() {
+    report "design links" ./scripts/check_design_links.sh
 }
 
 report-end-safe() {

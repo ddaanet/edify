@@ -10,7 +10,6 @@ description: >-
 allowed-tools:
   - Read
   - Edit
-  - Write
   - Bash
 user-invocable: true
 ---
@@ -18,10 +17,10 @@ user-invocable: true
 # Formalize and Check a Function
 
 Drive a propose-contract -> check -> repair loop around one Python function. The
-verifier (`edify check`, backed by CrossHair) owns deduction. You own *intent*:
-what the function should guarantee. Verification proves code meets a contract;
-it does NOT prove the contract is the right one. That judgment is yours, and
-when intent is genuinely ambiguous you ASK rather than guess.
+verifier (`edify check`, backed by CrossHair) owns deduction; the skill owns
+*intent* — what the function should guarantee. Verification proves code meets a
+contract; it does NOT prove the contract is the right one. That judgment stays
+here, and genuinely ambiguous intent gets asked about rather than guessed.
 
 ## Procedure
 
@@ -49,6 +48,7 @@ when intent is genuinely ambiguous you ASK rather than guess.
    beside it.
 
 2. **Write the contract.** Add `icontract` decorators to the function:
+   `from icontract import require, ensure`, then
    `@require(lambda <args>: <precondition>)` and
    `@ensure(lambda <args>, result: <postcondition>)`. A target needs at least
    one pre/post-condition or CrossHair will not analyze it.
@@ -59,12 +59,21 @@ when intent is genuinely ambiguous you ASK rather than guess.
    edify check <file-or-dotted-target> --json
    ```
 
-   The result status is one of `verified`, `refuted`, or `error`.
+   Status is `verified`, `refuted` or `error`, and the exit code encodes it — 0,
+   1, 2 respectively. A nonzero exit here is a result, not a command failure:
+   this is the case the project's error-handling rule carves out, so read the
+   JSON rather than suppressing the exit.
+
+   `--json` also returns `budget` (the per-condition timeout used, `null` at the
+   default) and `vacuity_warning` (true for any `verified` reached at the
+   default budget). Re-run a `verified` result with an explicit
+   `--timeout <seconds>` before reporting it, and state the budget the verdict
+   was reached at.
 
 4. **Interpret — the core judgment:**
    - `verified` — no counterexample within CrossHair's search budget. Report and
      stop. State the honest guarantee level: bounded path-exploration, not a
-     total proof.
+     total proof. State the per-condition budget the verdict was reached at.
    - `refuted` — read the counterexample (falsifying input + location), then
      decide *why* it failed:
      - **code bug** — the implementation is wrong: fix the code.
@@ -76,8 +85,8 @@ when intent is genuinely ambiguous you ASK rather than guess.
      (CrossHair analyzed nothing); add a contract. Never report `error` as
      success.
 
-5. **Loop with a cap.** Do at most a small fixed number of repair iterations
-   (e.g. 5). If you hit the cap, STOP and report the honest state: the last
+5. **Loop with a cap.** At most 5 repair iterations — an arbitrary number, not
+   calibrated. At the cap, STOP and report the honest state: the last
    counterexample and what remains unresolved. Never upgrade `refuted` or an
    error to "verified".
 
@@ -91,5 +100,8 @@ when intent is genuinely ambiguous you ASK rather than guess.
 ## Backend
 
 `edify check` wraps CrossHair (symbolic execution + Z3). It is the deduction
-oracle; this skill is the intent-holder. See
-`docs/superpowers/specs/2026-06-08-invariant-guided-verify-loop-design.md`.
+oracle; this skill is the intent-holder. Read
+`docs/superpowers/design/invariant-guided-verify-loop.md` for the four-state
+output contract, the seed-function rule and CrossHair's verbose reporting — it
+is the living document and supersedes the 2026-06-08 frozen spec where they
+diverge.

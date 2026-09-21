@@ -22,11 +22,13 @@ if [[ -n "$status" ]]; then
     echo "$status"
     exit 1
 fi
+checks="tree clean"
 
 just precommit || {
     echo "PRECOMMIT: validation failed"
     exit 1
 }
+checks="$checks, just precommit passed"
 
-echo "CLEAN"
+echo "CLEAN: $checks"
 exit 0

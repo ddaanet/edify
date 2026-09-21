@@ -1,21 +1,18 @@
 ---
 name: runbook
-description: |
+description: >-
   Decompose a design into an executable runbook — phases of typed items
-  (tdd / general) that /build composes dispatch prompts from.
-  Triggers on /runbook or when a design needs step-by-step planning.
+  (tdd / general) that /build composes dispatch prompts from. Triggers on
+  /runbook, "implementation plan", "break the design into steps", "plan the
+  work", or when a design needs step-by-step decomposition. Not for work that
+  needs no runbook — that goes straight to /build.
 allowed-tools: Agent, Read, Write, Edit, Skill, Bash(rg:*, git:*)
-requires:
-  - Design document from /design
-  - CLAUDE.md for project conventions (if exists)
-outputs:
-  - Execution runbook at plans/<job-name>/runbook.md
 user-invocable: true
 ---
 
-# Write the Runbook
+# Decompose a Design into a Runbook
 
-**Usage:** `/runbook plans/<job-name>/design.md`
+**Usage:** `/runbook plans/<job-name>`
 
 Produce `plans/<job>/runbook.md` — the terminal planning artifact. Item and
 slice format: `references/runbook-format.md`. Pipeline context (see
@@ -23,13 +20,16 @@ slice format: `references/runbook-format.md`. Pipeline context (see
 `runbook-corrector` → `runbook-simplifier` → `/proof` → `/build` in a fresh
 session.
 
-**Prerequisites check (D+B anchor):** Check the plan directory for a
-design-stage artifact: `outline.md` or `design.md`. Absent → STOP. `/runbook`
-without prior `/design` gating is an error — scope was not user-validated.
+**Prerequisites check (D+B anchor — tool call required):**
+`rg --files plans/<job>` and branch on it: a design-stage artifact —
+`outline.md` or `design.md` — must be listed. Absent → STOP. `/runbook` without
+prior `/design` gating is an error — scope was not user-validated.
 
 ## Phase Type Model
 
-Each phase declares `type: tdd` or `type: general` (default). Type determines:
+Each phase declares `type: tdd` or `type: general` (default). Assign the type by
+what the phase produces: a phase building or changing behaviour is `tdd`;
+infrastructure, configuration and prose work is `general`. Type determines:
 
 - **Item format:** tdd → `Slices:` with per-slice test lists; general → concrete
   action against a named target. Read `references/runbook-format.md` and write
@@ -47,30 +47,30 @@ steer it, and do not write an item that presumes either answer.
 
 ### 1. Recall and Discovery
 
-0. **Documentation perimeter and requirements (if present):** If the design
-   includes a "Documentation Perimeter" section, Read the files under "Required
-   reading" and invoke any listed skill-loading directives. If it includes a
-   "Requirements" section, note requirements and scope boundaries.
+a. **Documentation perimeter and requirements (if present):** If the design
+includes a "Documentation Perimeter" section, Read the files under "Required
+reading" and invoke any listed skill-loading directives. If it includes a
+"Requirements" section, note requirements and scope boundaries.
 
-1. **Implementation recall (D+B anchor — tool call required):**
-   `Skill(skill: "edify:recall", args: "plans/<job> — implementation patterns for this design")`.
-   Patterns for building this, not classifying it. Upstream triage recall (from
-   /design) does not satisfy this gate.
+b. **Implementation recall (D+B anchor — tool call required):**
+`Skill(skill: "edify:recall", args: "plans/<job> — implementation patterns for this design")`.
+Patterns for building this, not classifying it. Upstream triage recall (from
+/design) does not satisfy this gate.
 
-2. **Augment the recall artifact** (`plans/<job>/recall-artifact.md`): add the
-   paths recall selected, with implementation focus — planning-relevant entries
-   only (model selection failures, phase typing decisions, precommit gotchas).
-   Execution-level detail reaches executors through dispatch prompts, not the
-   artifact. If absent, write the initial artifact.
+c. **Augment the recall artifact** (`plans/<job>/recall-artifact.md`): add the
+paths recall selected, with implementation focus — planning-relevant entries
+only (model selection failures, phase typing decisions, precommit gotchas).
+Execution-level detail reaches executors through dispatch prompts, not the
+artifact. If absent, write the initial artifact.
 
-3. **Verify actual file locations:** `rg --files` / `rg` (Bash) for every source
-   and test file the design references. Never assume paths from conventions.
-   STOP if expected files are not found.
+d. **Verify actual file locations:** `rg --files` / `rg` (Bash) for every source
+and test file the design references. Never assume paths from conventions. STOP
+if expected files are not found.
 
-4. **Post-explore recall gate (D+B anchor):** exploration may surface domains
-   step 1 did not anticipate. Invoke `Skill(skill: "edify:recall")` (no topic —
-   selection runs against what exploration surfaced). New entries → add their
-   paths to the artifact. None → state that explicitly.
+e. **Post-explore recall gate (D+B anchor):** exploration may surface domains
+step b did not anticipate. Invoke `Skill(skill: "edify:recall")` (no topic —
+selection runs against what exploration surfaced). New entries → add their paths
+to the artifact. None → state that explicitly.
 
 ### 2. Write the Runbook
 
@@ -96,11 +96,15 @@ Before review, verify:
   stated.
 - **No code blocks in items** — behaviour, targets and tests in prose;
   `Interfaces:` is the only formal element.
-- **Code-fix items enumerate affected call sites** (file:function or file:line).
+- **Code-fix items enumerate affected call sites** by file and enclosing symbol,
+  plus a quoted distinctive fragment where the symbol holds more than one site.
+  No line numbers: the edits the item prescribes invalidate them, and the reader
+  who needs them is reading after the edit.
 - **Later items reference post-phase state** — an item modifying a file a prior
   phase changed notes the expected state.
-- **Phase size** — a phase over 8 items is a split signal: prefer splitting the
-  phase at a clean boundary. Not a count gate.
+- **Phase size** — a phase over 8 items is a split signal
+  *(ungrounded — needs calibration)*: prefer splitting at a clean boundary. Not
+  a count gate.
 - **Cross-cutting issues scope-bounded** — "addressed by items X, Y" / "out of
   scope: Z".
 - **No vacuous items** — every item produces a functional outcome; scaffolding
@@ -115,8 +119,9 @@ Before review, verify:
 
 ### 4. Commit
 
-Commit `runbook.md` before review — review agents operate on filesystem state,
-and a committed checkpoint keeps their fixes diffable.
+Run `just precommit`, then commit `runbook.md` before review — review agents
+operate on filesystem state, and a committed checkpoint keeps their fixes
+diffable. Route the commit through `/commit-commands:commit`.
 
 ### 5. Review
 
@@ -135,7 +140,7 @@ survived.
 
 ### 7. Proof
 
-Invoke `/proof plans/<job>/runbook.md` — the user validates the runbook item by
+Invoke `/edify:proof plans/<job>/runbook.md` — the user validates the runbook
 item. This is the human gate on the artifact execution will read.
 
 ## Routing out

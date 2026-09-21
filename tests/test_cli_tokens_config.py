@@ -32,9 +32,7 @@ class TestResolveApiKeyFallback:
     ) -> None:
         """Empty env var → config file consulted, config key returned."""
         monkeypatch.setenv("ANTHROPIC_API_KEY", "")
-        mocker.patch(
-            "edify.tokens_cli.get_api_key", return_value="sk-ant-from-config"
-        )
+        mocker.patch("edify.tokens_cli.get_api_key", return_value="sk-ant-from-config")
 
         result = _resolve_api_key()
         assert result == "sk-ant-from-config"
@@ -44,9 +42,7 @@ class TestResolveApiKeyFallback:
     ) -> None:
         """Env var absent → config file consulted, config key returned."""
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-        mocker.patch(
-            "edify.tokens_cli.get_api_key", return_value="sk-ant-from-config"
-        )
+        mocker.patch("edify.tokens_cli.get_api_key", return_value="sk-ant-from-config")
 
         result = _resolve_api_key()
         assert result == "sk-ant-from-config"
@@ -66,9 +62,7 @@ class TestResolveApiKeyFallback:
     ) -> None:
         """Whitespace-only env var → config file consulted."""
         monkeypatch.setenv("ANTHROPIC_API_KEY", "   ")
-        mocker.patch(
-            "edify.tokens_cli.get_api_key", return_value="sk-ant-from-config"
-        )
+        mocker.patch("edify.tokens_cli.get_api_key", return_value="sk-ant-from-config")
 
         result = _resolve_api_key()
         assert result == "sk-ant-from-config"
@@ -91,9 +85,7 @@ class TestResolvedKeyReachesCounting:
         client performs the count — the config key is never used
         """
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-from-env")
-        mocker.patch(
-            "edify.tokens_cli.get_api_key", return_value="sk-ant-stale-config"
-        )
+        mocker.patch("edify.tokens_cli.get_api_key", return_value="sk-ant-stale-config")
 
         sentinel_client = Mock(spec=Anthropic)
         make_client = mocker.patch(

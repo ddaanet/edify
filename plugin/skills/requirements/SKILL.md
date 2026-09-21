@@ -1,7 +1,7 @@
 ---
 name: requirements
 description: Capture and document requirements for implementation. Triggers on "capture requirements", "document requirements", "what do I want to build", or feature discussions without clear documentation. Produces requirements.md artifact for design and planning phases.
-allowed-tools: Read, Write, Bash, Skill
+allowed-tools: Read, Write, Edit, Bash, Skill
 user-invocable: true
 ---
 
@@ -11,30 +11,31 @@ Dual-mode requirements capture: extract from conversation or elicit through
 semi-structured questions. Produces `plans/<job>/requirements.md` artifact
 consumed by `/design` and `/runbook`.
 
-## Target Model
-
-**Opus required.** Extract mode requires synthesizing nuanced conversation
-context; sonnet misses implicit requirements.
-
 ## Usage
 
 ```
 /requirements <job-name>
 ```
 
-Skill automatically detects appropriate mode based on conversation history.
+Detect the mode from conversation history (see §Mode Detection).
 
 ## Mode Detection
 
-**Primary signal:** `rg --files plans/<job>/requirements.md` — if file exists,
-Read it and use as base for update/refinement (extract mode with existing
-artifact). If absent, fall through to conversation heuristic.
+**Primary signal:** `test -f plans/<job>/requirements.md` — if it exists, Read
+it and use as base for update/refinement (extract mode with existing artifact).
+If absent, fall through to conversation heuristic.
 
 **Conversation heuristic (fallback):**
 - **Extract mode** — conversation contains substantive discussion (feature
   descriptions, constraints, scope)
 - **Elicit mode** — fresh conversation or minimal context (no prior feature
   discussion, cold-start)
+
+**STOP and report to the user when:**
+- **No job name given.** `plans/<job>/` cannot be derived. Ask for one.
+- **Extract mode with no substantive conversation to extract from.** Mode
+  detection misfired. Switch to elicit mode rather than inventing requirements
+  from an empty transcript.
 
 ## Recall Pass
 
@@ -46,11 +47,11 @@ existing infrastructure, patterns, and decisions — prevents naive requirements
 Invoke
 `Skill(skill: "edify:recall", args: "<topic derived from job name and conversation>")`.
 
-**Gate anchor:** The recall artifact **write** is the structural anchor — a tool
-call that fires whether or not anything relevant turns up. When nothing relevant
-is found, write the artifact with an explicit null entry (see format below), so
-downstream consumers hit a file that exists on both paths and need no
-conditional logic of their own.
+**Gate anchor:** No plan-dir argument: this skill *creates* the artifact, so
+there is none to resolve. The artifact **write** is the structural anchor — a
+tool call that fires whether or not anything relevant turns up. When nothing
+relevant is found, write the artifact with an explicit null entry (see format
+below).
 
 **Boundaries:**
 - No agent delegation, no Context7, no web research — those belong to /design
@@ -99,7 +100,7 @@ When conversation contains requirements signals:
 
 ### 1. Scan Conversation
 
-Extract from conversation history:
+Read `plans/<job>/requirements.md` if it exists, then extract from history:
 - **Functional requirements:** What should the system do?
 - **Non-functional requirements:** Performance, usability, constraints
 - **Explicit constraints:** Technology, compatibility, architecture
@@ -109,7 +110,8 @@ Extract from conversation history:
 
 **Critical rule:** Extract from what was said, do NOT infer unstated
 requirements. Hallucination risk — if not discussed, flag as Open Question
-rather than inventing.
+rather than inventing. Basis: `references/empirical-grounding.md` §Hallucination
+Risk and §AI Weaknesses.
 
 ### 2. Lightweight Codebase Discovery
 
@@ -122,7 +124,7 @@ Quick scan to ground requirements (runs after extraction, so scan is targeted):
 3. `Read` existing patterns in relevant area — inform constraints
 
 **Boundaries:**
-- Direct tool use only (Read, Write, Bash (`rg`, `rg --files`))
+- Direct tool use only (Read, Write, Bash (`rg`, `rg --files`, `test -f`))
 - No agent delegation
 - No Context7, no web research, no scout
 - Purpose: prevent naive requirements (e.g., "add X" when X exists)
@@ -130,11 +132,11 @@ Quick scan to ground requirements (runs after extraction, so scan is targeted):
 - Save exploration prototypes to `plans/prototypes/` (not `tmp/`) — they are
   referenced artifacts, not ephemera
 
-### Post-Explore Recall Gate
+### 2.5 Post-Explore Recall Gate
 
 Discovery via `rg --files`/`rg` (Bash) may surface domains not anticipated
-during the initial recall pass. Invoke `Skill(skill: "edify:recall")` (no
-topic).
+during the initial recall pass. Run the recall procedure already loaded in
+§Recall Pass inline, with no topic — do not issue a second `Skill` call.
 
 **Gate anchor (D+B — tool call required):**
 - **New entries found:** add the paths recall selected to the recall artifact —
@@ -144,7 +146,7 @@ topic).
 
 ### 3. Structure Requirements
 
-Format into standard artifact (see Standard Format section below):
+Read §Standard Format below, then format the extracted items by it:
 - Number items sequentially within each section (FR-1, FR-2, ...)
 - Include acceptance criteria for functional requirements
 - Capture rationale for constraints
@@ -152,7 +154,7 @@ Format into standard artifact (see Standard Format section below):
 
 ### 4. Gap Detection
 
-Check for empty critical sections:
+Read the structured draft, then check for empty critical sections:
 
 **Critical sections** (ask if empty):
 - Functional Requirements — "What should the system do?"
@@ -189,20 +191,24 @@ say, which is the opposite of elicitation. Numbered prose keeps both the
 question and the user's own words in the thread, and a stated default lets the
 turn proceed without a round-trip.
 
-### 5. User Validation
+### 5. Write the Draft and Validate
 
-Invoke `/proof plans/<job>/requirements.md` — structured reword-accumulate-sync
-loop on the requirements draft. Present artifact path, summarize sections
-populated, note Open Questions.
+Write the draft to `plans/<job>/requirements.md` (create the directory if
+needed) — where that file already exists and the draft records a narrower scope
+than it does, confirm the overwrite with the user before writing, since
+requirements loss is silent downstream. Then invoke
+`/edify:proof plans/<job>/requirements.md` — a structured reword-accumulate-sync
+loop on it. Present the artifact path, summarize the sections populated, note
+Open Questions.
 
-/proof handles the iterative validation loop. No corrector dispatch for
+/proof runs the iterative validation loop. No corrector dispatch for
 requirements (user-validated directly). On terminal action "apply", accumulated
 decisions are applied to the artifact.
 
-### 6. Write Artifact
+### 6. Finalise
 
-After user validation:
-- Write to `plans/<job>/requirements.md` (create directory if needed)
+After /proof applies the accumulated decisions:
+- Confirm the artifact on disk matches the validated state
 - Scan for skill dependencies (see Skill Dependency Scanning section)
 - Suggest next step (see Default Exit section)
 
@@ -217,8 +223,7 @@ block above, and for the same reason. Cover the critical sections (Functional
 Requirements, Scope Boundaries), adding Constraints/Dependencies where the job
 suggests them. Each question states a proposed answer inferred from the job name
 and the conversation; the user corrects what is wrong and silence carries the
-rest. Then 1-2 adaptive follow-ups based on what came back. Total budget: 4-6
-questions.
+rest. Then 1-2 adaptive follow-ups based on what came back.
 
 Elicit mode has less to infer from than Extract mode, so its proposals will be
 weaker — say so, rather than presenting a guess with the confidence of a
@@ -226,8 +231,8 @@ derivation.
 
 ### 2-6. Shared Steps
 
-After elicitation, follow Extract mode steps 2-6 (Codebase Discovery, Structure,
-Gap Detection, Present Draft, Write Artifact).
+After elicitation, follow Extract mode steps 2, 2.5 and 3-6 (Codebase Discovery,
+Post-Explore Recall, Structure, Gap Detection, Write and Validate, Finalise).
 
 ## Standard Format
 
@@ -261,8 +266,9 @@ Gap Detection, Present Draft, Write Artifact).
 - Q-1: <unresolved item — what needs investigation>
 
 ### References
-- `plans/<job-name>/reports/explore-<topic>.md` — codebase exploration findings
-- `plans/reports/<topic>.md` — grounding research synthesis
+- `plans/<job-name>/reports/explore-<topic>.md` — inherited from prior work;
+  this skill does not produce one
+- `plans/reports/<topic>-grounding.md` — grounding research synthesis
 - [External Paper Title](url) — informed FR-2 scope decision
 ```
 
@@ -309,7 +315,7 @@ Requirements written to: plans/<job>/requirements.md
 
 Next steps (decision criteria):
 - 0-2 open questions, all critical sections populated → `/design plans/<job>/`
-- 3+ open questions or empty critical sections → Standalone (revisit when clearer)
+- 3+ open questions or empty critical sections → stop here; revisit when clearer
 - Very clear scope + simple → `/design plans/<job>/` (its triage routes small work straight to `/build`)
 - User stated explicit next step → Use that path
 ```
@@ -329,17 +335,10 @@ before an artifact is written; a wrong or empty requirements.md is worse than
 none, because downstream phases treat it as settled.
 
 **STOP and report to the user when:**
-- **No job name given.** `plans/<job>/` cannot be derived. Ask for one.
-- **Extract mode with no substantive conversation to extract from.** Mode
-  detection misfired. Switch to elicit mode rather than inventing requirements
-  from an empty transcript.
-- **An existing `plans/<job>/requirements.md` is being overwritten with a
-  narrower scope than it already records.** Confirm with the user first —
-  requirements loss is silent downstream.
 - **Gap detection cannot reduce open questions below the count that blocks every
   exit path** (3+ open questions AND empty critical sections). Write what
-  exists, mark the artifact incomplete in its header, and route to Standalone
-  rather than to `/design`.
+  exists, mark the artifact incomplete in its header, and stop here rather than
+  routing to `/design`.
 
 **Failure handling:** these are user-decision points, not retries. Report the
 condition, state what is missing, and wait. Do not fill a gap by inference —
@@ -352,6 +351,4 @@ an artifact as validated when it has only been written.
 ## Key Principles
 
 - Extract from conversation, do not infer (hallucination risk)
-- Gap-fill, not interrogation: max 3 questions (extract) or 4-6 (elicit)
 - Omit empty sections — do not scaffold structure nobody will fill
-- See `references/empirical-grounding.md` for research basis

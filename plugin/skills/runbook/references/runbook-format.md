@@ -64,7 +64,8 @@ contract.
   - `class TranscriptError(ValueError)` — raised for undecodable input
 
 - Item 2.2: src/edify/cli.py — wire parse_entries() into `edify extract`.
-  Requirements: FR-3. Depends on: Item 2.1
+  Requirements: FR-3.
+  Depends on: Item 2.1
 ```
 
 A general phase uses the base item shape with no `Slices:`:

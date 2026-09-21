@@ -11,18 +11,41 @@ Part of the `docs/design.md` graph; conclusions are indexed in
 **D-46 — Quality gates are layered; no single gate is trusted alone.** Four
 layers, outer to inner: execution flow (the gate is anchored by a tool call so
 it cannot be optimized away as prose), automated checks (`just precommit` —
-formatting, line limits, lint, tests), semantic review (a corrector catches
-logic, integration and design-deviation issues), and conformance (comparison
-against an external reference). Each prevents a distinct failure mode.
-*Grounding:* a parity failure cascade where unit tests passed 385/385 while 8
-visual parity issues survived, the review missed systemic conformance gaps
-because its mandate excluded reference comparison, and the 400-line constraint
-was bypassed — each layer failed independently.
+`ruff format --check`, a non-fixing markdown reflow check, line limits, design
+links, lint, tests), semantic review (a corrector catches logic, integration and
+design-deviation issues), and conformance (comparison against an external
+reference). Each prevents a distinct failure mode. *Grounding:* a parity failure
+cascade where unit tests passed 385/385 while 8 visual parity issues survived,
+the review missed systemic conformance gaps because its mandate excluded
+reference comparison, and the 400-line constraint was bypassed — each layer
+failed independently.
 
 Checklist when designing a new gate: is there an outer execution-flow defense, a
 middle automated check, an inner semantic review, and — for external-reference
 work — a conformance comparison? Do the layers have *different* failure modes?
 Can any single layer's failure cause total failure?
+
+`scripts/check_design_links.sh` is the automated check pinning the split living
+design's internals: every `D-<n>` a `docs/references/*.md` node defines is
+indexed exactly once in `docs/decisions.md`, the node's conclusion is a prefix
+of its index line's, and every group's `Argued in` path resolves to a real file.
+The hub, `docs/design.md`, is deliberately unpinned — its conclusions are prose
+carrying no ID-bearing form to match on — so keeping a hub conclusion and its
+node in step stays a review obligation rather than a mechanical one. The check
+is wired into the root `justfile`'s `precommit` and not into
+`plugin/portable.just`, since a consuming project has no `docs/decisions.md` to
+check.
+
+The test sentinel that lets `just precommit` skip an unchanged suite hashes
+*untracked* files alongside tracked ones
+(`git ls-files --cached --others --exclude-standard`): a new test module is an
+input before its first commit, and hashing only tracked files meant a freshly
+written test could not invalidate the sentinel that skipped it. The input list
+also carries `scripts/` — the suite executes both gate scripts, so a change to
+either changes test outcomes — and, in the root copy only, `docs/decisions.md`
+and `docs/references/`, because `tests/test_design_links.py` ends by running the
+design-links gate against the real tree rather than a fixture. `docs/design.md`
+is absent from the list for the same reason the gate does not read it.
 
 **D-47 — Gate at the chokepoint, not with ambient rules.** Ambient rules in
 always-loaded context telling agents to review artifacts are unenforceable:
@@ -36,14 +59,16 @@ behavioral loss.
 mode, and the agent rationalizes the skip without verifying. The canonical
 anchor is the recall pass, and its anchoring call is the Read of
 `<plan-dir>/recall-artifact.md` followed by Reads of the files selected from the
-index — *not* a Read of the index itself. The index is already in context
-(D-72), so instructing a Read of it buys a redundant tool call rather than
-evidence of selection. The artifact Read is unskippable and the per-file Reads
-require knowing which entries matter, so the pair proves selection happened. One
-anchor suffices — passphrase and proof-of-Read mechanisms are redundant when the
-anchor proves both. The negative path must cost the same: a null recall artifact
-still gets Read, so the gate is provably reached whether or not anything was
-found.
+index — *not* a Read of the index itself. The index is *normally* already in
+context (D-72), so instructing an unconditional Read of it buys a redundant tool
+call rather than evidence of selection. Normally is not always: the injection
+has been observed absent at every checkpoint of a session, so the index Read is
+conditional on its lines not being in context (D-85) and never becomes the
+anchor. The artifact Read is unskippable and the per-file Reads require knowing
+which entries matter, so the pair proves selection happened. One anchor suffices
+— passphrase and proof-of-Read mechanisms are redundant when the anchor proves
+both. The negative path must cost the same: a null recall artifact still gets
+Read, so the gate is provably reached whether or not anything was found.
 
 Verify that the anchor tool's preconditions match the gate's runtime state. A
 recall-diff keyed on `git log --since=mtime` needs intervening commits; at a
@@ -55,7 +80,9 @@ deterministic checks — blocking, zero false positives. An agent enriches an
 existing review for semantic checks — advisory. `verify-step.sh` (clean tree,
 precommit — blocking) beside `corrector` (semantic review — fix-all, flagging
 what it cannot fix) is the split; bundling both in one agent pass loses both
-properties.
+properties. The script's success line names the checks that passed —
+`CLEAN: tree clean, just precommit passed` — because a bare `CLEAN` is
+indistinguishable from a check that never ran.
 
 **D-50 — Fix the environment, not the prose.** Strengthening language ("no
 exceptions", "MUST", scenario-specific warnings) in a rule the agent already saw

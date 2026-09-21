@@ -2,17 +2,8 @@
 
 **User:** `/review`
 
-**Agent:** "What should I review?
-
-1. Uncommitted changes
-2. Recent commits
-3. Current branch
-4. Specific files
-5. Everything"
-
-**User:** "Uncommitted changes"
-
-**Agent:** "Reviewing uncommitted changes...
+**Agent:** "Reviewing uncommitted changes, 5 files — the tree is dirty and
+nothing is ahead of main.
 
 *Runs git status and git diff HEAD*
 
@@ -36,7 +27,7 @@ Review complete.
 - Major: 0
 - Minor: 2
 
-Full review written to: scratch/reviews/review-report-2026-01-19-142530.md
+Full review written to: tmp/review-report-<timestamp>.md
 
 **Minor issues:**
 1. triage-feedback.sh: Consider adding a usage line to the header comment

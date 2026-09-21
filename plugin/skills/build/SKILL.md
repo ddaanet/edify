@@ -49,7 +49,7 @@ shared state, and parallel dispatch causes race conditions.
 plugin/skills/build/scripts/verify-step.sh
 ```
 
-- Exit 0 (CLEAN) → proceed.
+- Exit 0 (`CLEAN:` and the checks that passed) → proceed.
 - Exit 1 with `DIRTY:` → STOP: "Dirty tree. Commit or stash before /build."
 - Exit 1 with `PRECOMMIT:` → STOP: "Precommit failing. Fix before /build."
 - Exit 2 → STOP: the script itself failed, so there is no verdict.
@@ -131,14 +131,14 @@ the mechanical work, since subagents have no parent context.
 ### 4.4 Post-item verification
 
 After every dispatch whose work is committed — a slice's GREEN, a slice's code
-review once its fixes are committed, and any general or directly executed item.
-Not after RED or test review, where uncommitted tests are the designed state:
+review once its commit lands, and any general or directly executed item. Not
+after RED or test review, where uncommitted tests are the designed state:
 
 ```bash
 plugin/skills/build/scripts/verify-step.sh
 ```
 
-- Exit 0 (CLEAN) → proceed.
+- Exit 0 (`CLEAN:` and the checks that passed) → proceed.
 - Exit 2 → the script itself failed, not the dispatch. Stop and report; do not
   remediate, since there is no established verdict to remediate against.
 - Exit 1 → remediate: resume the named agent once (`SendMessage to: <name>`,

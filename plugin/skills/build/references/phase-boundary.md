@@ -16,7 +16,9 @@ dispatch of `edify:corrector`: scope IN/OUT from the phase's items, design and
 recall artifact by path, changed-files list, report path from that reference's
 §Prompt contents rule under the dispatch name `phase-P-corrector`. IN/OUT lists
 must be non-empty and the changed-files list present — empty fields → STOP
-before delegating. UNFIXABLE → STOP and escalate. Otherwise commit and continue.
+before delegating. UNFIXABLE → STOP and escalate. Otherwise commit and continue:
+the corrector commits nothing, so that commit carries its report — with the
+fixes it applied where there are any — and always happens.
 
 The **final checkpoint** adds a lifecycle audit: verify all stateful objects
 (MERGE_HEAD, staged content, lock files) cleared on success paths.

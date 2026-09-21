@@ -5,7 +5,7 @@ description: >-
   simple/moderate/complex, produce design documents for complex jobs, and
   route by whether the work needs a runbook. Triggers on /design, planning
   requests, or tasks needing complexity assessment.
-allowed-tools: Agent, Read, Write, Bash, WebSearch, WebFetch, Skill
+allowed-tools: Agent, Read, Write, Edit, Bash, WebSearch, WebFetch, Skill
 user-invocable: true
 ---
 
@@ -186,9 +186,9 @@ reasoning — **per-item if composite**):
   investigation / ephemeral]
 - **Evidence:** Which criteria and recall entries informed the decision
 
-**Classification persistence (C-2):** Write the classification block verbatim to
-`plans/<job>/classification.md`. This file is consumed by `triage-feedback.sh`
-for post-execution comparison.
+**Classification persistence (C-2):** Write the filled-in classification block
+to `plans/<job>/classification.md`. This file is consumed by
+`triage-feedback.sh` for post-execution comparison.
 
 #### Routing
 
@@ -211,7 +211,7 @@ for post-execution comparison.
      `../runbook/references/runbook-format.md` and write that change as an item
      in its shape — an item carrying `Slices:` carries nothing else to execute,
      and general work goes in its own item.
-  4. **Proof:** Invoke `/proof plans/<job>/outline.md` (outline-corrector
+  4. **Proof:** Invoke `/edify:proof plans/<job>/outline.md` (outline-corrector
      dispatched by /proof on revise/kill).
   5. **Route (after /proof approval):** commit the outline, then name
      `/build plans/<job>` as the next command and stop. `/build` consumes no
@@ -229,13 +229,12 @@ for post-execution comparison.
      change, Read `../runbook/references/runbook-format.md` and write that
      change as an item in its shape — an item carrying `Slices:` carries nothing
      else to execute, and general work goes in its own item.
-  3. **Proof:** Invoke `/proof plans/<job>/outline.md` (outline-corrector
+  3. **Proof:** Invoke `/edify:proof plans/<job>/outline.md` (outline-corrector
      dispatched by /proof on revise/kill)
   4. **Route (after /proof approval):** Read `references/route-to-execution.md`
      and route by it. A failed precondition returns to step 2.
 - **Complex →** Read `references/write-outline.md` for Phase A (research +
   outline) and Phase B (user validation + outline sufficiency gate).
-  *(Verb-oriented name: action the agent takes, not the artifact produced.)*
 - **Defect →** Route to structured-bugfix workflow: reproduce → root-cause → fix
   → verify. Skip design — the investigation structure replaces architectural
   design.
@@ -253,18 +252,11 @@ When a design modifies an "author" skill (a skill whose output is reviewed by a
 corrector), check coupled dependencies before completing the design:
 
 1. Identify the corrector from the transformation table (T1–T6 in
-   `docs/references/pipeline-contracts.md`)
+   `docs/references/pipeline-contracts.md` §D-26) — Read it; do not work from
+   memory of it
 2. Check: does the corrector's review criteria need corresponding update?
 3. Check: does any mechanical validator need update?
 4. Include corrector/validator updates in the same design scope
-
-**Dependency mapping:**
-
-| Author Skill/Artifact | Corrector | Validator |
-|----------------------|-----------|-----------|
-| /design (outline format) | outline-corrector | -- |
-| /runbook (runbook-format.md) | runbook-corrector | -- |
-| /requirements (standard format) | -- (user-reviewed) | -- |
 
 **Visible output (mandatory):** "Author change: X. Coupled corrector: Y. Update
 needed: yes/no." This block forces awareness of coupling — designers check the

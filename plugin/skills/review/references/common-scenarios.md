@@ -21,7 +21,7 @@
 - Note in summary that changes are already committed
 - Recommendations can be addressed in follow-up commit
 
-## Large changeset (1000+ lines)
+## Large changeset (1000+ lines — ungrounded threshold, needs calibration)
 - Focus on high-level patterns and critical issues
 - Do not nitpick every line
 - Suggest breaking into smaller reviewable chunks if not committed yet

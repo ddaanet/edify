@@ -20,7 +20,10 @@ conformance gaps, correctness issues, coverage holes, and excess artifacts.
 
 ## Prerequisites
 
-Before starting, gather:
+`ls plans/<plan>` — branch on what it lists. Neither `design.md` nor
+`outline.md` present → STOP: there is no conformance baseline, and a review
+without one reports an empty gap analysis as a clean one.
+
 - **Design artifact** — the conformance baseline. Take the first that exists:
   `plans/<plan>/design.md`, else `plans/<plan>/outline.md`. The agentic-prose
   route produces only an outline, so a `design.md`-only prerequisite leaves that
@@ -45,7 +48,7 @@ Before starting, gather:
    | any other | — | STOP: the script failed, no verdict |
 
    With the range established, run
-   `git diff --numstat <range> -- . ':!plans' ':!tmp' ':!.claude'` for per-file
+   `git diff --numstat <range> -- . ':!plans' ':!tmp' ':!.claude/handoff-*'` for
    line counts. A submodule that moved in the range is diffed inside the
    submodule between its two pointers
 3. Classify each deliverable by artifact type:
@@ -55,8 +58,8 @@ Before starting, gather:
 | Code | `*.py` source | Universal + robustness, modularity, testability, idempotency, error signaling |
 | Test | `test_*.py` | Universal + specificity, coverage, independence |
 | Agentic prose | `SKILL.md`, agent defs | Universal + actionability, constraint precision, determinism, scope boundaries |
-| Human docs | Fragments, references | Universal + accuracy, consistency, completeness, usability |
-| Configuration | Justfile, pyproject | Universal only |
+| Human docs | Fragments, references, `docs/` | Universal + accuracy, consistency, completeness, usability |
+| Configuration | Justfile, pyproject, `.claude/settings.json`, `.claude/rules/*.md` | Universal only |
 
 Universal axes (all types): conformance, functional correctness, functional
 completeness, vacuity, excess.
@@ -68,8 +71,9 @@ Full axis definitions: `docs/references/deliverable-review.md`
 Compare inventory against the design artifact's In-scope items:
 - **Missing deliverables** — specified but not produced
 - **Unspecified deliverables** — produced but not in design scope
-- **Excess** in unspecified is acceptable if justified (edge case coverage,
-  defensive tests)
+- **Excess** in unspecified is acceptable only where the deliverable itself
+  states why it exists — an edge case named in a test docstring, a defensive
+  branch with a comment. Unexplained excess is a finding.
 
 ### Phase 3: Per-Deliverable Review
 
@@ -78,7 +82,8 @@ Two-layer review. Layer 1 is optional (scales to large deliverable sets). Layer
 
 #### Layer 1: Delegated Per-File Review (optional)
 
-Gate on total deliverable lines from Phase 1 inventory:
+Gate on total changed lines from Phase 1 inventory. The three thresholds below
+are an **ungrounded starting point** — no measurement supports them:
 
 | Total lines | Strategy |
 |-------------|----------|
@@ -86,14 +91,19 @@ Gate on total deliverable lines from Phase 1 inventory:
 | 500–2000 | Two opus agents: code+test, prose+config |
 | > 2000 | Three opus agents: code, test, prose+config |
 
-When Layer 1 applies, partition deliverables by type and launch parallel review
-agents. Each agent receives:
+When Layer 1 applies, partition deliverables by type and launch the review
+agents in a single message — that is what makes them parallel. Each agent
+receives:
 - Files to review (with line counts)
 - Design reference path
 - Applicable review axes for its artifact types
-- Output report path: `plans/<plan>/reports/deliverable-review-<type>.md`
+- Output report path: `plans/<plan>/reports/deliverable-review-<type>.md`,
+  `<type>` being `code`, `tests`, `prose` or `config` — one per partition,
+  joined with `-` where a partition covers two
 
-Use `run_in_background=true` for parallel agents.
+Each agent follows `plugin/fragments/delegation.md`: quiet execution (report to
+the named file, return the filepath or an error), `Bash` in its tool list for
+search, and the recall artifact resolved by path rather than inlined.
 
 #### Layer 2: Interactive Full-Artifact Review (mandatory)
 
@@ -110,7 +120,8 @@ Always runs in main session with full cross-project context.
 - Path consistency across documents
 - API contract alignment between modules
 - Naming convention uniformity
-- Fragment convention compliance
+- Fragment convention compliance — each `plugin/fragments/` file opens with an
+  `## ` heading naming its rule and states the rule before its rationale
 - Other skills' allowed-tools and frontmatter cross-reference validation
 
 **Per-file review (when Layer 1 skipped):**
@@ -119,19 +130,24 @@ Always runs in main session with full cross-project context.
 
 **Why interactive is mandatory:** Delegated agents lack cross-project context —
 fragment conventions, other skills' configurations, inter-file consistency.
-Layer 2 reads deliverables directly against the design spec, not delegation
-reports. The two layers are independent.
+Layer 2 forms its own judgement by reading deliverables directly against the
+design spec, never by reading a delegation report first. The judgements are
+independent; Phase 4 merges the findings.
 
 ### Phase 4: Report
 
-Write consolidated report to `plans/<plan>/reports/deliverable-review.md`.
+Where Layer 1 ran, Read each `plans/<plan>/reports/deliverable-review-<type>.md`
+it produced and merge its findings into the consolidated set, deduplicating
+against Layer 2's own. Attribute each merged finding to its sub-report.
+
+Write the consolidated report to `plans/<plan>/reports/deliverable-review.md`.
 
 **Report structure:**
 
 ```markdown
 # Deliverable Review: <plan-name>
 
-**Date:** <date>
+**Date:** <date — from `date -I`>
 **Methodology:** docs/references/deliverable-review.md
 
 ## Inventory
@@ -148,13 +164,18 @@ Write consolidated report to `plans/<plan>/reports/deliverable-review.md`.
 [Grouped by category, brief]
 
 ## Gap Analysis
-[Table: design requirement, status (covered/missing), reference]
+[Table: design requirement, status (covered/missing) with the finding id]
 
 ## Summary
 [Severity counts, assessment]
+
+## Sub-reports
+[Paths of every Layer 1 report merged in Phase 4; omit when Layer 1 skipped]
 ```
 
-**Severity classification:**
+**Severity classification** — `docs/references/deliverable-review.md` §D-56
+defines the three levels; the parenthetical extensions below are this skill's,
+not the node's:
 - **Critical** — incorrect behavior, data loss, security, unimplemented design
   requirement
 - **Major** — missing functionality, broken references, vacuous artifact, test

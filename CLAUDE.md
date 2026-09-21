@@ -300,12 +300,16 @@ claim about, or changing, the mechanism it argues:
 - `cli-and-package.md` — `src/edify/`, the plugin/package split, the bootstrap,
   markdown and token tooling
 - `testing.md` — `tests/`
-- `pipeline-contracts.md` — dispatch, review gates, phase types
-- `execution-routing.md` — `/design`, `/runbook`, `/build` routing
+- `pipeline-contracts.md` — dispatch, the planning/execution session boundary,
+  review gates, phase types, artifact provenance
+- `execution-routing.md` — `/design`, `/runbook`, `/build` routing,
+  classification, escalation tiers
 - `agent-instructions.md` — model choice, instruction structure
-- `quality-gates.md` — gates, hooks, validating scripts
+- `quality-gates.md` — gates, hooks, validating scripts, skill step and rule
+  placement
 - `deliverable-review.md` — review axes and findings
-- `project-configuration.md` — `.claude/`, agent frontmatter, line caps
+- `project-configuration.md` — `.claude/`, agent frontmatter, line caps, what a
+  sub-agent gets, naming, script-versus-delegate
 
 A hub conclusion and its node's argument change together. `docs/changelog.md`
 carries the dated design-significant entries.

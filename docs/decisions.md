@@ -70,6 +70,12 @@ Argued in `docs/references/pipeline-contracts.md`.
 - **D-33** — Consolidate identical patterns before `/proof`.
 - **D-80** — Every `/design` artifact records the base commit its deliverable
   starts from.
+- **D-84** — A GREEN dispatch carries one slice's behaviour; a slice already
+  implemented is proven by mutation.
+- **D-85** — The recall checkpoint resolves skills alongside memory files, and
+  Reads the index when the index is not in context.
+- **D-86** — A report rides the commit whose work it reports, and names no hash
+  (the commit is resolved from `git log --diff-filter=A` over the report path).
 
 *Rejected:* per-plan generated agent definitions; a two-stage runbook expanded
 into step files for a weak orchestrator; per-test RED/GREEN dispatch; whole-task

@@ -1,7 +1,15 @@
 ---
 name: review
-description: Review in-progress changes for quality and correctness
-allowed-tools: Read, Bash(git:*, diff:*)
+description: >-
+  Review in-progress changes for quality and correctness — uncommitted work,
+  recent commits, or partial branch work. Triggers on /review, "review my
+  changes", "review this work", "check my changes before commit". Not for a
+  finished plan's deliverables — that is /deliverable-review — and not for a
+  PR, which is the built-in code-review.
+allowed-tools:
+  - Read
+  - Write
+  - Bash(git:*, rg:*, ls:*)
 user-invocable: true
 ---
 
@@ -11,10 +19,14 @@ Review in-progress work for quality, correctness, and adherence to project
 standards. This skill examines uncommitted changes, recent commits, or partial
 branch work to identify issues and suggest improvements.
 
-**Distinction:** This skill reviews work-in-progress. The built-in `/review` is
-for PR-focused reviews.
+**Distinction:** This skill reviews work-in-progress in the main session. The
+built-in `code-review` targets a diff, PR, branch or path at a chosen effort
+level; `security-review` is its security counterpart.
 
 ## Review Process
+
+**Example execution:** Read `references/example-execution.md` for a complete
+review interaction flow.
 
 ### 1. Determine Scope
 
@@ -72,6 +84,12 @@ git diff main...HEAD  # Changes since branch point
 git diff HEAD <file1> <file2> ...
 ```
 
+**For a design document:**
+```bash
+ls plans/*/design.md plans/*/outline.md   # locate the plan's artifact
+git diff HEAD                              # changes to judge against it
+```
+
 ### 3. Analyze Changes
 
 **Review axes:** Read `references/review-axes.md` for the full 10-category
@@ -79,97 +97,20 @@ checklist (code quality, design conformity, functional completeness, project
 standards, runbook file references, self-referential modification, security,
 testing, documentation, completeness).
 
+**Common scenarios:** Read `references/common-scenarios.md` for handling
+secrets, multi-concern changes, pattern violations, already-committed work, and
+large changesets.
+
 ### 4. Provide Feedback
 
-**Feedback structure:**
-
-```markdown
-# Review Report: [scope description]
-
-**Scope**: [What was reviewed]
-**Date**: [timestamp]
-
-## Summary
-
-[2-3 sentence overview of changes and overall assessment]
-
-**Overall Assessment**: [Ready / Needs Minor Changes / Needs Significant Changes]
-
-## Issues Found
-
-### Critical Issues
-
-[Issues that must be fixed before commit/merge]
-
-1. **[Issue title]**
-   - Location: [file:line or commit hash]
-   - Problem: [What's wrong]
-   - Fix: [What to do]
-
-### Major Issues
-
-[Issues that should be fixed, strongly recommended]
-
-1. **[Issue title]**
-   - Location: [file:line or commit hash]
-   - Problem: [What's wrong]
-   - Suggestion: [Recommended fix]
-
-### Minor Issues
-
-[Nice-to-have improvements, optional]
-
-1. **[Issue title]**
-   - Location: [file:line or commit hash]
-   - Note: [Improvement idea]
-
-## Positive Observations
-
-[What was done well - be specific]
-
-- [Good practice 1]
-- [Good pattern 2]
-
-## Recommendations
-
-[High-level suggestions if applicable]
-
-1. [Recommendation 1]
-2. [Recommendation 2]
-
-## Next Steps
-
-[Clear action items]
-
-1. [Action 1]
-2. [Action 2]
-```
-
-**Assessment criteria:**
-
-**Ready:**
-- No critical issues
-- Minor issues only or no issues
-- Follows project standards
-- Tests adequate
-- Documentation complete
-
-**Needs Minor Changes:**
-- No critical issues
-- 1-2 major issues
-- Quick fixes needed
-- Can proceed after addressing major issues
-
-**Needs Significant Changes:**
-- Critical issues present, or
-- Multiple major issues, or
-- Design problems requiring rework
+**Report format and assessment criteria:** Read `references/review-template.md`
+and write the report by it.
 
 ### 5. Output Review
 
 **Write review to file:**
-- Path: `scratch/reviews/review-report-[timestamp].md` or
-- Path: `plans/[plan-name]/reports/review-report.md` (if part of runbook)
+- Reviewing a plan's work → `plans/[plan-name]/reports/review-report.md`
+- Otherwise → project-local `tmp/review-report-[timestamp].md` (gitignored)
 
 **Return summary to user:**
 - Overall assessment
@@ -179,19 +120,12 @@ testing, documentation, completeness).
 
 ## Constraints
 
-- **Bash** for git commands only, **Read** for examining files, **Write** for
-  review output
+- **Bash** for git commands and read-only search (`rg`, `rg --files`), **Read**
+  for examining files, **Write** for review output
 - Do NOT use Edit to fix issues (review only)
 - Review exactly what user requested — do not expand scope
 - Be specific, actionable, constructive
 - Flag secrets as CRITICAL — never log or output secret values
-
-**Example execution:** Read `references/example-execution.md` for a complete
-review interaction flow.
-
-**Common scenarios:** Read `references/common-scenarios.md` for handling
-secrets, multi-concern changes, pattern violations, already-committed work, and
-large changesets.
 
 ## Integration with General Workflow
 
@@ -212,20 +146,16 @@ In workflow contexts, prefer agent delegation. **Direct invocation** is for when
 the user asks for a review in conversation.
 
 **Workflow stages:**
-1. `/design` — Opus creates design document
-2. `/runbook` — Sonnet creates runbook (per-phase typing: TDD + general)
-3. `/build` — Executes the planned work
-4. corrector — Review and fix changes before commit
-5. `/commit-commands:commit` — Commit changes
-6. Complete job
+1. `/requirements` — capture requirements
+2. `/design` — triage and design; routes to `/runbook` or straight to `/build`
+3. `/runbook` — decompose into phases of typed items
+4. `/build` — execute the planned work, runbook or not
+5. corrector — review and fix changes before commit
+6. `/commit-commands:commit` — commit changes
 
 ## Execution Context for Review Delegations
 
 When delegating to corrector, Read `../../fragments/review-requirement.md` and
-include the scope context it specifies:
-
-**Required:** Scope IN, Scope OUT, Changed files, Requirements summary
-**Optional:** Prior state, Design reference
-
-See `plugin/fragments/review-requirement.md` for full template and rationale.
+include the scope context it specifies — §Execution Context is the authority for
+the field list and the rationale.
 

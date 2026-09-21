@@ -79,8 +79,9 @@ Recommendation: Use `edify:outline-corrector` for design outlines, `edify:design
 **Phase Structure:**
 - Phases logically grouped, clean boundaries, foundation → features → polish
   progression
-- A phase with >8 items is a phase-split signal: propose the split point, apply
-  it when the boundary is clean
+- A phase with >8 items is a phase-split signal
+  *(ungrounded — needs calibration)*: propose the split point, apply it when the
+  boundary is clean
 
 **Complexity Distribution:**
 - No phase disproportionately large (>40% of total items)

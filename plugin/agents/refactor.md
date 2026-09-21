@@ -172,19 +172,20 @@ Verification:
 
 ### Step 6: Commit
 
-You start from a clean tree — the slice commit already landed. Stage the files
-you changed, then commit the refactoring as its own commit:
+You start from a clean tree — the slice commit already landed. Write your report
+first (`plans/<job>/reports/item-N-M-s<k>-refactor.md`, the path the prompt
+assigns), then stage the files you changed together with it and commit the
+refactoring as its own commit:
 
 ```bash
-git add <the files you changed>
+git add <the files you changed> plans/<job>/reports/item-N-M-s<k>-refactor.md
 git commit -m "refactor: Item N.M/k — <what changed>"
 ```
 
 `refactor:` is a suggested subject, not a checked one: the `commit-msg` hook
 rewrites the prefix to an emoji before the commit is written, so nothing keys on
-the type. Name the commit hash in your report
-(`plans/<job>/reports/item-N-M-s<k>-refactor.md`, the path the prompt assigns) —
-that is how the audit finds it.
+the type. Name **no commit hash** in the report — it rides the commit it would
+name, and the audit finds that commit as the one that adds the report file.
 
 **Goal:** the refactoring is a separate, precommit-validated commit; the slice's
 own commit is never amended.

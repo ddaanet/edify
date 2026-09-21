@@ -65,4 +65,3 @@ decides.
 **D-60 — Route findings unconditionally to `/design`.** Conditional dispatch on
 fix size or an "architectural?" judgment reintroduces judgment at a stage that
 should be mechanical. `/design` triage already handles proportionality.
-

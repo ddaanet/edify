@@ -164,7 +164,6 @@ class TestTokenCacheOperations:
         assert result == 99
 
 
-
 class TestCachedCountTokens:
     """Tests for cached_count_tokens_for_file wrapper function."""
 

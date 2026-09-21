@@ -38,9 +38,7 @@ def test_end_to_end_token_counting_with_alias_resolution(
         lambda appname: str(cache_dir),
     )
 
-    result = CliRunner().invoke(
-        cli, ["tokens", "--model", "sonnet", str(fixture_file)]
-    )
+    result = CliRunner().invoke(cli, ["tokens", "--model", "sonnet", str(fixture_file)])
 
     assert result.exit_code == 0, result.output
     lines = result.output.strip().split("\n")

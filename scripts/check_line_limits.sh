@@ -79,6 +79,10 @@ if [ -f "$ALLOWLIST" ]; then
         case "$entry_path" in
         \#*) continue ;;
         esac
+        if [[ "$entry_path" == *$'\r'* || "$ceiling" == *$'\r'* || "$_note" == *$'\r'* ]]; then
+            echo "check_line_limits: $ALLOWLIST: line $line_no: entry has a carriage return (CRLF line ending)" >&2
+            exit 2
+        fi
         if ! [[ "$ceiling" =~ ^[0-9]+$ ]]; then
             echo "check_line_limits: $ALLOWLIST: line $line_no: ceiling is not an integer: $ceiling" >&2
             exit 2
@@ -146,8 +150,10 @@ walk() {
 }
 
 # A failed `mktemp` leaves the tree unchecked: exit 2, since a bare `set -e`
-# abort on the assignment would surface as 1 and read as an overage.
-if ! WALK_LIST="$(mktemp)"; then
+# abort on the assignment would surface as 1 and read as an overage. Explicit
+# template: BSD `mktemp` has no default one, so a bare `mktemp` is a usage
+# error on macOS.
+if ! WALK_LIST="$(mktemp "${TMPDIR:-/tmp}/check_line_limits.XXXXXX")"; then
     echo "check_line_limits: cannot create the walk list temp file" >&2
     exit 2
 fi
