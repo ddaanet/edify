@@ -1,5 +1,8 @@
 """Contract tests for ``edify-review-range.sh``'s ``RANGE:`` verdict.
 
+One of five modules split from ``tests/test_review_range.py``, the name
+KD-2 records, to keep each module under its line cap.
+
 See ``tests/review_range_helpers.py`` for the shared fixtures and the
 subprocess-invocation contract these tests exercise against.
 """
@@ -64,6 +67,36 @@ def test_second_pass_matching_base_emits_range(tmp_path: Path) -> None:
     sha = _init_repo(repo)
     prior = repo / "plans" / "prior-job" / "outline.md"
     _write_artifact(prior, "none", sha)
+    artifact = repo / "plans" / "job" / "outline.md"
+    _write_artifact(
+        artifact,
+        _second_pass_derived_from("plans/prior-job/outline.md"),
+        sha,
+    )
+
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+
+    result = _run_review_range(artifact, elsewhere)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout == f"RANGE: {sha}..HEAD\n"
+
+
+def test_prior_base_uppercase_same_commit_emits_range(tmp_path: Path) -> None:
+    """An uppercase-hex prior `Base:` on the same commit still emits `RANGE:`.
+
+    `plugin/bin/edify-review-range.sh:151` compares `$resolved_base` (git-
+    canonical lowercase) against `$prior_base`, the prior artifact's raw text —
+    case-preserved and never canonicalised. Two artifacts naming the identical
+    commit, one of them uppercase, must inherit cleanly: KD-2 reserves
+    `CONFLICT:` for "one of two artifacts is wrong", and a case difference alone
+    is neither artifact being wrong.
+    """
+    repo = tmp_path / "repo"
+    sha = _init_repo(repo)
+    prior = repo / "plans" / "prior-job" / "outline.md"
+    _write_artifact(prior, "none", sha.upper())
     artifact = repo / "plans" / "job" / "outline.md"
     _write_artifact(
         artifact,
@@ -145,6 +178,62 @@ def test_first_pass_none_with_rationale_emits_range(tmp_path: Path) -> None:
     sha = _init_repo(repo)
     artifact = repo / "plans" / "job" / "outline.md"
     _write_artifact(artifact, "none — this job originates from the task frame", sha)
+
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+
+    result = _run_review_range(artifact, elsewhere)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout == f"RANGE: {sha}..HEAD\n"
+
+
+def test_backticked_none_emits_range(tmp_path: Path) -> None:
+    """`` - **Derived from:** `none` `` resolves exactly like plain `none`.
+
+    `plugin/bin/edify-review-range.sh:64` strips backticks from the `Base:`
+    value only; the `derived_from` comparison against the literal `none`
+    (`:119`) never sees backticks stripped, so the backticked form falls
+    through to `NO-PROVENANCE:` — telling the operator the section is
+    missing rather than that a value is over-quoted. The prescribed shape
+    (`design-content-rules.md:139`) backticks every path, so backticking
+    `none` for symmetry is a plausible slip.
+    """
+    repo = tmp_path / "repo"
+    sha = _init_repo(repo)
+    artifact = repo / "plans" / "job" / "outline.md"
+    _write_artifact(artifact, "`none`", sha)
+
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+
+    result = _run_review_range(artifact, elsewhere)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout == f"RANGE: {sha}..HEAD\n"
+
+
+def test_crlf_artifact_emits_range(tmp_path: Path) -> None:
+    r"""An artifact written with CRLF line endings emits `RANGE:` unchanged.
+
+    `plugin/bin/edify-review-range.sh:40` strips only `[ \\t]+$` from each raw
+    line, so the `\\r` of every CRLF ending survives into the parsed values.
+    The first casualty is `Base:`, which the script reports as
+    `UNRESOLVED: <sha>\\r` — the operator is told the base cannot be resolved
+    and shown a sha that resolves fine. `Derived from:` is the second: its
+    value reads `none\\r`, which fails the `none` test at `:119` and would
+    fall through to `NO-PROVENANCE:`. The whole artifact is written CRLF, not
+    just the `Base:` line, so only a per-line fix at `:40` satisfies this —
+    stripping `\\r` from the `Base:` value alone leaves the second casualty
+    in place and merely swaps one wrong verdict for another.
+    """
+    repo = tmp_path / "repo"
+    sha = _init_repo(repo)
+    artifact = repo / "plans" / "job" / "outline.md"
+    _write_artifact(artifact, "none", sha)
+    artifact.write_bytes(
+        artifact.read_text(encoding="utf-8").replace("\n", "\r\n").encode("utf-8")
+    )
 
     elsewhere = tmp_path / "elsewhere"
     elsewhere.mkdir()

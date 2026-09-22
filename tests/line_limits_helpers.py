@@ -29,13 +29,18 @@ def _write_lines(path: Path, count: int) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-def _run_check_line_limits(
+def _run_check_line_limits(  # noqa: PLR0913 — `root` plus five independent
+    # toggles, each documented in the docstring below and each selecting a
+    # different invocation shape (argv, argv[0], CWD or PATH); bundling them
+    # into a struct would only add an indirection layer for this file's own
+    # tests, the sole caller.
     root: Path,
     allowlist: Path | None | Literal["default"] = None,
     path_prepend: Path | None = None,
     script: Path | None = None,
     *,
     omit_root: bool = False,
+    second_root: Path | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Invoke ``check_line_limits.sh`` by absolute path against ``root``.
 
@@ -74,6 +79,11 @@ def _run_check_line_limits(
     ``path_prepend``, when given, is put ahead of the real ``PATH`` so a
     fixture-supplied shim (a ``wc`` wrapper, for instance) is what the
     script's subshells resolve.
+
+    ``second_root``, when given, is appended as a *second* positional
+    argument after ``root`` — usage is ``[--allowlist FILE] [ROOT]``, one
+    optional ``ROOT``, so this exercises what the script does when given
+    two.
     """
     script_path = script if script is not None else SCRIPT
     args = [str(script_path)]
@@ -86,6 +96,8 @@ def _run_check_line_limits(
         args += ["--allowlist", str(allowlist)]
     if not omit_root:
         args.append(str(root))
+    if second_root is not None:
+        args.append(str(second_root))
     env = None
     if path_prepend is not None:
         env = os.environ.copy()

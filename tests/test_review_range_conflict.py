@@ -1,5 +1,8 @@
 """Contract tests for ``edify-review-range.sh``'s ``CONFLICT:`` verdict.
 
+One of five modules split from ``tests/test_review_range.py``, the name
+KD-2 records, to keep each module under its line cap.
+
 See ``tests/review_range_helpers.py`` for the shared fixtures and the
 subprocess-invocation contract these tests exercise against.
 """

@@ -13,14 +13,19 @@
 # sha comes only from the artifact text — never from `HEAD`, `git log`, or
 # `merge-base` — so a script that recomputes it cannot pass this contract.
 # Where `Derived from:` names a prior artifact, that artifact's own
-# `Base:` is read the same way and compared against this one's.
+# `Base:` is read the same way and compared against this one's — resolved
+# against the repo, the same as this artifact's own base, so a prior `Base:`
+# that names no commit yields `UNRESOLVED: <prior sha>` rather than
+# presenting a phantom commit as an inherited base under `CONFLICT:`.
 #
 # One verdict line on stdout, per KD-2's table:
 #   exit 0   RANGE: <base>..HEAD                          proceed with it
 #   exit 1   CONFLICT: base <a> != <b> inherited from <path>   STOP, report both
 #   exit 1   NO-PROVENANCE: / UNRESOLVED: <base> / NO-PRIOR: <path>  ask the user
 #            (NO-PROVENANCE also covers a `Derived from:` that is neither
-#            `none` nor names a `superseding` artifact: no range follows)
+#            `none` nor names a `superseding` artifact: no range follows.
+#            UNRESOLVED: covers either this artifact's own `Base:` or a
+#            prior's, one hop back, failing to resolve to a commit.)
 #   other    (nothing on stdout)                            STOP: script failed
 set -euo pipefail
 
@@ -28,16 +33,17 @@ set -euo pipefail
 # its indented continuation lines so a hard-wrapped value (the artifact may
 # wrap at 80 columns) reads as one logical line. Only the `## Provenance`
 # section is in scope: stop joining at the next `## ` heading. Trailing
-# whitespace is stripped per line so the join cannot manufacture a double
-# space or leave the last field value with a trailing blank. `[ \t]` rather
-# than `[[:space:]]`: the one-true-awk shipped on older macOS reads the
-# POSIX class as a plain bracket set of its own characters.
+# whitespace, and any `\r` left by a CRLF line ending, is stripped per line
+# so the join cannot manufacture a double space, leave the last field value
+# with a trailing blank, or leak a `\r` into every parsed value. `[ \t\r]`
+# rather than `[[:space:]]`: the one-true-awk shipped on older macOS reads
+# the POSIX class as a plain bracket set of its own characters.
 provenance_of() {
     awk '
         /^## Provenance/ { in_section = 1; next }
         in_section && /^## / { in_section = 0 }
         in_section {
-            sub(/[ \t]+$/, "")
+            sub(/[ \t\r]+$/, "")
             if ($0 ~ /^- \*\*/) {
                 if (bullet != "") print bullet
                 bullet = $0
@@ -116,7 +122,12 @@ if ! resolved_base=$(git -C "$root" rev-parse --verify --quiet "${base}^{commit}
     exit 1
 fi
 
-if [[ "${derived_from%% *}" == "none" ]]; then
+# The value may backtick-quote `none` for symmetry with the prescribed shape,
+# which backticks every path (`design-content-rules.md:139`); strip
+# backticks from the first word before comparing so `` `none` `` reads the
+# same as bare `none`.
+derived_from_first_word="${derived_from%% *}"
+if [[ "${derived_from_first_word//\`/}" == "none" ]]; then
     printf 'RANGE: %s..HEAD\n' "$resolved_base"
     exit 0
 fi
@@ -148,13 +159,26 @@ if [[ "$derived_from" =~ $superseding_quoted ]] ||
         exit 1
     fi
 
-    if [[ "$resolved_base" == "$prior_base" ]]; then
+    # `--quiet`, matching the base resolution above: a prior `Base:` that
+    # names no commit is a verdict, not a script failure. `UNRESOLVED:`
+    # carrying the prior's own sha is the verdict the script already gives
+    # its own unresolvable base, one hop away — not `CONFLICT:`, which KD-2
+    # reserves for adjudicating between two *resolvable* bases that disagree.
+    if ! resolved_prior_base=$(git -C "$root" rev-parse --verify --quiet "${prior_base}^{commit}"); then
+        echo "UNRESOLVED: $prior_base"
+        exit 1
+    fi
+
+    # Both sides compared as git-canonical shas (never the raw artifact
+    # text), so a prior `Base:` written uppercase, naming the same commit,
+    # reads as a match rather than a spurious `CONFLICT:`.
+    if [[ "$resolved_base" == "$resolved_prior_base" ]]; then
         printf 'RANGE: %s..HEAD\n' "$resolved_base"
         exit 0
     fi
 
     printf 'CONFLICT: base %s != %s inherited from %s\n' \
-        "$resolved_base" "$prior_base" "$prior_path"
+        "$resolved_base" "$resolved_prior_base" "$prior_path"
     exit 1
 fi
 

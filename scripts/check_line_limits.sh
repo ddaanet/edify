@@ -33,6 +33,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="."
+ROOT_SET=0
 ALLOWLIST=""
 ALLOWLIST_EXPLICIT=0
 while [[ $# -gt 0 ]]; do
@@ -54,7 +55,16 @@ while [[ $# -gt 0 ]]; do
         exit 2
         ;;
     *)
+        # Usage at `:4` is `[--allowlist FILE] [ROOT]` — one optional ROOT.
+        # A second positional silently overwriting the first would walk
+        # only the second, exiting 0 with no diagnostic; treat it the same
+        # as an unrecognised flag, just above.
+        if [ "$ROOT_SET" -eq 1 ]; then
+            echo "check_line_limits: unexpected extra argument: $1" >&2
+            exit 2
+        fi
         ROOT="$1"
+        ROOT_SET=1
         shift
         ;;
     esac
@@ -125,6 +135,11 @@ check_cap() {
     # this a pipeline, so the guard now depends on `pipefail`: without it
     # the status would be `tr`'s zero and an unreadable $file would slip
     # through as line_count="". Do not drop `pipefail` from the `set` line.
+    # Residual, unguarded: `wc -l` counts newlines, so a file whose last
+    # line carries no terminating newline counts one short — a cap+1-line
+    # file passes. Python source is terminated by `ruff format`, which every
+    # checking recipe runs; markdown is not, since `.rumdl.toml` enables
+    # MD013 alone and no other gate here requires a trailing newline.
     if ! line_count=$(wc -l <"$file" | tr -d ' '); then
         echo "check_line_limits: cannot read $file" >&2
         exit 2

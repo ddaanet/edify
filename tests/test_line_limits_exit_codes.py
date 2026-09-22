@@ -12,12 +12,18 @@ Both conditions here have a deterministic order: the script walks
 docs``), so putting the exit-2 condition under ``plugin`` and the oversized
 file under ``docs`` guarantees the script reaches the exit-2 site first —
 regardless of ``find``'s own (unspecified) entry order within a directory.
-The two ``exit 2`` sites this pins are the only ones that can be reached
-after ``check_cap`` has already run at least once: every other exit-2 site
-(bad ``--allowlist`` argument, unknown option, malformed or CRLF allowlist
-entry, a failed ``mktemp``) fires during argument or allowlist parsing,
-strictly before the first ``check_cap`` call, so none of them can co-occur
-with an already-set ``EXIT_CODE=1``.
+The two ``exit 2`` sites the precedence tests pin are the only ones that can
+be reached after ``check_cap`` has already run at least once: every other
+exit-2 site (bad ``--allowlist`` argument, unknown option, a second
+positional ``ROOT``, malformed or CRLF allowlist entry, a failed
+``mktemp``) fires during argument or allowlist parsing, strictly before the
+first ``check_cap`` call, so none of them can co-occur with an already-set
+``EXIT_CODE=1``.
+
+``test_two_positional_roots_exits_2_with_usage_diagnostic`` is one of those
+parse-time sites rather than a precedence test, and sits here only because
+``tests/test_line_limits.py``, its natural home, has no room left under its
+line cap.
 """
 
 import os
@@ -50,6 +56,36 @@ def test_unreadable_file_outranks_a_later_overage(tmp_path: Path) -> None:
         locked.chmod(0o644)
 
     assert result.returncode == 2, result.stdout + result.stderr
+    assert "oversized-file:" not in result.stdout, result.stdout
+
+
+def test_two_positional_roots_exits_2_with_usage_diagnostic(tmp_path: Path) -> None:
+    """A second positional `ROOT` is a usage error, not a silent second root.
+
+    `scripts/check_line_limits.sh:56-59`'s `*)` arm assigns `ROOT="$1"`
+    unconditionally on every non-flag argument, so a second positional
+    silently overwrites the first: the run proceeds against the *second*
+    root and walks straight past the 401-line file waiting under the first,
+    exiting 0 with no diagnostic at all. Usage at `:4` is
+    `[--allowlist FILE] [ROOT]` — one optional `ROOT` — so a second
+    positional must instead be rejected with a usage diagnostic on stderr
+    and exit 2, the treatment the `-*)` arm just above (`:52-55`) already
+    gives an unrecognised flag.
+
+    The 401-line file under the *first* root is what makes the three
+    outcomes distinguishable: exit 0 means the script silently walked the
+    second root, exit 1 means it walked the first, exit 2 means it rejected
+    the invocation without walking either.
+    """
+    root_a = tmp_path / "a"
+    root_b = tmp_path / "b"
+    _write_lines(root_a / "docs" / "over.md", 401)
+    root_b.mkdir(parents=True, exist_ok=True)
+
+    result = _run_check_line_limits(root_a, second_root=root_b)
+
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert result.stderr.strip() != "", "expected a usage diagnostic on stderr"
     assert "oversized-file:" not in result.stdout, result.stdout
 
 
