@@ -23,11 +23,13 @@ slice-batched TDD have not yet run against a real plan (L-6).
 **Next** — a `/gitlore:index-audit` pass over the memory store.
 
 **Do not re-litigate** — the planning-to-execution session boundary (D-25 keeps
-it on context-budget grounds, not discoverability); the publication postponement
-(D-9); the one-stage runbook — it is the terminal planning artifact (§5.3, FR-9)
-and a strong orchestrator composes every dispatch prompt from it live (D-24),
-which retired the three-tier structure (D-34). Pre-written step files were the
-weak-orchestrator premise, rejected in `docs/references/pipeline-contracts.md`.
+it on context-budget grounds, not discoverability); the release recipe staying
+edify's own, since `claude-plugin-dev` excludes this repo's shape in its own
+record (D-87); the one-stage runbook — it is the terminal planning artifact
+(§5.3, FR-9) and a strong orchestrator composes every dispatch prompt from it
+live (D-24), which retired the three-tier structure (D-34). Pre-written step
+files were the weak-orchestrator premise, rejected in
+`docs/references/pipeline-contracts.md`.
 
 ## 2. Status legend
 
@@ -153,7 +155,12 @@ exactly `plugin/` and never the sibling `src/` tree.
 The plugin does not ship the CLI's code. It obtains the CLI at runtime through a
 `SessionStart` hook that builds a venv with uv (§5.4). The two are locked to one
 version by `plugin/bin/check-version-consistency.py`, which requires
-`plugin.json` version == `pyproject.toml` version.
+`plugin.json` version == `pyproject.toml` version. `scripts/release.sh` moves
+the two together at release time, publishing the package to PyPI before bumping
+the plugin's `git-subdir` entry in the `ddaanet` marketplace, so the package
+never lags the plugin version that pins it (D-9). The script is edify's own
+rather than the shared `claude-plugin-dev` toolkit's, which excludes this
+two-product shape by design (D-87).
 
 `memory/` is a separate submodule, gated by gitlore. It is unaffected by the
 plugin de-submodule and stays a submodule.
@@ -321,11 +328,9 @@ execution in 2026-01 with estimated, not measured, figures.
 
 ## 9. Non-goals
 
-**Publishing to PyPI and the marketplace** — parked indefinitely by user
-decision (D-9), not blocked.
-
 **Cross-version compatibility** — there is no user base, so nothing is kept for
-migration's sake.
+migration's sake. `edify-cli` is on PyPI and the plugin is in the `ddaanet`
+marketplace, but nothing outside this repo installs either.
 
 **Model-specific instruction variants** — deferred until haiku execution quality
 becomes a demonstrated problem.

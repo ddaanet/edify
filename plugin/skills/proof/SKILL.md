@@ -112,8 +112,14 @@ Present items in document order. Each item:
 
 Recall: [domain-relevant context if any, or omitted if none]
 
-Verdict? (a)pprove (r)evise (k)ill (s)kip
+[proposed verdict in prose, with its reason; a revision shows the amended item]
 ```
+
+**Propose a verdict; never poll for one.** An option list bounds what the user
+can say, which defeats elicitation. State the verdict the item deserves and why,
+then read the verdict from the reply: agreement takes the proposal, all four
+stay expressible however phrased, and a reply that settles none gets one
+clarifying question, never a guess. See `references/item-review.md`.
 
 **Per-item recall:** Before presenting each item, run recall for that item's
 topic. The first item loads the procedure —
@@ -122,28 +128,24 @@ run the loaded procedure inline, without another `Skill` call. Null recall is
 silent — no "no relevant context found" noise.
 
 **Verdicts** — 4 explicit, uniform across all artifact types:
-- **approve** (a) — item correct, no changes
-- **revise** (r) — user states fix, recorded for batch-apply
-- **kill** (k) — item removed; sub-action prompt for planning artifacts: "Delete
-  only, or absorb into another artifact?" If absorb: user names target, content
-  transfer recorded in verdict list
-- **skip** (s) — explicit deferral, item persists unchanged
+- **approve** — item correct, no changes
+- **revise** — the fix the reply settles on, recorded for batch-apply
+- **kill** — item removed; for a planning artifact, ask delete-only or absorb,
+  recording the named target and its content transfer
+- **skip** — explicit deferral, item persists unchanged
 
-**Non-verdict input is implicit discussion.** Any response that isn't a
-recognized verdict shortcut enters the discussion sub-loop for that item. The
-conversational medium makes explicit "discuss" actions unnecessary.
+**Non-verdict input is implicit discussion.** A reply that settles no verdict
+and answers no clarifying question enters the discussion sub-loop for that item.
 
 ### Discussion Sub-Loop
 
-When user provides non-verdict input on an item, enter discussion scoped to that
-item:
+Discussion scoped to the item under review:
 
 **Reword:** Restate user feedback as understanding statement: "Understanding:
 [restatement]. Correct?" Wait for confirmation before proceeding.
 
 **Accumulate:** Each validated round adds to a per-item decision list
-(in-memory). Returns to verdict prompt with accumulated understanding when
-discussion concludes.
+(in-memory); when discussion concludes, propose a verdict again, carrying it.
 
 **Sync:** On user request ("sync", "show decisions"), output the full
 accumulated verdict list across all items.

@@ -4,8 +4,8 @@
 
 #### C.1. Create Design Document
 
-**Recall diff:** per `references/research-protocol.md` §A.5 — re-invoke recall
-on what just changed and reconcile the artifact.
+**Recall diff:** Read `references/research-protocol.md` §A.5 and, by it,
+re-invoke recall on what just changed and reconcile the artifact.
 
 **Output:** `plans/<job-name>/design.md`
 

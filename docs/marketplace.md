@@ -16,9 +16,11 @@ Marketplace name `ddaanet` — install commands: `/plugin install ddaa@ddaanet`,
 
 `ddaanet/edify-plugin` was archived on 2026-07-16: the plugin lives in this
 repo's `plugin/` subdirectory and is sourced via `git-subdir` (see
-`docs/design.md` §5.1 "One tree, two products"). The marketplace entry is not
-yet added — it waits on the first `edify-cli` PyPI publish, since the plugin's
-SessionStart hook installs `edify-cli==<plugin version>` from the index.
+`docs/design.md` §5.1 "One tree, two products"). The marketplace entry exists,
+with `url: ddaanet/edify` and `path: plugin`; `scripts/release.sh` bumps its
+version as the last step of every release, after the PyPI publish, since the
+plugin's SessionStart hook installs `edify-cli==<plugin version>` from the index
+(D-9, D-87).
 
 ## Distribution model
 

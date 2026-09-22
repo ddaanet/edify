@@ -67,7 +67,7 @@ general-purpose, model: sonnet). Model is always sonnet. Agent prompt includes:
 Write to `plans/reports/<topic>-external-research.md`.
 
 Both agents write reports and return filepath only — the quiet execution pattern
-at `plugin/fragments/delegation.md` §Quiet Execution Pattern.
+at `../../fragments/delegation.md` §Quiet Execution Pattern.
 
 ### Phase 3: Converge
 

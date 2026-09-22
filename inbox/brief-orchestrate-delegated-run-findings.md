@@ -112,9 +112,17 @@ Evidence offered as observation, not requirement.
 - **Two git-hygiene incidents from children.** A child's in-place mutation of a
   security hook (deny → allow) tripped an automated security review mid-run; and
   two staged files that were no part of the work were unstaged and rewritten
-  mid-phase, consistent with a child using `git stash` / `git stash pop`, cause
-  unconfirmed. Nothing under `build/`, `agents/` or `fragments/` currently
-  forbids `git stash`, `git reset` or a blanket `git add`.
+  mid-phase, consistent with a child using `git stash` / `git stash pop`.
+  Confirmed after the fact: `reports/item-3-4.md` describes obtaining its
+  pre-conversion red set "via `git stash` to isolate the two states, then
+  popped back". Nothing under `build/`, `agents/` or `fragments/` currently
+  forbids `git stash`, `git reset` or a blanket `git add`, or names the
+  parent's pre-staged files as state an executor must leave alone.
+- **One dispatch per item is the only grain.** `/orchestrate` composes a
+  dispatch per runbook item and names it `item-N-M`, so a `Depends on:` chain
+  of several items over one file yields one fresh agent per item, each
+  re-reading the file. A runbook that wants one agent to own a file across
+  its edits has to merge the items; there is no dispatch-level option for it.
 - **"Stop on anything needing a user decision" conflated two things.** A
   delegate given that instruction came back twice; only one was a genuine fork
   (the mutation-gate escalation). The other was the expected context-ceiling

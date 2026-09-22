@@ -78,117 +78,14 @@ This invocation is the structural anchor — it prevents classification from bei
 skipped or rationalized. It fires whether or not anything relevant turns up,
 whether or not `/requirements` already wrote the artifact.
 
-#### Classification Criteria
+#### Classify
 
-Assess two axes (Stacey Matrix-grounded), then classify. Classify only — do not
-route yet.
-
-**Axes:**
-1. **Implementation certainty** — is the approach known? Prior art in codebase?
-   Known technique?
-2. **Requirement stability** — are FRs agreed and mechanism-specified? Scope
-   bounded?
-
-**Complex:** Either axis low. Architectural decisions with multiple valid
-approaches, uncertain or evolving requirements, significant codebase impact.
-
-**Moderate:** Both axes moderate-to-high. Clear requirements, no architectural
-uncertainty, well-defined scope. Behavioral code changes: new functions, changed
-logic paths, conditional branches.
-
-**Simple:** Both axes high. Single file, obvious implementation, no
-architectural decisions. **No behavioral code changes** — new functions, changed
-logic paths, conditional branches are Moderate regardless of conceptual
-simplicity.
-
-**Defect:** Observed behavior ≠ expected behavior. Route to structured-bugfix
-regardless of apparent complexity — the investigation structure replaces
-architectural design. Cynefin Complicated domain: cause analyzable, fix
-knowable, but analysis must be structured to prevent premature-closure bias.
-
-#### Work Type Assessment
-
-Assess work type alongside complexity — independent dimension (XP spike/story,
-Boehm throwaway/evolutionary). Work type determines execution ceremony (quality
-obligations); complexity determines design ceremony.
-
-| Work Type | Diagnostic Question | Deliverable | Done Criteria |
-|-----------|-------------------|-------------|---------------|
-| **Production** | Does this deliver capability to users/agents? | Working feature, behavior change | Tested, linted, reviewed, integrated |
-| **Exploration** | Does this produce knowledge or validate an approach? | Prototype, spike, feasibility answer | Functional, produces intended learning |
-| **Investigation** | Does this produce a decision or analysis? | Report, decision entry, requirements | Accurate, complete, actionable |
-
-**Assessment signals:**
-- Explicit constraints: "prototype first," "spike," "investigate," "explore"
-- Artifact destination: `plans/prototypes/` → Exploration, `plans/reports/` →
-  Investigation, `src/` → Production
-- Requirement framing: "can we...?" → Exploration, "build X" → Production, "what
-  is...?" → Investigation
-- If ambiguous, default to Production (highest ceremony — safe default)
-
-**Artifact destination** informs quality obligations (Boehm throwaway vs
-evolutionary prototype distinction):
-
-| Destination | Paths | Quality Obligations |
-|------------|-------|-------------------|
-| **production** | `src/`, `plugin/bin/`, `plugin/lib/` | Tests, lint, module structure, review |
-| **agentic-prose** | `plugin/skills/`, `plugin/fragments/`, `plugin/agents/`, `agents/` | Wording quality, behavioral verification |
-| **exploration** | `plans/prototypes/`, `plans/spikes/` | Functional, documented purpose, no test mirrors |
-| **investigation** | `plans/reports/`, `docs/design.md` | Accuracy, completeness, grounding |
-| **ephemeral** | `tmp/` | None |
-
-#### Multi-Item Decomposition
-
-**Before classifying**, check both triggers. Either one means this invocation
-covers more than one work item:
-
-- **Implicit bundling** — the input artifact contains multiple discrete items
-  (deliverable review findings, PR review comments, multi-FR implementation
-  list).
-- **Explicit bundling** — the task frame or session notes fold additional work
-  into this invocation ("address X during /design").
-
-Both triggers run the same procedure — the source of the item list does not
-change how the items are handled:
-
-1. Enumerate all discrete items explicitly, naming the trigger for each
-2. Produce a per-item behavioral code check (does this item add functions,
-   change logic paths, or add conditional branches?)
-3. Classify each item individually, with its own visible output block
-   (Requirements-clarity → Triage Recall → Classification) — any behavioral item
-   elevates to Moderate minimum for that item
-4. Only after every item is classified, route: Simple items can batch, Moderate+
-   items get their own routing
-
-**Why:** Batch classification averages heterogeneous items — a behavioral change
-gets masked by non-behavioral siblings. The enumeration is the structural
-anchor: it forces explicit acknowledgment of each item rather than silently
-merging them into the primary task's classification.
-
-#### Classification Gate
-
-**Structural check (D+B anchor):** If classification is borderline
-Simple/Moderate, verify with `rg --files` or `rg` (Bash) on affected files to
-confirm whether behavioral code changes are involved (new functions, changed
-logic paths).
-
-Produce this classification block before routing (visible output, not internal
-reasoning — **per-item if composite**):
-- **Classification:** [Simple / Moderate / Complex / Defect]
-- **Implementation certainty:** [High / Moderate / Low] — is approach known?
-- **Requirement stability:** [High / Moderate / Low] — are FRs
-  mechanism-specified?
-- **Behavioral code check:** Does this task add functions, change logic paths,
-  or add conditional branches? [Yes → Moderate minimum / No]
-- **Work type:** [Production / Exploration / Investigation] — what does this
-  deliver?
-- **Artifact destination:** [production / agentic-prose / exploration /
-  investigation / ephemeral]
-- **Evidence:** Which criteria and recall entries informed the decision
-
-**Classification persistence (C-2):** Write the filled-in classification block
-to `plans/<job>/classification.md`. This file is consumed by
-`triage-feedback.sh` for post-execution comparison.
+**Only on the artifact check's "otherwise" branch** — a resumed `design.md` or
+`outline.md` carries its own classification and skips this. Read
+`references/triage.md` and work through it: the two axes and the four classes,
+the work-type and artifact-destination tables, the multi-item decomposition
+check that runs before classifying, and the classification block the gate writes
+to `plans/<job>/classification.md`. Return here with that block filled in.
 
 #### Routing
 
@@ -239,8 +136,8 @@ to `plans/<job>/classification.md`. This file is consumed by
   → verify. Skip design — the investigation structure replaces architectural
   design.
 
-**Bundled work:** handled by §Multi-Item Decomposition in Phase 0 — explicit
-bundling is one of its two triggers.
+**Bundled work:** handled by §Multi-Item Decomposition in `references/triage.md`
+— explicit bundling is one of its two triggers.
 
 **Session state check:** If the session has significant pending work (>5 tasks
 *— ungrounded threshold, needs calibration*), suggest `/handoff:handoff` before

@@ -1,6 +1,10 @@
 ---
 name: requirements
-description: Capture and document requirements for implementation. Triggers on "capture requirements", "document requirements", "what do I want to build", or feature discussions without clear documentation. Produces requirements.md artifact for design and planning phases.
+description: >-
+  Capture and document requirements for implementation. Triggers on "capture
+  requirements", "document requirements", "what do I want to build", or feature
+  discussions without clear documentation. Produces requirements.md artifact
+  for design and planning phases.
 allowed-tools: Read, Write, Edit, Bash, Skill
 user-invocable: true
 ---
@@ -49,9 +53,7 @@ Invoke
 
 **Gate anchor:** No plan-dir argument: this skill *creates* the artifact, so
 there is none to resolve. The artifact **write** is the structural anchor — a
-tool call that fires whether or not anything relevant turns up. When nothing
-relevant is found, write the artifact with an explicit null entry (see format
-below).
+tool call that fires whether or not anything relevant turns up.
 
 **Boundaries:**
 - No agent delegation, no Context7, no web research — those belong to /design
@@ -60,39 +62,14 @@ below).
 
 ### Recall Artifact
 
-After recall completes, write `plans/<job>/recall-artifact.md`. File paths only
-— downstream consumers Read them fresh at consumption time, so the artifact
-never goes stale.
+Read `references/formats-and-exit.md` now — read it once, here, on every run. It
+carries the recall artifact's shape and its null form, the gap-fill question
+template step 4 asks for, the `requirements.md` format step 3 writes by, the
+skill-dependency table and the exit routing step 6 uses, and the STOP conditions
+that abort before an artifact exists.
 
-The artifact carries planning-stage **curation** into execution. Subagents do
-receive the memory index, but nothing is fetched for them automatically —
-auto-recall does not run below the main session. The artifact records which
-files the planner judged relevant, so no downstream agent has to re-derive that
-selection, and it covers corpora the index does not reach.
-
-**Format:**
-
-```markdown
-# Recall Artifact: <Job Name>
-
-Read each file listed below — do not rely on inline summaries.
-
-## Entries
-
-memory/<name>.md — <1-line relevance note>
-```
-
-**Null artifact (nothing relevant):** Write `null — no relevant entries found`
-as the sole entry. Downstream consumers still Read the artifact and find the
-null marker, so the gate is anchored without consumer-side empty-section
-handling. Augmenting consumers (/design A.1, /runbook §1 Recall and Discovery)
-remove the null entry when adding real ones.
-
-**Selection criteria:** Include files that informed requirements or constrain
-implementation. Exclude files read but proved irrelevant — the artifact is
-curated, not exhaustive.
-
-**Output:** `plans/<job>/recall-artifact.md`
+Write `plans/<job>/recall-artifact.md` by it, with the null entry when nothing
+relevant turned up.
 
 ## Extract Mode Procedure
 
@@ -146,7 +123,8 @@ during the initial recall pass. Run the recall procedure already loaded in
 
 ### 3. Structure Requirements
 
-Read §Standard Format below, then format the extracted items by it:
+Format the extracted items by §Standard Format in
+`references/formats-and-exit.md`, already read at the recall pass:
 - Number items sequentially within each section (FR-1, FR-2, ...)
 - Include acceptance criteria for functional requirements
 - Capture rationale for constraints
@@ -167,22 +145,9 @@ Read the structured draft, then check for empty critical sections:
 - Extract mode: Maximum 3 gap-fill questions for empty critical sections
 - Elicit mode: 4-6 total questions (section questions + adaptive follow-ups)
 
-Ask gap-fill questions inline, as numbered prose in a single turn. Each question
-carries a **proposed answer** drawn from the job name and the conversation, so
-the user corrects a draft rather than filling a blank — and silence on a
-question is agreement with its proposal.
-
-```
-Three gaps in the requirements. Proposed answers below; correct the ones I got
-wrong and I'll take the rest as agreed.
-
-1. Functional — the validator parses hook scripts before commit, blocks the
-   commit when one is malformed, and reports which hook failed and why.
-2. Scope — hook scripts under `.git/hooks/` only; not the hooks Claude Code
-   configures in settings.json.
-3. Constraints — runs inside the commit path, so it must finish well under a
-   second and must not need network.
-```
+Ask gap-fill questions by §Gap-Fill Questions in
+`references/formats-and-exit.md` — numbered prose in a single turn, each
+question carrying a proposed answer.
 
 Never reach for `AskUserQuestion`. A picker hides the exchange from the
 transcript, so the requirements artifact ends up with no readable record of how
@@ -207,148 +172,14 @@ decisions are applied to the artifact.
 
 ### 6. Finalise
 
-After /proof applies the accumulated decisions:
+After /proof applies the accumulated decisions, by
+`references/formats-and-exit.md`:
 - Confirm the artifact on disk matches the validated state
-- Scan for skill dependencies (see Skill Dependency Scanning section)
-- Suggest next step (see Default Exit section)
+- Scan for skill dependencies (§Skill Dependency Scanning)
+- Suggest the next step (§Default Exit)
 
 ## Elicit Mode Procedure
 
-When conversation lacks requirements context:
-
-### 1. Semi-Structured Elicitation
-
-Ask inline, in numbered prose, one turn per round — same form as the gap-fill
-block above, and for the same reason. Cover the critical sections (Functional
-Requirements, Scope Boundaries), adding Constraints/Dependencies where the job
-suggests them. Each question states a proposed answer inferred from the job name
-and the conversation; the user corrects what is wrong and silence carries the
-rest. Then 1-2 adaptive follow-ups based on what came back.
-
-Elicit mode has less to infer from than Extract mode, so its proposals will be
-weaker — say so, rather than presenting a guess with the confidence of a
-derivation.
-
-### 2-6. Shared Steps
-
-After elicitation, follow Extract mode steps 2, 2.5 and 3-6 (Codebase Discovery,
-Post-Explore Recall, Structure, Gap Detection, Write and Validate, Finalise).
-
-## Standard Format
-
-```markdown
-# <Job Name>
-
-## Requirements
-
-### Functional Requirements
-**FR-1: <requirement title>**
-<description, acceptance criteria>
-
-**FR-2: <requirement title>**
-<description, acceptance criteria>
-
-### Non-Functional Requirements
-**NFR-1: <requirement title>**
-<description>
-
-### Constraints
-**C-1: <constraint title>**
-<rationale>
-
-### Out of Scope
-- <item> — <rationale>
-
-### Dependencies
-- <dependency> — <impact on implementation>
-
-### Open Questions
-- Q-1: <unresolved item — what needs investigation>
-
-### References
-- `plans/<job-name>/reports/explore-<topic>.md` — inherited from prior work;
-  this skill does not produce one
-- `plans/reports/<topic>-grounding.md` — grounding research synthesis
-- [External Paper Title](url) — informed FR-2 scope decision
-```
-
-**Section rules:**
-- Omit empty sections entirely (don't scaffold structure)
-- Number identifiers sequentially within each section (FR-1, FR-2, ... not FR-1,
-  FR-3)
-- Open Questions captures items conversation didn't resolve → become Design
-  Phase A research targets
-- Dependencies flags blocking work, prerequisite plans, or external dependencies
-- References track provenance — what research, external sources, or project
-  artifacts informed the requirements. Include exploration reports, grounding
-  research, external papers, prior plan reports. Omit if requirements came
-  entirely from conversation.
-
-## Skill Dependency Scanning
-
-After writing artifact, scan requirements text for skill dependency indicators:
-
-| Indicator | Skill to Flag |
-|-----------|---------------|
-| "sub-agent", "delegate to agent", "agent definition" | `plugin-dev:agent-development` |
-| "skill", "invoke skill", "skill preloaded" | `plugin-dev:skill-development` |
-| "hook", "PreToolUse", "PostToolUse" | `plugin-dev:hook-development` |
-| "plugin", "MCP server" | `plugin-dev:plugin-structure` |
-
-If indicators found, append to artifact:
-
-```markdown
-### Skill Dependencies (for /design)
-- Load `plugin-dev:hook-development` before design (hooks mentioned in FR-2)
-```
-
-**Rationale:** Artifact-scoped scanning reduces A.0 scan time — planner reads
-requirements.md first, loads indicated skills immediately rather than scanning
-entire codebase.
-
-## Default Exit
-
-Present artifact path and suggest next step based on completeness:
-
-```
-Requirements written to: plans/<job>/requirements.md
-
-Next steps (decision criteria):
-- 0-2 open questions, all critical sections populated → `/design plans/<job>/`
-- 3+ open questions or empty critical sections → stop here; revisit when clearer
-- Very clear scope + simple → `/design plans/<job>/` (its triage routes small work straight to `/build`)
-- User stated explicit next step → Use that path
-```
-
-**Workflow positioning:**
-```
-/requirements <job> → /design plans/<job>/ (seeds A.0)
-/requirements <job> → /handoff:handoff (document intent for later)
-/requirements <job> (standalone — capture intent, no immediate follow-up)
-```
-
-## STOP Conditions
-
-The artifact is a planning input — `/design` and `/runbook` argue from it, and
-`/proof` validates its content, not its preconditions. These conditions abort
-before an artifact is written; a wrong or empty requirements.md is worse than
-none, because downstream phases treat it as settled.
-
-**STOP and report to the user when:**
-- **Gap detection cannot reduce open questions below the count that blocks every
-  exit path** (3+ open questions AND empty critical sections). Write what
-  exists, mark the artifact incomplete in its header, and stop here rather than
-  routing to `/design`.
-
-**Failure handling:** these are user-decision points, not retries. Report the
-condition, state what is missing, and wait. Do not fill a gap by inference —
-that is the hallucination risk the Key Principles below name.
-
-**Review:** `/requirements` has no corrector; `/proof` is the sole gate on
-content. That places the burden of a careful read on the user, so do not present
-an artifact as validated when it has only been written.
-
-## Key Principles
-
-- Extract from conversation, do not infer (hallucination risk)
-- Omit empty sections — do not scaffold structure nobody will fill
+**When mode detection lands on elicit:** Read `references/elicit-mode.md` and
+run its elicitation round, then rejoin Extract mode above at steps 2, 2.5 and
+3-6. Extract mode never reads it.

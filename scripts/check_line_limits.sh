@@ -121,7 +121,11 @@ check_cap() {
     local file="$1" cap="$2" line_count
     # An unreadable file leaves the tree unchecked: exit 2, since a bare
     # `set -e` abort here would surface as 1 and read as an overage.
-    if ! line_count=$(wc -l <"$file"); then
+    # `tr` strips BSD `wc`'s left padding (unverified on macOS) and makes
+    # this a pipeline, so the guard now depends on `pipefail`: without it
+    # the status would be `tr`'s zero and an unreadable $file would slip
+    # through as line_count="". Do not drop `pipefail` from the `set` line.
+    if ! line_count=$(wc -l <"$file" | tr -d ' '); then
         echo "check_line_limits: cannot read $file" >&2
         exit 2
     fi

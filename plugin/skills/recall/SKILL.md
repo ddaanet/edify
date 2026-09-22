@@ -17,7 +17,7 @@ plan's recall artifact, select further entries from the memory index, Read their
 bodies, report. A caller invokes this skill with a plan directory and a topic
 and adds only its own delta — except a dispatch prompt for a sub-agent that may
 hold no `Skill` tool, which restates step 1 inline
-(`plugin/fragments/delegation.md` §Recall Artifacts For Sub-Agents).
+(`../../fragments/delegation.md` §Recall Artifacts For Sub-Agents).
 
 This skill reads; it never writes. A caller that needs its selection to survive
 past the turn (`plans/<job>/recall-artifact.md`) writes that artifact itself.
@@ -42,7 +42,7 @@ a further `Skill` call only reprints a body already in context.
 Those files carry the upstream planner's curation — decision content, failure
 modes, quality anti-patterns — and cover corpora the index does not reach. A
 delegation prompt supplies entries as **paths**, never as inlined content
-(`plugin/fragments/delegation.md` §Recall Content In Delegation Prompts): Read
+(`../../fragments/delegation.md` §Recall Content In Delegation Prompts): Read
 those paths and do not re-select against the index for them.
 
 Load the artifact's `## Skills to load before executing` list in the same step,

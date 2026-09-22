@@ -68,12 +68,18 @@ directory raises `FileNotFoundError`. Partial data beats total failure, and the
 warnings tell the user where to look. Optional fields use
 `.get(field, default)`.
 
-**D-9 — Publication is postponed indefinitely (2026-07-17, user decision).** The
-PyPI publish and the marketplace `git-subdir` entry are parked. The marketplace
-manifest has no `edify` entry, so edify is uninstallable meanwhile. *Reopen-if:*
-the user asks to publish; note that publish ordering is hard — `edify-cli` must
-reach the index *before* the plugin version that pins it, so a plugin version
-can never lead its package.
+**D-9 — Publication is postponed indefinitely (2026-07-17, user decision).**
+*Reversed 2026-08-04:* `edify-cli` 0.0.3 shipped to PyPI through `just release`,
+and the `ddaanet` marketplace now carries an `edify` entry with a `git-subdir`
+source (`url: ddaanet/edify`, `path: plugin`). Edify is installable. No in-repo
+source records *why* the postponement was lifted; the nearest thing is the note
+that the publish was verified end to end through the SessionStart bootstrap
+resolving from PyPI, which is the occasion rather than a stated reason. What
+survives the reversal is the ordering constraint it warned about: `edify-cli`
+must reach the index *before* the plugin version that pins it, because the
+bootstrap installs `edify-cli==<plugin version>`, so a plugin version can never
+lead its package. `scripts/release.sh` encodes that order — the PyPI publish
+sits between the tag push and the GitHub release (D-87).
 
 **D-10 — The plugin is a subdirectory, not a submodule.** A parent repo cannot
 `git add` inside a submodule, so `git add plugin/.claude-plugin/plugin.json`
@@ -112,6 +118,38 @@ from a package index, not from PyPI specifically. Build the wheel locally, point
 uv at it (`UV_FIND_LINKS`, `UV_INDEX`), prove the bootstrap green offline, then
 publish and drop the override. The publish-ordering constraint binds releases,
 not development.
+
+**D-87 — The release recipe is edify's own, because the shared plugin toolkit
+excludes hybrid repos by design.** `scripts/release.sh`, behind `just release`,
+bumps `plugin/.claude-plugin/plugin.json` as the version source of truth, syncs
+`pyproject.toml` through `uv version`, commits, tags, pushes, publishes the
+wheel to PyPI, creates the GitHub release and bumps the marketplace entry, each
+external step probing what already landed so `--resume` can finish a release
+that died partway. The publish sits between the tag push and the GitHub release,
+which is where the D-9 ordering constraint binds. The script lives at the repo
+root rather than under `plugin/`, because that directory ships verbatim to every
+install and `MARKETPLACE_DIR` paths and PyPI credentials have no business inside
+it. Adopting `claude-plugin-dev` instead is not a configuration question: that
+project rules edify's shape out in its own record, both as a repo non-goal
+("Don't add hybrid Python+plugin support … Repos like `edify` are deliberately
+out of scope") and as a stated limitation ("Hybrid Python+plugin repos (e.g.
+edify) are out of scope. … Edify keeps its bespoke recipe"). The shape it
+excludes is the one §5.1 describes — two products in one tree whose versions
+move in lockstep (NFR-4). Concretely its recipe carries no PyPI build or publish
+step and no `pyproject.toml` awareness, drives a single manifest rather than two
+version files, and resolves that manifest at the repo root, where edify's sits a
+directory down with no search and no configuration to point it there. Adoption
+is also not free-standing: integration vendors the toolkit as a `git subtree`
+plus an imported justfile, and installs a PreToolUse hook that denies any Write
+or Edit changing `plugin.json`'s `.version`. Edify's script is not independent
+invention — its GitHub and marketplace steps are ported near-verbatim from the
+toolkit's with the PyPI step spliced in, so the divergence stays legible and the
+port is what to re-read when those steps change upstream. *Taken 2026-07-16*
+(user decision) as keep-now-migrate-later, not as a permanent split; the
+migration needs the exclusion lifted, and nothing has lifted it. *Reopen-if:*
+the toolkit grows a hybrid path, or its maintainers revisit an exclusion that
+predates the de-submodule (D-10) — the edify it ruled out was a different shape
+from the merged one.
 
 ## Markdown and token tooling
 
@@ -178,6 +216,19 @@ rarely-exercised path format drifts and rots silently (D-12).
 
 **Click's `ClickException` for CLI failure** — hardcoded exit codes do not map
 to this project's semantics (D-5).
+
+**Extending `claude-plugin-dev` to cover hybrid repos** — reverses that
+project's documented non-goal, and by its own reasoning the conditionals needed
+would obscure its main path or break edify outright (D-87).
+
+**Un-hybridising edify so the toolkit fits** — the single-manifest model would
+apply if the plugin were published as its own thing again, which is exactly what
+D-10 undid (D-87).
+
+**Adopting the toolkit on the grounds that its exclusion predates the merge** —
+the exclusion stands in that project's current record, so adopting anyway is
+edify deciding another project's scope for it. It is D-87's reopen gate, not a
+route around it.
 
 **A JSON file as a general key-value store** — the existing models cache is a
 special case (bounded, ~50 entries, TTL-refreshed); extending it to unbounded

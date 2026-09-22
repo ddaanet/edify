@@ -321,3 +321,57 @@ def test_line_limits_handles_spaced_path(tmp_path: Path) -> None:
     assert result.stdout.splitlines() == [
         "oversized-file: docs/my notes.md: 401 lines > 400"
     ], result.stdout
+
+
+def test_line_limits_fails_python_over_400_under_src(tmp_path: Path) -> None:
+    """A 401-line ``.py`` file under ``src/`` reports the overage and exits 1.
+
+    KD-7's "the Python loop adopts the same line" pins that the pre-existing
+    ``src/``/``tests/`` branch emits the same ``oversized-file:`` form the
+    markdown branch does, not the pre-job ``❌ ... (exceeds ... limit)``
+    wording it replaced.
+    """
+    root = tmp_path / "root"
+    _write_lines(root / "src" / "pkg" / "big.py", 401)
+
+    result = _run_check_line_limits(root)
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert result.stdout.splitlines() == [
+        "oversized-file: src/pkg/big.py: 401 lines > 400"
+    ], result.stdout
+
+
+def test_line_limits_fails_python_over_400_under_tests(tmp_path: Path) -> None:
+    """The same contract holds for a ``.py`` file under ``tests/``."""
+    root = tmp_path / "root"
+    _write_lines(root / "tests" / "big.py", 401)
+
+    result = _run_check_line_limits(root)
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert result.stdout.splitlines() == [
+        "oversized-file: tests/big.py: 401 lines > 400"
+    ], result.stdout
+
+
+def test_line_limits_reports_allowlisted_python_without_failing(
+    tmp_path: Path,
+) -> None:
+    """An allowlisted ``.py`` file at its ceiling is reported, not failed.
+
+    Mirrors ``test_line_limits_reports_allowlisted_without_failing`` for the
+    markdown branch — the allowlist lookup is shared code, but nothing
+    before this pinned that the Python branch calls into it at all.
+    """
+    root = tmp_path / "root"
+    _write_lines(root / "src" / "pkg" / "big.py", 401)
+    allowlist = tmp_path / "allowlist.txt"
+    _write_allowlist(allowlist, [("src/pkg/big.py", 401, "no job yet")])
+
+    result = _run_check_line_limits(root, allowlist=allowlist)
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.splitlines() == [
+        "oversized-file: src/pkg/big.py: 401 lines > 400"
+    ], result.stdout

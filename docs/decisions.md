@@ -20,7 +20,9 @@ Argued in `docs/references/cli-and-package.md`.
 - **D-6** — A call site that explodes under Black has an API problem.
 - **D-7** — Pydantic for all data structures, StrEnum for closed vocabularies.
 - **D-8** — Malformed session data degrades, it does not abort.
-- **D-9** — Publication is postponed indefinitely (2026-07-17, user decision).
+- **D-9** — Publication is postponed indefinitely (2026-07-17, user decision)
+  (reversed 2026-08-04: `edify-cli` 0.0.3 shipped and the marketplace entry
+  exists).
 - **D-10** — The plugin is a subdirectory, not a submodule.
 - **D-11** — The venv lives in `CLAUDE_PLUGIN_DATA`, version-scoped by path.
 - **D-12** — Skills reach the binary by content substitution, never a hardcoded
@@ -29,6 +31,8 @@ Argued in `docs/references/cli-and-package.md`.
 - **D-14** — remark-cli is the formatter.
 - **D-15** — The preprocessor runs before the formatter and fails loudly.
 - **D-16** — Model aliases resolve at runtime with a 24-hour cache.
+- **D-87** — The release recipe is edify's own, because the shared plugin
+  toolkit excludes hybrid repos by design.
 
 *Rejected:* Prettier and markdownlint-cli2 as the markdown formatter; merging
 the plugin to the repo root; keeping `plugin/` as a submodule; a stdlib venv
@@ -36,7 +40,9 @@ the plugin to the repo root; keeping `plugin/` as a submodule; a stdlib venv
 `uv tool install edify-cli`; running the CLI from the `src/` tree in the same
 repo; `${CLAUDE_PLUGIN_ROOT}/.venv` for the venv; a hardcoded
 `~/.claude/plugins/data/...` fallback path in skills; Click's `ClickException`
-for CLI failure; a JSON file as a general key-value store.
+for CLI failure; a JSON file as a general key-value store; extending
+`claude-plugin-dev` to cover hybrid repos; un-hybridising edify so the toolkit
+fits; adopting the toolkit on the grounds that its exclusion predates the merge.
 
 ## Testing
 

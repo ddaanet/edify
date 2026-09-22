@@ -118,7 +118,7 @@ Review implementation changes against design specification.
 - FR-11: Runbook-less execution lifecycle
 
 **Scope:**
-- IN: plugin/skills/build/SKILL.md, references/tdd-slice.md, references/resuming.md, references/dispatch-composition.md, references/review-dispatch-template.md, scripts/verify-step.sh
+- IN: plugin/skills/build/SKILL.md, references/tdd-slice.md, references/escalation.md, references/dispatch-composition.md, references/review-dispatch-template.md, scripts/verify-step.sh
 - OUT: the reference sweep across /design, /runbook and the fragments; `docs/design.md`; `memory/MEMORY.md`
 
 **Design reference:** plans/build-skill/outline.md

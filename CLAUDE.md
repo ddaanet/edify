@@ -312,4 +312,5 @@ claim about, or changing, the mechanism it argues:
   sub-agent gets, naming, script-versus-delegate
 
 A hub conclusion and its node's argument change together. `docs/changelog.md`
-carries the dated design-significant entries.
+indexes the dated design-significant entries, one file per entry under
+`docs/changelog/`.

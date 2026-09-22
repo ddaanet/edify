@@ -139,14 +139,8 @@ plugin/skills/build/scripts/verify-step.sh
 ```
 
 - Exit 0 (`CLEAN:` and the checks that passed) → proceed.
-- Exit 2 → the script itself failed, not the dispatch. Stop and report; do not
-  remediate, since there is no established verdict to remediate against.
-- Exit 1 → remediate: resume the named agent once (`SendMessage to: <name>`,
-  "Your dispatch left uncommitted changes or precommit failures. Fix and
-  commit."). If the resume fails or returns without progress, dispatch a fresh
-  `edify:artisan` (sonnet) with the git status, diff and error output — recovery
-  is mechanical, no design context needed. If recovery fails, escalate to the
-  user. After any remediation, note the RCA follow-up in the run summary.
+- Anything else → Read `references/escalation.md` §Post-item remediation and
+  follow it. Exit 2 and exit 1 are different situations there.
 
 **Invent no further checkpoints.** A run's semantic reviews are exactly two —
 the phase-boundary corrector below, where the work is a phased runbook, and
@@ -189,30 +183,6 @@ tree) are handled here; design-level issues escalate to the user. Every
 resolution must pass precommit, leave a clean tree, and satisfy the item's own
 criteria.
 
-- **Unexpected result, no error** → stop and report to the user: the planning
-  assumptions were wrong.
-- **Report file missing after an agent completes** → ask the agent for the
-  report (resume by name); if that fails, investigate before proceeding.
-- **Same error from two dispatches** → stop and report the pattern: a systemic
-  issue, not a one-off.
-- **Agent never returns** → check with `TaskOutput`; hanging → stop the task and
-  escalate. There is no in-band turn or duration bound
-  (`plugin/fragments/escalation-acceptance.md`) — a runaway agent's only stop is
-  the user.
-
-**When resuming after a context ceiling or a kill:** Read
-`references/resuming.md` before assessing state.
-
-## References
-
-Each node names the condition that reaches it; none is loaded unconditionally.
-
-- **`references/dispatch-composition.md`** — composing any dispatch prompt
-- **`references/tdd-slice.md`** — §4.3, an item carrying `Slices:`
-- **`references/phase-boundary.md`** — §4.5, end of a runbook phase
-- **`references/finishing.md`** — §5, every item done
-- **`references/review-dispatch-template.md`** — reviewer prompts, from
-  `finishing.md` §1
-- **`references/resuming.md`** — §6, resuming an interrupted run
-- **`scripts/verify-step.sh`** — the clean-tree verdict, §2, §4.4, §4.5
-- **`plugin/fragments/delegation.md`** — agent behaviour rules
+**When a dispatch errors, returns an unexpected result, or never returns, and
+when a run resumes after a context ceiling or a kill:** Read
+`references/escalation.md` and follow it before acting on the state.

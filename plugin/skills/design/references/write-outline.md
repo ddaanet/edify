@@ -146,8 +146,8 @@ invocation, and recall diff guidance.
 framework, gaps identified. This file is a cascading dependency: A.5 reads it,
 absence blocks outline generation.
 
-**Recall diff:** per `references/research-protocol.md` §A.5 — re-invoke recall
-on what just changed and reconcile the artifact.
+**Recall diff:** Read `references/research-protocol.md` §A.5 and, by it,
+re-invoke recall on what just changed and reconcile the artifact.
 
 #### A.5. Outline
 

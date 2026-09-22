@@ -101,7 +101,7 @@ receives:
   `<type>` being `code`, `tests`, `prose` or `config` — one per partition,
   joined with `-` where a partition covers two
 
-Each agent follows `plugin/fragments/delegation.md`: quiet execution (report to
+Each agent follows `../../fragments/delegation.md`: quiet execution (report to
 the named file, return the filepath or an error), `Bash` in its tool list for
 search, and the recall artifact resolved by path rather than inlined.
 

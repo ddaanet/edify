@@ -9,392 +9,52 @@ place by answering a question a future reader would otherwise ask of
 `docs/design.md` and find no answer to.
 
 `docs/design.md` holds the present-tense answer to *what the system is and why*.
-This file is the write-time record of how it got that way.
-
-## 2026-09-21 — the design graph's crosslinks are checked mechanically
-
-Splitting `docs/design.md` into a hub, an index and eight nodes made two
-invariants hand-breakable: a `D-<n>` with no index line, and an index conclusion
-drifting from its node's. `scripts/check_design_links.sh` pins both, plus
-`Argued in` resolution, in the root `justfile` only — a consuming project has no
-`docs/decisions.md`. The hub stays unpinned: its conclusions carry no ID.
-
-## 2026-09-21 — what the TDD audit changed: slice-scoped GREEN, mutation proof, report commits
-
-The TDD audit of `plans/provenance-enforcement-and-routing/` found the
-over-implementing GREEN: each dispatch was handed the whole item contract "for
-structure" and implemented all of it, so six later slices — 1.2/3, 1.2/4–8,
-1.10/3, /6, /7 — had no behaviour left to red against, and nothing forbade it.
-The contract legitimately goes into the prompt, and once it is there an agent
-told to make one test pass has no reason to stop at the test. So the prompt now
-names the rest of it out of scope in all three places it has to act —
-`dispatch-composition.md` §Prompt contents (where the prompt is composed),
-`tdd-slice.md` §(c) (where the dispatch is described) and `test-driver.md` GREEN
-mode (where the agent reads it); the first two alone would have been rules the
-agent never sees.
-
-The recovery those six slices actually used is now the recorded fallback, D-84's
-second half: a mutation proof, per named test and never per batch. The audit
-rates it *stronger* evidence than an ordinary red, which is why it is kept
-rather than counted as a failure — and not a reason to plan for it. It also
-reconciles three statements that each read as absolute: a passing RED test has
-named itself vacuous, the test review's first check is that every listed test
-FAILED, and a slice whose behaviour exists cannot fail.
-
-The same audit's other hole, D-86: GREEN committed the slice and then wrote its
-report, leaving it untracked for `verify-step.sh` to call every GREEN dispatch
-dirty — as were the RED, test-review and code-review reports whenever their
-review changed no file. A report now rides the commit whose work it reports and
-names no hash; the commit is the one that adds it, `git log --diff-filter=A`.
-
-## 2026-09-21 — recall resolves skills, and stops assuming the index is in context
-
-Two groups of memory facts had already migrated into the `craft` and
-`plugin-craft` skills — how index-size pressure is relieved once a group grows
-large and stable, since a skill gives progressive disclosure an index line
-cannot. Recall did not follow: nothing read the
-`## Skills to load before executing` section its artifact had carried for a
-while. That section is now part of step 1's resolution, with the read path for
-the two agents that resolve an artifact without holding `Skill` — `artisan` and
-`test-driver` carry it in their own definitions, because no agent definition
-reads a fragment.
-
-The second half is a premise that turned out false. The skill's step 2 said the
-memory index "is injected at session start and is never Read", degrading only
-where the index is "structurally absent". A prior session found it absent at
-*every* recall checkpoint and grepped `memory/MEMORY.md` instead — the case the
-step called impossible. The Read is now conditional on the index's lines not
-being in context. D-48's anchoring argument survives unchanged: the anchor is
-still the artifact Read plus the per-file Reads, never the index.
-
-## 2026-09-21 — `ruff format --check` joins the precommit gate
-
-`just precommit` ran `ruff check` but never `ruff format --check`, so
-format-dirty code passed the gate — and `just format` could not have cleaned it
-either: both its `ruff`-sourced pipelines piped diffs into a bare `patch` that
-cannot guess the strip level from ruff's prefix-free headers, and the helper
-meant to print the reformatted files matched a quoted filename that `patch` does
-not emit. Two independent defects, each masking the other's symptom. The check
-now runs in `run-checks` in both the root `justfile` and `plugin/portable.just`,
-since the root file carries its own copy and executes here.
-
-`verify-step.sh` stopped signing off with a bare `CLEAN`, which is
-indistinguishable from a check that never ran, and now prints
-`CLEAN: tree clean, just precommit passed`. Exit codes are unchanged.
-
-## 2026-09-20 — the living design becomes a hub, an index and eight nodes
-
-`docs/design.md` had reached 1234 lines against a 400-line cap, carried on the
-line-limit allowlist with the note "a split is due". Trimming could not close
-that gap: past a few percent it starts removing the argument that stops a
-settled decision from being re-litigated, which is the document's job.
-
-The cut follows the seam that already existed, the `## Decisions` heading.
-Everything above it — what the system is and how it is built, read while
-building or debugging one component — stays in the hub. Everything below is the
-argument index, read whole when weighing or adding a decision, and it moved:
-`docs/decisions.md` carries one conclusion line per decision and every rejected
-alternative by name, grouped by the node that argues it, and `docs/references/`
-holds eight nodes carrying the arguments — `cli-and-package`, `testing`,
-`pipeline-contracts`, `execution-routing`, `agent-instructions`,
-`quality-gates`, `deliverable-review`, `project-configuration`. Node boundaries
-are need-time: what a reader needs while changing one thing. §6.6 and §6.9
-merged into one node because model choice and instruction structure are read
-together and neither was cited from outside; every other node is one former
-subsection. Rejected alternatives moved to the node whose decisions they
-protect, under that node's own heading.
-
-Nothing was renumbered and nothing was cut: the 112 identifier definitions
-before the split are the 112 after, and the only tokens that left the moved text
-are four `§7`/`§5.3` cross-references that became paths, with two more repointed
-in the retained hub. The hub is 288 lines, the index 175, the largest node 224.
-`docs/design.md` left the allowlist.
-
-What the split does not buy on its own is the read: nothing in Claude Code loads
-a node, so the hub's opening states the shape and `CLAUDE.md` carries a routing
-table from what an agent touches to the node it reads first. Whether an
-always-on instruction reliably causes that read is unestablished; the routing
-table is the part with the best chance, because it matches the path the agent is
-already looking at.
-
-## 2026-09-20 — the route asks whether the work needs a runbook, not whether it is prose
-
-`route-to-execution.md` routed by material: a prose path of its own, and
-"implementation loops" among the runbook discriminators. Both described the work
-rather than what `/runbook` adds, which is phases with boundaries and a
-corrector, simplifier and `/proof` pass over the decomposition itself. The route
-is now three branches — Investigation or Exploration to `/build`, a runbook
-discriminator to `/runbook`, everything else to `/build` — so a plan simple
-enough not to need that layer is built directly whether it is prose or not. Two
-discriminators remain: cross-file coordination requiring sequencing, and a
-decomposition the author judges needs its own review before execution. The
-second is **ungrounded** and offers no threshold; no data exists on the item
-count at which an unreviewed decomposition fails. The prose path's own
-contribution survives as a definition under the first — prose edits are
-commutative, so multi-file prose is not cross-file coordination.
-
-An outline routed to `/build` therefore carries behavioural changes, which only
-a runbook carried before. It writes each one in the item shape of
-`runbook-format.md`, and `/build` §4.3 and `tdd-slice.md` now fire on an item
-carrying `Slices:` rather than on a phase attribute no outline has. Phase 0's
-Moderate non-prose route stops hard-coding `/runbook`: it generates, `/proof`s,
-then reads the routing node like the other callers, which go from three to four.
-The multi-sub-problem gate gains the branch the node had been deferring to: a
-sub-problem recorded not-routable reopens its own entry alone — siblings with no
-dependency path through it stay dispatchable, its dependents are held, and the
-user confirms the revised entry rather than the whole outline.
-
-This narrows the 2026-09-17 routing-node entry below. Its "preconditions, which
-bind every branch including prose" was already wider than what shipped: the
-first precondition — every decision the executor would otherwise make is
-resolved — binds every branch the node routes, while the second — edit targets
-named — binds the `/build` branches only, since on the `/runbook` branch naming
-targets is `/runbook`'s job.
-
-## 2026-09-17 — one routing node in `/design`; artifacts record their base commit
-
-`/design` stated the execution-routing decision twice — once in
-`write-outline.md`'s Outline Sufficiency Gate, once in `write-design.md`'s C.5 —
-and the copies had drifted. Wording differed; the prose branch's hard-gate
-qualifier existed in only one; and, substantively, one copy exempted the prose
-path from the readiness criteria while the other bound it. The two copies routed
-differently on the same input, which is what a second copy costs.
-`references/route-to-execution.md` now states the decision once, under a name
-that says what it decides: **does this work need a runbook?**, not whether the
-session can execute it. "Execution readiness" and "direct execution" are retired
-from `/design` with the branch they named; `/build` §4.1 keeps the second phrase
-for a different thing, inline rather than delegated dispatch. Single-session
-capacity was a criterion on both copies and contradicted `/build` §5, which
-provides for a run spanning several sessions — the residue of the retired
-in-session execution path, true only while the design session did the work. The
-surviving criteria split in two, because the flat list was hiding that:
-preconditions, which bind every branch including prose and send a failure back
-to *design*; and runbook discriminators, which send it to `/runbook`. The
-Exploration branch drops its "and design resolved all questions" conjunct — read
-literally it bounced every spike back to design, since a spike exists to answer
-a question.
-
-Separately, every `/design` artifact now carries a `## Provenance` section
-naming the review it derives from and the commit its deliverable starts at
-(D-80). `/edify:deliverable-review` built its range from context or by asking,
-so a second design-to-deliverable pass reviewed only the fixes — the original
-base was gone from context by then, and nothing in the narrowed review looked
-wrong. The inheritance rule is the whole mechanism: a second-pass artifact
-copies `Base:` from the artifact it supersedes and never recomputes it. The
-correctors enforce it after the fact and are barred from supplying a base
-themselves, since a computed one is the recomputation. The same change makes
-that consumer take `design.md` *or* `outline.md`, whichever exists; it had named
-`design.md` alone, so nothing from the agentic-prose route — which produces only
-an outline — was reviewable at all.
-
-## 2026-09-17 — `/inline` and `/orchestrate` merge into `/build`; continuation passing retires
-
-One execution skill now takes whatever planning produced — a proofed
-`runbook.md`, a `design.md` or `outline.md` with no runbook, or a task from its
-own invocation — and runs one lifecycle over all of them. `/inline` and
-`/orchestrate` are deleted.
-
-The split had partitioned on whether a runbook existed, and it charged for that
-twice. Two skills carrying one lifecycle drifted: three different definitions of
-a clean tree between them, so a run that wrote a memory file tripped the entry
-gate on a state the post-item gate was documented to tolerate; and two
-descriptions of the same reviewer's tool list, both wrong, each in its own way.
-`plugin-dev:skill-reviewer` holds Read, Grep and Glob, and both skills told it
-to fix issues and write a report — it can do neither, so every skill-definition
-review silently produced nothing and the structural-proof Read then blocked on
-the missing file. The seam also invited the belief that simple work needs a
-different *skill* rather than a lighter path through one. `/build` is a lean
-hub: the once-firing steps — phase boundary, finishing the job — are opt-in
-reference nodes, so a session in the middle of a multi-session run loads only
-what it hits.
-
-The phase type `inline` goes with it. It meant "the executor does this one
-itself", which is a decision a planner takes a stage too early; `/build` decides
-delegation per item at dispatch time, by the batching rule. Types are now `tdd`
-and `general`. `inline-plan.md` is removed as an artifact kind rather than
-renamed — it was an `outline.md` with the architecture section empty, named
-after its consumer — which collapses `/design`'s Simple and agentic-prose
-branches into one route producing an `outline.md`.
-
-Continuation passing retires in the same pass. Skills chained through a
-`[CONTINUATION: ...]` suffix with tail-calls and a frontmatter `cooperative:`
-declaration; the machinery over-compensated for agents that could not chain
-unaided, which is no longer the failure mode. `/design` and `/runbook` now name
-the next command and stop, and `plugin/fragments/continuation-passing.md` is
-deleted. Its successor — handoff-and-continue, conditioned on context usage — is
-a different mechanism and is not preserved as an extension point here.
-
-## 2026-09-16 — The runbook stops naming models
-
-`Model:` is gone from the runbook item format. Two dispatches are now fixed and
-unoverridable — `test-driver` at sonnet in both RED and GREEN, prose
-deliverables at opus — and D-42's artifact-type override is stated by artifact
-kind instead of by a list of edify's own paths.
-
-The defect that surfaced it was precedence, not defaults. `delegation.md`
-already had the right type defaults; what defeated them was the third rule on
-the same list, that a `Model:` line wins. A live run over a consumer
-repository's runbook had `Model: opus` on all three tdd items — copied from the
-worked example in `runbook-format.md` — so every test-driver dispatch was headed
-for opus. The same run dispatched a changelog entry under the consumer's `docs/`
-at sonnet, because D-42's path list named only edify's directories and nothing
-matched.
-
-Demoting `Model:` below the new rules would have left the field that taught the
-habit. It is removed instead: a planner cannot know the agent type or the real
-shape of the work, so a model named at plan time is a guess. Escalation on
-demand replaces it — the agent returns `escalated:`, the dispatcher
-re-dispatches higher, which is what D-30 already did for `edify:refactor`. The
-rule had been carried as a stopgap sentence in the shared `ddaanet` conventions
-since 2026-09-07; that sentence is deleted here, now that the tooling states it.
-
-## 2026-09-02 — Shared ddaanet conventions load in every session; the design record sheds situational state
-
-`CLAUDE.md` now imports `@memory/ddaanet/shared-claude.md`. That file declares
-itself the always-in-context tier for every repo mounting the `ddaanet` memory
-store — the scope between a repo's own conventions and `~/.claude/CLAUDE.md` —
-but edify had never wired the import, so its standing defaults reached no
-session here.
-
-L-5 is retired rather than corrected. It recorded that `memory/MEMORY.md`
-exceeded the loader cutoff, with a byte figure that went stale within days. A
-measurement of a store that changes on every memory write is situational state,
-not a design limitation, and neither the size nor the "the index is truncated"
-claim belongs in a present-tense design record; the retirement pass it called
-for is `/gitlore:index-audit`. Limitation IDs are referenceable, so the gap
-stands rather than renumbering L-6.
-
-## 2026-09-01 — One-stage runbook replaces the two-stage expansion pipeline
-
-The expanded-runbook stage — outline → phase files → assembled runbook → step
-files and an orchestrator manifest — existed so a weak (haiku) orchestrator
-could dispatch pre-written sub-agent prompts. The user's diagnosis from
-operating the pre-teardown pipeline was that a strong orchestrator does not need
-them and that pre-written prompts turn harmful the moment implementation
-deviates; the revived two-stage pipeline had also never been run end to end
-(`plans/pipeline-simplification/requirements.md`, C-1).
-
-`/runbook` now writes `plans/<job>/runbook.md` as the terminal planning
-artifact: typed phases of prose items with requirement IDs, `Interfaces:` blocks
-where one item feeds another, and behaviour slices on tdd items.
-`runbook-corrector` (the renamed outline corrector) and `runbook-simplifier`
-gate it, `/proof` validates it, and `/orchestrate` composes every dispatch
-prompt from it live. TDD runs four dispatches per slice — RED, test review,
-GREEN, code review — with `refactor` on review signal and a list-revision step
-after each slice; `test-driver` owns RED and GREEN as two named modes.
-
-Deleted in one pass: `prepare-runbook.py`, `validate-runbook.py` and its tests,
-`assemble-runbook.py`, `split-execution-plan.py`, `verify-red.sh`,
-`/review-plan`, the old `runbook-corrector`, `plugin/docs/`, and the tier-3
-runbook references — 7,029 lines / 97,724 tokens measured before deletion
-(`plans/pipeline-simplification/reports/measurements.md`). Deterministic runbook
-validation does not survive (D-51). FR-19, FR-20 and L-1 closed; D-31
-superseded; D-24 to D-26, D-30, D-32 to D-35, D-39, D-49, D-69, L-2 and L-6
-rewired; §7 records the rejected two-stage model, per-test dispatch and RED-less
-whole-task batching.
-
-The planning/execution session boundary lost one of its two grounds. It was kept
-on model-tier and context-budget grounds in 2026-08-13; orchestration no longer
-runs a tier below planning, so D-25 now rests on context budget alone.
-
-## 2026-08-14 — Decision records folded into one living design doc
-
-The 23 files under `agents/decisions/` (~286KB) were folded into
-`docs/design.md` and deleted. The fold triaged three ways: design rationale
-moved into the design doc, live agent rules already covered by `CLAUDE.md` or
-`memory/ddaanet/` were not duplicated, and content describing torn-down
-subsystems was dropped rather than carried across.
-
-Dropped subjects were verified absent from the tree first — the `analyze` and
-`rules` CLI commands and `filtering.py`, the worktree CLI and its `session.md`
-merge machinery, the memory-index validator and resolver, the retired autoformat
-and recall-check hooks, and the CLAUDE.md fragment-ordering scheme.
-
-The document follows the six-section format: functional requirements,
-non-functional requirements, architecture, decisions, rejected alternatives,
-changelog — with the resume affordances the project's living-design format adds
-on top (status stamp, Now, status legend, and the split between limitations and
-non-goals).
-
-## 2026-08-13 — Per-plan generated agents retired
-
-Execution now delegates by reference: the orchestrator dispatches a standing
-agent with the path to a step file (D-24). The bespoke `<plan>-task`,
-`<plan>-corrector`, `<plan>-tester` and `<plan>-implementer` definitions that
-`prepare-runbook.py` used to generate into `.claude/agents/` are gone — they
-fought the platform, since generated agents are not discoverable as
-`subagent_type` values until session restart.
-
-The forced planning/execution session restart stopped being a discoverability
-requirement as a result. It was kept on model-tier and context-budget grounds
-(D-25), and auto-chaining `/runbook` into `/orchestrate` was deliberately not
-taken.
-
-## 2026-08-10 — Sub-agent capability claims re-probed
-
-Several long-standing claims about sub-agents were measured false. Sub-agents
-have the `Skill` tool, receive `CLAUDE.md` and `memory/MEMORY.md` natively, and
-can spawn sub-agents via `Agent`; there is no `Task` tool at any level (D-72).
-
-The rule that execution agents never review their own work survived the
-falsification, but as policy rather than capability limit — it holds *because*
-an execution agent is now technically able to review its own work and must not
-(D-28).
-
-## 2026-08-04 — Pipeline revived
-
-The workflow pipeline was restored from the `edify-plugin` GitHub repo, the only
-place the purged history survived, and rewired off the dead subsystems it
-depended on. Recall became a read of `memory/MEMORY.md` and the files it
-indexes, `/commit` and `/handoff` moved to the `commit-commands` and `handoff`
-plugins, and the session task frame became `.claude/handoff-task.md`.
-
-## 2026-07-17 — Bootstrap reversed from stdlib venv to uv
-
-The previous day's choice of a stdlib venv (`python3 -m venv` + pip) was
-reversed. A stdlib venv inherits the host interpreter, so it required host
-`python3` ≥3.14 and failed loudly otherwise — unshippable on hosts still at
-3.13. uv fetches its own interpreter, removing the host floor. The price is a uv
-runtime dependency, paid down by informative degradation when uv is absent
-(NFR-5).
-
-Publication was postponed indefinitely by user decision the same day (D-9): the
-PyPI publish and the marketplace `git-subdir` entry are parked, so edify is
-uninstallable meanwhile.
-
-## 2026-07-16 — Plugin de-submoduled
-
-`plugin/` stopped being a git submodule and became a plain tracked subdirectory
-of the package repo (D-10, commit `c3c4477f`). The submodule shipped a live
-defect: a parent repo cannot `git add` inside a submodule, so
-`git add plugin/.claude-plugin/plugin.json` failed and `just release` could not
-complete a real release. The old `ddaanet/edify-plugin` GitHub repo was
-archived.
-
-## 2026-05 — Teardown
-
-The homegrown workflow system was removed in favour of the ecosystem
-(superpowers plus auto-memory), and the project's direction narrowed to
-Lean-assisted, formal-proof-backed requirements tracking. Session scraping,
-token counting, markdown tooling and contract checking survived as the CLI.
-(Partially reversed by the 2026-08-04 revival above.)
-
-## 2026-02 — Pipeline contracts and execution tiers
-
-Pipeline contracts, review gates, execution tiers and model-selection rules
-accumulated from operational incidents through the month. The three-tier
-execution structure was grounded in execution-environment constraints — context
-window capacity, delegation overhead, prompt generation cost — rather than in an
-external methodology framework (D-34).
-
-## 2026-01 — Weak orchestrator and TDD workflow
-
-The weak-orchestrator pattern and the TDD workflow were delivered, along with
-the terminology still in use: job (the user's goal), design (architectural
-spec), runbook (implementation steps), step (individual unit of work). The
-pattern was claimed on a single small execution, and the token-cost and
-reliability figures quoted alongside that claim were estimates rather than
-measurements (L-6).
-
-remark-cli was selected as the markdown formatter over Prettier and
-markdownlint-cli2 after a corpus evaluation (D-14).
+Each entry below is the write-time record of how it got that way, one file per
+entry in `docs/changelog/`.
+
+- **2026-09-21** —
+  [the release mechanism is recorded as a decision](changelog/2026-09-21-release-mechanism-recorded-as-a-decision.md)
+- **2026-09-21** —
+  [the pipeline hubs split along branch seams](changelog/2026-09-21-pipeline-hubs-split-along-branch-seams.md)
+- **2026-09-21** —
+  [`/proof` proposes a verdict instead of polling for one](changelog/2026-09-21-proof-proposes-a-verdict-instead-of-polling.md)
+- **2026-09-21** —
+  [the design graph's crosslinks are checked mechanically](changelog/2026-09-21-design-graph-crosslinks-checked-mechanically.md)
+- **2026-09-21** —
+  [what the TDD audit changed: slice-scoped GREEN, mutation proof, report commits](changelog/2026-09-21-tdd-audit-slice-scoped-green-mutation-proof-report-commits.md)
+- **2026-09-21** —
+  [recall resolves skills, and stops assuming the index is in context](changelog/2026-09-21-recall-resolves-skills-stops-assuming-index-in-context.md)
+- **2026-09-21** —
+  [`ruff format --check` joins the precommit gate](changelog/2026-09-21-ruff-format-check-joins-precommit-gate.md)
+- **2026-09-20** —
+  [the living design becomes a hub, an index and eight nodes](changelog/2026-09-20-living-design-becomes-hub-index-eight-nodes.md)
+- **2026-09-20** —
+  [the route asks whether the work needs a runbook, not whether it is prose](changelog/2026-09-20-route-asks-whether-work-needs-runbook.md)
+- **2026-09-17** —
+  [one routing node in `/design`; artifacts record their base commit](changelog/2026-09-17-one-routing-node-in-design-artifacts-record-base-commit.md)
+- **2026-09-17** —
+  [`/inline` and `/orchestrate` merge into `/build`; continuation passing retires](changelog/2026-09-17-inline-and-orchestrate-merge-into-build-continuation-passing-retires.md)
+- **2026-09-16** —
+  [The runbook stops naming models](changelog/2026-09-16-runbook-stops-naming-models.md)
+- **2026-09-02** —
+  [Shared ddaanet conventions load in every session; the design record sheds situational state](changelog/2026-09-02-shared-ddaanet-conventions-load-design-record-sheds-situational-state.md)
+- **2026-09-01** —
+  [One-stage runbook replaces the two-stage expansion pipeline](changelog/2026-09-01-one-stage-runbook-replaces-two-stage-expansion-pipeline.md)
+- **2026-08-14** —
+  [Decision records folded into one living design doc](changelog/2026-08-14-decision-records-folded-into-one-living-design-doc.md)
+- **2026-08-13** —
+  [Per-plan generated agents retired](changelog/2026-08-13-per-plan-generated-agents-retired.md)
+- **2026-08-10** —
+  [Sub-agent capability claims re-probed](changelog/2026-08-10-sub-agent-capability-claims-re-probed.md)
+- **2026-08-04** —
+  [the publication postponement is reversed](changelog/2026-08-04-publication-postponement-reversed.md)
+- **2026-08-04** — [Pipeline revived](changelog/2026-08-04-pipeline-revived.md)
+- **2026-07-17** —
+  [Bootstrap reversed from stdlib venv to uv](changelog/2026-07-17-bootstrap-reversed-from-stdlib-venv-to-uv.md)
+- **2026-07-16** —
+  [Plugin de-submoduled](changelog/2026-07-16-plugin-de-submoduled.md)
+- **2026-05** — [Teardown](changelog/2026-05-teardown.md)
+- **2026-02** —
+  [Pipeline contracts and execution tiers](changelog/2026-02-pipeline-contracts-and-execution-tiers.md)
+- **2026-01** —
+  [Weak orchestrator and TDD workflow](changelog/2026-01-weak-orchestrator-and-tdd-workflow.md)

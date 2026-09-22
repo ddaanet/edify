@@ -12,10 +12,6 @@
 # the number.
 #
 # Counts measured after the 80-column reflow (Item 1.11).
-docs/superpowers/design/plugin-transition-evaluation.md	403	no job yet
 plugin/agents/corrector.md	682	pilfer defect 21 (corrector-family dedup)
 plugin/agents/design-corrector.md	460	pilfer defect 21 (corrector-family dedup)
 plugin/agents/outline-corrector.md	450	pilfer defect 21 (corrector-family dedup)
-plugin/skills/build/SKILL.md	218	no job yet
-plugin/skills/design/SKILL.md	277	no job yet
-plugin/skills/requirements/SKILL.md	354	no job yet

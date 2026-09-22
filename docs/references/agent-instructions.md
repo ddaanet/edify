@@ -135,6 +135,22 @@ unsatisfiable. Delegated reviewers are a separate case already covered: they
 have no user at all (`plugin/agents/corrector.md`), and a reviewer reaching for
 a question has hit a dispatch-prompt defect.
 
+The bounded option list is the defect, not the tool that renders it. `proof`
+ended every item with `Verdict? (a)pprove (r)evise (k)ill (s)kip` — an inline
+menu, so the `allowed-tools` omission never reached it — and it invited a single
+character where the gate wants a judgement. It now proposes the verdict it
+thinks the item deserves, with its reason and, for a revision, the amended item
+text, and reads the disposition from the free-form reply; an unsettled reply
+costs one clarifying question rather than a guessed verdict. That is the same
+proposed-answer form, applied to a disposition instead of a question.
+
+The norm behind both cases is plain conversation (user ruling, 2026-09-21): the
+picker makes a non-binary answer hard to give and obscures its own output in the
+transcript, so plain-text interaction is the default for every skill, whatever
+renders the alternative. The conclusion stays worded against `AskUserQuestion`
+because that is the mechanism that exists; it takes no position on interaction
+mechanisms that do not exist yet.
+
 ## Rejected alternatives
 
 **Inlining a "top N" subset of a reference file to avoid a Read** — the agent
