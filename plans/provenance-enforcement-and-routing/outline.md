@@ -101,10 +101,13 @@ line on stdout:
 `Base:`. `NO-PROVENANCE:` also covers a `Derived from:` that is neither
 `none` nor names a `superseding` artifact — the report-only shape KD-1
 repairs — since no range can be established from it (ruled at the review
-gate; pinned by `tests/test_review_range.py`). Phase 1 step 2 shrinks to the call and this table; the parsing prose
-it carries today is deleted. No substitution: a conflict means one of two
-artifacts is wrong, and the script cannot know which. One hop only — each
-artifact in a chain was compared against its predecessor at its own review.
+gate; pinned by `tests/test_review_range.py`, since split into five
+`tests/test_review_range_*.py` modules plus `tests/review_range_helpers.py`
+to stay under the line cap). Phase 1 step 2 shrinks to the call and this
+table; the parsing prose it carries today is deleted. No substitution: a
+conflict means one of two artifacts is wrong, and the script cannot know
+which. One hop only — each artifact in a chain was compared against its
+predecessor at its own review.
 
 **KD-3 — The route asks whether the work needs the runbook layer.** What
 `/runbook` adds, read off the tree: phases with boundaries
@@ -206,10 +209,13 @@ cite. Every pointer an item writes into a skill body is skill-relative
   KD-1's table and three invariants, identical text in both.
   `outline-corrector.md` also gains one criterion: an item carrying `Slices:`
   states each test's assertion, per `runbook-format.md`. Requirements: M-1,
-  M-2, M-3.
+  M-2 — the `Slices:` criterion serves KD-4 rather than a review finding.
+  M-3 is a Part B routing finding and belongs to Items 1.3 and 1.5–1.7.
 - Item 1.2: `plugin/bin/edify-review-range.sh` (new), then
   `deliverable-review/SKILL.md` Phase 1 step 2 rewritten to call it by bare
-  name per KD-2. Tests in `tests/test_review_range.py`, each building a
+  name per KD-2. Tests in `tests/test_review_range.py`, since split into
+  five `tests/test_review_range_*.py` modules plus
+  `tests/review_range_helpers.py` to stay under the line cap, each building a
   throwaway git repo under `tmp_path` and running the script as a subprocess
   by bare name, with `plugin/bin` on PATH and CWD outside the repo.
   Requirements: M-4. Depends on: Item 1.7
@@ -293,7 +299,10 @@ cite. Every pointer an item writes into a skill body is skill-relative
   was single-line; five more had "per" at a line end. Exit condition:
   `rg -n -U -i '\bper\s+`?[\w/.-]+\.md' plugin/ docs/` with every hit
   classified in the item report. Requirements: M-6.
-- Item 1.10: `scripts/check_line_limits.sh` and its allowlist file.
+- Item 1.10: `scripts/check_line_limits.sh` and its allowlist file, with
+  `tests/test_line_limits.py`, `tests/line_limits_helpers.py` and
+  `tests/test_line_limits_exit_codes.py` (split off to keep the first module
+  under its cap).
   Requirements: m-5. Depends on: Item 1.7
   Slices:
   1. External contract: `test_line_limits_passes_clean_tree` — asserts exit 0
@@ -319,13 +328,26 @@ cite. Every pointer an item writes into a skill body is skill-relative
      `oversized-file:` line (added after slices 3–7's code review found
      `find` failing inside process substitution left the gate green).
   Final list revision (TDD audit): the landed suites carry seven tests the
-  reviews added beyond the slice lists — in `test_review_range.py` the
-  `Base:`-only and report-only Provenance shapes and a `Base:` with a
+  reviews added beyond the slice lists — in the `test_review_range_*` modules
+  the `Base:`-only and report-only Provenance shapes and a `Base:` with a
   trailing rationale; in `test_line_limits.py` a comment-and-blank allowlist
   fixture, `docs/superpowers/specs/` excluded and `docs/superpowers/design/`
   in scope, and an exact-path allowlist match. Slice 1.10/8's "no
   `oversized-file:` line" assertion was dropped as vacuous (nothing in its
   fixture is printable); the contract is exit 2.
+  Six more tests were unaccounted for by that enumeration and are added to it
+  here (`reports/deliverable-review.md`, Test-suite bookkeeping) — all six do
+  real work, so the defect was the stale list rather than the tests:
+  `test_one_hop_only_ignores_grandprior_mismatch`
+  (`tests/test_review_range_range.py`), the only thing pinning KD-2's "One
+  hop only" clause; in `tests/test_line_limits.py`,
+  `test_line_limits_allowlisted_file_shrunk_below_cap_is_silent`,
+  `test_line_limits_rejects_crlf_on_full_entry_line` and
+  `test_line_limits_rejects_crlf_on_two_field_entry_line`; and both functions of
+  `tests/test_line_limits_exit_codes.py`,
+  `test_unreadable_file_outranks_a_later_overage` and
+  `test_walk_failure_outranks_a_later_overage`, which pin KD-7's "exit 2
+  outranks exit 1".
   List revision before slice 1: today's script ignores a `ROOT` argument and
   exits 0 on any tree, so slice 1 alone cannot red. Slices 1 and 2 run as
   one RED dispatch — 2 supplies the genuine red, the review proves 1 by

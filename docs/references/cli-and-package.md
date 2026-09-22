@@ -144,12 +144,18 @@ plus an imported justfile, and installs a PreToolUse hook that denies any Write
 or Edit changing `plugin.json`'s `.version`. Edify's script is not independent
 invention — its GitHub and marketplace steps are ported near-verbatim from the
 toolkit's with the PyPI step spliced in, so the divergence stays legible and the
-port is what to re-read when those steps change upstream. *Taken 2026-07-16*
-(user decision) as keep-now-migrate-later, not as a permanent split; the
-migration needs the exclusion lifted, and nothing has lifted it. *Reopen-if:*
-the toolkit grows a hybrid path, or its maintainers revisit an exclusion that
-predates the de-submodule (D-10) — the edify it ruled out was a different shape
-from the merged one.
+port is what to re-read when those steps change upstream. Three frictions are
+not grounds either way: submodule handling stopped being a need when D-10
+flattened `plugin/`; the marketplace side effect stopped being a differentiator
+once `scripts/release.sh` grew the same `MARKETPLACE_DIR` requirement and the
+same synthesize-an-entry-if-absent branch; and the dry-run and rollback gaps are
+real but are the toolkit's own framing of its exclusion rather than edify's
+requirement — edify has neither, and offers `--resume` instead.
+*Taken 2026-07-16* (user decision) as keep-now-migrate-later, not as a permanent
+split; the migration needs the exclusion lifted, and nothing has lifted it.
+*Reopen-if:* the toolkit grows a hybrid path, or its maintainers revisit an
+exclusion that predates the de-submodule (D-10) — the edify it ruled out was a
+different shape from the merged one.
 
 ## Markdown and token tooling
 

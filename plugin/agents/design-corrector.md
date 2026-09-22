@@ -194,16 +194,16 @@ If design includes "Documentation Perimeter" section:
 
 Every `/design` artifact carries a `## Provenance` section with `Derived from:`
 and `Base:`:
-- Section missing → Major: `/edify:deliverable-review` has no way to establish
-  its review range
+- Section missing → Major: `/edify:deliverable-review` cannot establish a range
 - `Derived from:` is `none`, or names **both** the review report that motivated
-  the design and the artifact it supersedes — naming only the report → Major,
-  since the superseded artifact is a later pass's only route to `Base:`
-- `Derived from:` names a prior artifact → Read that artifact and check `Base:`
-  matches it verbatim. A recomputed base → Critical: the range then starts after
-  the prior pass's work, and the resulting narrow diff reads as a clean review.
-  A `Derived from:` path that does not resolve → Major; report it rather than
-  accept the base unchecked
+  the design and, after the literal word `superseding`, the backticked artifact
+  it supersedes — naming only the report → Major, since the superseded artifact
+  is a later pass's only route to `Base:`; any other wording ("replacing `…`") →
+  Major too, since the range script finds no prior and yields `NO-PROVENANCE:`
+- `Derived from:` names a prior artifact → Read it and check `Base:` matches
+  verbatim. A recomputed base → Critical: the range starts after the prior
+  pass's work, so the narrow diff reads as a clean review. A path that does not
+  resolve → Major; report it rather than accept the base unchecked
 - `Derived from:` is `none` → `Base:` is a full 40-character sha reachable from
   HEAD (`git merge-base --is-ancestor <base> HEAD` via Bash, exit 0)
 - **Repair by what you found**, and only by that:

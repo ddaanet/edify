@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-"""Bump plugin.json and sessionstart-health.sh versions to match the given
-version string."""
+"""Bump plugin.json to the given version string."""
 
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -32,27 +30,6 @@ def main() -> None:
         f.write("\n")
 
     print(f"Bumped plugin.json version to {version}")
-
-    # Bump EDIFY_VERSION in sessionstart-health.sh
-    health_sh = agent_core / "hooks" / "sessionstart-health.sh"
-    if health_sh.exists():
-        content = health_sh.read_text()
-        updated = re.sub(
-            r'^(\s*EDIFY_VERSION=)"[^"]*"',
-            rf'\1"{version}"',
-            content,
-            count=1,
-            flags=re.MULTILINE,
-        )
-        if updated != content:
-            health_sh.write_text(updated)
-            print(f"Bumped EDIFY_VERSION in sessionstart-health.sh to {version}")
-        else:
-            print(
-                "Warning: EDIFY_VERSION pattern not found in sessionstart-health.sh",
-                file=sys.stderr,
-            )
-            sys.exit(1)
 
 
 if __name__ == "__main__":

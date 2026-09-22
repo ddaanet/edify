@@ -1,3 +1,0 @@
-## Current task
-
-The 2026-09-21 second pass is finished and reviewed: the `provenance-enforcement-and-routing` deliverable review (0 critical, 6 major, 15 minor) with its F-1 to F-5 fixed through a RED / test-review / GREEN / code-review cycle, the changelog split into one file per entry, the three oversized skill hubs split along branch seams and `plugin-transition-evaluation.md` trimmed (only the three correctors remain on the line-limit allowlist), `/proof` proposing a verdict conversationally, the release mechanism recorded as D-87, D-9 rewired as reversed, and D-78 carrying my human partner's plain-conversation ruling. Nothing is in flight; what resumes is the open decisions and design jobs in the todo list.

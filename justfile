@@ -61,30 +61,6 @@ design-links:
     run-design-links
     report-end-safe "Design links"
 
-# `precommit` and `dev` are defined in plugin/portable.just, which ships to
-# other projects that have no docs/decisions.md or docs/references/ — the
-# design-links check does not belong there. This overrides portable.just's
-# `precommit` (via `set allow-duplicate-recipes`, same mechanism this file
-# already uses to override its shared `bash_prolog`) to add `run-design-links`
-# for this repo only; `dev: format precommit` picks it up automatically, since
-# `just` resolves a recipe dependency by name against the final recipe set.
-# Run all checks
-[no-exit-message]
-precommit:
-    #!{{ bash_prolog }}
-    sync
-    run-checks
-    report "version consistency" python3 plugin/bin/check-version-consistency.py
-    run-pytest
-    # Non-fixing: `fmt --check` exits 1 exactly when `fmt` would rewrite a
-    # file, and `-q` drops the summary so a clean run prints nothing. Plain
-    # `rumdl check` is not equivalent — it also reports the over-column lines
-    # MD013 cannot reflow, which no `fmt` pass can clear.
-    report "rumdl" rumdl fmt --check -q --no-cache
-    run-line-limits
-    run-design-links
-    report-end-safe "Precommit"
-
 # Create release: bump plugin.json (SOT), sync pyproject.toml, tag, push,
 # publish to PyPI, GitHub release, bump the marketplace entry.
 [no-exit-message]
@@ -222,6 +198,10 @@ run-line-limits() {
 run-design-links() {
     report "design links" ./scripts/check_design_links.sh
 }
+# Overrides portable.just's no-op hook: `precommit` is the portable recipe,
+# and design-links belongs to this repo only — other consumers of
+# portable.just have no docs/decisions.md.
+run-project-checks() { run-design-links; }
 
 report-end-safe() {
     if end-safe

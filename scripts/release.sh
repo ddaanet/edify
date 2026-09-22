@@ -189,9 +189,10 @@ bump_marketplace() {
     local mp_tmp repo_slug mp_branch mp_remote_head mp_local_head committed=0
     mp_tmp=$(mktemp)
     if [ "$marketplace_entry_exists" = 1 ]; then
-        jq --arg n "$plugin_name" --arg v "$V" \
-            '(.plugins[] | select(.name == $n) | .version) = $v' \
-            "$marketplace_json" > "$mp_tmp"
+        jq --arg n "$plugin_name" --arg v "$V" --slurpfile m "$manifest" '
+          (.plugins[] | select(.name == $n) | .version) = $v
+          | (.plugins[] | select(.name == $n) | .description) = ($m[0].description // "")
+        ' "$marketplace_json" > "$mp_tmp"
     else
         repo_slug=$(git remote get-url origin | sed -E 's#\.git$##; s#^.*[:/]([^/]+/[^/]+)$#\1#')
         jq --arg v "$V" --arg repo "$repo_slug" --arg subdir "$plugin_subdir" --slurpfile m "$manifest" '

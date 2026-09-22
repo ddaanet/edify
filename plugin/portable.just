@@ -85,6 +85,9 @@ run-line-limits() {
     # every green run say what produced them.
     report "line limits" ./scripts/check_line_limits.sh
 }
+# No-op hook: a consuming repo's own bash_prolog override redefines this to
+# add project-specific checks without copying the shared `precommit` body.
+run-project-checks() { :; }
 report-end-safe() {
     if end-safe
     then echo "${GREEN}✓$NORMAL $1 OK"
@@ -120,6 +123,7 @@ precommit:
     # MD013 cannot reflow, which no `fmt` pass can clear.
     report "rumdl" rumdl fmt --check -q --no-cache
     run-line-limits
+    run-project-checks
     report-end-safe "Precommit"
 
 # Run test suite

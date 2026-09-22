@@ -5,7 +5,9 @@ carried on `scripts/check_line_limits.allow` with the note "no job yet" — 218,
 277 and 354 lines against the 200-line hub cap (NFR-1, D-69). All three are now
 under it and off the allowlist, along with
 `docs/superpowers/design/plugin-transition-evaluation.md`, which was trimmed of
-the four directives it evaluated that have since been executed.
+the four directives it evaluated that have since been executed. That page was
+deleted outright on 2026-09-22, once the last three staleness items it held were
+fixed and the two release-comparison claims it carried moved into D-87.
 
 The split rule that produced them, which is not the obvious one: the cost being
 managed is the *number of extra Reads a single run makes*, not the number of

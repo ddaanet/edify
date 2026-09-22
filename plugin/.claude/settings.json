@@ -14,7 +14,7 @@
     "commit": "",
     "pr": ""
   },
-  "plansDirectory": "plans/",
+  "plansDirectory": "plans/claude/",
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true

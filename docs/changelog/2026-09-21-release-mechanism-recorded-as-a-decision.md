@@ -18,5 +18,7 @@ Re-checking the 2026-07-15 evaluation against the tree dropped two of its
 frictions. Submodule handling stopped being a need when D-10 flattened
 `plugin/`. The marketplace side effect stopped distinguishing the two recipes
 once edify's own script grew the same `MARKETPLACE_DIR` requirement and the same
-synthesize-an-entry-if-absent branch. What the evaluation page keeps is a
-pointer to D-87 and those two corrections.
+synthesize-an-entry-if-absent branch. The evaluation page was left holding a
+pointer to D-87 and those two corrections; it was deleted on 2026-09-22 once its
+last staleness items were fixed, and the corrections moved into D-87's own
+argument.

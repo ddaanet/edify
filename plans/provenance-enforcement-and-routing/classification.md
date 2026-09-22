@@ -35,8 +35,9 @@ M-4 and m-5 do not and carry their own blocks.
   on conflict
 - **Behavioral code check:** **Yes** — a new script with six verdict branches
 - **Work type:** Production
-- **Artifact destination:** production (`plugin/skills/*/scripts/`) plus
-  agentic-prose (the calling step)
+- **Artifact destination:** production (`plugin/bin/`, settled by outline
+  KD-2 — one simple script directly in `bin/`, no shim and no `scripts/`
+  directory) plus agentic-prose (the calling step)
 - **Evidence:** shared convention "deterministic mechanical work belongs in
   the harness"; `verify-step.sh` as the in-repo precedent
 
@@ -60,4 +61,4 @@ M-4 and m-5 ride as the outline's two tdd items rather than routing to
 
 **Author-corrector coupling:** Author change: `/design` outline format gains
 tdd items (outline KD-4). Coupled corrector: `outline-corrector`. **Update
-needed: yes** — one criterion, outline Item 1.7. No mechanical validator.
+needed: yes** — one criterion, outline Item 1.1. No mechanical validator.
