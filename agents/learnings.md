@@ -2,7 +2,7 @@
 
 Institutional knowledge accumulated across sessions. Append new learnings at the bottom.
 
-**Soft limit: 80 lines.** When approaching this limit, use `/claude-md-management:revise-claude-md` to consolidate older learnings into permanent documentation (behavioral rules → project-root `CLAUDE.md`, technical details → `docs/design.md`, a decision → a `docs/references/` node plus its `docs/decisions.md` line). Keep the 3-5 most recent learnings for continuity.
+**Soft limit: 80 lines.** When approaching this limit, consolidate older learnings into permanent documentation: a behavioral rule goes to the project-root `CLAUDE.md` via `/claude-md-management:revise-claude-md`; a decision or technical detail goes through `craft:design-doc-writing` into the `docs/references/` node that argues it, its `docs/decisions.md` line, and the `docs/design.md` hub where a conclusion changes. Keep the 3-5 most recent learnings for continuity.
 
 ---
 

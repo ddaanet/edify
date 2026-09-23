@@ -242,9 +242,9 @@ review-fix commit — so subject matching alone cannot pick the slice out. No
 report names a hash, since each rides the commit it would name; the auditor
 resolves a commit as the one that **adds** its report
 (`git log --diff-filter=A`). The GREEN report also records the tests run and the
-one-at-a-time sequence, and the session's `subagents/` transcripts are the
-fallback where a report is missing. Git serves only to resolve a report to its
-adding commit and to diff that commit.
+one-at-a-time sequence and the gate verdict; where a report is missing the named
+agent is resumed for it, never its transcript. Git serves only to resolve a
+report to its adding commit and to diff that commit.
 
 **Delegation is by reference.** The orchestrator's prompt carries the item text
 and the paths of the design and recall artifacts, never their content (D-24).
@@ -270,23 +270,9 @@ variable (D-12).
 ## 6. Decisions
 
 Conclusions are indexed in `docs/decisions.md` — one line per decision, grouped
-by the node that argues it. The arguments live in `docs/references/`:
-
-- `cli-and-package.md` — the `edify-cli` package, the plugin/package split, the
-  runtime bootstrap, the markdown postprocessor and the token counter.
-- `testing.md` — what a RED assertion proves, real-git e2e, `CliRunner`,
-  self-diagnosing setup.
-- `pipeline-contracts.md` — dispatch by reference, the planning/execution
-  session boundary, the typed review gates, phase types, artifact provenance.
-- `execution-routing.md` — the planning artifacts, the runbook discriminators,
-  classification, escalation tiers.
-- `agent-instructions.md` — model assignment per dispatch, instruction ordering,
-  format and density.
-- `quality-gates.md` — gate layering, chokepoint placement, tool-call anchors.
-- `deliverable-review.md` — what counts as a deliverable, the review axes,
-  finding resolution.
-- `project-configuration.md` — rules files, sub-agent capabilities, line caps,
-  naming, agent frontmatter.
+by the `docs/references/` node that argues it, each group opening with an
+`Argued in` line naming that node. `CLAUDE.md` §Design Decisions carries the
+same routing table for sessions; this hub does not repeat it.
 
 ## 7. Rejected alternatives
 

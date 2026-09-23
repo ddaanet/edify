@@ -81,7 +81,6 @@ bash_prolog := \
     else { "/usr/bin/env bash\nset -euo pipefail" } ) + "\n" + '''
 export PATH="$PWD/node_modules/.bin:$PATH"
 COMMAND="''' + style('command') + '''"
-ERROR="''' + style('error') + '''"
 RED=$'\033[31m'
 GREEN=$'\033[32m'
 NORMAL="''' + NORMAL + '''"
@@ -89,7 +88,9 @@ safe () { "$@" || status=false; }
 end-safe () { ${status:-true}; }
 show () { echo "$COMMAND$*$NORMAL"; }
 visible () { show "$@"; "$@"; }
-fail () { echo "${ERROR}$*${NORMAL}"; exit 1; }
+# Same definition as plugin/portable.just: this prolog overrides that one on
+# import, so a drift here changes what every recipe prints on failure.
+fail () { echo "${RED}FAIL: $*${NORMAL}" >&2; exit 1; }
 wt-path() {
     local parent
     parent="$(cd .. && basename "$PWD")"

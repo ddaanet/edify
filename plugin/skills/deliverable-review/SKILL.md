@@ -126,7 +126,9 @@ Always runs in main session with full cross-project context.
 
 **Per-file review (when Layer 1 skipped):**
 - Read each deliverable and evaluate against type-specific axes
-- Record findings with: file:line, axis violated, severity, description
+- Record findings with: file and enclosing symbol (no line numbers — a later fix
+  pass reads the finding after the code has moved), axis violated, severity,
+  description
 
 **Why interactive is mandatory:** Delegated agents lack cross-project context —
 fragment conventions, other skills' configurations, inter-file consistency.
@@ -155,7 +157,7 @@ Write the consolidated report to `plans/<plan>/reports/deliverable-review.md`.
 [Design conformance summary]
 
 ## Critical Findings
-[Numbered, with file:line, design requirement, impact]
+[Numbered, with file and enclosing symbol, design requirement, impact]
 
 ## Major Findings
 [Same format]

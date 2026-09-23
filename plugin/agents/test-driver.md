@@ -54,7 +54,10 @@ Writes the slice's tests and proves each one red. Writes no implementation.
    decides.
 5. **Write the report** to the path from the prompt
    (`plans/<job>/reports/item-N-M-s<k>-red.md`), carrying the per-test output:
-   each test id with its failure line.
+   each test id with its failure line, and a `Fixtures tried and rejected`
+   heading naming each fixture discarded and why — a red that the item's own
+   mutation would also have produced is the case worth recording. `None` is a
+   valid entry; an absent heading is not.
 6. **Stop.** No commit — the uncommitted tests and this report are the designed
    end state of this dispatch; the slice's GREEN commit carries both. Return the
    report path.
@@ -82,8 +85,11 @@ ahead of its own slice's tests leaves that slice unable to red.
 5. **Write the report before committing**, to the path from the prompt
    (`plans/<job>/reports/item-N-M-s<k>-green.md`). It carries the tests run with
    their results and the order they were made to pass — one at a time. The audit
-   reads that sequence from here, not from the commit history. Record
-   **no commit hash**: the report rides the commit it would name, and the
+   reads that sequence from here, not from the commit history. It also carries
+   the gate verdict: the `just precommit` recap line and the hash in
+   `tmp/.test-sentinel`, which the sentinel run computed over the suite's inputs
+   — that pair is the auditable evidence the suite was green at this commit.
+   Record **no commit hash**: the report rides the commit it would name, and the
    orchestrator and the audit identify that commit as the one that adds this
    file.
 6. **Commit once for the slice:** subject `<type>: Item N.M/k — <title>`, the

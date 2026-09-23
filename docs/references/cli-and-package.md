@@ -8,8 +8,6 @@ under `src/edify/` or `plugin/bin/`.
 Part of the `docs/design.md` graph; conclusions are indexed in
 `docs/decisions.md`.
 
-## CLI and package
-
 **D-1 — Two output conventions, split by consumer.** User-facing commands follow
 Unix convention: errors to stderr via `print(..., file=sys.stderr)` before
 `sys.exit(1)`, with text and JSON format options. Commands whose sole caller is

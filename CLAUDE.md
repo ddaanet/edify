@@ -291,11 +291,15 @@ and the session task frame is `.claude/handoff-task.md`.
 ## Design Decisions
 
 The living design is a graph, rewired when components change rather than
-appended to as an ADR archive. `docs/design.md` is the hub — requirements,
-architecture, limitations, non-goals. `docs/decisions.md` indexes every decision
-as one conclusion line and names every rejected alternative. `docs/references/`
-holds the arguments, one node per decision group; read the node before making a
-claim about, or changing, the mechanism it argues:
+appended to as an ADR archive; `craft:design-doc-writing` carries the rules for
+editing it. It covers edify-shaped work only: `docs/superpowers/` holds
+superpowers-shaped docs, including a live subproject design with its own FR/NFR
+lifecycle, and is not a fossil of the torn-down superpowers subsystem.
+`docs/design.md` is the hub — requirements, architecture, limitations,
+non-goals. `docs/decisions.md` indexes every decision as one conclusion line and
+names every rejected alternative. `docs/references/` holds the arguments, one
+node per decision group; read the node before making a claim about, or changing,
+the mechanism it argues:
 
 - `cli-and-package.md` — `src/edify/`, the plugin/package split, the bootstrap,
   markdown and token tooling
