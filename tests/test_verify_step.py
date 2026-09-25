@@ -10,6 +10,7 @@ pattern in ``tests/test_triage_feedback.py``.
 """
 
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -60,16 +61,25 @@ def _stub_just(bin_dir: Path, marker: Path) -> None:
     stub.chmod(0o755)
 
 
-def _run_script(repo: Path, bin_dir: Path) -> subprocess.CompletedProcess[str]:
+def _run_script(
+    repo: Path,
+    bin_dir: Path,
+    *,
+    extra_env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
     """Run verify-step.sh by absolute path with CWD at ``repo``.
 
     ``bin_dir`` is prepended to ``PATH`` so the stub ``just`` is found first;
-    git config is insulated the same way as ``_run_git``.
+    git config is insulated the same way as ``_run_git``. ``extra_env`` is
+    applied last, so a ``PATH`` entry there replaces the prepended one
+    outright instead of merely prefixing it.
     """
     env = dict(os.environ)
     env["GIT_CONFIG_GLOBAL"] = os.devnull
     env["GIT_CONFIG_SYSTEM"] = os.devnull
     env["PATH"] = f"{bin_dir}{os.pathsep}{env.get('PATH', '')}"
+    if extra_env:
+        env.update(extra_env)
     return subprocess.run(
         [str(SCRIPT)],
         cwd=repo,
@@ -147,3 +157,118 @@ def test_conventional_dirt_is_clean_and_other_dirt_is_not(tmp_path: Path) -> Non
         "DIRTY: uncommitted changes",
         "?? inbox/notes.txt",
     ], result.stdout
+
+
+def test_rename_out_of_exempt_path_is_dirty(tmp_path: Path) -> None:
+    r"""A staged rename out of an exempt path is listed as dirt.
+
+    The pre-F-1 pattern matched ``inbox/[^/]+\.md`` against the ``old ->
+    new`` tail of an ``R`` line, so ``inbox/a.md -> notes.md`` passed as one
+    exempt path even though ``notes.md`` is not exempt.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    (repo / "inbox").mkdir()
+    (repo / "inbox" / "a.md").write_text("a\n", encoding="utf-8")
+    _run_git(repo, "add", "inbox/a.md")
+    _run_git(repo, "commit", "-q", "-m", "add inbox/a.md")
+    _run_git(repo, "mv", "inbox/a.md", "notes.md")
+    assert _run_git(repo, "status", "--porcelain", "--untracked-files=all") == (
+        "R  inbox/a.md -> notes.md\n"
+    )
+
+    bin_dir = tmp_path / "bin"
+    marker = tmp_path / "just-invocations"
+    _stub_just(bin_dir, marker)
+
+    result = _run_script(repo, bin_dir)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert result.stdout.splitlines() == [
+        "DIRTY: uncommitted changes",
+        "R  inbox/a.md -> notes.md",
+    ], result.stdout
+
+
+def test_quoted_exempt_path_is_clean(tmp_path: Path) -> None:
+    """A quoted exempt path (a space in the name) still clears the tree.
+
+    Git quotes a porcelain path containing a space; the pre-F-1 pattern
+    anchored directly on ``inbox/`` with no allowance for the quotes.
+
+    Decoy phase: a quoted ``inbox/my notes.txt``, differing from the brief
+    only in not being ``*.md``, is dirt listed alone. That catches an
+    allowance exempting every quoted path rather than quoted exempt paths.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    (repo / "inbox").mkdir()
+    (repo / "inbox" / "my brief.md").write_text("brief\n", encoding="utf-8")
+    assert _run_git(repo, "status", "--porcelain", "--untracked-files=all") == (
+        '?? "inbox/my brief.md"\n'
+    )
+
+    bin_dir = tmp_path / "bin"
+    marker = tmp_path / "just-invocations"
+    _stub_just(bin_dir, marker)
+
+    result = _run_script(repo, bin_dir)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.startswith("CLEAN:"), result.stdout
+    assert marker.read_text(encoding="utf-8") == "precommit\n"
+
+    (repo / "inbox" / "my notes.txt").write_text("notes\n", encoding="utf-8")
+    assert _run_git(repo, "status", "--porcelain", "--untracked-files=all") == (
+        '?? "inbox/my brief.md"\n?? "inbox/my notes.txt"\n'
+    )
+
+    result = _run_script(repo, bin_dir)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert result.stdout.splitlines() == [
+        "DIRTY: uncommitted changes",
+        '?? "inbox/my notes.txt"',
+    ], result.stdout
+
+
+def test_git_status_failure_exits_2(tmp_path: Path) -> None:
+    """A CWD outside any repo fails closed with exit 2, not a raw fatal.
+
+    ``GIT_CEILING_DIRECTORIES`` blocks git from discovering an enclosing
+    repository, so the failure is deterministic regardless of checkout.
+    """
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    bin_dir = tmp_path / "bin"
+
+    result = _run_script(
+        outside,
+        bin_dir,
+        extra_env={"GIT_CEILING_DIRECTORIES": str(tmp_path)},
+    )
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert "ERROR: git status failed" in result.stdout.splitlines(), result.stdout
+    assert not any(
+        line.startswith(("CLEAN:", "DIRTY:")) for line in result.stdout.splitlines()
+    ), result.stdout
+
+
+def test_missing_just_exits_2(tmp_path: Path) -> None:
+    """A clean repo with no ``just`` on ``PATH`` fails closed, not silently.
+
+    Pre-F-2 code ran ``just precommit`` unconditionally, so a missing tool
+    was reported as a precommit failure rather than an environment fault.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    for tool in ("bash", "git", "grep"):
+        resolved = shutil.which(tool)
+        assert resolved is not None, f"{tool} not found on the outer PATH"
+        (bin_dir / tool).symlink_to(resolved)
+    assert shutil.which("just", path=str(bin_dir)) is None
+
+    result = _run_script(repo, bin_dir, extra_env={"PATH": str(bin_dir)})
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert "ERROR: just not found on PATH" in result.stdout.splitlines(), result.stdout
+    assert "PRECOMMIT:" not in result.stdout, result.stdout
