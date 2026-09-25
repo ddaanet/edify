@@ -170,6 +170,7 @@ run-pytest() {
         # first commit. scripts/ and the design docs are read by the suite.
         git ls-files -z --cached --others --exclude-standard \
             src/ tests/ scripts/ plugin/hooks/ plugin/bin/ \
+            plugin/skills/build/scripts/ \
             docs/decisions.md docs/references/ | sort -z | xargs -0 cat
         cat pyproject.toml
     } | cksum )
