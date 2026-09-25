@@ -92,7 +92,8 @@ gitlore submodule at rest), `.claude/handoff-*.md` (`/precompact` or
 (briefs dropped or updated uncommitted on purpose, so sessions need not
 coordinate). They are safe to exempt because every committing dispatch stages
 its paths by name and never `git add -A`, so exempt dirt cannot enter a
-commit. The list is hardcoded in `verify-step.sh`: all three are ddaanet
+commit. It then commits with `git commit -- <paths>`, never a pathspec-less
+`git commit`, so exempt dirt already staged stays out too. The list is hardcoded in `verify-step.sh`: all three are ddaanet
 workflow conventions shared by every repo that runs this plugin. The status
 runs with `--untracked-files=all`, so an untracked `inbox/` lists its files
 rather than collapsing to one directory line the exemption cannot judge.
@@ -133,6 +134,19 @@ once, not remediated.
      modified `.claude/handoff-task.md`. Assert exit 0 and stdout starting
      `CLEAN:`. Then add an untracked `stray.txt`, and assert exit 1 with
      stdout carrying `DIRTY:` and `?? stray.txt` and not naming `inbox/`.
+  2. Pins the slice 1 code review's F-1 and F-2, already committed. The RED is
+     a mutation red: each test fails against `31fe4a16`'s script, run as a copy
+     with the test module's `SCRIPT` rebound, never by reverting the tracked
+     file.
+     - `test_rename_out_of_exempt_path_is_dirty`: a staged
+       `R  inbox/a.md -> notes.md` gives exit 1 and a DIRTY listing of that
+       line.
+     - `test_quoted_exempt_path_is_clean`: an untracked `inbox/my brief.md`,
+       which git quotes, gives exit 0 and `CLEAN:`.
+     - `test_git_status_failure_exits_2`: a run from a CWD outside any repo
+       gives exit 2 and `ERROR: git status failed`.
+     - `test_missing_just_exits_2`: a clean repo with no `just` on `PATH` gives
+       exit 2 and `ERROR: just not found on PATH`.
 
 - Item 2.1: `plugin/skills/build/SKILL.md`. Requirements: orch M1, m7, M4, C2,
   m3, m5; inline m9.
@@ -188,6 +202,11 @@ once, not remediated.
   - §Naming: add `review-<group>` for review-gate dispatches.
   - §Prompt contents item 5: name the report-only reviewer's return as the
     second exception, and state that UNFIXABLE lives inside the report (KD-2).
+  - §Prompt contents item 4: a committing dispatch commits with
+    `git commit -- <paths>`, naming the paths it staged (KD-7). Requirements:
+    orch m5.
+  - `plugin/agents/test-driver.md` and `plugin/agents/refactor.md`: their
+    commit steps take the same form.
 
 - Item 2.6: `plugin/skills/build/references/escalation.md`. Requirements: orch
   M1, m7, M7, C2.
@@ -217,7 +236,7 @@ once, not remediated.
 ## Scope
 
 IN: the files the items name — two scripts, two new test files, `SKILL.md`,
-five references and three fragments.
+five references, three fragments and two agent definitions.
 
 OUT:
 
