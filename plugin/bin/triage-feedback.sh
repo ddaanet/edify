@@ -16,16 +16,16 @@ files_changed=$(git diff --name-only "$baseline_commit" | wc -l | tr -d ' ')
 # Count report files in plans/$job_dir/reports/
 # Exclude pre-execution artifacts: design-review*, outline-review*, recall-*
 # Exclude review-gate and closing-review reports too: review.md, review-*.md,
-# final-review.md (KD-3). review_artifact below already reports their
-# presence separately, so counting them here double-counts the same signal
-# and misclassifies a reviewed Simple run as underclassified.
+# final-review.md (KD-3). They record review, not execution; review_artifact
+# below reports the review gate's presence separately.
+# One byte per file, not `wc -l`: a newline in a filename would overcount.
 reports_count=0
 reports_dir="plans/$job_dir/reports"
 if [[ -d "$reports_dir" ]]; then
     reports_count=$(find "$reports_dir" -maxdepth 1 -type f \
         ! -name "design-review*" ! -name "outline-review*" ! -name "recall-*" \
         ! -name "review.md" ! -name "review-*.md" ! -name "final-review.md" \
-        | wc -l | tr -d ' ')
+        -exec printf x \; | wc -c | tr -d ' ')
 fi
 
 # Detect behavioral code: new definitions in the diff. Anchored after the `+`
@@ -48,7 +48,7 @@ fi
 verdict="no-classification"
 classification_file="plans/$job_dir/classification.md"
 if [[ -f "$classification_file" ]]; then
-    classification=$(grep -E "(^-?\s*\*\*Classification:\*\*|^-?\s*Classification:)" "$classification_file" | head -1 | sed -E 's/.*:\s*//;s/\*//g' | xargs || true)
+    classification=$(grep -E "(^-?[[:space:]]*\*\*Classification:\*\*|^-?[[:space:]]*Classification:)" "$classification_file" | head -1 | sed -E 's/.*:[[:space:]]*//;s/\*//g' | xargs || true)
 
     if [[ -z "$classification" ]]; then
         verdict="no-classification"
