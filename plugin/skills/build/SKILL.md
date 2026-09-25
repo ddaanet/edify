@@ -65,9 +65,8 @@ Run it with `dangerouslyDisableSandbox: true`, here and at every other call
 site; a sandboxed run yields no verdict.
 
 This script is the skill's single definition of a clean tree; Section 4 and
-`references/phase-boundary.md` call the same one. A bare
-`git status --porcelain` here would refuse states the later gates are documented
-to tolerate.
+`references/finishing.md` §1 call the same one. A bare `git status --porcelain`
+here would refuse states the later gates are documented to tolerate.
 
 **Capture the baseline** — before any edits:
 

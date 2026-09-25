@@ -28,7 +28,7 @@ appropriate reviewer by its routing table.
   no Bash, no Skill — so it can neither fix nor file. Use the template's
   §Report-only variant.
 
-Scope per dispatch is the uncommitted changes for that artifact group,
+Scope per dispatch is that artifact group's share of step 1's list,
 implementation only; the template's §Field Rules set every other field.
 
 Planning artifacts do not route through this gate. They route by artifact, as
@@ -37,13 +37,29 @@ Planning artifacts do not route through this gate. They route by artifact, as
 → `edify:runbook-corrector`. `runbook-corrector` rejects anything that is not
 `runbook.md`.
 
+**Report-only re-dispatch:** where this session applied a report-only reviewer's
+fixes, re-dispatch that group to its reviewer once, over the same files — this
+session does not review its own edits (`/build` §4.1). Add what it returns to
+the group's report and apply it; there is no further pass.
+
 **Structural proof (D+B anchor):** once review completes, Read each report path
 this gate actually dispatched. The Read proves the report exists; without it, §2
-cannot proceed. UNFIXABLE in any report → STOP and surface it to the user with
-the path. Do not proceed to §2 until every issue is resolved or accepted.
+cannot proceed. UNFIXABLE in any report → validate it by
+`../../fragments/review-requirement.md` §UNFIXABLE Detection Protocol, then STOP
+on each that holds and surface it to the user with the path. Do not proceed to
+§2 until every issue is resolved or accepted.
 
-A corrector commits nothing, so commit each group's report yourself — with the
-fixes that reviewer applied where it applied any — staging those paths by name.
+A reviewer commits nothing, so commit each group's report yourself — with the
+fixes applied where there are any, by the reviewer or by this session — staging
+those paths by name and committing with `git commit -- <paths>`. Then:
+
+```bash
+plugin/skills/build/scripts/verify-step.sh
+```
+
+Exit 0 (`CLEAN:` and the checks that passed) → §2. Anything else → Read
+`references/escalation.md` §Post-item remediation and follow it; §2 waits for
+exit 0.
 
 ## 2. Triage feedback
 
@@ -55,8 +71,11 @@ The script prepends `plans/` itself — pass the bare job name, not the plan pat
 It rejects an empty baseline with its usage line, so read the commit back from
 the `/build` §2 file rather than from a variable.
 
-Read the script output. On a divergence message → surface it inline. On match or
-no-classification → proceed silently.
+Read the script output. On a divergence message → surface it inline. On
+`WARNING: No corrector report` → surface it inline and investigate before §3: §1
+should have left a review report, or `/build` §5 a `review-skip.md`, and the
+warning means neither exists. On match or no-classification with no warning →
+proceed silently.
 
 ## 3. Completion
 
