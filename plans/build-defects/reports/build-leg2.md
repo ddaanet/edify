@@ -197,9 +197,23 @@ The run after `24879259` (Item 2.4), the last item commit, is below. For
 reference, the earlier run after `e8179177` is kept after it. The sandbox was
 disabled for both.
 
-After `24879259`: this run follows in the commit after this report's first
-commit. Only reports changed between the two, so the run is on the same
-plugin tree.
+After `24879259`. The run was taken at `0ee9f3dc`, which adds only reports on
+top of it:
+
+```
+# version consistency
+Version consistent: 0.3.0
+Tests cached (inputs unchanged)
+# line limits
+oversized-file: plugin/agents/corrector.md: 682 lines > 400
+oversized-file: plugin/agents/outline-corrector.md: 450 lines > 400
+oversized-file: plugin/agents/design-corrector.md: 460 lines > 400
+# design links
+design-links: 87 decisions indexed, defined once, conclusions match, 8 nodes present
+✓ Precommit OK
+CLEAN: tree clean, just precommit passed
+exit=0
+```
 
 After `e8179177`:
 
