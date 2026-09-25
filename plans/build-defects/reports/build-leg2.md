@@ -1,14 +1,25 @@
-# build-defects — leg 2 (slice 1.2/2, Item 2.1 attempted)
+# build-defects — leg 2 (slice 1.2/2, Items 2.1–2.4; 2.5 blocked)
 
-**Status: stopped by the parent after Item 2.1 was blocked.** Slice 1.2/2 and
-both of my human partner's decisions are committed. Item 2.1 was never
-committed: the auto-mode classifier refuses every `Edit` of
-`plugin/skills/build/SKILL.md` ("gave no verdict"), for the artisan and for
-this leg alike. Items 2.2–2.9 are not done. The artisan's `Edit` of
-`references/phase-boundary.md` got the same "no verdict". Its fallback was a
-Python-built patched copy, which the classifier then *denied* as
-"[Auto-Mode Bypass]". The parent withdrew the patched-copy route for everyone
-and stopped all dispatches.
+**Status: stopped at Item 2.5, blocked by the auto-mode classifier.** Slice
+1.2/2, both of my human partner's decisions and Items 2.1–2.4 are committed.
+Item 2.5's exact old→new text is in `item-2-5.md`, committed with this report.
+Items 2.6–2.9 are not started.
+
+**How the leg went, in order:**
+1. First stop. In auto mode, every `Edit` under `plugin/` (`SKILL.md`,
+   `phase-boundary.md`) got "gave no verdict". The patched-copy fallback was
+   then *denied* as "[Auto-Mode Bypass]". The parent withdrew that route and
+   deleted `tmp/patched/`.
+2. My human partner took the session out of auto mode. This leg then applied
+   Item 2.1 itself.
+3. The first artisan still ran in auto mode, which it had inherited at spawn,
+   and was refused on 2.2.
+4. A fresh artisan, spawned under accept-edits, committed 2.2–2.4.
+5. The session then returned to auto mode, and the artisan's `Edit` of
+   `dispatch-composition.md` (2.5) got "no verdict". The parent had
+   authorized this leg to make item edits itself if the artisan was refused.
+   This leg's own `Edit` of the same file got the same "no verdict", so it
+   stopped rather than work around it.
 
 Entry state: HEAD `4a24c0fe`, baseline `f44ddbbf…` in `tmp/build-baseline`,
 untouched. §2's entry gate had already passed. Pre-work: there is no
@@ -80,11 +91,15 @@ grep in syntax. One major fix:
 **Refactor and list revision.** No refactor was flagged. List revision:
 slice 1.2/2 was added before its RED; nothing else changed.
 
-## Item 2.1 — `SKILL.md`: blocked, not committed
+## Item 2.1 — `SKILL.md`: done — `28ba697c`
 
-The artisan wrote `plans/build-defects/reports/item-2-1.md`, committed with
-this report. It holds the exact old→new text for every bullet, one per
-finding:
+This leg applied it with `Edit`, verbatim from the artisan's `item-2-1.md`,
+after auto mode was lifted. `just format` reflowed it. The report's Status
+line now records that. `SKILL.md` is 200 lines. Review: the text was authored
+by a delegated artisan (§4.2), and this leg only transcribed it, so no per-item
+corrector ran. §5's review gate covers it. Post-item verification: CLEAN.
+
+What the report records, one bullet per finding:
 - orch M1/m7: frontmatter drops `TaskOutput`, `TaskStop`.
 - orch C2: §1 says `<job>` is the invocation's path.
 - orch m5: the §2 DIRTY bullet names the KD-7 exemptions and the mask re-run.
@@ -94,25 +109,68 @@ finding:
   `git commit -- <paths>`.
 - orch M4: §4.4 lists that case.
 
-Before the route was withdrawn, this leg built `tmp/patched/SKILL.md` from
-that text (rumdl-formatted, 200 lines). Per the parent, that file is left
-untouched and my human partner decides about it.
+**Carry-forward, done in Item 2.3.** `SKILL.md` §2 said "Section 4 and
+`references/phase-boundary.md` call the same one". It now reads "Section 4
+and `references/finishing.md` §1 call the same one". An `rg` check found
+`verify-step.sh` run at `SKILL.md` §2 and §4.4 and at `finishing.md` §1, and
+no longer in `phase-boundary.md`.
 
-**Carry-forward (from the artisan).** `SKILL.md` §2 says "This script is the
-skill's single definition of a clean tree; Section 4 and
-`references/phase-boundary.md` call the same one." That goes stale once
-Item 2.2 drops phase-boundary's `verify-step.sh` run and Item 2.3 adds one to
-`finishing.md`. It must then name `references/finishing.md` instead. Neither
-`item-2-1.md` nor `tmp/patched/SKILL.md` carries that change.
+## Items 2.2–2.4 — done (one fresh opus artisan dispatch)
 
-## Items 2.2–2.9: not done
+- `5e2039fb` Item 2.2, `phase-boundary.md`, applied from the first
+  artisan's prepared text:
+  - the `verify-step.sh` run is dropped (m4);
+  - the KD-1 phase base: `tmp/build-baseline` for phase 1, and for phase P>1
+    the `git log --diff-filter=A` resolution of `phase-<P-1>-corrector.md`
+    (C1);
+  - the dispatch is scoped to the phase's items (m3);
+  - the halt covers the full §Execution Context set, Constraints included
+    (M8);
+  - the boundary commit takes `git commit -- <paths>`.
+- `653d9c45` Item 2.3, `finishing.md`, plus the one `SKILL.md` sentence
+  above:
+  - group scope;
+  - UNFIXABLE validation;
+  - the report-only re-dispatch;
+  - `verify-step.sh` must exit 0 before §2;
+  - `WARNING: No corrector report` handling.
+- `24879259` Item 2.4, `review-dispatch-template.md`:
+  - an explicit changed-files list;
+  - a `**Constraints:**` block;
+  - an agent-definition criteria line;
+  - report path and return defer to `dispatch-composition.md`;
+  - the routing paragraph replaced by a pointer to `finishing.md` §1.
 
-The artisan's `Edit` of `references/phase-boundary.md` (Item 2.2) was
-refused with "no verdict". Its patched-copy script was denied as
-"[Auto-Mode Bypass]". No report exists for 2.2 onward, and nothing is
-committed. Every remaining target is under `plugin/`: five references, three
-fragments and two agent definitions. Nothing in this leg shows which of them
-the classifier accepts.
+The artisan's judgement calls, recorded in the item reports:
+- **2.3.** KD-2 does not say what the single report-only re-dispatch's
+  findings become. Settled: they are appended to the same `review-<group>.md`
+  and applied, with no further pass. The re-dispatch's name was left unsaid.
+  A non-zero verify exit routes to `escalation.md` §Post-item remediation.
+- **2.4.** Its pointers to `dispatch-composition.md` land fully only once
+  Item 2.5 adds `review-<group>` and the report-only exception. Until then
+  they are partly dangling.
+- **2.4, noticed and not changed.** The §Example dispatches a skill group
+  through the fix-capable template, while `review-requirement.md` routes skill
+  definitions to the report-only `plugin-dev:skill-reviewer`. The example is
+  correct only under the plugin-dev-absent fallback.
+
+Post-item verification after `24879259`: see Final `verify-step.sh` output.
+
+## Item 2.5 — blocked; Items 2.6–2.9 not started
+
+`item-2-5.md`, committed with this report, holds the exact old→new text for
+all five edits:
+- §Naming `review-<group>`;
+- §Prompt contents item 4, `git commit -- <paths>`;
+- item 5, the report-only reviewer as the second exception, with UNFIXABLE
+  inside the report;
+- `test-driver.md` GREEN step 6;
+- `refactor.md` Step 6.
+
+Nothing was applied: the artisan's three `Edit`s and this leg's one `Edit` on
+`dispatch-composition.md` all got "no verdict". The agent definitions were
+not tried. Its note: `references/tdd-slice.md`'s orchestrator commits (OUT)
+lack the pathspec form.
 
 ## Deferred and routed
 
@@ -135,8 +193,15 @@ the classifier accepts.
 
 ## Final `verify-step.sh` output
 
-This run was after `e8179177`, before `item-2-1.md` existed. The sandbox was
-disabled:
+The run after `24879259` (Item 2.4), the last item commit, is below. For
+reference, the earlier run after `e8179177` is kept after it. The sandbox was
+disabled for both.
+
+After `24879259`: this run follows in the commit after this report's first
+commit. Only reports changed between the two, so the run is on the same
+plugin tree.
+
+After `e8179177`:
 
 ```
 # version consistency
@@ -155,13 +220,15 @@ exit=0
 
 ## Resume block
 
-- **Where the next leg starts.** Item 2.1, once my human partner settles how
-  edits under `plugin/` land. Direct `Edit` gets "no verdict" and the
-  patched-copy route is withdrawn. If `tmp/patched/SKILL.md` is adopted,
-  commit it with the already-committed `item-2-1.md` as Item 2.1 (the report
-  needs no change). Then run the §4.1 review: the change is over 5 lines, so
-  a corrector is required unless it was delegated. Then do Items 2.2–2.9 in
-  order, applying the carry-forward above to `SKILL.md` §2 when 2.2/2.3 land.
+- **Where the next leg starts.** Item 2.5, applied from `item-2-5.md` once
+  edits under `plugin/` can land. That means the session out of auto mode,
+  and any executor spawned *after* the mode change, since an agent keeps the
+  mode it was spawned under. Re-check each old string first. Then update the
+  report's Status line and commit it with the three targets. Then Items
+  2.6–2.9 in order, then §5 Finish. §5 has not run.
+- **Before §5.** Item 2.4's pointers to `dispatch-composition.md` land fully
+  only after 2.5. The 2.3 judgement on the re-dispatch's findings is the
+  artisan's reading of KD-2; §5's review gate should check it.
 - **Commit form.** Every commit uses `git commit -- <paths>` (KD-7). That
   includes the orchestrator's own, until Item 2.5 writes it into the pipeline
   text.
@@ -169,6 +236,6 @@ exit=0
   `inbox/brief-corrector-reads-surfaces-against-each-other.md`. That file
   belongs to another session, is KD-7-exempt, and must never be staged.
   Gitignored scratch left in place: `tmp/mutants/` (the rebind harness and
-  mutants) and `tmp/patched/`.
+  mutants). The parent deleted `tmp/patched/`.
 - **Baseline.** `tmp/build-baseline` holds `f44ddbbf…`, unchanged. §5 Finish
   uses it; it has not run.
