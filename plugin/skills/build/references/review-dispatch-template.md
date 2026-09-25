@@ -17,7 +17,8 @@ Review implementation changes against design specification.
 
 **Baseline:** <baseline commit hash>
 
-**Changed files:** `git diff --name-only <baseline commit hash>`
+**Changed files:**
+- <one line per file in this artifact group — its share of `finishing.md` §1 step 1's list>
 
 **Requirements:**
 <FR/NFR items relevant to this execution, from outline or design>
@@ -36,10 +37,14 @@ Review implementation changes against design specification.
 - Test quality (if behavioral code): behavior-focused, meaningful assertions
 - Code quality: clarity, patterns, no duplication
 - Integration: consistency with existing patterns
+- <agent-definition group only: the `plugin-dev:agent-development` criteria — frontmatter validity, trigger description quality, tool access minimality, system-prompt structure>
 
-Fix all issues (critical, major, minor). Write report to: plans/<job>/reports/review-<group>.md
+**Constraints:**
+- Do NOT flag items outside the provided scope (Scope OUT above)
 
-Return filepath on success, or "UNFIXABLE: [description]" on failure.
+Fix all issues (critical, major, minor). Write report to: <report path, per `dispatch-composition.md` §Prompt contents>
+
+<return contract, per `dispatch-composition.md` §Prompt contents>
 ```
 
 ## Report-only variant
@@ -63,10 +68,10 @@ every issue (critical, major, minor) with its file, its location and the
 change you would make. Mark a blocker "UNFIXABLE: [description]".
 ```
 
-The **calling session** then writes the returned findings to
-`plans/<job>/reports/review-<group>.md` and applies the fixes itself. The
-structural-proof Read in `finishing.md` §1 then finds a file that exists, so the
-gate stops blocking on skill-definition groups.
+The **calling session** then writes the returned findings to the group's report
+path (§Field Rules) and applies the fixes itself. The structural-proof Read in
+`finishing.md` §1 then finds a file that exists, so the gate stops blocking on
+skill-definition groups.
 
 ## Field Rules
 
@@ -86,10 +91,11 @@ gate stops blocking on skill-definition groups.
   Edit, no Bash, no `Skill` — so it takes the §Report-only variant, which
   resolves recall by path and moves writing and fixing to the caller. `Grep` and
   `Glob` are its search tools; a prompt instructing it to run `rg` fails.
-- **Report path:** one rule — `plans/<job>/reports/review-<group>.md`, `<group>`
-  being the artifact group `finishing.md` §1 routed. The structural proof reads
-  the path actually dispatched, so the prompt and the proof must name the same
-  file.
+- **Report path and return contract:** `dispatch-composition.md` §Prompt
+  contents is the one rule for both, under the dispatch name `review-<group>`,
+  `<group>` being the artifact group `finishing.md` §1 routed. The structural
+  proof reads the path actually dispatched, so the prompt and the proof must
+  name the same file.
 - **Scope IN/OUT:** From design or outline, not invented. Prevents reviewer from
   flagging work explicitly deferred.
 - **Scope completeness:** Reviewer must mechanically diff every Scope IN item
@@ -97,11 +103,8 @@ gate stops blocking on skill-definition groups.
   components are the gap — component+decision validation alone misses standalone
   scope items (e.g., planstate specified in Scope IN but not part of any C1-C4
   component).
-- **Constraint:** This template is for implementation changes only. Planning
-  artifacts route by artifact, as `docs/references/pipeline-contracts.md` D-26
-  records: `design.md` → `edify:design-corrector`, `outline.md` →
-  `edify:outline-corrector`, `runbook.md` → `edify:runbook-corrector`.
-  `runbook-corrector` rejects anything that is not `runbook.md`.
+- **Constraint:** implementation changes only. Planning artifacts route as
+  `finishing.md` §1 says, not through this template.
 
 ## Example: Skill Creation Task
 
@@ -110,7 +113,12 @@ Review implementation changes against design specification.
 
 **Baseline:** abc1234
 
-**Changed files:** `git diff --name-only abc1234`
+**Changed files:**
+- plugin/skills/build/SKILL.md
+- plugin/skills/build/references/tdd-slice.md
+- plugin/skills/build/references/escalation.md
+- plugin/skills/build/references/dispatch-composition.md
+- plugin/skills/build/references/review-dispatch-template.md
 
 **Requirements:**
 - FR-8: One execution skill covering runbook and runbook-less work
@@ -131,7 +139,10 @@ Review implementation changes against design specification.
 - Skill structure follows D+B convention (tool call anchors per phase)
 - Delegation protocol complete and accurate
 
+**Constraints:**
+- Do NOT flag items outside the provided scope (Scope OUT above)
+
 Fix all issues. Write report to: plans/build-skill/reports/review-skill.md
 
-Return filepath on success, or "UNFIXABLE: [description]" on failure.
+Return the report path on success, or `blocked: <reason>`. Mark an issue you cannot fix "UNFIXABLE: [description]" inside the report.
 ```
