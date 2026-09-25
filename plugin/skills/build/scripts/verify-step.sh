@@ -7,14 +7,19 @@ set -euo pipefail
 # and `/precompact` leave it modified or staged) and `inbox/*.md` (briefs
 # dropped or updated uncommitted on purpose). Safe to exempt because every
 # committing dispatch stages its paths by name and never `git add -A`, so
-# exempt dirt never enters a commit. The two-column XY status may hold
-# anything, so the pattern matches only the path after it.
+# exempt dirt never enters a commit. The two-column XY status may hold any
+# state but a rename or copy: an `R`/`C` line's `old -> new` is two paths, and
+# `inbox/a.md -> b.md` would pass as one exempt path. Git quotes a path holding
+# a space or a non-ASCII byte, so the pattern allows the quotes.
 # `--untracked-files=all` explodes an untracked `inbox/` into its files, since
 # a collapsed `?? inbox/` line is not a path the exemption can judge.
 # `git status` must succeed; only grep's exit 1 (every line filtered out) is
 # a result rather than a failure, so tolerate that one code and nothing else.
-exempt='^.. (memory|\.claude/handoff-[^/]+\.md|inbox/[^/]+\.md)$'
-porcelain=$(git status --porcelain --untracked-files=all)
+exempt='^[^RC][^RC] "?(memory|\.claude/handoff-[^/]+\.md|inbox/[^/]+\.md)"?$'
+porcelain=$(git status --porcelain --untracked-files=all) || {
+    echo "ERROR: git status failed"
+    exit 2
+}
 if status=$(grep -vE "$exempt" <<<"$porcelain"); then
     :
 elif [[ $? -eq 1 ]]; then
@@ -33,6 +38,10 @@ if [[ -n "$status" ]]; then
 fi
 checks="tree clean"
 
+command -v just >/dev/null || {
+    echo "ERROR: just not found on PATH"
+    exit 2
+}
 just precommit || {
     echo "PRECOMMIT: validation failed"
     exit 1
