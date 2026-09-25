@@ -5,7 +5,7 @@ description: >-
   design or outline that has no runbook. Triggers on /build,
   "execute the runbook", "execute this plan", or when /design or /runbook
   hands work off for execution.
-allowed-tools: Agent, Read, Write, Edit, Bash, Skill, SendMessage, TaskOutput, TaskStop
+allowed-tools: Agent, Read, Write, Edit, Bash, Skill, SendMessage
 user-invocable: true
 ---
 
@@ -22,6 +22,9 @@ the job — are reference nodes, each named below with the condition that reache
 it. A run spanning several sessions loads only what its own session hits.
 
 ## 1. Load the work
+
+`<job>` is the `plans/<job>` path the invocation names. A run resumed in a fresh
+session is re-invoked with the same path; nothing infers it.
 
 ```bash
 ls plans/<job>
@@ -50,7 +53,11 @@ plugin/skills/build/scripts/verify-step.sh
 ```
 
 - Exit 0 (`CLEAN:` and the checks that passed) → proceed.
-- Exit 1 with `DIRTY:` → STOP: "Dirty tree. Commit or stash before /build."
+- Exit 1 with `DIRTY:` → STOP: "Dirty tree. Commit or stash before /build." Any
+  change is dirt, untracked files included, except three paths dirty by
+  convention: `memory` (the gitlore submodule), `.claude/handoff-*.md` and
+  `inbox/*.md`. A listing the `sandbox-lies` hook annotates as sandbox masks is
+  re-run instead, per `references/escalation.md` §Post-item remediation.
 - Exit 1 with `PRECOMMIT:` → STOP: "Precommit failing. Fix before /build."
 - Exit 2 → STOP: the script itself failed, so there is no verdict.
 
@@ -90,7 +97,7 @@ In worktrees: `git show main:plans/<job>/brief.md`.
 
 `Skill(skill: "edify:recall", args: "plans/<job> — execution patterns for this task")`
 
-Patterns for implementing this, not for classifying it.
+Select patterns for implementing this task, not for classifying it.
 
 ### 3.3 Reference loading
 
@@ -112,9 +119,9 @@ Read the targets, apply the edits, `just precommit`, commit.
 
 Review is **not** the executor's judgement. Self-review via `git diff` only when
 every self-review condition in `plugin/fragments/review-requirement.md`
-§Proportionality holds; otherwise dispatch `edify:corrector` in its checkpoint
-form. This is the one path where the executor would review its own edits, and
-per-item choice makes it common — so the threshold is the fragment's.
+§Proportionality holds; otherwise dispatch `edify:corrector` scoped to this
+item's changes. This is the one path where the executor would review its own
+edits, and per-item choice makes it common — so the threshold is the fragment's.
 
 ### 4.2 Delegated execution
 
@@ -122,6 +129,10 @@ One dispatch: Read `references/dispatch-composition.md` and compose by it —
 `edify:artisan`, or `edify:corrector` where the item is itself a review. The
 parent does the cognitive work (curating what the dispatch sees); the child does
 the mechanical work, since subagents have no parent context.
+
+Where the item is a review, the corrector commits nothing: commit its report,
+with the fixes it applied where there are any, before §4.4. Stage those paths by
+name and commit with `git commit -- <paths>`.
 
 ### 4.3 TDD items
 
@@ -131,8 +142,9 @@ the mechanical work, since subagents have no parent context.
 ### 4.4 Post-item verification
 
 After every dispatch whose work is committed — a slice's GREEN, a slice's code
-review once its commit lands, and any general or directly executed item. Not
-after RED or test review, where uncommitted tests are the designed state:
+review once its commit lands, a review item once §4.2's commit lands, and any
+general or directly executed item. Not after RED or test review, where
+uncommitted tests are the designed state:
 
 ```bash
 plugin/skills/build/scripts/verify-step.sh

@@ -1,6 +1,10 @@
 # Item 2.1 — `plugin/skills/build/SKILL.md`
 
-Status: **blocked — classifier refused `plugin/skills/build/SKILL.md`.** Every
+Status: **applied.** My human partner took the session out of auto mode, and
+the orchestrator then applied the edits below with `Edit`, verbatim from this
+report and reflowed by `just format`. The history follows.
+
+Original status: **blocked — classifier refused `plugin/skills/build/SKILL.md`.** Every
 Edit on the target returned "The server-side auto mode classifier gave no
 verdict (it skipped this action)". Nothing was applied; the target is unchanged
 and nothing is committed for this item. Per the dispatch rules, no retry and no
