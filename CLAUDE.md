@@ -245,7 +245,7 @@ unnecessary `git stash` diagnostic cycle.
 
 Python >=3.14, hatchling build, uv package manager. Entry point
 `src/edify/cli.py` (Click). Source in `src/edify/`. Four tools:
-- **Session scraping** — `edify list | extract <prefix> | collect`
+- **Session scraping** — `edify list`, `edify extract <prefix>`, `edify collect`
 - **Token counting** — `edify tokens FILE...` (Anthropic API)
 - **Markdown postprocessing** — `edify markdown` (reads paths from stdin)
 - **Contract checking** — `edify check <target>` (CrossHair verification)
