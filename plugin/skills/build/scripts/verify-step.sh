@@ -6,8 +6,9 @@ set -euo pipefail
 # (the gitlore submodule, normally ` M`), `.claude/handoff-*.md` (`/handoff`
 # and `/precompact` leave it modified or staged) and `inbox/*.md` (briefs
 # dropped or updated uncommitted on purpose). Safe to exempt because every
-# committing dispatch stages its paths by name and never `git add -A`, so
-# exempt dirt never enters a commit. The two-column XY status may hold any
+# committing dispatch stages its paths by name, never `git add -A`, and
+# commits them with `git commit -- <paths>`, so exempt dirt never enters a
+# commit, even when already staged. The two-column XY status may hold any
 # state but a rename or copy: an `R`/`C` line's `old -> new` is two paths, and
 # `inbox/a.md -> b.md` would pass as one exempt path. Git quotes a path holding
 # a space or a non-ASCII byte, so the pattern allows the quotes.
@@ -20,7 +21,10 @@ porcelain=$(git status --porcelain --untracked-files=all) || {
     echo "ERROR: git status failed"
     exit 2
 }
-if status=$(grep -vE "$exempt" <<<"$porcelain"); then
+# A pipe, not a here-string: bash writes a here-string to a temp file (always
+# before 5.1, above the pipe size after), and a failure to create it also
+# exits 1, which would read as "every line filtered out".
+if status=$(printf '%s\n' "$porcelain" | grep -vE "$exempt"); then
     :
 elif [[ $? -eq 1 ]]; then
     status=""
