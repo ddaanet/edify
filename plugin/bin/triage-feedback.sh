@@ -15,10 +15,17 @@ files_changed=$(git diff --name-only "$baseline_commit" | wc -l | tr -d ' ')
 
 # Count report files in plans/$job_dir/reports/
 # Exclude pre-execution artifacts: design-review*, outline-review*, recall-*
+# Exclude review-gate and closing-review reports too: review.md, review-*.md,
+# final-review.md (KD-3). review_artifact below already reports their
+# presence separately, so counting them here double-counts the same signal
+# and misclassifies a reviewed Simple run as underclassified.
 reports_count=0
 reports_dir="plans/$job_dir/reports"
 if [[ -d "$reports_dir" ]]; then
-    reports_count=$(find "$reports_dir" -maxdepth 1 -type f ! -name "design-review*" ! -name "outline-review*" ! -name "recall-*" | wc -l | tr -d ' ')
+    reports_count=$(find "$reports_dir" -maxdepth 1 -type f \
+        ! -name "design-review*" ! -name "outline-review*" ! -name "recall-*" \
+        ! -name "review.md" ! -name "review-*.md" ! -name "final-review.md" \
+        | wc -l | tr -d ' ')
 fi
 
 # Detect behavioral code: new definitions in the diff. Anchored after the `+`
