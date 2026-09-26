@@ -1,4 +1,30 @@
-# build-defects — leg 5 (stopped at Item 2.5, Edit denied)
+# build-defects — leg 5 (stopped at Item 2.5, Edit denied twice)
+
+## Second attempt — denied again
+
+The team lead reported that the first denial had been a permission prompt, and
+that my human partner had added `Edit(/plugin/**)` to the project
+`.claude/settings.json`. This leg resumed from `6b768bd2`. The tree showed that
+rule as an unstaged ` M .claude/settings.json` (`"allow": ["Edit(/plugin/**)"]`,
+no deny rule touching `Edit` or `plugin/`). The same §Naming `Edit` on
+`plugin/skills/build/references/dispatch-composition.md` came back with the same
+"Permission for this tool use was denied" text. Stopped again: no retry, no
+fallback route, nothing under `plugin/` modified, no dispatch.
+
+Not established from here: why an allowed path is denied for this agent.
+Candidates, none verified: the rule not being picked up by an agent spawned
+before it was written; `/plugin/**` resolving against a different root than
+the repo's `plugin/`; a prompt raised in a teammate context that is refused
+rather than shown.
+
+Two things for whoever resumes:
+
+- `.claude/settings.json` is dirty and not this job's. It is outside KD-7's
+  exemptions, so `verify-step.sh` will read DIRTY at §4.4 until it is committed
+  or reverted. It was kept out of this leg's commit.
+- The edits owed are unchanged and still match: `item-2-5.md`.
+
+## First attempt
 
 **Status: stopped before any item edit landed.** The team lead reported the
 session out of auto mode with a permission rule added for `plugin/`. The first
