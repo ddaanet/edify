@@ -109,9 +109,11 @@ First check (git status) returns clean → exit momentum suppresses second check
 (just lint). The sub-agent "already linted" rationalization makes the skip feel
 safe.
 
-**Correct pattern:** Single compound command
-(`git status --porcelain && just lint`). Compound commands can't be partially
-executed — both run or neither.
+**Correct pattern:** one script owns the whole verdict — `/build`'s
+`verify-step.sh`, which checks the tree, then runs `just precommit`, and names
+which check failed. The compound `git status --porcelain && just lint` is no
+substitute: `git status --porcelain` exits 0 on a dirty tree too, so `&&` guards
+nothing — the lint runs either way, and a dirty tree reads as a pass.
 
 ### Recall Content In Delegation Prompts
 
