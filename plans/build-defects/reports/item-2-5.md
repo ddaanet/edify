@@ -15,6 +15,11 @@ Leg 4 re-checked all five old strings again: each still matches verbatim, at
 the same lines. Its first Edit, the same §Naming one, got the same "gave no
 verdict" under auto mode, so leg 4 stopped too.
 
+Leg 5 ran with the session reported out of auto mode. It re-checked all five
+old strings: each still matches verbatim, at the same lines. Its first Edit,
+the same §Naming one, was *denied* ("Permission for this tool use was denied"),
+not skipped, so leg 5 stopped too.
+
 Nothing was applied: all three targets are unchanged and nothing is committed
 for this item. No retry and no sed, Bash or Write fallback was attempted, and
 the agent definitions were not tried.
