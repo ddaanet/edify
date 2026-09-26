@@ -122,8 +122,10 @@ loudly if any field is missing or contains only placeholder text.**
   deferred items). Each item must be specific enough to match against review
   findings. Prevents false positives — without OUT, review confabulates issues
   from future work.
-- **Changed files:** Explicit file list (from `git diff --name-only` or known
-  from implementation). Must not be empty.
+- **Changed files:** Explicit file list, from `git diff --name-only <base>`
+  against the base commit of the run or phase under review — never a bare
+  `git diff --name-only`, which compares the working tree to the index and is
+  empty once the work is committed. Must not be empty.
 - **Requirements summary:** What the implementation should satisfy (from
   design/requirements). Must reference specific FRs, acceptance criteria, or
   behavioral expectations.
