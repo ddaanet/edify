@@ -15,11 +15,13 @@ trace := "false"
 help:
     @just --list --unsorted
 
-# Remove generated build artifacts
+# Remove generated build artifacts, sparing the plugin copy `.bin/claude` loads
 [no-exit-message]
 clean:
     #!{{ bash_prolog }}
-    visible rm -rf dist
+    if [[ -d dist ]]; then
+        visible find dist -mindepth 1 -maxdepth 1 ! -name plugin -exec rm -rf {} +
+    fi
     echo "${GREEN}✓${NORMAL} Clean"
 
 # Set up development environment (venv, direnv, npm)

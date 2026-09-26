@@ -6,6 +6,9 @@
 /tmp/
 /plans/claude/
 
+# Build output, and the plugin copy `.bin/claude` loads
+/dist/
+
 # Node.js
 /node_modules/
 
