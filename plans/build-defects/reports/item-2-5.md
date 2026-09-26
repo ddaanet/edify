@@ -1,6 +1,6 @@
 # Item 2.5 — `plugin/skills/build/references/dispatch-composition.md`, `plugin/agents/test-driver.md`, `plugin/agents/refactor.md`
 
-Status: **blocked, Edit refused, three times across three legs.** In leg 2 the first
+Status: **applied in leg 6**, after four legs of refused Edits. In leg 2 the first
 three Edits on `dispatch-composition.md` each came back with "The server-side
 auto mode classifier gave no verdict (it skipped this action)". This session
 had switched back to auto mode after Item 2.4 committed.
@@ -20,9 +20,16 @@ old strings: each still matches verbatim, at the same lines. Its first Edit,
 the same §Naming one, was *denied* ("Permission for this tool use was denied"),
 not skipped, so leg 5 stopped too.
 
-Nothing was applied: all three targets are unchanged and nothing is committed
-for this item. No retry and no sed, Bash or Write fallback was attempted, and
-the agent definitions were not tried.
+Legs 2–5 applied nothing and attempted no retry and no sed, Bash or Write
+fallback.
+
+Leg 6 ran with the plugin loaded from `dist/plugin/`. All five edits below
+landed with `Edit` and were reflowed by `just format`. The per-item corrector
+(`item-2-5-review.md`) then fixed three seams: item 5 now states the
+report-only reviewer's `CONTINUED` / `END OF REPORT` handling on the
+consumer side; `<group>` is a one-word slug (`review-skill`); and
+`refactor.md` gives the reason for naming the paths. The final text therefore
+differs from the "new" blocks below by those fixes.
 
 Requirements: inline M1, m15; orch m5.
 

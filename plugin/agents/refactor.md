@@ -175,11 +175,14 @@ Verification:
 You start from a clean tree — the slice commit already landed. Write your report
 first (`plans/<job>/reports/item-N-M-s<k>-refactor.md`, the path the prompt
 assigns), then stage the files you changed together with it and commit the
-refactoring as its own commit:
+refactoring as its own commit, naming the same paths — a clean tree can still
+hold staged exempt dirt such as `.claude/handoff-*.md`, which a pathspec-less
+`git commit` would carry:
 
 ```bash
 git add <the files you changed> plans/<job>/reports/item-N-M-s<k>-refactor.md
-git commit -m "refactor: Item N.M/k — <what changed>"
+git commit -m "refactor: Item N.M/k — <what changed>" \
+    -- <the files you changed> plans/<job>/reports/item-N-M-s<k>-refactor.md
 ```
 
 `refactor:` is a suggested subject, not a checked one: the `commit-msg` hook

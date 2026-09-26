@@ -32,10 +32,11 @@ Every dispatch prompt carries:
    prefix to an emoji before the commit is written, so no check may key on the
    type; the `Item N.M/k` marker is the only part of a subject anything may
    match. A committing dispatch stages the paths it names — its own report among
-   them — and never `git add -A`. Overrides: a RED dispatch commits nothing and
+   them — and never `git add -A`, then commits with `git commit -- <paths>`,
+   naming the paths it staged. Overrides: a RED dispatch commits nothing and
    stops after the red run; a review dispatch commits nothing either — the
    orchestrator commits the corrector's report, with the fixes it applied where
-   there are any.
+   there are any, in the same form.
 5. **Report path** — `plans/<job>/reports/<dispatch name>.md`, the `name` from
    §Naming and nothing else. This is the only rule for report paths: the prompt
    assigns the path and the agent writes exactly there, whatever default its own
@@ -43,10 +44,16 @@ Every dispatch prompt carries:
    and code review from overwriting each other, and what let `tdd-auditor` find
    them. A report names no hash of the commit that carries it; whoever needs
    that commit resolves it with `git log --diff-filter=A` over the report's
-   path. Return contract: the report path on success, or `blocked: <reason>` —
-   except `edify:refactor`, whose own protocol returns `success` /
+   path. Return contract: the report path on success, or `blocked: <reason>`.
+   UNFIXABLE is never a return: a reviewer marks an issue it cannot fix
+   `UNFIXABLE` inside its report. Two exceptions to the contract:
+   `edify:refactor`, whose own protocol returns `success` /
    `escalated: <reason>` / `error: <reason>` and still writes its report at the
-   assigned path.
+   assigned path; and a report-only reviewer (`plugin-dev:skill-reviewer`),
+   which returns its findings as text in parts and writes nothing — the
+   dispatching session resumes it by name for the next part while a part ends
+   `CONTINUED`, and writes the parts to the assigned path only once one ends
+   `END OF REPORT` (`review-dispatch-template.md` §Report-only variant).
 6. **Mode**, for `edify:test-driver` only: `RED` or `GREEN`, named explicitly —
    the agent refuses a prompt that names neither.
 
@@ -89,6 +96,8 @@ Give every dispatch a `name`: `item-N-M` for a general item, `item-N-M-s<k>-red`
 / `-test-review` / `-green` / `-code-review` for slice dispatches,
 `item-N-M-s<k>-refactor` for a refactor the code review flagged (the opus
 re-dispatch reuses the name), `phase-P-corrector` for checkpoints,
+`review-<group>` for a review-gate dispatch (`<group>` a lowercase one-word slug
+for the artifact group `finishing.md` §1 routed, as in `review-skill`),
 `final-review` for a single-phase run's closing corrector, `tdd-audit` for the
 auditor. Resumption is `SendMessage` to that name; an unnamed agent cannot be
 resumed.

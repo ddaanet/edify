@@ -99,8 +99,10 @@ ahead of its own slice's tests leaves that slice unable to red.
    keys on it. Stage by name the slice's tests, the implementation, and this
    slice's RED, test-review and GREEN reports — the RED and the test review left
    theirs uncommitted for this commit to carry. Never `git add -A` or
-   `git add .`, which sweep in whatever else the tree holds. The commit leaves
-   the suite green; no commit ever leaves the suite red. Return the report path.
+   `git add .`, which sweep in whatever else the tree holds. Commit with
+   `git commit -m "<subject>" -- <the same paths>`, so nothing staged before
+   this dispatch rides along. The commit leaves the suite green; no commit ever
+   leaves the suite red. Return the report path.
 
 ## Stop Conditions
 
