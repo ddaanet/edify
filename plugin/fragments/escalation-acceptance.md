@@ -43,11 +43,14 @@ new issues or acceptance criteria cannot be met:
 **Dirty tree recovery:**
 
 When an item leaves the tree dirty (uncommitted changes detected by
-post-dispatch verification):
+post-dispatch verification), `plugin/skills/build/references/escalation.md`
+§Post-item remediation governs, and this section defers to it:
 - Do NOT proceed regardless of whether changes look expected
-- Do NOT clean up on behalf of the item
-- Revert to last clean commit: `git checkout -- . && git clean -fd`
-- Report the dirty tree and escalate
+- The agent that owns the dirt commits or reverts its own work: resume it once,
+  then dispatch a fresh `edify:artisan`, then escalate. The orchestrator never
+  cleans up in its own session
+- `git checkout -- . && git clean -fd` runs only where no agent owns the dirt,
+  and only after the user confirms it, because it destroys untracked work
 
 **Timeout handling:**
 
