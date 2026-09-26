@@ -159,6 +159,52 @@ def test_conventional_dirt_is_clean_and_other_dirt_is_not(tmp_path: Path) -> Non
     ], result.stdout
 
 
+def test_memory_gitlink_is_clean_and_a_sibling_name_is_not(tmp_path: Path) -> None:
+    """The ``memory`` gitlink is exempt in any porcelain state.
+
+    ``MM memory`` — a staged gitlink bump with a newer submodule commit on top —
+    sets both columns, so an exemption keyed on the pre-KD-7 `` M memory`` line
+    alone, or one dropping ``memory`` from the pattern, fails the clean phase.
+
+    Decoy phase: an untracked ``memory.md`` beside it is dirt listed alone,
+    which catches an unanchored ``memory`` prefix.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    submodule = repo / "memory"
+    submodule.mkdir()
+    _run_git(submodule, "init", "-q", "-b", "main")
+    _run_git(submodule, "config", "user.name", "Test User")
+    _run_git(submodule, "config", "user.email", "test@example.com")
+    _run_git(submodule, "commit", "-q", "--allow-empty", "-m", "fact 1")
+    _run_git(repo, "add", "memory")
+    _run_git(repo, "commit", "-q", "-m", "add memory gitlink")
+    _run_git(submodule, "commit", "-q", "--allow-empty", "-m", "fact 2")
+    _run_git(repo, "add", "memory")
+    _run_git(submodule, "commit", "-q", "--allow-empty", "-m", "fact 3")
+    assert _run_git(repo, "status", "--porcelain", "--untracked-files=all") == (
+        "MM memory\n"
+    )
+
+    bin_dir = tmp_path / "bin"
+    marker = tmp_path / "just-invocations"
+    _stub_just(bin_dir, marker)
+
+    result = _run_script(repo, bin_dir)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.startswith("CLEAN:"), result.stdout
+    assert marker.read_text(encoding="utf-8") == "precommit\n"
+
+    (repo / "memory.md").write_text("not the gitlink\n", encoding="utf-8")
+
+    result = _run_script(repo, bin_dir)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert result.stdout.splitlines() == [
+        "DIRTY: uncommitted changes",
+        "?? memory.md",
+    ], result.stdout
+
+
 def test_rename_out_of_exempt_path_is_dirty(tmp_path: Path) -> None:
     r"""A staged rename out of an exempt path is listed as dirt.
 
