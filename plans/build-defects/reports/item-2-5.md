@@ -1,6 +1,6 @@
 # Item 2.5 — `plugin/skills/build/references/dispatch-composition.md`, `plugin/agents/test-driver.md`, `plugin/agents/refactor.md`
 
-Status: **blocked, Edit refused, twice across two legs.** In leg 2 the first
+Status: **blocked, Edit refused, three times across three legs.** In leg 2 the first
 three Edits on `dispatch-composition.md` each came back with "The server-side
 auto mode classifier gave no verdict (it skipped this action)". This session
 had switched back to auto mode after Item 2.4 committed.
@@ -10,6 +10,10 @@ still matches verbatim (`dispatch-composition.md` lines 91–92, 46–49 and
 34–38; `test-driver.md` 101–102; `refactor.md` 177–183). Its first Edit, the
 §Naming one below on `plugin/skills/build/references/dispatch-composition.md`,
 got the same "gave no verdict" under auto mode, so leg 3 stopped.
+
+Leg 4 re-checked all five old strings again: each still matches verbatim, at
+the same lines. Its first Edit, the same §Naming one, got the same "gave no
+verdict" under auto mode, so leg 4 stopped too.
 
 Nothing was applied: all three targets are unchanged and nothing is committed
 for this item. No retry and no sed, Bash or Write fallback was attempted, and
