@@ -1,12 +1,19 @@
 # Item 2.5 — `plugin/skills/build/references/dispatch-composition.md`, `plugin/agents/test-driver.md`, `plugin/agents/refactor.md`
 
-Status: **blocked, Edit refused.** The first three Edits on
-`dispatch-composition.md` each came back with "The server-side auto mode
-classifier gave no verdict (it skipped this action)". This session had switched
-back to auto mode after Item 2.4 committed. Nothing was applied: all three
-targets are unchanged and nothing is committed for this item. Per the dispatch
-rules, no retry and no sed, Bash or Write fallback was attempted, and the agent
-definitions were not tried.
+Status: **blocked, Edit refused, twice across two legs.** In leg 2 the first
+three Edits on `dispatch-composition.md` each came back with "The server-side
+auto mode classifier gave no verdict (it skipped this action)". This session
+had switched back to auto mode after Item 2.4 committed.
+
+Leg 3 re-checked all five old strings below against the current files: each
+still matches verbatim (`dispatch-composition.md` lines 91–92, 46–49 and
+34–38; `test-driver.md` 101–102; `refactor.md` 177–183). Its first Edit, the
+§Naming one below on `plugin/skills/build/references/dispatch-composition.md`,
+got the same "gave no verdict" under auto mode, so leg 3 stopped.
+
+Nothing was applied: all three targets are unchanged and nothing is committed
+for this item. No retry and no sed, Bash or Write fallback was attempted, and
+the agent definitions were not tried.
 
 Requirements: inline M1, m15; orch m5.
 
