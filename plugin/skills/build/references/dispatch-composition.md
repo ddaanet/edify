@@ -38,22 +38,23 @@ Every dispatch prompt carries:
    orchestrator commits the corrector's report, with the fixes it applied where
    there are any, in the same form.
 5. **Report path** — `plans/<job>/reports/<dispatch name>.md`, the `name` from
-   §Naming and nothing else. This is the only rule for report paths: the prompt
-   assigns the path and the agent writes exactly there, whatever default its own
-   definition carries. Per-dispatch names are what keep a slice's test review
-   and code review from overwriting each other, and what let `tdd-auditor` find
-   them. A report names no hash of the commit that carries it; whoever needs
-   that commit resolves it with `git log --diff-filter=A` over the report's
-   path. Return contract: the report path on success, or `blocked: <reason>`.
-   UNFIXABLE is never a return: a reviewer marks an issue it cannot fix
-   `UNFIXABLE` inside its report. Two exceptions to the contract:
-   `edify:refactor`, whose own protocol returns `success` /
-   `escalated: <reason>` / `error: <reason>` and still writes its report at the
-   assigned path; and a report-only reviewer (`plugin-dev:skill-reviewer`),
-   which returns its findings as text in parts and writes nothing — the
-   dispatching session resumes it by name for the next part while a part ends
-   `CONTINUED`, and writes the parts to the assigned path only once one ends
-   `END OF REPORT` (`review-dispatch-template.md` §Report-only variant).
+   §Naming and resumption and nothing else. This is the only rule for report
+   paths: the prompt assigns the path and the agent writes exactly there,
+   whatever default its own definition carries. Per-dispatch names are what keep
+   a slice's test review and code review from overwriting each other, and what
+   let `tdd-auditor` find them. A report names no hash of the commit that
+   carries it; whoever needs that commit resolves it with
+   `git log --diff-filter=A` over the report's path. Return contract: the report
+   path on success, or `blocked: <reason>`. UNFIXABLE is never a return: a
+   reviewer marks an issue it cannot fix `UNFIXABLE` inside its report. Two
+   exceptions to the contract: `edify:refactor`, whose own protocol returns
+   `success` / `escalated: <reason>` / `error: <reason>` and still writes its
+   report at the assigned path; and a report-only reviewer
+   (`plugin-dev:skill-reviewer`), which returns its findings as text in parts
+   and writes nothing — the dispatching session resumes it by name for the next
+   part while a part ends `CONTINUED`, and writes the parts to the assigned path
+   only once one ends `END OF REPORT` (`review-dispatch-template.md`
+   §Report-only variant).
 6. **Mode**, for `edify:test-driver` only: `RED` or `GREEN`, named explicitly —
    the agent refuses a prompt that names neither.
 
@@ -92,15 +93,16 @@ at plan time.
 
 ## Naming and resumption
 
-Give every dispatch a `name`: `item-N-M` for a general item, `item-N-M-s<k>-red`
-/ `-test-review` / `-green` / `-code-review` for slice dispatches,
-`item-N-M-s<k>-refactor` for a refactor the code review flagged (the opus
-re-dispatch reuses the name), `phase-P-corrector` for checkpoints,
-`review-<group>` for a review-gate dispatch (`<group>` a lowercase one-word slug
-for the artifact group `finishing.md` §1 routed, as in `review-skill`),
-`final-review` for a single-phase run's closing corrector, `tdd-audit` for the
-auditor. Resumption is `SendMessage` to that name; an unnamed agent cannot be
-resumed.
+Give every dispatch a `name`: `item-N-M` for a general item — or for the
+corrector reviewing an item executed in session (`/build` §4.1), which frees the
+name — `item-N-M-s<k>-red` / `-test-review` / `-green` / `-code-review` for
+slice dispatches, `item-N-M-s<k>-refactor` for a refactor the code review
+flagged (the opus re-dispatch reuses the name), `phase-P-corrector` for phase
+boundaries, `review-<group>` for a review-gate dispatch (`<group>` a lowercase
+one-word slug for the artifact group `finishing.md` §1 routed, as in
+`review-skill`), `final-review` for a single-phase run's closing corrector,
+`tdd-audit` for the auditor. Resumption is `SendMessage` to that name; an
+unnamed agent cannot be resumed.
 
 A child's own reply is the only authoritative result for its task. A late
 task-notification on an already-reported task id may be answering something else
@@ -109,6 +111,7 @@ task-notification on an already-reported task id may be answering something else
 ## Agent behaviour contract
 
 The dispatched agent follows `plugin/fragments/delegation.md`: it reports to a
-file and returns only the filepath or an error, resolves recall by reading the
-artifact's listed files itself, and is resumed at most once before a fresh
-launch.
+file, resolves recall by reading the artifact's listed files itself, returns per
+§Prompt contents item 5, and after a failure is resumed at most once before a
+fresh launch. The report-only reviewer's part-resumes are its return protocol,
+not recovery.

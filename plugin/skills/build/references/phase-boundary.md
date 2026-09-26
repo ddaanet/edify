@@ -4,10 +4,12 @@ Reached at the end of each phase of a **phased runbook**. Work with no runbook
 has no phases and never reaches this file; its whole diff is covered by the
 review gate in `finishing.md` instead.
 
-The changed-files list is the phase's diff against its base:
+The changed-files list is the phase's committed diff against its base. It is
+taken against `HEAD`, not the working tree, so the paths `verify-step.sh`
+exempts stay out:
 
 ```bash
-git diff --name-only <phase base>
+git diff --name-only <phase base> HEAD
 ```
 
 For phase 1 the base is the commit in `tmp/build-baseline`. For phase P>1 it is
@@ -35,7 +37,7 @@ inside its own scope; neither the orchestrator's own judgement nor the next
 phase's reviewer stands in for that review. Otherwise commit and continue: the
 corrector commits nothing, so that commit carries its report — with the fixes it
 applied where there are any — and always happens. Stage those paths by name and
-commit with `git commit -- <paths>`.
+commit with `git commit -- <paths>`. Then run `/build` §4.4's verification.
 
-The **final checkpoint** adds a lifecycle audit: verify all stateful objects
-(MERGE_HEAD, staged content, lock files) cleared on success paths.
+The **last phase's boundary** adds a lifecycle audit: verify all stateful
+objects (MERGE_HEAD, staged content, lock files) cleared on success paths.

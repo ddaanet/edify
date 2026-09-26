@@ -23,8 +23,9 @@ it. A run spanning several sessions loads only what its own session hits.
 
 ## 1. Load the work
 
-`<job>` is the `plans/<job>` path the invocation names. A run resumed in a fresh
-session is re-invoked with the same path; nothing infers it.
+`<job>` is the job directory named by the invocation's `plans/<job>` path. A run
+resumed in a fresh session is re-invoked with the same path; nothing infers it.
+A resumed run Reads `references/escalation.md` §Resuming before §2.
 
 ```bash
 ls plans/<job>
@@ -53,11 +54,11 @@ plugin/skills/build/scripts/verify-step.sh
 ```
 
 - Exit 0 (`CLEAN:` and the checks that passed) → proceed.
-- Exit 1 with `DIRTY:` → STOP: "Dirty tree. Commit or stash before /build." Any
-  change is dirt, untracked files included, except three paths dirty by
-  convention: `memory` (the gitlore submodule), `.claude/handoff-*.md` and
-  `inbox/*.md`. A listing the `sandbox-lies` hook annotates as sandbox masks is
-  re-run instead, per `references/escalation.md` §Post-item remediation.
+- Exit 1 with `DIRTY:` → if the `sandbox-lies` hook annotates the listing as
+  sandbox masks, re-run per `references/escalation.md` §Post-item remediation;
+  otherwise STOP: "Dirty tree. Commit or stash before /build." Any change is
+  dirt, untracked files included, except three paths dirty by convention:
+  `memory` (the gitlore submodule), `.claude/handoff-*.md` and `inbox/*.md`.
 - Exit 1 with `PRECOMMIT:` → STOP: "Precommit failing. Fix before /build."
 - Exit 2 → STOP: the script itself failed, so there is no verdict.
 
@@ -68,24 +69,20 @@ This script is the skill's single definition of a clean tree; Section 4 and
 `references/finishing.md` §1 call the same one. A bare `git status --porcelain`
 here would refuse states the later gates are documented to tolerate.
 
-**Capture the baseline** — before any edits:
+**Capture the baseline** — before any edits, and not on a resumed run, which
+keeps the file:
 
 ```bash
 mkdir -p tmp && git rev-parse HEAD > tmp/build-baseline
 ```
 
-A file, not a shell variable: each Bash call is its own shell, so a `BASELINE=`
-assignment here is gone by Section 5. `tmp/` is gitignored, so the baseline
-never enters the diff it defines. Section 5 reads it back with
-`$(cat tmp/build-baseline)`.
+A file, since no shell variable survives to Section 5; `tmp/` is gitignored, so
+it never enters the diff it defines.
 
 ## 3. Pre-work
 
-Unconditional — run it even when `/design` chained straight in with context
-already loaded. The alternative is a caller-supplied token asserting the context
-is warm, and such a token fails open and invisibly: a chained call that drops it
-re-runs a recall pass with nothing in the output saying so. One cheap duplicate
-recall is the cheaper side of that trade.
+Unconditional — run it even when `/design` chained straight in: a caller token
+asserting warm context would fail open, invisibly.
 
 ### 3.1 Brief check
 
@@ -114,13 +111,16 @@ per edit is not. No type plays a part: §4.3 fires on the item carrying
 
 ### 4.1 Direct execution
 
-Read the targets, apply the edits, `just precommit`, commit.
+Read the targets, apply the edits, `just precommit`, then stage the edited paths
+and commit them with `git commit -- <paths>` under an `Item N.M` subject.
 
 Review is **not** the executor's judgement. Self-review via `git diff` only when
 every self-review condition in `plugin/fragments/review-requirement.md`
 §Proportionality holds; otherwise dispatch `edify:corrector` scoped to this
-item's changes. This is the one path where the executor would review its own
-edits, and per-item choice makes it common — so the threshold is the fragment's.
+item's changes, named `item-N-M`. This is the one path where the executor would
+review its own edits, and per-item choice makes it common — so the threshold is
+the fragment's. The corrector commits nothing: commit its report and fixes as
+§4.2 does for a review item, before §4.4.
 
 ### 4.2 Delegated execution
 
@@ -141,9 +141,10 @@ name and commit with `git commit -- <paths>`.
 ### 4.4 Post-item verification
 
 After every dispatch whose work is committed — a slice's GREEN, a slice's code
-review once its commit lands, a review item once §4.2's commit lands, and any
-general or directly executed item. Not after RED or test review, where
-uncommitted tests are the designed state:
+review once its commit lands, a review item or §4.1's corrector once its commit
+lands, a phase-boundary corrector once its commit lands, and any general or
+directly executed item. Not after RED or test review, where uncommitted tests
+are the designed state:
 
 ```bash
 plugin/skills/build/scripts/verify-step.sh

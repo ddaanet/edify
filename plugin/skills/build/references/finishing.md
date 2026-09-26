@@ -10,7 +10,9 @@ skipped review still runs §2 and §3 here.
 Read `../../fragments/review-requirement.md` and route changed files to the
 appropriate reviewer by its routing table.
 
-1. List changed files: `git diff --name-only "$(cat tmp/build-baseline)"`
+1. List changed files: `git diff --name-only "$(cat tmp/build-baseline)" HEAD`.
+   This lists committed changes only: apart from them the tree holds only paths
+   `verify-step.sh` exempts, and no commit carries those.
 2. Group by artifact type (code/tests/plans, skill definitions, agent
    definitions, design documents)
 3. Look up the reviewer per group from the routing table
@@ -22,11 +24,12 @@ appropriate reviewer by its routing table.
 - **Fix-capable reviewers** (`edify:corrector`, `edify:design-corrector`,
   `edify:outline-corrector`, `edify:runbook-corrector`): delegate, read the
   report, grep UNFIXABLE. The agent applies its fixes and writes its own report.
-- **Report-only reviewers** (`plugin-dev:skill-reviewer`): delegate, read the
-  findings it returns, then write the report and apply the fixes in this
-  session. That reviewer holds **Read, Grep and Glob only** — no Write, no Edit,
-  no Bash, no Skill — so it can neither fix nor file. Use the template's
-  §Report-only variant.
+- **Report-only reviewers** (`plugin-dev:skill-reviewer`): delegate, collect the
+  findings it returns in parts as `dispatch-composition.md` §Prompt contents
+  item 5 says, then write the report and apply the fixes in this session. That
+  reviewer holds **Read, Grep and Glob only** — no Write, no Edit, no Bash, no
+  Skill — so it can neither fix nor file. Use the template's §Report-only
+  variant.
 
 Scope per dispatch is that artifact group's share of step 1's list,
 implementation only; the template's §Field Rules set every other field.
@@ -37,10 +40,12 @@ Planning artifacts do not route through this gate. They route by artifact, as
 → `edify:runbook-corrector`. `runbook-corrector` rejects anything that is not
 `runbook.md`.
 
-**Report-only re-dispatch:** where this session applied a report-only reviewer's
-fixes, re-dispatch that group to its reviewer once, over the same files — this
-session does not review its own edits (`/build` §4.1). Add what it returns to
-the group's report and apply it; there is no further pass.
+**Report-only second pass:** where this session applied a report-only reviewer's
+fixes, resume that reviewer (`review-<group>`) once by `SendMessage`, naming the
+fixes applied, over the same files: the gate's edits get an independent review,
+and this session's would otherwise have none. Append its findings to the group's
+report under a second-pass heading and apply them. There is no further pass; the
+second pass's fixes go unreviewed by design.
 
 **Structural proof (D+B anchor):** once review completes, Read each report path
 this gate actually dispatched. The Read proves the report exists; without it, §2
@@ -74,8 +79,8 @@ the `/build` §2 file rather than from a variable.
 Read the script output. On a divergence message → surface it inline. On
 `WARNING: No corrector report` → surface it inline and investigate before §3: §1
 should have left a review report, or `/build` §5 a `review-skip.md`, and the
-warning means neither exists. On match or no-classification with no warning →
-proceed silently.
+warning means neither exists — run §1, or write `/build` §5's `review-skip.md`,
+then rerun §2. On match or no-classification with no warning → proceed silently.
 
 ## 3. Completion
 

@@ -15,7 +15,10 @@ returned, or a run resuming after a context ceiling or a kill.
   reader when a sandboxed Bash call runs concurrently, so they say nothing about
   the dispatch. The re-run's verdict is the one acted on, at the entry gate as
   after an item; a re-run annotated again → stop and report to the user. Any
-  other exit 1 → remediate: resume the named agent once
+  other exit 1 → remediate. Where there is no named agent (an item executed in
+  session and self-reviewed), or the named agent commits nothing (a review
+  dispatch) or holds no edit tools, skip the resume and go to the fresh
+  `edify:artisan`. Otherwise resume the named agent once
   (`SendMessage to: <name>`, "Your dispatch left uncommitted changes or
   precommit failures. Fix and commit, or revert your own uncommitted work."). If
   the resume fails or returns without progress, dispatch a fresh `edify:artisan`
@@ -54,23 +57,22 @@ criteria.
 A run that hit a context ceiling, or whose session was killed, resumes from
 committed state rather than from memory of what it was doing. Re-invoke `/build`
 with the same `plans/<job>` path the run started with: nothing infers it, and
-`/build` never writes the task frame, so it cannot be read back from there.
+`/build` never writes the task frame, so it cannot be read back from there. A
+run is resumed when the invocation says so, or when `plans/<job>/reports/`
+already holds this run's reports.
 
-Where the work is a phased runbook, resolve the current phase's base as
-`references/phase-boundary.md` does. For phase 1 the base is the commit in
-`tmp/build-baseline`, so a resumed run keeps that file rather than recapturing
-it. For phase P>1 it is the commit that adds the previous phase's corrector
-report, which the commit closing that phase always lands:
+Where the work is a phased runbook, the current phase's base resolves as
+`references/phase-boundary.md` says. A resumed run keeps `tmp/build-baseline`,
+phase 1's base, rather than recapturing it.
 
-```bash
-git log --diff-filter=A --format=%H \
-    -- plans/<job>/reports/phase-<P-1>-corrector.md
-```
-
-1. Find the last checkpoint commit in `git log`.
-2. Run that checkpoint's verification.
-3. Build the inventory of remaining work from its output.
-4. Resume from the next item.
+1. Find the last committed item or phase-boundary commit in `git log`
+   (`Item N.M` subjects, `item-N-M*.md` and `phase-<P>-corrector.md` reports).
+2. Run `scripts/verify-step.sh`. Anything but exit 0 → §Post-item remediation
+   above, before anything else; the entry gate then finds the tree clean.
+3. Build the inventory of remaining work: the work's items minus those step 1
+   shows landed.
+4. Run `/build` §2 (without the baseline capture) and §3, then start §4 at the
+   first remaining item.
 
 **Do not use `just precommit` as a state-assessment tool.** It is a pass/fail
 gate, not a diagnostic: a green run says the tree is valid, never which items

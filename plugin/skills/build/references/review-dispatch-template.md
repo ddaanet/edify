@@ -68,10 +68,11 @@ every issue (critical, major, minor) with its file, its location and the
 change you would make. Mark a blocker "UNFIXABLE: [description]".
 ```
 
-The **calling session** then writes the returned findings to the group's report
-path (§Field Rules) and applies the fixes itself. The structural-proof Read in
-`finishing.md` §1 then finds a file that exists, so the gate stops blocking on
-skill-definition groups.
+The **calling session** then collects the parts (`dispatch-composition.md`
+§Prompt contents item 5), writes them to the group's report path (§Field Rules)
+and applies the fixes itself. The structural-proof Read in `finishing.md` §1
+then finds a file that exists, so the gate stops blocking on skill-definition
+groups.
 
 ## Field Rules
 
@@ -92,8 +93,8 @@ skill-definition groups.
   resolves recall by path and moves writing and fixing to the caller. `Grep` and
   `Glob` are its search tools; a prompt instructing it to run `rg` fails.
 - **Report path and return contract:** `dispatch-composition.md` §Prompt
-  contents is the one rule for both, under the dispatch name `review-<group>`,
-  `<group>` being the artifact group `finishing.md` §1 routed. The structural
+  contents is the one rule for both, under the dispatch name `review-<group>`
+  that `dispatch-composition.md` §Naming and resumption defines. The structural
   proof reads the path actually dispatched, so the prompt and the proof must
   name the same file.
 - **Scope IN/OUT:** From design or outline, not invented. Prevents reviewer from
@@ -103,8 +104,10 @@ skill-definition groups.
   components are the gap — component+decision validation alone misses standalone
   scope items (e.g., planstate specified in Scope IN but not part of any C1-C4
   component).
-- **Constraint:** implementation changes only. Planning artifacts route as
-  `finishing.md` §1 says, not through this template.
+- **Constraints:** keep the template's scope-OUT bullet as written; add any
+  constraint the design names.
+- **Implementation only:** planning artifacts route as `finishing.md` §1 says,
+  not through this template.
 
 ## Example: Skill Creation Task
 
