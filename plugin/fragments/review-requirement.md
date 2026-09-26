@@ -123,9 +123,10 @@ loudly if any field is missing or contains only placeholder text.**
   findings. Prevents false positives — without OUT, review confabulates issues
   from future work.
 - **Changed files:** Explicit file list, from `git diff --name-only <base>`
-  against the base commit of the run or phase under review — never a bare
-  `git diff --name-only`, which compares the working tree to the index and is
-  empty once the work is committed. Must not be empty.
+  against the base commit of the work under review — under `/build`, the run's
+  or phase's base as `plugin/skills/build/references/phase-boundary.md` resolves
+  it. Never a bare `git diff --name-only`, which compares the working tree to
+  the index and is empty once the work is committed. Must not be empty.
 - **Requirements summary:** What the implementation should satisfy (from
   design/requirements). Must reference specific FRs, acceptance criteria, or
   behavioral expectations.

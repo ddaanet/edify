@@ -46,9 +46,12 @@ When an item leaves the tree dirty (uncommitted changes detected by
 post-dispatch verification), `plugin/skills/build/references/escalation.md`
 §Post-item remediation governs, and this section defers to it:
 - Do NOT proceed regardless of whether changes look expected
-- The agent that owns the dirt commits or reverts its own work: resume it once,
-  then dispatch a fresh `edify:artisan`, then escalate. The orchestrator never
-  cleans up in its own session
+- A listing the `sandbox-lies` hook annotates as sandbox masks is re-run once,
+  not remediated; act on the re-run's verdict, and stop and report to the user
+  if the re-run is annotated again
+- The agent that owns the dirt commits or reverts its own work: resume it once;
+  if that fails, dispatch a fresh `edify:artisan`; if that fails too, escalate.
+  The orchestrator never cleans up in its own session
 - `git checkout -- . && git clean -fd` runs only where no agent owns the dirt,
   and only after the user confirms it, because it destroys untracked work
 
