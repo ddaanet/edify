@@ -18,11 +18,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "plugin" / "skills" / "build" / "scripts" / "verify-step.sh"
 
 
-def _run_git(repo: Path, *args: str) -> str:
+def _run_git(repo: Path, *args: str, returncode: int = 0) -> str:
     """Run git in ``repo`` insulated from user and system config; return stdout.
 
     Failures assert with stderr attached rather than raising a bare
-    ``CalledProcessError`` (docs/references/testing.md D-21).
+    ``CalledProcessError`` (docs/references/testing.md D-21). ``returncode``
+    is the exit expected, for a call that fails on purpose.
     """
     env = dict(os.environ)
     env["GIT_CONFIG_GLOBAL"] = os.devnull
@@ -35,7 +36,9 @@ def _run_git(repo: Path, *args: str) -> str:
         capture_output=True,
         text=True,
     )
-    assert result.returncode == 0, f"git {args}: {result.stdout}{result.stderr}"
+    assert result.returncode == returncode, (
+        f"git {args}: {result.stdout}{result.stderr}"
+    )
     return result.stdout
 
 
@@ -273,6 +276,56 @@ def test_quoted_exempt_path_is_clean(tmp_path: Path) -> None:
         "DIRTY: uncommitted changes",
         '?? "inbox/my notes.txt"',
     ], result.stdout
+
+
+def test_exempt_paths_clean_in_any_porcelain_state(tmp_path: Path) -> None:
+    """Exempt paths clear the tree in XY states beyond `` M``, ``MM``, ``??``.
+
+    One tree holds a staged add, a staged delete, a worktree-only delete and an
+    unmerged conflict from a real two-branch merge on a tracked file. KD-7
+    frees both columns of anything but a rename or copy. Every line must be
+    filtered for ``CLEAN:``, so a pattern losing any one of ``A``, ``D`` or
+    ``U`` in either column lists that line as dirt — as does the narrower
+    ``[ M?]`` in both columns, which none of the four pairs is drawn from.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    (repo / "inbox").mkdir()
+    (repo / "inbox" / "old.md").write_text("base\n", encoding="utf-8")
+    (repo / "inbox" / "conflict.md").write_text("base\n", encoding="utf-8")
+    _run_git(repo, "add", "inbox/old.md", "inbox/conflict.md")
+    _run_git(repo, "commit", "-q", "-m", "add inbox files")
+
+    _run_git(repo, "checkout", "-q", "-b", "feature")
+    (repo / "inbox" / "conflict.md").write_text("feature\n", encoding="utf-8")
+    _run_git(repo, "commit", "-q", "-am", "feature change")
+    _run_git(repo, "checkout", "-q", "main")
+    (repo / "inbox" / "conflict.md").write_text("main\n", encoding="utf-8")
+    _run_git(repo, "commit", "-q", "-am", "main change")
+
+    # Both branches rewrote the same line: the merge stops at exit 1, leaving UU.
+    _run_git(repo, "merge", "feature", "-m", "merge", returncode=1)
+
+    _run_git(repo, "rm", "-q", "inbox/old.md")
+    (repo / ".claude" / "handoff-new.md").write_text("new\n", encoding="utf-8")
+    _run_git(repo, "add", ".claude/handoff-new.md")
+    (repo / ".claude" / "handoff-task.md").unlink()
+
+    assert _run_git(repo, "status", "--porcelain", "--untracked-files=all") == (
+        "A  .claude/handoff-new.md\n"
+        " D .claude/handoff-task.md\n"
+        "UU inbox/conflict.md\n"
+        "D  inbox/old.md\n"
+    )
+
+    bin_dir = tmp_path / "bin"
+    marker = tmp_path / "just-invocations"
+    _stub_just(bin_dir, marker)
+
+    result = _run_script(repo, bin_dir)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.startswith("CLEAN:"), result.stdout
+    assert marker.read_text(encoding="utf-8") == "precommit\n"
 
 
 def test_git_status_failure_exits_2(tmp_path: Path) -> None:
