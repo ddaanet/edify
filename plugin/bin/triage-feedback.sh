@@ -29,11 +29,12 @@ if [[ -d "$reports_dir" ]]; then
         -exec printf x \; | wc -c | tr -d ' ')
 fi
 
-# Detect behavioral code: new definitions in the diff. Anchored after the `+`
-# so a commented-out line does not match. Covers the keyword-declaration
-# languages plus POSIX shell function syntax; a language that declares
-# behaviour without one of these keywords (C, C++, Java method bodies) reads as
-# "no", which under-reports rather than over-reports.
+# Detect behavioral code: new definitions in the committed diff from baseline
+# to HEAD (KD-6). Anchored after the `+` so a commented-out line does not
+# match. Covers the keyword-declaration languages plus POSIX shell function
+# syntax; a language that declares behaviour without one of these keywords
+# (C, C++, Java method bodies) reads as "no", which under-reports rather than
+# over-reports.
 # Not `grep -q`: `set -o pipefail` is on, and an early-exiting consumer would
 # kill `git diff` with SIGPIPE and fail the pipeline.
 definition_re='^\+[[:space:]]*((export|public|private|protected|static|async|pub|final)[[:space:]]+)*'
@@ -41,7 +42,7 @@ definition_re+='(def|class|function|func|fn|impl|interface|struct|trait|enum|mod
 shell_fn_re='^\+[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\(\)[[:space:]]*\{'
 
 behavioral_code="no"
-if git diff "$baseline_commit" | grep -E "$definition_re|$shell_fn_re" > /dev/null; then
+if git diff "$baseline_commit" HEAD | grep -E "$definition_re|$shell_fn_re" > /dev/null; then
     behavioral_code="yes"
 fi
 

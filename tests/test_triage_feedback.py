@@ -162,3 +162,51 @@ def test_files_changed_counts_committed_changes_only(tmp_path: Path) -> None:
 
     lines = _triage_lines("job", baseline, repo)
     assert "- Files changed: 3" in lines, "\n".join(lines)
+
+
+def test_uncommitted_definition_is_not_behavioral(tmp_path: Path) -> None:
+    """Behavioral code reads the committed diff from the baseline to HEAD only.
+
+    Both repos come from ``_def_edits_pending``: after the baseline a commit
+    tracks ``module.py`` and ``other.py`` holding no definition, then each
+    file picks up a ``def`` line, ``module.py`` unstaged and ``other.py``
+    staged (KD-6). The negative leaves both edits uncommitted, so it reads
+    ``no`` only once neither the working tree nor the index reaches the diff.
+
+    The positive differs only in committing those same edits, then a
+    plain-text commit on top, and must read ``yes``: an implementation whose
+    regex misses the ``def`` lines, that diffs only the uncommitted state, or
+    that diffs only the last commit reads ``no`` there. It runs second so the
+    negative's result stays its own.
+    """
+    repo = tmp_path / "repo"
+    baseline = _def_edits_pending(repo)
+
+    lines = _triage_lines("job", baseline, repo)
+    assert "- Behavioral code: no" in lines, "\n".join(lines)
+
+    positive_repo = tmp_path / "positive"
+    positive_baseline = _def_edits_pending(positive_repo)
+    _run_git(positive_repo, "commit", "-q", "-a", "-m", "commit defs")
+    (positive_repo / "notes.txt").write_text("plain text\n", encoding="utf-8")
+    _run_git(positive_repo, "add", "notes.txt")
+    _run_git(positive_repo, "commit", "-q", "-m", "add notes")
+
+    lines = _triage_lines("job", positive_baseline, positive_repo)
+    assert "- Behavioral code: yes" in lines, "\n".join(lines)
+
+
+def _def_edits_pending(repo: Path) -> str:
+    """Leave a ``def`` uncommitted in two tracked files; return the baseline.
+
+    ``module.py`` carries it unstaged, ``other.py`` staged.
+    """
+    baseline = _init_repo(repo)
+    (repo / "module.py").write_text("x = 1\n", encoding="utf-8")
+    (repo / "other.py").write_text("y = 2\n", encoding="utf-8")
+    _run_git(repo, "add", "module.py", "other.py")
+    _run_git(repo, "commit", "-q", "-m", "add plain text")
+    (repo / "module.py").write_text("x = 1\ndef foo():\n    pass\n", encoding="utf-8")
+    (repo / "other.py").write_text("y = 2\ndef bar():\n    pass\n", encoding="utf-8")
+    _run_git(repo, "add", "other.py")
+    return baseline
