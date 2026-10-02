@@ -11,13 +11,15 @@ set -euo pipefail
 # commit, even when already staged. The two-column XY status may hold any
 # state but a rename or copy: an `R`/`C` line's `old -> new` is two paths, and
 # `inbox/a.md -> b.md` would pass as one exempt path. Git quotes a path holding
-# a space or a non-ASCII byte, so the pattern allows the quotes.
+# a space or a non-ASCII byte, so the pattern allows the quotes. The status
+# forces `core.quotePath` on: with a user's `false`, a raw non-UTF-8 byte makes
+# grep call the input binary and drop that line, so its dirt would read clean.
 # `--untracked-files=all` explodes an untracked `inbox/` into its files, since
 # a collapsed `?? inbox/` line is not a path the exemption can judge.
 # `git status` must succeed; only grep's exit 1 (every line filtered out) is
 # a result rather than a failure, so tolerate that one code and nothing else.
 exempt='^[^RC][^RC] "?(memory|\.claude/handoff-[^/]+\.md|inbox/[^/]+\.md)"?$'
-porcelain=$(git status --porcelain --untracked-files=all) || {
+porcelain=$(git -c core.quotePath=true status --porcelain --untracked-files=all) || {
     echo "ERROR: git status failed"
     exit 2
 }
