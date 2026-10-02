@@ -186,3 +186,59 @@ def test_exempt_paths_committed_in_the_run_are_dropped(tmp_path: Path) -> None:
         "inbox/x.txt",
         "memoryx.txt",
     ], result.stdout
+
+
+def test_no_item_report_exits_1(tmp_path: Path) -> None:
+    """No committed ``item-*`` report gives ``NO-BASE:``, never ``BASE:``.
+
+    The repo holds job ``j``'s own planning reports (``explore-x.md``,
+    ``outline-review.md``, neither matching ``item-*``), a committed
+    ``item-*`` report for job ``jj`` (``plans/jj/reports/item-1-1.md``), and
+    an **uncommitted** ``plans/j/reports/item-1-1.md`` sitting on disk. KD-1
+    keys on committed history scoped to this job: a derivation that ignores
+    the job or prefix-matches it (``plans/j*``) finds ``jj``'s report, and
+    one matching any committed report regardless of the ``item-*`` name
+    finds ``explore-x.md``, so each prints a ``BASE:``; one that takes the
+    on-disk file as a run in progress has no history to derive from and does
+    not print ``NO-BASE:``.
+
+    Exit 1 is ``NO-BASE:``'s code, not every failure's. A repo whose root
+    commit adds the item report has a report but no parent to take as the
+    base: a git failure, exit 2 with ``ERROR:``. That check runs first, so
+    an implementation answering ``NO-BASE:`` from the parent lookup's failure
+    branch — which both cases reach — reds there.
+    """
+    root_repo = _init_repo(tmp_path / "root-item")
+    root_report = root_repo / "plans" / "j" / "reports" / "item-1-1.md"
+    root_report.parent.mkdir(parents=True)
+    root_report.write_text("1\n", encoding="utf-8")
+    _run_git(root_repo, "add", "--", "plans/j/reports/item-1-1.md")
+    _run_git(root_repo, "commit", "-q", "--amend", "--no-edit")
+    root_result = _run_script(root_repo, "j")
+    assert (root_result.returncode, root_result.stdout[: len("ERROR:")]) == (
+        2,
+        "ERROR:",
+    ), root_result.stdout + root_result.stderr
+
+    repo = _init_repo(tmp_path)
+    _commit(repo, "other job item", {"plans/jj/reports/item-1-1.md": "o\n"})
+    _commit(
+        repo,
+        "j planning",
+        {
+            "plans/j/reports/explore-x.md": "x\n",
+            "plans/j/reports/outline-review.md": "r\n",
+        },
+    )
+    uncommitted = repo / "plans" / "j" / "reports" / "item-1-1.md"
+    uncommitted.parent.mkdir(parents=True, exist_ok=True)
+    uncommitted.write_text("uncommitted\n", encoding="utf-8")
+
+    result = _run_script(repo, "j")
+    assert (result.returncode, result.stdout[: len("NO-BASE:")]) == (
+        1,
+        "NO-BASE:",
+    ), result.stdout + result.stderr
+    assert not any(line.startswith("BASE: ") for line in result.stdout.splitlines()), (
+        result.stdout
+    )

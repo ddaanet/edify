@@ -6,7 +6,10 @@ set -euo pipefail
 # `plans/<job>/reports/item-*` report. `--diff-filter=A --reverse` orders
 # additions oldest first; the first line is that commit, and its parent is
 # the base. `--no-show-signature` keeps a user's `log.showSignature` from
-# printing verification lines ahead of the shas.
+# printing verification lines ahead of the shas. No commit at all adding
+# such a report prints `NO-BASE:` and exits 1; a root commit that adds one
+# has no parent to take as the base, which is a git failure: `ERROR:`,
+# exit 2. Exit 2 also covers usage and every other git failure.
 # KD-6: the changed-files list is the committed diff since that base
 # (`<base> HEAD`, never the working tree), minus the job's own
 # `plans/<job>/` record and the exempt paths `exempt-paths.sh` names (a run
@@ -67,6 +70,14 @@ first_commit=$(git log --no-show-signature --diff-filter=A --reverse --format=%H
     exit 2
 }
 first_commit=${first_commit%%$'\n'*}
+
+# No committed `item-*` report at all: not a git failure, exit 1 NO-BASE:.
+# A root commit that adds the report is a different case, handled below: it
+# has no parent to take as the base, which is a git failure, exit 2 ERROR:.
+if [[ -z $first_commit ]]; then
+    printf 'NO-BASE: no committed plans/%s/reports/item-* report\n' "$job"
+    exit 1
+fi
 
 # A root commit has no parent: an error, never a fallback base.
 base_sha=$(git rev-parse --verify --quiet "${first_commit}^") || {
