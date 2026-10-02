@@ -36,19 +36,19 @@ case "$job" in
         ;;
 esac
 
-# Parameter expansion, not `dirname`: strip the trailing `/name` from
-# `BASH_SOURCE[0]`, which the harness always invokes by absolute path. A
-# minimal stubbed PATH (as `verify-step.sh`'s tests use) need not carry
-# `dirname`.
+# Located as in `verify-step.sh`, whose comment explains the idiom. Here
+# `BASH_SOURCE[0]` may be relative to the CWD, so the source precedes the
+# `cd` below. An unset variable would trip `set -u`, whose exit 1 is
+# `NO-BASE:`'s code.
 case "${BASH_SOURCE[0]}" in
     */*) script_dir="${BASH_SOURCE[0]%/*}" ;;
     *) script_dir="." ;;
 esac
-# shellcheck source=exempt-paths.sh
-source "$script_dir/exempt-paths.sh" || {
-    echo "ERROR: cannot source exempt-paths.sh"
+# shellcheck source=SCRIPTDIR/exempt-paths.sh
+if ! source "$script_dir/exempt-paths.sh" || [[ -z ${EXEMPT_PATHS_ALTERNATION:-} ]]; then
+    echo "ERROR: cannot load EXEMPT_PATHS_ALTERNATION from exempt-paths.sh"
     exit 2
-}
+fi
 exempt_re='^('"${EXEMPT_PATHS_ALTERNATION}"')$'
 
 # The pathspecs are root-relative; from a subdirectory they would match

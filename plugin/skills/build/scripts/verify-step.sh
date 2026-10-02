@@ -2,9 +2,27 @@
 exec 2>&1
 set -euo pipefail
 
+# Parameter expansion, not `dirname`: `test_missing_just_exits_2` stubs a
+# minimal PATH that lacks `dirname`. `BASH_SOURCE[0]` is the invocation path,
+# absolute or relative to the CWD (`/build` runs
+# `plugin/skills/build/scripts/verify-step.sh` from the repo root); nothing
+# changes directory before the source, so both resolve. A symlink to this
+# file resolves to the link's directory and fails the source: exit 2.
+case "${BASH_SOURCE[0]}" in
+    */*) script_dir="${BASH_SOURCE[0]%/*}" ;;
+    *) script_dir="." ;;
+esac
+# A file that sources but leaves the variable unset would trip `set -u`,
+# whose exit 1 reads as the DIRTY verdict.
+# shellcheck source=SCRIPTDIR/exempt-paths.sh
+if ! source "$script_dir/exempt-paths.sh" || [[ -z ${EXEMPT_PATHS_ALTERNATION:-} ]]; then
+    echo "ERROR: cannot load EXEMPT_PATHS_ALTERNATION from exempt-paths.sh"
+    exit 2
+fi
+
 # KD-6: the exempt alternation lives in exempt-paths.sh (the three paths
-# dirty by convention are explained there), sourced below and shared with
-# changed-files.sh. Safe to exempt because every committing dispatch stages
+# dirty by convention are explained there), shared with changed-files.sh.
+# Safe to exempt (KD-7) because every committing dispatch stages
 # its paths by name, never `git add -A`, and commits them with
 # `git commit -- <paths>`, so exempt dirt never enters a commit, even when
 # already staged. The two-column XY status may hold any state but a rename
@@ -18,18 +36,6 @@ set -euo pipefail
 # exemption can judge. `git status` must succeed; only grep's exit 1 (every
 # line filtered out) is a result rather than a failure, so tolerate that one
 # code and nothing else.
-# Parameter expansion, not `dirname`: strip the trailing `/name` from
-# `BASH_SOURCE[0]`, which the harness always invokes by absolute path.
-# `test_missing_just_exits_2` stubs a minimal PATH that lacks `dirname`.
-case "${BASH_SOURCE[0]}" in
-    */*) script_dir="${BASH_SOURCE[0]%/*}" ;;
-    *) script_dir="." ;;
-esac
-# shellcheck source=exempt-paths.sh
-source "$script_dir/exempt-paths.sh" || {
-    echo "ERROR: cannot source exempt-paths.sh"
-    exit 2
-}
 exempt='^[^RC][^RC] "?('"${EXEMPT_PATHS_ALTERNATION}"')"?$'
 porcelain=$(git -c core.quotePath=true status --porcelain --untracked-files=all) || {
     echo "ERROR: git status failed"
