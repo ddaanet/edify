@@ -11,7 +11,7 @@ if [[ -z "$job_dir" ]] || [[ -z "$baseline_commit" ]]; then
 fi
 
 # Count files changed since baseline
-files_changed=$(git diff --name-only "$baseline_commit" | wc -l | tr -d ' ')
+files_changed=$(git diff --name-only "$baseline_commit" HEAD | wc -l | tr -d ' ')
 
 # Count report files in plans/$job_dir/reports/
 # Exclude pre-execution artifacts: design-review*, outline-review*, recall-*

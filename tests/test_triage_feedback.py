@@ -122,3 +122,43 @@ def test_simple_with_review_reports_matches(tmp_path: Path) -> None:
     assert "- Behavioral code: no" in lines, "\n".join(lines)
     assert "- Reports: 1" in lines, "\n".join(lines)
     assert lines[lines.index("## Verdict") + 1] == "underclassified", "\n".join(lines)
+
+
+def test_files_changed_counts_committed_changes_only(tmp_path: Path) -> None:
+    """Files changed counts the committed diff from the baseline to HEAD only.
+
+    Every file is tracked at the baseline, so each later edit is a diff:
+    ``git diff`` never lists an untracked path, which would drop the
+    uncommitted files for the wrong reason. Two commits follow the baseline --
+    ``a.txt``, then ``d.txt`` and ``e.txt`` -- and ``b.txt`` is left modified
+    unstaged and ``c.txt`` modified and staged (KD-6). The answer, 3, differs
+    from every neighbouring range: the last commit alone reads 2, the index
+    against HEAD 1, the working tree against HEAD 2, the baseline against the
+    index 4 and against the working tree 5.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+
+    names = ("a.txt", "b.txt", "c.txt", "d.txt", "e.txt")
+    for name in names:
+        (repo / name).write_text("original\n", encoding="utf-8")
+    _run_git(repo, "add", *names)
+    _run_git(repo, "commit", "-q", "-m", "track files")
+    baseline = _run_git(repo, "rev-parse", "HEAD").strip()
+
+    (repo / "a.txt").write_text("changed\n", encoding="utf-8")
+    _run_git(repo, "add", "a.txt")
+    _run_git(repo, "commit", "-q", "-m", "change a")
+
+    (repo / "d.txt").write_text("changed\n", encoding="utf-8")
+    (repo / "e.txt").write_text("changed\n", encoding="utf-8")
+    _run_git(repo, "add", "d.txt", "e.txt")
+    _run_git(repo, "commit", "-q", "-m", "change d and e")
+
+    (repo / "b.txt").write_text("modified, uncommitted\n", encoding="utf-8")
+
+    (repo / "c.txt").write_text("staged, uncommitted\n", encoding="utf-8")
+    _run_git(repo, "add", "c.txt")
+
+    lines = _triage_lines("job", baseline, repo)
+    assert "- Files changed: 3" in lines, "\n".join(lines)
