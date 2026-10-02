@@ -6,20 +6,23 @@ set -euo pipefail
 # `plans/<job>/reports/item-*` report. `--diff-filter=A --reverse` orders
 # additions oldest first; the first line is that commit, and its parent is
 # the base. `--no-show-signature` keeps a user's `log.showSignature` from
-# printing verification lines ahead of the shas. No commit at all adding
-# such a report prints `NO-BASE:` and exits 1; a root commit that adds one
-# has no parent to take as the base, which is a git failure: `ERROR:`,
-# exit 2. Exit 2 also covers usage and every other git failure.
+# printing verification lines ahead of the shas. With no commit adding such
+# a report the script prints `NO-BASE:` and exits 1; usage errors and git
+# failures exit 2 with `ERROR:`, so nothing else may exit 1.
 # KD-6: the changed-files list is the committed diff since that base
 # (`<base> HEAD`, never the working tree), minus the job's own
 # `plans/<job>/` record and the exempt paths `exempt-paths.sh` names (a run
 # commit can also carry a `/handoff` or memory-pointer commit's exempt
 # paths, which are not the run's own work). Paths come from a NUL-delimited
 # `git diff -z`, read with `read -r -d ''`, never split on whitespace or
-# newlines. The exempt match happens inside that same NUL-delimited read
-# loop, with bash's `[[ $path =~ $re ]]` (the regex held in a variable,
-# bash-3.2-safe) rather than a second pass through grep, which would need
-# its own NUL handling. The output is one path per line, so a path holding a
+# newlines. `--no-renames`, on the diff and the log alike, makes a rename a
+# deletion plus an addition whatever the user's `diff.renames`, so a report
+# renamed into place counts as added; it also keeps git's skipped-rename
+# warning, which `exec 2>&1` would print among the paths, out of stdout.
+# The exempt match happens inside that same NUL-delimited read loop, with
+# bash's `[[ $path =~ $re ]]` (the regex held in a variable, bash-3.2-safe)
+# rather than a second pass through grep, which would need its own NUL
+# handling. The output is one path per line, so a path holding a
 # newline prints as two lines: a residual bound of the line format, not of
 # the read.
 
@@ -65,15 +68,12 @@ cd "$top" || {
     exit 2
 }
 
-first_commit=$(git log --no-show-signature --diff-filter=A --reverse --format=%H -- "plans/$job/reports/item-*") || {
+first_commit=$(git log --no-show-signature --no-renames --diff-filter=A --reverse --format=%H -- "plans/$job/reports/item-*") || {
     echo "ERROR: git log failed"
     exit 2
 }
 first_commit=${first_commit%%$'\n'*}
 
-# No committed `item-*` report at all: not a git failure, exit 1 NO-BASE:.
-# A root commit that adds the report is a different case, handled below: it
-# has no parent to take as the base, which is a git failure, exit 2 ERROR:.
 if [[ -z $first_commit ]]; then
     printf 'NO-BASE: no committed plans/%s/reports/item-* report\n' "$job"
     exit 1
@@ -85,11 +85,12 @@ base_sha=$(git rev-parse --verify --quiet "${first_commit}^") || {
     exit 2
 }
 
-printf 'BASE: %s\n' "$base_sha"
+# A write failure would exit 1 under `set -e`, which reads as `NO-BASE:`.
+printf 'BASE: %s\n' "$base_sha" || exit 2
 
 exclude_prefix="plans/$job/"
 # `--` keeps a path named `HEAD` from making the revision ambiguous.
-git diff --name-only -z "$base_sha" HEAD -- | while IFS= read -r -d '' path; do
+git diff --name-only --no-renames -z "$base_sha" HEAD -- | while IFS= read -r -d '' path; do
     case "$path" in
         "$exclude_prefix"*) continue ;;
     esac
