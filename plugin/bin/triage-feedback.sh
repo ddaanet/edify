@@ -35,14 +35,17 @@ fi
 # syntax; a language that declares behaviour without one of these keywords
 # (C, C++, Java method bodies) reads as "no", which under-reports rather than
 # over-reports.
-# Not `grep -q`: `set -o pipefail` is on, and an early-exiting consumer would
-# kill `git diff` with SIGPIPE and fail the pipeline.
 definition_re='^\+[[:space:]]*((export|public|private|protected|static|async|pub|final)[[:space:]]+)*'
 definition_re+='(def|class|function|func|fn|impl|interface|struct|trait|enum|module)[[:space:]]'
 shell_fn_re='^\+[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\(\)[[:space:]]*\{'
 
+# Captured before matching, not piped into grep: errexit is off inside an `if`
+# condition, so a failing `git diff` would read as "no". --no-color and
+# --no-ext-diff stop color.diff or diff.external config from rewriting the `+`
+# lines the patterns anchor on.
+committed_diff=$(git diff --no-color --no-ext-diff "$baseline_commit" HEAD)
 behavioral_code="no"
-if git diff "$baseline_commit" HEAD | grep -E "$definition_re|$shell_fn_re" > /dev/null; then
+if grep -qE "$definition_re|$shell_fn_re" <<< "$committed_diff"; then
     behavioral_code="yes"
 fi
 
