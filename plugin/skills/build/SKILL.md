@@ -25,7 +25,6 @@ it. A run spanning several sessions loads only what its own session hits.
 
 `<job>` is the job directory named by the invocation's `plans/<job>` path. A run
 resumed in a fresh session is re-invoked with the same path; nothing infers it.
-A resumed run Reads `references/escalation.md` §Resuming before §2.
 
 ```bash
 ls plans/<job>
@@ -42,7 +41,12 @@ Take the first that exists:
 Existence is tested, not discovered by a failing Read: a missing runbook is a
 fallback, not an error. Note the recall artifact path
 (`plans/<job>/recall-artifact.md`) for dispatch composition, and the job
-directory — Section 5 writes under `plans/<job>/reports/`.
+directory — Sections 4 and 5 write under `plans/<job>/reports/`.
+
+**Resumed or fresh, tested at every start:** any `plans/<job>/reports/item-*.md`
+on disk → the run is resumed: Read `references/escalation.md` §Resuming before
+§2. None → fresh. Only `item-*` counts, since planning reports
+(`outline-review.md`, `runbook-review.md`, `explore-*`) share the directory.
 
 **Execution mode:** STRICT SEQUENTIAL. One dispatch per message — items modify
 shared state, and parallel dispatch causes race conditions.
@@ -66,18 +70,8 @@ Run it with `dangerouslyDisableSandbox: true`, here and at every other call
 site; a sandboxed run yields no verdict.
 
 This script is the skill's single definition of a clean tree; Section 4 and
-`references/finishing.md` §1 call the same one. A bare `git status --porcelain`
+`references/finishing.md` call the same one. A bare `git status --porcelain`
 here would refuse states the later gates are documented to tolerate.
-
-**Capture the baseline** — before any edits, and not on a resumed run, which
-keeps the file:
-
-```bash
-mkdir -p tmp && git rev-parse HEAD > tmp/build-baseline
-```
-
-A file, since no shell variable survives to Section 5; `tmp/` is gitignored, so
-it never enters the diff it defines.
 
 ## 3. Pre-work
 
@@ -111,16 +105,20 @@ per edit is not. No type plays a part: §4.3 fires on the item carrying
 
 ### 4.1 Direct execution
 
-Read the targets, apply the edits, `just precommit`, then stage the edited paths
-and commit them with `git commit -- <paths>` under an `Item N.M` subject.
+Read the targets, apply the edits, `just precommit`, then review the uncommitted
+diff before anything is committed.
 
-Review is **not** the executor's judgement. Self-review via `git diff` only when
-every self-review condition in `plugin/fragments/review-requirement.md`
-§Proportionality holds; otherwise dispatch `edify:corrector` scoped to this
-item's changes, named `item-N-M`. This is the one path where the executor would
-review its own edits, and per-item choice makes it common — so the threshold is
-the fragment's. The corrector commits nothing: commit its report and fixes as
-§4.2 does for a review item, before §4.4.
+Review is **not** the executor's judgement. Self-review via `git diff HEAD` only
+when every self-review condition in `plugin/fragments/review-requirement.md`
+§Proportionality holds, and write its report to
+`plans/<job>/reports/item-N-M.md` yourself; otherwise dispatch `edify:corrector`
+scoped to this item's uncommitted changes, named `item-N-M`, and take its report
+at that path. This is the one path where the executor would review its own
+edits, and per-item choice makes it common — so the threshold is the fragment's.
+
+Then one commit, `<type>: <job> Item N.M — <title>`, carrying the edits, any
+fixes and the report: stage those paths by name and commit with
+`git commit -- <paths>`. The report is what §1's resume test finds.
 
 ### 4.2 Delegated execution
 
@@ -140,11 +138,10 @@ name and commit with `git commit -- <paths>`.
 
 ### 4.4 Post-item verification
 
-After every dispatch whose work is committed — a slice's GREEN, a slice's code
-review once its commit lands, a review item or §4.1's corrector once its commit
-lands, a phase-boundary corrector once its commit lands, and any general or
-directly executed item. Not after RED or test review, where uncommitted tests
-are the designed state:
+After every step whose work is committed — a slice's GREEN, a slice's code
+review once its commit lands, a review item once its commit lands, §4.1's one
+commit, a phase-boundary corrector once its commit lands, and any general item.
+Not after RED or test review, where uncommitted tests are the designed state:
 
 ```bash
 plugin/skills/build/scripts/verify-step.sh
@@ -186,14 +183,10 @@ It must state what changed, why review adds no value for this specific change,
 and what verification was performed instead, specifically enough to survive
 deliverable-review scrutiny. **Skip is not confidence-gated:** "scope is small"
 and "well-tested" are not justifications — review exists precisely to catch what
-confidence misses. Triage feedback and completion still run.
+confidence misses. `references/finishing.md` §1's report commit carries it.
+Triage feedback and completion still run.
 
 ## 6. Escalation
-
-**2-level model:** execution-level issues (missing files, failed commands, dirty
-tree) are handled here; design-level issues escalate to the user. Every
-resolution must pass precommit, leave a clean tree, and satisfy the item's own
-criteria.
 
 **When a dispatch errors, returns an unexpected result, or never returns, and
 when a run resumes after a context ceiling or a kill:** Read
