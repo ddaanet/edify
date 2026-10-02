@@ -42,8 +42,14 @@ def _run_git(repo: Path, *args: str, returncode: int = 0) -> str:
     return result.stdout
 
 
-def _init_repo(repo: Path) -> None:
-    """Init a git repo at ``repo`` with one commit including a handoff file."""
+def _status(repo: Path) -> str:
+    """Return the repo's porcelain status, exploding untracked directories."""
+    return _run_git(repo, "status", "--porcelain", "--untracked-files=all")
+
+
+def _init_repo(tmp_path: Path) -> Path:
+    """Init a repo under ``tmp_path``, seeded with a handoff file; return it."""
+    repo = tmp_path / "repo"
     repo.mkdir(parents=True, exist_ok=True)
     _run_git(repo, "init", "-q", "-b", "main")
     _run_git(repo, "config", "user.name", "Test User")
@@ -54,14 +60,22 @@ def _init_repo(repo: Path) -> None:
     (claude_dir / "handoff-task.md").write_text("original\n", encoding="utf-8")
     _run_git(repo, "add", "README.md", ".claude/handoff-task.md")
     _run_git(repo, "commit", "-q", "-m", "seed")
+    return repo
 
 
-def _stub_just(bin_dir: Path, marker: Path) -> None:
-    """Write a ``just`` stub in ``bin_dir`` appending its args to ``marker``."""
+def _stub_just(tmp_path: Path) -> tuple[Path, Path]:
+    """Write a ``just`` stub under ``tmp_path``; return ``(bin_dir, marker)``.
+
+    The stub appends its args to ``marker``, which exists only once ``just``
+    has been invoked.
+    """
+    bin_dir = tmp_path / "bin"
+    marker = tmp_path / "just-invocations"
     bin_dir.mkdir(parents=True, exist_ok=True)
     stub = bin_dir / "just"
     stub.write_text(f'#!/bin/sh\necho "$*" >> "{marker}"\nexit 0\n', encoding="utf-8")
     stub.chmod(0o755)
+    return bin_dir, marker
 
 
 def _run_script(
@@ -93,6 +107,13 @@ def _run_script(
     )
 
 
+def _assert_dirty(result: subprocess.CompletedProcess[str], *lines: str) -> None:
+    """Assert exit 1 and a DIRTY verdict listing exactly ``lines``, in order."""
+    assert result.returncode == 1, result.stdout + result.stderr
+    expected = ["DIRTY: uncommitted changes", *lines]
+    assert result.stdout.splitlines() == expected, result.stdout
+
+
 def test_conventional_dirt_is_clean_and_other_dirt_is_not(tmp_path: Path) -> None:
     """KD-7's exemptions clear the tree; any other change is dirt.
 
@@ -113,12 +134,9 @@ def test_conventional_dirt_is_clean_and_other_dirt_is_not(tmp_path: Path) -> Non
     an exemption of all of ``inbox/``, and a status without
     ``--untracked-files=all`` whose collapsed ``?? inbox/`` line is exempted.
     """
-    repo = tmp_path / "repo"
-    _init_repo(repo)
+    repo = _init_repo(tmp_path)
 
-    bin_dir = tmp_path / "bin"
-    marker = tmp_path / "just-invocations"
-    _stub_just(bin_dir, marker)
+    bin_dir, marker = _stub_just(tmp_path)
 
     (repo / "inbox").mkdir()
     (repo / "inbox" / "brief.md").write_text("brief\n", encoding="utf-8")
@@ -126,9 +144,7 @@ def test_conventional_dirt_is_clean_and_other_dirt_is_not(tmp_path: Path) -> Non
     handoff.write_text("staged\n", encoding="utf-8")
     _run_git(repo, "add", ".claude/handoff-task.md")
     handoff.write_text("staged then edited\n", encoding="utf-8")
-    assert _run_git(repo, "status", "--porcelain", "--untracked-files=all") == (
-        "MM .claude/handoff-task.md\n?? inbox/brief.md\n"
-    )
+    assert _status(repo) == "MM .claude/handoff-task.md\n?? inbox/brief.md\n"
 
     result = _run_script(repo, bin_dir)
     assert result.returncode == 0, result.stdout + result.stderr
@@ -140,26 +156,19 @@ def test_conventional_dirt_is_clean_and_other_dirt_is_not(tmp_path: Path) -> Non
     (repo / ".claude" / "notes.md").write_text("notes\n", encoding="utf-8")
     (repo / ".claude" / "handoff-notes.txt").write_text("x\n", encoding="utf-8")
 
-    result = _run_script(repo, bin_dir)
-    assert result.returncode == 1, result.stdout + result.stderr
-    assert result.stdout.splitlines() == [
-        "DIRTY: uncommitted changes",
+    _assert_dirty(
+        _run_script(repo, bin_dir),
         "?? .claude/handoff-notes.txt",
         "?? .claude/notes.md",
         "?? stray.txt",
-    ], result.stdout
+    )
 
     (repo / "stray.txt").unlink()
     (repo / ".claude" / "notes.md").unlink()
     (repo / ".claude" / "handoff-notes.txt").unlink()
     (repo / "inbox" / "notes.txt").write_text("notes\n", encoding="utf-8")
 
-    result = _run_script(repo, bin_dir)
-    assert result.returncode == 1, result.stdout + result.stderr
-    assert result.stdout.splitlines() == [
-        "DIRTY: uncommitted changes",
-        "?? inbox/notes.txt",
-    ], result.stdout
+    _assert_dirty(_run_script(repo, bin_dir), "?? inbox/notes.txt")
 
 
 def test_memory_gitlink_is_clean_and_a_sibling_name_is_not(tmp_path: Path) -> None:
@@ -172,8 +181,7 @@ def test_memory_gitlink_is_clean_and_a_sibling_name_is_not(tmp_path: Path) -> No
     Decoy phase: an untracked ``memory.md`` beside it is dirt listed alone,
     which catches an unanchored ``memory`` prefix.
     """
-    repo = tmp_path / "repo"
-    _init_repo(repo)
+    repo = _init_repo(tmp_path)
     submodule = repo / "memory"
     submodule.mkdir()
     _run_git(submodule, "init", "-q", "-b", "main")
@@ -185,13 +193,9 @@ def test_memory_gitlink_is_clean_and_a_sibling_name_is_not(tmp_path: Path) -> No
     _run_git(submodule, "commit", "-q", "--allow-empty", "-m", "fact 2")
     _run_git(repo, "add", "memory")
     _run_git(submodule, "commit", "-q", "--allow-empty", "-m", "fact 3")
-    assert _run_git(repo, "status", "--porcelain", "--untracked-files=all") == (
-        "MM memory\n"
-    )
+    assert _status(repo) == "MM memory\n"
 
-    bin_dir = tmp_path / "bin"
-    marker = tmp_path / "just-invocations"
-    _stub_just(bin_dir, marker)
+    bin_dir, marker = _stub_just(tmp_path)
 
     result = _run_script(repo, bin_dir)
     assert result.returncode == 0, result.stdout + result.stderr
@@ -200,12 +204,7 @@ def test_memory_gitlink_is_clean_and_a_sibling_name_is_not(tmp_path: Path) -> No
 
     (repo / "memory.md").write_text("not the gitlink\n", encoding="utf-8")
 
-    result = _run_script(repo, bin_dir)
-    assert result.returncode == 1, result.stdout + result.stderr
-    assert result.stdout.splitlines() == [
-        "DIRTY: uncommitted changes",
-        "?? memory.md",
-    ], result.stdout
+    _assert_dirty(_run_script(repo, bin_dir), "?? memory.md")
 
 
 def test_rename_out_of_exempt_path_is_dirty(tmp_path: Path) -> None:
@@ -215,27 +214,17 @@ def test_rename_out_of_exempt_path_is_dirty(tmp_path: Path) -> None:
     new`` tail of an ``R`` line, so ``inbox/a.md -> notes.md`` passed as one
     exempt path even though ``notes.md`` is not exempt.
     """
-    repo = tmp_path / "repo"
-    _init_repo(repo)
+    repo = _init_repo(tmp_path)
     (repo / "inbox").mkdir()
     (repo / "inbox" / "a.md").write_text("a\n", encoding="utf-8")
     _run_git(repo, "add", "inbox/a.md")
     _run_git(repo, "commit", "-q", "-m", "add inbox/a.md")
     _run_git(repo, "mv", "inbox/a.md", "notes.md")
-    assert _run_git(repo, "status", "--porcelain", "--untracked-files=all") == (
-        "R  inbox/a.md -> notes.md\n"
-    )
+    assert _status(repo) == "R  inbox/a.md -> notes.md\n"
 
-    bin_dir = tmp_path / "bin"
-    marker = tmp_path / "just-invocations"
-    _stub_just(bin_dir, marker)
+    bin_dir, _marker = _stub_just(tmp_path)
 
-    result = _run_script(repo, bin_dir)
-    assert result.returncode == 1, result.stdout + result.stderr
-    assert result.stdout.splitlines() == [
-        "DIRTY: uncommitted changes",
-        "R  inbox/a.md -> notes.md",
-    ], result.stdout
+    _assert_dirty(_run_script(repo, bin_dir), "R  inbox/a.md -> notes.md")
 
 
 def test_quoted_exempt_path_is_clean(tmp_path: Path) -> None:
@@ -248,17 +237,12 @@ def test_quoted_exempt_path_is_clean(tmp_path: Path) -> None:
     only in not being ``*.md``, is dirt listed alone. That catches an
     allowance exempting every quoted path rather than quoted exempt paths.
     """
-    repo = tmp_path / "repo"
-    _init_repo(repo)
+    repo = _init_repo(tmp_path)
     (repo / "inbox").mkdir()
     (repo / "inbox" / "my brief.md").write_text("brief\n", encoding="utf-8")
-    assert _run_git(repo, "status", "--porcelain", "--untracked-files=all") == (
-        '?? "inbox/my brief.md"\n'
-    )
+    assert _status(repo) == '?? "inbox/my brief.md"\n'
 
-    bin_dir = tmp_path / "bin"
-    marker = tmp_path / "just-invocations"
-    _stub_just(bin_dir, marker)
+    bin_dir, marker = _stub_just(tmp_path)
 
     result = _run_script(repo, bin_dir)
     assert result.returncode == 0, result.stdout + result.stderr
@@ -266,16 +250,9 @@ def test_quoted_exempt_path_is_clean(tmp_path: Path) -> None:
     assert marker.read_text(encoding="utf-8") == "precommit\n"
 
     (repo / "inbox" / "my notes.txt").write_text("notes\n", encoding="utf-8")
-    assert _run_git(repo, "status", "--porcelain", "--untracked-files=all") == (
-        '?? "inbox/my brief.md"\n?? "inbox/my notes.txt"\n'
-    )
+    assert _status(repo) == '?? "inbox/my brief.md"\n?? "inbox/my notes.txt"\n'
 
-    result = _run_script(repo, bin_dir)
-    assert result.returncode == 1, result.stdout + result.stderr
-    assert result.stdout.splitlines() == [
-        "DIRTY: uncommitted changes",
-        '?? "inbox/my notes.txt"',
-    ], result.stdout
+    _assert_dirty(_run_script(repo, bin_dir), '?? "inbox/my notes.txt"')
 
 
 def test_exempt_paths_clean_in_any_porcelain_state(tmp_path: Path) -> None:
@@ -288,8 +265,7 @@ def test_exempt_paths_clean_in_any_porcelain_state(tmp_path: Path) -> None:
     ``U`` in either column lists that line as dirt — as does the narrower
     ``[ M?]`` in both columns, which none of the four pairs is drawn from.
     """
-    repo = tmp_path / "repo"
-    _init_repo(repo)
+    repo = _init_repo(tmp_path)
     (repo / "inbox").mkdir()
     (repo / "inbox" / "old.md").write_text("base\n", encoding="utf-8")
     (repo / "inbox" / "conflict.md").write_text("base\n", encoding="utf-8")
@@ -311,21 +287,53 @@ def test_exempt_paths_clean_in_any_porcelain_state(tmp_path: Path) -> None:
     _run_git(repo, "add", ".claude/handoff-new.md")
     (repo / ".claude" / "handoff-task.md").unlink()
 
-    assert _run_git(repo, "status", "--porcelain", "--untracked-files=all") == (
+    assert _status(repo) == (
         "A  .claude/handoff-new.md\n"
         " D .claude/handoff-task.md\n"
         "UU inbox/conflict.md\n"
         "D  inbox/old.md\n"
     )
 
-    bin_dir = tmp_path / "bin"
-    marker = tmp_path / "just-invocations"
-    _stub_just(bin_dir, marker)
+    bin_dir, marker = _stub_just(tmp_path)
 
     result = _run_script(repo, bin_dir)
     assert result.returncode == 0, result.stdout + result.stderr
     assert result.stdout.startswith("CLEAN:"), result.stdout
     assert marker.read_text(encoding="utf-8") == "precommit\n"
+
+
+def test_nested_path_under_exempt_dir_is_dirty(tmp_path: Path) -> None:
+    r"""The exempt globs are single-level; a path one level deeper is dirt.
+
+    ``inbox/[^/]+\.md`` and ``\.claude/handoff-[^/]+\.md`` each stop at the
+    first ``/`` past their directory prefix, so ``inbox/sub/x.md`` and
+    ``.claude/handoff-dir/x.md`` are dirt, listed by their own ``??`` lines —
+    as they would not be if either glob were widened to span directories.
+
+    Single-level siblings ``inbox/x.md`` and ``.claude/handoff-x.md`` share
+    the tree and are absent from the listing, so a pattern that exempts
+    neither directory at all, rather than only its nested paths, fails too.
+    """
+    repo = _init_repo(tmp_path)
+    (repo / "inbox" / "sub").mkdir(parents=True)
+    (repo / "inbox" / "sub" / "x.md").write_text("x\n", encoding="utf-8")
+    (repo / "inbox" / "x.md").write_text("x\n", encoding="utf-8")
+    (repo / ".claude" / "handoff-dir").mkdir()
+    (repo / ".claude" / "handoff-dir" / "x.md").write_text("x\n", encoding="utf-8")
+    (repo / ".claude" / "handoff-x.md").write_text("x\n", encoding="utf-8")
+
+    assert _status(repo) == (
+        "?? .claude/handoff-dir/x.md\n"
+        "?? .claude/handoff-x.md\n"
+        "?? inbox/sub/x.md\n"
+        "?? inbox/x.md\n"
+    )
+
+    bin_dir, marker = _stub_just(tmp_path)
+
+    result = _run_script(repo, bin_dir)
+    _assert_dirty(result, "?? .claude/handoff-dir/x.md", "?? inbox/sub/x.md")
+    assert not marker.exists(), "just was invoked: " + result.stdout
 
 
 def test_git_status_failure_exits_2(tmp_path: Path) -> None:
@@ -356,8 +364,7 @@ def test_missing_just_exits_2(tmp_path: Path) -> None:
     Pre-F-2 code ran ``just precommit`` unconditionally, so a missing tool
     was reported as a precommit failure rather than an environment fault.
     """
-    repo = tmp_path / "repo"
-    _init_repo(repo)
+    repo = _init_repo(tmp_path)
 
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
