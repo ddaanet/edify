@@ -136,3 +136,53 @@ def test_base_is_parent_of_first_item_report_commit(tmp_path: Path) -> None:
         "a.txt",
         "b.txt",
     ], result.stdout
+
+
+def test_exempt_paths_committed_in_the_run_are_dropped(tmp_path: Path) -> None:
+    r"""The run's own commit of exempt paths does not appear in the list.
+
+    The item 1.1 commit — the run's first, so its parent is the base — also
+    touches the three exempt paths of KD-6 (``inbox/x.md``,
+    ``.claude/handoff-task.md``, a file named ``memory``) and one near-miss
+    per boundary of the exempt alternation, each of which must stay listed:
+
+        memory|\.claude/handoff-[^/]+\.md|inbox/[^/]+\.md
+
+    ``inbox/sub/y.md`` (single level; a shell ``case`` glob ``inbox/*.md``
+    matches ``/``), ``inbox/x.txt`` and ``.claude/handoff-task.json`` (the
+    ``.md`` suffix), ``.claude/other.md`` (the ``handoff-`` prefix),
+    ``memoryx.txt`` (the exact name, not a prefix) and ``docs/inbox/x.md``
+    (anchored at the path start, which an ungrouped ``^a|b|c$`` loses). The
+    exact-list assertion fails an implementation that drops nothing and one
+    that drops any near-miss.
+    """
+    repo = _init_repo(tmp_path)
+    base_sha = _run_git(repo, "rev-parse", "HEAD").strip()
+    _commit(
+        repo,
+        "item 1.1",
+        {
+            "plans/j/reports/item-1-1.md": "1\n",
+            "inbox/x.md": "exempt\n",
+            ".claude/handoff-task.md": "exempt\n",
+            "memory": "exempt\n",
+            "inbox/sub/y.md": "keep\n",
+            "inbox/x.txt": "keep\n",
+            ".claude/handoff-task.json": "keep\n",
+            ".claude/other.md": "keep\n",
+            "memoryx.txt": "keep\n",
+            "docs/inbox/x.md": "keep\n",
+        },
+    )
+
+    result = _run_script(repo, "j")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.splitlines() == [
+        f"BASE: {base_sha}",
+        ".claude/handoff-task.json",
+        ".claude/other.md",
+        "docs/inbox/x.md",
+        "inbox/sub/y.md",
+        "inbox/x.txt",
+        "memoryx.txt",
+    ], result.stdout

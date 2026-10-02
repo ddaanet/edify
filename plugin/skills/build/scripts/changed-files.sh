@@ -9,10 +9,16 @@ set -euo pipefail
 # printing verification lines ahead of the shas.
 # KD-6: the changed-files list is the committed diff since that base
 # (`<base> HEAD`, never the working tree), minus the job's own
-# `plans/<job>/` record. Paths come from a NUL-delimited `git diff -z`, read
-# with `read -r -d ''`, never split on whitespace or newlines. The output is
-# one path per line, so a path holding a newline prints as two lines: a
-# residual bound of the line format, not of the read.
+# `plans/<job>/` record and the exempt paths `exempt-paths.sh` names (a run
+# commit can also carry a `/handoff` or memory-pointer commit's exempt
+# paths, which are not the run's own work). Paths come from a NUL-delimited
+# `git diff -z`, read with `read -r -d ''`, never split on whitespace or
+# newlines. The exempt match happens inside that same NUL-delimited read
+# loop, with bash's `[[ $path =~ $re ]]` (the regex held in a variable,
+# bash-3.2-safe) rather than a second pass through grep, which would need
+# its own NUL handling. The output is one path per line, so a path holding a
+# newline prints as two lines: a residual bound of the line format, not of
+# the read.
 
 if [[ $# -ne 1 ]]; then
     echo "ERROR: usage: changed-files.sh <job>"
@@ -29,6 +35,21 @@ case "$job" in
         exit 2
         ;;
 esac
+
+# Parameter expansion, not `dirname`: strip the trailing `/name` from
+# `BASH_SOURCE[0]`, which the harness always invokes by absolute path. A
+# minimal stubbed PATH (as `verify-step.sh`'s tests use) need not carry
+# `dirname`.
+case "${BASH_SOURCE[0]}" in
+    */*) script_dir="${BASH_SOURCE[0]%/*}" ;;
+    *) script_dir="." ;;
+esac
+# shellcheck source=exempt-paths.sh
+source "$script_dir/exempt-paths.sh" || {
+    echo "ERROR: cannot source exempt-paths.sh"
+    exit 2
+}
+exempt_re='^('"${EXEMPT_PATHS_ALTERNATION}"')$'
 
 # The pathspecs are root-relative; from a subdirectory they would match
 # nothing.
@@ -61,6 +82,9 @@ git diff --name-only -z "$base_sha" HEAD -- | while IFS= read -r -d '' path; do
     case "$path" in
         "$exclude_prefix"*) continue ;;
     esac
+    if [[ $path =~ $exempt_re ]]; then
+        continue
+    fi
     printf '%s\n' "$path"
 done || {
     echo "ERROR: git diff failed"

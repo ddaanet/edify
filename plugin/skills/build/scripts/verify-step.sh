@@ -2,23 +2,35 @@
 exec 2>&1
 set -euo pipefail
 
-# Any change is dirt except three paths dirty by convention (KD-7): `memory`
-# (the gitlore submodule, normally ` M`), `.claude/handoff-*.md` (`/handoff`
-# and `/precompact` leave it modified or staged) and `inbox/*.md` (briefs
-# dropped or updated uncommitted on purpose). Safe to exempt because every
-# committing dispatch stages its paths by name, never `git add -A`, and
-# commits them with `git commit -- <paths>`, so exempt dirt never enters a
-# commit, even when already staged. The two-column XY status may hold any
-# state but a rename or copy: an `R`/`C` line's `old -> new` is two paths, and
-# `inbox/a.md -> b.md` would pass as one exempt path. Git quotes a path holding
-# a space or a non-ASCII byte, so the pattern allows the quotes. The status
-# forces `core.quotePath` on: with a user's `false`, a raw non-UTF-8 byte makes
-# grep call the input binary and drop that line, so its dirt would read clean.
-# `--untracked-files=all` explodes an untracked `inbox/` into its files, since
-# a collapsed `?? inbox/` line is not a path the exemption can judge.
-# `git status` must succeed; only grep's exit 1 (every line filtered out) is
-# a result rather than a failure, so tolerate that one code and nothing else.
-exempt='^[^RC][^RC] "?(memory|\.claude/handoff-[^/]+\.md|inbox/[^/]+\.md)"?$'
+# KD-6: the exempt alternation lives in exempt-paths.sh (the three paths
+# dirty by convention are explained there), sourced below and shared with
+# changed-files.sh. Safe to exempt because every committing dispatch stages
+# its paths by name, never `git add -A`, and commits them with
+# `git commit -- <paths>`, so exempt dirt never enters a commit, even when
+# already staged. The two-column XY status may hold any state but a rename
+# or copy: an `R`/`C` line's `old -> new` is two paths, and
+# `inbox/a.md -> b.md` would pass as one exempt path. Git quotes a path
+# holding a space or a non-ASCII byte, so the pattern allows the quotes. The
+# status forces `core.quotePath` on: with a user's `false`, a raw non-UTF-8
+# byte makes grep call the input binary and drop that line, so its dirt
+# would read clean. `--untracked-files=all` explodes an untracked `inbox/`
+# into its files, since a collapsed `?? inbox/` line is not a path the
+# exemption can judge. `git status` must succeed; only grep's exit 1 (every
+# line filtered out) is a result rather than a failure, so tolerate that one
+# code and nothing else.
+# Parameter expansion, not `dirname`: strip the trailing `/name` from
+# `BASH_SOURCE[0]`, which the harness always invokes by absolute path.
+# `test_missing_just_exits_2` stubs a minimal PATH that lacks `dirname`.
+case "${BASH_SOURCE[0]}" in
+    */*) script_dir="${BASH_SOURCE[0]%/*}" ;;
+    *) script_dir="." ;;
+esac
+# shellcheck source=exempt-paths.sh
+source "$script_dir/exempt-paths.sh" || {
+    echo "ERROR: cannot source exempt-paths.sh"
+    exit 2
+}
+exempt='^[^RC][^RC] "?('"${EXEMPT_PATHS_ALTERNATION}"')"?$'
 porcelain=$(git -c core.quotePath=true status --porcelain --untracked-files=all) || {
     echo "ERROR: git status failed"
     exit 2
