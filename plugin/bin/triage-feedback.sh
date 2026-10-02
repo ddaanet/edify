@@ -10,7 +10,8 @@ if [[ -z "$job_dir" ]] || [[ -z "$baseline_commit" ]]; then
     exit 1
 fi
 
-# Count files changed since baseline
+# Count files committed since baseline: the HEAD form keeps uncommitted dirt
+# out. git C-quotes a path holding a newline, so one line is one file.
 files_changed=$(git diff --name-only "$baseline_commit" HEAD | wc -l | tr -d ' ')
 
 # Count report files in plans/$job_dir/reports/
