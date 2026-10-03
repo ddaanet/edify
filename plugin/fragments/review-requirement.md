@@ -49,20 +49,21 @@ per-artifact-type, not per-batch.
 | Artifact | Reviewer | Why |
 |----------|----------|-----|
 | Code, tests, plans | `edify:corrector` | Default — general quality review |
-| Skill definitions | `plugin-dev:skill-reviewer` | Cross-skill consistency (allowed-tools, conventions) |
+| Skill definitions, their `references/` nodes, and shared instruction files kept outside a skill | `plugin-dev:skill-reviewer` | Cross-skill consistency (allowed-tools, conventions) |
 | Agent definitions | `edify:corrector` | Agent structure, triggering, tool access — criteria from the `plugin-dev:agent-development` skill, named in the dispatch prompt |
-| Design documents | `edify:design-corrector` (opus) | Architectural completeness and feasibility |
+| The living design graph under `docs/` | `edify:corrector` | Graph structure and decision records — criteria from the `craft:design-doc-writing` skill, named in the dispatch prompt. Not a job's `plans/<job>/design.md`: that is a planning artifact, reviewed by `edify:design-corrector` |
 
 **Dispatch names are namespaced.** `subagent_type` requires `<plugin>:<agent>`;
 a bare name returns "Agent type not found", including for the dispatching
 plugin's own agents.
 
-**When plugin-dev is not installed:** the skill-definition row falls back to
-`edify:corrector`, and the agent-definition row loses its criteria source —
-review against the agent definitions already in `plugin/agents/` instead.
-`plugin-dev` is a separate marketplace plugin, not an edify dependency — check
-availability before routing, and note the fallback in the review report so the
-weaker routing is visible.
+**When plugin-dev or craft is not installed:** without `plugin-dev`, the
+skill-definition row falls back to `edify:corrector`, and the agent-definition
+row loses its criteria source — review against the agent definitions already in
+`plugin/agents/` instead. Without `craft`, the design-graph row keeps
+`edify:corrector` but loses its criteria source. Each is a separate marketplace
+plugin, not an edify dependency — check availability before routing, and note
+the fallback in the review report so the weaker routing is visible.
 
 Orchestration-specific extensions (planning artifacts, human docs):
 `docs/references/pipeline-contracts.md`.
@@ -122,11 +123,17 @@ loudly if any field is missing or contains only placeholder text.**
   deferred items). Each item must be specific enough to match against review
   findings. Prevents false positives — without OUT, review confabulates issues
   from future work.
-- **Changed files:** Explicit file list, from `git diff --name-only <base>`
-  against the base commit of the work under review — under `/build`, the run's
-  or phase's base as `plugin/skills/build/references/phase-boundary.md` resolves
-  it. Never a bare `git diff --name-only`, which compares the working tree to
-  the index and is empty once the work is committed. Must not be empty.
+- **Changed files:** Explicit file list. Under `/build`, it is the list
+  `plugin/skills/build/scripts/changed-files.sh <job>` prints after its `BASE:`
+  line (`--phase` at a phase boundary): the committed diff from the run's or
+  phase's base to `HEAD`, minus the paths `verify-step.sh` exempts and the job's
+  own `plans/<job>/` record. The working-tree form,
+  `git diff --name-only <base>` against the base commit of the work under
+  review, is for uncommitted work only: `/review`, and `/build` §4.1's
+  corrector, which reviews an item before its commit. It takes in uncommitted
+  changes but never an untracked new file, so add those by name. Never a bare
+  `git diff --name-only`, which compares the working tree to the index and is
+  empty once the work is committed. Must not be empty.
 - **Requirements summary:** What the implementation should satisfy (from
   design/requirements). Must reference specific FRs, acceptance criteria, or
   behavioral expectations.
@@ -214,9 +221,10 @@ section with subcategory codes and investigation format).
 1. Read the report file returned by corrector
 2. Use `rg` (Bash) to search for `UNFIXABLE` in the report content
 3. If found: validate each UNFIXABLE issue (see validation below)
-4. If validation fails: resume corrector for reclassification with guidance
-   (delegate again with specific reclassification instructions in prompt — no
-   continuation mechanism available)
+4. If validation fails: resume the corrector for reclassification with specific
+   guidance — by name (`SendMessage`) where the dispatch was named, as `/build`
+   names every dispatch. An unnamed dispatch cannot be resumed: delegate again
+   with the reclassification instructions in the prompt
 5. If validated UNFIXABLE remains: **STOP**, report to user with report path,
    wait for guidance
 6. If no UNFIXABLE found: proceed (DEFERRED and OUT-OF-SCOPE are non-blocking)
