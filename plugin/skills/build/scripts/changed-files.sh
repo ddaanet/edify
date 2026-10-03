@@ -29,7 +29,10 @@ set -euo pipefail
 # latest commit in `<run base>..HEAD` touching
 # `plans/<job>/reports/phase-*-corrector.md` (the path, never the commit
 # subject, KD-8); no `--diff-filter`, so a modified report counts, and `-1`
-# takes the latest. With no such commit the base is the run base.
+# takes the latest. With no such commit the base is the run base. The
+# `:(glob)` magic keeps `*` inside one path component: git's default `*`
+# also matches `/`, so `reports/phase-1/old-corrector.md` would count as a
+# boundary.
 
 if [[ $# -lt 1 || $# -gt 2 || ( $# -eq 2 && $2 != --phase ) ]]; then
     echo "ERROR: usage: changed-files.sh <job> [--phase]"
@@ -92,7 +95,7 @@ base_sha=$(git rev-parse --verify --quiet "${first_commit}^") || {
 }
 
 if [[ ${2:-} == --phase ]]; then
-    phase_commit=$(git log -1 --format=%H --no-renames --no-show-signature "${base_sha}..HEAD" -- "plans/$job/reports/phase-*-corrector.md") || {
+    phase_commit=$(git log -1 --format=%H --no-renames --no-show-signature "${base_sha}..HEAD" -- ":(glob)plans/$job/reports/phase-*-corrector.md") || {
         echo "ERROR: git log for the phase boundary failed"
         exit 2
     }
