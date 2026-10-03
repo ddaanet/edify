@@ -57,7 +57,7 @@ fi
 
 if [[ -n "$status" ]]; then
     echo "DIRTY: uncommitted changes"
-    echo "$status"
+    printf '%s\n' "$status"
     exit 1
 fi
 checks="tree clean"
