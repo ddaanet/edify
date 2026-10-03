@@ -34,9 +34,9 @@ appropriate reviewer by its routing table.
 
 **Two dispatch patterns:**
 
-- **Fix-capable reviewers** (`edify:corrector`, `edify:design-corrector`,
-  `edify:outline-corrector`, `edify:runbook-corrector`): delegate, read the
-  report, grep UNFIXABLE. The agent applies its fixes and writes its own report.
+- **Fix-capable reviewers** (`edify:corrector`, which takes every row but the
+  skill row, and that row too without `plugin-dev`): delegate, read the report,
+  grep UNFIXABLE. The agent applies its fixes and writes its own report.
 - **Report-only reviewers** (`plugin-dev:skill-reviewer`): delegate, collect the
   findings it returns in parts as `dispatch-composition.md` §Prompt contents
   item 5 says, then write the report and apply the fixes in this session. That

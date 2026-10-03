@@ -48,7 +48,7 @@ per-artifact-type, not per-batch.
 
 | Artifact | Reviewer | Why |
 |----------|----------|-----|
-| Code, tests, plans | `edify:corrector` | Default — general quality review |
+| Code, tests, and any file kind no other row names | `edify:corrector` | Default — general quality review. Planning artifacts route by artifact (`docs/references/pipeline-contracts.md` D-26) |
 | Skill definitions, their `references/` nodes, and shared instruction files kept outside a skill | `plugin-dev:skill-reviewer` | Cross-skill consistency (allowed-tools, conventions) |
 | Agent definitions | `edify:corrector` | Agent structure, triggering, tool access — criteria from the `plugin-dev:agent-development` skill, named in the dispatch prompt |
 | The living design graph under `docs/` | `edify:corrector` | Graph structure and decision records — criteria from the `craft:design-doc-writing` skill, named in the dispatch prompt. Not a job's `plans/<job>/design.md`: that is a planning artifact, reviewed by `edify:design-corrector` |
@@ -138,8 +138,8 @@ loudly if any field is missing or contains only placeholder text.**
   design/requirements). Must reference specific FRs, acceptance criteria, or
   behavioral expectations.
 
-**Anti-pattern:** Give corrector full design.md when reviewing phase checkpoint
-— agent may confabulate issues from future phases.
+**Anti-pattern:** Give corrector full design.md when reviewing at a phase
+boundary — agent may confabulate issues from future phases.
 
 **Correct pattern:** Precommit-first grounds agent in real work; explicit IN/OUT
 scope prevents confabulating future-phase issues.
@@ -237,7 +237,8 @@ section with subcategory codes and investigation format).
   UNFIXABLE)
 - If any check fails: resume corrector with specific reclassification guidance
   (e.g., "Issue X overlaps scope OUT — reclassify as DEFERRED" or "Issue Y
-  missing investigation summary — complete 4-gate checklist or downgrade")
+  missing investigation summary — complete the three-gate investigation or
+  downgrade")
 
 **DEFERRED is not UNFIXABLE.** DEFERRED items match the execution context OUT
 section — they are known future work, not blockers. Do not escalate DEFERRED

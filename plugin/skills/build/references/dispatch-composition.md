@@ -17,7 +17,7 @@ Every dispatch prompt carries:
    - `Read plans/<job>/recall-artifact.md, then Read each file it lists`
 
    The `tdd-audit` dispatch is the exception: its inputs are the slice reports
-   and the commit range, and nothing else (`finishing.md` §3).
+   and the commits that add them, and nothing else (`finishing.md` §3).
 3. **Scope:** IN — this item (or slice); OUT — the next items' targets, named
    explicitly so the executor does not wander into them. For a GREEN dispatch,
    OUT also names the rest of the item's own contract: the `Interfaces:` block

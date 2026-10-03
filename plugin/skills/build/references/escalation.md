@@ -14,14 +14,16 @@ gate for its mask re-run:
 - Exit 1 → first, a `DIRTY:` listing the `sandbox-lies` hook annotates as
   sandbox masks is re-run once, not remediated: masks reach an unsandboxed
   reader when a sandboxed Bash call runs concurrently, so they say nothing about
-  the dispatch. A re-run annotated again → stop and report to the user. At the
-  entry gate, the re-run's verdict goes back to `SKILL.md` §2, whose STOP
-  governs it: dirt there predates the run and is never remediated. After an
-  item, any other exit 1 → remediate, below.
+  the dispatch. A re-run annotated again → stop and report to the user. At a
+  fresh run's entry gate, the re-run's verdict goes back to `SKILL.md` §2, whose
+  STOP governs it: dirt there predates the run and is never remediated. On a
+  resumed run it goes back to §Resuming step 2. After an item, or after a
+  phase-boundary, review-gate or closing commit, any other exit 1 → remediate,
+  below.
 
-**Remediation after an item.** The gate held the tree clean before the item, so
-non-exempt dirt is the item's own work, unless someone touched the tree in
-between.
+**Remediation after a committed step.** The gate held the tree clean before the
+step, so non-exempt dirt is the step's own work, unless someone touched the tree
+in between.
 
 1. Resume the named agent once (`SendMessage to: <name>`): "Your dispatch left
    uncommitted work: finish it and commit it by name." On a `PRECOMMIT:` verdict
@@ -32,7 +34,9 @@ between.
 2. No owner to resume, or the resume fails or returns without progress → a fresh
    dispatch composed from the item by `references/dispatch-composition.md`,
    carrying the dirt — the `verify-step.sh` listing, the diff and any precommit
-   output — as a prior attempt's work to examine and finish.
+   output — as a prior attempt's work to examine and finish. After a
+   phase-boundary, review-gate or closing commit there is no item to compose
+   from: go to step 3.
 3. That fails → escalate to the user with the listing and the dispatch's
    findings.
 
@@ -96,18 +100,20 @@ says.
    `git log --format=%H -- plans/<job>/reports/<name>.md` prints a hash, for the
    dispatch names of `references/dispatch-composition.md` §Naming and resumption
    — `item-N-M` for an item; for a tdd slice, `item-N-M-s<k>-green` (its GREEN
-   commit) and `item-N-M-s<k>-code-review` (its code-review commit). Phase P's
-   boundary has landed as `references/phase-boundary.md` resolves it. For each
-   phase whose items have all landed but whose boundary has not:
+   commit) and `item-N-M-s<k>-code-review` (its code-review commit), and, where
+   that code-review report flags a refactoring, `item-N-M-s<k>-refactor` (its
+   refactoring commit). Phase P's boundary has landed as
+   `references/phase-boundary.md` resolves it. For each phase whose items have
+   all landed but whose boundary has not:
    - **`phase-<P>-corrector.md` is absent** → the boundary review has not run.
      Run `references/phase-boundary.md` for P before phase P+1's first item.
    - **The report is present, uncommitted and complete** → inspect the source to
      decide which of its fixes landed, because the corrector writes its report
-     before it applies fixes. Apply in session the fixes that did not land, then
-     commit the report with every fix, landed and applied, as
-     `references/phase-boundary.md` commits it. The fixes applied in session get
-     no second review, the same bound as `references/finishing.md` §1's
-     report-only second pass.
+     before it applies fixes. Apply in session the fixes that did not land,
+     check the report for UNFIXABLE as `references/phase-boundary.md` §Review
+     does, then commit the report with every fix, landed and applied, as its
+     §Commit commits it. The fixes applied in session get no second review, the
+     same bound as `references/finishing.md` §1's report-only second pass.
    - **The report is present but partial** → no fix was applied, for the same
      reason. Delete the report and run the boundary.
 

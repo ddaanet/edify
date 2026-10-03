@@ -37,7 +37,8 @@ Review implementation changes against design specification.
 - Test quality (if behavioral code): behavior-focused, meaningful assertions
 - Code quality: clarity, patterns, no duplication
 - Integration: consistency with existing patterns
-- <agent-definition group only: the `plugin-dev:agent-development` criteria — frontmatter validity, trigger description quality, tool access minimality, system-prompt structure>
+- <agent-definition group only: the `plugin-dev:agent-development` criteria — frontmatter validity, trigger description quality, tool access minimality, system-prompt structure; where `plugin-dev` is not installed, review against the existing agent definitions and say so in the report>
+- <design-graph group only: the `craft:design-doc-writing` criteria — graph structure, hub/node agreement, decision records; where `craft` is not installed, say so in the report>
 
 **Constraints:**
 - Do NOT flag items outside the provided scope (Scope OUT above)
@@ -85,8 +86,9 @@ then finds a file that exists, so the gate stops blocking on skill-definition
 groups. An UNFIXABLE that fails validation there goes back to this reviewer,
 `review-<group>`, resumed by `SendMessage` for reclassification; its reply comes
 in parts as before, and the session rewrites the report from it. A
-`blocked: <reason>` reply carries no findings and leaves no report: Read
-`references/escalation.md` and follow it.
+`blocked: <reason>` reply carries no findings and leaves no report for the
+structural proof to Read: STOP and report the reason to the user, as
+`references/escalation.md` §Escalation's "Unexpected result" bullet does.
 
 ## Field Rules
 

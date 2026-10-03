@@ -33,8 +33,11 @@ item is considered resolved:
 When escalation fails partway through an item — the fix attempt itself causes
 new issues or acceptance criteria cannot be met:
 
-- Fix committed: revert to the last clean commit before the failed item with
-  `git revert HEAD`
+- Fix committed: revert every commit since the last clean commit before the
+  failed item, newest first, with `git revert --no-commit <sha>`, then commit
+  the reverted paths by name (`git commit -- <paths>`), subject
+  `<type>: <job> Item N.M[/k] — revert failed fix` (probed on git 2.47.3). Never
+  `git reset`, which discards history
 - Fix uncommitted: escalate to the user with the `verify-step.sh` listing and
   what the attempt found. Nothing reverts it by default. A path the user decides
   to revert is reverted by name, by the one call

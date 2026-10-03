@@ -44,9 +44,11 @@ fallback, not an error. Note the recall artifact path
 directory — Sections 4 and 5 write under `plans/<job>/reports/`.
 
 **Resumed or fresh, tested at every start:** any `plans/<job>/reports/item-*.md`
-on disk → the run is resumed: Read `references/escalation.md` §Resuming before
-§2. None → fresh. Only `item-*` counts, since planning reports
-(`outline-review.md`, `runbook-review.md`, `explore-*`) share the directory.
+on disk → the run is resumed: Read `references/escalation.md` §Resuming and
+follow it in place of §2, whose gate its step 2 runs with the run's dirt
+examined, not refused. None → fresh. Only `item-*` counts, since planning
+reports (`outline-review.md`, `runbook-review.md`, `explore-*`) share the
+directory.
 
 **Execution mode:** STRICT SEQUENTIAL. One dispatch per message — items modify
 shared state, and parallel dispatch causes race conditions.
@@ -129,7 +131,8 @@ the mechanical work, since subagents have no parent context.
 
 Where the item is a review, the corrector commits nothing: commit its report,
 with the fixes it applied where there are any, before §4.4. Stage those paths by
-name and commit with `git commit -- <paths>`.
+name and commit with `git commit -- <paths>`, subject
+`<type>: <job> Item N.M — <title>`.
 
 ### 4.3 TDD items
 
