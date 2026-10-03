@@ -46,8 +46,8 @@ the tree, and the GREEN commit carries it.
 
 **(c) GREEN** — `edify:test-driver`, GREEN mode named in the prompt. Makes the
 tests pass one at a time, full suite at the end; commits once per slice,
-`<type>: Item N.M/k — <title>`, carrying tests and implementation together with
-the suite green. The type is the executor's choice (see
+`<type>: <job> Item N.M/k — <title>`, carrying tests and implementation together
+with the suite green. The type is the executor's choice (see
 `dispatch-composition.md` §Prompt contents) — nothing keys on it. No commit ever
 leaves the suite red. The commit also carries the slice's three reports so far —
 RED, test review and GREEN — staged by name, never by a blanket add. So the
@@ -75,11 +75,12 @@ flags in-scope-unfixable refactorings (module split, new abstraction). UNFIXABLE
 ## After the slice
 
 1. **Commit the code review:** the corrector never commits, so this commit
-   always happens — `<type>: Item N.M/k — code-review fixes` — carrying (d)'s
-   report and the fixes it applied, or the report alone where it changed
-   nothing. Stage those paths by name. It comes before the post-item
-   verification of `SKILL.md` §4.4, the same step §5 takes at a phase boundary;
-   a review whose report stayed uncommitted is what leaves that gate dirty.
+   always happens — `<type>: <job> Item N.M/k — code-review fixes` — carrying
+   (d)'s report and the fixes it applied, or the report alone where it changed
+   nothing. Stage those paths by name and commit with `git commit -- <paths>`.
+   It comes before the post-item verification of `SKILL.md` §4.4, the order
+   `SKILL.md` §4.5's phase boundary keeps too; a review whose report stayed
+   uncommitted is what leaves that gate dirty.
 2. **Refactor on signal:** if (d) flagged a refactoring, dispatch
    `edify:refactor` before the next slice's RED, so later tests target the
    refactored shape. It commits its own refactoring commit on a clean tree. On
@@ -91,5 +92,7 @@ flags in-scope-unfixable refactorings (module split, new abstraction). UNFIXABLE
    and execution continues. On `error` → log and continue.
 3. **List revision:** revise the remaining slices' test lists in `runbook.md`
    from what this slice revealed, or record "List revision: none" in the run
-   summary. Commit the `runbook.md` edits after the slice — plan-as-executed
-   versus plan-as-written stays a `git diff`.
+   summary. Commit the `runbook.md` edits after the slice: stage the file by
+   name and commit with `git commit -- plans/<job>/runbook.md`, subject
+   `<type>: <job> Item N.M/k — list revision` — plan-as-executed versus
+   plan-as-written stays a `git diff`.
