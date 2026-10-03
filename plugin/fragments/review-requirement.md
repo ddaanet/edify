@@ -222,9 +222,9 @@ section with subcategory codes and investigation format).
 2. Use `rg` (Bash) to search for `UNFIXABLE` in the report content
 3. If found: validate each UNFIXABLE issue (see validation below)
 4. If validation fails: resume the corrector for reclassification with specific
-   guidance — by name (`SendMessage`) where the dispatch was named, as `/build`
-   names every dispatch. An unnamed dispatch cannot be resumed: delegate again
-   with the reclassification instructions in the prompt
+   guidance by `SendMessage` — to its name where the dispatch was named, as
+   `/build` names every dispatch, otherwise to its agent id. Delegate again with
+   the reclassification instructions in the prompt only when neither is known
 5. If validated UNFIXABLE remains: **STOP**, report to user with report path,
    wait for guidance
 6. If no UNFIXABLE found: proceed (DEFERRED and OUT-OF-SCOPE are non-blocking)
