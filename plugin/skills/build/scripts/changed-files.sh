@@ -6,16 +6,20 @@ set -euo pipefail
 # `plans/<job>/reports/item-*` report. `--diff-filter=A --reverse` orders
 # additions oldest first; the first line is that commit, and its parent is
 # the base. `--no-show-signature` keeps a user's `log.showSignature` from
-# printing verification lines ahead of the shas. With no commit adding such
-# a report the script prints `NO-BASE:` and exits 1; usage errors and git
-# failures exit 2 with `ERROR:`, so nothing else may exit 1.
+# printing verification lines ahead of the shas. Its pathspec, like the
+# `--phase` one, carries `:(glob)` magic, which keeps `*` inside one path
+# component: git's default `*` also matches `/`, so
+# `reports/item-x/notes.md` would count as an item report and
+# `reports/phase-1/old-corrector.md` as a boundary. With no commit adding
+# such a report the script prints `NO-BASE:` and exits 1; usage errors and
+# git failures exit 2 with `ERROR:`, so nothing else may exit 1.
 # KD-6: the changed-files list is the committed diff since that base
 # (`<base> HEAD`, never the working tree), minus the job's own
-# `plans/<job>/` record and the exempt paths `exempt-paths.sh` names (a run
-# commit can also carry a `/handoff` or memory-pointer commit's exempt
-# paths, which are not the run's own work). Paths come from a NUL-delimited
+# `plans/<job>/` record and the exempt paths `exempt-paths.sh` names: the
+# range can also hold a `/handoff` or memory-pointer commit, whose exempt
+# paths are not the run's own work. Paths come from a NUL-delimited
 # `git diff -z`, read with `read -r -d ''`, never split on whitespace or
-# newlines. `--no-renames`, on the diff and the log alike, makes a rename a
+# newlines. `--no-renames`, on the diff and both logs alike, makes a rename a
 # deletion plus an addition whatever the user's `diff.renames`, so a report
 # renamed into place counts as added; it also keeps git's skipped-rename
 # warning, which `exec 2>&1` would print among the paths, out of stdout.
@@ -29,10 +33,9 @@ set -euo pipefail
 # latest commit in `<run base>..HEAD` touching
 # `plans/<job>/reports/phase-*-corrector.md` (the path, never the commit
 # subject, KD-8); no `--diff-filter`, so a modified report counts, and `-1`
-# takes the latest. With no such commit the base is the run base. The
-# `:(glob)` magic keeps `*` inside one path component: git's default `*`
-# also matches `/`, so `reports/phase-1/old-corrector.md` would count as a
-# boundary.
+# takes the latest. With no such commit the base is the run base. Either
+# base then feeds the one print-and-filter path below, so the bare and
+# `--phase` lists cannot drift apart.
 
 if [[ $# -lt 1 || $# -gt 2 || ( $# -eq 2 && $2 != --phase ) ]]; then
     echo "ERROR: usage: changed-files.sh <job> [--phase]"
@@ -77,7 +80,7 @@ cd "$top" || {
     exit 2
 }
 
-first_commit=$(git log --no-show-signature --no-renames --diff-filter=A --reverse --format=%H -- "plans/$job/reports/item-*") || {
+first_commit=$(git log --no-show-signature --no-renames --diff-filter=A --reverse --format=%H -- ":(glob)plans/$job/reports/item-*") || {
     echo "ERROR: git log failed"
     exit 2
 }
