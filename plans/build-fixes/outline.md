@@ -400,6 +400,16 @@ history (KD-1, KD-2). The commit-msg hook rewrites only the type prefix.
   the argument in the node, the conclusion line and its rejected alternatives in
   the index. Load `craft:design-doc-writing`.
 
+- Item 2.15: `plugin/portable.just` and `justfile` — make `just lint` agree with
+  `precommit` on `tests/line_limits_helpers.py:32`, added at leg 2 by my human
+  partner's ruling. `lint` passes `--ignore=PLR0913`, so that line's
+  `# noqa: PLR0913` reads as unused there (RUF100), while `precommit` enables
+  PLR0913. Remove `PLR0913` from `run-lint-checks`' `ruff_ignores` and leave the
+  rest of that list unchanged. Never ignore RUF100. If removing it surfaces
+  PLR0913 hits under `just lint` that `precommit` does not already flag, stop
+  and report them; add no suppressions. `justfile`'s prolog carries its own copy
+  of `run-lint-checks`, which overrides the imported one, so both copies change.
+
 ## Scope
 
 IN: the files the items name. That is four scripts (`verify-step.sh`,
@@ -407,7 +417,8 @@ IN: the files the items name. That is four scripts (`verify-step.sh`,
 three test files (`test_verify_step.py`, `test_triage_feedback.py`, and the new
 `test_changed_files.py`), `build/SKILL.md`, six `build` references, two
 fragments, `tdd-auditor.md`, `test-driver.md`, `refactor.md`,
-`plugin/README.md`, `pipeline-contracts.md` and `docs/decisions.md`.
+`plugin/README.md`, `pipeline-contracts.md`, `docs/decisions.md`,
+`plugin/portable.just` and `justfile`.
 
 OUT:
 

@@ -42,7 +42,7 @@ run-checks() {
     report "mypy" mypy
 }
 run-lint-checks() {
-    ruff_ignores=C901,PLR0904,PLR0911,PLR0912,PLR0913,PLR0914,PLR0915,PLR0916,PLR0917,PLR1701,PLR1702
+    ruff_ignores=C901,PLR0904,PLR0911,PLR0912,PLR0914,PLR0915,PLR0916,PLR0917,PLR1701,PLR1702
     report "ruff check" ruff check -q --ignore=$ruff_ignores
     # `check` has no `format` dependency, so without this `just check` is the
     # one checking recipe that never notices unformatted code. Redundant but
