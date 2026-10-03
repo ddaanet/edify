@@ -68,10 +68,22 @@ Utility scripts in `bin/` (POSIX shell and Python 3):
 | `check-version-consistency.py` | Verify plugin and package versions agree |
 | `triage-feedback.sh` | Compare predicted against actual complexity after execution |
 
-Plus `skills/build/scripts/verify-step.sh`, the clean-tree and precommit gate
-`/build` runs after each committing dispatch — GREEN, code review and general
-items — never after a RED or a test review, whose tests are uncommitted by
-design.
+Plus three in `skills/build/scripts/`, used by `/build`:
+
+- `verify-step.sh` — the clean-tree and precommit gate. `/build` runs it at its
+  entry gate and after every committing step: a slice's GREEN and its
+  code-review commit, a delegated general item, a review item, an item done in
+  session (`/build` §4.1), the phase-boundary commit, the review gate and the
+  run's closing commit (`skills/build/references/finishing.md` §3). Never after
+  a RED or a test review, whose tests are uncommitted by design.
+- `changed-files.sh` — prints the run's base as `BASE:`, then the files the run
+  changed: the committed diff from that base to `HEAD`, minus the exempt paths
+  and the job's own `plans/<job>/` record. `--phase` takes the current phase's
+  base instead. The phase-boundary and review-gate scopes and the triage base
+  come from it.
+- `exempt-paths.sh` — sourced by the other two, never run: the one definition of
+  the three paths dirty by convention (`memory`, `.claude/handoff-*.md`,
+  `inbox/*.md`), which the gate tolerates and the changed-files list drops.
 
 ## Recipes
 
