@@ -12,6 +12,8 @@ place by answering a question a future reader would otherwise ask of
 Each entry below is the write-time record of how it got that way, one file per
 entry in `docs/changelog/`.
 
+- **2026-10-03** —
+  [`/build` reads its run state from report history; dirt is finished, not reverted](changelog/2026-10-03-build-reads-run-state-from-report-history.md)
 - **2026-09-21** —
   [the release mechanism is recorded as a decision](changelog/2026-09-21-release-mechanism-recorded-as-a-decision.md)
 - **2026-09-21** —

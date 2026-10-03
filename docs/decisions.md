@@ -87,6 +87,30 @@ Argued in `docs/references/pipeline-contracts.md`.
 into step files for a weak orchestrator; per-test RED/GREEN dispatch; whole-task
 batching without a separate RED dispatch; a deterministic runbook validator.
 
+## Build run state
+
+Argued in `docs/references/build-run-state.md`.
+
+- **D-88** — A `/build` run is resumed when it holds an item report, and report
+  history gives its base.
+- **D-89** — A phase boundary has landed when the run holds a commit touching
+  its corrector report.
+- **D-90** — A changed-files list is the committed diff since the base, minus
+  the exempt paths and the job's own record, and one script produces it.
+- **D-91** — Any change is dirt, except three paths dirty by convention.
+- **D-92** — Dirt is unfinished work to examine and finish; nothing reverts by
+  default.
+- **D-93** — Review-gate groups are four fixed rows, with fixed slugs.
+- **D-94** — `/build` commit subjects name the job, and are labels only.
+
+*Rejected:* a baseline file, `tmp/build-baseline-<job>`, for the run's base;
+commit subjects as the resume or boundary key; a committed start marker; a
+stored phase base, or `HEAD~N`; the changed-files query and the exempt regex
+spelled out in prose at each site; filtering or gitignoring the sandbox-mask
+names; reverting dirt by default; a `verify-step.sh --revert` mode; a listing
+token guarding the revert; a mechanical item scope for dirt; a new review group
+per file kind; `edify:design-corrector` as the design-graph reviewer.
+
 ## Execution routing
 
 Argued in `docs/references/execution-routing.md`.

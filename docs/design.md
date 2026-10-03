@@ -193,8 +193,8 @@ collection is plain tree recursion with no special tracking.
 
 ### 5.3 Pipeline structure
 
-The plugin is a skills bundle plus standing agents plus two verification
-scripts.
+The plugin is a skills bundle plus standing agents plus the scripts `/build`
+runs.
 
 Pipeline skills: `requirements` → `design` → `runbook` → `build`, or `design` →
 `build` for work that needs no runbook, with `review` as the in-progress quality
@@ -215,11 +215,14 @@ Standing agents in `plugin/agents/`: the correctors (`corrector`,
 `runbook-simplifier`), the executors (`artisan`, `test-driver`, `refactor`), and
 the investigators (`scout`, `tdd-auditor`, `brainstorm-name`).
 
-Scripts: `plugin/skills/build/scripts/verify-step.sh` (clean tree + precommit
-after every committing dispatch — GREEN, code review and general items, never
-after a RED or a test review whose tests are uncommitted by design) and
-`plugin/bin/triage-feedback.sh` (the post-execution gate `/build` runs when the
-work is done, D-26 T5).
+Scripts: `plugin/skills/build/scripts/verify-step.sh` (clean tree, D-91, +
+precommit, at the entry gate and after every step whose work is committed —
+never after a RED or a test review whose tests are uncommitted by design),
+`plugin/skills/build/scripts/changed-files.sh` (the run's or phase's base and
+its changed-files list, read from report history, D-88 to D-90),
+`plugin/skills/build/scripts/exempt-paths.sh` (the three exempt paths, sourced
+by the other two, never run) and `plugin/bin/triage-feedback.sh` (the
+post-execution gate `/build` runs when the work is done, D-26 T5).
 
 The orchestrator owns every commit a review produces. A corrector applies
 fix-all and never commits; after the per-slice code review the orchestrator
@@ -230,17 +233,18 @@ slice's own commit is the implementer's, made in GREEN mode, and it carries the
 slice's RED, test-review and GREEN reports along with the tests and the
 implementation (D-86).
 
-**Slice commits carry `Item N.M/k` in the subject.** The convention is
-`<type>: Item N.M/k — <title>`, and the type is the executor's choice — `feat`,
+**Commit subjects name the job and are labels only (D-94).** A slice commit is
+`<type>: <job> Item N.M/k — <title>`, beside the item, `Phase P boundary`,
+`Review gate` and `Finish` forms. The type is the executor's choice — `feat`,
 `fix`, `docs`, `perf`, `test`, `build` and `chore` are all legitimate, since a
-slice that pins an error path is not a feature. Nothing keys on it: the
-installed gitmoji `commit-msg` hook rewrites the prefix to an emoji before the
-commit is written, so the `Item N.M/k` marker, which the hook preserves, is the
-only thing `tdd-auditor` may match in a subject. A reviewed slice carries two
-commits with that marker — the implementer's GREEN commit and the orchestrator's
-review-fix commit — so subject matching alone cannot pick the slice out. No
-report names a hash, since each rides the commit it would name; the auditor
-resolves a commit as the one that **adds** its report
+slice that pins an error path is not a feature — and the installed gitmoji
+`commit-msg` hook rewrites only that prefix to an emoji. Nothing mechanical keys
+on a subject: resume, inventory and bases read report history (D-88, D-89). A
+reviewed slice carries several commits with its `<job> Item N.M/k` label — the
+implementer's GREEN commit, the orchestrator's code-review commit, and a
+refactor or list-revision commit where one follows — so subject matching cannot
+pick the slice out. No report names a hash, since each rides the commit it would
+name; the auditor resolves a commit as the one that **adds** its report
 (`git log --diff-filter=A`). The GREEN report also records the tests run and the
 one-at-a-time sequence and the gate verdict; where a report is missing the named
 agent is resumed for it, never its transcript. Git serves only to resolve a
