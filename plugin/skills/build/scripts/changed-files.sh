@@ -25,8 +25,11 @@ set -euo pipefail
 # handling. The output is one path per line, so a path holding a
 # newline prints as two lines: a residual bound of the line format, not of
 # the read.
-# `--phase` is accepted only as the second argument; with no phase boundary
-# landed it yields the run base, as without it.
+# `--phase` is accepted only as the second argument. KD-2: its base is the
+# latest commit in `<run base>..HEAD` touching
+# `plans/<job>/reports/phase-*-corrector.md` (the path, never the commit
+# subject, KD-8); no `--diff-filter`, so a modified report counts, and `-1`
+# takes the latest. With no such commit the base is the run base.
 
 if [[ $# -lt 1 || $# -gt 2 || ( $# -eq 2 && $2 != --phase ) ]]; then
     echo "ERROR: usage: changed-files.sh <job> [--phase]"
@@ -87,6 +90,16 @@ base_sha=$(git rev-parse --verify --quiet "${first_commit}^") || {
     printf 'ERROR: cannot resolve the parent of first item report commit "%s"\n' "$first_commit"
     exit 2
 }
+
+if [[ ${2:-} == --phase ]]; then
+    phase_commit=$(git log -1 --format=%H --no-renames --no-show-signature "${base_sha}..HEAD" -- "plans/$job/reports/phase-*-corrector.md") || {
+        echo "ERROR: git log for the phase boundary failed"
+        exit 2
+    }
+    if [[ -n $phase_commit ]]; then
+        base_sha=$phase_commit
+    fi
+fi
 
 # A write failure would exit 1 under `set -e`, which reads as `NO-BASE:`.
 printf 'BASE: %s\n' "$base_sha" || exit 2
