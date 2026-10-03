@@ -25,7 +25,7 @@ set -euo pipefail
 # handling. The output is one path per line, so a path holding a
 # newline prints as two lines: a residual bound of the line format, not of
 # the read.
-# `--phase` is accepted as a second argument; with no phase boundary
+# `--phase` is accepted only as the second argument; with no phase boundary
 # landed it yields the run base, as without it.
 
 if [[ $# -lt 1 || $# -gt 2 || ( $# -eq 2 && $2 != --phase ) ]]; then
@@ -36,9 +36,10 @@ job=$1
 # The job is one directory name under `plans/`. It lands in a git pathspec,
 # where `*`, `?`, `[` and `\` are glob syntax: `j*` would match a sibling
 # job's reports and yield a wrong base. `/`, `.` and `..` would leave
-# `plans/`.
+# `plans/`. `--phase` here is the flag with the job missing, which would
+# otherwise read as a job with no item report: exit 1, `NO-BASE:`.
 case "$job" in
-    '' | . | .. | */* | *[*?[\\]*)
+    '' | . | .. | --phase | */* | *[*?[\\]*)
         printf 'ERROR: usage: changed-files.sh <job> [--phase]; not a job name: %s\n' "$job"
         exit 2
         ;;
