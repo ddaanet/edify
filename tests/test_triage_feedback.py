@@ -52,14 +52,20 @@ def _init_repo(repo: Path) -> str:
 
 
 def _triage_lines(job_dir: str, baseline: str, cwd: Path) -> list[str]:
-    """Run triage-feedback.sh by absolute path with CWD at the repo root.
+    """Run triage-feedback.sh; return its stdout lines, asserting exit 0."""
+    result = _run_triage(job_dir, baseline, cwd)
+    assert result.returncode == 0, result.stdout + result.stderr
+    return result.stdout.splitlines()
 
-    Return its stdout lines, asserting exit 0 with the output attached.
-    """
+
+def _run_triage(
+    job_dir: str, baseline: str, cwd: Path
+) -> subprocess.CompletedProcess[str]:
+    """Run triage-feedback.sh by absolute path with CWD at the repo root."""
     env = dict(os.environ)
     env["GIT_CONFIG_GLOBAL"] = os.devnull
     env["GIT_CONFIG_SYSTEM"] = os.devnull
-    result = subprocess.run(
+    return subprocess.run(
         [str(SCRIPT), job_dir, baseline],
         cwd=cwd,
         env=env,
@@ -67,8 +73,6 @@ def _triage_lines(job_dir: str, baseline: str, cwd: Path) -> list[str]:
         text=True,
         check=False,
     )
-    assert result.returncode == 0, result.stdout + result.stderr
-    return result.stdout.splitlines()
 
 
 def test_simple_with_review_reports_matches(tmp_path: Path) -> None:
@@ -194,6 +198,46 @@ def test_uncommitted_definition_is_not_behavioral(tmp_path: Path) -> None:
 
     lines = _triage_lines("job", positive_baseline, positive_repo)
     assert "- Behavioral code: yes" in lines, "\n".join(lines)
+
+
+def test_forced_color_does_not_hide_definitions(tmp_path: Path) -> None:
+    r"""A repo-local ``color.ui always`` still finds a committed ``def``.
+
+    Forced colour wraps each added line in escape codes, so the patterns'
+    ``^\+`` anchor matches nothing and the committed definition reads
+    ``no``. The script's ``--no-color`` keeps the patch plain: ``yes``.
+    """
+    repo = tmp_path / "repo"
+    baseline = _init_repo(repo)
+    _run_git(repo, "config", "color.ui", "always")
+    (repo / "module.py").write_text("def foo():\n    pass\n", encoding="utf-8")
+    _run_git(repo, "add", "module.py")
+    _run_git(repo, "commit", "-q", "-m", "add foo")
+
+    lines = _triage_lines("job", baseline, repo)
+    assert "- Behavioral code: yes" in lines, "\n".join(lines)
+
+
+def test_failing_diff_is_an_error_not_no(tmp_path: Path) -> None:
+    """A committed diff git cannot produce fails the script, never reads ``no``.
+
+    The committed ``module.py`` blob is deleted from the object store. The
+    files-changed count reads trees only and still succeeds; the patch
+    needs the blob and fails. A match fed from that failure inside an
+    ``if`` would report ``Behavioral code: no`` and exit 0.
+    """
+    repo = tmp_path / "repo"
+    baseline = _init_repo(repo)
+    (repo / "module.py").write_text("def foo():\n    pass\n", encoding="utf-8")
+    _run_git(repo, "add", "module.py")
+    _run_git(repo, "commit", "-q", "-m", "add foo")
+    blob = _run_git(repo, "rev-parse", "HEAD:module.py").strip()
+    (repo / ".git" / "objects" / blob[:2] / blob[2:]).unlink()
+
+    result = _run_triage("job", baseline, repo)
+    assert result.returncode != 0, result.stdout + result.stderr
+    assert f"unable to read {blob}" in result.stderr, result.stderr
+    assert "- Behavioral code:" not in result.stdout, result.stdout
 
 
 def _def_edits_pending(repo: Path) -> str:

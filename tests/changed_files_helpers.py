@@ -3,7 +3,7 @@
 KD-1, KD-2 and KD-6 in ``plans/build-fixes/outline.md``. Each test builds a
 throwaway git repo under ``tmp_path`` and runs the script by absolute path
 with CWD at the repo root, following the ``_init_repo`` pattern in
-``tests/test_verify_step.py``.
+``tests/verify_step_helpers.py``.
 """
 
 import os

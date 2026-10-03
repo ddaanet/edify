@@ -126,8 +126,7 @@ def test_phase_flag_only_as_exact_second_argument(tmp_path: Path) -> None:
     Pins the exact-``--phase`` guard from slice 1's code review: a near-miss
     flag, an extra word, the flag first, and the flag alone (the job
     missing, which would otherwise read as a job with no report, exit 1) each
-    exit 2 with ``ERROR:``. The guard already holds, so this test is
-    red-neutral against the current script.
+    exit 2 with ``ERROR:``.
     """
     repo = _init_repo(tmp_path)
     for args in (

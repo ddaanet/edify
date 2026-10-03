@@ -19,10 +19,12 @@ set -euo pipefail
 # range can also hold a `/handoff` or memory-pointer commit, whose exempt
 # paths are not the run's own work. Paths come from a NUL-delimited
 # `git diff -z`, read with `read -r -d ''`, never split on whitespace or
-# newlines. `--no-renames`, on the diff and both logs alike, makes a rename a
-# deletion plus an addition whatever the user's `diff.renames`, so a report
-# renamed into place counts as added; it also keeps git's skipped-rename
-# warning, which `exec 2>&1` would print among the paths, out of stdout.
+# newlines. `--no-renames` on the diff makes a rename a deletion plus an
+# addition whatever the user's `diff.renames`, so both paths are listed, and
+# keeps git's skipped-rename warning, which `exec 2>&1` would print among the
+# paths, out of stdout. Both logs carry it for uniformity only: a
+# path-limited log pairs no rename source from outside its pathspec, so a
+# report renamed into place reads as added either way (probed, git 2.47.3).
 # The exempt match happens inside that same NUL-delimited read loop, with
 # bash's `[[ $path =~ $re ]]` (the regex held in a variable, bash-3.2-safe)
 # rather than a second pass through grep, which would need its own NUL
