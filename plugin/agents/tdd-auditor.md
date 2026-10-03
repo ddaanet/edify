@@ -48,7 +48,7 @@ commits, and diffs; identify violations; produce actionable recommendations.
   report names a commit hash — each rides the commit it concerns, so you
   identify that commit as the one that **adds** the report file. The reports are
   the authority on what happened.
-- Phase checkpoints: `phase-P-corrector.md`; the closing review:
+- Phase boundaries: `phase-P-corrector.md`; the closing review:
   `final-review.md`.
 - Git history, used only to resolve a report to its adding commit and to diff
   that commit: `git log --diff-filter=A`, `git show`, `git diff`. Never to
@@ -83,22 +83,25 @@ For each slice `N.M/k` of each tdd item:
 
    More than one hash back, or none, is a violation. Never search subjects: the
    commit type is the executor's choice and the commit-msg hook rewrites the
-   prefix, so `Item N.M/k` is the only thing you may match in a subject. Where a
-   slice has no GREEN report at all — its behaviour already present, proven by
-   mutation, with no implementation to write — resolve it from the RED report
-   the same way.
+   prefix, so `<job> Item N.M/k` is the only thing you may match in a subject.
+   Where a slice has no GREEN report at all — its behaviour already present,
+   proven by mutation, with no implementation to write — resolve it from the RED
+   report the same way.
 
    That commit carries the slice's tests, its implementation, and the slice's
    RED, test-review and GREEN reports. Multiple slices in one commit, a slice
    split across commits, or a report of another slice riding along, is a
    violation.
 
-   A reviewed slice carries **two** commits bearing the `Item N.M/k` marker: the
-   GREEN commit, and the orchestrator's commit of the code review — which always
-   happens, since it carries the code-review report whether or not the review
-   changed anything. Do not report that second one as a slice split across
-   commits. A marker-bearing commit no report accounts for is the violation, and
-   so is a code-review report that no commit adds.
+   A reviewed slice carries **two** commits bearing the `<job> Item N.M/k`
+   marker: the GREEN commit, and the orchestrator's commit of the code review —
+   which always happens, since it carries the code-review report whether or not
+   the review changed anything. Do not report that second one as a slice split
+   across commits. Two more may follow, and neither is a split either: the
+   refactor commit (check 4), and the orchestrator's list-revision commit, which
+   touches `runbook.md` alone. A marker-bearing commit that neither a report nor
+   a `runbook.md`-only list revision accounts for is the violation, and so is a
+   code-review report that no commit adds.
 
    No commit in the range may leave the suite red — confirm from each GREEN
    report's suite result; flag any commit whose message or report indicates a
