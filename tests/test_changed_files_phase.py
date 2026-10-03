@@ -142,3 +142,64 @@ def test_phase_flag_only_as_exact_second_argument(tmp_path: Path) -> None:
             2,
             "ERROR:",
         ), f"{args}: {result.stdout}{result.stderr}"
+
+
+def test_phase_list_keeps_the_filters(tmp_path: Path) -> None:
+    """Under ``--phase`` the exempt-path and ``plans/j/`` drops still apply.
+
+    KD-6 and Item 1.4: the list since the phase base is filtered as the bare
+    list is. History: seed -> ``j`` planning, the run base -> item 1.1 -> the
+    boundary (``phase-1-corrector.md``, the expected base) -> a commit of the
+    three exempt paths (``inbox/x.md``, ``.claude/handoff-task.md``, a file
+    named ``memory``), ``j``'s item 2.1 report and a ``runbook.md`` revision,
+    and near-misses of the exempt alternation that stay listed
+    (``inbox/sub/y.md``, ``memoryx.txt``) -> a decoy commit adding only
+    ``plans/j/reports/phase-9/old-corrector.md`` and
+    ``plans/j/reports/sub/phase-9-corrector.md``.
+
+    The decoy pins the ``:(glob)`` magic on the base query: git's default
+    ``*`` crosses ``/``, so ``phase-*-corrector.md`` would match
+    ``phase-9/old-corrector.md`` and move the base past the kept files.
+    ``sub/phase-9-corrector.md`` matches neither way: it pins the literal
+    ``reports/phase-`` prefix, catching a pathspec that admits a directory
+    before ``phase-`` (``reports/**/phase-*-corrector.md``). The list is
+    exactly the near-misses, with the pre-boundary ``a.txt`` and the
+    ``fix.txt`` of the boundary commit absent.
+    """
+    repo = _init_repo(tmp_path)
+    _commit(repo, "j planning", {"plans/j/runbook.md": "v1\n"})
+    _commit(repo, "item 1.1", {"plans/j/reports/item-1-1.md": "1\n", "a.txt": "a\n"})
+    boundary = _commit(
+        repo,
+        "fix review findings",
+        {"plans/j/reports/phase-1-corrector.md": "v1\n", "fix.txt": "f\n"},
+    )
+    _commit(
+        repo,
+        "item 2.1",
+        {
+            "inbox/x.md": "exempt\n",
+            ".claude/handoff-task.md": "exempt\n",
+            "memory": "exempt\n",
+            "plans/j/reports/item-2-1.md": "2\n",
+            "plans/j/runbook.md": "v2\n",
+            "inbox/sub/y.md": "kept\n",
+            "memoryx.txt": "kept\n",
+        },
+    )
+    _commit(
+        repo,
+        "decoys",
+        {
+            "plans/j/reports/phase-9/old-corrector.md": "d\n",
+            "plans/j/reports/sub/phase-9-corrector.md": "d\n",
+        },
+    )
+
+    result = _run_script(repo, "j", "--phase")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.splitlines() == [
+        f"BASE: {boundary}",
+        "inbox/sub/y.md",
+        "memoryx.txt",
+    ], result.stdout
