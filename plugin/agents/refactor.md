@@ -181,7 +181,7 @@ hold staged exempt dirt such as `.claude/handoff-*.md`, which a pathspec-less
 
 ```bash
 git add <the files you changed> plans/<job>/reports/item-N-M-s<k>-refactor.md
-git commit -m "refactor: Item N.M/k — <what changed>" \
+git commit -m "refactor: <job> Item N.M/k — <what changed>" \
     -- <the files you changed> plans/<job>/reports/item-N-M-s<k>-refactor.md
 ```
 

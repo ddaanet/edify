@@ -92,14 +92,14 @@ ahead of its own slice's tests leaves that slice unable to red.
    Record **no commit hash**: the report rides the commit it would name, and the
    orchestrator and the audit identify that commit as the one that adds this
    file.
-6. **Commit once for the slice:** subject `<type>: Item N.M/k — <title>`, the
-   title from the prompt. The type is yours to pick — `feat`, `fix`, `docs`,
-   `perf`, `test`, `build`, `chore` all legitimate; the commit-msg hook rewrites
-   the prefix to an emoji before the commit is written, so nothing downstream
-   keys on it. Stage by name the slice's tests, the implementation, and this
-   slice's RED, test-review and GREEN reports — the RED and the test review left
-   theirs uncommitted for this commit to carry. Never `git add -A` or
-   `git add .`, which sweep in whatever else the tree holds. Commit with
+6. **Commit once for the slice:** subject `<type>: <job> Item N.M/k — <title>`,
+   the job and title from the prompt. The type is yours to pick — `feat`, `fix`,
+   `docs`, `perf`, `test`, `build`, `chore` all legitimate; the commit-msg hook
+   rewrites the prefix to an emoji before the commit is written, so nothing
+   downstream keys on it. Stage by name the slice's tests, the implementation,
+   and this slice's RED, test-review and GREEN reports — the RED and the test
+   review left theirs uncommitted for this commit to carry. Never `git add -A`
+   or `git add .`, which sweep in whatever else the tree holds. Commit with
    `git commit -m "<subject>" -- <the same paths>`, so nothing staged before
    this dispatch rides along. The commit leaves the suite green; no commit ever
    leaves the suite red. Return the report path.
