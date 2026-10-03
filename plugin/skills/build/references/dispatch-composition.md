@@ -25,18 +25,20 @@ Every dispatch prompt carries:
    is out of scope for this dispatch. A GREEN that implements the whole item
    leaves the later slices unable to red.
 4. **Done criteria:** `just precommit` green, clean tree, and the commit subject
-   to use. A slice commit's subject is `<type>: Item N.M/k — <title>`; `<type>`
-   is the executor's choice — `feat`, `fix`, `docs`, `perf`, `test`, `build` and
+   to use. An item commit's subject is `<type>: <job> Item N.M — <title>`, a
+   slice commit's `<type>: <job> Item N.M/k — <title>`; `<type>` is the
+   executor's choice — `feat`, `fix`, `docs`, `perf`, `test`, `build` and
    `chore` are all legitimate, since a slice may pin an error path or change a
    build surface rather than add a feature. The `commit-msg` hook rewrites the
-   prefix to an emoji before the commit is written, so no check may key on the
-   type; the `Item N.M/k` marker is the only part of a subject anything may
-   match. A committing dispatch stages the paths it names — its own report among
-   them — and never `git add -A`, then commits with `git commit -- <paths>`,
-   naming the paths it staged. Overrides: a RED dispatch commits nothing and
-   stops after the red run; a review dispatch commits nothing either — the
-   orchestrator commits the corrector's report, with the fixes it applied where
-   there are any, in the same form.
+   prefix to an emoji before the commit is written. `<job> Item N.M[/k]` is a
+   label only, for a human reading `git log` and to keep two jobs' commits
+   apart: nothing mechanical keys on any part of a subject, since resume,
+   inventory and base all read report history. A committing dispatch stages the
+   paths it names — its own report among them — and never `git add -A`, then
+   commits with `git commit -- <paths>`, naming the paths it staged. Overrides:
+   a RED dispatch commits nothing and stops after the red run; a review dispatch
+   commits nothing either — the orchestrator commits the corrector's report,
+   with the fixes it applied where there are any, in the same form.
 5. **Report path** — `plans/<job>/reports/<dispatch name>.md`, the `name` from
    §Naming and resumption and nothing else. This is the only rule for report
    paths: the prompt assigns the path and the agent writes exactly there,
@@ -54,7 +56,8 @@ Every dispatch prompt carries:
    and writes nothing — the dispatching session resumes it by name for the next
    part while a part ends `CONTINUED`, and writes the parts to the assigned path
    only once one ends `END OF REPORT` (`review-dispatch-template.md`
-   §Report-only variant).
+   §Report-only variant). A part ending in neither marker was truncated: resume
+   the reviewer by name for the rest of that part before asking for the next.
 6. **Mode**, for `edify:test-driver` only: `RED` or `GREEN`, named explicitly —
    the agent refuses a prompt that names neither.
 
@@ -93,16 +96,36 @@ at plan time.
 
 ## Naming and resumption
 
-Give every dispatch a `name`: `item-N-M` for a general item — or for the
-corrector reviewing an item executed in session (`/build` §4.1), which frees the
-name — `item-N-M-s<k>-red` / `-test-review` / `-green` / `-code-review` for
-slice dispatches, `item-N-M-s<k>-refactor` for a refactor the code review
-flagged (the opus re-dispatch reuses the name), `phase-P-corrector` for phase
-boundaries, `review-<group>` for a review-gate dispatch (`<group>` a lowercase
-one-word slug for the artifact group `finishing.md` §1 routed, as in
-`review-skill`), `final-review` for a single-phase run's closing corrector,
-`tdd-audit` for the auditor. Resumption is `SendMessage` to that name; an
-unnamed agent cannot be resumed.
+Give every dispatch a `name`:
+
+- `item-N-M` for a general item. An item executed in session (`/build` §4.1)
+  leaves the name free, so it names that item's review: the corrector §4.1
+  dispatches, or the self-review report the session writes itself at that name's
+  report path.
+- `item-N-M-s<k>-red` / `-test-review` / `-green` / `-code-review` for slice
+  dispatches, and `item-N-M-s<k>-refactor` for a refactor the code review
+  flagged (the opus re-dispatch reuses the name).
+- `phase-P-corrector` for phase boundaries.
+- `review-<group>` for a review-gate dispatch, `<group>` one of four fixed
+  slugs, the rows `finishing.md` §1 groups by:
+  - `review-code` — code and tests, and the default for any file kind no row
+    names;
+  - `review-skill` — skill definitions and the agent-instruction prose they
+    load: a skill's `references/` nodes and any shared instruction file a repo
+    keeps outside a skill;
+  - `review-agent` — agent definitions;
+  - `review-design` — the living design graph under `docs/`, not a job's
+    `plans/<job>/design.md`, which is a planning artifact.
+
+  A file kind is always classed into one of these rows, never into a new group.
+  The gate routes implementation files only; planning artifacts route by
+  artifact (`finishing.md` §1).
+- `final-review` for `finishing.md` §3.1's closing corrector, dispatched only
+  where the review was skipped or routing left a group of changed files
+  unreviewed.
+- `tdd-audit` for the auditor.
+
+Resumption is `SendMessage` to that name; an unnamed agent cannot be resumed.
 
 A child's own reply is the only authoritative result for its task. A late
 task-notification on an already-reported task id may be answering something else
