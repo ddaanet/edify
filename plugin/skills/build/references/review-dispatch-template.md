@@ -65,23 +65,37 @@ it lists — that is all the recall available to you.
 
 Do not apply fixes and do not write a file — you have neither tool. Report
 every issue (critical, major, minor) with its file, its location and the
-change you would make. Mark a blocker "UNFIXABLE: [description]".
+change you would make.
+
+Mark an issue that has no fix path "UNFIXABLE" with its subcategory code:
+U-REQ (requirements ambiguous or in conflict), U-ARCH (the fix would break an
+architectural invariant or a documented design decision) or U-DESIGN (several
+valid approaches with non-trivial downstream consequences). Follow it with an
+investigation summary of the three gates you checked — Scope OUT, design
+deferral, codebase patterns — and your conclusion. An issue in Scope OUT or
+deferred by the design is DEFERRED, not UNFIXABLE.
+
+If you cannot review at all, reply `blocked: <reason>` instead of findings.
 ```
 
 The **calling session** then collects the parts (`dispatch-composition.md`
 §Prompt contents item 5), writes them to the group's report path (§Field Rules)
 and applies the fixes itself. The structural-proof Read in `finishing.md` §1
 then finds a file that exists, so the gate stops blocking on skill-definition
-groups.
+groups. An UNFIXABLE that fails validation there goes back to this reviewer,
+`review-<group>`, resumed by `SendMessage` for reclassification; its reply comes
+in parts as before, and the session rewrites the report from it. A
+`blocked: <reason>` reply carries no findings and leaves no report: Read
+`references/escalation.md` and follow it.
 
 ## Field Rules
 
-- **Baseline:** substitute the hash itself, read back from `tmp/build-baseline`
-  (written at `/build` §2 by `git rev-parse HEAD` before edits) — the reviewer's
-  shell is not the dispatcher's, so no variable survives into the prompt. The
-  baseline is taken after the entry gate has confirmed a clean tree, so it
-  excludes design-phase artifacts unconditionally: whatever `/design` produced
-  is already committed, and only execution edits are in the diff it defines.
+- **Baseline:** substitute the hash itself — the `BASE:` that
+  `plugin/skills/build/scripts/changed-files.sh <job>` prints, the one
+  `finishing.md` §1 step 1 took. The reviewer's shell is not the dispatcher's,
+  so no variable survives into the prompt. That base is the parent of the run's
+  first item-report commit, so whatever `/design` produced and committed before
+  execution lies outside the diff it defines.
 - **Design context:** Always `outline.md` or `design.md` — never
   `requirements.md`. Requirements are upstream abstractions; design/outline
   contains the implementation-level decisions the reviewer needs.
@@ -110,6 +124,11 @@ groups.
   not through this template.
 
 ## Example: Skill Creation Task
+
+The example shows the fix-capable §Template for a skill-definition group, which
+is what that group takes when `plugin-dev` is not installed and the routing
+table's skill row falls back to `edify:corrector`. With `plugin-dev` installed,
+the group goes to `plugin-dev:skill-reviewer` with the §Report-only variant.
 
 ```
 Review implementation changes against design specification.
