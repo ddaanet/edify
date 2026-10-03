@@ -306,6 +306,9 @@ the mechanism it argues:
 - `testing.md` — `tests/`
 - `pipeline-contracts.md` — dispatch, the planning/execution session boundary,
   review gates, phase types, artifact provenance
+- `build-run-state.md` — `/build`'s run state in git: resume, run and phase
+  bases, changed files, the clean tree, dirt, review-gate groups, commit
+  subjects
 - `execution-routing.md` — `/design`, `/runbook`, `/build` routing,
   classification, escalation tiers
 - `agent-instructions.md` — model choice, instruction structure
