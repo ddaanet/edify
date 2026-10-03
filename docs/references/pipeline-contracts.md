@@ -263,11 +263,11 @@ Where a slice has no GREEN report — behaviour already present, proven by
 mutation (D-84), with no implementation to write — the same query over its RED
 report resolves it. *The defect this settles:* GREEN committed at one step and
 wrote its report at the next, so the report was left untracked and
-`verify-step.sh`, which tolerates nothing but ` M memory`, reported every GREEN
-dispatch DIRTY; the same hole left the RED, test-review and code-review reports
-untracked whenever the review that produced them changed no file. *Grounding:*
-the `provenance-enforcement-and-routing` run had already done this by hand —
-`78206a83` carries `item-1-2-s1-{red,test-review,green}.md` with
+`verify-step.sh`, which then tolerated nothing but ` M memory`, reported every
+GREEN dispatch DIRTY; the same hole left the RED, test-review and code-review
+reports untracked whenever the review that produced them changed no file.
+*Grounding:* the `provenance-enforcement-and-routing` run had already done this
+by hand — `78206a83` carries `item-1-2-s1-{red,test-review,green}.md` with
 `edify-review-range.sh` and its tests, `c30b7bc1` carries
 `item-1-2-s1-code-review.md` with its fixes, and `45ad1184` and `f8d1e254`, the
 two mutation-proven slices with no GREEN dispatch, carry their RED and
