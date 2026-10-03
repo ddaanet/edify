@@ -25,9 +25,11 @@ set -euo pipefail
 # handling. The output is one path per line, so a path holding a
 # newline prints as two lines: a residual bound of the line format, not of
 # the read.
+# `--phase` is accepted as a second argument; with no phase boundary
+# landed it yields the run base, as without it.
 
-if [[ $# -ne 1 ]]; then
-    echo "ERROR: usage: changed-files.sh <job>"
+if [[ $# -lt 1 || $# -gt 2 || ( $# -eq 2 && $2 != --phase ) ]]; then
+    echo "ERROR: usage: changed-files.sh <job> [--phase]"
     exit 2
 fi
 job=$1
@@ -37,7 +39,7 @@ job=$1
 # `plans/`.
 case "$job" in
     '' | . | .. | */* | *[*?[\\]*)
-        printf 'ERROR: usage: changed-files.sh <job>; not a job name: %s\n' "$job"
+        printf 'ERROR: usage: changed-files.sh <job> [--phase]; not a job name: %s\n' "$job"
         exit 2
         ;;
 esac

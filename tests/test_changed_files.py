@@ -242,3 +242,41 @@ def test_no_item_report_exits_1(tmp_path: Path) -> None:
     assert not any(line.startswith("BASE: ") for line in result.stdout.splitlines()), (
         result.stdout
     )
+
+
+def test_phase_without_boundary_gives_run_base(tmp_path: Path) -> None:
+    """``--phase`` with no boundary landed in the run falls back to the run base.
+
+    KD-2 and KD-8: the phase base is the latest commit in ``<run base>..HEAD``
+    touching ``plans/j/reports/phase-*-corrector.md``, and the run base (KD-1)
+    when none matches. History: seed -> a ``phase-1-corrector.md`` report for
+    ``j`` -> ``j``'s ``runbook.md``, the run base -> item 1.1 (report, new
+    ``a.txt``) -> another job's ``plans/jj/reports/phase-1-corrector.md``
+    inside the run -> item 1.2 (report, changed ``b.txt``).
+
+    The pre-run report sits one commit before the run base, so a search over
+    the whole history names it, not the base; the in-run ``jj`` report
+    catches a search ignoring the job, which would name it as the base. Only
+    the run base, the commit before item 1.1, is right. ``--phase`` must also
+    print exactly what the bare call prints; only ``plans/j/`` is filtered
+    out, so the list is ``a.txt``, ``b.txt`` and the other job's report.
+    """
+    repo = _init_repo(tmp_path)
+    _commit(repo, "pre-run phase", {"plans/j/reports/phase-1-corrector.md": "p\n"})
+    base_sha = _commit(repo, "j planning", {"plans/j/runbook.md": "v1\n"})
+    _commit(repo, "item 1.1", {"plans/j/reports/item-1-1.md": "1\n", "a.txt": "a\n"})
+    _commit(repo, "jj boundary", {"plans/jj/reports/phase-1-corrector.md": "o\n"})
+    _commit(repo, "item 1.2", {"plans/j/reports/item-1-2.md": "2\n", "b.txt": "x\n"})
+
+    plain = _run_script(repo, "j")
+    assert plain.returncode == 0, plain.stdout + plain.stderr
+    assert plain.stdout.splitlines() == [
+        f"BASE: {base_sha}",
+        "a.txt",
+        "b.txt",
+        "plans/jj/reports/phase-1-corrector.md",
+    ], plain.stdout
+
+    result = _run_script(repo, "j", "--phase")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout == plain.stdout
