@@ -6,8 +6,10 @@ item is considered resolved:
 
 **Required (all three):**
 - `just precommit` passes — mechanical validation (lint, format, type checks)
-- Git tree clean — no uncommitted changes (`git status --porcelain` returns
-  empty)
+- Git tree clean — `plugin/skills/build/scripts/verify-step.sh` exits 0, the
+  single definition of a clean tree `/build` uses. It tolerates three paths
+  dirty by convention — `memory`, `.claude/handoff-*.md` and `inbox/*.md` — so
+  the test is not an empty `git status --porcelain`, which any of them fails
 - Output validates against item acceptance criteria — the item's stated
   objective is met
 
@@ -17,8 +19,9 @@ item is considered resolved:
 1. Apply fix
 2. Run `just precommit`
    - If fails: fix issues, re-run (loop until pass or give up)
-3. Check `git status --porcelain`
-   - If dirty: commit fix, verify clean
+3. Run `plugin/skills/build/scripts/verify-step.sh`
+   - If `DIRTY:`: commit the fix by name (`git commit -- <paths>`), re-run
+     until it exits 0
 4. Validate the output against the acceptance criteria in the dispatch prompt
    - If criteria undefined: escalate as ambiguity error
 5. All three pass → item resolved, resume execution
@@ -30,8 +33,14 @@ item is considered resolved:
 When escalation fails partway through an item — the fix attempt itself causes
 new issues or acceptance criteria cannot be met:
 
-- Revert to the last clean commit before the failed item: `git revert HEAD` (if
-  fix was committed) or `git checkout -- .` (if uncommitted)
+- Fix committed: revert to the last clean commit before the failed item with
+  `git revert HEAD`
+- Fix uncommitted: escalate to the user with the `verify-step.sh` listing and
+  what the attempt found. Nothing reverts it by default. A path the user decides
+  to revert is reverted by name, by the one call
+  `plugin/skills/build/references/escalation.md` §Post-item remediation gives —
+  never by `git checkout -- .`, which reverts every modified tracked path at
+  once, the exempt ones included
 - This is a simplification of the Saga compensating transaction pattern, enabled
   by git's atomic snapshot model: reverting a commit restores state (no
   concurrent modifications within single orchestration)
@@ -42,18 +51,10 @@ new issues or acceptance criteria cannot be met:
 
 **Dirty tree recovery:**
 
-When an item leaves the tree dirty (uncommitted changes detected by
-post-dispatch verification), `plugin/skills/build/references/escalation.md`
-§Post-item remediation governs, and this section defers to it:
-- Do NOT proceed regardless of whether changes look expected
-- A listing the `sandbox-lies` hook annotates as sandbox masks is re-run once,
-  not remediated; act on the re-run's verdict, and stop and report to the user
-  if the re-run is annotated again
-- The agent that owns the dirt commits or reverts its own work: resume it once;
-  if that fails, dispatch a fresh `edify:artisan`; if that fails too, escalate.
-  The orchestrator never cleans up in its own session
-- `git checkout -- . && git clean -fd` runs only where no agent owns the dirt,
-  and only after the user confirms it, because it destroys untracked work
+When an item leaves the tree dirty — `verify-step.sh` reports `DIRTY:` after the
+item — follow `plugin/skills/build/references/escalation.md` §Post-item
+remediation. That section is the one copy of the procedure; this fragment keeps
+none.
 
 **Timeout handling:**
 
