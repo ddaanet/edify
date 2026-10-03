@@ -27,11 +27,13 @@ git log --no-renames --diff-filter=A --reverse --format=%H \
 
 first line, then its parent. The `:(glob)` magic keeps `*` inside one path
 component — git's default `*` also matches `/`, so `reports/item-x/notes.md`
-would count — and `--no-renames` counts a report renamed into place as added.
-`changed-files.sh` re-derives the base wherever it is needed (D-90), and nothing
-needs it before the first item commit, so there is no baseline file, no capture
-step and nothing to delete. A finished job re-invoked reads as resumed: its
-inventory finds every item landed and goes to finishing.
+would count. `--no-renames` is there for uniformity with the script's diff only:
+a path-limited log pairs no rename source from outside its pathspec, so a report
+renamed into place reads as added either way. `changed-files.sh` re-derives the
+base wherever it is needed (D-90), and nothing needs it before the first item
+commit, so there is no baseline file, no capture step and nothing to delete. A
+finished job re-invoked reads as resumed: its inventory finds every item landed
+and goes to finishing.
 
 **D-89 — A phase boundary has landed when the run holds a commit touching its
 corrector report.** Phase P has landed when
@@ -72,9 +74,10 @@ run's reports and `runbook.md` list revisions are its record, not its
 implementation. The exempt alternation lives in one sourced file,
 `exempt-paths.sh`, which both scripts read. Every site that needs the list or
 the base calls the script: the phase boundary, the review gate, and triage,
-whose two diffs take the same `<base> HEAD` form. The working-tree form,
-`git diff --name-only <base>`, stays for uncommitted work — `/review`, and the
-`/build` §4.1 corrector that reviews an item before its one commit.
+which takes the script's `BASE:` as its argument and whose two diffs take the
+same `<base> HEAD` form. The working-tree form, `git diff --name-only <base>`,
+stays for uncommitted work — `/review`, and the `/build` §4.1 corrector that
+reviews an item before its one commit.
 
 **D-91 — Any change is dirt, except three paths dirty by convention.**
 `verify-step.sh` is `/build`'s one definition of a clean tree, at the entry gate
@@ -110,8 +113,9 @@ A tdd slice's implementation-side dirt escalates unless its RED and test-review
 reports are on disk, because RED's proof needs unchanged code. My human partner
 decides escalated dirt path by path, and a path decided for revert is reverted
 in session by one call,
-`git restore --source=HEAD --staged --worktree -- <paths> && rm -- <untracked paths>`;
-the orchestrator never cleans up on its own judgement.
+`git restore --source=HEAD --staged --worktree -- <paths> && rm -- <untracked paths>`,
+dropping either half that has no paths, since both commands error on an empty
+operand list; the orchestrator never cleans up on its own judgement.
 
 **D-93 — Review-gate groups are four fixed rows, with fixed slugs.** The
 `/build` review gate routes implementation files only; planning artifacts route

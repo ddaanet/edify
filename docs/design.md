@@ -215,8 +215,8 @@ Standing agents in `plugin/agents/`: the correctors (`corrector`,
 `runbook-simplifier`), the executors (`artisan`, `test-driver`, `refactor`), and
 the investigators (`scout`, `tdd-auditor`, `brainstorm-name`).
 
-Scripts: `plugin/skills/build/scripts/verify-step.sh` (clean tree, D-91, +
-precommit, at the entry gate and after every step whose work is committed —
+Scripts: `plugin/skills/build/scripts/verify-step.sh` (the clean tree of D-91
+plus precommit, at the entry gate and after every step whose work is committed —
 never after a RED or a test review whose tests are uncommitted by design),
 `plugin/skills/build/scripts/changed-files.sh` (the run's or phase's base and
 its changed-files list, read from report history, D-88 to D-90),
