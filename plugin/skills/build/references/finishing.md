@@ -2,19 +2,32 @@
 
 Reached once per job, in the session that completes the last item. Three steps
 in order: review gate, triage feedback, completion. `/build` §5 owns the one
-branch before this file — whether review is dispatched or skipped — and a
-skipped review still runs §2 and §3 here.
+branch before this file — whether review is dispatched or skipped. A skipped
+review still runs §1's report commit, which carries its `review-skip.md`, then
+§2 and §3 here.
 
 ## 1. Review gate
 
 Read `../../fragments/review-requirement.md` and route changed files to the
 appropriate reviewer by its routing table.
 
-1. List changed files: `git diff --name-only "$(cat tmp/build-baseline)" HEAD`.
-   This lists committed changes only: apart from them the tree holds only paths
-   `verify-step.sh` exempts, and no commit carries those.
-2. Group by artifact type (code/tests/plans, skill definitions, agent
-   definitions, design documents)
+1. List changed files:
+
+   ```bash
+   plugin/skills/build/scripts/changed-files.sh <job>
+   ```
+
+   Exit 0 prints `BASE: <sha>`, the run's base, then one path per line: the
+   committed diff from that base to `HEAD`, minus the paths `verify-step.sh`
+   exempts and the job's own `plans/<job>/` record. The `HEAD` form keeps
+   uncommitted dirt out; a `/handoff` or memory-pointer commit can still land
+   exempt paths during the run, and the script drops those by name. Exit 1
+   (`NO-BASE:`, no committed item report) or exit 2 (`ERROR:`) → STOP; never
+   substitute an empty base or a working-tree diff.
+2. Group by the four fixed rows of `references/dispatch-composition.md` §Naming
+   and resumption — `review-code`, `review-skill`, `review-agent`,
+   `review-design` — classing each file kind by the rule stated there, never
+   into a new group. The row's slug is the group's dispatch name.
 3. Look up the reviewer per group from the routing table
 4. Read `references/review-dispatch-template.md` and dispatch each group to its
    reviewer, structuring the prompt by it
@@ -51,12 +64,18 @@ second pass's fixes go unreviewed by design.
 this gate actually dispatched. The Read proves the report exists; without it, §2
 cannot proceed. UNFIXABLE in any report → validate it by
 `../../fragments/review-requirement.md` §UNFIXABLE Detection Protocol, then STOP
-on each that holds and surface it to the user with the path. Do not proceed to
-§2 until every issue is resolved or accepted.
+on each that holds and surface it to the user with the path. Where the protocol
+resumes the corrector for reclassification, resume the group's own reviewer,
+`review-<group>`, by `SendMessage`: for a report-only group that is the reviewer
+that raised the finding, whose reply comes back in parts as on the first pass,
+and this session rewrites the report from it. Do not proceed to §2 until every
+issue is resolved or accepted.
 
-A reviewer commits nothing, so commit each group's report yourself — with the
-fixes applied where there are any, by the reviewer or by this session — staging
-those paths by name and committing with `git commit -- <paths>`. Then:
+A reviewer commits nothing, so make the report commit yourself: every group's
+report, with the fixes applied where there are any, by the reviewer or by this
+session — or, where review was skipped, `plans/<job>/reports/review-skip.md`.
+Stage those paths by name and commit with `git commit -- <paths>`, subject
+`<type>: <job> Review gate`. Then:
 
 ```bash
 plugin/skills/build/scripts/verify-step.sh
@@ -69,33 +88,46 @@ exit 0.
 ## 2. Triage feedback
 
 ```bash
-plugin/bin/triage-feedback.sh <job> "$(cat tmp/build-baseline)"
+plugin/bin/triage-feedback.sh <job> <base>
 ```
 
-The script prepends `plans/` itself — pass the bare job name, not the plan path.
-It rejects an empty baseline with its usage line, so read the commit back from
-the `/build` §2 file rather than from a variable.
+`<base>` is the `BASE:` that
+`plugin/skills/build/scripts/changed-files.sh <job>` prints — §1 step 1's, or a
+fresh call's where review was skipped — written into the command as the hash
+itself: no shell variable survives from an earlier call, and the script rejects
+an empty baseline with its usage line. The script prepends `plans/` itself —
+pass the bare job name, not the plan path.
 
 Read the script output. On a divergence message → surface it inline. On
 `WARNING: No corrector report` → surface it inline and investigate before §3: §1
 should have left a review report, or `/build` §5 a `review-skip.md`, and the
-warning means neither exists — run §1, or write `/build` §5's `review-skip.md`,
-then rerun §2. On match or no-classification with no warning → proceed silently.
+warning means neither exists — run §1, or write `/build` §5's `review-skip.md`
+and commit it as §1's report commit does, then rerun §2. On match or
+no-classification with no warning → proceed silently.
 
 ## 3. Completion
 
 1. **Final review:** dispatch one `edify:corrector` over the whole diff,
    dispatch name `final-review` — **only where §1 did not already cover it**. §1
-   normally reviews the entire baseline diff, and a second corrector over the
-   same changes is waste; the cases that still need this are a run whose review
-   was skipped, and one whose routing left a group of changed files unreviewed.
+   normally reviews the run's entire diff, and a second corrector over the same
+   changes is waste; the cases that still need this are a run whose review was
+   skipped, and one whose routing left a group of changed files unreviewed.
 2. **TDD audit:** if any tdd item ran, dispatch `edify:tdd-auditor`, dispatch
    name `tdd-audit`. Its inputs are the RED, GREEN and review reports of every
    slice; git serves only to resolve a report to its adding commit and to diff
    that commit. Where a report is missing, resume the agent named for that
    dispatch and get it (`references/dispatch-composition.md` §Naming and
    resumption).
-3. **Run summary:** close with the run summary in context — per item its
+3. **Closing commit:** one commit carrying what §2 and §3 left — the triage log
+   line in `plans/reports/triage-feedback-log.md` where `triage-feedback.sh`
+   wrote one, `final-review`'s report and its fixes, and
+   `plans/<job>/reports/tdd-audit.md`, each where it exists. Stage those paths
+   by name and commit with `git commit -- <paths>`, subject
+   `<type>: <job> Finish`; where none of them exists there is nothing to commit.
+   Then run `plugin/skills/build/scripts/verify-step.sh`: exit 0 → the run
+   summary; anything else → Read `references/escalation.md` §Post-item
+   remediation and follow it, and the run summary waits for exit 0.
+4. **Run summary:** close with the run summary in context — per item its
    dispatches (`item-N-M`, `item-N-M-s<k>-red`, …), each report path, each
    remediation RCA, the list revisions, and the follow-up
    `/deliverable-review plans/<job>` (opus, fresh session). Name the follow-up
