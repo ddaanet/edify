@@ -17,6 +17,7 @@ from tests.triage_feedback_helpers import (
     JOB,
     _commit,
     _commit_item_report,
+    _commit_reports_fixture,
     _init_repo,
     _run_git,
     _run_triage,
@@ -83,28 +84,8 @@ def test_reports_exclude_the_per_item_report(tmp_path: Path) -> None:
     ``<base> HEAD`` range alone.
     """
     repo = tmp_path / "repo"
-    _init_repo(repo)
+    _commit_reports_fixture(repo)
     classification = repo / "plans" / JOB / "classification.md"
-    _commit(
-        repo,
-        "planning",
-        {
-            f"plans/{JOB}/reports/runbook-review.md": "ok\n",
-            f"plans/{JOB}/reports/explore-x.md": "notes\n",
-            f"plans/{JOB}/classification.md": "- **Classification:** Simple\n",
-        },
-    )
-    _commit_item_report(repo, {"notes.txt": "plain text\n"})
-    _commit(
-        repo,
-        "run: item 1.12",
-        {
-            f"plans/{JOB}/reports/item-1-12.md": "item report\n",
-            f"plans/{JOB}/reports/runbook-review.md": "ok, revisited\n",
-            f"plans/{JOB}/reports/explore/notes.md": "notes\n",
-        },
-    )
-    _commit(repo, "run: review", {f"plans/{JOB}/reports/review-code.md": "ok\n"})
 
     lines = _triage_lines(JOB, repo)
     assert "- Reports: 0" in lines, "\n".join(lines)

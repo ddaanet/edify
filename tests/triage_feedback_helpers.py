@@ -69,6 +69,42 @@ def _commit_item_report(repo: Path, files: dict[str, str] | None = None) -> None
     _commit(repo, "run: item 1.1", run_files)
 
 
+def _commit_reports_fixture(repo: Path) -> None:
+    """Build the run whose reports and review gate leave triage at ``match``.
+
+    Planning reports, ``runbook-review.md`` and ``explore-x.md``, are committed
+    before the base with ``classification.md`` (``Simple``). One run commit
+    adds ``item-1-1.md`` and a plain ``notes.txt``. Another adds
+    ``item-1-12.md``, which a single-digit ``item-[0-9]-[0-9].md`` would
+    count, revises ``runbook-review.md``, which a count of every touched path
+    would read, and adds ``explore/notes.md``, below the reports directory,
+    which a pathspec without ``:(glob)`` would match. A third adds the
+    review-gate report ``review-code.md``. Reports read 0, Files changed 1 and
+    there is no behavioural code.
+    """
+    _init_repo(repo)
+    _commit(
+        repo,
+        "planning",
+        {
+            f"plans/{JOB}/reports/runbook-review.md": "ok\n",
+            f"plans/{JOB}/reports/explore-x.md": "notes\n",
+            f"plans/{JOB}/classification.md": "- **Classification:** Simple\n",
+        },
+    )
+    _commit_item_report(repo, {"notes.txt": "plain text\n"})
+    _commit(
+        repo,
+        "run: item 1.12",
+        {
+            f"plans/{JOB}/reports/item-1-12.md": "item report\n",
+            f"plans/{JOB}/reports/runbook-review.md": "ok, revisited\n",
+            f"plans/{JOB}/reports/explore/notes.md": "notes\n",
+        },
+    )
+    _commit(repo, "run: review", {f"plans/{JOB}/reports/review-code.md": "ok\n"})
+
+
 def _run_triage(
     job: str, cwd: Path, path_prepend: Path | None = None
 ) -> subprocess.CompletedProcess[str]:

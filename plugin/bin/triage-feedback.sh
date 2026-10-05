@@ -239,8 +239,27 @@ if [[ "$verdict" != "no-classification" ]]; then
         echo "|---|---|---|---|---|---|---|" >> "$log_file"
     fi
 
-    log_date=$(date -u +%Y-%m-%d)
-    echo "| $log_date | $job_dir | $classification | $files_changed | $reports_count | $behavioral_code | $verdict |" >> "$log_file"
+    # One row per evidence: the append is skipped when a row equals the new one
+    # in every column but the date. Rows are compared whole, past the date
+    # column, by parameter expansion: no grep, so no substring match and no
+    # exit status to mistake for a result.
+    new_undated="$job_dir | $classification | $files_changed | $reports_count | $behavioral_code | $verdict |"
+    row_seen="no"
+    if ! while IFS= read -r log_row; do
+        log_rest=${log_row#"| "}
+        if [[ ${log_rest#* | } == "$new_undated" ]]; then
+            row_seen="yes"
+            break
+        fi
+    done < "$log_file"; then
+        echo "ERROR: cannot read $log_file"
+        exit 2
+    fi
+
+    if [[ $row_seen == "no" ]]; then
+        log_date=$(date -u +%Y-%m-%d)
+        echo "| $log_date | $new_undated" >> "$log_file"
+    fi
 fi
 
 exit 0
