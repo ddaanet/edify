@@ -168,5 +168,12 @@ Review implementation changes against design specification.
 
 Fix all issues. Write report to: plans/build-skill/reports/review-skill.md
 
-Return the report path on success, or `blocked: <reason>`. Mark an issue you cannot fix "UNFIXABLE: [description]" inside the report.
+Return the report path on success, or `blocked: <reason>`. Inside the report,
+mark an issue that has no fix path "UNFIXABLE" with its subcategory code:
+U-REQ (requirements ambiguous or in conflict), U-ARCH (the fix would break an
+architectural invariant or a documented design decision) or U-DESIGN (several
+valid approaches with non-trivial downstream consequences). Follow it with an
+investigation summary of the three gates you checked — Scope OUT, design
+deferral, codebase patterns — and your conclusion. An issue in Scope OUT or
+deferred by the design is DEFERRED, not UNFIXABLE.
 ```
