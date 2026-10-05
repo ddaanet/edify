@@ -134,11 +134,16 @@ fi
 
 # Compare against classification if present
 verdict="no-classification"
+unrecognised_label=""
 classification_file="plans/$job_dir/classification.md"
 if [[ -f "$classification_file" ]]; then
     classification=$(grep -E "(^-?[[:space:]]*\*\*Classification:\*\*|^-?[[:space:]]*Classification:)" "$classification_file" | head -1 | sed -E 's/.*:[[:space:]]*//;s/\*//g' | xargs || true)
 
     if [[ -z "$classification" ]]; then
+        verdict="no-classification"
+    elif [[ "$classification" != "Simple" && "$classification" != "Moderate" &&
+        "$classification" != "Complex" && "$classification" != "Defect" ]]; then
+        unrecognised_label=$classification
         verdict="no-classification"
     elif [[ "$classification" == "Simple" ]]; then
         if [[ "$behavioral_code" == "yes" ]] || [[ "$reports_count" -gt 0 ]]; then
@@ -186,6 +191,11 @@ echo "- Review artifact: $review_artifact"
 echo ""
 echo "## Verdict"
 echo "$verdict"
+
+if [[ -n "$unrecognised_label" ]]; then
+    echo ""
+    echo "unrecognised classification: $unrecognised_label"
+fi
 
 if [[ "$verdict" == "underclassified" ]] || [[ "$verdict" == "overclassified" ]]; then
     echo ""

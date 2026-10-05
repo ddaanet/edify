@@ -239,3 +239,56 @@ def test_no_base_is_an_error_with_no_log_row(tmp_path: Path) -> None:
     assert "## Evidence" not in lines, result.stdout
     assert result.returncode == 2, result.stdout + result.stderr
     assert not (repo / "plans" / "reports" / "triage-feedback-log.md").exists()
+
+
+def test_unrecognised_label_is_no_classification(tmp_path: Path) -> None:
+    """An unrecognised first ``Classification:`` value is no classification.
+
+    Only an exact ``Simple``, ``Moderate``, ``Complex`` or ``Defect`` is a
+    class. The label ``Simple / Moderate agentic-prose (one route)`` starts
+    with ``Simple``, and the run commits a ``def``, so a Simple reading would
+    give ``underclassified``. The run reads ``no-classification`` instead,
+    names the label once, verbatim, on stdout, exits 0 and appends no row. A
+    label that fell through to ``match`` would log one. A later, exact
+    ``Simple`` line pins the first value: reading the last or any recognised
+    one gives ``underclassified``.
+
+    The same fixture relabelled, on disk, to an exact ``Moderate`` and then
+    ``Defect`` reaches a verdict, prints no unrecognised line and logs one row
+    each, so recognising only ``Simple`` and ``Complex`` reds too.
+    """
+    label = "Simple / Moderate agentic-prose (one route)"
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    classification = repo / "plans" / JOB / "classification.md"
+    log = repo / "plans" / "reports" / "triage-feedback-log.md"
+    _commit(
+        repo,
+        "planning",
+        {
+            f"plans/{JOB}/classification.md": (
+                f"- **Classification:** {label}\n- **Classification:** Simple\n"
+            )
+        },
+    )
+    _commit_item_report(repo, {"a.py": "def foo():\n    pass\n"})
+
+    result = _run_triage(JOB, repo)
+    lines = result.stdout.splitlines()
+    assert _verdict(lines) == "no-classification", result.stdout + result.stderr
+    assert lines.count(f"unrecognised classification: {label}") == 1, result.stdout
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert not log.exists()
+
+    for logged, recognised in enumerate(("Moderate", "Defect"), start=1):
+        classification.write_text(
+            f"- **Classification:** {recognised}\n", encoding="utf-8"
+        )
+        lines = _triage_lines(JOB, repo)
+        assert _verdict(lines) not in ("", "no-classification"), "\n".join(lines)
+        assert not any(
+            line.startswith("unrecognised classification:") for line in lines
+        ), "\n".join(lines)
+        rows = log.read_text(encoding="utf-8").splitlines()[2:]
+        assert len(rows) == logged, "\n".join(rows)
+        assert f"| {JOB} | {recognised} |" in rows[-1], rows[-1]
