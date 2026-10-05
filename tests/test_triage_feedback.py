@@ -151,3 +151,34 @@ def test_failing_diff_is_an_error_not_no(tmp_path: Path) -> None:
         result.stdout
     )
     assert "- Behavioral code:" not in result.stdout, result.stdout
+
+
+def test_no_base_is_an_error_with_no_log_row(tmp_path: Path) -> None:
+    """``changed-files.sh``'s ``NO-BASE:`` stops triage: exit 2, no row.
+
+    The repo holds no committed item report, so ``changed-files.sh j`` exits
+    1 with ``NO-BASE:``. Triage prints that line, then its own ``ERROR:``,
+    and exits 2 (D-90). The classification is ``Simple`` and the commit
+    holds a ``def``, so a run reaching a verdict would log an
+    ``underclassified`` row. An unguarded capture under ``set -e`` exits 1
+    with empty stdout instead, and one that drops the printed output loses
+    the ``NO-BASE:`` cause.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    _commit(
+        repo,
+        "no item report",
+        {
+            f"plans/{JOB}/classification.md": "- **Classification:** Simple\n",
+            "module.py": "def foo():\n    pass\n",
+        },
+    )
+
+    result = _run_triage(JOB, repo)
+    lines = result.stdout.splitlines()
+    assert any(line.startswith("NO-BASE: ") for line in lines), result.stdout
+    assert any(line.startswith("ERROR: ") for line in lines), result.stdout
+    assert "## Evidence" not in lines, result.stdout
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert not (repo / "plans" / "reports" / "triage-feedback-log.md").exists()

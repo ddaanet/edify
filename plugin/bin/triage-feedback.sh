@@ -22,7 +22,7 @@ esac
 status=0
 changed_output=$("$script_dir/../skills/build/scripts/changed-files.sh" "$job_dir") || status=$?
 if [[ $status -ne 0 ]]; then
-    echo "$changed_output"
+    printf '%s\n' "$changed_output"
     echo "ERROR: changed-files.sh exited $status"
     exit 2
 fi
