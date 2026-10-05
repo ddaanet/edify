@@ -49,9 +49,15 @@ per-artifact-type, not per-batch.
 | Artifact | Reviewer | Why |
 |----------|----------|-----|
 | Code, tests, and any file kind no other row names | `edify:corrector` | Default — general quality review. Planning artifacts route by artifact (`docs/references/pipeline-contracts.md` D-26) |
-| Skill definitions, their `references/` nodes, and shared instruction files kept outside a skill | `plugin-dev:skill-reviewer` | Cross-skill consistency (allowed-tools, conventions) |
+| Skill definitions and the agent-instruction prose they load, meaning their `references/` nodes and the shared instruction files a skill loads from outside itself | `plugin-dev:skill-reviewer` | Cross-skill consistency (allowed-tools, conventions) |
 | Agent definitions | `edify:corrector` | Agent structure, triggering, tool access — criteria from the `plugin-dev:agent-development` skill, named in the dispatch prompt |
 | The living design graph under `docs/` | `edify:corrector` | Graph structure and decision records — criteria from the `craft:design-doc-writing` skill, named in the dispatch prompt. Not a job's `plans/<job>/design.md`: that is a planning artifact, reviewed by `edify:design-corrector` |
+
+An instruction file no skill loads, such as `CLAUDE.md` or `.claude/rules/*.md`,
+matches no row and takes the `review-code` default. `review-code` is `/build`'s
+dispatch name for the first row, and
+`plugin/skills/build/references/dispatch-composition.md` §Naming and resumption
+states this rule.
 
 **Dispatch names are namespaced.** `subagent_type` requires `<plugin>:<agent>`;
 a bare name returns "Agent type not found", including for the dispatching
