@@ -53,13 +53,19 @@ def _init_repo(tmp_path: Path) -> Path:
     return repo
 
 
-def _run_script(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
-    """Run ``changed-files.sh`` by absolute path with CWD at ``repo``."""
+def _run_script(
+    repo: Path, *args: str, script: Path = SCRIPT
+) -> subprocess.CompletedProcess[str]:
+    """Run ``script`` by absolute path with CWD at ``repo``.
+
+    ``script`` defaults to the repo's ``changed-files.sh``; a test passes a
+    copy to run it beside a doctored ``exempt-paths.sh``.
+    """
     env = dict(os.environ)
     env["GIT_CONFIG_GLOBAL"] = os.devnull
     env["GIT_CONFIG_SYSTEM"] = os.devnull
     return subprocess.run(
-        [str(SCRIPT), *args],
+        [str(script), *args],
         cwd=repo,
         env=env,
         capture_output=True,

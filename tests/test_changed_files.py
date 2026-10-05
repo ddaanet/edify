@@ -9,9 +9,12 @@ The ``--phase`` tests (KD-2) are in ``tests/test_changed_files_phase.py``.
 See ``tests/changed_files_helpers.py`` for the shared fixtures.
 """
 
+import shutil
 from pathlib import Path
 
-from .changed_files_helpers import _commit, _init_repo, _run_git, _run_script
+import pytest
+
+from .changed_files_helpers import SCRIPT, _commit, _init_repo, _run_git, _run_script
 
 
 def test_base_is_parent_of_first_item_report_commit(tmp_path: Path) -> None:
@@ -269,3 +272,41 @@ def test_paths_with_space_and_non_ascii_bytes_are_listed_whole(
         "café.txt",
         "my file.txt",
     ], result.stdout
+
+
+@pytest.mark.parametrize(
+    "exempt_paths",
+    [
+        pytest.param(None, id="absent"),
+        pytest.param("# defines nothing\n", id="defines-nothing"),
+    ],
+)
+def test_unloadable_exempt_paths_is_an_error_not_no_base(
+    tmp_path: Path, exempt_paths: str | None
+) -> None:
+    """An ``exempt-paths.sh`` that cannot supply the alternation exits 2.
+
+    The script under test is copied into ``tmp_path/scripts`` beside a
+    doctored ``exempt-paths.sh``: absent, or present and defining nothing.
+    Each repo holds a committed item report, so a script that carried on
+    would find a base. The load guard must turn either case into
+    ``ERROR: cannot load EXEMPT_PATHS_ALTERNATION from exempt-paths.sh`` with
+    exit 2. A bare ``source`` fails differently: the missing file, or the
+    unbound variable under ``set -u``, exits 1, which is ``NO-BASE:``'s
+    code, and no ``NO-BASE:`` line is printed either.
+    """
+    repo = _init_repo(tmp_path)
+    _commit(repo, "item 1.1", {"plans/j/reports/item-1-1.md": "1\n", "a.txt": "a\n"})
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    shutil.copy2(SCRIPT, scripts / SCRIPT.name)
+    if exempt_paths is not None:
+        (scripts / "exempt-paths.sh").write_text(exempt_paths, encoding="utf-8")
+
+    result = _run_script(repo, "j", script=scripts / SCRIPT.name)
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert (
+        "ERROR: cannot load EXEMPT_PATHS_ALTERNATION from exempt-paths.sh"
+        in result.stdout.splitlines()
+    ), result.stdout
+    assert "NO-BASE:" not in result.stdout, result.stdout
