@@ -78,8 +78,12 @@ def _run_script(
     bin_dir: Path,
     *,
     extra_env: dict[str, str] | None = None,
+    script: Path = SCRIPT,
 ) -> subprocess.CompletedProcess[str]:
-    """Run verify-step.sh by absolute path with CWD at ``repo``.
+    """Run ``script`` by absolute path with CWD at ``repo``.
+
+    ``script`` defaults to the repo's ``verify-step.sh``; a test passes a copy
+    to run it beside a doctored ``exempt-paths.sh``.
 
     ``bin_dir`` is prepended to ``PATH`` so the stub ``just`` is found first;
     git config is insulated the same way as ``_run_git``. ``extra_env`` is
@@ -93,7 +97,7 @@ def _run_script(
     if extra_env:
         env.update(extra_env)
     return subprocess.run(
-        [str(SCRIPT)],
+        [str(script)],
         cwd=repo,
         env=env,
         capture_output=True,

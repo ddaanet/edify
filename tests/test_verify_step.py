@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from .verify_step_helpers import (
+    SCRIPT,
     _assert_dirty,
     _init_repo,
     _run_git,
@@ -91,4 +92,43 @@ def test_quotepath_false_does_not_hide_dirt(tmp_path: Path) -> None:
 
     result = _run_script(repo, bin_dir, extra_env={"LC_ALL": "C.UTF-8"})
     _assert_dirty(result, r'?? "inbox/x\377/y.md"')
+    assert not marker.exists(), "just was invoked: " + result.stdout
+
+
+@pytest.mark.parametrize(
+    "exempt_paths",
+    [
+        pytest.param(None, id="absent"),
+        pytest.param("# defines nothing\n", id="defines-nothing"),
+    ],
+)
+def test_unloadable_exempt_paths_is_an_error_not_dirty(
+    tmp_path: Path, exempt_paths: str | None
+) -> None:
+    """An ``exempt-paths.sh`` that cannot supply the alternation exits 2.
+
+    The script under test is copied into ``tmp_path/scripts`` beside a
+    doctored ``exempt-paths.sh``: absent, or present and defining nothing.
+    The repo holds an untracked file, so a script that carried on would print
+    ``DIRTY:`` and exit 1. The load guard must turn either case into
+    ``ERROR: cannot load EXEMPT_PATHS_ALTERNATION from exempt-paths.sh`` with
+    exit 2. A bare ``source`` fails with exit 1 (the missing file, or the
+    unbound variable under ``set -u``), which is ``DIRTY:``'s code.
+    """
+    repo = _init_repo(tmp_path)
+    (repo / "dirt.txt").write_text("dirt\n", encoding="utf-8")
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    shutil.copy2(SCRIPT, scripts / SCRIPT.name)
+    if exempt_paths is not None:
+        (scripts / "exempt-paths.sh").write_text(exempt_paths, encoding="utf-8")
+    bin_dir, marker = _stub_just(tmp_path)
+
+    result = _run_script(repo, bin_dir, script=scripts / SCRIPT.name)
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert (
+        "ERROR: cannot load EXEMPT_PATHS_ALTERNATION from exempt-paths.sh"
+        in result.stdout.splitlines()
+    ), result.stdout
+    assert "DIRTY:" not in result.stdout, result.stdout
     assert not marker.exists(), "just was invoked: " + result.stdout
