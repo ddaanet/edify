@@ -14,12 +14,14 @@ gate for its mask re-run:
 - Exit 1 → first, a `DIRTY:` listing the `sandbox-lies` hook annotates as
   sandbox masks is re-run once, not remediated: masks reach an unsandboxed
   reader when a sandboxed Bash call runs concurrently, so they say nothing about
-  the dispatch. A re-run annotated again → stop and report to the user. At a
-  fresh run's entry gate, the re-run's verdict goes back to `SKILL.md` §2, whose
-  STOP governs it: dirt there predates the run and is never remediated. On a
-  resumed run it goes back to §Resuming step 2. After an item, or after a
-  phase-boundary, review-gate or closing commit, any other exit 1 → remediate,
-  below.
+  the dispatch. The annotation comes from the `phantom-untracked` detector of
+  the optional `sandbox-lies` plugin's Bash hook. Without that plugin no listing
+  is annotated, so this branch never fires, and a masked listing reads as dirt.
+  A re-run annotated again → stop and report to the user. At a fresh run's entry
+  gate, the re-run's verdict goes back to `SKILL.md` §2, whose STOP governs it:
+  dirt there predates the run and is never remediated. On a resumed run it goes
+  back to §Resuming step 2. After an item, or after a phase-boundary,
+  review-gate or closing commit, any other exit 1 → remediate, below.
 
 **Remediation after a committed step.** The gate held the tree clean before the
 step, so non-exempt dirt is the step's own work, unless someone touched the tree
@@ -34,9 +36,12 @@ in between.
 2. No owner to resume, or the resume fails or returns without progress → a fresh
    dispatch composed from the item by `references/dispatch-composition.md`,
    carrying the dirt — the `verify-step.sh` listing, the diff and any precommit
-   output — as a prior attempt's work to examine and finish. After a
-   phase-boundary, review-gate or closing commit there is no item to compose
-   from: go to step 3.
+   output — as a prior attempt's work to examine and finish. After a tdd slice's
+   step, the step names the agent: after its GREEN, `edify:test-driver` in GREEN
+   mode; after its code-review, refactor or list-revision commit,
+   `edify:artisan`. Either dispatch carries the slice's entry and the dirt.
+   After a phase-boundary, review-gate or closing commit there is no item to
+   compose from: go to step 3.
 3. That fails → escalate to the user with the listing and the dispatch's
    findings.
 
@@ -129,7 +134,15 @@ says.
    remediation closes. For tdd: without the slice's `-red.md` and
    `-test-review.md` on disk, its implementation-side dirt cannot enter RED,
    whose proof needs unchanged code, so it escalates too. A masked listing is
-   re-run first, as §2 says; every other verdict is taken as §2 takes it.
+   re-run first, as §2 says. The other verdicts:
+   - `CLEAN:` → proceed.
+   - `DIRTY:` → examined, as above.
+   - `PRECOMMIT:` over a clean tree, and exit 2 → STOP, as `/build` §2 does.
+
+   `verify-step.sh` exits on `DIRTY:` before it runs `just precommit`, so a
+   dirty resume reaches no precommit at the gate. Precommit first runs at the
+   first remaining item's `SKILL.md` §4.4 verification, over the adopted prior
+   work too.
 3. Run `/build` §3, then start §4 at the first remaining item.
 
 **Do not use `just precommit` as a state-assessment tool.** It is a pass/fail
