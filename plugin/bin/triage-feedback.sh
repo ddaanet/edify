@@ -85,9 +85,10 @@ shell_fn_re='^\+[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\(\)[[:space:]]*\{
 # An empty list reads "no" and runs no diff: an empty pathspec diffs
 # everything. `:(literal)` keeps a glob character in a name from matching other
 # paths. One line is one path; a path holding a newline prints as two list
-# lines and matches nothing, the residual bound of changed-files.sh's line
-# format. Bash 3.2 has no `mapfile`, and a here-string would hit the temp-file
-# failure described below, so the list is split by parameter expansion.
+# lines, which match nothing unless a half names another path the range
+# changes: the residual bound of changed-files.sh's line format. Bash 3.2 has
+# no `mapfile`, and a here-string would hit the temp-file failure described
+# below, so the list is split by parameter expansion.
 behavioral_code="no"
 if [[ -n $changed_list ]]; then
     list_pathspecs=()
@@ -111,14 +112,24 @@ if [[ -n $changed_list ]]; then
         exit 2
     fi
     # A pipe, not a here-string: bash writes a here-string to a temp file, and
-    # failing to create it also exits 1, which would read as "no". Only grep's
-    # exit 1 is a result; anything above is a failure.
-    if printf '%s\n' "$committed_diff" | grep -E "$definition_re|$shell_fn_re" > /dev/null; then
-        behavioral_code="yes"
-    elif [[ $? -ne 1 ]]; then
-        echo "ERROR: grep failed"
-        exit 2
-    fi
+    # failing to create it also exits 1, which would read as "no". grep's own
+    # status decides, from PIPESTATUS: `-q` stops at the first match, so on a
+    # diff larger than the pipe buffer `printf` dies of SIGPIPE, or exits 1
+    # where SIGPIPE is ignored, and under `pipefail` the pipeline's status
+    # would read an early match as a failure or as "no". The diff is already
+    # captured, so `printf` has no other failure to report. Only grep's exit 1
+    # is a result; anything above is a failure.
+    grep_status=0
+    printf '%s\n' "$committed_diff" | grep -qE "$definition_re|$shell_fn_re" ||
+        grep_status=${PIPESTATUS[1]}
+    case $grep_status in
+        0) behavioral_code="yes" ;;
+        1) ;;
+        *)
+            echo "ERROR: grep failed"
+            exit 2
+            ;;
+    esac
 fi
 
 # Compare against classification if present
