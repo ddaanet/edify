@@ -111,8 +111,10 @@ Give every dispatch a `name`:
   - `review-code` — code and tests, and the default for any file kind no row
     names;
   - `review-skill` — skill definitions and the agent-instruction prose they
-    load: a skill's `references/` nodes and any shared instruction file a repo
-    keeps outside a skill;
+    load, meaning their `references/` nodes and the shared instruction files a
+    skill loads from outside itself. An instruction file no skill loads, such as
+    `CLAUDE.md` or `.claude/rules/*.md`, matches no row and takes the
+    `review-code` default;
   - `review-agent` — agent definitions;
   - `review-design` — the living design graph under `docs/`, not a job's
     `plans/<job>/design.md`, which is a planning artifact.
@@ -125,7 +127,9 @@ Give every dispatch a `name`:
   unreviewed.
 - `tdd-audit` for the auditor.
 
-Resumption is `SendMessage` to that name; an unnamed agent cannot be resumed.
+Resumption is `SendMessage` to the dispatch's name. An agent spawned unnamed is
+resumed by `SendMessage` to its agent id, as `review-requirement.md` §UNFIXABLE
+Detection Protocol step 4 does.
 
 A child's own reply is the only authoritative result for its task. A late
 task-notification on an already-reported task id may be answering something else
