@@ -234,3 +234,38 @@ def test_renamed_file_lists_both_paths(tmp_path: Path) -> None:
         "b.txt",
         "c.txt",
     ], result.stdout
+
+
+def test_paths_with_space_and_non_ascii_bytes_are_listed_whole(
+    tmp_path: Path,
+) -> None:
+    r"""A path with a space or non-ASCII bytes is listed whole and unquoted.
+
+    Item 1.2 reads the diff NUL-delimited. The run commit adds ``my file.txt``
+    and ``café.txt`` beside the exempt ``inbox/é.md``. A word-split read
+    (``for path in $(git diff --name-only ...)``) lists ``my`` and ``file.txt``
+    apart. A newline-delimited read, with ``-z`` dropped from the diff, gets
+    git's ``core.quotePath`` form for ``café.txt``, ``"caf\303\251.txt"``, and
+    would not match the exempt path either, so ``inbox/é.md`` would leak in
+    quoted. The exact-list assertion fails both.
+    """
+    repo = _init_repo(tmp_path)
+    base_sha = _run_git(repo, "rev-parse", "HEAD").strip()
+    _commit(
+        repo,
+        "item 1.1",
+        {
+            "plans/j/reports/item-1-1.md": "1\n",
+            "my file.txt": "keep\n",
+            "café.txt": "keep\n",
+            "inbox/é.md": "exempt\n",
+        },
+    )
+
+    result = _run_script(repo, "j")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.splitlines() == [
+        f"BASE: {base_sha}",
+        "café.txt",
+        "my file.txt",
+    ], result.stdout
