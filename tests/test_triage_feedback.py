@@ -6,6 +6,7 @@ the call takes the job name alone. Fixtures and the subprocess wrappers live in
 ``tests/triage_feedback_helpers.py``.
 """
 
+import shutil
 from pathlib import Path
 
 from tests.triage_feedback_helpers import (
@@ -120,6 +121,63 @@ def test_reports_exclude_the_per_item_report(tmp_path: Path) -> None:
     lines = _triage_lines(JOB, repo)
     assert "- Reports: 1" in lines, "\n".join(lines)
     assert _verdict(lines) == "underclassified", "\n".join(lines)
+
+
+def test_reports_read_names_byte_exact(tmp_path: Path) -> None:
+    """Report names are read NUL-delimited, never as git's quoted form.
+
+    Without ``-z``, git C-quotes a name holding ``"`` whatever
+    ``core.quotePath`` says, so the review-gate report ``review-"x".md``
+    reads as a quoted name ending ``.md"``, escapes the ``review-*.md``
+    exclusion and counts. ``explore-é.md`` counts either way: it is there so
+    the expected 1 comes from a counted report, not from an empty read.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    _commit_item_report(
+        repo,
+        {
+            f'plans/{JOB}/reports/review-"x".md': "ok\n",
+            f"plans/{JOB}/reports/explore-é.md": "notes\n",
+        },
+    )
+
+    lines = _triage_lines(JOB, repo)
+    assert "- Reports: 1" in lines, "\n".join(lines)
+
+
+def test_failing_reports_diff_is_an_error_not_none(tmp_path: Path) -> None:
+    """A failing reports diff exits 2, never reads as ``Reports: 0``.
+
+    No repo state fails the ``--diff-filter=A`` name-only diff without
+    failing ``changed-files.sh``'s diff first, so a ``git`` shim fails that
+    one call. The count is a pipeline into ``wc -c``; a form that loses the
+    diff's status prints ``Reports: 0`` and exits 0.
+    """
+    real_git = shutil.which("git")
+    assert real_git is not None, "git not found on PATH"
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    shim = bin_dir / "git"
+    shim.write_text(
+        "#!/bin/sh\n"
+        'if [ "$1" = diff ]; then\n'
+        '    for arg in "$@"; do\n'
+        '        [ "$arg" = --diff-filter=A ] && { echo "shim: fail" >&2; exit 128; }\n'
+        "    done\n"
+        "fi\n"
+        f'exec "{real_git}" "$@"\n',
+        encoding="utf-8",
+    )
+    shim.chmod(0o755)
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    _commit_item_report(repo, {"a.txt": "a\n"})
+
+    result = _run_triage(JOB, repo, path_prepend=bin_dir)
+    assert "ERROR: git diff failed" in result.stdout.splitlines(), result.stdout
+    assert "- Reports:" not in result.stdout, result.stdout
+    assert result.returncode == 2, result.stdout + result.stderr
 
 
 def test_files_changed_counts_committed_changes_only(tmp_path: Path) -> None:

@@ -69,11 +69,19 @@ def _commit_item_report(repo: Path, files: dict[str, str] | None = None) -> None
     _commit(repo, "run: item 1.1", run_files)
 
 
-def _run_triage(job: str, cwd: Path) -> subprocess.CompletedProcess[str]:
-    """Run triage-feedback.sh by absolute path with CWD at the repo root."""
+def _run_triage(
+    job: str, cwd: Path, path_prepend: Path | None = None
+) -> subprocess.CompletedProcess[str]:
+    """Run triage-feedback.sh by absolute path with CWD at the repo root.
+
+    ``path_prepend``, when given, is put ahead of the real ``PATH`` so a
+    fixture-supplied shim is what the script resolves.
+    """
     env = dict(os.environ)
     env["GIT_CONFIG_GLOBAL"] = os.devnull
     env["GIT_CONFIG_SYSTEM"] = os.devnull
+    if path_prepend is not None:
+        env["PATH"] = f"{path_prepend}{os.pathsep}{env.get('PATH', '')}"
     return subprocess.run(
         [str(SCRIPT), job],
         cwd=cwd,

@@ -47,30 +47,29 @@ fi
 # before the base fall outside the range. `review_artifact` below reports
 # the review gate's presence separately. `:(glob)` keeps `*` inside one path
 # component, so a report below `reports/` is not "directly under" it;
-# `--no-renames` reads a rename as an addition. Paths come one per line, so a
-# path holding a newline counts as two, the residual bound of the line
-# format; `core.quotepath=off` keeps non-ASCII names unquoted. Captured
-# before the loop so a failing `git diff` is seen, not read as "none".
+# `--no-renames` reads a rename as an addition. Paths come NUL-delimited, as
+# in `changed-files.sh`: without `-z`, git C-quotes a name holding `"`, `\`
+# or a control byte whatever `core.quotePath` says, and the quoted name
+# escapes the exclusions. One `x` per counted report, then `wc -c`; with
+# `pipefail` a failing `git diff` fails the assignment, never reading as
+# "none".
 reports_dir="plans/$job_dir/reports"
-if ! added_reports=$(git -c core.quotepath=off diff --name-only --no-renames \
-    --no-color --no-ext-diff --diff-filter=A "$baseline_commit" HEAD -- \
-    ":(glob)$reports_dir/*"); then
+item_report_re='^item-[0-9]+-[0-9]+\.md$'
+if ! reports_count=$(git diff --name-only --no-renames -z --diff-filter=A \
+    "$baseline_commit" HEAD -- ":(glob)$reports_dir/*" |
+    while IFS= read -r -d '' report_path; do
+        report_name=${report_path##*/}
+        if [[ $report_name =~ $item_report_re ]]; then
+            continue
+        fi
+        case "$report_name" in
+            review.md | review-*.md | final-review.md) continue ;;
+        esac
+        printf x
+    done | wc -c | tr -d ' '); then
     echo "ERROR: git diff failed"
     exit 2
 fi
-item_report_re='^item-[0-9]+-[0-9]+\.md$'
-reports_count=0
-while IFS= read -r report_path; do
-    [[ -n $report_path ]] || continue
-    report_name=${report_path##*/}
-    if [[ $report_name =~ $item_report_re ]]; then
-        continue
-    fi
-    case "$report_name" in
-        review.md | review-*.md | final-review.md) continue ;;
-    esac
-    reports_count=$((reports_count + 1))
-done <<< "$added_reports"
 
 # Detect behavioral code: new definitions in the committed diff from baseline
 # to HEAD. Anchored after the `+` so a commented-out line does not
