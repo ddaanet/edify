@@ -56,7 +56,7 @@ When a delegate is interrupted, stopped, or returns incomplete results — resum
 before relaunching.
 
 - Give the agent an explicit `name` at spawn; resuming is `SendMessage` to that
-  name
+  name, or to the agent id where the agent was spawned unnamed
 - **Resume if:** Agent has context for its own issues (dirty tree, incomplete
   work, lint failures)
 - **Fresh launch if:** The resume fails, or the resumed agent returns without
