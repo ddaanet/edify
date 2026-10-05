@@ -296,7 +296,9 @@ def test_unrecognised_label_is_no_classification(tmp_path: Path) -> None:
         assert f"| {JOB} | {recognised} |" in rows[-1], rows[-1]
 
 
-@pytest.mark.parametrize("case", ["head-file", "apostrophe-label", "no-label-line"])
+@pytest.mark.parametrize(
+    "case", ["head-file", "apostrophe-label", "colon-label", "no-label-line"]
+)
 def test_odd_names_and_labels_do_not_derail_triage(tmp_path: Path, case: str) -> None:
     """A file named ``HEAD`` and odd classification lines leave triage running.
 
@@ -311,14 +313,24 @@ def test_odd_names_and_labels_do_not_derail_triage(tmp_path: Path, case: str) ->
     on both sides of the value pins the trim at each end, so a parse that
     trims one side only, or ``xargs -0``, which trims neither, reds too.
 
+    ``colon-label``: ``Moderate (note: see *KD-3*)``, on a bare
+    ``Classification:`` line, carries a colon and asterisks of its own. Only
+    the prefix is stripped, so the unrecognised-label line carries the label
+    verbatim; a parse cutting at the last colon, or deleting every ``*``,
+    reds.
+
     ``no-label-line``: a ``classification.md`` with no ``Classification:``
     line is a result, not a failure: verdict ``no-classification``, exit 0, no
     unrecognised-label line and no log row.
     """
-    label = "Moderate (my human partner's call)"
+    label = {
+        "apostrophe-label": "Moderate (my human partner's call)",
+        "colon-label": "Moderate (note: see *KD-3*)",
+    }.get(case, "")
     text = {
         "head-file": "- **Classification:** Simple\n",
         "apostrophe-label": f"- **Classification:** {label} \t\n",
+        "colon-label": f"Classification: {label}\n",
         "no-label-line": "no label here\n",
     }[case]
     repo = tmp_path / "repo"
@@ -333,7 +345,7 @@ def test_odd_names_and_labels_do_not_derail_triage(tmp_path: Path, case: str) ->
     log = repo / "plans" / "reports" / "triage-feedback-log.md"
     if case == "head-file":
         assert "- Files changed: 1" in lines, output
-    elif case == "apostrophe-label":
+    elif case in ("apostrophe-label", "colon-label"):
         assert f"unrecognised classification: {label}" in lines, output
         assert "xargs" not in result.stderr, result.stderr
         assert not log.exists()

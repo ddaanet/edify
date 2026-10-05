@@ -139,16 +139,16 @@ classification_file="plans/$job_dir/classification.md"
 if [[ -f "$classification_file" ]]; then
     # grep's exit 1 is "no Classification line", a result; above that is a
     # failure. The first match is cut by parameter expansion, not `head`, which
-    # would SIGPIPE grep under `pipefail`. `sed` trims, so an apostrophe in the
-    # label reads literally.
+    # would SIGPIPE grep under `pipefail`. `sed` strips the prefix grep matched
+    # and trims, so a colon, `*` or apostrophe in the label reads literally.
+    label_prefix_re='^-?[[:space:]]*(\*\*Classification:\*\*|Classification:)'
     classification=""
     grep_status=0
-    label_lines=$(grep -E "(^-?[[:space:]]*\*\*Classification:\*\*|^-?[[:space:]]*Classification:)" \
-        "$classification_file") || grep_status=$?
+    label_lines=$(grep -E "$label_prefix_re" "$classification_file") || grep_status=$?
     case $grep_status in
         0)
             if ! classification=$(printf '%s\n' "${label_lines%%$'\n'*}" |
-                sed -E 's/\*//g;s/.*:[[:space:]]*//;s/[[:space:]]+$//'); then
+                sed -E "s/${label_prefix_re}[[:space:]]*//;s/[[:space:]]+\$//"); then
                 echo "ERROR: sed failed"
                 exit 2
             fi
