@@ -11,6 +11,8 @@ The behavioural-code tests are in ``tests/test_triage_feedback_behavioral.py``.
 import shutil
 from pathlib import Path
 
+import pytest
+
 from tests.triage_feedback_helpers import (
     JOB,
     _commit,
@@ -292,3 +294,53 @@ def test_unrecognised_label_is_no_classification(tmp_path: Path) -> None:
         rows = log.read_text(encoding="utf-8").splitlines()[2:]
         assert len(rows) == logged, "\n".join(rows)
         assert f"| {JOB} | {recognised} |" in rows[-1], rows[-1]
+
+
+@pytest.mark.parametrize("case", ["head-file", "apostrophe-label", "no-label-line"])
+def test_odd_names_and_labels_do_not_derail_triage(tmp_path: Path, case: str) -> None:
+    """A file named ``HEAD`` and odd classification lines leave triage running.
+
+    ``head-file``: the run commits a tracked file named ``HEAD``, which git
+    refuses as ambiguous with the revision unless ``--`` precedes the
+    pathspecs: exit 0, counted in Files changed.
+
+    ``apostrophe-label``: ``Moderate (my human partner's call)`` is not a
+    class. ``xargs`` reads the apostrophe as an unmatched quote; the parse
+    must read the value literally: exit 0, no ``xargs`` complaint on stderr,
+    and the unrecognised-label line carrying the label verbatim. Whitespace
+    on both sides of the value pins the trim at each end, so a parse that
+    trims one side only, or ``xargs -0``, which trims neither, reds too.
+
+    ``no-label-line``: a ``classification.md`` with no ``Classification:``
+    line is a result, not a failure: verdict ``no-classification``, exit 0, no
+    unrecognised-label line and no log row.
+    """
+    label = "Moderate (my human partner's call)"
+    text = {
+        "head-file": "- **Classification:** Simple\n",
+        "apostrophe-label": f"- **Classification:** {label} \t\n",
+        "no-label-line": "no label here\n",
+    }[case]
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    _commit(repo, "planning", {f"plans/{JOB}/classification.md": text})
+    name = "HEAD" if case == "head-file" else "a.txt"
+    _commit_item_report(repo, {name: "a file, not a revision\n"})
+
+    result = _run_triage(JOB, repo)
+    lines = result.stdout.splitlines()
+    output = result.stdout + result.stderr
+    log = repo / "plans" / "reports" / "triage-feedback-log.md"
+    if case == "head-file":
+        assert "- Files changed: 1" in lines, output
+    elif case == "apostrophe-label":
+        assert f"unrecognised classification: {label}" in lines, output
+        assert "xargs" not in result.stderr, result.stderr
+        assert not log.exists()
+    else:
+        assert _verdict(lines) == "no-classification", output
+        assert not any(
+            line.startswith("unrecognised classification:") for line in lines
+        ), output
+        assert not log.exists()
+    assert result.returncode == 0, output

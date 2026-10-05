@@ -137,7 +137,28 @@ verdict="no-classification"
 unrecognised_label=""
 classification_file="plans/$job_dir/classification.md"
 if [[ -f "$classification_file" ]]; then
-    classification=$(grep -E "(^-?[[:space:]]*\*\*Classification:\*\*|^-?[[:space:]]*Classification:)" "$classification_file" | head -1 | sed -E 's/.*:[[:space:]]*//;s/\*//g' | xargs || true)
+    # grep's exit 1 is "no Classification line", a result; above that is a
+    # failure. The first match is cut by parameter expansion, not `head`, which
+    # would SIGPIPE grep under `pipefail`. `sed` trims, so an apostrophe in the
+    # label reads literally.
+    classification=""
+    grep_status=0
+    label_lines=$(grep -E "(^-?[[:space:]]*\*\*Classification:\*\*|^-?[[:space:]]*Classification:)" \
+        "$classification_file") || grep_status=$?
+    case $grep_status in
+        0)
+            if ! classification=$(printf '%s\n' "${label_lines%%$'\n'*}" |
+                sed -E 's/\*//g;s/.*:[[:space:]]*//;s/[[:space:]]+$//'); then
+                echo "ERROR: sed failed"
+                exit 2
+            fi
+            ;;
+        1) ;;
+        *)
+            echo "ERROR: grep failed"
+            exit 2
+            ;;
+    esac
 
     if [[ -z "$classification" ]]; then
         verdict="no-classification"
