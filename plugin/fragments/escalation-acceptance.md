@@ -20,8 +20,11 @@ item is considered resolved:
 2. Run `just precommit`
    - If fails: fix issues, re-run (loop until pass or give up)
 3. Run `plugin/skills/build/scripts/verify-step.sh`
-   - If `DIRTY:`: commit the fix by name (`git commit -- <paths>`), re-run
-     until it exits 0
+   - If `DIRTY:`: commit the fix by name (`git commit -- <paths>`), subject
+     `<type>: <job> Item N.M[/k] — <title>`, then re-run it once:
+     - `CLEAN:` → step 4
+     - `PRECOMMIT:` → step 2
+     - a second `DIRTY:`, or exit 2 → escalate
 4. Validate the output against the acceptance criteria in the dispatch prompt
    - If criteria undefined: escalate as ambiguity error
 5. All three pass → item resolved, resume execution
@@ -33,9 +36,11 @@ item is considered resolved:
 When escalation fails partway through an item — the fix attempt itself causes
 new issues or acceptance criteria cannot be met:
 
-- Fix committed: revert every commit since the last clean commit before the
-  failed item, newest first, with `git revert --no-commit <sha>`, then commit
-  the reverted paths by name (`git commit -- <paths>`), subject
+- Fix committed: escalate to the user with the commits since the last clean
+  commit before the failed item and what the attempt found. Nothing reverts them
+  by default. Only the commits the user decides to revert are reverted: newest
+  first, each with `git revert --no-commit <sha>`, then the reverted paths
+  committed by name (`git commit -- <paths>`), subject
   `<type>: <job> Item N.M[/k] — revert failed fix` (probed on git 2.47.3). Never
   `git reset`, which discards history
 - Fix uncommitted: escalate to the user with the `verify-step.sh` listing and
