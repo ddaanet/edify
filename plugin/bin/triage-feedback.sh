@@ -3,16 +3,41 @@
 set -euo pipefail
 
 job_dir="${1:-}"
-baseline_commit="${2:-}"
 
-if [[ -z "$job_dir" ]] || [[ -z "$baseline_commit" ]]; then
-    echo "Usage: triage-feedback.sh <job-dir> <baseline-commit>" >&2
+if [[ -z "$job_dir" ]] || [[ $# -gt 1 ]]; then
+    echo "Usage: triage-feedback.sh <job>" >&2
     exit 1
 fi
 
-# Count files committed since baseline: the HEAD form keeps uncommitted dirt
-# out. git C-quotes a path holding a newline, so one line is one file.
-files_changed=$(git diff --name-only "$baseline_commit" HEAD | wc -l | tr -d ' ')
+# Located as in `verify-step.sh`, whose comment explains the idiom.
+case "${BASH_SOURCE[0]}" in
+    */*) script_dir="${BASH_SOURCE[0]%/*}" ;;
+    *) script_dir="." ;;
+esac
+
+# D-90: the review gate and triage count one list, so the list comes from
+# `changed-files.sh` (D-88 base, D-91 exemptions), never a second diff. Its
+# exit 1 is `NO-BASE:` and its exit 2 an `ERROR:`; both stop the script with
+# no log row, and `|| status=$?` keeps `set -e` from exiting silently.
+status=0
+changed_output=$("$script_dir/../skills/build/scripts/changed-files.sh" "$job_dir") || status=$?
+if [[ $status -ne 0 ]]; then
+    echo "$changed_output"
+    echo "ERROR: changed-files.sh exited $status"
+    exit 2
+fi
+base_line=${changed_output%%$'\n'*}
+baseline_commit=${base_line#BASE: }
+changed_list=""
+if [[ $changed_output == *$'\n'* ]]; then
+    changed_list=${changed_output#*$'\n'}
+fi
+# One line is one path; a path holding a newline counts as two, the residual
+# bound of changed-files.sh's line format.
+files_changed=0
+if [[ -n $changed_list ]]; then
+    files_changed=$(printf '%s\n' "$changed_list" | wc -l | tr -d ' ')
+fi
 
 # Count report files in plans/$job_dir/reports/
 # Exclude pre-execution artifacts: design-review*, outline-review*, recall-*
@@ -30,7 +55,7 @@ if [[ -d "$reports_dir" ]]; then
 fi
 
 # Detect behavioral code: new definitions in the committed diff from baseline
-# to HEAD (KD-6). Anchored after the `+` so a commented-out line does not
+# to HEAD. Anchored after the `+` so a commented-out line does not
 # match. Covers the keyword-declaration languages plus POSIX shell function
 # syntax; a language that declares behaviour without one of these keywords
 # (C, C++, Java method bodies) reads as "no", which under-reports rather than
@@ -43,7 +68,10 @@ shell_fn_re='^\+[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\(\)[[:space:]]*\{
 # condition, so a failing `git diff` would read as "no". --no-color and
 # --no-ext-diff stop color.diff or diff.external config from rewriting the `+`
 # lines the patterns anchor on.
-committed_diff=$(git diff --no-color --no-ext-diff "$baseline_commit" HEAD)
+if ! committed_diff=$(git diff --no-color --no-ext-diff "$baseline_commit" HEAD); then
+    echo "ERROR: git diff failed"
+    exit 2
+fi
 behavioral_code="no"
 if grep -qE "$definition_re|$shell_fn_re" <<< "$committed_diff"; then
     behavioral_code="yes"
