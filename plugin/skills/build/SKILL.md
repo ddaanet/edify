@@ -48,7 +48,9 @@ on disk → the run is resumed: Read `references/escalation.md` §Resuming and
 follow it in place of §2, whose gate its step 2 runs with the run's dirt
 examined, not refused. None → fresh. Only `item-*` counts, since planning
 reports (`outline-review.md`, `runbook-review.md`, `explore-*`) share the
-directory.
+directory. Work with no `Item N.M` — option 3, or a design or outline without
+items — is one item, Item 1.1: its report is `item-1-1.md` and its subject
+`<type>: <job> Item 1.1 — <title>`, so every run commits an item report (D-88).
 
 **Execution mode:** STRICT SEQUENTIAL. One dispatch per message — items modify
 shared state, and parallel dispatch causes race conditions.
@@ -63,8 +65,8 @@ plugin/skills/build/scripts/verify-step.sh
 - Exit 1 with `DIRTY:` → if the `sandbox-lies` hook annotates the listing as
   sandbox masks, re-run per `references/escalation.md` §Post-item remediation;
   otherwise STOP: "Dirty tree. Commit or stash before /build." Any change is
-  dirt, untracked files included, except three paths dirty by convention:
-  `memory` (the gitlore submodule), `.claude/handoff-*.md` and `inbox/*.md`.
+  dirt, untracked files included, except the paths dirty by convention that
+  `scripts/exempt-paths.sh` defines (D-91).
 - Exit 1 with `PRECOMMIT:` → STOP: "Precommit failing. Fix before /build."
 - Exit 2 → STOP: the script itself failed, so there is no verdict.
 
@@ -141,10 +143,10 @@ name and commit with `git commit -- <paths>`, subject
 
 ### 4.4 Post-item verification
 
-After every step whose work is committed — a slice's GREEN, a slice's code
-review once its commit lands, a review item once its commit lands, §4.1's one
-commit, a phase-boundary corrector once its commit lands, and any general item.
-Not after RED or test review, where uncommitted tests are the designed state:
+After every step whose work is committed, once its commit lands — a slice's
+GREEN, its code review, its refactor and its list revision, a review item,
+§4.1's one commit, a phase-boundary corrector, and any general item. Not after
+RED or test review, where uncommitted tests are the designed state:
 
 ```bash
 plugin/skills/build/scripts/verify-step.sh
@@ -172,7 +174,8 @@ sessions reaches this once, in its last one.
 
 Read `references/finishing.md` and follow it: review gate, triage feedback,
 completion. **Not skippable** — whichever way the branch below goes, it ends in
-a tool call on `plans/<job>/reports/`.
+a tool call on `plans/<job>/reports/`; a review gate `finishing.md` §1 finds
+already landed is not re-run.
 
 The one branch this hub owns is the review gate's. Where review is genuinely
 unnecessary — trivial task-frame-only edits, plan artifact cleanup — the review
