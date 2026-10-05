@@ -242,23 +242,30 @@ if [[ "$verdict" != "no-classification" ]]; then
     # One row per evidence: the append is skipped when a row equals the new one
     # in every column but the date. Rows are compared whole, past the date
     # column, by parameter expansion: no grep, so no substring match and no
-    # exit status to mistake for a result.
+    # exit status to mistake for a result. A last line with no newline is
+    # still compared, and `log_lead` puts the new row on a line of its own.
+    # The braces matter: when a compound command's own redirection fails,
+    # bash skips the `!`, so an unreadable log would fall through to a blind
+    # append.
     new_undated="$job_dir | $classification | $files_changed | $reports_count | $behavioral_code | $verdict |"
     row_seen="no"
-    if ! while IFS= read -r log_row; do
-        log_rest=${log_row#"| "}
-        if [[ ${log_rest#* | } == "$new_undated" ]]; then
-            row_seen="yes"
-            break
-        fi
-    done < "$log_file"; then
+    log_lead=""
+    if ! {
+        while IFS= read -r log_row || { [[ -n $log_row ]] && log_lead=$'\n'; }; do
+            log_rest=${log_row#"| "}
+            if [[ ${log_rest#* | } == "$new_undated" ]]; then
+                row_seen="yes"
+                break
+            fi
+        done < "$log_file"
+    }; then
         echo "ERROR: cannot read $log_file"
         exit 2
     fi
 
     if [[ $row_seen == "no" ]]; then
         log_date=$(date -u +%Y-%m-%d)
-        echo "| $log_date | $new_undated" >> "$log_file"
+        printf '%s| %s | %s\n' "$log_lead" "$log_date" "$new_undated" >> "$log_file"
     fi
 fi
 
