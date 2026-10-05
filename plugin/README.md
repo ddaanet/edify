@@ -71,16 +71,25 @@ Utility scripts in `bin/` (POSIX shell and Python 3):
 Plus three in `skills/build/scripts/`, used by `/build`:
 
 - `verify-step.sh` — the clean-tree and precommit gate. `/build` runs it at its
-  entry gate and after every committing step: a slice's GREEN and its
-  code-review commit, a delegated general item, a review item, an item done in
-  session (`/build` §4.1), the phase-boundary commit, the review gate and the
-  run's closing commit (`skills/build/references/finishing.md` §3). Never after
-  a RED or a test review, whose tests are uncommitted by design.
+  entry gate and after every committing step: a slice's GREEN, its code-review
+  commit, its refactor commit and its list-revision commit, a delegated general
+  item, a review item, an item done in session (`/build` §4.1), the
+  phase-boundary commit, the review gate and the run's closing commit
+  (`skills/build/references/finishing.md` §3). Never after a RED or a test
+  review, whose tests are uncommitted by design. A `DIRTY:` listing annotated as
+  sandbox masks is re-run once rather than remediated; the annotation comes from
+  the `phantom-untracked` detector of the optional `sandbox-lies` plugin's Bash
+  hook. Without that plugin no listing is annotated, so the re-run never fires,
+  and a masked listing reads as dirt.
 - `changed-files.sh` — prints the run's base as `BASE:`, then the files the run
   changed: the committed diff from that base to `HEAD`, minus the exempt paths
   and the job's own `plans/<job>/` record. `--phase` takes the current phase's
-  base instead. The phase-boundary and review-gate scopes and the triage base
-  come from it.
+  base instead. The phase-boundary and review-gate scopes come from it, and
+  `triage-feedback.sh <job>` runs it itself and measures that list, the set the
+  review gate reviewed: its file count, and behavioural code in those paths'
+  diff only. The report count alone looks past the list, at the reports the
+  `<base> HEAD` range adds under `plans/<job>/reports/`, which the list drops
+  with the job's record.
 - `exempt-paths.sh` — sourced by the other two, never run: the one definition of
   the three paths dirty by convention (`memory`, `.claude/handoff-*.md`,
   `inbox/*.md`), which the gate tolerates and the changed-files list drops.
