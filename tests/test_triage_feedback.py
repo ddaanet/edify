@@ -308,3 +308,68 @@ def test_no_base_is_an_error_with_no_log_row(tmp_path: Path) -> None:
     assert "## Evidence" not in lines, result.stdout
     assert result.returncode == 2, result.stdout + result.stderr
     assert not (repo / "plans" / "reports" / "triage-feedback-log.md").exists()
+
+
+def test_behavioral_code_reads_the_lists_paths_only(tmp_path: Path) -> None:
+    """Behavioral code diffs only the paths in the gate's list (D-90).
+
+    The first run commits ``item-1-1.md``, whose prose has a line starting
+    ``class with an explicit whitelist``, and ``inbox/x.md`` holding a
+    ``def``. Both fall outside the list, which is empty: ``no``, and a diff
+    over the whole ``<base> HEAD`` range would read ``yes`` from either file.
+    A further commit adds ``a.py`` holding a ``def``, and the same repo reads
+    ``yes``.
+
+    An empty list runs no diff, because an empty pathspec diffs everything. A
+    second repo keeps the list non-empty, ``notes.txt`` alone, beside the same
+    exempt ``def`` and ``class`` report line: an implementation that
+    special-cases only the empty list and then diffs the range, or the list
+    plus the job's reports, reads ``yes`` there, and must read ``no``.
+
+    The pathspecs are literal. A third repo's list is a file named ``*.md``,
+    holding no definition; as a glob pathspec it matches ``inbox/x.md`` and
+    reads its ``def``.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    _commit(
+        repo,
+        "run: item 1.1",
+        {
+            f"plans/{JOB}/reports/item-1-1.md": (
+                "item report\nclass with an explicit whitelist\n"
+            ),
+            "inbox/x.md": "def foo():\n",
+        },
+    )
+
+    lines = _triage_lines(JOB, repo)
+    assert "- Files changed: 0" in lines, "\n".join(lines)
+    assert "- Behavioral code: no" in lines, "\n".join(lines)
+
+    _commit(repo, "add a", {"a.py": "def foo():\n    pass\n"})
+    lines = _triage_lines(JOB, repo)
+    assert "- Behavioral code: yes" in lines, "\n".join(lines)
+
+    non_empty = tmp_path / "non-empty"
+    _init_repo(non_empty)
+    _commit_item_report(
+        non_empty,
+        {
+            f"plans/{JOB}/reports/item-1-1.md": (
+                "item report\nclass with an explicit whitelist\n"
+            ),
+            "notes.txt": "plain\n",
+            "inbox/x.md": "def foo():\n",
+        },
+    )
+    lines = _triage_lines(JOB, non_empty)
+    assert "- Files changed: 1" in lines, "\n".join(lines)
+    assert "- Behavioral code: no" in lines, "\n".join(lines)
+
+    glob_name = tmp_path / "glob-name"
+    _init_repo(glob_name)
+    _commit_item_report(glob_name, {"*.md": "plain\n", "inbox/x.md": "def foo():\n"})
+    lines = _triage_lines(JOB, glob_name)
+    assert "- Files changed: 1" in lines, "\n".join(lines)
+    assert "- Behavioral code: no" in lines, "\n".join(lines)

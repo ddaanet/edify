@@ -72,26 +72,53 @@ if ! reports_count=$(git diff --name-only --no-renames -z --diff-filter=A \
 fi
 
 # Detect behavioral code: new definitions in the committed diff from baseline
-# to HEAD. Anchored after the `+` so a commented-out line does not
-# match. Covers the keyword-declaration languages plus POSIX shell function
-# syntax; a language that declares behaviour without one of these keywords
-# (C, C++, Java method bodies) reads as "no", which under-reports rather than
-# over-reports.
+# to HEAD, limited to the paths of the changed-files list, so exempt paths and
+# the job's own reports never count. Anchored after the `+` so a commented-out
+# line does not match. Covers the keyword-declaration languages plus POSIX
+# shell function syntax; a language that declares behaviour without one of
+# these keywords (C, C++, Java method bodies) reads as "no", which
+# under-reports rather than over-reports.
 definition_re='^\+[[:space:]]*((export|public|private|protected|static|async|pub|final)[[:space:]]+)*'
 definition_re+='(def|class|function|func|fn|impl|interface|struct|trait|enum|module)[[:space:]]'
 shell_fn_re='^\+[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\(\)[[:space:]]*\{'
 
-# Captured before matching, not piped into grep: errexit is off inside an `if`
-# condition, so a failing `git diff` would read as "no". --no-color and
-# --no-ext-diff stop color.diff or diff.external config from rewriting the `+`
-# lines the patterns anchor on.
-if ! committed_diff=$(git diff --no-color --no-ext-diff "$baseline_commit" HEAD); then
-    echo "ERROR: git diff failed"
-    exit 2
-fi
+# An empty list reads "no" and runs no diff: an empty pathspec diffs
+# everything. `:(literal)` keeps a glob character in a name from matching other
+# paths. One line is one path; a path holding a newline prints as two list
+# lines and matches nothing, the residual bound of changed-files.sh's line
+# format. Bash 3.2 has no `mapfile`, and a here-string would hit the temp-file
+# failure described below, so the list is split by parameter expansion.
 behavioral_code="no"
-if grep -qE "$definition_re|$shell_fn_re" <<< "$committed_diff"; then
-    behavioral_code="yes"
+if [[ -n $changed_list ]]; then
+    list_pathspecs=()
+    list_rest=$changed_list
+    while [[ -n $list_rest ]]; do
+        list_pathspecs+=(":(literal)${list_rest%%$'\n'*}")
+        if [[ $list_rest == *$'\n'* ]]; then
+            list_rest=${list_rest#*$'\n'}
+        else
+            list_rest=""
+        fi
+    done
+    # Captured before matching, not piped into grep: errexit is off inside an
+    # `if` condition, so a failing `git diff` would read as "no". --no-color and
+    # --no-ext-diff stop color.diff or diff.external config from rewriting the
+    # `+` lines the patterns anchor on; --no-renames lists a rename's target as
+    # an addition, as the list does.
+    if ! committed_diff=$(git diff --no-color --no-ext-diff --no-renames \
+        "$baseline_commit" HEAD -- "${list_pathspecs[@]}"); then
+        echo "ERROR: git diff failed"
+        exit 2
+    fi
+    # A pipe, not a here-string: bash writes a here-string to a temp file, and
+    # failing to create it also exits 1, which would read as "no". Only grep's
+    # exit 1 is a result; anything above is a failure.
+    if printf '%s\n' "$committed_diff" | grep -E "$definition_re|$shell_fn_re" > /dev/null; then
+        behavioral_code="yes"
+    elif [[ $? -ne 1 ]]; then
+        echo "ERROR: grep failed"
+        exit 2
+    fi
 fi
 
 # Compare against classification if present
