@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-exec 2>&1
 set -euo pipefail
 
-# KD-1: the base is the parent of the earliest commit that added a
+# D-88: the base is the parent of the earliest commit that added a
 # `plans/<job>/reports/item-*` report. `--diff-filter=A --reverse` orders
 # additions oldest first; the first line is that commit, and its parent is
 # the base. `--no-show-signature` keeps a user's `log.showSignature` from
@@ -13,7 +12,7 @@ set -euo pipefail
 # `reports/phase-1/old-corrector.md` as a boundary. With no commit adding
 # such a report the script prints `NO-BASE:` and exits 1; usage errors and
 # git failures exit 2 with `ERROR:`, so nothing else may exit 1.
-# KD-6: the changed-files list is the committed diff since that base
+# D-90: the changed-files list is the committed diff since that base
 # (`<base> HEAD`, never the working tree), minus the job's own
 # `plans/<job>/` record and the exempt paths `exempt-paths.sh` names: the
 # range can also hold a `/handoff` or memory-pointer commit, whose exempt
@@ -21,8 +20,8 @@ set -euo pipefail
 # `git diff -z`, read with `read -r -d ''`, never split on whitespace or
 # newlines. `--no-renames` on the diff makes a rename a deletion plus an
 # addition whatever the user's `diff.renames`, so both paths are listed, and
-# keeps git's skipped-rename warning, which `exec 2>&1` would print among the
-# paths, out of stdout. Both logs carry it for uniformity only: a
+# keeps git's skipped-rename warning, which goes to stderr, out of the paths
+# on stdout. Both logs carry it for uniformity only: a
 # path-limited log pairs no rename source from outside its pathspec, so a
 # report renamed into place reads as added either way (probed, git 2.47.3).
 # The exempt match happens inside that same NUL-delimited read loop, with
@@ -31,10 +30,10 @@ set -euo pipefail
 # handling. The output is one path per line, so a path holding a
 # newline prints as two lines: a residual bound of the line format, not of
 # the read.
-# `--phase` is accepted only as the second argument. KD-2: its base is the
+# `--phase` is accepted only as the second argument. D-89: its base is the
 # latest commit in `<run base>..HEAD` touching
 # `plans/<job>/reports/phase-*-corrector.md` (the path, never the commit
-# subject, KD-8); no `--diff-filter`, so a modified report counts, and `-1`
+# subject, D-94); no `--diff-filter`, so a modified report counts, and `-1`
 # takes the latest. With no such commit the base is the run base. Either
 # base then feeds the one print-and-filter path below, so the bare and
 # `--phase` lists cannot drift apart.

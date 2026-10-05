@@ -20,9 +20,9 @@ if ! source "$script_dir/exempt-paths.sh" || [[ -z ${EXEMPT_PATHS_ALTERNATION:-}
     exit 2
 fi
 
-# KD-6: the exempt alternation lives in exempt-paths.sh (the three paths
+# D-91: the exempt alternation lives in exempt-paths.sh (the three paths
 # dirty by convention are explained there), shared with changed-files.sh.
-# Safe to exempt (KD-7) because every committing dispatch stages
+# Safe to exempt (D-91) because every committing dispatch stages
 # its paths by name, never `git add -A`, and commits them with
 # `git commit -- <paths>`, so exempt dirt never enters a commit, even when
 # already staged. The two-column XY status may hold any state but a rename

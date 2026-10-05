@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Sourced by verify-step.sh and changed-files.sh (KD-6): the exempt
+# Sourced by verify-step.sh and changed-files.sh (D-91): the exempt
 # alternation lives in one place these two scripts both read, so it never
 # drifts between them. This file is not executable as a command — only
 # sourced — and defines one variable: a bare ERE alternation, unanchored and
