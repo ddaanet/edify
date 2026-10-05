@@ -194,7 +194,7 @@ echo "$verdict"
 
 if [[ -n "$unrecognised_label" ]]; then
     echo ""
-    echo "unrecognised classification: $unrecognised_label"
+    printf 'unrecognised classification: %s\n' "$unrecognised_label"
 fi
 
 if [[ "$verdict" == "underclassified" ]] || [[ "$verdict" == "overclassified" ]]; then
