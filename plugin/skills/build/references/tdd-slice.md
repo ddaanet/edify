@@ -89,10 +89,16 @@ flags in-scope-unfixable refactorings (module split, new abstraction). UNFIXABLE
    that **this run is the opus escalation** — the agent cannot see its own model
    and branches on that sentence, so quoting the reason alone makes it escalate
    again — and carry the reason. A second `escalated` goes in the run summary
-   and execution continues. On `error` → log and continue.
-3. **List revision:** revise the remaining slices' test lists in `runbook.md`
-   from what this slice revealed, or record "List revision: none" in the run
-   summary. Commit the `runbook.md` edits after the slice: stage the file by
-   name and commit with `git commit -- plans/<job>/runbook.md`, subject
-   `<type>: <job> Item N.M/k — list revision` — plan-as-executed versus
-   plan-as-written stays a `git diff`.
+   and execution continues. Once the refactoring commit lands, run the post-item
+   verification of `SKILL.md` §4.4. On `error` → run it too, since a failed
+   refactor can leave dirt like any other step, then log and continue.
+3. **List revision:** revise the remaining slices' test lists from what this
+   slice revealed, or record "List revision: none" in the run summary. The
+   revision is made in the file hosting the item — `runbook.md`, or the
+   `outline.md` or `design.md` routed to `/build` — and its commit takes that
+   file alone: stage it by name and commit with
+   `git commit -- plans/<job>/<hosting file>`, subject
+   `<type>: <job> Item N.M/k — list revision`, so plan-as-executed versus
+   plan-as-written stays a `git diff`. Once that commit lands, run the post-item
+   verification of `SKILL.md` §4.4. "List revision: none" commits nothing and
+   has nothing to verify.
