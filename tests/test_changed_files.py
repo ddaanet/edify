@@ -128,27 +128,16 @@ def test_exempt_paths_committed_in_the_run_are_dropped(tmp_path: Path) -> None:
     ], result.stdout
 
 
-def test_no_item_report_exits_1(tmp_path: Path) -> None:
-    """No committed ``item-*`` report gives ``NO-BASE:``, never ``BASE:``.
-
-    The repo holds job ``j``'s own planning reports (``explore-x.md``,
-    ``outline-review.md``, neither matching ``item-*``), a committed
-    ``item-*`` report for job ``jj`` (``plans/jj/reports/item-1-1.md``), and
-    an **uncommitted** ``plans/j/reports/item-1-1.md`` sitting on disk. KD-1
-    keys on committed history scoped to this job: a derivation that ignores
-    the job or prefix-matches it (``plans/j*``) finds ``jj``'s report, and
-    one matching any committed report regardless of the ``item-*`` name
-    finds ``explore-x.md``, so each prints a ``BASE:``; one that takes the
-    on-disk file as a run in progress has no history to derive from and does
-    not print ``NO-BASE:``.
+def test_git_failure_is_error_not_no_base(tmp_path: Path) -> None:
+    """A git failure exits 2 with ``ERROR:``, never ``NO-BASE:``'s exit 1.
 
     Exit 1 is ``NO-BASE:``'s code, not every failure's. A repo whose root
     commit adds the item report has a report but no parent to take as the
     base: a git failure, exit 2 with ``ERROR:``. A repo with no commit at
     all fails one step earlier, in the ``git log`` query itself, and must
-    give exit 2 too, never the empty result that ``NO-BASE:`` reads. Those
-    checks run first, so an implementation answering ``NO-BASE:`` from
-    either failure branch reds there.
+    give exit 2 too, never the empty result that ``NO-BASE:`` reads. An
+    implementation answering ``NO-BASE:`` from either failure branch reds
+    here.
     """
     unborn = tmp_path / "unborn"
     unborn.mkdir()
@@ -172,6 +161,21 @@ def test_no_item_report_exits_1(tmp_path: Path) -> None:
         "ERROR:",
     ), root_result.stdout + root_result.stderr
 
+
+def test_no_item_report_exits_1(tmp_path: Path) -> None:
+    """No committed ``item-*`` report gives ``NO-BASE:``, never ``BASE:``.
+
+    The repo holds job ``j``'s own planning reports (``explore-x.md``,
+    ``outline-review.md``, neither matching ``item-*``), a committed
+    ``item-*`` report for job ``jj`` (``plans/jj/reports/item-1-1.md``), and
+    an **uncommitted** ``plans/j/reports/item-1-1.md`` sitting on disk. KD-1
+    keys on committed history scoped to this job: a derivation that ignores
+    the job or prefix-matches it (``plans/j*``) finds ``jj``'s report, and
+    one matching any committed report regardless of the ``item-*`` name
+    finds ``explore-x.md``, so each prints a ``BASE:``; one that takes the
+    on-disk file as a run in progress has no history to derive from and does
+    not print ``NO-BASE:``.
+    """
     repo = _init_repo(tmp_path)
     _commit(repo, "other job item", {"plans/jj/reports/item-1-1.md": "o\n"})
     _commit(

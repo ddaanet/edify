@@ -1,9 +1,14 @@
 """Exemption-pattern tests for ``plugin/skills/build/scripts/verify-step.sh``.
 
 KD-7 in ``plans/build-defects/outline.md``: any change is dirt except three
-paths dirty by convention — `` M memory``, ``.claude/handoff-*.md`` and
-``inbox/*.md`` — under a status taken with ``--untracked-files=all``. See
-``tests/verify_step_helpers.py`` for the shared fixtures.
+paths dirty by convention, under a status taken with
+``--untracked-files=all``. D-91 exempts ``memory``, ``.claude/handoff-*.md``
+and ``inbox/*.md`` (each ``*`` one path component) in any porcelain state but
+a rename or copy, which fails closed as dirt.
+
+Split from ``tests/test_verify_step.py``, which keeps the fail-closed tests,
+to keep each module under its line cap. See ``tests/verify_step_helpers.py``
+for the shared fixtures.
 """
 
 from pathlib import Path

@@ -1,7 +1,8 @@
 """Fail-closed tests for ``plugin/skills/build/scripts/verify-step.sh``.
 
-The exemption-pattern tests live in ``tests/test_verify_step_exemption.py``;
-see ``tests/verify_step_helpers.py`` for the shared fixtures.
+The exemption-pattern tests live in ``tests/test_verify_step_exemption.py``,
+split out to keep each module under its line cap; see
+``tests/verify_step_helpers.py`` for the shared fixtures.
 """
 
 import os
