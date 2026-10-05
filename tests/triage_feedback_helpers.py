@@ -91,6 +91,14 @@ def _triage_lines(job: str, cwd: Path) -> list[str]:
     return result.stdout.splitlines()
 
 
+def _verdict(lines: list[str]) -> str:
+    """Return the line after ``## Verdict``, or an empty string if absent."""
+    if "## Verdict" not in lines:
+        return ""
+    following = lines[lines.index("## Verdict") + 1 :]
+    return following[0] if following else ""
+
+
 def _def_edits_pending(repo: Path) -> None:
     """Leave a ``def`` uncommitted in two tracked files.
 

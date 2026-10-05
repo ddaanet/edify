@@ -39,20 +39,38 @@ if [[ -n $changed_list ]]; then
     files_changed=$(printf '%s\n' "$changed_list" | wc -l | tr -d ' ')
 fi
 
-# Count report files in plans/$job_dir/reports/
-# Exclude pre-execution artifacts: design-review*, outline-review*, recall-*
-# Exclude review-gate and closing-review reports too: review.md, review-*.md,
-# final-review.md (KD-3). They record review, not execution; review_artifact
-# below reports the review gate's presence separately.
-# One byte per file, not `wc -l`: a newline in a filename would overcount.
-reports_count=0
+# D-90: Reports counts what the run committed beyond the one report every
+# item leaves: the paths directly under `plans/<job>/reports/` that
+# `<base> HEAD` adds, minus the per-item `item-<N>-<M>.md` and the
+# review-gate reports (`review.md`, `review-*.md`, `final-review.md`). Slice,
+# refactor and phase-boundary reports count; planning reports committed
+# before the base fall outside the range. `review_artifact` below reports
+# the review gate's presence separately. `:(glob)` keeps `*` inside one path
+# component, so a report below `reports/` is not "directly under" it;
+# `--no-renames` reads a rename as an addition. Paths come one per line, so a
+# path holding a newline counts as two, the residual bound of the line
+# format; `core.quotepath=off` keeps non-ASCII names unquoted. Captured
+# before the loop so a failing `git diff` is seen, not read as "none".
 reports_dir="plans/$job_dir/reports"
-if [[ -d "$reports_dir" ]]; then
-    reports_count=$(find "$reports_dir" -maxdepth 1 -type f \
-        ! -name "design-review*" ! -name "outline-review*" ! -name "recall-*" \
-        ! -name "review.md" ! -name "review-*.md" ! -name "final-review.md" \
-        -exec printf x \; | wc -c | tr -d ' ')
+if ! added_reports=$(git -c core.quotepath=off diff --name-only --no-renames \
+    --no-color --no-ext-diff --diff-filter=A "$baseline_commit" HEAD -- \
+    ":(glob)$reports_dir/*"); then
+    echo "ERROR: git diff failed"
+    exit 2
 fi
+item_report_re='^item-[0-9]+-[0-9]+\.md$'
+reports_count=0
+while IFS= read -r report_path; do
+    [[ -n $report_path ]] || continue
+    report_name=${report_path##*/}
+    if [[ $report_name =~ $item_report_re ]]; then
+        continue
+    fi
+    case "$report_name" in
+        review.md | review-*.md | final-review.md) continue ;;
+    esac
+    reports_count=$((reports_count + 1))
+done <<< "$added_reports"
 
 # Detect behavioral code: new definitions in the committed diff from baseline
 # to HEAD. Anchored after the `+` so a commented-out line does not

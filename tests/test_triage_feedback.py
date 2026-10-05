@@ -17,6 +17,7 @@ from tests.triage_feedback_helpers import (
     _run_git,
     _run_triage,
     _triage_lines,
+    _verdict,
 )
 
 
@@ -52,6 +53,73 @@ def test_files_changed_is_the_review_gates_list(tmp_path: Path) -> None:
         result.stdout + result.stderr
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_reports_exclude_the_per_item_report(tmp_path: Path) -> None:
+    """Reports counts what the run committed beyond the item report (D-90).
+
+    Planning reports, ``runbook-review.md`` and ``explore-x.md``, are
+    committed before the base and fall outside the ``<base> HEAD`` range; an
+    on-disk count reads them. One run commit adds ``item-1-1.md`` and a plain
+    ``notes.txt``. Another adds ``item-1-12.md``, which a single-digit
+    ``item-[0-9]-[0-9].md`` would count, revises ``runbook-review.md``, which
+    a count of every touched path would read, and adds
+    ``explore/notes.md``, below the reports directory, which a pathspec
+    without ``:(glob)`` would match. A third adds the review-gate report
+    ``review-code.md``. None counts, so a Simple run reads ``match`` (0
+    reports, no definitions) and a Complex one, at one changed file,
+    ``overclassified``. A later commit adds the slice report
+    ``item-1-1-s1-code-review.md``, which is not the per-item
+    ``item-<N>-<M>.md`` and counts: 1 report, so Simple reads
+    ``underclassified``.
+
+    ``classification.md`` is committed with the planning reports, as a plan
+    leaves it, and the Complex and Simple relabels are on-disk edits only:
+    triage reads the file from disk, and an uncommitted edit leaves the
+    ``<base> HEAD`` range alone.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    classification = repo / "plans" / JOB / "classification.md"
+    _commit(
+        repo,
+        "planning",
+        {
+            f"plans/{JOB}/reports/runbook-review.md": "ok\n",
+            f"plans/{JOB}/reports/explore-x.md": "notes\n",
+            f"plans/{JOB}/classification.md": "- **Classification:** Simple\n",
+        },
+    )
+    _commit_item_report(repo, {"notes.txt": "plain text\n"})
+    _commit(
+        repo,
+        "run: item 1.12",
+        {
+            f"plans/{JOB}/reports/item-1-12.md": "item report\n",
+            f"plans/{JOB}/reports/runbook-review.md": "ok, revisited\n",
+            f"plans/{JOB}/reports/explore/notes.md": "notes\n",
+        },
+    )
+    _commit(repo, "run: review", {f"plans/{JOB}/reports/review-code.md": "ok\n"})
+
+    lines = _triage_lines(JOB, repo)
+    assert "- Reports: 0" in lines, "\n".join(lines)
+    assert "- Behavioral code: no" in lines, "\n".join(lines)
+    assert _verdict(lines) == "match", "\n".join(lines)
+
+    classification.write_text("- **Classification:** Complex\n", encoding="utf-8")
+    lines = _triage_lines(JOB, repo)
+    assert _verdict(lines) == "overclassified", "\n".join(lines)
+
+    classification.write_text("- **Classification:** Simple\n", encoding="utf-8")
+    _commit(
+        repo,
+        "run: slice review",
+        {f"plans/{JOB}/reports/item-1-1-s1-code-review.md": "ok\n"},
+    )
+    lines = _triage_lines(JOB, repo)
+    assert "- Reports: 1" in lines, "\n".join(lines)
+    assert _verdict(lines) == "underclassified", "\n".join(lines)
 
 
 def test_files_changed_counts_committed_changes_only(tmp_path: Path) -> None:
