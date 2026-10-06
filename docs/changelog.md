@@ -12,6 +12,8 @@ place by answering a question a future reader would otherwise ask of
 Each entry below is the write-time record of how it got that way, one file per
 entry in `docs/changelog/`.
 
+- **2026-10-06** —
+  [triage measures the review gate's set; a committed failed fix no longer reverts by default](changelog/2026-10-06-triage-measures-the-review-gates-set.md)
 - **2026-10-03** —
   [`/build` reads its run state from report history; dirt is finished, not reverted](changelog/2026-10-03-build-reads-run-state-from-report-history.md)
 - **2026-09-21** —
