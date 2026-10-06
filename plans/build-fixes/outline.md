@@ -195,8 +195,11 @@ history (KD-1, KD-2). The commit-msg hook rewrites only the type prefix.
 
 ## Items
 
-- Item 1.1: `tests/test_verify_step.py` — pin the exemption's porcelain states
-  and its single-level globs. Requirements: Major 6, F-4. The script already
+- Item 1.1: `tests/test_verify_step_exemption.py` — pin the exemption's
+  porcelain states and its single-level globs. Requirements: Major 6, F-4. The
+  tests landed in that module, split from `tests/test_verify_step.py` to keep
+  each under its line cap (revised after the fact by
+  `plans/review-fixes-2/` Item 3.4). The script already
   behaves, so each slice's RED is a mutation red. The mutant is a copy of the
   script with the test module's `SCRIPT` rebound. The tracked file is never
   reverted. Fixtures are the module's existing `_init_repo` and `_stub_just`.
@@ -236,7 +239,9 @@ history (KD-1, KD-2). The commit-msg hook rewrites only the type prefix.
 
   Interfaces:
   - `changed-files.sh <job> [--phase]` → exit 0: `BASE: <sha>`, then one path
-    per line. Exit 1: `NO-BASE:`. Exit 2: `ERROR:` on usage or git failure.
+    per line. Exit 1: `NO-BASE:`, for a repo with commits and no committed
+    item report. Exit 2: `ERROR:` on usage or git failure, an unborn `HEAD`
+    included (revised after the fact by `plans/review-fixes-2/` Item 3.4).
     Paths are read from a NUL-delimited diff, never split on whitespace.
     `--phase` takes the phase base (Item 1.4).
   - `verify-step.sh` → unchanged verdicts, its exempt pattern composed from
@@ -258,8 +263,10 @@ history (KD-1, KD-2). The commit-msg hook rewrites only the type prefix.
   `plans/<job>/reports/phase-*-corrector.md` (KD-2's path rule, never the commit
   subject, per KD-8). If no commit matches, the base is the run base (KD-1). It
   prints `BASE: <that sha>` and the same filtered list since that base. Without
-  `--phase` nothing changes. The tests go in `tests/test_changed_files.py`, and
-  slice 4's in the `verify-step.sh` tests. Slices:
+  `--phase` nothing changes. Slices 1–3's tests landed in
+  `tests/test_changed_files_phase.py`, split from `tests/test_changed_files.py`
+  to keep each under its line cap, and slice 4's in `tests/test_verify_step.py`
+  (revised after the fact by `plans/review-fixes-2/` Item 3.4). Slices:
   1. `test_phase_without_boundary_gives_run_base` — no boundary landed, so
      `--phase` gives the run base.
   2. One boundary landed: the base is that boundary commit, and only later files
