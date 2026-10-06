@@ -96,7 +96,8 @@ Argued in `docs/references/build-run-state.md`.
 - **D-89** — A phase boundary has landed when the run holds a commit touching
   its corrector report.
 - **D-90** — A changed-files list is the committed diff since the base, minus
-  the exempt paths and the job's own record, and one script produces it.
+  the exempt paths and the job's own record, and one script produces it, for the
+  phase boundary, the review gate and triage alike.
 - **D-91** — Any change is dirt, except three paths dirty by convention.
 - **D-92** — Dirt is unfinished work to examine and finish; nothing reverts by
   default.
@@ -106,10 +107,11 @@ Argued in `docs/references/build-run-state.md`.
 *Rejected:* a baseline file, `tmp/build-baseline-<job>`, for the run's base;
 commit subjects as the resume or boundary key; a committed start marker; a
 stored phase base, or `HEAD~N`; the changed-files query and the exempt regex
-spelled out in prose at each site; filtering or gitignoring the sandbox-mask
-names; reverting dirt by default; a `verify-step.sh --revert` mode; a listing
-token guarding the revert; a mechanical item scope for dirt; a new review group
-per file kind; `edify:design-corrector` as the design-graph reviewer.
+spelled out in prose at each site; triage keeping a base argument and filtering
+the raw diff itself; filtering or gitignoring the sandbox-mask names; reverting
+dirt by default; a `verify-step.sh --revert` mode; a listing token guarding the
+revert; a mechanical item scope for dirt; a new review group per file kind;
+`edify:design-corrector` as the design-graph reviewer.
 
 ## Execution routing
 

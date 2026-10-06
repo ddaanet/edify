@@ -62,22 +62,40 @@ uncommitted is finished when complete and rerun when partial, because the
 corrector writes its report before it applies any fix.
 
 **D-90 — A changed-files list is the committed diff since the base, minus the
-exempt paths and the job's own record, and one script produces it.**
+exempt paths and the job's own record, and one script produces it, for the phase
+boundary, the review gate and triage alike.**
 `plugin/skills/build/scripts/changed-files.sh <job>` derives the run base
 (D-88), prints `BASE: <sha>`, then the `<base> HEAD` diff with the D-91 exempt
-paths and `plans/<job>/` removed; with no committed item report it exits 1 with
-`NO-BASE:`, and `--phase` takes the phase base instead (D-89). The `HEAD` form
+paths and `plans/<job>/` removed, and `--phase` takes the phase base instead
+(D-89). In a repo with commits and no committed item report it exits 1 with
+`NO-BASE:`. A usage error or a git failure exits 2 with `ERROR:`, and an unborn
+`HEAD` is a git failure, so it exits 2 too, never `NO-BASE:`. The `HEAD` form
 keeps uncommitted exempt dirt out, but not the exempt paths a `/handoff` or
 memory-pointer commit lands during the run; those are not the run's work, so the
 list drops them by name, as `verify-step.sh` does. `plans/<job>/` goes too: the
 run's reports and `runbook.md` list revisions are its record, not its
 implementation. The exempt alternation lives in one sourced file,
 `exempt-paths.sh`, which both scripts read. Every site that needs the list or
-the base calls the script: the phase boundary, the review gate, and triage,
-which takes the script's `BASE:` as its argument and whose two diffs take the
-same `<base> HEAD` form. The working-tree form, `git diff --name-only <base>`,
-stays for uncommitted work — `/review`, and the `/build` §4.1 corrector that
-reviews an item before its one commit.
+the base calls the script. Triage, `plugin/bin/triage-feedback.sh <job>`, takes
+no base: it runs the script itself and counts its list, so its evidence is the
+set the review gate reviewed. Files changed is the length of the list, and
+behavioural code is read from the `<base> HEAD` diff of those paths only, given
+as literal pathspecs. Its report count looks past the list, which drops the
+job's record: it counts the reports `<base> HEAD` adds directly under
+`plans/<job>/reports/`, excluding the `item-<N>-<M>.md` report every item leaves
+and the review reports (`review.md`, `review-*.md`, `final-review.md`). Slice,
+refactor and phase-boundary reports count, and planning reports committed before
+the base fall outside the range. A `NO-BASE:` or `ERROR:` from the script stops
+triage with exit 2 and no log row. The working-tree form,
+`git diff --name-only <base>`, stays for uncommitted work — `/review`, and the
+`/build` §4.1 corrector that reviews an item before its one commit.
+
+**Limitation:** the base query and the `<base> HEAD` range read the job branch
+as linear. A merge of `main` into the job branch, or another session committing
+on the branch, puts commits that are not the run's into the range, and their
+paths into the list. A report added only in a merge commit is invisible to the
+base query, which then gives `NO-BASE:` (probed on git 2.47.3). How often either
+happens is unmeasured.
 
 **D-91 — Any change is dirt, except three paths dirty by convention.**
 `verify-step.sh` is `/build`'s one definition of a clean tree, at the entry gate
@@ -95,9 +113,11 @@ committing step, dispatch or orchestrator, stages its paths by name, never
 `git add -A`, and commits with `git commit -- <paths>`, so exempt dirt never
 enters a commit even when already staged. A rename or copy line fails closed as
 DIRTY even when both sides are exempt, since `old -> new` is two paths that one
-match cannot judge. A listing the `sandbox-lies` hook annotates as sandbox masks
-is re-run once, not remediated: masks reach an unsandboxed reader while a
-sandboxed Bash call runs concurrently.
+match cannot judge. A listing annotated as sandbox masks is re-run once, not
+remediated: masks reach an unsandboxed reader while a sandboxed Bash call runs
+concurrently. The annotation comes from the `phantom-untracked` detector of the
+optional `sandbox-lies` plugin's Bash hook. Without that plugin no listing is
+annotated, so the re-run never fires, and a masked listing reads as dirt.
 
 **D-92 — Dirt is unfinished work to examine and finish; nothing reverts by
 default.** The gate held the tree clean before an item, so non-exempt dirt after
@@ -113,26 +133,34 @@ A tdd slice's implementation-side dirt escalates unless its RED and test-review
 reports are on disk, because RED's proof needs unchanged code. My human partner
 decides escalated dirt path by path, and a path decided for revert is reverted
 in session by one call,
-`git restore --source=HEAD --staged --worktree -- <paths> && rm -- <untracked paths>`,
+`git restore --source=HEAD --staged --worktree -- <tracked or indexed paths> && rm -- <untracked paths>`,
 dropping either half that has no paths, since both commands error on an empty
-operand list; the orchestrator never cleans up on its own judgement.
+operand list; the orchestrator never cleans up on its own judgement. A failed
+fix already committed is not reverted by default either. It escalates to my
+human partner with the commits since the last clean commit before the failed
+item and what the attempt found. Only the commits they decide to revert are
+reverted: newest first, each with `git revert --no-commit <sha>`, then the
+reverted paths committed by name, subject
+`<type>: <job> Item N.M[/k] — revert failed fix`; never `git reset`, which
+discards history (`escalation-acceptance.md` §Rollback protocol).
 
 **D-93 — Review-gate groups are four fixed rows, with fixed slugs.** The
 `/build` review gate routes implementation files only; planning artifacts route
 by artifact (D-26). Its groups, which are also its dispatch names, are
 `review-code` (code and tests, and the default for any file kind no row names),
-`review-skill` (skill definitions and the agent-instruction prose they load: a
-skill's `references/` nodes and any shared instruction file kept outside a
-skill), `review-agent` (agent definitions) and `review-design` (the living
-design graph under `docs/`). A file kind is always classed into an existing row,
-never a new group, by the one rule in `dispatch-composition.md` §Naming and
-resumption. `review-design` goes to `edify:corrector` with
-`craft:design-doc-writing` named as its criteria source, as the agent row names
-`plugin-dev:agent-development`, and the report notes the fallback when `craft`
-is absent. *Grounding:* a free one-word slug per routed group did not determine
-the names; one run produced `review-code`, `review-skill`, `review-agents` and
-`review-fragments`, mixing singular and plural and minting a group the routing
-table does not have.
+`review-skill` (skill definitions and the agent-instruction prose they load,
+meaning their `references/` nodes and the shared instruction files a skill loads
+from outside itself. An instruction file no skill loads, such as `CLAUDE.md` or
+`.claude/rules/*.md`, matches no row and takes the `review-code` default),
+`review-agent` (agent definitions) and `review-design` (the living design graph
+under `docs/`). A file kind is always classed into an existing row, never a new
+group, by the one rule in `dispatch-composition.md` §Naming and resumption.
+`review-design` goes to `edify:corrector` with `craft:design-doc-writing` named
+as its criteria source, as the agent row names `plugin-dev:agent-development`,
+and the report notes the fallback when `craft` is absent. *Grounding:* a free
+one-word slug per routed group did not determine the names; one run produced
+`review-code`, `review-skill`, `review-agents` and `review-fragments`, mixing
+singular and plural and minting a group the routing table does not have.
 
 **D-94 — `/build` commit subjects name the job, and are labels only.** Every
 `/build` commit takes one of four subjects:
@@ -162,6 +190,10 @@ slices and review commits (D-89).
 
 **The changed-files query and the exempt regex spelled out in prose at each
 site** — four sites, and a prose copy of a script's regex drifts (D-90).
+
+**Triage keeping a base argument and filtering the raw diff itself** — a second
+copy of the list's filters, which drifts from the script's as a prose copy does
+(D-90).
 
 **Filtering or gitignoring the sandbox-mask names** — a filter hides real files
 sharing the masked names, and those `.claude/` names are legitimately versioned
