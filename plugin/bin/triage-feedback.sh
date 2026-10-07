@@ -15,7 +15,9 @@ case "${BASH_SOURCE[0]}" in
     *) script_dir="." ;;
 esac
 # Absolute before the change of directory below, which would break a relative
-# path.
+# path. CDPATH is unset first: it would send `cd` to a matching directory
+# elsewhere and print the destination into the capture.
+unset CDPATH
 script_dir=$(cd "$script_dir" && pwd)
 
 # D-90: every pathspec, `classification.md`, `reports_dir` and the log path are
@@ -72,6 +74,8 @@ if ! reports_count=$(git diff --name-only --no-renames -z --diff-filter=A \
         if [[ $report_name =~ $item_report_re ]]; then
             continue
         fi
+        # The leading `(`: inside `$(…)`, bash 3.2 reads a bare pattern's `)`
+        # as the end of the substitution.
         case "$report_name" in
             (review.md | review-*.md | final-review.md | tdd-audit.md)
                 continue ;;
