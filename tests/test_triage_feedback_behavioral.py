@@ -5,12 +5,14 @@ Behavioral code runs the definition patterns over the committed
 
 Split from ``tests/test_triage_feedback.py``, which keeps the files-changed,
 reports and classification tests, to keep each module under its line cap. The
-failure arms are in ``tests/test_triage_feedback_failures.py``. See
+failure arms, apart from a failing definition grep and a failing diff, are in
+``tests/test_triage_feedback_failures.py``. See
 ``tests/triage_feedback_helpers.py`` for the shared fixtures.
 """
 
 from pathlib import Path
 
+from tests.changed_files_helpers import _write_shim
 from tests.triage_feedback_helpers import (
     JOB,
     _commit,
@@ -177,3 +179,44 @@ def test_early_match_in_a_large_diff_is_not_an_error(tmp_path: Path) -> None:
         result.stdout + result.stderr
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_failing_definition_grep_is_an_error_not_no(tmp_path: Path) -> None:
+    """A definition grep that fails stops the script, never reading ``no``.
+
+    The run holds ``a.py`` with a ``def`` under a ``Simple`` classification.
+    The ``grep`` shim acts on the one call that carries ``-qE``, the
+    definition match. It runs the real ``grep``, which finds the ``def``, then
+    exits 2: only the status carries the failure. A script that read that
+    status as "no", or as a match, would carry on to a verdict and log a row.
+    The classification grep takes ``-E`` alone and passes through. The failure
+    exits 2 with the one ``ERROR:`` line on stdout and logs no row.
+    """
+    bin_dir = _write_shim(
+        tmp_path,
+        "grep",
+        'for arg in "$@"; do\n'
+        '    if [ "$arg" = -qE ]; then\n'
+        '        "$real" "$@"\n'
+        '        echo "shim: fail" >&2\n'
+        "        exit 2\n"
+        "    fi\n"
+        "done\n"
+        'exec "$real" "$@"\n',
+    )
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    _commit_item_report(
+        repo,
+        {
+            f"plans/{JOB}/classification.md": "- **Classification:** Simple\n",
+            "a.py": "def foo():\n    pass\n",
+        },
+    )
+
+    result = _run_triage(JOB, repo, path_prepend=bin_dir)
+    output = result.stdout + result.stderr
+    assert result.stdout.splitlines() == ["ERROR: grep failed"], output
+    assert "shim: fail" in result.stderr, output
+    assert result.returncode == 2, output
+    assert not (repo / "plans" / "reports" / "triage-feedback-log.md").exists()

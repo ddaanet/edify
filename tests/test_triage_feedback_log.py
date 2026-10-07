@@ -149,7 +149,7 @@ def test_unreadable_log_is_an_error_and_appends_nothing(tmp_path: Path) -> None:
     assert log.read_text(encoding="utf-8") == logged
 
 
-@pytest.mark.parametrize("unwritable", ["header", "row"])
+@pytest.mark.parametrize("unwritable", ["header", "row", "directory"])
 def test_unwritable_log_is_an_error_not_a_usage_exit(
     tmp_path: Path, unwritable: str
 ) -> None:
@@ -159,7 +159,12 @@ def test_unwritable_log_is_an_error_not_a_usage_exit(
     exits 1, so an unguarded write reads as a usage error. ``header``: the
     log is absent and ``plans/reports/`` is read-only, so the header write
     fails. ``row``: the log holds the header alone and is read-only, so the
-    duplicate check reads it and the row append fails.
+    duplicate check reads it and the row append fails. ``directory``:
+    ``plans/`` is read-only and holds no ``reports/``, so ``mkdir -p`` fails.
+    The error follows the verdict once, as the run's last stdout line. Past
+    an unguarded ``mkdir`` the header write fails on the same path with the
+    same line, so stderr is pinned too: ``mkdir``'s diagnostic, and no shell
+    error naming the log, shows the run stopped at the directory.
     """
     if os.geteuid() == 0:
         pytest.skip("root ignores file permissions; chmod has no effect")
@@ -168,7 +173,10 @@ def test_unwritable_log_is_an_error_not_a_usage_exit(
     _commit_reports_fixture(repo)
     log_dir = repo / "plans" / "reports"
     log = log_dir / "triage-feedback-log.md"
-    log_dir.mkdir(parents=True)
+    if unwritable == "directory":
+        log_dir.parent.chmod(0o555)
+    else:
+        log_dir.mkdir(parents=True)
     if unwritable == "row":
         log.write_text(
             "| Date | Job | Predicted | Files Changed | Reports | Behavioral Code"
@@ -176,18 +184,24 @@ def test_unwritable_log_is_an_error_not_a_usage_exit(
             encoding="utf-8",
         )
         log.chmod(0o400)
-    else:
+    elif unwritable == "header":
         log_dir.chmod(0o500)
     try:
         result = _run_triage(JOB, repo)
     finally:
-        log_dir.chmod(0o755)
+        log_dir.parent.chmod(0o755)
+        if log_dir.exists():
+            log_dir.chmod(0o755)
         if log.exists():
             log.chmod(0o644)
 
-    assert f"ERROR: cannot write {log.relative_to(repo)}" in result.stdout, (
-        result.stdout + result.stderr
-    )
+    error = f"ERROR: cannot write {log.relative_to(repo)}"
+    assert error in result.stdout, result.stdout + result.stderr
+    if unwritable == "directory":
+        tail = result.stdout.splitlines()[-3:]
+        assert tail == ["## Verdict", "match", error], result.stdout
+        assert "Permission denied" in result.stderr, result.stderr
+        assert log.name not in result.stderr, result.stderr
     assert result.returncode == 2, result.stdout + result.stderr
 
 
