@@ -380,6 +380,11 @@ cite D-numbers, never an outline's KD.
   - Scanned files: those five, plus
     `plugin/skills/build/references/finishing.md`. Its commands already
     carry the flag and stay pinned as regressions.
+  - List revision after 2.4/1: the code review found a seventh site,
+    D-86's query block in `docs/references/pipeline-contracts.md`, the
+    same slice-commit query `tdd-slice.md` runs. It added the flag there
+    and the file to the test's scanned set, proven by mutation. KD-7's
+    site list above is plan-as-written and stays.
   - Slices:
     1. `test_read_git_log_commands_print_hashes_only_on_signed_history`,
        parametrized over the extracted commands, with ids `<file>:<n>`.
