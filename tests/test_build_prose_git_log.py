@@ -45,6 +45,7 @@ SCANNED = (
     "plugin/skills/build/references/escalation.md",
     "plugin/agents/tdd-auditor.md",
     "docs/references/build-run-state.md",
+    "docs/references/pipeline-contracts.md",
     "plugin/skills/build/references/finishing.md",
 )
 

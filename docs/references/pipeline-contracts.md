@@ -256,7 +256,7 @@ slice commit is resolved mechanically instead, from the commit that **adds** the
 report:
 
 ```bash
-git log --diff-filter=A --format=%H \
+git log --diff-filter=A --no-show-signature --format=%H \
     -- plans/<job>/reports/item-N-M-s<k>-green.md
 ```
 
