@@ -1,8 +1,10 @@
 """Contract tests for the log ``plugin/bin/triage-feedback.sh`` appends to.
 
 The log, ``plans/reports/triage-feedback-log.md``, holds one row per
-evidence: a run is skipped when the log already holds a row equal to the new
-one in every column but the date, and a re-run on new evidence still appends.
+evidence: the append is skipped when the log already holds a row equal to the
+new one in every column but the date, and a re-run on new evidence still
+appends. The run itself is not skipped: it still prints its evidence and
+verdict.
 
 Split from ``tests/test_triage_feedback.py``, which keeps the evidence and
 verdict tests, to keep each module under its line cap. See

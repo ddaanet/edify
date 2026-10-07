@@ -4,7 +4,8 @@ Behavioral code runs the definition patterns over the committed
 ``<base> HEAD`` diff, limited to the paths of the review gate's list (D-90).
 
 Split from ``tests/test_triage_feedback.py``, which keeps the files-changed,
-reports and failure tests, to keep each module under its line cap. See
+reports and classification tests, to keep each module under its line cap. The
+failure arms are in ``tests/test_triage_feedback_failures.py``. See
 ``tests/triage_feedback_helpers.py`` for the shared fixtures.
 """
 

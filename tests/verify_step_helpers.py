@@ -2,7 +2,7 @@
 
 Each test builds a throwaway git repo under ``tmp_path`` and runs the script
 by absolute path with CWD at the repo root, following the subprocess-run
-pattern in ``tests/test_triage_feedback.py``.
+pattern in ``tests/triage_feedback_helpers.py``.
 """
 
 import os
