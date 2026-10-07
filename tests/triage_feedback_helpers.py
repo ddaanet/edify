@@ -2,7 +2,8 @@
 
 Each test builds a throwaway git repo under ``tmp_path`` and runs the script
 by absolute path with CWD at the repo root, following the subprocess-run
-pattern in ``tests/review_range_helpers.py``. The script takes the job name
+pattern in ``tests/review_range_helpers.py``; ``_run_triage_relative`` runs
+it by a relative path from a subdirectory instead. The script takes the job name
 only: its base is the parent of the commit that first added a
 ``plans/<job>/reports/item-*`` report (D-88), so every fixture commits one.
 """
@@ -120,6 +121,32 @@ def _run_triage(
         env["PATH"] = f"{path_prepend}{os.pathsep}{env.get('PATH', '')}"
     return subprocess.run(
         [str(SCRIPT), job],
+        cwd=cwd,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def _run_triage_relative(
+    job: str, cwd: Path, link_dir: Path
+) -> subprocess.CompletedProcess[str]:
+    """Run triage-feedback.sh by a short path relative to ``cwd``.
+
+    ``link_dir/plugin`` is made a symlink to the real ``plugin`` directory and
+    the script is run through it, so it sees a relative ``BASH_SOURCE`` that a
+    change of directory breaks if the script did not resolve it first. The
+    relative path to the real script climbs to ``/``, where surplus ``..``
+    are absorbed, so it would resolve from any directory of the fixture.
+    """
+    link = link_dir / "plugin"
+    link.symlink_to(SCRIPT.parents[1], target_is_directory=True)
+    env = dict(os.environ)
+    env["GIT_CONFIG_GLOBAL"] = os.devnull
+    env["GIT_CONFIG_SYSTEM"] = os.devnull
+    return subprocess.run(
+        [os.path.relpath(link / "bin" / SCRIPT.name, cwd), job],
         cwd=cwd,
         env=env,
         capture_output=True,

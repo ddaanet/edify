@@ -26,6 +26,7 @@ from tests.triage_feedback_helpers import (
     _init_repo,
     _run_git,
     _run_triage,
+    _run_triage_relative,
     _triage_lines,
     _verdict,
 )
@@ -304,3 +305,52 @@ def test_odd_names_and_labels_do_not_derail_triage(tmp_path: Path, case: str) ->
         ), output
         assert not log.exists()
     assert result.returncode == 0, output
+
+
+def test_subdirectory_run_measures_the_repository_root(tmp_path: Path) -> None:
+    """A run from a subdirectory measures the repository root (D-90).
+
+    A committed ``sub/keep.txt`` gives the subdirectory a place in the tree.
+    ``classification.md`` reads ``Simple``; the run commit adds the item
+    report, the slice report ``item-1-1-s1-red.md`` and ``a.py`` holding a
+    ``def``. The script is run by its path relative to ``repo/sub`` with that
+    as CWD, through a ``plugin`` symlink beside ``repo``, so it sees a
+    ``BASH_SOURCE`` of ``../../plugin/bin/...``: resolved after a change to
+    the root it names a missing file and the run exits 2. Measured from the
+    root it reads 1 file, 1 report and behavioural code: ``underclassified``,
+    one log row at the root, none under ``sub``. Measured from ``sub`` every
+    root-relative path misses: 0 reports, no behavioural code and
+    ``no-classification``. The evidence assertions come first so a
+    measurement from the wrong directory fails on what it read.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    _commit(
+        repo,
+        "planning",
+        {
+            "sub/keep.txt": "kept\n",
+            f"plans/{JOB}/classification.md": "- **Classification:** Simple\n",
+        },
+    )
+    _commit_item_report(
+        repo,
+        {
+            f"plans/{JOB}/reports/item-1-1-s1-red.md": "ok\n",
+            "a.py": "def foo():\n    pass\n",
+        },
+    )
+
+    result = _run_triage_relative(JOB, repo / "sub", tmp_path)
+    lines = result.stdout.splitlines()
+    output = result.stdout + result.stderr
+    assert "- Files changed: 1" in lines, output
+    assert "- Reports: 1" in lines, output
+    assert "- Behavioral code: yes" in lines, output
+    assert _verdict(lines) == "underclassified", output
+    assert result.returncode == 0, output
+    log = repo / "plans" / "reports" / "triage-feedback-log.md"
+    assert log.is_file(), output
+    rows = log.read_text(encoding="utf-8").splitlines()[2:]
+    assert len(rows) == 1, "\n".join(rows)
+    assert not (repo / "sub" / "plans").exists()

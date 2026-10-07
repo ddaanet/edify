@@ -14,6 +14,16 @@ case "${BASH_SOURCE[0]}" in
     */*) script_dir="${BASH_SOURCE[0]%/*}" ;;
     *) script_dir="." ;;
 esac
+# Absolute before the change of directory below, which would break a relative
+# path.
+script_dir=$(cd "$script_dir" && pwd)
+
+# D-90: every pathspec, `classification.md`, `reports_dir` and the log path are
+# root-relative, as `changed-files.sh` already is (it reads the same
+# `git rev-parse --show-toplevel`), so a run from any directory in the work tree
+# measures and logs what a run from the root does.
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
 
 # D-90: the review gate and triage count one list, so the list comes from
 # `changed-files.sh` (D-88 base, D-91 exemptions), never a second diff. Its
@@ -63,7 +73,8 @@ if ! reports_count=$(git diff --name-only --no-renames -z --diff-filter=A \
             continue
         fi
         case "$report_name" in
-            review.md | review-*.md | final-review.md | tdd-audit.md) continue ;;
+            (review.md | review-*.md | final-review.md | tdd-audit.md)
+                continue ;;
         esac
         printf x
     done | wc -c | tr -d ' '); then
