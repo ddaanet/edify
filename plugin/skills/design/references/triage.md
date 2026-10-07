@@ -102,8 +102,11 @@ confirm whether behavioral code changes are involved (new functions, changed
 logic paths).
 
 Produce this classification block before routing (visible output, not internal
-reasoning — **per-item if composite**):
-- **Classification:** [Simple / Moderate / Complex / Defect]
+reasoning — **per-item if composite**). A single-item job's block is the whole
+file, and its first line is the job-level line. A composite job opens with one
+job-level `- **Classification:** <label>` line, then one block per item:
+- **Classification:** <label> — exactly one of `Simple`, `Moderate`, `Complex`
+  or `Defect`, with nothing after it
 - **Implementation certainty:** [High / Moderate / Low] — is approach known?
 - **Requirement stability:** [High / Moderate / Low] — are FRs
   mechanism-specified?
@@ -115,6 +118,14 @@ reasoning — **per-item if composite**):
   investigation / ephemeral]
 - **Evidence:** Which criteria and recall entries informed the decision
 
-**Classification persistence (C-2):** Write the filled-in classification block
-to `plans/<job>/classification.md`. This file is consumed by
-`triage-feedback.sh` for post-execution comparison.
+**Classification persistence (C-2):** Write the filled-in block or blocks to
+`plans/<job>/classification.md`. Open the file with one job-level
+`- **Classification:** <label>` line, at the start of its line, before any
+per-item block. Write `<label>` as exactly `Simple`, `Moderate`, `Complex` or
+`Defect`, with nothing after it: `triage-feedback.sh` reads the file's first
+`Classification:` line, and any other value gives `no-classification`, so the
+job's row is lost to calibration. A composite job's label is its most demanding
+item's class, in the order Simple < Moderate < Complex, because triage measures
+the whole run's evidence against that one label. `Defect` is the job-level label
+only when every item is a Defect. No calibration data backs this ordering yet;
+the triage log is where it will come from, once composite jobs have logged rows.
