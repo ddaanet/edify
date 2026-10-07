@@ -31,11 +31,11 @@ script_dir=$(cd "$script_dir" && pwd)
 status=0
 repo_root=$(git rev-parse --show-toplevel) || status=$?
 if [[ $status -ne 0 ]]; then
-    echo "ERROR: not inside a git work tree"
+    echo "ERROR: git rev-parse --show-toplevel failed"
     exit 2
 fi
-# Residual bound: this `cd` failing after a successful `rev-parse` is the one
-# arm with no test; no input provokes it without fault injection.
+# Residual bound: this `cd` failing after a successful `rev-parse` has no
+# test; no input provokes it without fault injection.
 if ! cd "$repo_root"; then
     echo "ERROR: cannot change to $repo_root"
     exit 2
