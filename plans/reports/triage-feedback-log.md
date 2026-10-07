@@ -10,3 +10,4 @@
 | 2026-09-20 | provenance-enforcement-and-routing | Simple / Moderate agentic-prose (one route) | 102 | 37 | yes | match |
 | 2026-09-26 | build-defects | Moderate | 54 | 28 | yes | match |
 | 2026-10-03 | build-fixes | Moderate | 99 | 62 | yes | match |
+| 2026-10-07 | review-fixes-2 | Moderate | 33 | 45 | yes | match |
