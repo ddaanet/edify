@@ -54,7 +54,7 @@ RED, test review and GREEN — staged by name, never by a blanket add. So the
 GREEN report names no hash, and the slice commit is the commit that adds it:
 
 ```bash
-git log --diff-filter=A --format=%H \
+git log --diff-filter=A --no-show-signature --format=%H \
     -- plans/<job>/reports/item-N-M-s<k>-green.md
 ```
 

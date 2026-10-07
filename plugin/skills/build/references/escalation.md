@@ -102,14 +102,14 @@ says.
 
 1. **Inventory from report history**, never from commit subjects, which are
    labels only. An item has landed when the commit carrying its report has:
-   `git log --format=%H -- plans/<job>/reports/<name>.md` prints a hash, for the
-   dispatch names of `references/dispatch-composition.md` §Naming and resumption
-   — `item-N-M` for an item; for a tdd slice, `item-N-M-s<k>-green` (its GREEN
-   commit) and `item-N-M-s<k>-code-review` (its code-review commit), and, where
-   that code-review report flags a refactoring, `item-N-M-s<k>-refactor` (its
-   refactoring commit). Phase P's boundary has landed as
-   `references/phase-boundary.md` resolves it. For each phase whose items have
-   all landed but whose boundary has not:
+   `git log --no-show-signature --format=%H -- plans/<job>/reports/<name>.md`
+   prints a hash, for the dispatch names of `references/dispatch-composition.md`
+   §Naming and resumption — `item-N-M` for an item; for a tdd slice,
+   `item-N-M-s<k>-green` (its GREEN commit) and `item-N-M-s<k>-code-review` (its
+   code-review commit), and, where that code-review report flags a refactoring,
+   `item-N-M-s<k>-refactor` (its refactoring commit). Phase P's boundary has
+   landed as `references/phase-boundary.md` resolves it. For each phase whose
+   items have all landed but whose boundary has not:
    - **`phase-<P>-corrector.md` is absent** → the boundary review has not run.
      Run `references/phase-boundary.md` for P before phase P+1's first item.
    - **The report is present, uncommitted and complete** → inspect the source to

@@ -25,7 +25,7 @@ cost of resume granularity, since a kill mid-item re-runs the whole item. The
 run's base is the parent of the earliest commit adding an item report:
 
 ```bash
-git log --no-renames --diff-filter=A --reverse --format=%H \
+git log --no-renames --diff-filter=A --reverse --no-show-signature --format=%H \
     -- ':(glob)plans/<job>/reports/item-*'
 ```
 
@@ -43,7 +43,7 @@ and goes to finishing.
 corrector report.** Phase P has landed when
 
 ```bash
-git log -1 --format=%H <run base>..HEAD \
+git log -1 --no-show-signature --format=%H <run base>..HEAD \
     -- plans/<job>/reports/phase-<P>-corrector.md
 ```
 

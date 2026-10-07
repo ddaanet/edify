@@ -28,7 +28,7 @@ does: `--phase` reads boundaries from report history by the rule for when one
 has landed. Phase P has landed when
 
 ```bash
-git log -1 --format=%H <run base>..HEAD \
+git log -1 --no-show-signature --format=%H <run base>..HEAD \
     -- plans/<job>/reports/phase-<P>-corrector.md
 ```
 
