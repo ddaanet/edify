@@ -163,8 +163,11 @@ def test_unwritable_log_is_an_error_not_a_usage_exit(
     ``plans/`` is read-only and holds no ``reports/``, so ``mkdir -p`` fails.
     The error follows the verdict once, as the run's last stdout line. Past
     an unguarded ``mkdir`` the header write fails on the same path with the
-    same line, so stderr is pinned too: ``mkdir``'s diagnostic, and no shell
-    error naming the log, shows the run stopped at the directory.
+    same line, so stderr is pinned too: ``mkdir``'s diagnostic, naming
+    ``plans/reports``, and no shell error naming the log, shows the run
+    stopped at the directory. Only the path is asserted: the wording is
+    localised, and BSD ``mkdir -p`` naming the whole operand is unverified on
+    macOS.
     """
     if os.geteuid() == 0:
         pytest.skip("root ignores file permissions; chmod has no effect")
@@ -175,16 +178,16 @@ def test_unwritable_log_is_an_error_not_a_usage_exit(
     log = log_dir / "triage-feedback-log.md"
     if unwritable == "directory":
         log_dir.parent.chmod(0o555)
-    else:
+    elif unwritable == "row":
         log_dir.mkdir(parents=True)
-    if unwritable == "row":
         log.write_text(
             "| Date | Job | Predicted | Files Changed | Reports | Behavioral Code"
             " | Verdict |\n|---|---|---|---|---|---|---|\n",
             encoding="utf-8",
         )
         log.chmod(0o400)
-    elif unwritable == "header":
+    else:
+        log_dir.mkdir(parents=True)
         log_dir.chmod(0o500)
     try:
         result = _run_triage(JOB, repo)
@@ -200,7 +203,7 @@ def test_unwritable_log_is_an_error_not_a_usage_exit(
     if unwritable == "directory":
         tail = result.stdout.splitlines()[-3:]
         assert tail == ["## Verdict", "match", error], result.stdout
-        assert "Permission denied" in result.stderr, result.stderr
+        assert str(log_dir.relative_to(repo)) in result.stderr, result.stderr
         assert log.name not in result.stderr, result.stderr
     assert result.returncode == 2, result.stdout + result.stderr
 
