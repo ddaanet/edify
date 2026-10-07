@@ -35,6 +35,8 @@ in between.
    nothing (a review dispatch) or holds no edit tools.
 2. No owner to resume, or the resume fails or returns without progress → a fresh
    dispatch composed from the item by `references/dispatch-composition.md`,
+   named `<step name>-fix` after the step whose dirt it finishes (`item-1-2-fix`
+   after a general item, `item-1-1-s2-green-fix` after a slice's GREEN),
    carrying the dirt — the `verify-step.sh` listing, the diff and any precommit
    output — as a prior attempt's work to examine and finish. After a tdd slice's
    step, the step names the agent: after its GREEN, `edify:test-driver` in GREEN

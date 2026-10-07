@@ -106,6 +106,11 @@ Give every dispatch a `name`:
 - `item-N-M-s<k>-red` / `-test-review` / `-green` / `-code-review` for slice
   dispatches, and `item-N-M-s<k>-refactor` for a refactor the code review
   flagged (the opus re-dispatch reuses the name).
+- `<step name>-fix` for the fresh dispatch of `escalation.md` §Post-item
+  remediation step 2, `<step name>` the dispatch whose dirt it finishes:
+  `item-1-2-fix` after a general item, `item-1-1-s2-green-fix` after a slice's
+  GREEN. Reusing the step's name would overwrite the report its commit already
+  carries.
 - `phase-P-corrector` for phase boundaries.
 - `review-<group>` for a review-gate dispatch, `<group>` one of four fixed
   slugs, the rows `finishing.md` §1 groups by:
