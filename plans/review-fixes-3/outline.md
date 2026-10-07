@@ -315,6 +315,10 @@ cite D-numbers, never an outline's KD.
       it. The run-location tests now sit in
       `tests/test_triage_feedback_location.py`, and the hub is at 308
       lines.
+    - List revision after 2.3/2: slice 3's `grep` shim is written with
+      `_write_shim` from `tests/changed_files_helpers.py`. That helper
+      embeds the real tool's path with `shlex.quote` and takes only the
+      case-specific body.
   - Slices:
     1. Entry clauses, in the failures module.
        - `test_usage_error_exits_1`, parametrized:
