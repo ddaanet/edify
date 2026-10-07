@@ -309,6 +309,12 @@ cite D-numbers, never an outline's KD.
       quotes (list revision after 2.1/1's test review).
     - Permission fixtures skip as root and restore modes before cleanup, as
       `test_unreadable_log_is_an_error_and_appends_nothing` does.
+    - List revision after 2.2/2: Item 2.2 added a second
+      `if [[ $status -ne 0 ]]; then`, the `rev-parse` guard's. Slice 1's
+      `$status` mutant must take in the `changed-files.sh` call line above
+      it. The run-location tests now sit in
+      `tests/test_triage_feedback_location.py`, and the hub is at 308
+      lines.
   - Slices:
     1. Entry clauses, in the failures module.
        - `test_usage_error_exits_1`, parametrized:
