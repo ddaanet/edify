@@ -13,13 +13,19 @@ are in ``tests/test_changed_files_phase.py``. See
 ``tests/changed_files_helpers.py`` for the shared fixtures.
 """
 
-import shlex
 import shutil
 from pathlib import Path
 
 import pytest
 
-from .changed_files_helpers import SCRIPT, _commit, _init_repo, _run_git, _run_script
+from .changed_files_helpers import (
+    SCRIPT,
+    _commit,
+    _init_repo,
+    _run_git,
+    _run_script,
+    _write_shim,
+)
 
 
 def test_git_failure_is_error_not_no_base(tmp_path: Path) -> None:
@@ -175,20 +181,11 @@ def test_late_diff_failure_prints_error_alone(tmp_path: Path) -> None:
     keeps stdout to ``ERROR:`` alone on exit 2: a script that has printed
     ``BASE:`` or a path by then leaves them above the error.
     """
-    real_git = shutil.which("git")
-    assert real_git is not None, "git not found on PATH"
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    shim = bin_dir / "git"
-    shim.write_text(
-        "#!/bin/sh\n"
-        f'{shlex.quote(real_git)} "$@"\n'
-        "status=$?\n"
-        '[ "$1" = diff ] && exit 128\n'
-        "exit $status\n",
-        encoding="utf-8",
+    bin_dir = _write_shim(
+        tmp_path,
+        "git",
+        '"$real" "$@"\nstatus=$?\n[ "$1" = diff ] && exit 128\nexit $status\n',
     )
-    shim.chmod(0o755)
     repo = _init_repo(tmp_path)
     _commit(
         repo,

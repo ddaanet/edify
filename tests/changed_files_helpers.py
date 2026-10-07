@@ -7,6 +7,8 @@ absolute path with CWD at the repo root, following the ``_init_repo`` pattern in
 """
 
 import os
+import shlex
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -92,3 +94,21 @@ def _commit(repo: Path, message: str, files: dict[str, str]) -> str:
     _run_git(repo, "add", "--", *files)
     _run_git(repo, "commit", "-q", "-m", message)
     return _run_git(repo, "rev-parse", "HEAD").strip()
+
+
+def _write_shim(tmp_path: Path, tool: str, body: str) -> Path:
+    """Write a ``tool`` shim under ``tmp_path``; return its directory.
+
+    The shim is a ``/bin/sh`` script that opens with ``real=`` set to the
+    real tool's path, quoted with ``shlex.quote``, so ``body`` reaches the
+    real tool as ``"$real"``. ``body`` injects the fault and must pass every
+    other call through. Prepend the returned directory to ``PATH``.
+    """
+    real = shutil.which(tool)
+    assert real is not None, f"{tool} not found on PATH"
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    shim = bin_dir / tool
+    shim.write_text(f"#!/bin/sh\nreal={shlex.quote(real)}\n{body}", encoding="utf-8")
+    shim.chmod(0o755)
+    return bin_dir

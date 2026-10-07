@@ -17,12 +17,11 @@ See ``tests/triage_feedback_helpers.py`` for the shared fixtures.
 """
 
 import os
-import shlex
-import shutil
 from pathlib import Path
 
 import pytest
 
+from tests.changed_files_helpers import _write_shim
 from tests.triage_feedback_helpers import (
     JOB,
     _commit,
@@ -41,22 +40,16 @@ def test_failing_reports_diff_is_an_error_not_none(tmp_path: Path) -> None:
     one call. The count is a pipeline into ``wc -c``; a form that loses the
     diff's status prints ``Reports: 0`` and exits 0.
     """
-    real_git = shutil.which("git")
-    assert real_git is not None, "git not found on PATH"
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    shim = bin_dir / "git"
-    shim.write_text(
-        "#!/bin/sh\n"
+    bin_dir = _write_shim(
+        tmp_path,
+        "git",
         'if [ "$1" = diff ]; then\n'
         '    for arg in "$@"; do\n'
         '        [ "$arg" = --diff-filter=A ] && { echo "shim: fail" >&2; exit 128; }\n'
         "    done\n"
         "fi\n"
-        f'exec "{real_git}" "$@"\n',
-        encoding="utf-8",
+        'exec "$real" "$@"\n',
     )
-    shim.chmod(0o755)
     repo = tmp_path / "repo"
     _init_repo(repo)
     _commit_item_report(repo, {"a.txt": "a\n"})
@@ -219,27 +212,20 @@ def test_failing_label_sed_is_an_error(tmp_path: Path) -> None:
     status, or tests the captured label for emptiness instead, reads
     ``Simple``, reaches ``underclassified`` and logs a row.
     """
-    real_sed = shutil.which("sed")
-    assert real_sed is not None, "sed not found on PATH"
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    shim = bin_dir / "sed"
-    quoted_sed = shlex.quote(real_sed)
-    shim.write_text(
-        "#!/bin/sh\n"
+    bin_dir = _write_shim(
+        tmp_path,
+        "sed",
         'for arg in "$@"; do\n'
         '    case "$arg" in\n'
         "        *Classification*)\n"
-        f'            {quoted_sed} "$@"\n'
+        '            "$real" "$@"\n'
         '            echo "shim: fail" >&2\n'
         "            exit 4\n"
         "            ;;\n"
         "    esac\n"
         "done\n"
-        f'exec {quoted_sed} "$@"\n',
-        encoding="utf-8",
+        'exec "$real" "$@"\n',
     )
-    shim.chmod(0o755)
     repo = tmp_path / "repo"
     _underclassified_repo(repo)
 
