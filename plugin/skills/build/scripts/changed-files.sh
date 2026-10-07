@@ -120,22 +120,24 @@ fi
 exclude_prefix="plans/$job/"
 # `--` keeps a path named `HEAD` from making the revision ambiguous. The list
 # is captured whole so nothing reaches stdout before the diff has succeeded.
+# The case pattern opens with `(`: bash 3.2 takes a bare pattern's `)` inside
+# `$(…)` as the substitution's end and fails to parse the script. The `x`
+# appended on success keeps the substitution from stripping the list's final
+# newlines, which would drop the second line of a last path ending in one.
 paths=$(git diff --name-only --no-renames -z "$base_sha" HEAD -- | while IFS= read -r -d '' path; do
     case "$path" in
-        "$exclude_prefix"* | plans/reports/triage-feedback-log.md) continue ;;
+        ("$exclude_prefix"* | plans/reports/triage-feedback-log.md) continue ;;
     esac
     if [[ $path =~ $exempt_re ]]; then
         continue
     fi
     printf '%s\n' "$path"
-done) || {
+done && printf x) || {
     echo "ERROR: git diff failed"
     exit 2
 }
+paths=${paths%x}
 
-# A write failure would exit 1 under `set -e`, which reads as `NO-BASE:`. The
-# substitution stripped the trailing newline, and an empty list prints nothing.
+# A write failure would exit 1 under `set -e`, which reads as `NO-BASE:`.
 printf 'BASE: %s\n' "$base_sha" || exit 2
-if [[ -n $paths ]]; then
-    printf '%s\n' "$paths" || exit 2
-fi
+printf '%s' "$paths" || exit 2
