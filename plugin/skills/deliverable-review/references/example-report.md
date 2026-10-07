@@ -1,7 +1,8 @@
 # Deliverable Review: worktree-update
 
-**Date:** 2026-02-13 **Methodology:** `docs/references/deliverable-review.md`
-(ISO 25010 / IEEE 1012) **Design reference:** `plans/worktree-update/design.md`
+**Date:** 2026-02-13 **Methodology:** deliverable-review skill,
+references/axes.md (ISO 25010 / IEEE 1012) **Design reference:**
+`plans/worktree-update/design.md`
 
 ---
 

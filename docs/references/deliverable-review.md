@@ -37,6 +37,9 @@ Findings are Critical (incorrect behavior, data loss, security), Major (missing
 functionality, broken references, vacuous artifact) or Minor (style, clarity,
 naming).
 
+The shipped operational copy of these axes and severity levels is
+`plugin/skills/deliverable-review/references/axes.md`; the two change together.
+
 *Sources:*
 [ISO/IEC 25010:2023](https://iso25000.com/index.php/en/iso-25000-standards/iso-25010),
 [IEEE 1012](https://standards.ieee.org/ieee/1012/5609/),

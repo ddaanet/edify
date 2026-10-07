@@ -64,7 +64,7 @@ without one reports an empty gap analysis as a clean one.
 Universal axes (all types): conformance, functional correctness, functional
 completeness, vacuity, excess.
 
-Full axis definitions: `docs/references/deliverable-review.md`
+Full axis definitions: `references/axes.md`
 
 ### Phase 2: Gap Analysis
 
@@ -150,7 +150,7 @@ Write the consolidated report to `plans/<plan>/reports/deliverable-review.md`.
 # Deliverable Review: <plan-name>
 
 **Date:** <date — from `date -I`>
-**Methodology:** docs/references/deliverable-review.md
+**Methodology:** deliverable-review skill, references/axes.md
 
 ## Inventory
 [Table: type, file, lines]
@@ -175,9 +175,8 @@ Write the consolidated report to `plans/<plan>/reports/deliverable-review.md`.
 [Paths of every Layer 1 report merged in Phase 4; omit when Layer 1 skipped]
 ```
 
-**Severity classification** — `docs/references/deliverable-review.md` §D-56
-defines the three levels; the parenthetical extensions below are this skill's,
-not the node's:
+**Severity classification** — `references/axes.md` defines the three levels; the
+extensions below are this skill's, not that file's:
 - **Critical** — incorrect behavior, data loss, security, unimplemented design
   requirement
 - **Major** — missing functionality, broken references, vacuous artifact, test
@@ -193,6 +192,6 @@ skill does not queue follow-up work or record lifecycle state.
 ## References
 
 - **Methodology** — full axis definitions, ISO/IEEE sources:
-  `docs/references/deliverable-review.md`
+  `references/axes.md`
 - **Example report** — completed review with all sections:
   `references/example-report.md`
