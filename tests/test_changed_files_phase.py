@@ -1,14 +1,15 @@
 """Contract tests for ``changed-files.sh <job> --phase``.
 
-KD-2 and KD-8 in ``plans/build-fixes/outline.md``, Item 1.4: the phase base
-is the latest commit in ``<run base>..HEAD`` touching
-``plans/<job>/reports/phase-*-corrector.md``, keyed on that path and never on
-the commit subject, and the run base (KD-1) when no such commit exists. The
-list is the same filtered diff as without ``--phase``, since that base.
+D-89 and D-94: the phase base is the latest commit in ``<run base>..HEAD``
+touching ``plans/<job>/reports/phase-*-corrector.md``, keyed on that path and
+never on the commit subject, and the run base (D-88) when no such commit
+exists. The list is the same filtered diff as without ``--phase``, since that
+base.
 
 Split from ``tests/test_changed_files.py``, which keeps the base and list
-tests, to keep each module under its line cap. See
-``tests/changed_files_helpers.py`` for the shared fixtures.
+tests, to keep each module under its line cap. The exit-code tests are in
+``tests/test_changed_files_errors.py``. See ``tests/changed_files_helpers.py``
+for the shared fixtures.
 """
 
 from pathlib import Path
@@ -19,8 +20,8 @@ from .changed_files_helpers import _commit, _init_repo, _run_script
 def test_phase_without_boundary_gives_run_base(tmp_path: Path) -> None:
     """``--phase`` with no boundary landed in the run falls back to the run base.
 
-    KD-2 and KD-8: the phase base is the latest commit in ``<run base>..HEAD``
-    touching ``plans/j/reports/phase-*-corrector.md``, and the run base (KD-1)
+    D-89 and D-94: the phase base is the latest commit in ``<run base>..HEAD``
+    touching ``plans/j/reports/phase-*-corrector.md``, and the run base (D-88)
     when none matches. History: seed -> a ``phase-1-corrector.md`` report for
     ``j`` -> ``j``'s ``runbook.md``, the run base -> item 1.1 (report, new
     ``a.txt``) -> another job's ``plans/jj/reports/phase-1-corrector.md``
@@ -57,7 +58,7 @@ def test_phase_without_boundary_gives_run_base(tmp_path: Path) -> None:
 def test_phase_base_is_latest_boundary_commit(tmp_path: Path) -> None:
     """``--phase`` takes the latest commit touching ``j``'s corrector report.
 
-    KD-2 and KD-8: the base is keyed on the report's path history in
+    D-89 and D-94: the base is keyed on the report's path history in
     ``<run base>..HEAD``, never the subject, and ``-1`` takes the latest, so a
     report committed twice resolves to the later commit. A commit that
     modifies ``phase-1-corrector.md`` again is therefore the base, and only
@@ -146,7 +147,7 @@ def test_phase_flag_only_as_exact_second_argument(tmp_path: Path) -> None:
 def test_phase_list_keeps_the_filters(tmp_path: Path) -> None:
     """Under ``--phase`` the exempt-path and ``plans/j/`` drops still apply.
 
-    KD-6 and Item 1.4: the list since the phase base is filtered as the bare
+    D-89, D-90 and D-91: the list since the phase base is filtered as the bare
     list is. History: seed -> ``j`` planning, the run base -> item 1.1 -> the
     boundary (``phase-1-corrector.md``, the expected base) -> a commit of the
     three exempt paths (``inbox/x.md``, ``.claude/handoff-task.md``, a file
