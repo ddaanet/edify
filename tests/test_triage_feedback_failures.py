@@ -142,14 +142,7 @@ def test_usage_error_exits_1(
     log nothing.
     """
     repo = tmp_path / "repo"
-    _init_repo(repo)
-    _commit_item_report(
-        repo,
-        {
-            f"plans/{JOB}/classification.md": "- **Classification:** Simple\n",
-            "module.py": "def foo():\n    pass\n",
-        },
-    )
+    _underclassified_repo(repo)
     result = _run_triage(job, repo, extra_args=extra_args)
 
     assert result.returncode == 1, result.stdout + result.stderr
@@ -187,23 +180,6 @@ def test_changed_files_error_is_printed_then_exit_2(tmp_path: Path) -> None:
     assert not (repo / "plans" / "reports" / "triage-feedback-log.md").exists()
 
 
-def _underclassified_repo(repo: Path) -> Path:
-    """Build an ``underclassified`` run; return its ``classification.md``.
-
-    The run commit holds a ``def`` under a ``Simple`` classification, so a
-    run that is not stopped logs a row.
-    """
-    _init_repo(repo)
-    _commit_item_report(
-        repo,
-        {
-            f"plans/{JOB}/classification.md": "- **Classification:** Simple\n",
-            "module.py": "def foo():\n    pass\n",
-        },
-    )
-    return repo / "plans" / JOB / "classification.md"
-
-
 @pytest.mark.skipif(os.geteuid() == 0, reason="root reads a mode-000 file")
 def test_unreadable_classification_is_an_error(tmp_path: Path) -> None:
     """An unreadable ``classification.md`` exits 2 with ``grep failed``.
@@ -213,8 +189,9 @@ def test_unreadable_classification_is_an_error(tmp_path: Path) -> None:
     ``no-classification`` with an evidence report and exit 0; the fixture
     otherwise reaches ``underclassified`` and logs a row. The behavioural
     grep prints the same ``ERROR:`` line, so grep's own diagnostic, naming
-    the file, ties the failure to the classification grep. The mode is
-    restored before cleanup.
+    the file, ties the failure to the classification grep. Only the name is
+    asserted: the diagnostic's wording may differ on BSD grep, unverified on
+    macOS. The mode is restored before cleanup.
     """
     repo = tmp_path / "repo"
     classification = _underclassified_repo(repo)
@@ -271,3 +248,20 @@ def test_failing_label_sed_is_an_error(tmp_path: Path) -> None:
     assert result.stdout.splitlines() == ["ERROR: sed failed"], output
     assert result.returncode == 2, output
     assert not (repo / "plans" / "reports" / "triage-feedback-log.md").exists()
+
+
+def _underclassified_repo(repo: Path) -> Path:
+    """Build an ``underclassified`` run; return its ``classification.md``.
+
+    The run commit holds a ``def`` under a ``Simple`` classification, so a
+    run that is not stopped logs a row.
+    """
+    _init_repo(repo)
+    _commit_item_report(
+        repo,
+        {
+            f"plans/{JOB}/classification.md": "- **Classification:** Simple\n",
+            "module.py": "def foo():\n    pass\n",
+        },
+    )
+    return repo / "plans" / JOB / "classification.md"
