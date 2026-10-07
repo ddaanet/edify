@@ -354,3 +354,46 @@ def test_subdirectory_run_measures_the_repository_root(tmp_path: Path) -> None:
     rows = log.read_text(encoding="utf-8").splitlines()[2:]
     assert len(rows) == 1, "\n".join(rows)
     assert not (repo / "sub" / "plans").exists()
+
+
+def test_cdpath_does_not_move_the_script_dir(tmp_path: Path) -> None:
+    """An exported ``CDPATH`` leaves the script directory where it is.
+
+    ``CDPATH`` applies to a ``cd`` operand not starting with ``/``, ``.`` or
+    ``..``. The script is run as ``plugin/bin/triage-feedback.sh`` through a
+    ``plugin`` symlink at the repo root, with CWD the root and ``CDPATH``
+    naming a decoy outside the repo that holds an empty ``plugin/bin``.
+    Honoured, ``CDPATH`` sends ``cd plugin/bin`` to the decoy and prints the
+    destination into the capture; either sends ``changed-files.sh`` to a path
+    that does not exist and exits 2. A decoy rather than ``.``, which names
+    the same directory, so a ``cd`` that only silences the print still fails.
+    The run reads what the subdirectory run does: 1 file, 1 report,
+    behavioural code, ``underclassified`` and one log row.
+    """
+    decoy = tmp_path / "decoy"
+    (decoy / "plugin" / "bin").mkdir(parents=True)
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    _commit(
+        repo,
+        "planning",
+        {f"plans/{JOB}/classification.md": "- **Classification:** Simple\n"},
+    )
+    _commit_item_report(
+        repo,
+        {
+            f"plans/{JOB}/reports/item-1-1-s1-red.md": "ok\n",
+            "a.py": "def foo():\n    pass\n",
+        },
+    )
+
+    result = _run_triage_relative(JOB, repo, repo, env_extra={"CDPATH": str(decoy)})
+    lines = result.stdout.splitlines()
+    output = result.stdout + result.stderr
+    assert "- Files changed: 1" in lines, output
+    assert "- Reports: 1" in lines, output
+    assert "- Behavioral code: yes" in lines, output
+    assert _verdict(lines) == "underclassified", output
+    assert result.returncode == 0, output
+    log = repo / "plans" / "reports" / "triage-feedback-log.md"
+    assert len(log.read_text(encoding="utf-8").splitlines()[2:]) == 1, output

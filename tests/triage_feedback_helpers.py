@@ -107,16 +107,21 @@ def _commit_reports_fixture(repo: Path) -> None:
 
 
 def _run_triage(
-    job: str, cwd: Path, path_prepend: Path | None = None
+    job: str,
+    cwd: Path,
+    path_prepend: Path | None = None,
+    env_extra: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Run triage-feedback.sh by absolute path with CWD at the repo root.
 
     ``path_prepend``, when given, is put ahead of the real ``PATH`` so a
-    fixture-supplied shim is what the script resolves.
+    fixture-supplied shim is what the script resolves. ``env_extra`` adds
+    variables to the environment.
     """
     env = dict(os.environ)
     env["GIT_CONFIG_GLOBAL"] = os.devnull
     env["GIT_CONFIG_SYSTEM"] = os.devnull
+    env.update(env_extra or {})
     if path_prepend is not None:
         env["PATH"] = f"{path_prepend}{os.pathsep}{env.get('PATH', '')}"
     return subprocess.run(
@@ -130,9 +135,11 @@ def _run_triage(
 
 
 def _run_triage_relative(
-    job: str, cwd: Path, link_dir: Path
+    job: str, cwd: Path, link_dir: Path, env_extra: dict[str, str] | None = None
 ) -> subprocess.CompletedProcess[str]:
     """Run triage-feedback.sh by a short path relative to ``cwd``.
+
+    ``env_extra`` adds variables to the environment.
 
     ``link_dir/plugin`` is made a symlink to the real ``plugin`` directory and
     the script is run through it, so it sees a relative ``BASH_SOURCE`` that a
@@ -145,6 +152,7 @@ def _run_triage_relative(
     env = dict(os.environ)
     env["GIT_CONFIG_GLOBAL"] = os.devnull
     env["GIT_CONFIG_SYSTEM"] = os.devnull
+    env.update(env_extra or {})
     return subprocess.run(
         [os.path.relpath(link / "bin" / SCRIPT.name, cwd), job],
         cwd=cwd,

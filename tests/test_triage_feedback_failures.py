@@ -1,7 +1,8 @@
 """Failure-arm tests for ``plugin/bin/triage-feedback.sh``.
 
 This module is for the script's failure arms: an entry that stops triage
-with ``ERROR:`` and exit 2 and appends no log row, a failing git call behind
+with ``ERROR:`` and exit 2 and appends no log row (including a run outside
+any work tree, which prints one ``ERROR:`` line), a failing git call behind
 the reports count, and a classification parse that fails rather than
 returning a result. A run that reaches a verdict, including
 ``no-classification``, is a result and stays in the hub. The behavioural-code
@@ -87,3 +88,28 @@ def test_no_base_is_an_error_with_no_log_row(tmp_path: Path) -> None:
     assert "## Evidence" not in lines, result.stdout
     assert result.returncode == 2, result.stdout + result.stderr
     assert not (repo / "plans" / "reports" / "triage-feedback-log.md").exists()
+
+
+def test_outside_a_work_tree_is_one_error_line(tmp_path: Path) -> None:
+    """Outside any work tree triage prints one ``ERROR:`` line and exits 2.
+
+    The CWD is a directory in no work tree, with ``GIT_CEILING_DIRECTORIES``
+    set to its parent so no enclosing repository is found. The only stdout
+    line is the script's own cause: no ``changed-files.sh exited`` text, which
+    would name a second failure behind the first. Nothing is created under the
+    CWD, so no log directory is made.
+    """
+    outside = tmp_path / "outside"
+    outside.mkdir()
+
+    result = _run_triage(
+        JOB, outside, env_extra={"GIT_CEILING_DIRECTORIES": str(tmp_path)}
+    )
+    lines = result.stdout.splitlines()
+    output = result.stdout + result.stderr
+    assert len(lines) == 1, output
+    assert lines[0].startswith("ERROR: "), output
+    assert lines[0].removeprefix("ERROR: ").strip(), output
+    assert "changed-files.sh exited" not in result.stdout, output
+    assert result.returncode == 2, output
+    assert list(outside.iterdir()) == [], output

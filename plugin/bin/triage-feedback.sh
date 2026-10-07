@@ -24,8 +24,22 @@ script_dir=$(cd "$script_dir" && pwd)
 # root-relative, as `changed-files.sh` already is (it reads the same
 # `git rev-parse --show-toplevel`), so a run from any directory in the work tree
 # measures and logs what a run from the root does.
-repo_root=$(git rev-parse --show-toplevel)
-cd "$repo_root"
+#
+# Outside a work tree `rev-parse` fails and its stderr (git's own message) is
+# left through; stdout carries the one `ERROR:` line, before
+# `changed-files.sh` runs. `|| status=$?` keeps `set -e` from exiting silently.
+status=0
+repo_root=$(git rev-parse --show-toplevel) || status=$?
+if [[ $status -ne 0 ]]; then
+    echo "ERROR: not inside a git work tree"
+    exit 2
+fi
+# Residual bound: this `cd` failing after a successful `rev-parse` is the one
+# arm with no test; no input provokes it without fault injection.
+if ! cd "$repo_root"; then
+    echo "ERROR: cannot change to $repo_root"
+    exit 2
+fi
 
 # D-90: the review gate and triage count one list, so the list comes from
 # `changed-files.sh` (D-88 base, D-91 exemptions), never a second diff. Its
