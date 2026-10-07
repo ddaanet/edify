@@ -233,6 +233,12 @@ cite D-numbers, never an outline's KD.
   - Files: `plugin/bin/triage-feedback.sh`, `tests/test_triage_feedback.py`,
     `tests/triage_feedback_helpers.py` if the runner needs a relative
     invocation
+  - Notes (list revision after 2.1/1):
+    - The script must still parse and pass under bash 3.2: GREEN and the
+      code review run `bash -n` and the triage suite with a bash 3.2.57
+      binary first on `PATH` where one is available. Slice 2.1/1's code
+      review found a bare `case` pattern inside `$(…)` that bash 3.2 reads
+      as the substitution's end, which the Linux suite did not catch.
   - Slices:
     1. `test_subdirectory_run_measures_the_repository_root`.
        - Fixture:
@@ -288,6 +294,8 @@ cite D-numbers, never an outline's KD.
     - A shim passes every other call through to the real tool. Probe a shim
       with `command grep`, never the Bash tool's `grep` (recall
       `cc-grep-shell-function`).
+    - A shim embeds the real tool's path with `shlex.quote`, not double
+      quotes (list revision after 2.1/1's test review).
     - Permission fixtures skip as root and restore modes before cleanup, as
       `test_unreadable_log_is_an_error_and_appends_nothing` does.
   - Slices:
@@ -504,6 +512,10 @@ cite D-numbers, never an outline's KD.
       job its verdict can flip from `match` to `underclassified`. The
       final-review fixes clause is ruled unchanged and is not added.
     - D-90 (m16): KD-2's row sentence.
+    - D-90 (m2, list revision after 2.1/1): "A usage error or a git failure
+      exits 2 with `ERROR:`" says `ERROR:` alone, with no `BASE:` line and
+      no path, as KD-4 makes true and
+      `test_late_diff_failure_prints_error_alone` pins.
     - D-93 (m12): where it says planning artifacts route by artifact, one
       sentence gives KD-1's name and why it matches `review-*.md`.
     - Rejected (m17): the entry becomes "Triage filtering its own log path
