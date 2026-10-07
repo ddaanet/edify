@@ -1,17 +1,15 @@
 """Regression test for F-1: `check_line_limits.sh`'s unguarded `wc -l`.
 
-`scripts/check_line_limits.sh:124` feeds `wc -l`'s output straight into the
+`scripts/check_line_limits.sh` fed `wc -l`'s output straight into the
 `oversized-file:` line with no `tr -d ' '` guard, unlike the two counts in
 `plugin/bin/triage-feedback.sh` that reach output (the changed-files count,
 `wc -l`, and the committed-report count, `wc -c`), which each pipe through
-`tr -d ' '`. The script's remaining `wc -l`, counting `review-*.md` files,
-feeds only a numeric `-eq` test, where padding is harmless. BSD/macOS `wc`
-left-pads a bare count into a fixed-width field; GNU `wc` reading stdin (the
-call shape at `:124`) does not. This module shims `wc` on `PATH` to reproduce
-the BSD form on this (Linux) box and pins the exact unpadded line KD-7
-requires regardless of which `wc` ran. It is red on unchanged code — on its
-stdout assertion, not on a shim, import or fixture error — and is expected to
-stay red until the GREEN half of this fix adds the guard.
+`tr -d ' '`; the fix added the same guard. Triage's remaining `wc -l`,
+counting `review-*.md` files, feeds only a numeric `-eq` test, where padding
+is harmless. BSD/macOS `wc` left-pads a bare count into a fixed-width field;
+GNU `wc` reading stdin (`check_line_limits.sh`'s call shape) does not. This
+module shims `wc` on `PATH` to reproduce the BSD form on this (Linux) box and
+pins the exact unpadded line KD-7 requires regardless of which `wc` ran.
 """
 
 from pathlib import Path

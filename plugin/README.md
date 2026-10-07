@@ -83,13 +83,16 @@ Plus three in `skills/build/scripts/`, used by `/build`:
   and a masked listing reads as dirt.
 - `changed-files.sh` — prints the run's base as `BASE:`, then the files the run
   changed: the committed diff from that base to `HEAD`, minus the exempt paths
-  and the job's own `plans/<job>/` record. `--phase` takes the current phase's
+  and the pipeline's record: the job's own `plans/<job>/` and the triage log,
+  `plans/reports/triage-feedback-log.md`. `--phase` takes the current phase's
   base instead. The phase-boundary and review-gate scopes come from it, and
   `triage-feedback.sh <job>` runs it itself and measures that list, the set the
   review gate reviewed: its file count, and behavioural code in those paths'
   diff only. The report count alone looks past the list, at the reports the
-  `<base> HEAD` range adds under `plans/<job>/reports/`, which the list drops
-  with the job's record.
+  `<base> HEAD` range adds directly under `plans/<job>/reports/`, which the list
+  drops with the job's record: every one but each item's own `item-<N>-<M>.md`
+  and the review reports (`review.md`, `review-*.md`, `final-review.md`,
+  `tdd-audit.md`).
 - `exempt-paths.sh` — sourced by the other two, never run: the one definition of
   the three paths dirty by convention (`memory`, `.claude/handoff-*.md`,
   `inbox/*.md`), which the gate tolerates and the changed-files list drops.

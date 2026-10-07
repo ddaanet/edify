@@ -45,7 +45,7 @@ Review implementation changes against design specification.
 
 Fix all issues (critical, major, minor). Write report to: <report path, per `dispatch-composition.md` §Prompt contents>
 
-<return contract, per `dispatch-composition.md` §Prompt contents>
+<return contract, per `dispatch-composition.md` §Prompt contents, plus the UNFIXABLE marking as §Example words it>
 ```
 
 ## Report-only variant

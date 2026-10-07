@@ -14,8 +14,8 @@ The gate has landed when a commit after the run's last item-report commit
 touches a review-gate report:
 
 ```bash
-git log -1 --format=%H -- ':(glob)plans/<job>/reports/item-*'
-git log -1 --format=%H <L>..HEAD -- ':(glob)plans/<job>/reports/review-*.md'
+git log -1 --no-show-signature --format=%H -- ':(glob)plans/<job>/reports/item-*'
+git log -1 --no-show-signature --format=%H <L>..HEAD -- ':(glob)plans/<job>/reports/review-*.md'
 ```
 
 `<L>` is the first command's hash, written into the second as the hash itself;
@@ -36,7 +36,8 @@ appropriate reviewer by its routing table.
 
    Exit 0 prints `BASE: <sha>`, the run's base, then one path per line: the
    committed diff from that base to `HEAD`, minus the paths `verify-step.sh`
-   exempts and the job's own `plans/<job>/` record. The `HEAD` form keeps
+   exempts and the pipeline's record: the job's own `plans/<job>/` and the
+   triage log, `plans/reports/triage-feedback-log.md`. The `HEAD` form keeps
    uncommitted dirt out; a `/handoff` or memory-pointer commit can still land
    exempt paths during the run, and the script drops those by name. Exit 1
    (`NO-BASE:`, no committed item report) or exit 2 (`ERROR:`) → STOP; never
@@ -123,8 +124,11 @@ On exit 0, read the script output. On a divergence message → surface it inline
 On `WARNING: No corrector report` → surface it inline and investigate before §3:
 §1 should have left a review report, or `/build` §5 a `review-skip.md`, and the
 warning means neither exists — run §1, or write `/build` §5's `review-skip.md`
-and commit it as §1's report commit does, then rerun §2. On match or
-no-classification with no warning → proceed silently.
+and commit it as §1's report commit does, then rerun §2. On
+`unrecognised classification: <label>` → surface it inline:
+`classification.md`'s label is none of `Simple`, `Moderate`, `Complex` or
+`Defect`, so no row was logged. On match, or no-classification with neither line
+→ proceed silently.
 
 ## 3. Completion
 
@@ -132,9 +136,10 @@ no-classification with no warning → proceed silently.
    dispatch name `final-review` — **only where §1 did not already cover it**. §1
    normally reviews the run's entire diff, and a second corrector over the same
    changes is waste; the cases that still need this are a run whose review was
-   skipped, and one whose routing left a group of changed files unreviewed. Not
-   where it has landed: skip it when
-   `git log -1 --format=%H <L>..HEAD -- plans/<job>/reports/final-review.md`
+   skipped over a non-empty list, and one whose routing left a group of changed
+   files unreviewed. An empty list has nothing to review here either. Not where
+   it has landed: skip it when
+   `git log -1 --no-show-signature --format=%H <L>..HEAD -- plans/<job>/reports/final-review.md`
    prints a hash, `<L>` being §1's. Its report gets §1's structural proof before
    the closing commit: Read `plans/<job>/reports/final-review.md`, and on
    UNFIXABLE validate each by `../../fragments/review-requirement.md` §UNFIXABLE
@@ -144,9 +149,11 @@ no-classification with no warning → proceed silently.
 2. **TDD audit:** if any tdd item ran, dispatch `edify:tdd-auditor`, dispatch
    name `tdd-audit` — skipped, as step 1 is, where the same query over
    `plans/<job>/reports/tdd-audit.md` prints a hash. Its inputs are the RED,
-   GREEN and review reports of every slice; git serves only to resolve a report
-   to its adding commit and to diff that commit. Where a report is missing,
-   resume the agent named for that dispatch and get it
+   GREEN and review reports of every slice, and the hosting file, which the
+   prompt names: the file the tdd items came from (`/build` §1). git serves to
+   resolve a report to its adding commit, to diff that commit, and to read the
+   hosting file's list-revision commits. Where a report is missing, resume the
+   agent named for that dispatch and get it
    (`references/dispatch-composition.md` §Naming and resumption).
 3. **Closing commit:** one commit carrying what §2 and §3 left — the triage log
    line in `plans/reports/triage-feedback-log.md` where `triage-feedback.sh`

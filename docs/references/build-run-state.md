@@ -17,8 +17,12 @@ run is resumed (`/build` §1); none means fresh. Only `item-*` counts, because
 planning reports — `outline-review.md`, `runbook-review.md`, `explore-*` — share
 the directory. The test holds because every item leaves a report and its first
 commit carries it (D-86), which is why `/build` §4.1 reviews the uncommitted
-diff and writes or takes `item-N-M.md` before the item's one commit. The run's
-base is the parent of the earliest commit adding an item report:
+diff and writes or takes `item-N-M.md` before the item's one commit. Work with
+no `Item N.M` — the task an invocation names, or a design or outline without
+items — is one item, Item 1.1, so every run leaves an item report: a design
+without items carries general work only (D-83), which one item executes, at the
+cost of resume granularity, since a kill mid-item re-runs the whole item. The
+run's base is the parent of the earliest commit adding an item report:
 
 ```bash
 git log --no-renames --diff-filter=A --reverse --format=%H \
@@ -62,19 +66,26 @@ uncommitted is finished when complete and rerun when partial, because the
 corrector writes its report before it applies any fix.
 
 **D-90 — A changed-files list is the committed diff since the base, minus the
-exempt paths and the job's own record, and one script produces it, for the phase
-boundary, the review gate and triage alike.**
+exempt paths and the pipeline's record, and one script produces it, for the
+phase boundary, the review gate and triage alike.**
 `plugin/skills/build/scripts/changed-files.sh <job>` derives the run base
 (D-88), prints `BASE: <sha>`, then the `<base> HEAD` diff with the D-91 exempt
-paths and `plans/<job>/` removed, and `--phase` takes the phase base instead
-(D-89). In a repo with commits and no committed item report it exits 1 with
-`NO-BASE:`. A usage error or a git failure exits 2 with `ERROR:`, and an unborn
-`HEAD` is a git failure, so it exits 2 too, never `NO-BASE:`. The `HEAD` form
-keeps uncommitted exempt dirt out, but not the exempt paths a `/handoff` or
-memory-pointer commit lands during the run; those are not the run's work, so the
-list drops them by name, as `verify-step.sh` does. `plans/<job>/` goes too: the
-run's reports and `runbook.md` list revisions are its record, not its
-implementation. The exempt alternation lives in one sourced file,
+paths, `plans/<job>/` and the triage log,
+`plans/reports/triage-feedback-log.md`, removed, and `--phase` takes the phase
+base instead (D-89). In a repo with commits and no committed item report it
+exits 1 with `NO-BASE:`. A usage error or a git failure exits 2 with `ERROR:`,
+and an unborn `HEAD` is a git failure, so it exits 2 too, never `NO-BASE:`. The
+`HEAD` form keeps uncommitted exempt dirt out, but not the exempt paths a
+`/handoff` or memory-pointer commit lands during the run; those are not the
+run's work, so the list drops them by name, as `verify-step.sh` does.
+`plans/<job>/` goes too: the run's reports and the list revisions in the file
+hosting its items — `runbook.md`, or the `outline.md` or `design.md` routed to
+`/build` — are its record, not its implementation. The triage log goes for the
+same reason: it is the pipeline's record across jobs, and a closing commit lands
+it. It goes by name, not with the rest of `plans/reports/`, which is where an
+Investigation's deliverable goes (`/design`'s artifact-destination table); D-82
+routes Investigation to `/build`, so that deliverable stays on the list, under
+review and counted. The exempt alternation lives in one sourced file,
 `exempt-paths.sh`, which both scripts read. Every site that needs the list or
 the base calls the script. Triage, `plugin/bin/triage-feedback.sh <job>`, takes
 no base: it runs the script itself and counts its list, so its evidence is the
@@ -83,12 +94,18 @@ behavioural code is read from the `<base> HEAD` diff of those paths only, given
 as literal pathspecs. Its report count looks past the list, which drops the
 job's record: it counts the reports `<base> HEAD` adds directly under
 `plans/<job>/reports/`, excluding the `item-<N>-<M>.md` report every item leaves
-and the review reports (`review.md`, `review-*.md`, `final-review.md`). Slice,
-refactor and phase-boundary reports count, and planning reports committed before
-the base fall outside the range. A `NO-BASE:` or `ERROR:` from the script stops
-triage with exit 2 and no log row. The working-tree form,
-`git diff --name-only <base>`, stays for uncommitted work — `/review`, and the
-`/build` §4.1 corrector that reviews an item before its one commit.
+and the review reports (`review.md`, `review-*.md`, `final-review.md`,
+`tdd-audit.md`). Slice, refactor and phase-boundary reports count, and planning
+reports committed before the base fall outside the range. Both drops keep a
+re-run on the set the first run measured: a finished job re-invoked runs triage
+again after its closing commit has landed the triage log and `tdd-audit.md`, so
+with either in the evidence the re-run's row differs from the first, the log's
+skip of a row equal past its date does not fire, and a second row is logged,
+with a verdict that can flip. A `NO-BASE:` or `ERROR:` from the script, or a git
+or grep failure of triage's own, stops triage with exit 2, no verdict and no log
+row. The working-tree form, `git diff --name-only <base>`, stays for uncommitted
+work — `/review`, and the `/build` §4.1 corrector that reviews an item before
+its one commit.
 
 **Limitation:** the base query and the `<base> HEAD` range read the job branch
 as linear. A merge of `main` into the job branch, or another session committing
@@ -150,17 +167,18 @@ by artifact (D-26). Its groups, which are also its dispatch names, are
 `review-code` (code and tests, and the default for any file kind no row names),
 `review-skill` (skill definitions and the agent-instruction prose they load,
 meaning their `references/` nodes and the shared instruction files a skill loads
-from outside itself. An instruction file no skill loads, such as `CLAUDE.md` or
-`.claude/rules/*.md`, matches no row and takes the `review-code` default),
-`review-agent` (agent definitions) and `review-design` (the living design graph
-under `docs/`). A file kind is always classed into an existing row, never a new
-group, by the one rule in `dispatch-composition.md` §Naming and resumption.
-`review-design` goes to `edify:corrector` with `craft:design-doc-writing` named
-as its criteria source, as the agent row names `plugin-dev:agent-development`,
-and the report notes the fallback when `craft` is absent. *Grounding:* a free
-one-word slug per routed group did not determine the names; one run produced
-`review-code`, `review-skill`, `review-agents` and `review-fragments`, mixing
-singular and plural and minting a group the routing table does not have.
+from outside itself), `review-agent` (agent definitions) and `review-design`
+(the living design graph under `docs/`). An instruction file no skill loads,
+such as `CLAUDE.md` or `.claude/rules/*.md`, matches no row and takes the
+`review-code` default. A file kind is always classed into an existing row, never
+a new group, by the one rule in `dispatch-composition.md` §Naming and
+resumption. `review-design` goes to `edify:corrector` with
+`craft:design-doc-writing` named as its criteria source, as the agent row names
+`plugin-dev:agent-development`, and the report notes the fallback when `craft`
+is absent. *Grounding:* a free one-word slug per routed group did not determine
+the names; one run produced `review-code`, `review-skill`, `review-agents` and
+`review-fragments`, mixing singular and plural and minting a group the routing
+table does not have.
 
 **D-94 — `/build` commit subjects name the job, and are labels only.** Every
 `/build` commit takes one of four subjects:
@@ -194,6 +212,17 @@ site** — four sites, and a prose copy of a script's regex drifts (D-90).
 **Triage keeping a base argument and filtering the raw diff itself** — a second
 copy of the list's filters, which drifts from the script's as a prose copy does
 (D-90).
+
+**A landed check on triage keyed on the triage log** — the log is shared across
+jobs, so another job's closing commit on the branch would skip this job's triage
+(D-90).
+
+**Triage dropping its own log path from the list** — a second copy of the list's
+filters, as above (D-90).
+
+**The list dropping all of `plans/reports/`** — an Investigation's deliverable
+lands there, so the review gate would not review it and triage would not count
+it; only the triage log, which a closing commit lands, is dropped (D-90).
 
 **Filtering or gitignoring the sandbox-mask names** — a filter hides real files
 sharing the masked names, and those `.claude/` names are legitimately versioned

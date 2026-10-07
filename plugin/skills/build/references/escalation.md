@@ -134,7 +134,7 @@ says.
    remediation closes. For tdd: without the slice's `-red.md` and
    `-test-review.md` on disk, its implementation-side dirt cannot enter RED,
    whose proof needs unchanged code, so it escalates too. A masked listing is
-   re-run first, as §2 says. The other verdicts:
+   re-run first, as `/build` §2 says. The other verdicts:
    - `CLEAN:` → proceed.
    - `DIRTY:` → examined, as above.
    - `PRECOMMIT:` over a clean tree, and exit 2 → STOP, as `/build` §2 does.
@@ -142,7 +142,10 @@ says.
    `verify-step.sh` exits on `DIRTY:` before it runs `just precommit`, so a
    dirty resume reaches no precommit at the gate. Precommit first runs at the
    first remaining item's `SKILL.md` §4.4 verification, over the adopted prior
-   work too.
+   work too. With no item remaining — a run killed inside `finishing.md` — dirt
+   is judged against `finishing.md`'s first unlanded stage, and precommit first
+   runs at the next verify-step `finishing.md` runs: after §1's report commit,
+   or after §3.3's closing commit.
 3. Run `/build` §3, then start §4 at the first remaining item.
 
 **Do not use `just precommit` as a state-assessment tool.** It is a pass/fail

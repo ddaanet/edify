@@ -17,9 +17,12 @@ import pytest
 from tests.triage_feedback_helpers import (
     JOB,
     _commit,
+    _commit_item_report,
     _commit_reports_fixture,
+    _init_repo,
     _run_triage,
     _triage_lines,
+    _verdict,
 )
 
 SEEDED_DATE = "2000-01-01"
@@ -142,6 +145,98 @@ def test_unreadable_log_is_an_error_and_appends_nothing(tmp_path: Path) -> None:
     assert result.returncode == 2, result.stdout + result.stderr
     assert f"ERROR: cannot read {log.relative_to(repo)}" in result.stdout, result.stdout
     assert log.read_text(encoding="utf-8") == logged
+
+
+@pytest.mark.parametrize("unwritable", ["header", "row"])
+def test_unwritable_log_is_an_error_not_a_usage_exit(
+    tmp_path: Path, unwritable: str
+) -> None:
+    """A log the script cannot write exits 2 with ``ERROR:``, never exit 1.
+
+    Exit 1 is the usage error's code. Under ``set -e`` a failed redirection
+    exits 1, so an unguarded write reads as a usage error. ``header``: the
+    log is absent and ``plans/reports/`` is read-only, so the header write
+    fails. ``row``: the log holds the header alone and is read-only, so the
+    duplicate check reads it and the row append fails.
+    """
+    if os.geteuid() == 0:
+        pytest.skip("root ignores file permissions; chmod has no effect")
+
+    repo = tmp_path / "repo"
+    _commit_reports_fixture(repo)
+    log_dir = repo / "plans" / "reports"
+    log = log_dir / "triage-feedback-log.md"
+    log_dir.mkdir(parents=True)
+    if unwritable == "row":
+        log.write_text(
+            "| Date | Job | Predicted | Files Changed | Reports | Behavioral Code"
+            " | Verdict |\n|---|---|---|---|---|---|---|\n",
+            encoding="utf-8",
+        )
+        log.chmod(0o400)
+    else:
+        log_dir.chmod(0o500)
+    try:
+        result = _run_triage(JOB, repo)
+    finally:
+        log_dir.chmod(0o755)
+        if log.exists():
+            log.chmod(0o644)
+
+    assert f"ERROR: cannot write {log.relative_to(repo)}" in result.stdout, (
+        result.stdout + result.stderr
+    )
+    assert result.returncode == 2, result.stdout + result.stderr
+
+
+def test_rerun_after_the_closing_commit_appends_no_row(tmp_path: Path) -> None:
+    """A re-invoked finished job measures the same evidence and logs no row.
+
+    D-90: the ``<job> Finish`` closing commit commits the triage log and, on a
+    TDD run, ``tdd-audit.md``, and a re-invocation runs triage again. The run
+    is Complex: one run commit (``item-1-1.md`` and ``a.txt``) and a
+    review-gate commit (``review-code.md``) read 1 file and 0 reports,
+    ``overclassified``, and log one row. The closing commit then adds the log
+    as triage wrote it and ``tdd-audit.md``. The second run must read the
+    same ``## Evidence`` and ``## Verdict`` and leave the one row. A list that
+    carries ``plans/reports/triage-feedback-log.md`` reads 2 files and a
+    count that includes ``tdd-audit.md`` reads 1 report: the evidence differs,
+    the verdict flips to ``match`` and a second row lands.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    _commit(
+        repo,
+        "planning",
+        {f"plans/{JOB}/classification.md": "- **Classification:** Complex\n"},
+    )
+    _commit_item_report(repo, {"a.txt": "a\n"})
+    _commit(repo, "run: review", {f"plans/{JOB}/reports/review-code.md": "ok\n"})
+    log = repo / "plans" / "reports" / "triage-feedback-log.md"
+
+    first = _triage_lines(JOB, repo)
+    assert "- Files changed: 1" in first, "\n".join(first)
+    assert "- Reports: 0" in first, "\n".join(first)
+    assert _verdict(first) == "overclassified", "\n".join(first)
+    first_lines = log.read_text(encoding="utf-8").splitlines()
+    assert len(first_lines) == 3, "\n".join(first_lines)
+
+    _commit(
+        repo,
+        f"{JOB} Finish",
+        {
+            "plans/reports/triage-feedback-log.md": log.read_text(encoding="utf-8"),
+            f"plans/{JOB}/reports/tdd-audit.md": "audited\n",
+        },
+    )
+    second = _triage_lines(JOB, repo)
+
+    assert (
+        second[: second.index("## Verdict") + 2]
+        == first[: first.index("## Verdict") + 2]
+    ), "\n".join(second)
+    rows = log.read_text(encoding="utf-8").splitlines()
+    assert rows == first_lines, "\n".join(rows)
 
 
 def _undated(row: str) -> str:

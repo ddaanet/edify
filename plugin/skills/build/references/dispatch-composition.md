@@ -16,8 +16,9 @@ Every dispatch prompt carries:
    - `Read plans/<job>/design.md` (or `outline.md`, whichever the plan has)
    - `Read plans/<job>/recall-artifact.md, then Read each file it lists`
 
-   The `tdd-audit` dispatch is the exception: its inputs are the slice reports
-   and the commits that add them, and nothing else (`finishing.md` §3).
+   The `tdd-audit` dispatch is the exception: its inputs are the slice reports,
+   the commits that add them, and the hosting file and its history, which the
+   prompt names (`finishing.md` §3).
 3. **Scope:** IN — this item (or slice); OUT — the next items' targets, named
    explicitly so the executor does not wander into them. For a GREEN dispatch,
    OUT also names the rest of the item's own contract: the `Interfaces:` block
@@ -123,8 +124,8 @@ Give every dispatch a `name`:
   The gate routes implementation files only; planning artifacts route by
   artifact (`finishing.md` §1).
 - `final-review` for `finishing.md` §3.1's closing corrector, dispatched only
-  where the review was skipped or routing left a group of changed files
-  unreviewed.
+  where the review was skipped over a non-empty list or routing left a group of
+  changed files unreviewed.
 - `tdd-audit` for the auditor.
 
 Resumption is `SendMessage` to the dispatch's name. An agent spawned unnamed is

@@ -198,7 +198,8 @@ history (KD-1, KD-2). The commit-msg hook rewrites only the type prefix.
 - Item 1.1: `tests/test_verify_step_exemption.py` — pin the exemption's
   porcelain states and its single-level globs. Requirements: Major 6, F-4. The
   tests landed in that module, split from `tests/test_verify_step.py` to keep
-  each under its line cap (revised after the fact by
+  each under its line cap; the `SCRIPT` and fixtures named below now sit in
+  `tests/verify_step_helpers.py` (revised after the fact by
   `plans/review-fixes-2/` Item 3.4). The script already
   behaves, so each slice's RED is a mutation red. The mutant is a copy of the
   script with the test module's `SCRIPT` rebound. The tracked file is never
@@ -241,7 +242,8 @@ history (KD-1, KD-2). The commit-msg hook rewrites only the type prefix.
   - `changed-files.sh <job> [--phase]` → exit 0: `BASE: <sha>`, then one path
     per line. Exit 1: `NO-BASE:`, for a repo with commits and no committed
     item report. Exit 2: `ERROR:` on usage or git failure, an unborn `HEAD`
-    included (revised after the fact by `plans/review-fixes-2/` Item 3.4).
+    included, or on an `exempt-paths.sh` that does not load (revised after the
+    fact by `plans/review-fixes-2/` Item 3.4).
     Paths are read from a NUL-delimited diff, never split on whitespace.
     `--phase` takes the phase base (Item 1.4).
   - `verify-step.sh` → unchanged verdicts, its exempt pattern composed from

@@ -295,10 +295,11 @@ its second discriminator is judgement with no item count behind it (D-82). The
 route *structure* is justified (D-34, D-82); the parameters inside it are not.
 `plans/reports/triage-feedback-log.md` collects per-execution evidence for
 eventual calibration: the files changed in the set the review gate reviewed, the
-reports committed beyond the one every item leaves, behavioural code in those
-files, and the classification verdict (D-90). The reports column keeps its
-`Reports` header; rows logged before `plans/review-fixes-2/` counted the reports
-on disk, the one every item leaves included.
+reports committed beyond the one every item leaves and the review reports,
+behavioural code in those files, and the classification verdict (D-90). The
+columns keep their headers, but rows logged before `plans/review-fixes-2/` do
+not compare with later ones: they were not measured over that set, and they
+counted the reports on disk, the one every item leaves included.
 
 **L-3 — Several prompt-structure figures are heuristics, not measurements.** The
 20/60/20 distribution comes from organizational change management, and the

@@ -14,11 +14,12 @@ plugin/skills/build/scripts/changed-files.sh <job> --phase
 
 Exit 0 prints `BASE: <sha>`, the phase base, then one path per line: the
 committed diff from that base to `HEAD`, minus the paths `verify-step.sh`
-exempts and the job's own `plans/<job>/` record. The `HEAD` form keeps
-uncommitted dirt out, but not the exempt paths a `/handoff` or memory-pointer
-commit lands during the run; the script drops those by name, since they are not
-the run's work. Exit 1 (`NO-BASE:`, no committed item report) or exit 2
-(`ERROR:`) → STOP. Never substitute an empty base or a working-tree diff:
+exempts and the pipeline's record: the job's own `plans/<job>/` and the triage
+log, `plans/reports/triage-feedback-log.md`. The `HEAD` form keeps uncommitted
+dirt out, but not the exempt paths a `/handoff` or memory-pointer commit lands
+during the run; the script drops those by name, since they are not the run's
+work. Exit 1 (`NO-BASE:`, no committed item report) or exit 2 (`ERROR:`) → STOP.
+Never substitute an empty base or a working-tree diff:
 `git diff --name-only HEAD` passes an empty-field check with the wrong list.
 
 The phase base is the latest commit in the run touching a

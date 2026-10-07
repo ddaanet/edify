@@ -41,9 +41,10 @@ commits, and diffs; identify violations; produce actionable recommendations.
 - The hosting file: the plan file carrying the tdd items — `runbook.md`, or the
   `outline.md` or `design.md` routed to `/build` — and its git history. List
   revisions are made in it and appear there as orchestrator commits touching
-  that file alone. The dispatch does not name it: it is the first of
-  `plans/<job>/runbook.md`, `design.md` and `outline.md` that exists, in the
-  order `/build` §1 loads the work.
+  that file alone. The dispatch names it. Where it does not, take it as `/build`
+  §1 loads the work: `plans/<job>/runbook.md` where it exists, else the plan's
+  `design.md` or `outline.md` — and where both of those exist with no runbook,
+  return `blocked: hosting file not named`.
 - The four reports each slice produces, in order, all under
   `plans/<job>/reports/`: `item-N-M-s<k>-red.md`,
   `item-N-M-s<k>-test-review.md`, `item-N-M-s<k>-green.md`,
@@ -54,9 +55,11 @@ commits, and diffs; identify violations; produce actionable recommendations.
   the authority on what happened.
 - Phase boundaries: `phase-P-corrector.md`; the closing review:
   `final-review.md`.
-- Git history, used only to resolve a report to its adding commit and to diff
-  that commit: `git log --diff-filter=A`, `git show`, `git diff`. Never to
-  discover slice commits by searching subjects.
+- Git history, used only to resolve a report to its adding commit, to diff that
+  commit, and to read the hosting file's list-revision commits:
+  `git log --diff-filter=A`, `git show`, `git diff`,
+  `git log -- plans/<job>/<hosting file>`. Never to discover slice commits by
+  searching subjects.
 
 ## Per-Slice Checks
 

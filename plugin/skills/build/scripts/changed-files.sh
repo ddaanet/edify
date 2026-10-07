@@ -14,11 +14,16 @@ set -euo pipefail
 # git failures exit 2 with `ERROR:`, so nothing else may exit 1.
 # D-90: the changed-files list is the committed diff since that base
 # (`<base> HEAD`, never the working tree), minus the job's own
-# `plans/<job>/` record and the exempt paths `exempt-paths.sh` names: the
-# range can also hold a `/handoff` or memory-pointer commit, whose exempt
-# paths are not the run's own work. Paths come from a NUL-delimited
-# `git diff -z`, read with `read -r -d ''`, never split on whitespace or
-# newlines. `--no-renames` on the diff makes a rename a deletion plus an
+# `plans/<job>/` record, the triage log `plans/reports/triage-feedback-log.md`
+# by name, and the exempt paths `exempt-paths.sh` names: the range can also
+# hold a `/handoff` or memory-pointer commit, whose exempt paths are not the
+# run's own work. The triage log is dropped because a finished job's closing
+# commit lands it, and a re-invocation would otherwise list it. Only it, by
+# name: the rest of `plans/reports/` holds an Investigation's deliverable,
+# which stays on the list. It is dropped here, not exempted in
+# `exempt-paths.sh`, which `verify-step.sh` also reads (D-91). Paths come
+# from a NUL-delimited `git diff -z`, read with `read -r -d ''`, never split
+# on whitespace or newlines. `--no-renames` on the diff makes a rename a deletion plus an
 # addition whatever the user's `diff.renames`, so both paths are listed, and
 # keeps git's skipped-rename warning, which goes to stderr, out of the paths
 # on stdout. Both logs carry it for uniformity only: a
@@ -58,11 +63,13 @@ esac
 # Located as in `verify-step.sh`, whose comment explains the idiom. Here
 # `BASH_SOURCE[0]` may be relative to the CWD, so the source precedes the
 # `cd` below. An unset variable would trip `set -u`, whose exit 1 is
-# `NO-BASE:`'s code.
+# `NO-BASE:`'s code. The variable is cleared first: an inherited value would
+# pass the check when the file defines nothing.
 case "${BASH_SOURCE[0]}" in
     */*) script_dir="${BASH_SOURCE[0]%/*}" ;;
     *) script_dir="." ;;
 esac
+unset EXEMPT_PATHS_ALTERNATION
 # shellcheck source=SCRIPTDIR/exempt-paths.sh
 if ! source "$script_dir/exempt-paths.sh" || [[ -z ${EXEMPT_PATHS_ALTERNATION:-} ]]; then
     echo "ERROR: cannot load EXEMPT_PATHS_ALTERNATION from exempt-paths.sh"
@@ -115,7 +122,7 @@ exclude_prefix="plans/$job/"
 # `--` keeps a path named `HEAD` from making the revision ambiguous.
 git diff --name-only --no-renames -z "$base_sha" HEAD -- | while IFS= read -r -d '' path; do
     case "$path" in
-        "$exclude_prefix"*) continue ;;
+        "$exclude_prefix"* | plans/reports/triage-feedback-log.md) continue ;;
     esac
     if [[ $path =~ $exempt_re ]]; then
         continue

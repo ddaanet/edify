@@ -42,17 +42,17 @@ fi
 # D-90: Reports counts what the run committed beyond the one report every
 # item leaves: the paths directly under `plans/<job>/reports/` that
 # `<base> HEAD` adds, minus the per-item `item-<N>-<M>.md` and the
-# review-gate reports (`review.md`, `review-*.md`, `final-review.md`). Slice,
-# refactor and phase-boundary reports count; planning reports committed
-# before the base fall outside the range. `review_artifact` below reports
-# the review gate's presence separately. `:(glob)` keeps `*` inside one path
-# component, so a report below `reports/` is not "directly under" it;
-# `--no-renames` reads a rename as an addition. Paths come NUL-delimited, as
-# in `changed-files.sh`: without `-z`, git C-quotes a name holding `"`, `\`
-# or a control byte whatever `core.quotePath` says, and the quoted name
-# escapes the exclusions. One `x` per counted report, then `wc -c`; with
-# `pipefail` a failing `git diff` fails the assignment, never reading as
-# "none".
+# review-gate reports (`review.md`, `review-*.md`, `final-review.md`,
+# `tdd-audit.md`). Slice, refactor and phase-boundary reports count;
+# planning reports committed before the base fall outside the range.
+# `review_artifact` below reports the review gate's presence separately.
+# `:(glob)` keeps `*` inside one path component, so a report below
+# `reports/` is not "directly under" it; `--no-renames` reads a rename as an
+# addition. Paths come NUL-delimited, as in `changed-files.sh`: without
+# `-z`, git C-quotes a name holding `"`, `\` or a control byte whatever
+# `core.quotePath` says, and the quoted name escapes the exclusions. One `x`
+# per counted report, then `wc -c`; with `pipefail` a failing `git diff`
+# fails the assignment, never reading as "none".
 reports_dir="plans/$job_dir/reports"
 item_report_re='^item-[0-9]+-[0-9]+\.md$'
 if ! reports_count=$(git diff --name-only --no-renames -z --diff-filter=A \
@@ -63,7 +63,7 @@ if ! reports_count=$(git diff --name-only --no-renames -z --diff-filter=A \
             continue
         fi
         case "$report_name" in
-            review.md | review-*.md | final-review.md) continue ;;
+            review.md | review-*.md | final-review.md | tdd-audit.md) continue ;;
         esac
         printf x
     done | wc -c | tr -d ' '); then
@@ -230,13 +230,21 @@ fi
 
 # Append to triage-feedback-log.md (only if verdict is not no-classification)
 if [[ "$verdict" != "no-classification" ]]; then
+    # A failed write would exit 1 under `set -e`, the usage error's code.
     log_dir="plans/reports"
-    mkdir -p "$log_dir"
     log_file="$log_dir/triage-feedback-log.md"
+    mkdir -p "$log_dir" || {
+        echo "ERROR: cannot write $log_file"
+        exit 2
+    }
 
     if [[ ! -f "$log_file" ]]; then
-        echo "| Date | Job | Predicted | Files Changed | Reports | Behavioral Code | Verdict |" > "$log_file"
-        echo "|---|---|---|---|---|---|---|" >> "$log_file"
+        printf '%s\n' \
+            "| Date | Job | Predicted | Files Changed | Reports | Behavioral Code | Verdict |" \
+            "|---|---|---|---|---|---|---|" > "$log_file" || {
+            echo "ERROR: cannot write $log_file"
+            exit 2
+        }
     fi
 
     # One row per evidence: the append is skipped when a row equals the new one
@@ -265,7 +273,10 @@ if [[ "$verdict" != "no-classification" ]]; then
 
     if [[ $row_seen == "no" ]]; then
         log_date=$(date -u +%Y-%m-%d)
-        printf '%s| %s | %s\n' "$log_lead" "$log_date" "$new_undated" >> "$log_file"
+        printf '%s| %s | %s\n' "$log_lead" "$log_date" "$new_undated" >> "$log_file" || {
+            echo "ERROR: cannot write $log_file"
+            exit 2
+        }
     fi
 fi
 

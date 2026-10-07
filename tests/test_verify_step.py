@@ -97,14 +97,18 @@ def test_quotepath_false_does_not_hide_dirt(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    "exempt_paths",
+    ("exempt_paths", "inherited"),
     [
-        pytest.param(None, id="absent"),
-        pytest.param("# defines nothing\n", id="defines-nothing"),
+        pytest.param(None, None, id="absent"),
+        pytest.param("# defines nothing\n", None, id="defines-nothing"),
+        pytest.param("# defines nothing\n", ".*", id="defines-nothing-inherited"),
     ],
 )
 def test_unloadable_exempt_paths_is_an_error_not_dirty(
-    tmp_path: Path, exempt_paths: str | None
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    exempt_paths: str | None,
+    inherited: str | None,
 ) -> None:
     """An ``exempt-paths.sh`` that cannot supply the alternation exits 2.
 
@@ -115,7 +119,16 @@ def test_unloadable_exempt_paths_is_an_error_not_dirty(
     ``ERROR: cannot load EXEMPT_PATHS_ALTERNATION from exempt-paths.sh`` with
     exit 2. A bare ``source`` fails with exit 1 (the missing file, or the
     unbound variable under ``set -u``), which is ``DIRTY:``'s code.
+
+    ``defines-nothing-inherited`` runs the script with
+    ``EXEMPT_PATHS_ALTERNATION=.*`` in its environment. A guard that tests
+    the variable without clearing it first passes on the inherited value,
+    reads the untracked file as exempt, and runs ``just``: ``CLEAN:``.
     """
+    if inherited is None:
+        monkeypatch.delenv("EXEMPT_PATHS_ALTERNATION", raising=False)
+    else:
+        monkeypatch.setenv("EXEMPT_PATHS_ALTERNATION", inherited)
     repo = _init_repo(tmp_path)
     (repo / "dirt.txt").write_text("dirt\n", encoding="utf-8")
     scripts = tmp_path / "scripts"

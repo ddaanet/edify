@@ -20,6 +20,7 @@ item is considered resolved:
 2. Run `just precommit`
    - If fails: fix issues, re-run (loop until pass or give up)
 3. Run `plugin/skills/build/scripts/verify-step.sh`
+   - `CLEAN:` → step 4; `PRECOMMIT:` → step 2; exit 2 → escalate
    - If `DIRTY:`: commit the fix by name (`git commit -- <paths>`), subject
      `<type>: <job> Item N.M[/k] — <title>`, then re-run it once:
      - `CLEAN:` → step 4

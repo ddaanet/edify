@@ -38,7 +38,10 @@ output. The evidence:
   These are the paths directly under `plans/<job>/reports/` that
   `<base> HEAD` adds, minus the per-item `item-<N>-<M>.md`, where N and M
   are digits, and minus the review-gate reports (`review.md`,
-  `review-*.md`, `final-review.md`). Slice, refactor and phase-boundary
+  `review-*.md`, `final-review.md`, and `tdd-audit.md`, added at the
+  review gate with the list's drop of the triage log,
+  `plans/reports/triage-feedback-log.md`, so a re-invoked finished job
+  measures the same set). Slice, refactor and phase-boundary
   reports count. Planning reports committed before the base fall outside the
   range. That replaces the name exclusions `design-review*`,
   `outline-review*` and `recall-*`, which never covered `runbook-review.md`
@@ -239,13 +242,18 @@ design record. No phases. All edits to one prose file sit in one item.
     records each under `Mutation proof`:
     - `for path in $(git diff --name-only …)`;
     - a newline `read` with `-z` dropped from the diff.
+  - At the review gate my human partner added two further mutants, which
+    the `back\slash.txt` path reds: a newline read of
+    `git -c core.quotepath=off diff --name-only …`, and a `read` without
+    `-r`.
   - Each mutation is restored before the next.
 
   Slices:
   1. `test_paths_with_space_and_non_ascii_bytes_are_listed_whole`. The
-     run commit adds `item-1-1.md`, `my file.txt`, `café.txt` and the
-     exempt `inbox/é.md`. Expect stdout to be exactly `BASE: <pre-run
-     sha>`, then `café.txt`, then `my file.txt`.
+     run commit adds `item-1-1.md`, `my file.txt`, `café.txt`,
+     `back\slash.txt` and the exempt `inbox/é.md`. Expect stdout to be
+     exactly `BASE: <pre-run sha>`, then `back\slash.txt`, then
+     `café.txt`, then `my file.txt`.
 
 - Item 1.4: the `exempt-paths.sh` load guard, in `tests/test_changed_files.py`
   and `tests/test_verify_step.py` (the fail-closed module). Requirements: m23.

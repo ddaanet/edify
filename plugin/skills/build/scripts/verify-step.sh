@@ -13,7 +13,9 @@ case "${BASH_SOURCE[0]}" in
     *) script_dir="." ;;
 esac
 # A file that sources but leaves the variable unset would trip `set -u`,
-# whose exit 1 reads as the DIRTY verdict.
+# whose exit 1 reads as the DIRTY verdict. The variable is cleared first: an
+# inherited value would pass the check when the file defines nothing.
+unset EXEMPT_PATHS_ALTERNATION
 # shellcheck source=SCRIPTDIR/exempt-paths.sh
 if ! source "$script_dir/exempt-paths.sh" || [[ -z ${EXEMPT_PATHS_ALTERNATION:-} ]]; then
     echo "ERROR: cannot load EXEMPT_PATHS_ALTERNATION from exempt-paths.sh"

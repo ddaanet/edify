@@ -107,6 +107,33 @@ def test_reports_exclude_the_per_item_report(tmp_path: Path) -> None:
     assert _verdict(lines) == "underclassified", "\n".join(lines)
 
 
+def test_reports_exclude_the_tdd_audit_report(tmp_path: Path) -> None:
+    """The audit's ``tdd-audit.md`` is review record, not a counted report.
+
+    D-90: a finished TDD job's closing commit adds ``tdd-audit.md`` beside the
+    review reports, so a re-invoked job would count it and measure different
+    evidence. The run adds ``item-1-1.md``, a plain ``notes.txt`` and
+    ``tdd-audit.md``: 0 reports, so a Simple run reads ``match``. An
+    implementation excluding only ``review.md``, ``review-*.md`` and
+    ``final-review.md`` counts it and reads ``underclassified``.
+    """
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+    _commit(
+        repo,
+        "planning",
+        {f"plans/{JOB}/classification.md": "- **Classification:** Simple\n"},
+    )
+    _commit_item_report(
+        repo,
+        {"notes.txt": "plain text\n", f"plans/{JOB}/reports/tdd-audit.md": "ok\n"},
+    )
+
+    lines = _triage_lines(JOB, repo)
+    assert "- Reports: 0" in lines, "\n".join(lines)
+    assert _verdict(lines) == "match", "\n".join(lines)
+
+
 def test_reports_read_names_byte_exact(tmp_path: Path) -> None:
     """Report names are read NUL-delimited, never as git's quoted form.
 

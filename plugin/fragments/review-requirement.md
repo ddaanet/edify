@@ -132,8 +132,9 @@ loudly if any field is missing or contains only placeholder text.**
 - **Changed files:** Explicit file list. Under `/build`, it is the list
   `plugin/skills/build/scripts/changed-files.sh <job>` prints after its `BASE:`
   line (`--phase` at a phase boundary): the committed diff from the run's or
-  phase's base to `HEAD`, minus the paths `verify-step.sh` exempts and the job's
-  own `plans/<job>/` record. The working-tree form,
+  phase's base to `HEAD`, minus the paths `verify-step.sh` exempts and the
+  pipeline's record: the job's own `plans/<job>/` and the triage log,
+  `plans/reports/triage-feedback-log.md`. The working-tree form,
   `git diff --name-only <base>` against the base commit of the work under
   review, is for uncommitted work only: `/review`, and `/build` §4.1's
   corrector, which reviews an item before its commit. It takes in uncommitted
