@@ -5,7 +5,8 @@ stdout, no log row), an entry that stops triage with ``ERROR:`` and exit 2
 and appends no log row (including a run outside any work tree, which prints
 one ``ERROR:`` line, and a ``changed-files.sh`` failure whose own output is
 printed first), a failing git call behind the reports count, and a
-classification parse that fails rather than returning a result. A run that
+classification parse that fails rather than returning a result (an
+unreadable ``classification.md`` or a failing label ``sed``). A run that
 reaches a verdict, including ``no-classification``, is a result and stays in
 the hub. The behavioural-code and log failures stay in their own modules
 (D-90).
@@ -15,6 +16,8 @@ reports and classification tests, to keep each module under its line cap.
 See ``tests/triage_feedback_helpers.py`` for the shared fixtures.
 """
 
+import os
+import shlex
 import shutil
 from pathlib import Path
 
@@ -180,5 +183,91 @@ def test_changed_files_error_is_printed_then_exit_2(tmp_path: Path) -> None:
         "ERROR: git log failed",
         "ERROR: changed-files.sh exited 2",
     ], output
+    assert result.returncode == 2, output
+    assert not (repo / "plans" / "reports" / "triage-feedback-log.md").exists()
+
+
+def _underclassified_repo(repo: Path) -> Path:
+    """Build an ``underclassified`` run; return its ``classification.md``.
+
+    The run commit holds a ``def`` under a ``Simple`` classification, so a
+    run that is not stopped logs a row.
+    """
+    _init_repo(repo)
+    _commit_item_report(
+        repo,
+        {
+            f"plans/{JOB}/classification.md": "- **Classification:** Simple\n",
+            "module.py": "def foo():\n    pass\n",
+        },
+    )
+    return repo / "plans" / JOB / "classification.md"
+
+
+@pytest.mark.skipif(os.geteuid() == 0, reason="root reads a mode-000 file")
+def test_unreadable_classification_is_an_error(tmp_path: Path) -> None:
+    """An unreadable ``classification.md`` exits 2 with ``grep failed``.
+
+    The file exists, so the ``-f`` test passes, and ``grep`` exits 2 on it.
+    Read as "no Classification line" the run would end at
+    ``no-classification`` with an evidence report and exit 0; the fixture
+    otherwise reaches ``underclassified`` and logs a row. The behavioural
+    grep prints the same ``ERROR:`` line, so grep's own diagnostic, naming
+    the file, ties the failure to the classification grep. The mode is
+    restored before cleanup.
+    """
+    repo = tmp_path / "repo"
+    classification = _underclassified_repo(repo)
+    classification.chmod(0o000)
+    try:
+        result = _run_triage(JOB, repo)
+    finally:
+        classification.chmod(0o644)
+
+    output = result.stdout + result.stderr
+    assert result.stdout.splitlines() == ["ERROR: grep failed"], output
+    assert "classification.md" in result.stderr, output
+    assert result.returncode == 2, output
+    assert not (repo / "plans" / "reports" / "triage-feedback-log.md").exists()
+
+
+def test_failing_label_sed_is_an_error(tmp_path: Path) -> None:
+    """A failing label ``sed`` exits 2 with ``sed failed``, never a verdict.
+
+    The script runs ``sed`` once, on the label. A ``sed`` shim, on a call
+    whose arguments name ``Classification``, runs the real tool and then
+    exits 4, so the label is printed and only the status reports the
+    failure; it passes any other call through. Without the guard, ``set -e``
+    ends the run at exit 4 with no ``ERROR:`` line. A guard that drops the
+    status, or tests the captured label for emptiness instead, reads
+    ``Simple``, reaches ``underclassified`` and logs a row.
+    """
+    real_sed = shutil.which("sed")
+    assert real_sed is not None, "sed not found on PATH"
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    shim = bin_dir / "sed"
+    quoted_sed = shlex.quote(real_sed)
+    shim.write_text(
+        "#!/bin/sh\n"
+        'for arg in "$@"; do\n'
+        '    case "$arg" in\n'
+        "        *Classification*)\n"
+        f'            {quoted_sed} "$@"\n'
+        '            echo "shim: fail" >&2\n'
+        "            exit 4\n"
+        "            ;;\n"
+        "    esac\n"
+        "done\n"
+        f'exec {quoted_sed} "$@"\n',
+        encoding="utf-8",
+    )
+    shim.chmod(0o755)
+    repo = tmp_path / "repo"
+    _underclassified_repo(repo)
+
+    result = _run_triage(JOB, repo, path_prepend=bin_dir)
+    output = result.stdout + result.stderr
+    assert result.stdout.splitlines() == ["ERROR: sed failed"], output
     assert result.returncode == 2, output
     assert not (repo / "plans" / "reports" / "triage-feedback-log.md").exists()
