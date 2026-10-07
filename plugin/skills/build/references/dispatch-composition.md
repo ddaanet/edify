@@ -123,6 +123,12 @@ Give every dispatch a `name`:
   A file kind is always classed into one of these rows, never into a new group.
   The gate routes implementation files only; planning artifacts route by
   artifact (`finishing.md` §1).
+- `review-plan-<source job>-<stem>` for a planning artifact on the gate's list,
+  a name and not a group: `<source job>` is the `plans/` directory the artifact
+  sits in and `<stem>` is `design`, `outline` or `runbook`, so
+  `plans/build-fixes/outline.md` is `review-plan-build-fixes-outline`. It
+  matches `review-*.md`, so the gate's landed check reads its report as a review
+  report.
 - `final-review` for `finishing.md` §3.1's closing corrector, dispatched only
   where the review was skipped over a non-empty list or routing left a group of
   changed files unreviewed.

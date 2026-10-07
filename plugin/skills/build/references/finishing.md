@@ -71,10 +71,19 @@ Scope per dispatch is that artifact group's share of step 1's list,
 implementation only; the template's §Field Rules set every other field.
 
 Planning artifacts do not route through this gate. They route by artifact, as
-`docs/references/pipeline-contracts.md` D-26 records: `design.md` →
-`edify:design-corrector`, `outline.md` → `edify:outline-corrector`, `runbook.md`
-→ `edify:runbook-corrector`. `runbook-corrector` rejects anything that is not
-`runbook.md`.
+`docs/references/pipeline-contracts.md` D-26 records, each under its name from
+`references/dispatch-composition.md` §Naming and resumption, `<source job>`
+being the `plans/` directory the artifact sits in:
+
+- `design.md` → `edify:design-corrector`, as `review-plan-<source job>-design`;
+- `outline.md` → `edify:outline-corrector`, as
+  `review-plan-<source job>-outline`;
+- `runbook.md` → `edify:runbook-corrector`, as
+  `review-plan-<source job>-runbook`.
+
+The prompt assigns the report path from that name, as `dispatch-composition.md`
+§Prompt contents item 5 does for every dispatch. `runbook-corrector` rejects
+anything that is not `runbook.md`.
 
 **Report-only second pass:** where this session applied a report-only reviewer's
 fixes, resume that reviewer (`review-<group>`) once by `SendMessage`, naming the
