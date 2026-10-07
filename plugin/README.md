@@ -97,6 +97,19 @@ Plus three in `skills/build/scripts/`, used by `/build`:
   the three paths dirty by convention (`memory`, `.claude/handoff-*.md`,
   `inbox/*.md`), which the gate tolerates and the changed-files list drops.
 
+## Optional plugins
+
+Edify depends on none of these plugins. Each entry says what is lost without it:
+
+- `plugin-dev` — without it, the review gate's skill-definition row (routing
+  table in `fragments/review-requirement.md`) falls back to `edify:corrector`,
+  and the agent-definition row loses its criteria source — review against the
+  agent definitions already in `agents/` instead.
+- `craft` — without it, the design-graph row keeps `edify:corrector` but loses
+  its criteria source.
+- `sandbox-lies` — what is lost without it is stated in the `verify-step.sh`
+  bullet under Scripts.
+
 ## Recipes
 
 `just precommit` runs the plugin's own checks. See `justfile` and
