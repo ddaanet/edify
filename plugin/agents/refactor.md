@@ -160,8 +160,10 @@ Update all references to refactored code:
    - Update only if agent behavior rules changed
 
 Never write into a plan's own sources — `runbook.md`, `design.md`, `outline.md`,
-`requirements.md`. You run inside a slice, where `runbook.md` is the
-orchestrator's artifact and a second writer collides with it. Your report under
+`requirements.md`. You run inside a slice. The file hosting the item —
+`runbook.md`, or the `outline.md` or `design.md` routed to `/build` — takes the
+orchestrator's list-revision commits, and the rest are the plan the run executes
+against. A second writer collides with either. Your report under
 `plans/<job>/reports/` is the one exception, and it is required (Step 6). Record
 every rename in your report; the orchestrator carries the reference update into
 the remaining items.
