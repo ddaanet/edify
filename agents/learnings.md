@@ -61,8 +61,8 @@ Institutional knowledge accumulated across sessions. Append new learnings at the
 - Root cause: `re.search` returns first match, not best match. Template text like `plans/{plan}/outline.md` in a requirements bullet appears before the actual plan path references.
 
 ## When calling triage-feedback.sh
-- Anti-pattern: Calling `triage-feedback.sh plans/outline-proofing baseline` — the script prepends `plans/` to `$1`, so the reports dir becomes `plans/plans/outline-proofing/reports` (double-prefixed).
-- Correct pattern: Pass just the job name: `triage-feedback.sh outline-proofing baseline`. The script constructs `plans/outline-proofing/reports` internally.
+- Anti-pattern: Calling `triage-feedback.sh plans/outline-proofing` — `$1` is a job name, not a path. Triage hands it to `changed-files.sh`, which refuses any `$1` holding `/` as not a job name (`ERROR: usage: changed-files.sh <job> [--phase]; not a job name: plans/outline-proofing`) and exits 2; triage prints that line, then `ERROR: changed-files.sh exited 2`, and itself exits 2 with no evidence and no log row. It never reaches a double-prefixed `plans/plans/outline-proofing/reports`. A two-argument call, such as the retired base argument in `triage-feedback.sh outline-proofing baseline`, exits 1 with `Usage: triage-feedback.sh <job>` on stderr.
+- Correct pattern: Pass the job name alone: `triage-feedback.sh outline-proofing`. The base is derived from report history — `changed-files.sh` takes the parent of the earliest commit adding a `plans/<job>/reports/item-*` report (D-88) — and the script builds `plans/outline-proofing/reports` internally.
 ## When referencing format files in skill steps
 - Anti-pattern: "Generate X using format from `references/foo.md`" — implies reading but doesn't require it. Agent may rationalize from memory rather than reading the file, producing format drift.
 - Correct pattern: Explicit Read instruction: "Read `references/foo.md`. Generate X using that format." Matches Complex path convention ("Read `references/write-outline.md`") and removes ambiguity.
