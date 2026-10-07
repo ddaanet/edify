@@ -146,8 +146,9 @@ def _run_triage_relative(
     ``link_dir/plugin`` is made a symlink to the real ``plugin`` directory and
     the script is run through it, so it sees a relative ``BASH_SOURCE`` that a
     change of directory breaks if the script did not resolve it first. The
-    relative path to the real script climbs to ``/``, where surplus ``..``
-    are absorbed, so it would resolve from any directory of the fixture.
+    path runs to the link, not to the real script, so it stays short and
+    resolves from ``cwd`` alone: a path climbing to ``/`` would absorb
+    surplus ``..`` and resolve from the repository root as well.
     """
     link = link_dir / "plugin"
     link.symlink_to(SCRIPT.parents[1], target_is_directory=True)

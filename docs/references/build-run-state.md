@@ -34,7 +34,7 @@ component — git's default `*` also matches `/`, so `reports/item-x/notes.md`
 would count. `--no-renames` is there for uniformity with the script's diff only:
 a path-limited log pairs no rename source from outside its pathspec, so a report
 renamed into place reads as added either way. Every `git log` whose output
-`/build` reads passes `--no-show-signature`, because a user's
+`/build` reads as hashes passes `--no-show-signature`, because a user's
 `log.showSignature` prints verification lines ahead of the shas;
 `tests/test_build_prose_git_log.py`
 (`test_read_git_log_commands_print_hashes_only_on_signed_history`) runs each
@@ -86,16 +86,17 @@ base instead (D-89). In a repo with commits and no committed item report it
 exits 1 with `NO-BASE:`. A usage error or a git failure exits 2 with `ERROR:`
 alone on stdout, with no `BASE:` line and no path: the list is built in full
 before `BASE:` prints, so a diff failing part-way leaves nothing ahead of it
-(`test_late_diff_failure_prints_error_alone`). An unborn `HEAD` is a git
-failure, so it exits 2 too, never `NO-BASE:`. The `HEAD` form keeps uncommitted
-exempt dirt out, but not the exempt paths a `/handoff` or memory-pointer commit
-lands during the run; those are not the run's work, so the list drops them by
-name, as `verify-step.sh` does. `plans/<job>/` goes too: the run's reports and
-the list revisions in the file hosting its items — `runbook.md`, or the
-`outline.md` or `design.md` routed to `/build` — are its record, not its
-implementation. The triage log goes for the same reason: it is the pipeline's
-record across jobs, and a closing commit lands it. It goes by name, not with the
-rest of `plans/reports/`, which is where an Investigation's deliverable goes
+(`tests/test_changed_files_errors.py`,
+`test_late_diff_failure_prints_error_alone`). An unborn `HEAD` is a git failure,
+so it exits 2 too, never `NO-BASE:`. The `HEAD` form keeps uncommitted exempt
+dirt out, but not the exempt paths a `/handoff` or memory-pointer commit lands
+during the run; those are not the run's work, so the list drops them by name, as
+`verify-step.sh` does. `plans/<job>/` goes too: the run's reports and the list
+revisions in the file hosting its items — `runbook.md`, or the `outline.md` or
+`design.md` routed to `/build` — are its record, not its implementation. The
+triage log goes for the same reason: it is the pipeline's record across jobs,
+and a closing commit lands it. It goes by name, not with the rest of
+`plans/reports/`, which is where an Investigation's deliverable goes
 (`/design`'s artifact-destination table); D-82 routes Investigation to `/build`,
 so that deliverable stays on the list, under review and counted. The exempt
 alternation lives in one sourced file, `exempt-paths.sh`, which both scripts

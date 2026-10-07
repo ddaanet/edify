@@ -18,7 +18,10 @@ esac
 # path. CDPATH is unset first: it would send `cd` to a matching directory
 # elsewhere and print the destination into the capture.
 unset CDPATH
-script_dir=$(cd "$script_dir" && pwd)
+script_dir=$(cd "$script_dir" && pwd) || {
+    echo "ERROR: cannot resolve the script directory"
+    exit 2
+}
 
 # D-90: every pathspec, `classification.md`, `reports_dir` and the log path are
 # root-relative, as `changed-files.sh` already is (it reads the same
@@ -34,10 +37,11 @@ if [[ $status -ne 0 ]]; then
     echo "ERROR: git rev-parse --show-toplevel failed"
     exit 2
 fi
-# Residual bound: this `cd` failing after a successful `rev-parse` has no
-# test; no input provokes it without fault injection.
+# Residual bound: this `cd` failing after a successful `rev-parse`, like the
+# script-directory `cd` above, has no test; no input provokes either without
+# fault injection.
 if ! cd "$repo_root"; then
-    echo "ERROR: cannot change to $repo_root"
+    printf 'ERROR: cannot change to %s\n' "$repo_root"
     exit 2
 fi
 

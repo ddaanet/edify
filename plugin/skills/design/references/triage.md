@@ -118,10 +118,11 @@ job-level `- **Classification:** <label>` line, then one block per item:
   investigation / ephemeral]
 - **Evidence:** Which criteria and recall entries informed the decision
 
-**Classification persistence (C-2):** Write the filled-in block or blocks to
+**Classification persistence:** Write the filled-in block or blocks to
 `plans/<job>/classification.md`. Open the file with one job-level
 `- **Classification:** <label>` line, at the start of its line, before any
-per-item block. Write `<label>` as exactly `Simple`, `Moderate`, `Complex` or
+per-item block, so that no other `Classification:` line, bulleted or bare, can
+precede it. Write `<label>` as exactly `Simple`, `Moderate`, `Complex` or
 `Defect`, with nothing after it: `triage-feedback.sh` reads the file's first
 `Classification:` line, and any other value gives `no-classification`, so the
 job's row is lost to calibration. A composite job's label is its most demanding

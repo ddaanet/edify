@@ -211,7 +211,7 @@ def test_paths_with_space_and_non_ascii_bytes_are_listed_whole(
 ) -> None:
     r"""A path with a space or non-ASCII bytes is listed whole and unquoted.
 
-    D-90 reads the diff NUL-delimited. The run commit adds ``my file.txt``
+    The list is read NUL-delimited (D-90). The run commit adds ``my file.txt``
     and ``café.txt`` beside the exempt ``inbox/é.md``, and ``back\slash.txt``,
     a name holding a literal backslash. A word-split read
     (``for path in $(git diff --name-only ...)``) lists ``my`` and ``file.txt``

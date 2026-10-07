@@ -36,14 +36,15 @@ in between.
 2. No owner to resume, or the resume fails or returns without progress → a fresh
    dispatch composed from the item by `references/dispatch-composition.md`,
    named `<step name>-fix` after the step whose dirt it finishes (`item-1-2-fix`
-   after a general item, `item-1-1-s2-green-fix` after a slice's GREEN),
-   carrying the dirt — the `verify-step.sh` listing, the diff and any precommit
-   output — as a prior attempt's work to examine and finish. After a tdd slice's
-   step, the step names the agent: after its GREEN, `edify:test-driver` in GREEN
-   mode; after its code-review, refactor or list-revision commit,
-   `edify:artisan`. Either dispatch carries the slice's entry and the dirt.
-   After a phase-boundary, review-gate or closing commit there is no item to
-   compose from: go to step 3.
+   after a general item, `item-1-1-s2-green-fix` after a slice's GREEN, and
+   `item-1-1-s2-list-revision-fix` after the in-session list-revision commit,
+   which has no dispatch name of its own), carrying the dirt — the
+   `verify-step.sh` listing, the diff and any precommit output — as a prior
+   attempt's work to examine and finish. After a tdd slice's step, the step
+   names the agent: after its GREEN, `edify:test-driver` in GREEN mode; after
+   its code-review, refactor or list-revision commit, `edify:artisan`. Either
+   dispatch carries the slice's entry and the dirt. After a phase-boundary,
+   review-gate or closing commit there is no item to compose from: go to step 3.
 3. That fails → escalate to the user with the listing and the dispatch's
    findings.
 

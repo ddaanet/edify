@@ -47,10 +47,13 @@ appropriate reviewer by its routing table.
    → there is nothing to review: take `/build` §5's `review-skip.md` branch,
    stating that the list came back empty, and go straight to the report commit
    below, which carries it.
-2. Group by the four fixed rows of `references/dispatch-composition.md` §Naming
-   and resumption — `review-code`, `review-skill`, `review-agent`,
-   `review-design` — classing each file kind by the rule stated there, never
-   into a new group. The row's slug is the group's dispatch name.
+2. Set aside each planning artifact on the list — a `design.md`, `outline.md` or
+   `runbook.md` under another job's `plans/` directory — for the
+   planning-artifact paragraph below. Group the rest by the four fixed rows of
+   `references/dispatch-composition.md` §Naming and resumption — `review-code`,
+   `review-skill`, `review-agent`, `review-design` — classing each file kind by
+   the rule stated there, never into a new group. The row's slug is the group's
+   dispatch name.
 3. Look up the reviewer per group from the routing table
 4. Read `references/review-dispatch-template.md` and dispatch each group to its
    reviewer, structuring the prompt by it
@@ -81,9 +84,10 @@ being the `plans/` directory the artifact sits in:
 - `runbook.md` → `edify:runbook-corrector`, as
   `review-plan-<source job>-runbook`.
 
-The prompt assigns the report path from that name, as `dispatch-composition.md`
-§Prompt contents item 5 does for every dispatch. `runbook-corrector` rejects
-anything that is not `runbook.md`.
+The prompt assigns the report path from that name, under the running job —
+`plans/<job>/reports/review-plan-<source job>-<stem>.md`, never the source job's
+`reports/` — as `dispatch-composition.md` §Prompt contents item 5 does for every
+dispatch. `runbook-corrector` rejects anything that is not `runbook.md`.
 
 **Report-only second pass:** where this session applied a report-only reviewer's
 fixes, resume that reviewer (`review-<group>`) once by `SendMessage`, naming the
@@ -97,17 +101,22 @@ this gate actually dispatched. The Read proves the report exists; without it, §
 cannot proceed. UNFIXABLE in any report → validate it by
 `../../fragments/review-requirement.md` §UNFIXABLE Detection Protocol, then STOP
 on each that holds and surface it to the user with the path. Where the protocol
-resumes the corrector for reclassification, resume the group's own reviewer,
-`review-<group>`, by `SendMessage`: for a report-only group that is the reviewer
-that raised the finding, whose reply comes back in parts as on the first pass,
-and this session rewrites the report from it. Do not proceed to §2 until every
-issue is resolved or accepted.
+resumes the corrector for reclassification, resume the reviewer that raised it
+by `SendMessage` to its dispatch name — `review-<group>`, or
+`review-plan-<source job>-<stem>` for a planning artifact; a report-only group's
+reviewer replies in parts as on the first pass, and this session rewrites the
+report from it. Do not proceed to §2 until every issue is resolved or accepted.
 
-A reviewer commits nothing, so make the report commit yourself: every group's
-report, with the fixes applied where there are any, by the reviewer or by this
-session — or, where review was skipped, `plans/<job>/reports/review-skip.md`.
-Stage those paths by name and commit with `git commit -- <paths>`, subject
-`<type>: <job> Review gate`. Then:
+A reviewer commits nothing, so make the report commit yourself, one commit for
+the whole gate: every report this gate dispatched — each group's
+`review-<group>` report and each planning artifact's
+`review-plan-<source job>-<stem>` report — with the fixes applied where there
+are any, by the reviewer or by this session, a planning corrector's edits to the
+source job's plan file included; or, where review was skipped,
+`plans/<job>/reports/review-skip.md`. A `review-plan-*` report committed on its
+own, ahead of the group reports, would read as the gate landed to the check
+above. Stage those paths by name and commit with `git commit -- <paths>`,
+subject `<type>: <job> Review gate`. Then:
 
 ```bash
 plugin/skills/build/scripts/verify-step.sh
