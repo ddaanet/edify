@@ -266,6 +266,17 @@ cite D-numbers, never an outline's KD.
 
        Today stdout carries `changed-files.sh`'s line and triage's second
        one.
+
+       List revision after 2.2/1: slice 2 gains
+       `test_cdpath_does_not_move_the_script_dir`. 2.2/1's code review
+       found that an exported `CDPATH` made `cd "$script_dir"` print the
+       destination into the capture, and fixed it with `unset CDPATH`.
+       Nothing pins that fix. CDPATH applies only to a path not starting
+       with `/`, `.` or `..`, so the run invokes the script as
+       `plugin/bin/triage-feedback.sh`, through a `plugin` symlink at the
+       fixture's root, with CWD the root and `CDPATH=.` in the environment.
+       Expect slice 1's evidence, verdict, row and exit 0. The behaviour
+       exists, so its red is a mutation red: drop `unset CDPATH`.
   - Interfaces:
     - `triage-feedback.sh <job>` from any directory in the work tree prints
       the evidence and verdict a run from the root prints, and appends to the
