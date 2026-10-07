@@ -23,10 +23,10 @@ set -euo pipefail
 # which stays on the list. It is dropped here, not exempted in
 # `exempt-paths.sh`, which `verify-step.sh` also reads (D-91). Paths come
 # from a NUL-delimited `git diff -z`, read with `read -r -d ''`, never split
-# on whitespace or newlines. `--no-renames` on the diff makes a rename a deletion plus an
-# addition whatever the user's `diff.renames`, so both paths are listed, and
-# keeps git's skipped-rename warning, which goes to stderr, out of the paths
-# on stdout. Both logs carry it for uniformity only: a
+# on whitespace or newlines. `--no-renames` on the diff makes a rename a
+# deletion plus an addition whatever the user's `diff.renames`, so both paths
+# are listed, and keeps git's skipped-rename warning, which goes to stderr,
+# out of the paths on stdout. Both logs carry it for uniformity only: a
 # path-limited log pairs no rename source from outside its pathspec, so a
 # report renamed into place reads as added either way (probed, git 2.47.3).
 # The exempt match happens inside that same NUL-delimited read loop, with
@@ -34,7 +34,9 @@ set -euo pipefail
 # rather than a second pass through grep, which would need its own NUL
 # handling. The output is one path per line, so a path holding a
 # newline prints as two lines: a residual bound of the line format, not of
-# the read.
+# the read. Order (D-90): the list is built in full before `BASE:` prints, so
+# a diff that fails part-way leaves `ERROR:` alone on stdout, with no `BASE:`
+# line and no path.
 # `--phase` is accepted only as the second argument. D-89: its base is the
 # latest commit in `<run base>..HEAD` touching
 # `plans/<job>/reports/phase-*-corrector.md` (the path, never the commit
@@ -115,12 +117,10 @@ if [[ ${2:-} == --phase ]]; then
     fi
 fi
 
-# A write failure would exit 1 under `set -e`, which reads as `NO-BASE:`.
-printf 'BASE: %s\n' "$base_sha" || exit 2
-
 exclude_prefix="plans/$job/"
-# `--` keeps a path named `HEAD` from making the revision ambiguous.
-git diff --name-only --no-renames -z "$base_sha" HEAD -- | while IFS= read -r -d '' path; do
+# `--` keeps a path named `HEAD` from making the revision ambiguous. The list
+# is captured whole so nothing reaches stdout before the diff has succeeded.
+paths=$(git diff --name-only --no-renames -z "$base_sha" HEAD -- | while IFS= read -r -d '' path; do
     case "$path" in
         "$exclude_prefix"* | plans/reports/triage-feedback-log.md) continue ;;
     esac
@@ -128,7 +128,14 @@ git diff --name-only --no-renames -z "$base_sha" HEAD -- | while IFS= read -r -d
         continue
     fi
     printf '%s\n' "$path"
-done || {
+done) || {
     echo "ERROR: git diff failed"
     exit 2
 }
+
+# A write failure would exit 1 under `set -e`, which reads as `NO-BASE:`. The
+# substitution stripped the trailing newline, and an empty list prints nothing.
+printf 'BASE: %s\n' "$base_sha" || exit 2
+if [[ -n $paths ]]; then
+    printf '%s\n' "$paths" || exit 2
+fi

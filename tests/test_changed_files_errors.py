@@ -4,12 +4,16 @@ These tests hold the script's failure exits: ``ERROR:`` with exit 2 for a git
 failure, an unsafe job name or an unloadable ``exempt-paths.sh``, and
 ``NO-BASE:`` with exit 1 when no item report is committed (D-88, D-90).
 
+A late diff failure also lives here: ``ERROR:`` stands alone, with no
+``BASE:`` line and no path above it (D-90).
+
 Split from ``tests/test_changed_files.py``, which keeps the base and list
 tests, to keep each module under its line cap. The ``--phase`` tests (D-89)
 are in ``tests/test_changed_files_phase.py``. See
 ``tests/changed_files_helpers.py`` for the shared fixtures.
 """
 
+import shlex
 import shutil
 from pathlib import Path
 
@@ -159,3 +163,39 @@ def test_unloadable_exempt_paths_is_an_error_not_no_base(
         in result.stdout.splitlines()
     ), result.stdout
     assert "NO-BASE:" not in result.stdout, result.stdout
+
+
+def test_late_diff_failure_prints_error_alone(tmp_path: Path) -> None:
+    """A diff failing once the base is known prints ``ERROR:`` alone.
+
+    The run commit adds ``item-1-1.md`` and ``a.txt`` and changes ``b.txt``.
+    A ``git`` shim runs the real git and, when its first argument is
+    ``diff``, exits 128 after the real command's output, so the failure
+    comes after the base is known and the diff has produced paths. D-90
+    keeps stdout to ``ERROR:`` alone on exit 2: a script that has printed
+    ``BASE:`` or a path by then leaves them above the error.
+    """
+    real_git = shutil.which("git")
+    assert real_git is not None, "git not found on PATH"
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    shim = bin_dir / "git"
+    shim.write_text(
+        "#!/bin/sh\n"
+        f'{shlex.quote(real_git)} "$@"\n'
+        "status=$?\n"
+        '[ "$1" = diff ] && exit 128\n'
+        "exit $status\n",
+        encoding="utf-8",
+    )
+    shim.chmod(0o755)
+    repo = _init_repo(tmp_path)
+    _commit(
+        repo,
+        "item 1.1",
+        {"plans/j/reports/item-1-1.md": "1\n", "a.txt": "a\n", "b.txt": "changed\n"},
+    )
+
+    result = _run_script(repo, "j", path_prepend=bin_dir)
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert result.stdout.splitlines() == ["ERROR: git diff failed"], result.stdout

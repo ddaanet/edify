@@ -54,14 +54,20 @@ def _init_repo(tmp_path: Path) -> Path:
 
 
 def _run_script(
-    repo: Path, *args: str, script: Path = SCRIPT
+    repo: Path,
+    *args: str,
+    script: Path = SCRIPT,
+    path_prepend: Path | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Run ``script`` by absolute path with CWD at ``repo``.
 
     ``script`` defaults to the repo's ``changed-files.sh``; a test passes a
-    copy to run it beside a doctored ``exempt-paths.sh``.
+    copy to run it beside a doctored ``exempt-paths.sh``. ``path_prepend``
+    puts a directory, such as one holding a ``git`` shim, ahead on ``PATH``.
     """
     env = dict(os.environ)
+    if path_prepend is not None:
+        env["PATH"] = f"{path_prepend}{os.pathsep}{env['PATH']}"
     env["GIT_CONFIG_GLOBAL"] = os.devnull
     env["GIT_CONFIG_SYSTEM"] = os.devnull
     return subprocess.run(
