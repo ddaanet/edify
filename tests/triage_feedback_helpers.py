@@ -107,16 +107,18 @@ def _commit_reports_fixture(repo: Path) -> None:
 
 
 def _run_triage(
-    job: str,
+    job: str | None,
     cwd: Path,
     path_prepend: Path | None = None,
     env_extra: dict[str, str] | None = None,
+    extra_args: tuple[str, ...] = (),
 ) -> subprocess.CompletedProcess[str]:
     """Run triage-feedback.sh by absolute path with CWD at the repo root.
 
     ``path_prepend``, when given, is put ahead of the real ``PATH`` so a
     fixture-supplied shim is what the script resolves. ``env_extra`` adds
-    variables to the environment.
+    variables to the environment. ``extra_args`` follow the job argument;
+    a ``job`` of ``None`` passes no job argument at all.
     """
     env = dict(os.environ)
     env["GIT_CONFIG_GLOBAL"] = os.devnull
@@ -125,7 +127,7 @@ def _run_triage(
     if path_prepend is not None:
         env["PATH"] = f"{path_prepend}{os.pathsep}{env.get('PATH', '')}"
     return subprocess.run(
-        [str(SCRIPT), job],
+        [str(SCRIPT), *([] if job is None else [job]), *extra_args],
         cwd=cwd,
         env=env,
         capture_output=True,
