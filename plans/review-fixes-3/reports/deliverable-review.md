@@ -27,7 +27,7 @@ two opus reviewers: code+tests, and prose+docs.
 | Code | `plugin/bin/triage-feedback.sh` | +34/−1 |
 | Code | `plugin/skills/build/scripts/changed-files.sh` | +21/−12 |
 | Test | `tests/test_changed_files.py`, `tests/test_changed_files_errors.py` (new), `tests/test_changed_files_phase.py`, `tests/changed_files_helpers.py` | +249/−167 |
-| Test | `tests/test_triage_feedback.py`, `_failures.py` (new), `_location.py` (new), `_behavioral.py`, `_log.py`, `tests/triage_feedback_helpers.py` | +589/−83 |
+| Test | `tests/test_triage_feedback.py`, `_failures.py` (new), `_location.py` (new), `_behavioral.py`, `_log.py`, `tests/triage_feedback_helpers.py` | +490/−82 |
 | Test | `tests/test_build_prose_git_log.py` (new) | +262 |
 | Test | `tests/verify_step_helpers.py` | +1/−1 |
 | Agentic prose | `plugin/skills/build/references/{finishing,escalation,dispatch-composition,phase-boundary,tdd-slice}.md` | +69/−36 |
@@ -75,9 +75,12 @@ None.
 
 ## Minor Findings
 
+Round-4 findings are F1–F7, kept apart from round 3's m1–m18, which the
+Gap Analysis cites as requirements.
+
 **Design record lags the gate's late fixes (attention item 1)**
 
-- **m1.** `docs/references/build-run-state.md` D-93 and D-89's finishing-stage
+- **F1.** `docs/references/build-run-state.md` D-93 and D-89's finishing-stage
   paragraph. Axes: completeness and consistency.
   - D-93 presents the `review-*.md` match of `review-plan-*` reports only as a
     benefit ("so the gate's landed check (D-89) … read its report as a review
@@ -95,7 +98,7 @@ None.
   - The `-list-revision-fix` name has no docs counterpart to disagree with,
     because D-92 does not name the remediation dispatch.
   - Found independently in Layer 2 and by the prose sub-report (P1).
-- **m2.** `finishing.md` §1, the planning-artifact paragraph, and D-93's
+- **F2.** `finishing.md` §1, the planning-artifact paragraph, and D-93's
   opening. Axes: constraint precision and consistency.
   - "Planning artifacts do not route through this gate" and "The `/build`
     review gate routes implementation files only" now sit beside text in which
@@ -106,7 +109,7 @@ None.
 
 **Untested exit-2 arm (attention item 2)**
 
-- **m3.** `plugin/bin/triage-feedback.sh`, the `if ! cd "$repo_root"` guard and
+- **F3.** `plugin/bin/triage-feedback.sh`, the `if ! cd "$repo_root"` guard and
   the residual-bound comment above it. Axes: coverage, testability.
   - The comment says neither `cd` arm can be tested because "no input provokes
     either without fault injection". For the repository-root `cd` that is
@@ -136,14 +139,14 @@ None.
 
 **Prose precision and excess**
 
-- **m4.** `plugin/README.md` §Optional plugins. Axis: completeness.
+- **F4.** `plugin/README.md` §Optional plugins. Axis: completeness.
   - It opens "Each entry says what is lost without it". The `plugin-dev` entry
     then lists only the review gate's consequences.
   - The edify skills that name `plugin-dev:*` skills to load go unmentioned:
     `design/references/write-outline.md`,
     `requirements/references/formats-and-exit.md` and `build/SKILL.md` §3.3.
   - Item 3.6's two review-gate clauses do conform. Prose sub-report P2.
-- **m5.** `plugin/skills/design/references/triage.md` §Classification Gate,
+- **F5.** `plugin/skills/design/references/triage.md` §Classification Gate,
   persistence paragraph. Axis: constraint precision.
   - "Open the file with one job-level … line" competes with the purpose clause
     ("so that no other `Classification:` line … can precede it").
@@ -151,13 +154,13 @@ None.
     paragraph. It still parses `Moderate`.
   - The text does not say whether a heading may precede the line. Prose
     sub-report P3.
-- **m6.** Same paragraph. Axes: determinism, actionability.
+- **F6.** Same paragraph. Axes: determinism, actionability.
   - Defect's place in a mixed composite is left to inference.
   - The closing sentence carries forward-looking state ("yet", "will come
     from", "once composite jobs have logged rows") where a bare "ungrounded"
     clause would carry the flag.
   - Both conform to KD-3's wording. Prose sub-report P4.
-- **m7.** `agents/learnings.md` §"When calling triage-feedback.sh",
+- **F7.** `agents/learnings.md` §"When calling triage-feedback.sh",
   Anti-pattern bullet. Axis: excess.
   - It quotes `changed-files.sh`'s full error message verbatim, and narrates
     triage's two output lines.
@@ -185,30 +188,30 @@ finding here.
 
 | Requirement | Item | Status |
 |---|---|---|
-| m1 triage measures from the root (KD-6) | 2.2 | covered; the residual bound is m3 |
+| m1 triage measures from the root (KD-6) | 2.2 | covered; the residual bound is F3 |
 | m2 `ERROR:` alone (KD-4) | 2.1 | covered (genuine red against `daad4769`) |
 | m3 re-run bound in D-90 | 4.1 | covered |
-| m4–m6 triage failure arms (KD-5) | 2.3 | covered, each mutant killed on its assertion; new root-`cd` arm: m3 |
+| m4–m6 triage failure arms (KD-5) | 2.3 | covered, each mutant killed on its assertion; new root-`cd` arm: F3 |
 | m7–m9 triage split and docstrings | 1.2 | covered |
 | m10 changed-files split, no KD-N | 1.1 | covered |
-| m11 learnings call pattern | 3.1 | covered; excess: m7 |
-| m12 `review-plan-<source job>-<stem>` (KD-1) | 3.2, 4.1 | covered on all four surfaces; seams: m1, m2 |
+| m11 learnings call pattern | 3.1 | covered; excess: F7 |
+| m12 `review-plan-<source job>-<stem>` (KD-1) | 3.2, 4.1 | covered on all four surfaces; seams: F1, F2 |
 | m13 refactor plan-sources reason | 3.4 | covered |
 | m14 `--no-show-signature` (KD-7) | 2.4, 4.1 | covered, D-86 site included |
-| m15 job-level classification line (KD-3) | 3.5 | covered; precision: m5, m6 |
-| m16 D-89 finishing stages, D-90 row rule (KD-2) | 4.1 | covered; invariant gap: m1 |
+| m15 job-level classification line (KD-3) | 3.5 | covered; precision: F5, F6 |
+| m16 D-89 finishing stages, D-90 row rule (KD-2) | 4.1 | covered; invariant gap: F1 |
 | m17 Rejected entry relabelled | 4.1 | covered |
 | m18 header reflow | 2.1 | covered |
 | C-1 `<step name>-fix` | 3.3 | covered, `-list-revision-fix` consistent in both files |
-| C-2 README optional plugins | 3.6 | covered; completeness: m4 |
+| C-2 README optional plugins | 3.6 | covered; completeness: F4 |
 
 ## Summary
 
 0 critical, 0 major, 7 minor.
 
-- Design-record seams from the gate's late fixes: m1, m2.
-- Untested root-`cd` arm, whose stated bound is false: m3.
-- Prose precision and excess: m4–m7.
+- Design-record seams from the gate's late fixes: F1, F2.
+- Untested root-`cd` arm, whose stated bound is false: F3.
+- Prose precision and excess: F4–F7.
 
 All of round 3's m1–m18, and C-1 and C-2, are resolved at HEAD. The code and
 tests verified by mutation, a bash 3.2.57 parse and a spaced-path dogfood run.
