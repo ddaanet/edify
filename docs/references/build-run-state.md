@@ -181,27 +181,32 @@ reverted paths committed by name, subject
 discards history (`escalation-acceptance.md` §Rollback protocol).
 
 **D-93 — Review-gate groups are four fixed rows, with fixed slugs.** The
-`/build` review gate routes implementation files only; planning artifacts route
-by artifact (D-26). A planning artifact on the gate's list is dispatched as
-`review-plan-<source job>-<stem>`, a name and not a group, `<source job>` being
-the `plans/` directory it sits in and `<stem>` `design`, `outline` or `runbook`;
-the name matches `review-*.md`, so the gate's landed check (D-89), triage's
-report exclusion and its `Review artifact` probe all read its report as a review
-report. Its groups, which are also its dispatch names, are `review-code` (code
-and tests, and the default for any file kind no row names), `review-skill`
-(skill definitions and the agent-instruction prose they load, meaning their
-`references/` nodes and the shared instruction files a skill loads from outside
-itself), `review-agent` (agent definitions) and `review-design` (the living
-design graph under `docs/`). An instruction file no skill loads, such as
-`CLAUDE.md` or `.claude/rules/*.md`, matches no row and takes the `review-code`
-default. A file kind is always classed into an existing row, never a new group,
-by the one rule in `dispatch-composition.md` §Naming and resumption.
-`review-design` goes to `edify:corrector` with `craft:design-doc-writing` named
-as its criteria source, as the agent row names `plugin-dev:agent-development`,
-and the report notes the fallback when `craft` is absent. *Grounding:* a free
-one-word slug per routed group did not determine the names; one run produced
-`review-code`, `review-skill`, `review-agents` and `review-fragments`, mixing
-singular and plural and minting a group the routing table does not have.
+`/build` review gate's four group rows take implementation files only; a
+planning artifact on its list routes by artifact (D-26). A planning artifact on
+the gate's list is dispatched as `review-plan-<source job>-<stem>`, a name and
+not a group, `<source job>` being the `plans/` directory it sits in and `<stem>`
+`design`, `outline` or `runbook`; the name matches `review-*.md`, so the gate's
+landed check (D-89), triage's report exclusion and its `Review artifact` probe
+all read its report as a review report. The gate's reports, `review-plan-*` ones
+included, land under the running job's `reports/` in one commit, together with
+any planning corrector's edits to the source job's plan file: a `review-plan-*`
+report committed on its own, ahead of the group reports, would read to D-89's
+landed check as the gate landed. Its groups, which are also its dispatch names,
+are `review-code` (code and tests, and the default for any file kind no row
+names), `review-skill` (skill definitions and the agent-instruction prose they
+load, meaning their `references/` nodes and the shared instruction files a skill
+loads from outside itself), `review-agent` (agent definitions) and
+`review-design` (the living design graph under `docs/`). An instruction file no
+skill loads, such as `CLAUDE.md` or `.claude/rules/*.md`, matches no row and
+takes the `review-code` default. A file kind is always classed into an existing
+row, never a new group, by the one rule in `dispatch-composition.md` §Naming and
+resumption. `review-design` goes to `edify:corrector` with
+`craft:design-doc-writing` named as its criteria source, as the agent row names
+`plugin-dev:agent-development`, and the report notes the fallback when `craft`
+is absent. *Grounding:* a free one-word slug per routed group did not determine
+the names; one run produced `review-code`, `review-skill`, `review-agents` and
+`review-fragments`, mixing singular and plural and minting a group the routing
+table does not have.
 
 **D-94 — `/build` commit subjects name the job, and are labels only.** Every
 `/build` commit takes one of four subjects:

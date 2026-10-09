@@ -104,7 +104,9 @@ Edify depends on none of these plugins. Each entry says what is lost without it:
 - `plugin-dev` — without it, the review gate's skill-definition row (routing
   table in `fragments/review-requirement.md`) falls back to `edify:corrector`,
   and the agent-definition row loses its criteria source — review against the
-  agent definitions already in `agents/` instead.
+  agent definitions already in `agents/` instead. The `/requirements`, `/design`
+  and `/build` steps that load a `plugin-dev:*` skill for hook, agent, skill or
+  plugin work go without that guidance.
 - `craft` — without it, the design-graph row keeps `edify:corrector` but loses
   its criteria source.
 - `sandbox-lies` — what is lost without it is stated in the `verify-step.sh`

@@ -119,14 +119,16 @@ job-level `- **Classification:** <label>` line, then one block per item:
 - **Evidence:** Which criteria and recall entries informed the decision
 
 **Classification persistence:** Write the filled-in block or blocks to
-`plans/<job>/classification.md`. Open the file with one job-level
+`plans/<job>/classification.md`. Write one job-level
 `- **Classification:** <label>` line, at the start of its line, before any
 per-item block, so that no other `Classification:` line, bulleted or bare, can
-precede it. Write `<label>` as exactly `Simple`, `Moderate`, `Complex` or
-`Defect`, with nothing after it: `triage-feedback.sh` reads the file's first
-`Classification:` line, and any other value gives `no-classification`, so the
-job's row is lost to calibration. A composite job's label is its most demanding
-item's class, in the order Simple < Moderate < Complex, because triage measures
-the whole run's evidence against that one label. `Defect` is the job-level label
-only when every item is a Defect. No calibration data backs this ordering yet;
-the triage log is where it will come from, once composite jobs have logged rows.
+precede it; a heading or prose may come before it. Write `<label>` as exactly
+`Simple`, `Moderate`, `Complex` or `Defect`, with nothing after it:
+`triage-feedback.sh` reads the file's first `Classification:` line, and any
+other value gives `no-classification`, so the job's row is lost to calibration.
+A composite job's label is its most demanding item's class, in the order Simple
+< Moderate < Complex, because triage measures the whole run's evidence against
+that one label. `Defect` is the job-level label only when every item is a
+Defect; in a mixed job a Defect item does not raise the label, which is the most
+demanding non-Defect item's class. This ordering is ungrounded: no calibration
+data backs it.

@@ -73,10 +73,10 @@ appropriate reviewer by its routing table.
 Scope per dispatch is that artifact group's share of step 1's list,
 implementation only; the template's §Field Rules set every other field.
 
-Planning artifacts do not route through this gate. They route by artifact, as
-`docs/references/pipeline-contracts.md` D-26 records, each under its name from
-`references/dispatch-composition.md` §Naming and resumption, `<source job>`
-being the `plans/` directory the artifact sits in:
+Planning artifacts do not route through the four group rows. They route by
+artifact, as `docs/references/pipeline-contracts.md` D-26 records, each under
+its name from `references/dispatch-composition.md` §Naming and resumption,
+`<source job>` being the `plans/` directory the artifact sits in:
 
 - `design.md` → `edify:design-corrector`, as `review-plan-<source job>-design`;
 - `outline.md` → `edify:outline-corrector`, as
