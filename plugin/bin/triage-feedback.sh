@@ -37,9 +37,10 @@ if [[ $status -ne 0 ]]; then
     echo "ERROR: git rev-parse --show-toplevel failed"
     exit 2
 fi
-# Residual bound: this `cd` failing after a successful `rev-parse`, like the
-# script-directory `cd` above, has no test; no input provokes either without
-# fault injection.
+# Residual bound: the script-directory `cd` in the `script_dir` assignment above
+# has no test. It is a builtin fed by `BASH_SOURCE`, so no input reaches its
+# failure; reaching it would need new, bash-version-dependent fault injection.
+# This guard's failure is pinned by test_root_cd_failure_is_one_error_line.
 if ! cd "$repo_root"; then
     printf 'ERROR: cannot change to %s\n' "$repo_root"
     exit 2

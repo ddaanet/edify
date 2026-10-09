@@ -17,6 +17,7 @@ See ``tests/triage_feedback_helpers.py`` for the shared fixtures.
 """
 
 import os
+import shlex
 from pathlib import Path
 
 import pytest
@@ -114,6 +115,35 @@ def test_outside_a_work_tree_is_one_error_line(tmp_path: Path) -> None:
     assert "changed-files.sh exited" not in result.stdout, output
     assert result.returncode == 2, output
     assert list(outside.iterdir()) == [], output
+
+
+def test_root_cd_failure_is_one_error_line(tmp_path: Path) -> None:
+    """A work-tree root that cannot be entered is one ``ERROR:`` line.
+
+    A ``git`` shim answers ``rev-parse --show-toplevel`` with a nonexistent
+    absolute path and exits 0, so the script's ``cd`` to the root fails after
+    a successful ``rev-parse``. Triage prints the one ``ERROR:`` line naming
+    that path and exits 2. A bare ``cd`` under ``set -e`` exits 1 with empty
+    stdout instead, and the printed path is the cause the operator needs.
+    The path holds a space, so an unquoted use of it in the script shows.
+    """
+    missing = tmp_path / "missing root"
+    root = shlex.quote(str(missing))
+    bin_dir = _write_shim(
+        tmp_path,
+        "git",
+        'case "$1 $2" in\n'
+        f"    'rev-parse --show-toplevel') printf '%s\\n' {root}; exit 0 ;;\n"
+        "esac\n"
+        'exec "$real" "$@"\n',
+    )
+    repo = tmp_path / "repo"
+    _init_repo(repo)
+
+    result = _run_triage(JOB, repo, path_prepend=bin_dir)
+    output = result.stdout + result.stderr
+    assert result.stdout == f"ERROR: cannot change to {missing}\n", output
+    assert result.returncode == 2, output
 
 
 @pytest.mark.parametrize(
