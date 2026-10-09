@@ -133,7 +133,8 @@ Argued in `docs/references/execution-routing.md`.
 - **D-39** — Self-modifying work leaves the runbook pipeline.
 - **D-40** — Escalation has three tiers.
 
-*Rejected:* a combined time-OR-tool-count timeout signal.
+*Rejected:* a combined time-OR-tool-count timeout signal; a Defect item that
+does not raise a mixed job's label.
 
 ## Agent instructions and model choice
 

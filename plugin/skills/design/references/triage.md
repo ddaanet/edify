@@ -128,7 +128,8 @@ precede it; a heading or prose may come before it. Write `<label>` as exactly
 other value gives `no-classification`, so the job's row is lost to calibration.
 A composite job's label is its most demanding item's class, in the order Simple
 < Moderate < Complex, because triage measures the whole run's evidence against
-that one label. `Defect` is the job-level label only when every item is a
-Defect; in a mixed job a Defect item does not raise the label, which is the most
-demanding non-Defect item's class. This ordering is ungrounded: no calibration
+that one label. In a mixed job a Defect item ranks as Moderate: Defect names the
+bugfix route, not a size, and a defect fix changes a logic path, Moderate's
+mark. `Defect` is the job-level label only when every item is a Defect, since
+then the whole job takes that route. This ordering is ungrounded: no calibration
 data backs it.

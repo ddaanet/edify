@@ -114,7 +114,14 @@ Batch-classifying an input holding N discrete work items averages heterogeneous
 items, so a behavioral-code change gets masked by non-behavioral siblings.
 Produce a per-item behavioral-code check; any item adding conditional branches,
 functions or logic paths raises that item to Moderate minimum. Distinct from
-companion tasks, which the user bundles explicitly.
+companion tasks, which the user bundles explicitly. The job-level label in
+`classification.md` is the most demanding item's class, Simple < Moderate <
+Complex, because triage measures the whole run's evidence against that one
+label. A Defect item ranks as Moderate there: Defect names the bugfix route, not
+a size, and a defect fix changes a logic path, which is Moderate's mark —
+`triage-feedback.sh` already gives the two the same verdict. `Defect` labels the
+job only when every item is one. The ordering is ungrounded: no calibration data
+backs it.
 
 **D-39 — Self-modifying work leaves the runbook pipeline.** When the planned
 work edits pipeline skills or pipeline contracts, a runbook step that edits the
@@ -141,3 +148,9 @@ kill zones, so it *increases* false positives against either threshold alone.
 Spinning (high activity, no convergence) needs a turn bound; hanging (no
 activity, high wall-clock) needs a duration timeout. They are independent
 guards. Neither is implementable today (L-4).
+
+**A Defect item that does not raise a mixed job's label** (D-38) — the label
+fell to the most demanding non-Defect item, so a Defect-plus-Simple job read
+Simple, and `triage-feedback.sh` logs any Simple run with behavioural code or a
+non-item report as `underclassified`, which a defect fix all but always has.
+Every such row would be a predictable false alarm.
