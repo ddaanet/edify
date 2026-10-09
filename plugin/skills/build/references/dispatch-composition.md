@@ -127,8 +127,8 @@ Give every dispatch a `name`:
     `plans/<job>/design.md`, which is a planning artifact.
 
   A file kind is always classed into one of these rows, never into a new group.
-  The gate routes implementation files only; planning artifacts route by
-  artifact (`finishing.md` §1).
+  The gate's four group rows take implementation files only; a planning artifact
+  on its list routes by artifact (`finishing.md` §1).
 - `review-plan-<source job>-<stem>` for a planning artifact on the gate's list,
   a name and not a group: `<source job>` is the `plans/` directory the artifact
   sits in and `<stem>` is `design`, `outline` or `runbook`, so
