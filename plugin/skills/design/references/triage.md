@@ -102,10 +102,9 @@ confirm whether behavioral code changes are involved (new functions, changed
 logic paths).
 
 Produce this classification block before routing (visible output, not internal
-reasoning — **per-item if composite**). A single-item job's block is the whole
-file, and its block opens with the job-level line. A composite job puts one
-job-level `- **Classification:** <label>` line ahead of its blocks, one block
-per item:
+reasoning — **per-item if composite**). A single-item job's block opens with the
+job-level line. A composite job puts one job-level
+`- **Classification:** <label>` line ahead of its blocks, one block per item:
 - **Classification:** <label> — exactly one of `Simple`, `Moderate`, `Complex`
   or `Defect`, with nothing after it
 - **Implementation certainty:** [High / Moderate / Low] — is approach known?
