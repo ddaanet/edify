@@ -15,6 +15,10 @@ trace := "false"
 help:
     @just --list --unsorted
 
+# Promote plugin/ into dist/plugin/, the copy `.bin/claude` loads; relaunch to pick it up
+dogfood:
+    bash scripts/dogfood.sh sync
+
 # Remove generated build artifacts, sparing the plugin copy `.bin/claude` loads
 [no-exit-message]
 clean:
@@ -125,7 +129,7 @@ if path not in dirs:
 # Do not uv sync when in Claude Code sandbox
 sync() { if [ -w /tmp ]; then uv sync -q; fi; }
 set-tmpfile() {
-    if [[ ! -v tmpfile ]]; then
+    if [[ -z "${tmpfile:-}" ]]; then
         tmpfile=$(mktemp tmp/justfile-XXXXXX)
         trap "rm $tmpfile" EXIT
     fi

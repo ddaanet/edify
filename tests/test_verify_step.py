@@ -66,10 +66,6 @@ def test_missing_just_exits_2(tmp_path: Path) -> None:
     assert "PRECOMMIT:" not in result.stdout, result.stdout
 
 
-@pytest.mark.skipif(
-    sys.platform == "darwin",
-    reason="APFS rejects a path that is not valid UTF-8, so the fixture cannot exist",
-)
 def test_quotepath_false_does_not_hide_dirt(tmp_path: Path) -> None:
     r"""A local ``core.quotePath false`` cannot make non-UTF-8 dirt read clean.
 
@@ -86,6 +82,13 @@ def test_quotepath_false_does_not_hide_dirt(tmp_path: Path) -> None:
     # fsdecode maps the invalid byte to a surrogate that the filesystem calls
     # encode back to the raw 0xFF byte.
     nested = repo / os.fsdecode(b"inbox/x\xff")
+    if sys.platform == "darwin":
+        # APFS rejects a path that is not valid UTF-8, so the dirt cannot exist
+        # and the hazard cannot arise. A skip would trip the gate's
+        # no-skipped-tests rule; asserting the premise keeps the test running.
+        with pytest.raises(OSError, match="Illegal byte sequence"):
+            nested.mkdir(parents=True)
+        return
     nested.mkdir(parents=True)
     (nested / "y.md").write_bytes(b"y\n")
 

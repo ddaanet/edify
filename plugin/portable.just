@@ -20,7 +20,7 @@ fail () { echo "${RED}FAIL: $*${NORMAL}" >&2; exit 1; }
 # Do not uv sync when in Claude Code sandbox
 sync() { if [ -w /tmp ]; then uv sync -q; fi; }
 set-tmpfile() {
-    if [[ ! -v tmpfile ]]; then
+    if [[ -z "${tmpfile:-}" ]]; then
         tmpfile=$(mktemp tmp/justfile-XXXXXX)
         trap "rm $tmpfile" EXIT
     fi
@@ -96,18 +96,6 @@ report-end-safe() {
     end-safe
 }
 '''
-
-# Launch Claude Code with plugin loaded from submodule
-[no-exit-message]
-claude:
-    #!{{ bash_prolog }}
-    exec claude --plugin-dir ./plugin
-
-# Launch Claude Code with plugin and empty system prompt (clean-slate workflow)
-[no-exit-message]
-claude0:
-    #!{{ bash_prolog }}
-    exec claude --plugin-dir ./plugin --system-prompt ""
 
 # Run all checks
 [no-exit-message]

@@ -1,3 +1,0 @@
-## Current task
-
-Plan the `review-fixes-3` job in plan mode, then run it: fix the 18 minors of deliverable review round 3 of `review-fixes-2` (`plans/review-fixes-2/reports/deliverable-review.md`, m1–m18), m15 included (my human partner's ruling), m3 resolved by stating the bound in D-90 (a re-run after Finish counts reports committed later, e.g. `deliverable-review*.md`, so it can log a second row). Ruled defaults from the round-2 cycle carry over: one job, `/design` → `/build`, each delegated to a fresh `general-purpose` opus agent (a new build delegate per leg, no dispatch `name`, resume by agentId — memory `feedback-build-delegate-legs`), then deliverable review round 4 as its own opus agent.

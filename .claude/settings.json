@@ -21,6 +21,29 @@
     "enabled": true,
     "autoAllowBashIfSandboxed": true
   },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/scripts/dogfood.sh\" pre-tool"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/scripts/dogfood.sh\" session-start"
+          }
+        ]
+      }
+    ]
+  },
   "plansDirectory": "plans/claude/",
   "gitlore": {
     "enabled": true,

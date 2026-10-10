@@ -73,7 +73,10 @@ case "${BASH_SOURCE[0]}" in
 esac
 unset EXEMPT_PATHS_ALTERNATION
 # shellcheck source=SCRIPTDIR/exempt-paths.sh
-if ! source "$script_dir/exempt-paths.sh" || [[ -z ${EXEMPT_PATHS_ALTERNATION:-} ]]; then
+# Bash 3.2 (macOS /bin/bash) exits 1 on a failed `source` of a missing file
+# even inside an `if`, so the file is checked before it is sourced.
+if [[ ! -f "$script_dir/exempt-paths.sh" || ! -r "$script_dir/exempt-paths.sh" ]] ||
+    ! source "$script_dir/exempt-paths.sh" || [[ -z ${EXEMPT_PATHS_ALTERNATION:-} ]]; then
     echo "ERROR: cannot load EXEMPT_PATHS_ALTERNATION from exempt-paths.sh"
     exit 2
 fi
