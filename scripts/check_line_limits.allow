@@ -11,7 +11,3 @@
 # its ceiling the gate is red by design — trim the file rather than raising
 # the number.
 #
-# Counts measured after the 80-column reflow (Item 1.11).
-plugin/agents/corrector.md	682	pilfer defect 21 (corrector-family dedup)
-plugin/agents/design-corrector.md	460	pilfer defect 21 (corrector-family dedup)
-plugin/agents/outline-corrector.md	450	pilfer defect 21 (corrector-family dedup)

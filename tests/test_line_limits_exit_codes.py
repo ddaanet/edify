@@ -1,6 +1,6 @@
 """Exit-code precedence for ``scripts/check_line_limits.sh``.
 
-KD-7 (Item 1.10) pins "exit 2 outranks exit 1": a run carrying both an
+The script pins "exit 2 outranks exit 1": a run carrying both an
 over-cap file (the exit-1 condition) and a failure to run the check (an
 exit-2 condition — an unreadable file or a directory ``find`` cannot walk)
 must exit 2, never 1. Split from ``tests/test_line_limits.py`` to keep that

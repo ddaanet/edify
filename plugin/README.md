@@ -1,120 +1,44 @@
 # edify plugin
 
-A [Claude Code][claude-code] bundle of skills and agents built around a
-`requirements → design → runbook → build` planning and execution pipeline.
+A [Claude Code][claude-code] plugin of working-discipline skills for an
+orchestrating agent, plus two small standard-library scripts.
 
-The pipeline was torn down in 2026-05, when the ecosystem (superpowers, native
-memory) was judged to have caught up, and revived in 2026-08. On revival it was
-rewired off the subsystems that did not come back: recall reads
-`memory/MEMORY.md` and the memory files it indexes instead of the removed
-`edify _recall` CLI, `/commit` and `/handoff` defer to the `commit-commands` and
-`handoff` plugins, and the session task frame is `.claude/handoff-task.md`.
+Install through the ddaanet marketplace:
 
-A plain subdirectory of the `edify` repo (previously a git submodule). Skills
-are invoked as slash commands.
+```text
+/plugin marketplace add ddaanet/marketplace
+/plugin install edify@ddaanet
+```
 
 ## Skills
 
-Slash-command procedures that inject instructions into the current conversation.
 Each lives in `skills/<name>/SKILL.md`.
 
-**Pipeline** — run in sequence; each stage names the next command and stops
-there.
-
 | Skill | Purpose |
 |-------|---------|
-| `/requirements` | Capture and document requirements for design and planning |
-| `/design` | Triage complexity, then design the approach; routes simple work straight to `/build` |
-| `/runbook` | Decompose a design into a runbook of typed items (tdd slices, general) |
-| `/build` | Execute planned work — a runbook, or a design with none — composing a dispatch prompt per item, with verification gates |
-| `/review` | Review in-progress changes for quality and correctness |
-
-**Standalone** — usable on their own, no pipeline required.
-
-| Skill | Purpose |
-|-------|---------|
-| `/proof` | Item-by-item structured user validation of an artifact before it ships |
-| `/deliverable-review` | Post-execution artifact review, severity-classified against ISO 25010 / IEEE 1012 |
-| `/ground` | Ground a methodology in external research before asserting it (diverge–converge) |
-| `/formalize` | Verify a Python function against intent via an icontract contract checked with `edify check` (CrossHair) |
-| `/recall` | Select and Read relevant memory-index entries for the current task or a given topic |
+| `/edify:release` | Release `dev` onto `main`: simplify, parallel release reviews, triaged fixes, a medium loop, then push, preflight and `just release` |
+| `/edify:review` | Per-commit review loop: a medium code review of each commit, triage, fix commits reviewed the same way |
+| `/edify:dispatch` | Rules for dispatching subagents: boundaries, reuse, model tiering, self-contained prompts, collecting replies |
+| `/edify:markdown` | Fix structural defects in agent-written markdown with `bin/edify-markdown` |
+| `/edify:token-counting` | Count file tokens with `bin/edify-count-tokens` |
+| `/edify:ground` | Ground a methodology in external research before asserting it |
 
 ## Agents
 
-Subagent definitions in `agents/`, dispatched by the pipeline skills.
-
 | Agent | Role |
 |-------|------|
-| `scout` | Open-ended codebase exploration; writes findings to a report file |
-| `artisan` | General implementation work for a dispatched runbook item |
-| `test-driver` | Executes one TDD slice dispatch in RED or GREEN mode |
-| `tdd-auditor` | Audits TDD discipline after execution |
-| `refactor` | Applies deslop directives; escalates what needs a stronger model |
-| `corrector` | Reviews produced artifacts against domain criteria |
-| `design-corrector` | Corrector specialized for design documents |
-| `outline-corrector` | Corrector specialized for design outlines |
-| `runbook-corrector` | Corrector specialized for runbooks |
-| `runbook-simplifier` | Consolidates redundant patterns in a runbook before `/proof` |
-| `brainstorm-name` | Generates and scores candidate names |
+| `brainstorm-name` | Generates and scores candidate names in a clean context |
 
 ## Scripts
 
-Utility scripts in `bin/` (POSIX shell and Python 3):
+In `bin/`, standard library only:
 
-| Script | Purpose |
-|--------|---------|
-| `bootstrap-venv.sh` | SessionStart hook: provision a venv with the version-matched `edify-cli` via uv |
-| `bump-plugin-version.py` | Bump the plugin manifest version |
-| `check-version-consistency.py` | Verify plugin and package versions agree |
-| `triage-feedback.sh` | Compare predicted against actual complexity after execution |
-
-Plus three in `skills/build/scripts/`, used by `/build`:
-
-- `verify-step.sh` — the clean-tree and precommit gate. `/build` runs it at its
-  entry gate and after every committing step: a slice's GREEN, its code-review
-  commit, its refactor commit and its list-revision commit, a delegated general
-  item, a review item, an item done in session (`/build` §4.1), the
-  phase-boundary commit, the review gate and the run's closing commit
-  (`skills/build/references/finishing.md` §3). Never after a RED or a test
-  review, whose tests are uncommitted by design. A `DIRTY:` listing annotated as
-  sandbox masks is re-run once rather than remediated; the annotation comes from
-  the `phantom-untracked` detector of the optional `sandbox-lies` plugin's Bash
-  hook. Without that plugin no listing is annotated, so the re-run never fires,
-  and a masked listing reads as dirt.
-- `changed-files.sh` — prints the run's base as `BASE:`, then the files the run
-  changed: the committed diff from that base to `HEAD`, minus the exempt paths
-  and the pipeline's record: the job's own `plans/<job>/` and the triage log,
-  `plans/reports/triage-feedback-log.md`. `--phase` takes the current phase's
-  base instead. The phase-boundary and review-gate scopes come from it, and
-  `triage-feedback.sh <job>` runs it itself and measures that list, the set the
-  review gate reviewed: its file count, and behavioural code in those paths'
-  diff only. The report count alone looks past the list, at the reports the
-  `<base> HEAD` range adds directly under `plans/<job>/reports/`, which the list
-  drops with the job's record: every one but each item's own `item-<N>-<M>.md`
-  and the review reports (`review.md`, `review-*.md`, `final-review.md`,
-  `tdd-audit.md`).
-- `exempt-paths.sh` — sourced by the other two, never run: the one definition of
-  the three paths dirty by convention (`memory`, `.claude/handoff-*.md`,
-  `inbox/*.md`), which the gate tolerates and the changed-files list drops.
-
-## Optional plugins
-
-Edify depends on none of these plugins. Each entry says what is lost without it:
-
-- `plugin-dev` — without it, the review gate's skill-definition row (routing
-  table in `fragments/review-requirement.md`) falls back to `edify:corrector`,
-  and the agent-definition row loses its criteria source — review against the
-  agent definitions already in `agents/` instead. The `/requirements`, `/design`
-  and `/build` steps that load a `plugin-dev:*` skill for hook, agent, skill or
-  plugin work go without that guidance.
-- `craft` — without it, the design-graph row keeps `edify:corrector` but loses
-  its criteria source.
-- `sandbox-lies` — what is lost without it is stated in the `verify-step.sh`
-  bullet under Scripts.
-
-## Recipes
-
-`just precommit` runs the plugin's own checks. See `justfile` and
-`portable.just`.
+- `edify-markdown` reads markdown paths on stdin and rewrites each file in
+  place, fixing keyword lists lacking bullets, inline triple backticks, spaced
+  backtick spans and similar defects. Fenced code and YAML prologs are left
+  alone.
+- `edify-count-tokens [--model haiku|sonnet|opus|ID] [--json] FILE...` counts
+  input tokens with the Anthropic `count_tokens` endpoint. The key comes from
+  `ANTHROPIC_API_KEY` or `[anthropic] api_key` in `~/.config/edify/config.toml`.
 
 [claude-code]: https://docs.claude.com/en/docs/claude-code/overview

@@ -8,8 +8,6 @@ Future enhancement ideas for edify.
 
 **Decision:** remark-cli selected and migrated
 
-**Reference:** `docs/references/cli-and-package.md` "Markdown and token tooling"
-
 ## Session Summary Extraction
 
 **Goal:** Extract a summary of a session for process compliance analysis.

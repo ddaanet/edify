@@ -1,7 +1,7 @@
 # Agent Instructions
 
-Edify is a lean Claude Code skills bundle plus a small CLI toolkit. Direction:
-Lean-assisted (formal-proof-backed) requirements tracking.
+Edify is a Claude Code plugin of working-discipline skills for an orchestrating
+agent, plus two standard-library scripts.
 
 Conventions shared across every repository mounting the `ddaanet` memory tier:
 
@@ -210,22 +210,17 @@ full-featured form. The simple form's visible success masks the missing side
 effects.
 
 **Same class as:** reaching for an ad-hoc `python3 -c "import..."` one-liner
-instead of the existing `edify` subcommand that already does the job.
+instead of the project script that already does the job.
 
 #### Rule Suppression by Procedure
 
-**Anti-pattern:** Procedural instructions in fragments suppress cross-cutting
-operational rules. When a procedure says "call X()" the agent follows it
-literally, skipping the project-tooling check.
+**Anti-pattern:** A procedural instruction that names a specific function
+suppresses cross-cutting operational rules: the agent follows it literally and
+skips the project-tooling check.
 
 **Correct pattern:** The check-for-existing-tools rule applies even when a
 procedure names a specific function. Specific instructions must not suppress
 general operational rules.
-
-**Evidence:** a procedure that said "call `<function>()`" led an agent to write
-ad-hoc Python — several failed attempts guessing attributes — when an `edify`
-subcommand already did the job. The named-function instruction suppressed the
-check-for-existing-tools rule.
 
 #### Validation Output Integrity
 
@@ -241,47 +236,32 @@ not the consumption site.
 identical to real failure. Agent tailed output, missed summary counts, ran
 unnecessary `git stash` diagnostic cycle.
 
-## CLI (`edify-cli`)
+## CLI
 
-Python >=3.14, hatchling build, uv package manager. Entry point
-`src/edify/cli.py` (Click). Source in `src/edify/`. Four tools:
-- **Session scraping** — `edify list`, `edify extract <prefix>`, `edify collect`
-- **Token counting** — `edify tokens FILE...` (Anthropic API)
-- **Markdown postprocessing** — `edify markdown` (reads paths from stdin)
-- **Contract checking** — `edify check <target>` (CrossHair verification)
+No installed command line. The plugin ships two scripts in `plugin/bin/`, run by
+path and standard library only: `edify-markdown` (reads markdown paths on stdin,
+fixes structural defects in place) and `edify-count-tokens` (counts file tokens
+with the Anthropic `count_tokens` endpoint). The Python package in `src/edify/`
+is on its way out; do not extend it.
 
 ## Skills
 
-In `plugin/skills/`, invoked via slash command.
+In `plugin/skills/`, invoked as `/edify:<name>`.
 
-- **Workflow pipeline:** `requirements` → `design` → `runbook` → `build`, or
-  `design` → `build` for work that needs no runbook, with `review` as the
-  in-progress quality gate.
-- **Standalone:** `proof`, `ground`, `deliverable-review`, `formalize`,
-  `recall`.
+- `release` — release `dev` onto `main` through the review cascade.
+- `review` — the per-commit review loop: review each commit as it lands, triage,
+  fix.
+- `dispatch` — rules for dispatching subagents: boundaries, model tiering,
+  self-contained prompts, collecting replies.
+- `markdown` — run `edify-markdown` on agent-written markdown.
+- `token-counting` — run `edify-count-tokens`.
+- `ground` — ground a methodology in external research before asserting it.
 
-The pipeline agents live in `plugin/agents/` (correctors, `artisan`, `scout`,
-`test-driver`, `tdd-auditor`, `refactor`, and friends). The runbook is one
-artifact, `plans/<job>/runbook.md` — typed phases of prose items with
-requirement IDs, interface blocks, and behaviour slices on tdd items
-(`plugin/skills/runbook/references/runbook-format.md`); nothing expands it.
-
-Execution delegates **by reference**: the orchestrator composes each dispatch
-prompt from the runbook item
-(`plugin/skills/build/references/dispatch-composition.md`) — item text inline,
-design and recall artifacts by path. A tdd slice is four dispatches: RED, test
-review, GREEN, code review. Bespoke per-plan agent definitions were dropped in
-2026-08 — they fought the platform (not discoverable until session restart);
-pre-generated step files were dropped in 2026-09 — a strong orchestrator
-composes prompts live.
-
-The pipeline was torn down in 2026-05 and revived in 2026-08. On revival it was
-rewired off the retired subsystems: recall now means reading `memory/MEMORY.md`
-and the memory files it indexes rather than the removed `edify _recall` CLI,
-`/commit` and `/handoff` point at the `commit-commands` and `handoff` plugins,
-and the session task frame is `.claude/handoff-task.md`.
+The one agent, `brainstorm-name`, is in `plugin/agents/`.
 
 ## Recipes
+
+Until the plugin's packaging is reworked, the recipes are the old ones:
 
 - `just precommit` — run all checks
 - `just test *ARGS` — run test suite
@@ -290,34 +270,7 @@ and the session task frame is `.claude/handoff-task.md`.
 
 ## Design Decisions
 
-The living design is a graph, rewired when components change rather than
-appended to as an ADR archive; `craft:design-doc-writing` carries the rules for
-editing it. It covers edify-shaped work only: `docs/superpowers/` holds
-superpowers-shaped docs, including a live subproject design with its own FR/NFR
-lifecycle, and is not a fossil of the torn-down superpowers subsystem.
-`docs/design.md` is the hub — requirements, architecture, limitations,
-non-goals. `docs/decisions.md` indexes every decision as one conclusion line and
-names every rejected alternative. `docs/references/` holds the arguments, one
-node per decision group; read the node before making a claim about, or changing,
-the mechanism it argues:
-
-- `cli-and-package.md` — `src/edify/`, the plugin/package split, the bootstrap,
-  markdown and token tooling
-- `testing.md` — `tests/`
-- `pipeline-contracts.md` — dispatch, the planning/execution session boundary,
-  review gates, phase types, artifact provenance
-- `build-run-state.md` — `/build`'s run state in git: resume, run and phase
-  bases, changed files, the clean tree, dirt, review-gate groups, commit
-  subjects
-- `execution-routing.md` — `/design`, `/runbook`, `/build` routing,
-  classification, escalation tiers
-- `agent-instructions.md` — model choice, instruction structure
-- `quality-gates.md` — gates, hooks, validating scripts, skill step and rule
-  placement
-- `deliverable-review.md` — review axes and findings
-- `project-configuration.md` — `.claude/`, agent frontmatter, line caps, what a
-  sub-agent gets, naming, script-versus-delegate
-
-A hub conclusion and its node's argument change together. `docs/changelog.md`
-indexes the dated design-significant entries, one file per entry under
-`docs/changelog/`.
+`docs/design.md` is the living design: requirements, architecture, decisions
+with their reasons, and rejected alternatives. It is rewritten in place when the
+plugin changes; `craft:design-doc-writing` carries the rules for editing it.
+Read it before touching anything structural.

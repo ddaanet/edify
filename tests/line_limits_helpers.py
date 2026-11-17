@@ -1,6 +1,5 @@
 """Shared fixtures for ``scripts/check_line_limits.sh`` contract tests.
 
-KD-7 in ``plans/provenance-enforcement-and-routing/outline.md`` (Item 1.10).
 Each test builds a throwaway fixture tree under ``tmp_path`` and runs the
 script by absolute path with ``[ROOT]`` = that tree, ``cwd=tmp_path`` (never
 the checkout — the script must honour ``ROOT`` rather than walking the repo
@@ -113,7 +112,7 @@ def _run_check_line_limits(  # noqa: PLR0913 — `root` plus five independent
 
 
 def _write_allowlist(path: Path, entries: list[tuple[str, int, str]]) -> None:
-    """Write an allowlist file in the format KD-7 pins for this job.
+    """Write an allowlist file in the format the script reads.
 
     One entry per line: ``<path><TAB><ceiling><TAB><note>``. ``path`` is
     root-relative and may contain spaces (never split on whitespace);

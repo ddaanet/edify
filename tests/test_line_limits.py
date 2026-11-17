@@ -1,6 +1,5 @@
 """Contract tests for ``scripts/check_line_limits.sh``.
 
-KD-7 in ``plans/provenance-enforcement-and-routing/outline.md`` (Item 1.10).
 Each test builds a throwaway fixture tree under ``tmp_path`` and runs the
 script by absolute path with ``[ROOT]`` = that tree, ``cwd=tmp_path`` (never
 the checkout — the script must honour ``ROOT`` rather than walking the repo
@@ -326,10 +325,8 @@ def test_line_limits_handles_spaced_path(tmp_path: Path) -> None:
 def test_line_limits_fails_python_over_400_under_src(tmp_path: Path) -> None:
     """A 401-line ``.py`` file under ``src/`` reports the overage and exits 1.
 
-    KD-7's "the Python loop adopts the same line" pins that the pre-existing
-    ``src/``/``tests/`` branch emits the same ``oversized-file:`` form the
-    markdown branch does, not the pre-job ``❌ ... (exceeds ... limit)``
-    wording it replaced.
+    The ``src/``/``tests/`` branch emits the same ``oversized-file:`` form the
+    markdown branch does.
     """
     root = tmp_path / "root"
     _write_lines(root / "src" / "pkg" / "big.py", 401)

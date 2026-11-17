@@ -66,8 +66,9 @@ general-purpose, model: sonnet). Model is always sonnet. Agent prompt includes:
 
 Write to `plans/reports/<topic>-external-research.md`.
 
-Both agents write reports and return filepath only — the quiet execution pattern
-at `../../fragments/delegation.md` §Quiet Execution Pattern.
+Both agents write reports and return the file path only, so the research does
+not enter the orchestrator's context. A grounding report is a long document, the
+case where `edify:dispatch` keeps a report file.
 
 ### Phase 3: Converge
 

@@ -106,21 +106,14 @@ frameworks describe how processes *should* work; git history documents how
   correct in messages
 - `git log --oneline --grep="reflect\|RCA\|deviat\|correct" --all` — targeted
   failure-pattern commits
-- `agents/learnings.md` — accumulated antipatterns with evidence and root causes
 - `memory/MEMORY.md` and the memory files it indexes — the live recall surface.
-  Where the `Skill` tool is available, route through `edify:recall`; otherwise
-  match the index's one-line hooks against the topic and Read the files they
+  Match the index's one-line hooks against the topic and Read the files they
   name
-- `plans/reports/workflow-grounding-audit.md` — grounding provenance for
-  workflow skills (if present)
-- Session scraper (`edify list`, then `edify extract <session-prefix>`, or
-  `edify collect`) — mine session transcripts for committed user feedback.
-  `edify list` enumerates top-level sessions; `edify extract <session-prefix>`
-  pulls feedback from one session; `edify collect` batch-collects feedback
-  across all sessions. Session logs contain user feedback, discussion turns, and
-  design iteration reasoning that produced committed corrections — material git
-  history alone cannot recover. Git history shows *what* changed; session logs
-  show *why the user asked for the change*.
+- Session transcripts (JSONL under `~/.claude/projects/`) — read them directly
+  for committed user feedback. Session logs contain user feedback, discussion
+  turns, and design iteration reasoning that produced committed corrections —
+  material git history alone cannot recover. Git history shows *what* changed;
+  session logs show *why the user asked for the change*.
 
 **Scope selector:** If topic is a process skill → use codebase scope
 **with git history mining + session log scraping**. Standard codebase scope

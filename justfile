@@ -59,14 +59,6 @@ line-limits:
     run-line-limits
     report-end-safe "Line limits"
 
-# Check docs/decisions.md and docs/references/*.md crosslink invariants
-[no-exit-message]
-design-links:
-    #!{{ bash_prolog }}
-    sync
-    run-design-links
-    report-end-safe "Design links"
-
 # Create release: bump plugin.json (SOT), sync pyproject.toml, tag, push,
 # publish to PyPI, GitHub release, bump the marketplace entry.
 [no-exit-message]
@@ -173,11 +165,9 @@ run-pytest() {
     current_hash=$( {
         python3 --version 2>&1
         # Untracked files count: a new test module is an input before its
-        # first commit. scripts/ and the design docs are read by the suite.
+        # first commit. scripts/ is read by the suite.
         git ls-files -z --cached --others --exclude-standard \
-            src/ tests/ scripts/ plugin/hooks/ plugin/bin/ \
-            plugin/skills/build/scripts/ \
-            docs/decisions.md docs/references/ | sort -z | xargs -0 cat
+            src/ tests/ scripts/ plugin/hooks/ plugin/bin/ | sort -z | xargs -0 cat
         cat pyproject.toml
     } | cksum )
     if [ -f "$sentinel" ] && [ "$(cat "$sentinel")" = "$current_hash" ]; then
@@ -203,13 +193,9 @@ run-line-limits() {
     report "line limits" ./scripts/check_line_limits.sh
 }
 
-run-design-links() {
-    report "design links" ./scripts/check_design_links.sh
-}
-# Overrides portable.just's no-op hook: `precommit` is the portable recipe,
-# and design-links belongs to this repo only — other consumers of
-# portable.just have no docs/decisions.md.
-run-project-checks() { run-design-links; }
+# No-op hook: portable.just's `precommit` calls it, and this prolog replaces
+# the one that defines it.
+run-project-checks() { :; }
 
 report-end-safe() {
     if end-safe
