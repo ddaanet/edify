@@ -167,8 +167,7 @@ common operations like:
 
 #### Precommit Cost
 
-`just precommit` is fast when the test suite is green, thanks to test sentinel.
-Valid as both entry gate and exit gate without redundant overhead concern.
+`just precommit` runs the whole test suite every time; it has no cache.
 
 **Partial failure recovery:** If a recipe fails partway through, fix the
 obstruction and **retry the recipe** — do not complete remaining steps manually.
