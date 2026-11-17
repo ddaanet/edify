@@ -70,10 +70,11 @@ code-free. Haiku misses subtle issues, hence the reviewer floor.
 
 The refactoring row: the Sonnet run handles a common refactoring (split a
 module, simplify a function, reduce nesting), factoring out duplication and dead
-code before splitting anything. An architectural one (a new abstraction,
-multi-module impact) comes back as `escalated: <reason and scope>`, and the
-dispatcher re-dispatches on Opus with a prompt saying that run is the
-escalation, so it does the work instead of escalating again.
+code before splitting anything. Its prompt says to stop and reply
+`escalated: <reason and scope>` when the refactoring turns architectural (a new
+abstraction, multi-module impact). On that reply, re-dispatch on Opus with a
+prompt saying that run is the escalation, so it does the work instead of
+escalating again.
 
 ## Writing the prompt
 

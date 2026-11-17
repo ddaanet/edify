@@ -28,7 +28,7 @@ all of them.
   `/code-review high main...dev`, writing its findings to
   `.claude/review-$(git rev-parse --short dev).md`, resolved before dispatch
   (severity and a one-line reason per finding), and replying with one line
-  pointing at it. Read the file.
+  pointing at it. Read the file, then delete it.
 - **Adversarial review on Codex astra.** Write the focus to
   `.claude/review-focus.md`: what the delta is for, what is settled and not up
   for challenge, the sources to verify claims against, and the finding format
@@ -41,7 +41,8 @@ all of them.
   node "$companion" adversarial-review --wait --base main --model "$model" "$(cat .claude/review-focus.md)"
   ```
 
-  Its findings arrive in the background task's output.
+  Its findings arrive in the background task's output. Delete
+  `.claude/review-focus.md` once the run returns.
 - **In a plugin repo, `plugin-dev:skill-reviewer` and
   `plugin-dev:plugin-validator`.** Neither has `Write`, and a reply is cut at
   about 4000 characters: ask for the report in parts under 3500 characters, each
@@ -59,16 +60,18 @@ its source before accepting it. List the lows as declined in the reply; never
 dispatch them.
 
 Partition the high and medium findings by the files they touch, one fix agent
-per partition, dispatched together; no two agents share a file. Each agent fixes
-its findings, runs the gate, commits with a `fix:` prefix, and replies with its
-commit and a one-line summary.
+per partition, dispatched together; no two agents share a file. They share one
+working tree, so each agent edits only, runs no gate and makes no commit, and
+replies with the files it changed and a one-line summary. Once all have replied,
+run `just precommit` once, then commit each partition's files as its own commit
+with a `fix:` prefix.
 
 ## 5. Medium loop
 
 Run `/code-review medium` over the fix commits of the previous round
 (`<sha before the round>..dev`). Triage as in step 4, fix the high and medium
-findings in parallel agents, commit. Repeat over the new fix commits until a
-pass returns only lows.
+findings as step 4 does, gate once and commit per partition. Repeat over the new
+fix commits until a pass returns only lows.
 
 ## 6. Ship
 
