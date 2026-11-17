@@ -259,11 +259,18 @@ The one agent, `brainstorm-name`, is in `agents/`.
 
 ## Recipes
 
-Dev tooling comes from `uv sync` (rumdl, ruff, mypy, pytest) and `npm install`
-(remark-cli, which the markdown fixer's pipeline test drives).
+Dev tooling comes from `uv sync` (rumdl, ruff, mypy, pytest, PyYAML) and
+`npm install` (remark-cli, which the markdown fixer's pipeline test drives). The
+release and check recipes come from the vendored `claude-plugin-dev` toolkit in
+`plugin-dev/` (`plugin-dev/README.md`); never edit that tree by hand.
 
-- `just precommit` — markdown wrapping, ruff lint and format check, mypy,
-  pytest, and a parse of `.claude-plugin/plugin.json`
+- `just precommit` — the toolkit's `check-refs`, `check-size`,
+  `check-frontmatter` and `check-modes`, then markdown wrapping of tracked
+  files, ruff lint and format check, mypy, pytest, and a parse of
+  `.claude-plugin/plugin.json`
+- `just prerelease` — the gate `just release` runs; the same as `precommit`
+- `just release <bump>` — the toolkit's release; ships the paths in
+  `dist.include` on the `dist` branch
 - `just test *ARGS` — run the test suite, arguments passed to pytest
 - `just format` — apply ruff fixes and formatting and rumdl's wrapping
 

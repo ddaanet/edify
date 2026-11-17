@@ -2,8 +2,11 @@
 # Every recipe puts `.venv/bin` and `node_modules/.bin` on PATH itself, so it
 # does not depend on direnv having loaded `.envrc`.
 
-# Check markdown wrapping, lint, type-check and test; parse the manifest
-precommit:
+import 'plugin-dev/release.just'
+import 'plugin-dev/gates.just'
+
+# Commit gate: toolkit checks, markdown wrapping, lint, types, tests, manifest
+precommit: check-refs check-size check-frontmatter check-modes
     #!/usr/bin/env bash
     set -euo pipefail
     export PATH="$PWD/.venv/bin:$PWD/node_modules/.bin:$PATH"
@@ -11,8 +14,12 @@ precommit:
     command -v remark >/dev/null || { echo "precommit: remark not on PATH — run 'npm install'" >&2; exit 1; }
     # `fmt --check` exits 1 exactly when `fmt` would rewrite a file. Plain
     # `rumdl check` also reports over-column lines MD013 cannot reflow.
-    rumdl fmt --check -q --no-cache
-    echo "rumdl: markdown wrapped"
+    # Tracked files only, so an untracked note in scope cannot fail the gate.
+    # rumdl skips .rumdl.toml's include for explicit paths: the scope is
+    # restated here as pathspecs, where a glob `*` does not cross `/`.
+    git ls-files -z -- ':(glob)skills/**/*.md' ':(glob)agents/**/*.md' \
+        ':(glob)docs/**/*.md' ':(glob)*.md' | xargs -0 rumdl fmt --check -q --no-cache
+    echo "rumdl: tracked markdown wrapped"
     ruff check -q
     echo "ruff: lint clean"
     ruff format --check -q
@@ -22,6 +29,9 @@ precommit:
     pytest -q
     jq . .claude-plugin/plugin.json >/dev/null
     echo "jq: plugin.json parses"
+
+# The gate `just release` runs
+prerelease: precommit
 
 # Apply ruff fixes and formatting, and rumdl's markdown wrapping
 format:

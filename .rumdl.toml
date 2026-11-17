@@ -12,7 +12,8 @@
 # `memory/` stay out (frozen work, and a submodule with its own gate), as do
 # the two frozen `docs/superpowers/` trees. The root-level pattern is `/*.md`, not `*.md`:
 # an unanchored `*` crosses `/` here, so `*.md` pulls in `.claude/`,
-# `plans/`, `memory/` and every other tree.
+# `plans/`, `memory/` and every other tree. `just precommit` passes tracked
+# paths explicitly, which bypasses `include`, so it restates this scope.
 
 [global]
 enable = ["MD013"]
