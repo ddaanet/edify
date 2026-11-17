@@ -1,10 +1,10 @@
 """Tests for markdown module."""
 
-from edify.markdown import (
-    escape_inline_backticks,
-    fix_backtick_spaces,
-    process_lines,
-)
+from tests.markdown_script import md
+
+escape_inline_backticks = md.escape_inline_backticks
+fix_backtick_spaces = md.fix_backtick_spaces
+process_lines = md.process_lines
 
 
 def test_escape_inline_backticks_wraps_language_references() -> None:

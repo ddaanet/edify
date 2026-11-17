@@ -1,9 +1,9 @@
 """Tests for markdown module."""
 
-from edify.markdown import (
-    fix_warning_lines,
-    process_lines,
-)
+from tests.markdown_script import md
+
+fix_warning_lines = md.fix_warning_lines
+process_lines = md.process_lines
 
 
 def test_segment_aware_processing_applies_fix_to_plain_text() -> None:

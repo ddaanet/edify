@@ -1,11 +1,11 @@
 """Tests for markdown module."""
 
-from edify.markdown import (
-    fix_metadata_blocks,
-    fix_metadata_list_indentation,
-    fix_warning_lines,
-    process_lines,
-)
+from tests.markdown_script import md
+
+fix_metadata_blocks = md.fix_metadata_blocks
+fix_metadata_list_indentation = md.fix_metadata_list_indentation
+fix_warning_lines = md.fix_warning_lines
+process_lines = md.process_lines
 
 
 def test_fix_warning_lines_handles_checkmark_emoji() -> None:

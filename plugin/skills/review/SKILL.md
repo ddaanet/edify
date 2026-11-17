@@ -1,161 +1,78 @@
 ---
 name: review
-description: >-
-  Review in-progress changes for quality and correctness — uncommitted work,
-  recent commits, or partial branch work. Triggers on /review, "review my
-  changes", "review this work", "check my changes before commit". Not for a
-  finished plan's deliverables — that is /deliverable-review — and not for a
-  PR, which is the built-in code-review.
-allowed-tools:
-  - Read
-  - Write
-  - Bash(git:*, rg:*, ls:*)
-user-invocable: true
+description: "Runs the per-commit review loop: a delegated medium code review of each commit as it lands, triage of its findings, and fix commits reviewed the same way until only lows remain. Use right after a commit that adds, changes or deletes content lands. Not for the pre-release review, which is edify:release."
 ---
 
-# Review Changes for Quality
+# Per-commit review
 
-Review in-progress work for quality, correctness, and adherence to project
-standards. This skill examines uncommitted changes, recent commits, or partial
-branch work to identify issues and suggest improvements.
+## Where reviews happen
 
-**Distinction:** This skill reviews work-in-progress in the main session. The
-built-in `code-review` targets a diff, PR, branch or path at a chosen effort
-level; `security-review` is its security counterpart.
+Each commit is reviewed as it lands. Work happens on `dev`; a release is a
+review of `dev` against `main`, run by `edify:release`. A plan whose
+multi-commit change needs a review of its own names a separate branch, and the
+user's approval of the plan is the prompt to create it, so branch-diffing tools
+(`/codex:review`, anything expecting a PR) have a base.
 
-## Review Process
+Never ask whether to move `main`, and never carry it as pending on a say-so: in
+a handoff or todo, record what review a branch has and has not had. Checked out
+on `main` anyway, commit there and say so; this is no licence to switch
+branches.
 
-**Example execution:** Read `references/example-execution.md` for a complete
-review interaction flow.
+## The loop
 
-### 1. Determine Scope
+1. Right after a commit that adds, changes or deletes content lands, dispatch a
+   `/code-review medium` of that commit to an agent. The review sits on the
+   critical path, so it runs before the next slice starts.
+2. Triage its findings (next section) before anything is fixed.
+3. Send out only the high and medium findings. The fix is a commit of its own.
+4. Review that fix commit the same way, and repeat until a pass returns only
+   lows.
 
-Infer the scope, state it in one line, and proceed. Do not open with a question
-— the tree answers it in most cases:
+Doc drift is the exception: fix it without a re-review.
 
-| State | Scope |
-|---|---|
-| User named files, a commit range or a design document | What they named |
-| Dirty tree | Uncommitted changes (staged + unstaged) — **the default** |
-| Clean tree, commits ahead of `main` | Those commits |
-| Clean tree, nothing ahead | Ask (below) |
+## Triage
 
-State the inference before gathering — "Reviewing uncommitted changes, 4 files"
-— so a wrong guess costs one correction instead of a whole review.
+Assign severity at triage, never from the reviewer, which often reports none. A
+finding is high or medium when a reader following the text would do the wrong
+thing: a command that fails, a claim a probe or primary source contradicts, two
+places prescribing opposite actions. Phrasing, wrapping, placement, redundancy
+and "could be clearer" are low. Verify a finding against its source before
+accepting it.
 
-When the scope is genuinely undetermined, ask inline in numbered prose with a
-stated default, in one turn:
+Decline a finding that guards a state nothing in practice produces: a fix for a
+rare state can itself regress a real case.
 
-```
-Nothing uncommitted and nothing ahead of main. What should I review?
-1. The last N commits (default: 5)
-2. Specific files — name them
-3. Changes against a design document — name it
-```
+Lows are the exhaust of the loop. A reviewer asked for findings always returns
+some and does not weigh simplicity, and every fix adds surface the next round
+mines. List them as declined; never dispatch them.
 
-Never reach for `AskUserQuestion`. It renders the exchange as a picker, which
-hides the user's own prompting from the transcript; numbered prose keeps the
-question and the answer readable in the thread and lets the default carry the
-turn when the user does not care.
+## Where a fix goes
 
-### 2. Gather Changes
+A per-commit fix goes back to the reviewer that found it, by `SendMessage` to
+the agent id its dispatch returned, while that reviewer's context is under about
+150k tokens; past that, a fresh agent with `name` unset takes it. A release fix
+goes to fresh agents partitioned by file, since the release reviewers cannot
+take a fix. A review fix is its own commit, never an amend.
 
-**For uncommitted changes:**
-```bash
-git status
-git diff HEAD  # Shows both staged and unstaged
-```
+An implementer that would depart from its brief stops and asks rather than
+deciding, and the dispatcher does not accept the departure on its argument
+alone.
 
-**For recent commits:**
-```bash
-git log -N --oneline  # List recent commits
-git diff HEAD~N..HEAD  # Show changes in last N commits
-git log -N -p  # Show commits with diffs
-```
+## A fix lists cases only when the list is closed
 
-**For current branch:**
-```bash
-git log main..HEAD --oneline  # Commits on branch
-git diff main...HEAD  # Changes since branch point
-```
+A list in prose reads as complete, so each case it misses is the next review's
+medium finding. Where the cases are open-ended, state the rule that produces
+them.
 
-**For specific files:**
-```bash
-git diff HEAD <file1> <file2> ...
-```
+Test for it at triage, before dispatching a fix: a finding that names a case the
+text missed, or one that lands on what the previous fix added, means the space
+is open and the fix is the rule, not one more case. Such rounds read as
+progress, because every probe in them is real, so the count of rounds is no
+signal; only the test is.
 
-**For a design document:**
-```bash
-ls plans/*/design.md plans/*/outline.md   # locate the plan's artifact
-git diff HEAD                              # changes to judge against it
-```
-
-### 3. Analyze Changes
-
-**Review axes:** Read `references/review-axes.md` for the full 10-category
-checklist (code quality, design conformity, functional completeness, project
-standards, runbook file references, self-referential modification, security,
-testing, documentation, completeness).
-
-**Common scenarios:** Read `references/common-scenarios.md` for handling
-secrets, multi-concern changes, pattern violations, already-committed work, and
-large changesets.
-
-### 4. Provide Feedback
-
-**Report format and assessment criteria:** Read `references/review-template.md`
-and write the report by it.
-
-### 5. Output Review
-
-**Write review to file:**
-- Reviewing a plan's work → `plans/[plan-name]/reports/review-report.md`
-- Otherwise → project-local `tmp/review-report-[timestamp].md` (gitignored)
-
-**Return summary to user:**
-- Overall assessment
-- Count of issues (critical/major/minor)
-- Key action items
-- Path to full review
-
-## Constraints
-
-- **Bash** for git commands and read-only search (`rg`, `rg --files`), **Read**
-  for examining files, **Write** for review output
-- Do NOT use Edit to fix issues (review only)
-- Review exactly what user requested — do not expand scope
-- Be specific, actionable, constructive
-- Flag secrets as CRITICAL — never log or output secret values
-
-## Integration with General Workflow
-
-**This skill and the corrector agent share review criteria, not interaction
-model.** They are not interchangeable:
-
-- **This skill** runs in the main session with a user present, so it can infer
-  scope from the tree and ask inline when it cannot.
-- **`edify:corrector`** runs delegated, with no user to ask (see
-  `plugin/agents/corrector.md`). Its scope must arrive in the dispatch prompt,
-  and it applies fixes directly.
-
-So the review *axes* (`references/review-axes.md`) are shared; the scoping step
-is not. A delegated reviewer that reaches for a question has hit a
-dispatch-prompt defect, not a decision point.
-
-In workflow contexts, prefer agent delegation. **Direct invocation** is for when
-the user asks for a review in conversation.
-
-**Workflow stages:**
-1. `/requirements` — capture requirements
-2. `/design` — triage and design; routes to `/runbook` or straight to `/build`
-3. `/runbook` — decompose into phases of typed items
-4. `/build` — execute the planned work, runbook or not
-5. corrector — review and fix changes before commit
-6. `/commit-commands:commit` — commit changes
-
-## Execution Context for Review Delegations
-
-When delegating to corrector, Read `../../fragments/review-requirement.md` and
-include the scope context it specifies — §Execution Context is the authority for
-the field list and the rationale.
-
+Where no probe-backed rule exists, or a second review round running hits the
+same sentence, drop the list or the stated cause instead of refining it. Keep
+what the reader acts on, hedge any effect that must stay ("can ... or fail"),
+and grep every copy of the dropped wording in the same fix. Refining one
+sentence can fail to converge over many rounds; dropping the enumeration or the
+claim is what ends the loop green.

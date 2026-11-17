@@ -2,7 +2,10 @@
 
 from pathlib import Path
 
-from edify.markdown import process_file, process_lines
+from tests.markdown_script import md
+
+process_file = md.process_file
+process_lines = md.process_lines
 
 
 def test_import_process_lines() -> None:

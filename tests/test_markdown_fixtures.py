@@ -20,7 +20,9 @@ from pathlib import Path
 
 import pytest
 
-from edify.markdown import process_lines
+from tests.markdown_script import md
+
+process_lines = md.process_lines
 
 
 def load_fixture_pair(

@@ -1,18 +1,41 @@
 """Tests for CLI markdown command."""
 
+import os
+import subprocess
 from pathlib import Path
+from types import SimpleNamespace
 
-from click.testing import CliRunner
-
-from edify.cli import cli
+from tests.markdown_script import SCRIPT
 
 
-def test_help_shows_markdown_command() -> None:
-    """Test: markdown command is registered in CLI."""
-    runner = CliRunner()
-    result = runner.invoke(cli, ["--help"])
+def run_script(input_text: str) -> SimpleNamespace:
+    """Run the script as a user would: paths on stdin, a fresh process."""
+    proc = subprocess.run(
+        [str(SCRIPT)],
+        input=input_text,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return SimpleNamespace(
+        output=proc.stdout + proc.stderr,
+        stdout=proc.stdout,
+        stderr=proc.stderr,
+        exit_code=proc.returncode,
+    )
+
+
+def test_script_is_executable_with_python_shebang() -> None:
+    """Test: the script is executable and its shebang names python3."""
+    assert os.access(SCRIPT, os.X_OK)
+    assert SCRIPT.read_text().splitlines()[0] == "#!/usr/bin/env python3"
+
+
+def test_script_runs_by_path_with_no_input() -> None:
+    """Test: empty stdin processes nothing and exits 0."""
+    result = run_script("")
     assert result.exit_code == 0
-    assert "markdown" in result.output
+    assert result.output == ""
 
 
 def test_markdown_processes_file_from_stdin(
@@ -22,8 +45,7 @@ def test_markdown_processes_file_from_stdin(
     filepath = tmp_path / "test.md"
     filepath.write_text("## About __init__.py\n")
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["markdown"], input=str(filepath) + "\n")
+    result = run_script(str(filepath) + "\n")
 
     assert str(filepath) in result.output
     assert filepath.read_text() == "## About `__init__.py`\n"
@@ -36,8 +58,7 @@ def test_markdown_skips_unchanged_files(
     filepath = tmp_path / "test.md"
     filepath.write_text("## About `__init__.py`\n")
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["markdown"], input=str(filepath) + "\n")
+    result = run_script(str(filepath) + "\n")
 
     assert result.output == ""
 
@@ -49,8 +70,7 @@ def test_markdown_errors_on_non_md_file(
     filepath = tmp_path / "test.txt"
     filepath.write_text("content")
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["markdown"], input=str(filepath) + "\n")
+    result = run_script(str(filepath) + "\n")
 
     assert result.exit_code == 1
     # Error message could be in output or exception
@@ -65,8 +85,7 @@ def test_markdown_errors_on_missing_file(
     """Test: markdown command errors on missing file."""
     filepath = tmp_path / "missing.md"
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["markdown"], input=str(filepath) + "\n")
+    result = run_script(str(filepath) + "\n")
 
     assert result.exit_code == 1
     # Error message could be in output or exception
@@ -89,8 +108,7 @@ def test_markdown_processes_multiple_files(
 
     input_text = f"{file1}\n{file2}\n{file3}\n"
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["markdown"], input=input_text)
+    result = run_script(input_text)
 
     assert str(file1) in result.output
     assert str(file2) in result.output
@@ -115,8 +133,7 @@ def test_markdown_batch_processes_all_valid_files_despite_errors(
 
     input_text = f"{valid1}\n{invalid}\n{valid2}\n{missing}\n{valid3}\n"
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["markdown"], input=input_text)
+    result = run_script(input_text)
 
     # Should exit with error code due to invalid files
     assert result.exit_code == 1
@@ -172,8 +189,7 @@ def test_markdown_reports_multiple_processing_errors(
 
     input_text = f"{file1}\n{file2}\n{file3}\n"
 
-    runner = CliRunner()
-    result = runner.invoke(cli, ["markdown"], input=input_text)
+    result = run_script(input_text)
 
     # Should exit successfully (no errors)
     assert result.exit_code == 0
