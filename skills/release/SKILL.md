@@ -5,8 +5,8 @@ description: "Releases `dev` onto `main` through the full cascade: /simplify, th
 
 # Release
 
-Run `just precommit` before every commit below. Switch branches only where
-section 6 says to.
+Run `just precommit` before committing; one passing run covers the commits that
+follow it with no edit in between. Switch branches only where section 6 says to.
 
 ## 1. Where the ritual stands
 
