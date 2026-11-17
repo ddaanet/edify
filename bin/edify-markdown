@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""Fix structural issues in Claude-generated markdown, in place.
+
+Reads markdown file paths from stdin, one per line, rewrites each file that a
+fix changes and prints the path of each rewritten file. Reports non-.md and
+missing paths on stderr and exits 1 after processing every valid path.
+
+Fixes: keyword lists lacking bullets, inline triple backticks, dunder names in
+headings, metadata labels, numbered-list spacing, lettered sub-items, spaced
+backtick spans, and ```markdown blocks that contain inner fences. Fenced code
+and YAML prologs are protected; ```markdown blocks are processed inside.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+
+from edify_markdown import process_file
+
+
+def main() -> int:
+    """Process the markdown files named on stdin."""
+    files = [line.strip() for line in sys.stdin if line.strip()]
+    errors: list[str] = []
+    valid_files: list[Path] = []
+    for name in files:
+        path = Path(name)
+        if path.suffix != ".md":
+            errors.append(f"Error: {name} is not a markdown file")
+        elif not path.exists():
+            errors.append(f"Error: {name} does not exist")
+        else:
+            valid_files.append(path)
+    for path in valid_files:
+        if process_file(path):
+            print(str(path))
+    for error in errors:
+        print(error, file=sys.stderr)
+    return 1 if errors else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

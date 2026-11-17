@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+"""Count the tokens of files with the Anthropic count_tokens endpoint.
+
+Usage: edify-count-tokens [--model haiku|sonnet|opus|ID] [--json] FILE...
+
+The key comes from ANTHROPIC_API_KEY, else `[anthropic] api_key` in
+~/.config/edify/config.toml. ANTHROPIC_BASE_URL overrides the endpoint base.
+Nothing is cached: every run asks the API.
+"""
+
+# ruff: noqa: TRY003
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+import urllib.error
+import urllib.request
+from pathlib import Path
+from typing import Any
+
+DEFAULT_BASE_URL = "https://api.anthropic.com"
+OAUTH_TOKEN_PREFIX = "sk-ant-oat"  # noqa: S105 - Claude Code / Plan tokens authenticate via Bearer
+
+
+class CountError(Exception):
+    """A failure to report as `Error: <message>` with exit status 1."""
+
+
+class RefusedError(CountError):
+    """The API answered and refused: bad credential or rate limit."""
+
+
+def main(argv: list[str]) -> int:
+    """Count tokens for the files in argv and print the result."""
+    parser = argparse.ArgumentParser(
+        description="Count tokens in files using the Anthropic API"
+    )
+    parser.add_argument(
+        "--model",
+        default="sonnet",
+        metavar="{haiku,sonnet,opus}",
+        help="model alias or full model ID (default: sonnet)",
+    )
+    parser.add_argument("--json", action="store_true", help="output JSON")
+    parser.add_argument("files", nargs="+", metavar="FILE")
+    args = parser.parse_args(argv)
+    try:
+        api_key = resolve_api_key()
+        base_url = os.environ.get("ANTHROPIC_BASE_URL") or DEFAULT_BASE_URL
+        model = resolve_model(args.model, api_key, base_url)
+        counts = [count_file(Path(f), model, api_key, base_url) for f in args.files]
+    except CountError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    total = sum(counts)
+    if args.json:
+        files = [{"path": f, "count": c} for f, c in zip(args.files, counts)]
+        print(json.dumps({"model": model, "files": files, "total": total}))
+        return 0
+    print(f"Using model: {model}")
+    for path, count in zip(args.files, counts):
+        print(f"{path}: {count} tokens")
+    if len(counts) > 1:
+        print(f"Total: {total} tokens")
+    return 0
+
+
+def resolve_api_key() -> str:
+    """Return the key from ANTHROPIC_API_KEY or the config file."""
+    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not key.strip():
+        key = read_config_key()
+    if not key.strip():
+        raise CountError(auth_message(None))
+    return key
+
+
+def read_config_key() -> str:
+    """Read `[anthropic] api_key` from the config file; empty when unusable."""
+    config_home = os.environ.get("XDG_CONFIG_HOME") or str(Path.home() / ".config")
+    config_file = Path(config_home) / "edify" / "config.toml"
+    if not config_file.exists():
+        return ""
+    try:
+        import tomllib  # noqa: PLC0415 - Python 3.11+, needed only for the config file
+    except ImportError as e:
+        raise CountError(
+            f"Reading {config_file} needs Python 3.11 or later; "
+            f"python3 is {sys.version.split()[0]}. Set ANTHROPIC_API_KEY instead."
+        ) from e
+    try:
+        data = tomllib.loads(config_file.read_text())
+    except (OSError, tomllib.TOMLDecodeError) as e:
+        print(f"Failed to read config {config_file}: {e}", file=sys.stderr)
+        return ""
+    key = data.get("anthropic", {}).get("api_key", "")
+    return key if isinstance(key, str) else ""
+
+
+def auth_message(details: str | None) -> str:
+    """Name the failure and the two ways to fix it."""
+    reason = f" ({details})" if details else ""
+    return (
+        f"Authentication failed{reason}. Set ANTHROPIC_API_KEY env var "
+        "or add [anthropic] api_key to ~/.config/edify/config.toml"
+    )
+
+
+def resolve_model(model: str, api_key: str, base_url: str) -> str:
+    """Resolve an alias to the newest model ID containing it, via the models API."""
+    parts = model.split("-")
+    if model.startswith("claude-") and parts[-1].isdigit() and len(parts[-1]) == 8:
+        return model
+    try:
+        data = request("GET", "/v1/models?limit=1000", None, api_key, base_url)
+    except RefusedError:
+        raise
+    except CountError as e:
+        raise CountError(
+            f"Models API is unreachable and cannot resolve alias '{model}'. "
+            "This is a transient failure. Please retry."
+        ) from e
+    matching = [m for m in data.get("data", []) if model.lower() in m["id"].lower()]
+    matching.sort(key=lambda m: m.get("created_at", ""), reverse=True)
+    return matching[0]["id"] if matching else model
+
+
+def count_file(path: Path, model: str, api_key: str, base_url: str) -> int:
+    """Return the input token count of one file; 0 for an empty file."""
+    try:
+        content = path.read_text()
+    except (OSError, UnicodeDecodeError) as e:
+        raise CountError(f"Failed to read {path}: {e}") from e
+    if not content:
+        return 0
+    body = {"model": model, "messages": [{"role": "user", "content": content}]}
+    data = request("POST", "/v1/messages/count_tokens", body, api_key, base_url)
+    return int(data["input_tokens"])
+
+
+def request(
+    method: str, route: str, body: dict[str, Any] | None, api_key: str, base_url: str
+) -> dict[str, Any]:
+    """Send one API request and return the decoded JSON reply."""
+    headers = {"anthropic-version": "2023-06-01", "content-type": "application/json"}
+    if api_key.startswith(OAUTH_TOKEN_PREFIX):
+        headers["authorization"] = f"Bearer {api_key}"
+    else:
+        headers["x-api-key"] = api_key
+    payload = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(  # noqa: S310
+        base_url.rstrip("/") + route, data=payload, headers=headers, method=method
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as response:  # noqa: S310
+            reply: dict[str, Any] = json.load(response)
+            return reply
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode(errors="replace")
+        if e.code in (401, 403):
+            raise RefusedError(auth_message(detail or str(e))) from e
+        if e.code == 429:
+            raise RefusedError("Rate limit exceeded. Please try again later.") from e
+        raise CountError(f"API error: {e.code} {detail}") from e
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        raise CountError(f"API error: {e}") from e
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
