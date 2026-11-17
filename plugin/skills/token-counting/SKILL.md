@@ -24,7 +24,8 @@ edify-count-tokens --model opus --json FILE...
 - `--model` takes `haiku`, `sonnet` (the default), `opus` or a full model ID. An
   alias resolves to the newest matching model through the models API.
 - `--json` prints `{"model", "files": [{"path", "count"}], "total"}`; without it
-  the output is one `path: N tokens` line per file and a total.
+  the output is a `Using model: <id>` line, then one `path: N tokens` line per
+  file, then `Total: N tokens` when more than one file is given.
 - Each count includes a constant overhead of about 7 tokens for the request
   frame. Haiku and opus counts agree.
 - The key comes from `ANTHROPIC_API_KEY`, else `[anthropic] api_key` in

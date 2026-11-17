@@ -24,6 +24,11 @@ reads `The subagent ended without delivering a report through SubagentHandback`
 and suggests `SendMessage`. Following that advice sends the resumed run's
 `[Subagent hand-back]` to the main session.
 
+On CC 2.1.283 the same dispatch's `SubagentHandback` reached the main session
+instead of failing, and the delegate saw only an idle "waiting for ...". Either
+way the delegate never receives it: route the report through a named file, or
+have the main session relay it by `SendMessage`.
+
 A subagent's `SendMessage` to the delegate's name does reach it. It stayed
 queued through the delegate's next five tool calls and arrived as a
 `<teammate-message>` the moment the delegate went idle, resuming it within the

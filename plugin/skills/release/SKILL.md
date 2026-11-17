@@ -26,8 +26,9 @@ all of them.
 
 - **Code review on Fable.** Dispatch an agent with `model: fable` whose task is
   `/code-review high main...dev`, writing its findings to
-  `.claude/review-<sha>.md` (severity and a one-line reason per finding) and
-  replying with one line pointing at it. Read the file.
+  `.claude/review-$(git rev-parse --short dev).md`, resolved before dispatch
+  (severity and a one-line reason per finding), and replying with one line
+  pointing at it. Read the file.
 - **Adversarial review on Codex astra.** Write the focus to
   `.claude/review-focus.md`: what the delta is for, what is settled and not up
   for challenge, the sources to verify claims against, and the finding format
@@ -71,28 +72,35 @@ pass returns only lows.
 
 ## 6. Ship
 
-In claude-plugin-dev and in a plugin whose `plugin-dev/VERSION` is 0.16.0 or
-later, every step runs on `dev`: skip item 2 of the list below, and the checkout
-and merge of its item 5 (the push of `dev` in item 5 still runs). The release
-moves `main` itself.
+Pick the bump from the delta and say which in the reply: `minor` when a
+user-visible capability lands or an installed setup changes (a file path or
+shape, a hook or command name); `patch` otherwise; `major` only when the user
+named it. Run `just release <bump>` alone in its Bash call, with no `cd` prefix
+and no `MARKETPLACE_DIR=` prefix. In `/ddaa:preflight`'s report, ` M memory` in
+the status is not a block; any other dirty path is one.
+
+**In claude-plugin-dev, or a plugin whose `plugin-dev/VERSION` is 0.16.0 or
+later**, every step runs on `dev` and the release moves `main` itself:
+
+1. Push `dev` when `git ls-remote --heads origin dev` prints a line.
+2. `/ddaa:preflight`.
+3. `just release <bump>`.
+4. Push `dev` under item 1's condition.
+
+**Otherwise:**
 
 1. Push `dev` when `git ls-remote --heads origin dev` prints a line.
 2. `git checkout main && git merge --ff-only dev`.
-3. `/ddaa:preflight`. ` M memory` in the status is not a block; any other dirty
-   path is one.
-4. Pick the bump from the delta and say which in the reply: `minor` when a
-   user-visible capability lands or an installed setup changes (a file path or
-   shape, a hook or command name); `patch` otherwise; `major` only when the user
-   named it. Then `just release <bump>`, alone in its Bash call, with no `cd`
-   prefix and no `MARKETPLACE_DIR=` prefix.
-5. `git checkout dev && git merge --ff-only main`. Then push `dev` under item
-   1's condition.
+3. `/ddaa:preflight`.
+4. `just release <bump>`.
+5. `git checkout dev && git merge --ff-only main`.
+6. Push `dev` under item 1's condition.
 
 ## Boundaries
 
 A boundary is a triage done (step 4, before its fixes are dispatched) or a fix
-pass done (step 4's, and each round of step 5). At each one, run
-`~/.claude/bin/context-usage`. Then:
+pass done (step 4's, and each round of step 5). At each one, read the context
+usage the harness last reported. Then:
 
 - Past 150k with no agents running: `/autodrive-handoff:handoff` with `clear`
   and `continue`. Its task text opens with "resume `/edify:release` at step N"

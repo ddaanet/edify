@@ -50,7 +50,7 @@ A reply that comes back as a report is truncated at about 4000 characters, with
 a literal `[result truncated — ask the agent for the rest via SendMessage]`
 marker where it stopped; observed on every long `plugin-dev:skill-reviewer`
 reply. An agent with no `Write` tool cannot route around it with a file, so the
-fix is in the dispatch prompt: send the report in parts, each well under 4000
+fix is in the dispatch prompt: send the report in parts, each under 3500
 characters, every part ending with a `CONTINUES` line and the last with a fixed
 end marker.
 

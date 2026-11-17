@@ -9,11 +9,12 @@ Nothing is cached: every run asks the API.
 """
 
 # ruff: noqa: TRY003
+from __future__ import annotations
+
 import argparse
 import json
 import os
 import sys
-import tomllib
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -54,12 +55,12 @@ def main(argv: list[str]) -> int:
         return 1
     total = sum(counts)
     if args.json:
-        pairs = zip(args.files, counts, strict=True)
+        pairs = zip(args.files, counts)  # noqa: B905 - strict= is 3.10+
         files = [{"path": f, "count": c} for f, c in pairs]
         print(json.dumps({"model": model, "files": files, "total": total}))
         return 0
     print(f"Using model: {model}")
-    for path, count in zip(args.files, counts, strict=True):
+    for path, count in zip(args.files, counts):  # noqa: B905
         print(f"{path}: {count} tokens")
     if len(counts) > 1:
         print(f"Total: {total} tokens")
@@ -80,11 +81,19 @@ def read_config_key() -> str:
     """Read `[anthropic] api_key` from the config file; empty when unusable."""
     config_home = os.environ.get("XDG_CONFIG_HOME") or str(Path.home() / ".config")
     config_file = Path(config_home) / "edify" / "config.toml"
+    if not config_file.exists():
+        return ""
+    try:
+        import tomllib  # noqa: PLC0415 - Python 3.11+, needed only for the config file
+    except ImportError as e:
+        raise CountError(
+            f"Reading {config_file} needs Python 3.11 or later; "
+            f"python3 is {sys.version.split()[0]}. Set ANTHROPIC_API_KEY instead."
+        ) from e
     try:
         data = tomllib.loads(config_file.read_text())
     except (OSError, tomllib.TOMLDecodeError) as e:
-        if config_file.exists():
-            print(f"Failed to read config {config_file}: {e}", file=sys.stderr)
+        print(f"Failed to read config {config_file}: {e}", file=sys.stderr)
         return ""
     key = data.get("anthropic", {}).get("api_key", "")
     return key if isinstance(key, str) else ""

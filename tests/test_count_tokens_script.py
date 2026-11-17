@@ -2,6 +2,7 @@
 
 # ruff: noqa: D102, D103, D107
 
+import ast
 import json
 import os
 import subprocess
@@ -87,12 +88,17 @@ def api() -> Iterator[FakeApi]:
 
 
 def run(
-    api_url: str, home: Path, *args: str, key_env: str | None = None
+    api_url: str,
+    home: Path,
+    *args: str,
+    key_env: str | None = None,
+    extra_env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     env = {
         "PATH": os.environ["PATH"],
         "HOME": str(home),
         "ANTHROPIC_BASE_URL": api_url,
+        **(extra_env or {}),
     }
     if key_env is not None:
         env["ANTHROPIC_API_KEY"] = key_env
@@ -114,6 +120,54 @@ def write_config(home: Path, text: str) -> None:
 
 def test_script_is_executable() -> None:
     assert os.access(SCRIPT, os.X_OK)
+
+
+def test_script_parses_as_python_3_9() -> None:
+    """Test: macOS /usr/bin/python3 is 3.9, so no newer grammar appears."""
+    text = SCRIPT.read_text()
+    ast.parse(text, filename=str(SCRIPT), feature_version=(3, 9))
+    assert "from __future__ import annotations" in text
+
+
+def no_tomllib_env(tmp_path: Path) -> dict[str, str]:
+    """Shadow tomllib with a failing module, as on Python before 3.11."""
+    shadow = tmp_path / "shadow"
+    shadow.mkdir()
+    (shadow / "tomllib.py").write_text("raise ImportError('no tomllib')\n")
+    return {"PYTHONPATH": str(shadow)}
+
+
+def test_config_without_tomllib_names_python_version(
+    api: FakeApi, tmp_path: Path
+) -> None:
+    write_config(tmp_path, '[anthropic]\napi_key = "sk-ant-api03-fake"\n')
+    doc = tmp_path / "d.md"
+    doc.write_text("x")
+
+    result = run(api.url, tmp_path, str(doc), extra_env=no_tomllib_env(tmp_path))
+
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert "needs Python 3.11 or later" in result.stderr
+    assert len(result.stderr.splitlines()) == 1
+    assert api.requests == []
+
+
+def test_env_key_works_without_tomllib(api: FakeApi, tmp_path: Path) -> None:
+    write_config(tmp_path, '[anthropic]\napi_key = "sk-ant-api03-fake"\n')
+    doc = tmp_path / "d.md"
+    doc.write_text("x")
+
+    result = run(
+        api.url,
+        tmp_path,
+        str(doc),
+        key_env="sk-ant-api03-env",
+        extra_env=no_tomllib_env(tmp_path),
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.endswith(f"{doc}: 8 tokens\n")
 
 
 def test_counts_one_file_with_config_key(api: FakeApi, tmp_path: Path) -> None:

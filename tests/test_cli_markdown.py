@@ -1,11 +1,12 @@
 """Tests for CLI markdown command."""
 
+import ast
 import os
 import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 
-from tests.markdown_script import SCRIPT
+from tests.markdown_script import LIB, SCRIPT
 
 
 def run_script(input_text: str) -> SimpleNamespace:
@@ -29,6 +30,16 @@ def test_script_is_executable_with_python_shebang() -> None:
     """Test: the script is executable and its shebang names python3."""
     assert os.access(SCRIPT, os.X_OK)
     assert SCRIPT.read_text().splitlines()[0] == "#!/usr/bin/env python3"
+
+
+def test_script_and_lib_parse_as_python_3_9() -> None:
+    """Test: macOS /usr/bin/python3 is 3.9, so no newer grammar appears."""
+    sources = [SCRIPT, *sorted((LIB / "edify_markdown").glob("*.py"))]
+    assert len(sources) > 1
+    for source in sources:
+        text = source.read_text()
+        ast.parse(text, filename=str(source), feature_version=(3, 9))
+        assert "from __future__ import annotations" in text, source
 
 
 def test_script_runs_by_path_with_no_input() -> None:

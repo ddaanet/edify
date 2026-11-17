@@ -89,9 +89,9 @@ those files, and its prompt says so. A flip in an unrelated suite surfaces at
 the gate, at the cost of one extra round; an agent's full-suite run duplicates
 minutes the gate repeats on every slice.
 
-A gate near the Bash tool's 10-minute cap runs in the background however it is
-launched, and the dispatched agent does receive its task-notification: tell it
-to wait for that and build no watcher.
+Launch a gate near the Bash tool's 10-minute cap with `run_in_background: true`.
+The dispatched agent receives its task-notification: tell it to wait for that
+and build no watcher.
 
 ## Naming
 
@@ -111,12 +111,13 @@ teammate stays available where addressing a worker mid-flight is the point.
 Agents report in their reply; git, session logs and agent messages hold the
 rest, so no report file is written by default. The exception: a dispatch whose
 deliverable is itself a long document keeps a report file, because agent replies
-are cut near 4000 characters.
+are cut near 4000 characters; the Fable release review's findings file in
+`edify:release` is that case.
 
 A reviewer with no `Write` tool gets the report asked for at spawn in parts
-under 4000 characters, each part ending with a continuation line and the last
-with a fixed end marker. Without the marker a truncated report reads as a
-complete one.
+under 3500 characters, each part ending with a continuation line and the last
+with a fixed end marker such as `END OF REPORT`. Without the marker a truncated
+report reads as a complete one.
 
 An idle reply is not evidence the agent died. Check the artifact, `git log` and
 the tree before re-dispatching. An executor idle "waiting for the watcher"

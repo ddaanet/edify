@@ -32,12 +32,6 @@ Constraints on the delegating layer:
 - **Launch it without `name`.** A named delegate is a teammate, and its
   dispatches' `SubagentHandback` never reaches it: see
   `cc-named-delegate-handback-lost.md`.
-- **A named delegate's own dispatches come back to the main session** (observed
-  on CC 2.1.283). A delegate spawned with a `name` joins a flat team roster and
-  cannot name its dispatches, so it resumes them by agent id. Their
-  `SubagentHandback` reports reach the main session and not the delegate, which
-  sees only an idle "waiting for ...". The main session relays each report by
-  `SendMessage`, or the dispatch writes its report to a file the delegate reads.
 - The delegate's Bash runs in the main session's sandbox, so a dispatch that has
   to fetch names its hosts in `allowed_domains` up front.
 - A delegate that runs `git stash` to compare two states takes the parent's
