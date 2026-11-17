@@ -56,8 +56,7 @@ def main(argv: list[str]) -> int:
         return 1
     total = sum(counts)
     if args.json:
-        pairs = zip(args.files, counts)
-        files = [{"path": f, "count": c} for f, c in pairs]
+        files = [{"path": f, "count": c} for f, c in zip(args.files, counts)]
         print(json.dumps({"model": model, "files": files, "total": total}))
         return 0
     print(f"Using model: {model}")
@@ -116,9 +115,9 @@ def resolve_model(model: str, api_key: str, base_url: str) -> str:
         return model
     try:
         data = request("GET", "/v1/models?limit=1000", None, api_key, base_url)
+    except RefusedError:
+        raise
     except CountError as e:
-        if isinstance(e, RefusedError):
-            raise
         raise CountError(
             f"Models API is unreachable and cannot resolve alias '{model}'. "
             "This is a transient failure. Please retry."
