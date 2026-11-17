@@ -27,7 +27,7 @@ edify-count-tokens --model opus --json FILE...
   the output is a `Using model: <id>` line, then one `path: N tokens` line per
   file, then `Total: N tokens` when more than one file is given.
 - Each count includes a constant overhead of about 7 tokens for the request
-  frame. Haiku and opus counts agree.
+  frame.
 - The key comes from `ANTHROPIC_API_KEY`, else `[anthropic] api_key` in
   `~/.config/edify/config.toml`; the config file needs Python 3.11 or later, and
   older Python errors and names `ANTHROPIC_API_KEY`. Without a key the command
