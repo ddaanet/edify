@@ -21,8 +21,6 @@ It fixes:
 - `**Label:**` runs, numbered-list spacing, lettered sub-items and dunder names
   in headings.
 
-Fenced code and YAML front matter are left alone, except `markdown` blocks.
-
 ## Run it
 
 `edify-markdown` is on PATH. Pass the file paths on stdin, one per line:
@@ -33,5 +31,6 @@ printf '%s\n' path/one.md path/two.md | edify-markdown
 
 It prints the path of each file it rewrote and nothing for a file already clean.
 A path that is not a `.md` file or does not exist is reported on stderr, the
-other paths are still processed, and the exit status is 1. Re-read a rewritten
-file before building on its old text.
+other paths are still processed, and the exit status is 1. The script rewrites
+files in place and can mangle valid markdown, so check `git diff` of each
+rewritten file and re-read it before building on its old text.

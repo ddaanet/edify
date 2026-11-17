@@ -9,7 +9,7 @@ dispatching subagents, a markdown fixer and a token counter.
 Through the ddaanet marketplace:
 
 ```text
-/plugin marketplace add ddaanet/marketplace
+/plugin marketplace add ddaanet/claude-plugins
 /plugin install edify@ddaanet
 ```
 
@@ -34,15 +34,17 @@ Each lives in `skills/<name>/SKILL.md`, invoked as a slash command.
 
 ## Scripts
 
-In `bin/`, standard library only, Python 3.9 or later:
+In `bin/`, standard library only, Python 3.9 or later (3.11 or later for the
+config-file key below):
 
 - `edify-markdown` reads markdown paths on stdin and rewrites each file in
   place, fixing keyword lists lacking bullets, inline triple backticks, spaced
-  backtick spans and similar defects. Fenced code and YAML prologs are left
-  alone.
+  backtick spans and similar defects. It can mangle valid markdown, so check
+  `git diff` of each file it reports before building on it.
 - `edify-count-tokens [--model haiku|sonnet|opus|ID] [--json] FILE...` counts
   input tokens with the Anthropic `count_tokens` endpoint. The key comes from
-  `ANTHROPIC_API_KEY` or `[anthropic] api_key` in `~/.config/edify/config.toml`.
+  `ANTHROPIC_API_KEY` or, on Python 3.11 or later, `[anthropic] api_key` in
+  `~/.config/edify/config.toml`.
 
 ## Development
 

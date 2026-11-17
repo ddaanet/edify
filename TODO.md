@@ -21,3 +21,8 @@
   section (it still advertises the removed pipeline, `/proof`, `edify-cli` and
   the uv venv hook) for the six skills, `brainstorm-name` and the two scripts,
   with no uv or venv (another repo — brief only).
+- The markdown fixer mangles valid markdown: `~~~` fences, fences inside
+  blockquotes, inline code spans wrapped across lines (xfailed in
+  `tests/test_markdown_fixtures.py`), `+` bullets, and repeated-prefix lines
+  such as `$ cmd` or headings without a blank line between them. Fix in
+  `lib/edify_markdown/` with regression fixtures.
