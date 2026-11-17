@@ -26,7 +26,7 @@ unset CDPATH
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-manifest="plugin/.claude-plugin/plugin.json"
+manifest=".claude-plugin/plugin.json"
 pypi_name="edify-cli"
 
 # The plugin root relative to the repo root — "." when the manifest sits at the
@@ -89,7 +89,7 @@ common_preflight() {
 }
 
 release_preflight() {
-    plugin/bin/check-version-consistency.py \
+    bin/check-version-consistency.py \
         || die "plugin.json and pyproject.toml already disagree — fix that before releasing"
     manifest_version=$(jq -r .version "$manifest")
     latest_tag=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || true)
@@ -123,9 +123,9 @@ resume_preflight() {
 }
 
 bump_commit_tag() {
-    plugin/bin/bump-plugin-version.py "$V"
+    bin/bump-plugin-version.py "$V"
     visible-uv-version "$V"
-    plugin/bin/check-version-consistency.py
+    bin/check-version-consistency.py
     git add "$manifest" pyproject.toml uv.lock
     git commit -m "🔖 Release $V"
     git tag -a "$tag" -m "Release $V"

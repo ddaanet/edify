@@ -11,10 +11,10 @@
   config.
 - `memory/MEMORY.md` is over the loader budget (116% of 25600 bytes), so tail
   entries may not load — run `/gitlore:index-audit`.
-- **justfile consolidation**: move `plugin/portable.just` into the root
-  `justfile`, then clean up or split to meet the line limit; remove
-  `plugin/justfile`. Sweep inbound references: the root `justfile`'s
-  `portable.just` comments, `tests/test_line_limits_default_invocation.py`,
+- **justfile consolidation**: move `portable.just` into the root `justfile`,
+  then clean up or split to meet the line limit; remove `plugin/justfile`. Sweep
+  inbound references: the root `justfile`'s `portable.just` comments,
+  `tests/test_line_limits_default_invocation.py`,
   `memory/worktree-submodule-setup.md`.
 - `memory/ddaanet/cc-plugin-dir-edits-sensitive.md` still names "a `just claude`
   recipe" as a `--plugin-dir` launcher; the recipe is gone — the launcher is

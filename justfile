@@ -3,7 +3,7 @@
 # - Only use `2>/dev/null` for probing (checking exit status when command has no quiet option)
 # - Only use `|| true` to continue after expected failures (required with `set -e`)
 
-import 'plugin/portable.just'
+import 'portable.just'
 
 set allow-duplicate-recipes
 set allow-duplicate-variables
@@ -46,8 +46,8 @@ bootstrap-check:
     mkdir -p "$data"
     # Install from the local wheel, not PyPI: dogfooding never needs a publish.
     export UV_FIND_LINKS="$PWD/dist"
-    visible env CLAUDE_PLUGIN_ROOT="$PWD/plugin" CLAUDE_PLUGIN_DATA="$data" \
-        plugin/bin/bootstrap-venv.sh
+    visible env CLAUDE_PLUGIN_ROOT="$PWD" CLAUDE_PLUGIN_DATA="$data" \
+        bin/bootstrap-venv.sh
     visible "$data/current/bin/edify" --version
     report-end-safe "Bootstrap"
 
@@ -86,7 +86,7 @@ safe () { "$@" || status=false; }
 end-safe () { ${status:-true}; }
 show () { echo "$COMMAND$*$NORMAL"; }
 visible () { show "$@"; "$@"; }
-# Same definition as plugin/portable.just: this prolog overrides that one on
+# Same definition as portable.just: this prolog overrides that one on
 # import, so a drift here changes what every recipe prints on failure.
 fail () { echo "${RED}FAIL: $*${NORMAL}" >&2; exit 1; }
 wt-path() {
@@ -167,7 +167,7 @@ run-pytest() {
         # Untracked files count: a new test module is an input before its
         # first commit. scripts/ is read by the suite.
         git ls-files -z --cached --others --exclude-standard \
-            src/ tests/ scripts/ plugin/hooks/ plugin/bin/ | sort -z | xargs -0 cat
+            src/ tests/ scripts/ hooks/ bin/ | sort -z | xargs -0 cat
         cat pyproject.toml
     } | cksum )
     if [ -f "$sentinel" ] && [ "$(cat "$sentinel")" = "$current_hash" ]; then

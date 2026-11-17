@@ -238,16 +238,16 @@ unnecessary `git stash` diagnostic cycle.
 
 ## CLI
 
-No installed command line. The plugin ships two scripts in `plugin/bin/`, run by
-name (the plugin's `bin/` is on PATH) and standard library only:
-`edify-markdown` (reads markdown paths on stdin, fixes structural defects in
-place) and `edify-count-tokens` (counts file tokens with the Anthropic
-`count_tokens` endpoint). The Python package in `src/edify/` is on its way out;
-do not extend it.
+No installed command line. The plugin ships two scripts in `bin/`, run by name
+(the plugin's `bin/` is on PATH) and standard library only: `edify-markdown`
+(reads markdown paths on stdin, fixes structural defects in place) and
+`edify-count-tokens` (counts file tokens with the Anthropic `count_tokens`
+endpoint). The Python package in `src/edify/` is on its way out; do not extend
+it.
 
 ## Skills
 
-In `plugin/skills/`, invoked as `/edify:<name>`.
+In `skills/`, invoked as `/edify:<name>`.
 
 - `release` — release `dev` onto `main` through the review cascade.
 - `review` — the per-commit review loop: review each commit as it lands, triage,
@@ -258,7 +258,7 @@ In `plugin/skills/`, invoked as `/edify:<name>`.
 - `token-counting` — run `edify-count-tokens`.
 - `ground` — ground a methodology in external research before asserting it.
 
-The one agent, `brainstorm-name`, is in `plugin/agents/`.
+The one agent, `brainstorm-name`, is in `agents/`.
 
 ## Recipes
 

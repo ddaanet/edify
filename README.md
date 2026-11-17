@@ -15,7 +15,7 @@ Through the ddaanet marketplace:
 
 ## Plugin
 
-The plugin lives in `plugin/`. Skills are invoked as slash commands:
+The plugin lives at the repository root. Skills are invoked as slash commands:
 
 - `/edify:release` — release `dev` onto `main` through the review cascade.
 - `/edify:review` — review each commit as it lands, triage, fix.

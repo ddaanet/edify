@@ -11,7 +11,7 @@
 # them; left on they report lines no `fmt` pass can fix.
 #
 # Scope matches the markdown scope of `scripts/check_line_limits.sh`:
-# `plugin/`, `docs/` and root-level `*.md`. `plans/` and `memory/` stay out
+# `skills/`, `agents/`, `plugin/`, `docs/` and root-level `*.md`. `plans/` and `memory/` stay out
 # (frozen work, and a submodule with its own gate), as do the two frozen
 # `docs/superpowers/` trees. The root-level pattern is `/*.md`, not `*.md`:
 # an unanchored `*` crosses `/` here, so `*.md` pulls in `.claude/`,
@@ -19,7 +19,7 @@
 
 [global]
 enable = ["MD013"]
-include = ["plugin/**/*.md", "docs/**/*.md", "/*.md"]
+include = ["skills/**/*.md", "agents/**/*.md", "plugin/**/*.md", "docs/**/*.md", "/*.md"]
 exclude = ["docs/superpowers/plans/**", "docs/superpowers/specs/**"]
 
 [MD013]

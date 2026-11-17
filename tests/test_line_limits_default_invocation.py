@@ -1,6 +1,6 @@
 """Coverage for the invocation form production actually uses.
 
-`justfile` and `plugin/portable.just` both run
+`justfile` and `portable.just` both run
 `./scripts/check_line_limits.sh` with **no arguments at all** — `ROOT`
 defaults to `.` and `ALLOWLIST_EXPLICIT` stays `0`, taking the
 default-sidecar branch at `scripts/check_line_limits.sh:63-65`. Every test

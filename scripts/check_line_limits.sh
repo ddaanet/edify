@@ -5,7 +5,7 @@
 #
 # ROOT defaults to `.`. Caps: 400 lines for a Python file under `src` or
 # `tests`, and for markdown, 200 for a file named `SKILL.md`, 400 otherwise.
-# Markdown scope is `plugin/`, `docs/` and root-level `*.md`, excluding
+# Markdown scope is `skills/`, `agents/`, `plugin/`, `docs/` and root-level `*.md`, excluding
 # `docs/superpowers/plans/` and `docs/superpowers/specs/` (frozen work).
 #
 # An allowlist records a per-file ceiling above the path-picked cap: a
@@ -187,9 +187,9 @@ for dir in src tests; do
     done <"$WALK_LIST"
 done
 
-# Markdown under plugin/, docs/, and root-level *.md; cap 200 for SKILL.md,
+# Markdown under skills/, agents/, plugin/, docs/, and root-level *.md; cap 200 for SKILL.md,
 # 400 otherwise; docs/superpowers/plans and docs/superpowers/specs excluded.
-for dir in plugin docs; do
+for dir in skills agents plugin docs; do
     [ -d "$dir" ] || continue
     walk "$dir" -type f -name "*.md"
     while IFS= read -r -d '' file; do

@@ -61,7 +61,7 @@ run-pytest() {
         # Untracked files count: a new test module is an input before its
         # first commit.
         git ls-files -z --cached --others --exclude-standard \
-            src/ tests/ scripts/ plugin/hooks/ plugin/bin/ | sort -z | xargs -0 cat
+            src/ tests/ scripts/ hooks/ bin/ | sort -z | xargs -0 cat
         cat pyproject.toml
     } | cksum )
     if [ -f "$sentinel" ] && [ "$(cat "$sentinel")" = "$current_hash" ]; then
@@ -103,7 +103,7 @@ precommit:
     #!{{ bash_prolog }}
     sync
     run-checks
-    report "version consistency" python3 plugin/bin/check-version-consistency.py
+    report "version consistency" python3 bin/check-version-consistency.py
     run-pytest
     # Non-fixing: `fmt --check` exits 1 exactly when `fmt` would rewrite a
     # file, and `-q` drops the summary so a clean run prints nothing. Plain

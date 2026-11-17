@@ -16,7 +16,7 @@ import pytest
 
 from tests.markdown_script import REPO_ROOT
 
-SCRIPT = REPO_ROOT / "plugin" / "bin" / "edify-count-tokens"
+SCRIPT = REPO_ROOT / "bin" / "edify-count-tokens"
 
 MODELS = [
     {"id": "claude-sonnet-4-20250514", "created_at": "2025-05-14T00:00:00Z"},

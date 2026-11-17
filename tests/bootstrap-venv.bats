@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Hermetic tests for plugin/bin/bootstrap-venv.sh.
+# Hermetic tests for bin/bootstrap-venv.sh.
 #
 # The bootstrap's real work (uv provisions a >=3.14 venv, uv installs edify-cli
 # from an index) needs network and a published package, so these tests stub `uv`
@@ -14,7 +14,7 @@ bats_require_minimum_version 1.5.0
 
 setup() {
   REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
-  SCRIPT="$REPO_ROOT/plugin/bin/bootstrap-venv.sh"
+  SCRIPT="$REPO_ROOT/bin/bootstrap-venv.sh"
   export CLAUDE_PLUGIN_ROOT="$BATS_TEST_TMPDIR/root"
   export CLAUDE_PLUGIN_DATA="$BATS_TEST_TMPDIR/data"
   STUBBIN="$BATS_TEST_TMPDIR/stubbin"

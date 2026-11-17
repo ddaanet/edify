@@ -3,7 +3,7 @@
 The plugin's SessionStart bootstrap is a POSIX shell script; its behavior is
 covered by ``tests/bootstrap-venv.bats`` (hermetic, uv stubbed). This wrapper
 lets ``just test`` / ``just precommit`` run that suite too — the test sentinel
-already hashes ``plugin/bin`` and ``plugin/hooks``. bats is a declared dev
+already hashes ``bin`` and ``hooks``. bats is a declared dev
 dependency, so a missing bats is a hard failure, never a skip.
 """
 
