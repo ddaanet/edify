@@ -29,6 +29,7 @@ edify-count-tokens --model opus --json FILE...
 - Each count includes a constant overhead of about 7 tokens for the request
   frame. Haiku and opus counts agree.
 - The key comes from `ANTHROPIC_API_KEY`, else `[anthropic] api_key` in
-  `~/.config/edify/config.toml`. The session environment needs neither. Without
-  a key the command exits 1 and names both places.
+  `~/.config/edify/config.toml`; the config file needs Python 3.11 or later, and
+  older Python errors and names `ANTHROPIC_API_KEY`. Without a key the command
+  exits 1 and names both places.
 - `ANTHROPIC_BASE_URL` overrides the endpoint base. Nothing is cached.

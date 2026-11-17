@@ -1,7 +1,8 @@
 # Agent Instructions
 
 Edify is a Claude Code plugin of working-discipline skills for an orchestrating
-agent, plus two standard-library scripts.
+agent, plus two standard-library scripts (`edify-markdown`'s modules are in
+`lib/edify_markdown/`).
 
 Conventions shared across every repository mounting the `ddaanet` memory tier:
 
@@ -240,7 +241,7 @@ No installed command line. The plugin ships two scripts in `bin/`, run by name
 (the plugin's `bin/` is on PATH) and standard library only: `edify-markdown`
 (reads markdown paths on stdin, fixes structural defects in place) and
 `edify-count-tokens` (counts file tokens with the Anthropic `count_tokens`
-endpoint).
+endpoint). `edify-markdown`'s modules are in `lib/edify_markdown/`.
 
 ## Skills
 

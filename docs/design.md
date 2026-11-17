@@ -3,8 +3,9 @@
 Edify is a Claude Code plugin of working-discipline skills for an orchestrating
 agent: how to release, how to review each commit, how to dispatch subagents, and
 two small tools for agent-written files. Everything it ships is prose or a
-standard-library script; there is no installed package, no daemon and no hook.
-History is git's; this document states what is true now.
+standard-library script, one of them with a `lib/` package; there is no
+installed package, no daemon and no hook. History is git's; this document states
+what is true now.
 
 ## 1. Functional requirements
 
@@ -60,7 +61,7 @@ root: `.claude-plugin/plugin.json`, `skills/`, `agents/`, and `bin/` with the
   written. The script reads paths on stdin and rewrites in place.
 - Skill `token-counting` documents `bin/edify-count-tokens`, which posts to the
   `count_tokens` endpoint and reads the key from the environment or
-  `~/.config/edify/config.toml`.
+  `~/.config/edify/config.toml` (the config file needs Python 3.11 or later).
 - Skill `ground` and its `references/` carry the grounding criteria.
 - Agent `brainstorm-name` delegates name brainstorming to a clean context to
   avoid anchoring.
@@ -78,9 +79,10 @@ root: `.claude-plugin/plugin.json`, `skills/`, `agents/`, and `bin/` with the
   whose deliverable is itself a long document names an output file, because a
   reply is cut near 4000 characters. A reviewer with no `Write` tool returns its
   report in parts under that size with a fixed end marker.
-- D-4: Scripts are single files with the standard library only; the token
-  counter keeps no cache, since a count is one request and a stale count is
-  worse than none.
+- D-4: Scripts use the standard library only: `edify-count-tokens` is a single
+  file and `edify-markdown` an entry script over its `lib/edify_markdown/`
+  package; the token counter keeps no cache, since a count is one request and a
+  stale count is worse than none.
 - D-5: Skills that wrap a script name the moment and run the script by name, the
   plugin's `bin/` being on PATH; nothing runs implicitly.
 - D-6: Facts about Claude Code's behaviour live in the skill that acts on them,
