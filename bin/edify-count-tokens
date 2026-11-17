@@ -18,6 +18,7 @@ import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 DEFAULT_BASE_URL = "https://api.anthropic.com"
 OAUTH_TOKEN_PREFIX = "sk-ant-oat"  # noqa: S105 - Claude Code / Plan tokens authenticate via Bearer
@@ -55,12 +56,12 @@ def main(argv: list[str]) -> int:
         return 1
     total = sum(counts)
     if args.json:
-        pairs = zip(args.files, counts)  # noqa: B905 - strict= is 3.10+
+        pairs = zip(args.files, counts)
         files = [{"path": f, "count": c} for f, c in pairs]
         print(json.dumps({"model": model, "files": files, "total": total}))
         return 0
     print(f"Using model: {model}")
-    for path, count in zip(args.files, counts):  # noqa: B905
+    for path, count in zip(args.files, counts):
         print(f"{path}: {count} tokens")
     if len(counts) > 1:
         print(f"Total: {total} tokens")
@@ -141,8 +142,8 @@ def count_file(path: Path, model: str, api_key: str, base_url: str) -> int:
 
 
 def request(
-    method: str, route: str, body: dict | None, api_key: str, base_url: str
-) -> dict:
+    method: str, route: str, body: dict[str, Any] | None, api_key: str, base_url: str
+) -> dict[str, Any]:
     """Send one API request and return the decoded JSON reply."""
     headers = {"anthropic-version": "2023-06-01", "content-type": "application/json"}
     if api_key.startswith(OAUTH_TOKEN_PREFIX):
@@ -155,7 +156,8 @@ def request(
     )
     try:
         with urllib.request.urlopen(req, timeout=60) as response:  # noqa: S310
-            return json.load(response)
+            reply: dict[str, Any] = json.load(response)
+            return reply
     except urllib.error.HTTPError as e:
         detail = e.read().decode(errors="replace")
         if e.code in (401, 403):

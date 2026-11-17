@@ -1,207 +1,41 @@
-# Justfile Rules:
-# - Errors should not pass silently without good reason
-# - Only use `2>/dev/null` for probing (checking exit status when command has no quiet option)
-# - Only use `|| true` to continue after expected failures (required with `set -e`)
+# Dev tooling from uv.lock (`uv sync`) and package.json (`npm install`).
+# Every recipe puts `.venv/bin` and `node_modules/.bin` on PATH itself, so it
+# does not depend on direnv having loaded `.envrc`.
 
-import 'portable.just'
+# Check markdown wrapping, lint, type-check and test; parse the manifest
+precommit:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export PATH="$PWD/.venv/bin:$PWD/node_modules/.bin:$PATH"
+    # remark-cli drives test_full_pipeline_remark, which skips without it.
+    command -v remark >/dev/null || { echo "precommit: remark not on PATH — run 'npm install'" >&2; exit 1; }
+    # `fmt --check` exits 1 exactly when `fmt` would rewrite a file. Plain
+    # `rumdl check` also reports over-column lines MD013 cannot reflow.
+    rumdl fmt --check -q --no-cache
+    echo "rumdl: markdown wrapped"
+    ruff check -q
+    echo "ruff: lint clean"
+    ruff format --check -q
+    echo "ruff: formatted"
+    mypy
+    echo "mypy: types check"
+    pytest -q
+    jq . .claude-plugin/plugin.json >/dev/null
+    echo "jq: plugin.json parses"
 
-set allow-duplicate-recipes
-set allow-duplicate-variables
+# Apply ruff fixes and formatting, and rumdl's markdown wrapping
+format:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export PATH="$PWD/.venv/bin:$PATH"
+    ruff check -q --fix-only
+    ruff format -q
+    rumdl fmt -q --no-cache
 
-# To enable bash tracing (set -x): just trace=true <recipe>
-trace := "false"
-
-# List available recipes
-help:
-    @just --list --unsorted
-
-# Promote plugin/ into dist/plugin/, the copy `.bin/claude` loads; relaunch to pick it up
-dogfood:
-    bash scripts/dogfood.sh sync
-
-# Remove generated build artifacts, sparing the plugin copy `.bin/claude` loads
-[no-exit-message]
-clean:
-    #!{{ bash_prolog }}
-    if [[ -d dist ]]; then
-        visible find dist -mindepth 1 -maxdepth 1 ! -name plugin -exec rm -rf {} +
-    fi
-    echo "${GREEN}✓${NORMAL} Clean"
-
-# Set up development environment (venv, direnv, npm)
-[no-exit-message]
-setup:
-    #!{{ bash_prolog }}
-    visible uv sync
-    visible npm install
-    visible direnv allow
-
-# Verify the plugin's SessionStart bootstrap against a locally built wheel
-[no-exit-message]
-bootstrap-check:
-    #!{{ bash_prolog }}
-    visible uv build --wheel --out-dir dist
-    data="$PWD/tmp/bootstrap-check"
-    visible rm -rf "$data"
-    mkdir -p "$data"
-    # Install from the local wheel, not PyPI: dogfooding never needs a publish.
-    export UV_FIND_LINKS="$PWD/dist"
-    visible env CLAUDE_PLUGIN_ROOT="$PWD" CLAUDE_PLUGIN_DATA="$data" \
-        bin/bootstrap-venv.sh
-    visible "$data/current/bin/edify" --version
-    report-end-safe "Bootstrap"
-
-# Check file line limits
-[no-exit-message]
-line-limits:
-    #!{{ bash_prolog }}
-    sync
-    run-line-limits
-    report-end-safe "Line limits"
-
-# Create release: bump plugin.json (SOT), sync pyproject.toml, tag, push,
-# publish to PyPI, GitHub release, bump the marketplace entry.
-[no-exit-message]
-release BUMP="patch": dev
-    #!{{ bash_prolog }}
-    visible scripts/release.sh "{{ BUMP }}"
-
-# Complete a release that landed only partially. Idempotent, no gate.
-[no-exit-message]
-resume-release:
-    #!{{ bash_prolog }}
-    visible scripts/release.sh --resume
-
-# Bash prolog
-[private]
-bash_prolog := \
-    ( if trace == "true" { "/usr/bin/env bash\nset -xeuo pipefail" } \
-    else { "/usr/bin/env bash\nset -euo pipefail" } ) + "\n" + '''
-export PATH="$PWD/node_modules/.bin:$PATH"
-COMMAND="''' + style('command') + '''"
-RED=$'\033[31m'
-GREEN=$'\033[32m'
-NORMAL="''' + NORMAL + '''"
-safe () { "$@" || status=false; }
-end-safe () { ${status:-true}; }
-show () { echo "$COMMAND$*$NORMAL"; }
-visible () { show "$@"; "$@"; }
-# Same definition as portable.just: this prolog overrides that one on
-# import, so a drift here changes what every recipe prints on failure.
-fail () { echo "${RED}FAIL: $*${NORMAL}" >&2; exit 1; }
-wt-path() {
-    local parent
-    parent="$(cd .. && basename "$PWD")"
-    if [[ "$parent" == *-wt ]]; then
-        echo "$(cd .. && pwd)/$1"
-    else
-        echo "$(cd .. && pwd)/$(basename "$PWD")-wt/$1"
-    fi
-}
-add-sandbox-dir() {
-    local dir="$1" settings="$2"
-    mkdir -p "$(dirname "$settings")"
-    python3 -c "
-import json, sys, os
-path = sys.argv[1]
-settings_file = sys.argv[2]
-data = {}
-if os.path.exists(settings_file):
-    with open(settings_file) as f:
-        data = json.load(f)
-dirs = data.setdefault('permissions', {}).setdefault('additionalDirectories', [])
-if path not in dirs:
-    dirs.append(path)
-    with open(settings_file, 'w') as f:
-        json.dump(data, f, indent=2)
-        f.write('\n')
-" "$dir" "$settings"
-}
-
-# Do not uv sync when in Claude Code sandbox
-sync() { if [ -w /tmp ]; then uv sync -q; fi; }
-set-tmpfile() {
-    if [[ -z "${tmpfile:-}" ]]; then
-        tmpfile=$(mktemp tmp/justfile-XXXXXX)
-        trap "rm $tmpfile" EXIT
-    fi
-}
-
-HEADER_STYLE=$'\033[1;36m'  # Bold cyan
-report () {
-    # Usage: report "header" command args
-    header=$1; shift
-    set-tmpfile
-    safe "$@" &> "$tmpfile"
-    if [ -s "$tmpfile" ]; then
-        echo "${HEADER_STYLE}# $header${NORMAL}"
-        cat "$tmpfile"
-    fi
-}
-
-run-checks() {
-    report "ruff check" ruff check -q
-    report "ruff format --check" ruff format --check -q
-    report "docformatter -c" docformatter -c src tests
-    report "mypy" mypy
-}
-
-run-lint-checks() {
-    ruff_ignores=C901,PLR0904,PLR0911,PLR0912,PLR0914,PLR0915,PLR0916,PLR0917,PLR1701,PLR1702
-    report "ruff check" ruff check -q --ignore=$ruff_ignores
-    # `check` has no `format` dependency, so without this `just check` is the
-    # one checking recipe that never notices unformatted code. Redundant but
-    # free under `lint`/`green`/`red-lint`, which all run `format` first.
-    report "ruff format --check" ruff format --check -q
-    report "docformatter -c" docformatter -c src tests
-    report "mypy" mypy
-}
-
-run-pytest() {
-    # Test sentinel: skip pytest if inputs unchanged
-    local sentinel="tmp/.test-sentinel"
-    mkdir -p tmp
-    local current_hash
-    current_hash=$( {
-        python3 --version 2>&1
-        # Untracked files count: a new test module is an input before its
-        # first commit. scripts/ is read by the suite.
-        git ls-files -z --cached --others --exclude-standard \
-            src/ tests/ scripts/ hooks/ bin/ | sort -z | xargs -0 cat
-        cat pyproject.toml
-    } | cksum )
-    if [ -f "$sentinel" ] && [ "$(cat "$sentinel")" = "$current_hash" ]; then
-        echo "Tests cached (inputs unchanged)"
-        return
-    fi
-    local pytest_output pytest_failed=false
-    pytest_output=$(pytest 2>&1) || pytest_failed=true
-    echo "$pytest_output"
-    if echo "$pytest_output" | grep -q "skipped"; then fail "Tests skipped — all tests must run"; fi
-    if [ "$pytest_failed" = true ]; then
-        status=false
-    else
-        echo "$current_hash" > "$sentinel"
-    fi
-}
-
-run-line-limits() {
-    # Wrapped like every other check: `safe` so an overage reaches
-    # `report-end-safe` instead of aborting the recipe under `set -e`, and a
-    # header so the `oversized-file:` lines an allowlisted file prints on
-    # every green run say what produced them.
-    report "line limits" ./scripts/check_line_limits.sh
-}
-
-# No-op hook: portable.just's `precommit` calls it, and this prolog replaces
-# the one that defines it.
-run-project-checks() { :; }
-
-report-end-safe() {
-    if end-safe
-    then echo "${GREEN}✓$NORMAL $1 OK"
-    else echo "${RED}✗$NORMAL $1 failed"
-    fi
-    end-safe
-}
-'''
+# Run the test suite; arguments go to pytest
+[positional-arguments]
+test *ARGS:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    export PATH="$PWD/.venv/bin:$PWD/node_modules/.bin:$PATH"
+    pytest "$@"

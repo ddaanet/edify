@@ -38,8 +38,9 @@ History is git's; this document states what is true now.
 
 ## 3. Architecture
 
-The plugin holds skills, one agent and two scripts. Names, not paths, identify
-the parts: the plugin moves within the repository, and the skills do not.
+The plugin holds skills, one agent and two scripts, laid out at the repository
+root: `.claude-plugin/plugin.json`, `skills/`, `agents/`, and `bin/` with the
+`lib/` package the markdown fixer imports.
 
 - Skill `release` is the release cascade. It owns the branch switches the
   cascade needs and the boundary between a release and ordinary work.

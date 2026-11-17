@@ -13,41 +13,51 @@ Through the ddaanet marketplace:
 /plugin install edify@ddaanet
 ```
 
-## Plugin
+## Skills
 
-The plugin lives at the repository root. Skills are invoked as slash commands:
+Each lives in `skills/<name>/SKILL.md`, invoked as a slash command.
 
-- `/edify:release` — release `dev` onto `main` through the review cascade.
-- `/edify:review` — review each commit as it lands, triage, fix.
-- `/edify:dispatch` — rules for dispatching subagents.
-- `/edify:markdown` — fix structural defects in agent-written markdown.
-- `/edify:token-counting` — count file tokens with the Anthropic API.
-- `/edify:ground` — ground a methodology in external research.
+| Skill | Purpose |
+|-------|---------|
+| `/edify:release` | Release `dev` onto `main`: simplify, parallel release reviews, triaged fixes, a medium loop, then push, preflight and `just release` |
+| `/edify:review` | Per-commit review loop: a medium code review of each commit, triage, fix commits reviewed the same way |
+| `/edify:dispatch` | Rules for dispatching subagents: boundaries, reuse, model tiering, self-contained prompts, collecting replies |
+| `/edify:markdown` | Fix structural defects in agent-written markdown with `bin/edify-markdown` |
+| `/edify:token-counting` | Count file tokens with `bin/edify-count-tokens` |
+| `/edify:ground` | Ground a methodology in external research before asserting it |
 
-Plus the `brainstorm-name` agent and two scripts, `bin/edify-markdown` and
-`bin/edify-count-tokens`. See [`plugin/README.md`](plugin/README.md).
+## Agents
+
+| Agent | Role |
+|-------|------|
+| `brainstorm-name` | Generates and scores candidate names in a clean context |
+
+## Scripts
+
+In `bin/`, standard library only, Python 3.9 or later:
+
+- `edify-markdown` reads markdown paths on stdin and rewrites each file in
+  place, fixing keyword lists lacking bullets, inline triple backticks, spaced
+  backtick spans and similar defects. Fenced code and YAML prologs are left
+  alone.
+- `edify-count-tokens [--model haiku|sonnet|opus|ID] [--json] FILE...` counts
+  input tokens with the Anthropic `count_tokens` endpoint. The key comes from
+  `ANTHROPIC_API_KEY` or `[anthropic] api_key` in `~/.config/edify/config.toml`.
 
 ## Development
 
 ```bash
-just dev        # format + check + test
+uv sync         # rumdl, ruff, mypy, pytest into .venv
+npm install     # remark-cli, for the markdown fixer's pipeline test
+just precommit  # all checks
 just test       # tests only
-just check      # lint + type check
-just precommit  # all checks (CI equivalent)
+just format     # apply ruff and rumdl fixes
 ```
 
-Python 3.14+ with [mypy] strict types, [pytest] for tests, [ruff] for linting,
-[uv] for dependencies, and [just] for tasks. Design is recorded in
-`docs/design.md`.
+Design is recorded in `docs/design.md`.
 
 ## License
 
 MIT
 
-[claude-code]: https://github.com/anthropics/claude-code
-[dprint]: https://dprint.dev
-[mypy]: https://mypy.readthedocs.io
-[pytest]: https://pytest.org
-[ruff]: https://docs.astral.sh/ruff
-[uv]: https://docs.astral.sh/uv
-[just]: https://just.systems
+[claude-code]: https://docs.claude.com/en/docs/claude-code/overview

@@ -6,7 +6,7 @@
 /tmp/
 /plans/claude/
 
-# Build output, and the plugin copy `.bin/claude` loads
+# Build output and the dogfood plugin copy
 /dist/
 
 # Node.js
@@ -17,10 +17,18 @@ __pycache__/
 list/
 /.venv/
 
-# IDE cruft
+# IDE and OS cruft
 /.vscode
 /.mypy_cache/
 /.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Local Claude Code configuration
+CLAUDE.local.md
+.claude/*.local.*
 
 # Claude Code sandboxing artifacts
 /.bash_profile

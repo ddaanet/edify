@@ -1,7 +1,7 @@
 {
   "name": "edify-markdown-test-corpus",
   "version": "1.0.0",
-  "description": "Extract user feedback from Claude Code conversation history for retrospective analysis.",
+  "description": "Dev tooling: remark-cli for the markdown fixer's pipeline test.",
   "main": "index.js",
   "directories": {
     "test": "tests"
@@ -14,7 +14,6 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "bats": "^1.11.1",
     "remark-cli": "^12.0.1",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",

@@ -162,7 +162,6 @@ when functionally equivalent.
 **Check:** Run `just --list` (or equivalent) before writing manual commands for
 common operations like:
 - Code formatting → `just format`
-- Linting → `just lint`
 - Testing → `just test`
 - Pre-commit validation → `just precommit`
 
@@ -228,9 +227,9 @@ general operational rules.
 Validation output is a diagnostic signal — truncation hides the pass/fail/xfail
 summary that distinguishes real failures from expected noise.
 
-**Correct pattern:** Show full output from `just precommit`, `just test`,
-`just lint`. If output is too long, fix the recipe (add `--quiet`, `--tb=no`),
-not the consumption site.
+**Correct pattern:** Show full output from `just precommit` and `just test`. If
+output is too long, fix the recipe (add `--quiet`, `--tb=no`), not the
+consumption site.
 
 **Evidence:** xfail traceback from `pytest-markdown-report` was visually
 identical to real failure. Agent tailed output, missed summary counts, ran
@@ -242,8 +241,7 @@ No installed command line. The plugin ships two scripts in `bin/`, run by name
 (the plugin's `bin/` is on PATH) and standard library only: `edify-markdown`
 (reads markdown paths on stdin, fixes structural defects in place) and
 `edify-count-tokens` (counts file tokens with the Anthropic `count_tokens`
-endpoint). The Python package in `src/edify/` is on its way out; do not extend
-it.
+endpoint).
 
 ## Skills
 
@@ -262,12 +260,13 @@ The one agent, `brainstorm-name`, is in `agents/`.
 
 ## Recipes
 
-Until the plugin's packaging is reworked, the recipes are the old ones:
+Dev tooling comes from `uv sync` (rumdl, ruff, mypy, pytest) and `npm install`
+(remark-cli, which the markdown fixer's pipeline test drives).
 
-- `just precommit` — run all checks
-- `just test *ARGS` — run test suite
-- `just dev` — format and run all checks
-- `just format` / `just lint` / `just check`
+- `just precommit` — markdown wrapping, ruff lint and format check, mypy,
+  pytest, and a parse of `.claude-plugin/plugin.json`
+- `just test *ARGS` — run the test suite, arguments passed to pytest
+- `just format` — apply ruff fixes and formatting and rumdl's wrapping
 
 ## Design Decisions
 
