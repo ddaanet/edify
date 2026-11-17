@@ -55,8 +55,8 @@ the parts: the plugin moves within the repository, and the skills do not.
   shell).
 - Skill `markdown` names the moment (agent-produced markdown with keyword lists
   lacking bullets, mis-quoted backticks or fence markers) and runs
-  `bin/edify-markdown` by path on the files just written. The script reads paths
-  on stdin and rewrites in place.
+  `edify-markdown` by name (the plugin's `bin/` is on PATH) on the files just
+  written. The script reads paths on stdin and rewrites in place.
 - Skill `token-counting` documents `bin/edify-count-tokens`, which posts to the
   `count_tokens` endpoint and reads the key from the environment or
   `~/.config/edify/config.toml`.
@@ -80,8 +80,8 @@ the parts: the plugin moves within the repository, and the skills do not.
 - D-4: Scripts are single files with the standard library only; the token
   counter keeps no cache, since a count is one request and a stale count is
   worse than none.
-- D-5: Skills that wrap a script name the moment and run the script by path;
-  nothing runs implicitly.
+- D-5: Skills that wrap a script name the moment and run the script by name, the
+  plugin's `bin/` being on PATH; nothing runs implicitly.
 - D-6: Facts about Claude Code's behaviour live in the skill that acts on them,
   as `references/` nodes written in the skill's voice, not as repository memory.
 

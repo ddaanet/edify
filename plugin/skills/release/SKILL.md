@@ -99,12 +99,12 @@ later**, every step runs on `dev` and the release moves `main` itself:
 ## Boundaries
 
 A boundary is a triage done (step 4, before its fixes are dispatched) or a fix
-pass done (step 4's, and each round of step 5). At each one, read the context
-usage the harness last reported. Then:
+pass done (step 4's, and each round of step 5). At each one, hand the work off
+when the session has grown long, by the first line that applies:
 
-- Past 150k with no agents running: `/autodrive-handoff:handoff` with `clear`
-  and `continue`. Its task text opens with "resume `/edify:release` at step N"
-  and records what each review found, what is fixed and what is still open.
-- Past 200k with agents running: `/autodrive-handoff:precompact` with
-  `compact: true` and `continue`. Its todo opens with the same resume line and
-  lists each running agent's id and what it owns.
+- No agents running: `/autodrive-handoff:handoff` with `clear` and `continue`.
+  Its task text opens with "resume `/edify:release` at step N" and records what
+  each review found, what is fixed and what is still open.
+- Agents running: `/autodrive-handoff:precompact` with `compact: true` and
+  `continue`. Its todo opens with the same resume line and lists each running
+  agent's id and what it owns.

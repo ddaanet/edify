@@ -55,6 +55,7 @@ uncertainty, so the word does not pick the tier.
 | Task | Model |
 | --- | --- |
 | Advice, a second opinion; keep its turns lean and code-free | Fable |
+| Name brainstorming (`brainstorm-name`) | Opus |
 | High uncertainty | Opus |
 | Low uncertainty, prose, tests not fully specified | Sonnet |
 | Agentic prose edits | Sonnet at least |

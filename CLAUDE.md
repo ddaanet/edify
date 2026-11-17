@@ -239,10 +239,11 @@ unnecessary `git stash` diagnostic cycle.
 ## CLI
 
 No installed command line. The plugin ships two scripts in `plugin/bin/`, run by
-path and standard library only: `edify-markdown` (reads markdown paths on stdin,
-fixes structural defects in place) and `edify-count-tokens` (counts file tokens
-with the Anthropic `count_tokens` endpoint). The Python package in `src/edify/`
-is on its way out; do not extend it.
+name (the plugin's `bin/` is on PATH) and standard library only:
+`edify-markdown` (reads markdown paths on stdin, fixes structural defects in
+place) and `edify-count-tokens` (counts file tokens with the Anthropic
+`count_tokens` endpoint). The Python package in `src/edify/` is on its way out;
+do not extend it.
 
 ## Skills
 

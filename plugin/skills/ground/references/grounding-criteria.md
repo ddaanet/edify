@@ -109,11 +109,13 @@ frameworks describe how processes *should* work; git history documents how
 - `memory/MEMORY.md` and the memory files it indexes — the live recall surface.
   Match the index's one-line hooks against the topic and Read the files they
   name
-- Session transcripts (JSONL under `~/.claude/projects/`) — read them directly
-  for committed user feedback. Session logs contain user feedback, discussion
-  turns, and design iteration reasoning that produced committed corrections —
-  material git history alone cannot recover. Git history shows *what* changed;
-  session logs show *why the user asked for the change*.
+- Session transcripts (JSONL under `~/.claude/projects/`) — extract the user
+  turns with `jq -c 'select(.type == "user")' <file>` (or `grep` for the topic)
+  and read only the matches; never Read a whole transcript. They hold committed
+  user feedback. Session logs contain user feedback, discussion turns, and
+  design iteration reasoning that produced committed corrections — material git
+  history alone cannot recover. Git history shows *what* changed; session logs
+  show *why the user asked for the change*.
 
 **Scope selector:** If topic is a process skill → use codebase scope
 **with git history mining + session log scraping**. Standard codebase scope

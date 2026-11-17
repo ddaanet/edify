@@ -1,7 +1,7 @@
 ---
 name: brainstorm-name
 description: |
-  Use this agent when brainstorming names for skills, agents, commands, CLI subcommands, plans, or any project artifact. Delegates to opus with clean context to avoid anchoring bias. Examples:
+  Use this agent when brainstorming names for skills, agents, commands, CLI subcommands, plans, or any project artifact. Runs with clean context to avoid anchoring bias. Examples:
 
   <example>
   Context: User needs a name for a new skill
@@ -20,7 +20,6 @@ description: |
   Renaming needs fresh perspective unanchored from the current name.
   </commentary>
   </example>
-model: opus
 color: magenta
 tools: ["Read"]
 ---

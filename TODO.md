@@ -19,3 +19,7 @@
 - `memory/ddaanet/cc-plugin-dir-edits-sensitive.md` still names "a `just claude`
   recipe" as a `--plugin-dir` launcher; the recipe is gone — the launcher is
   `.bin/claude` loading `dist/plugin/`, promoted by `just dogfood`.
+- Drop a brief in `../claude-plugins/inbox/` rewriting that README's edify
+  section (it still advertises the removed pipeline, `/proof`, `edify-cli` and
+  the uv venv hook) for the six skills, `brainstorm-name` and the two scripts,
+  with no uv or venv (another repo — brief only).
