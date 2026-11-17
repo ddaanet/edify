@@ -9,26 +9,23 @@
       "WebFetch(domain:http-intake.logs.*.datadoghq.com)"
     ]
   },
-  "enabledPlugins": {
-    "plugin-dev@claude-plugins-official": true,
-    "commit-commands@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true,
-    "gitlore@ddaanet": true,
-    "handoff@ddaanet": true
-  },
-  "sandbox": {
-    "enabled": true,
-    "autoAllowBashIfSandboxed": true
-  },
   "hooks": {
     "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/plugin-dev/version-guard.sh\""
+          }
+        ]
+      },
       {
         "matcher": "Write|Edit|NotebookEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR}/scripts/dogfood.sh\" pre-tool"
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/plugin-dev/dogfood.sh\" pre-tool"
           }
         ]
       }
@@ -38,11 +35,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR}/scripts/dogfood.sh\" session-start"
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/plugin-dev/dogfood.sh\" session-start"
           }
         ]
       }
     ]
+  },
+  "enabledPlugins": {},
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
   },
   "plansDirectory": "plans/claude/",
   "gitlore": {
